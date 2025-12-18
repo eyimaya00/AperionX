@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli - AperionX</title>
+    <link rel="icon" type="image/x-icon" href="uploads/favicon.ico" id="favicon">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --admin-bg: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --primary-accent: #6366f1;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --border-color: #e2e8f0;
+            --sidebar-width: 260px;
+            --sidebar-width-collapsed: 80px;
+            --transition-speed: 0.3s;
+        }
+
+        .mobile-toggle-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            background: white;
+            color: #0f172a;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid #e2e8f0;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode .mobile-toggle-btn {
+            background: #1e293b;
+            color: white;
+            border-color: #334155;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR (Match Author Panel) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            z-index: 100;
+            transition: width var(--transition-speed);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
+        }
+
+        .sidebar.collapsed .logo span,
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .logout-btn span {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo {
+            justify-content: center;
+            padding-left: 0;
+        }
+
+        .sidebar.collapsed .menu-item,
+        .sidebar.collapsed .logout-btn {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+            padding-left: 8px;
+        }
+
+        .logo img {
+            height: 36px;
+            border-radius: 4px;
+        }
+
+        .menu-item {
+            padding: 14px 16px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: var(--primary-accent);
+            color: white;
+            box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.4);
+        }
+
+        .menu-item i {
+            font-size: 1.4rem;
+        }
+
+        /* CONTENT */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            flex: 1;
+            max-width: 1400px;
+            box-sizing: border-box;
+            transition: margin-left var(--transition-speed);
+            width: 100%;
+        }
+
+        .content.expanded {
+            margin-left: var(--sidebar-width-collapsed);
+        }
+
+        /* TOGGLE BUTTON */
+        .sidebar-toggle {
+            position: fixed;
+            top: 28px;
+            left: 245px;
+            /* width 32px. Sidebar 260px. 260 - 15 = 245 */
+            background: var(--primary-accent);
+            color: white;
+            border: 4px solid var(--admin-bg);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s ease, transform 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 65px;
+            /* Sidebar 80px. 80 - 15 = 65 */
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            background: #4f46e5;
+        }
+
+        .sidebar-toggle i {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* General Admin UI */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            /* Handle table overflow */
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: #f8fafc;
+            color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
+
+        body.dark-mode .icon-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        body.dark-mode .icon-btn:hover {
+            color: white;
+            border-color: var(--primary-accent);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 0px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+                position: fixed;
+                z-index: 1001;
+                height: 100vh;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0 !important;
+                padding: 20px;
+                width: 100%;
+            }
+
+            .sidebar-toggle {
+                display: none !important;
+            }
+
+            .mobile-toggle-btn {
+                display: flex;
+            }
+
+            .stats-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid transparent;
+            cursor: pointer;
+            padding: 14px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            white-space: nowrap;
+            margin-bottom: 20px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border-color: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* SECTIONS & VISIBILITY (CRITICAL FIX) */
+        .section {
+            display: none !important;
+            animation: none;
+        }
+
+        .section.active {
+            display: block !important;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CARDS & CONTAINERS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border-color: #cbd5e1;
+        }
+
+        /* TYPOGRAPHY */
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 16px;
+        }
+
+        /* FORMS */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .draggable-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .draggable-item {
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+            background: #eff6ff;
+            border-color: var(--primary-accent);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-box {
+            background: white;
+            width: 400px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: #fee2e2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px auto;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .modal-desc {
+            color: #64748b;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #dc2626;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+            border-left: 4px solid transparent;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: #1e293b;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .toast.success {
+            border-left-color: #10b981;
+        }
+
+        .toast.success .toast-icon {
+            color: #10b981;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast.info {
+            border-left-color: #3b82f6;
+        }
+
+        .toast.info .toast-icon {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- MOBILE MENU BTN -->
+    <button class="mobile-toggle-btn" onclick="toggleSidebar()">
+        <i class="ph ph-list"></i>
+    </button>
+
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="ph ph-caret-left" id="toggle-icon"></i>
+    </button>
+    <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Toggle -->
+
+
+        <a href="index.html" class="logo" id="brand-logo">
+            <div id="logo-img-container" style="display:flex; align-items:center;">
+                <i class="ph-fill ph-planet" id="default-logo-icon"
+                    style="font-size: 32px; color: var(--primary-accent);"></i>
+            </div>
+            <span id="brand-text">Aperion<span style="color: var(--primary-accent)">X</span></span>
+        </a>
+
+        <nav style="flex: 1; display: flex; flex-direction: column; margin-top: 20px;">
+            <a href="#" class="menu-item active" onclick="showSection('dashboard', this)">
+                <i class="ph ph-house"></i> <span>Ana Sayfa</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('charts-section', this)">
+                <i class="ph ph-chart-line-up"></i> <span>Grafikler</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('site-settings', this)">
+                <i class="ph ph-gear"></i> <span>Site Ayarları</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('heading-settings', this)">
+                <i class="ph ph-text-t"></i> <span>Başlık Ayarları</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('homepage-management', this)">
+                <i class="ph ph-house"></i> <span>Ana Sayfa Yönetimi</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('articles-management', this)">
+                <i class="ph ph-article"></i> <span>Makale Yönetimi</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('newsletter-subscribers', this)">
+                <i class="ph ph-envelope-simple"></i> <span>Bülten Aboneleri</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('likes-management', this)">
+                <i class="ph ph-heart"></i> <span>Beğeniler</span>
+            </a>
+
+            <a href="#" class="menu-item" onclick="showSection('user-management', this)">
+                <i class="ph ph-users"></i> <span>Kullanıcılar</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('hero-slider', this)">
+                <i class="ph ph-image"></i> <span>Hero Slider</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('categories', this)">
+                <i class="ph ph-bookmarks"></i> <span>Kategoriler</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('menu-editor', this)">
+                <i class="ph ph-list"></i> <span>Menü Düzenle</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('comments-moderation', this)">
+                <i class="ph ph-chat-text"></i> <span>Yorumlar</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('about-management', this)">
+                <i class="ph ph-info"></i> <span>Hakkında Yönetimi</span>
+            </a>
+            <!-- <a href="#" class="menu-item" onclick="showSection('pending-articles', this)">
+                <i class="ph ph-check-circle"></i> <span>Onay Bekleyenler</span>
+            </a> -->
+        </nav>
+
+        <button onclick="logout()" class="logout-btn">
+            <i class="ph ph-sign-out" style="font-size: 1.4rem;"></i> <span>Güvenli Çıkış</span>
+        </button>
+    </aside>
+
+    <main class="content" id="main-content">
+
+        <!-- GLOBAL TOP BAR -->
+        <div class="top-bar">
+            <button class="icon-btn mobile-menu-toggle" onclick="toggleSidebar()" title="Menü">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <h1 class="page-title" style="margin-bottom: 30px;">Ana Sayfa</h1>
+            <div class="stats-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px;">
+
+                <!-- Total Users -->
+                <div class="stat-card"
+                    onclick="showSection('user-management', document.querySelector('a[onclick*=\'user-management\']'))"
+                    style="cursor: pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-users"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-users">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Kullanıcı</p>
+                    </div>
+                </div>
+
+                <!-- Views -->
+                <div class="stat-card"
+                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-eye"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-views">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Görüntülenme</p>
+                    </div>
+                </div>
+
+                <!-- Published Articles -->
+                <div class="stat-card"
+                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-article-medium"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-articles">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Yayında Makale</p>
+                    </div>
+                </div>
+
+                <!-- Likes -->
+                <div class="stat-card"
+                    onclick="showSection('likes-management', document.querySelector('a[onclick*=\'likes-management\']'))"
+                    style="cursor:pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fff1f2; color: #f43f5e; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-heart"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-likes">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Beğeni</p>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="stat-card"
+                    onclick="showSection('comments-moderation', document.querySelector('a[onclick*=\'comments-moderation\']'))"
+                    style="cursor:pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fff7ed; color: #f97316; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-chat-circle-text"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-comments">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Yorum</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 20px; color: #1e293b;">Detaylı İstatistikler</h2>
+                <div class="card">
+                    <div class="table-container">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                                    <th style="padding: 16px; color: #64748b;">Makale Başlığı</th>
+                                    <th style="padding: 16px; color: #64748b;">Yazar</th>
+                                    <th style="padding: 16px; color: #64748b;">Görüntülenme</th>
+                                    <th style="padding: 16px; color: #64748b;">Beğeni</th>
+                                    <th style="padding: 16px; color: #64748b;">Yorum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailed-stats-body">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:20px;">Yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Site Settings -->
+        <!-- Site Settings -->
+        <div id="site-settings" class="section" style="display:none">
+            <h1 class="page-title">Site Ayarları</h1>
+            <p class="section-subtitle">Web sitenizin genel yapılandırmasını buradan yönetebilirsiniz.</p>
+
+            <form id="settingsForm">
+                <!-- General & Media -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px;">
+
+                    <!-- General Info -->
+                    <div class="card">
+                        <h3 class="card-title"><i class="ph-duotone ph-info"></i> Genel Bilgiler</h3>
+                        <div class="form-group">
+                            <label>Site Başlığı</label>
+                            <input type="text" id="site_title" class="form-control" required placeholder="Site adı...">
+                        </div>
+                        <div class="form-group">
+                            <label>Site Açıklaması</label>
+                            <textarea id="site_description" class="form-control" rows="4"
+                                placeholder="Kısa site açıklaması..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>İletişim E-posta</label>
+                            <input type="email" id="contact_email" class="form-control" placeholder="info@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Logos -->
+                    <div class="card">
+                        <h3 class="card-title"><i class="ph-duotone ph-image"></i> Görseller & Medya</h3>
+                        <div class="form-group">
+                            <label>Site Logosu</label>
+                            <input type="file" id="site_logo" class="form-control" accept="image/*">
+                            <small style="display:block; margin-top:8px; color:#94a3b8;">Mevcut logoyu değiştirmek
+                                için yeni dosya seçin.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Favicon</label>
+                            <input type="file" id="site_favicon" class="form-control" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>Hakkımızda Görseli</label>
+                            <input type="file" id="about_us_image" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Homepage Content -->
+                <div class="card">
+                    <h3 class="card-title"><i class="ph-duotone ph-house-line"></i> Ana Sayfa & Bülten İçerikleri
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Bülten Başlığı</label>
+                            <input type="text" id="newsletter_section_title" class="form-control"
+                                placeholder="Örn: Bilimin Işığında Kalın">
+                        </div>
+                        <div class="form-group">
+                            <label>Bülten Açıklaması</label>
+                            <input type="text" id="newsletter_section_desc" class="form-control"
+                                placeholder="Örn: En son gelişmelerden haberdar olun...">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Footer Açıklaması</label>
+                            <textarea id="footer_desc" class="form-control" rows="2"
+                                placeholder="Footer alt metni..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Footer Telif Hakkı (Copyright)</label>
+                            <input type="text" id="footer_copyright" class="form-control" placeholder="© 2025...">
+                        </div>
+                    </div>
+
+                    <h4
+                        style="margin-top: 30px; margin-bottom: 20px; color: #475569; font-size: 1rem; border-bottom:1px solid #eee; padding-bottom:10px;">
+                        Hero & Showcase Alanları</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Hero Buton Metni</label>
+                            <input type="text" id="hero_btn_text" class="form-control" placeholder="Keşfetmeye Başla">
+                        </div>
+                        <div class="form-group">
+                            <label>Showcase Rozeti</label>
+                            <input type="text" id="showcase_badge" class="form-control" placeholder="Öne Çıkanlar">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label>Showcase Başlığı</label>
+                            <input type="text" id="showcase_title" class="form-control"
+                                placeholder="Bu Hafta En Çok Okunanlar">
+                        </div>
+                        <div class="form-group">
+                            <label>Showcase Açıklaması</label>
+                            <input type="text" id="showcase_desc" class="form-control" placeholder="Editör seçimi...">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>"Tümünü Gör" Buton Metni</label>
+                            <input type="text" id="showcase_btn_text" class="form-control" placeholder="Tümünü Gör">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authorization Buttons -->
+                <div class="card">
+                    <h3 class="card-title"><i class="ph-duotone ph-lock-key"></i> Giriş / Kayıt Butonları</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Giriş Yap Buton Metni</label>
+                            <input type="text" id="auth_login_text" class="form-control" placeholder="Giriş Yap">
+                        </div>
+                        <div class="form-group">
+                            <label>Kayıt Ol Buton Metni</label>
+                            <input type="text" id="auth_signup_text" class="form-control" placeholder="Kayıt Ol">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media -->
+                <div class="card">
+                    <h3 class="card-title"><i class="ph-duotone ph-share-network"></i> Sosyal Medya Bağlantıları
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+                        <div class="form-group">
+                            <label>Twitter (X)</label>
+                            <input type="text" id="social_twitter" class="form-control"
+                                placeholder="https://x.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram</label>
+                            <input type="text" id="social_instagram" class="form-control"
+                                placeholder="https://instagram.com/user">
+                        </div>
+                        <div class="form-group">
+                            <label>LinkedIn</label>
+                            <input type="text" id="social_linkedin" class="form-control"
+                                placeholder="https://linkedin.com/in/user">
+                        </div>
+                        <div class="form-group">
+                            <label>YouTube</label>
+                            <input type="text" id="social_youtube" class="form-control"
+                                placeholder="https://youtube.com/@channel">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Specific -->
+                <div class="card">
+                    <h3 class="card-title"><i class="ph-duotone ph-browsers"></i> Sayfa Başlıkları</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Makale Detay Slider Başlığı</label>
+                            <input type="text" id="article_detail_slider_title" class="form-control"
+                                placeholder="Örn: Bunlar da ilginizi çekebilir">
+                        </div>
+                        <div class="form-group">
+                            <label>Makaleler Sayfası Slider Başlığı</label>
+                            <input type="text" id="articles_page_slider_title" class="form-control"
+                                placeholder="Örn: Öne Çıkanlar">
+                        </div>
+                        <div class="form-group">
+                            <label>Makaleler Sayfası Liste Başlığı</label>
+                            <input type="text" id="articles_page_list_title" class="form-control"
+                                placeholder="Örn: Tüm Yazılar">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-bottom: 50px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 16px 48px; font-size: 1.1rem;">
+                        <i class="ph-bold ph-floppy-disk"></i> Ayarları Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Heading Settings Section -->
+        <div id="heading-settings" class="section">
+            <h1 class="page-title">Başlık Ayarlamaları</h1>
+            <div class="card">
+                <form id="headingSettingsForm">
+
+                    <!-- Homepage Settings -->
+                    <h3 class="card-title"
+                        style="margin-bottom: 20px; color: var(--primary-color); border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        <i class="ph ph-house" style="margin-right: 8px;"></i> Ana Sayfa Slider
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Başlık</label>
+                            <input type="text" id="homepage_hero_title" class="form-control" placeholder="Aperion | X">
+                            <small class="form-text text-muted">Renkli kısım için | kullanın.</small>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                <input type="color" id="homepage_hero_title_color" class="form-control"
+                                    style="width: 50px; height: 50px; padding: 2px;" value="#ffffff">
+                                <input type="text" id="homepage_hero_title_color_hex" class="form-control"
+                                    placeholder="#ffffff" style="width: 120px;">
+                                <small>Renk Seçimi</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Açıklama</label>
+                            <textarea id="homepage_hero_desc" class="form-control" rows="3"
+                                placeholder="Açıklama..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Articles Settings -->
+                    <h3 class="card-title"
+                        style="margin-top: 40px; margin-bottom: 20px; color: var(--primary-color); border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        <i class="ph ph-article" style="margin-right: 8px;"></i> Makaleler Slider
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Başlık</label>
+                            <input type="text" id="articles_hero_title" class="form-control" placeholder="Makaleler">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                <input type="color" id="articles_hero_title_color" class="form-control"
+                                    style="width: 50px; height: 50px; padding: 2px;" value="#ffffff">
+                                <input type="text" id="articles_hero_title_color_hex" class="form-control"
+                                    placeholder="#ffffff" style="width: 120px;">
+                                <small>Renk Seçimi</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Açıklama</label>
+                            <textarea id="articles_hero_desc" class="form-control" rows="3"
+                                placeholder="Açıklama..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- About Settings -->
+                    <h3 class="card-title"
+                        style="margin-top: 40px; margin-bottom: 20px; color: var(--primary-color); border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        <i class="ph ph-info" style="margin-right: 8px;"></i> Hakkında Slider
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Başlık</label>
+                            <input type="text" id="about_hero_title" class="form-control" placeholder="Biz | Kimiz?">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                <input type="color" id="about_hero_title_color" class="form-control"
+                                    style="width: 50px; height: 50px; padding: 2px;" value="#ffffff">
+                                <input type="text" id="about_hero_title_color_hex" class="form-control"
+                                    placeholder="#ffffff" style="width: 120px;">
+                                <small>Renk Seçimi</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Açıklama</label>
+                            <textarea id="about_hero_desc" class="form-control" rows="3"
+                                placeholder="Açıklama..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 40px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 16px 48px; font-size: 1.1rem;">
+                            <i class="ph ph-floppy-disk" style="margin-right: 8px;"></i> Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Homepage Management -->
+        <div id="homepage-management" class="section">
+            <h1 class="page-title" style="margin-bottom: 30px;">Ana Sayfa Yönetimi</h1>
+            <div class="card">
+                <form id="homepageSettingsForm">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        Son Eklenenler (Showcase) Düzeni</h3>
+                    <p style="margin-bottom: 20px; color: #64748b;">Buradan ana sayfada gösterilecek 3 makaleyi
+                        belirleyebilirsiniz. Eğer seçim yapmazsanız, otomatik olarak en son yayınlananlar
+                        gösterilir.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- Left Big Card -->
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>1. Makale (Büyük Kart - Sol)</label>
+                            <select id="homepage_article_1" class="form-control">
+                                <option value="">Otomatik (En Yeni)</option>
+                                <!-- JS will populate -->
+                            </select>
+                        </div>
+
+                        <!-- Right Small Cards -->
+                        <div class="form-group">
+                            <label>2. Makale (Küçük Kart - Sağ Üst)</label>
+                            <select id="homepage_article_2" class="form-control">
+                                <option value="">Otomatik (2. En Yeni)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>3. Makale (Küçük Kart - Sağ Alt)</label>
+                            <select id="homepage_article_3" class="form-control">
+                                <option value="">Otomatik (3. En Yeni)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3
+                        style="margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        Bülten Alanı Metinleri</h3>
+
+                    <div class="form-group">
+                        <label>Bülten Başlığı</label>
+                        <input type="text" id="newsletter_title" class="form-control"
+                            placeholder="Örn: Yeni Makalelerden Haberdar Olun">
+                    </div>
+                    <div class="form-group">
+                        <label>Bülten Açıklaması</label>
+                        <input type="text" id="newsletter_desc" class="form-control"
+                            placeholder="Örn: Güncel biyoloji araştırmalarını kaçırmayın">
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Ana Sayfa
+                            Ayarlarını Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Likes Management Section -->
+        <div id="likes-management" class="section" style="display:none">
+            <h1 class="page-title">Beğeniler</h1>
+            <div class="card">
+                <div class="table-container">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                                <th style="padding: 16px; color: #64748b;">Kullanıcı</th>
+                                <th style="padding: 16px; color: #64748b;">Makale</th>
+                                <th style="padding: 16px; color: #64748b;">Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="likes-table-body">
+                            <tr>
+                                <td colspan="3" style="padding:20px; text-align:center;">Yükleniyor...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article Management Section -->
+        <div id="articles-management" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Makale Yönetimi</h1>
+                <a href="author" class="btn btn-primary" target="_blank"><i class="ph ph-plus"></i> Yeni Makale
+                    Yaz</a>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <!-- Articles Hero Form Removed (Consolidated into Heading Settings) -->
+
+            </div>
+            <div class="card">
+                <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                    <button class="btn btn-primary" onclick="loadAllArticles()"><i class="ph ph-arrows-clockwise"></i>
+                        Yenile</button>
+                    <!-- Future: Search/Filter -->
+                </div>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px;">ID</th>
+                                <th style="padding: 12px;">Başlık</th>
+                                <th style="padding: 12px;">Yazar</th>
+                                <th style="padding: 12px;">Durum</th>
+                                <th style="padding: 12px;">Tarih</th>
+                                <th style="padding: 12px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-articles-table-body">
+                            <!-- JS Populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newsletter Subscribers Section -->
+        <div id="newsletter-subscribers" class="section">
+            <h1 class="page-title" style="margin-bottom: 30px;">Bülten Aboneleri</h1>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <p style="color: #64748b; margin:0;">Web sitenizdeki bültene abone olan kullanıcıların listesi.
+                    </p>
+                    <button class="btn btn-primary" onclick="loadSubscribers()"><i class="ph ph-arrows-clockwise"></i>
+                        Yenile</button>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">E-posta Adresi</th>
+                            <th style="padding: 12px;">Kayıt Tarihi</th>
+                            <th style="padding: 12px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscribers-table-body">
+                        <!-- JS Populate -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Charts Section -->
+        <div id="charts-section" class="section">
+            <h1 class="page-title">Grafikler ve İstatistikler</h1>
+
+            <!-- Monthly Stats Grid -->
+            <h2 style="font-size: 1.2rem; margin-bottom: 20px; color: #64748b;">Son 30 Günlük Özet</h2>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                <!-- Card 1 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #6366f1; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-eye"></i></div>
+                    <h3 id="m-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Okunma</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #f43f5e; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-heart"></i></div>
+                    <h3 id="m-likes" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Beğeni</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #f97316; font-size: 2rem; margin-bottom: 10px;"><i
+                            class="ph ph-chat-centered-text"></i></div>
+                    <h3 id="m-comments" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Yorum</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #8b5cf6; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-users"></i></div>
+                    <h3 id="m-users" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Yeni Üye</p>
+                </div>
+                <!-- Card 5 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #10b981; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-article"></i>
+                    </div>
+                    <h3 id="m-articles" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Yayınlanan Makale</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="ph ph-chart-line-up"></i> Son 7 Günlük Trafik</h2>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
+                    <div style="height: 400px;">
+                        <h4 style="margin-bottom:10px; color:#64748b;">Günlük Görüntülenme</h4>
+                        <canvas id="viewsChart"></canvas>
+                    </div>
+                    <div style="height: 400px;">
+                        <h4 style="margin-bottom:10px; color:#64748b;">Günlük Yeni Üye</h4>
+                        <canvas id="usersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New: Monthly History -->
+            <div class="card" style="margin-top:24px;">
+                <h2 class="card-title"><i class="ph ph-calendar"></i> Geçmiş Dönem Verileri (Aylık)</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                            <th style="padding: 12px; color:#64748b;">Dönem</th>
+                            <th style="padding: 12px; color:#64748b;">Okunma</th>
+                            <th style="padding: 12px; color:#64748b;">Beğeni</th>
+                            <th style="padding: 12px; color:#64748b;">Yorum</th>
+                            <th style="padding: 12px; color:#64748b;">Yeni Üye</th>
+                            <th style="padding: 12px; color:#64748b;">Yayınlanan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthly-history-body">
+                        <tr>
+                            <td colspan="6" style="padding:20px; text-align:center;">Yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- Category Management Section -->
+        <div id="categories" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Kategori Yönetimi</h1>
+            </div>
+            <div class="card">
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <input type="text" id="new-category-input" class="form-control" placeholder="Yeni Kategori Adı">
+                    <button class="btn btn-primary" onclick="addCategory()">Ekle</button>
+                </div>
+                <div id="categories-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                    <!-- Cats injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management -->
+        <div id="user-management" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Kullanıcı Yönetimi</h1>
+                <button class="btn btn-primary" onclick="showAddUserModal()"><i class="ph ph-user-plus"></i> Yeni
+                    Kullanıcı</button>
+            </div>
+            <div class="card">
+                <!-- Add User Form Hidden by default or inside modal, simpler for now inline -->
+                <div id="add-user-form"
+                    style="display:none; margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                    <h3 style="margin-top:0;">Yeni Kullanıcı Ekle</h3>
+                    <form id="newUserForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <input type="text" id="new_fullname" class="form-control" placeholder="Ad Soyad" required>
+                        <input type="email" id="new_email" class="form-control" placeholder="E-posta" required>
+                        <input type="password" id="new_password" class="form-control" placeholder="Şifre" required>
+                        <select id="new_role" class="form-control">
+                            <option value="user">Standart Üye</option>
+                            <option value="author">Yazar</option>
+                            <option value="editor">Editör</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <div style="grid-column: span 2;">
+                            <button type="submit" class="btn btn-primary">Kaydet</button>
+                            <button type="button" class="btn btn-danger"
+                                onclick="document.getElementById('add-user-form').style.display='none'">İptal</button>
+                        </div>
+                    </form>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                            <th style="padding: 12px;">Ad Soyad</th>
+                            <th style="padding: 12px;">E-posta</th>
+                            <th style="padding: 12px;">Rol</th>
+                            <th style="padding: 12px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Hero Slider & Menu Editor placeholders to keep file somewhat concise -->
+        <div id="hero-slider" class="section">
+            <h1 class="page-title">Hero Slider</h1>
+            <div class="card">
+                <h3 class="card-title">Slider Metin Ayarları</h3>
+                <form id="heroSliderTextForm">
+                    <div class="form-group">
+                        <label>Buton Metni</label>
+                        <input type="text" id="homepage_hero_btn_text" class="form-control"
+                            placeholder="Örn: Keşfetmeye Başla">
+                    </div>
+                    <div class="form-group">
+                        <label>Buton Metni</label>
+                        <input type="text" id="homepage_hero_btn_text" class="form-control"
+                            placeholder="Örn: Keşfetmeye Başla">
+                    </div>
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <button type="submit" class="btn btn-primary">Metinleri Kaydet</button>
+                    </div>
+                </form>
+
+                <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;">
+
+                <h3 class="card-title">Slider Görselleri</h3>
+                <p style="margin-bottom: 15px; color:#64748b;">Buraya yüklediğiniz görseller ana sayfa slider arka
+                    planında dönecektir.</p>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="file" id="heroImageInput" class="form-control">
+                    <button onclick="uploadHeroSlide()" class="btn btn-primary" style="white-space:nowrap;">Görsel
+                        Ekle</button>
+                </div>
+                <div id="hero-slides-list" style="margin-top: 20px; display: grid; gap: 10px;">
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-editor" class="section">
+            <h1 class="page-title">Menü Düzenleyici</h1>
+            <div class="card">
+                <div class="form-group">
+                    <label>Yeni Menü Öğesi Ekle</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="menuLabel" class="form-control" placeholder="Başlık (Örn: Hakkımızda)">
+                        <input type="text" id="menuUrl" class="form-control" placeholder="URL (Örn: /about)">
+                        <button onclick="addMenuItem()" class="btn btn-primary" style="white-space: nowrap;"><i
+                                class="ph ph-plus"></i> Ekle</button>
+                    </div>
+                </div>
+
+                <div id="menu-items-list" class="draggable-list">
+                    <!-- Menu Items will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="comments-moderation" class="section">
+            <h1 class="page-title" style="margin-bottom: 30px;">Tüm Yorumlar</h1>
+            <div class="card">
+                <div class="table-container" style="overflow-x: auto;">
+                    <table class="data-table" id="comments-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 12px; color: #64748b;">Kullanıcı</th>
+                                <th style="padding: 12px; color: #64748b;">Makale</th>
+                                <th style="padding: 12px; color: #64748b;">Yorum</th>
+                                <th style="padding: 12px; color: #64748b;">Tarih</th>
+                                <th style="padding: 12px; color: #64748b;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comments-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Management Section -->
+        <div id="about-management" class="section">
+            <h1 class="page-title">Hakkında Sayfası Yönetimi</h1>
+            <div class="card">
+                <form id="aboutSettingsForm">
+
+
+                    <hr style="border-color: rgba(255,255,255,0.1); margin: 30px 0;">
+
+                    <h3 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--primary-color);">
+                        Biz Kimiz Bölümü
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Bölüm Başlığı</label>
+                        <input type="text" id="about_us_title" class="form-control" placeholder="Biz Kimiz?">
+                        <small style="color: #64748b;">Renkli yazı için " | " karakterini kullanın.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bölüm Açıklaması</label>
+                        <textarea id="about_us_desc" class="form-control" rows="5"
+                            placeholder="Aperion, ismini..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bölüm Görseli</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="about_us_image" class="file-upload-input" accept="image/*">
+                            <div class="file-upload-label">
+                                <i class="ph ph-upload-simple"></i>
+                                <span>Görsel Yükle</span>
+                            </div>
+                        </div>
+                        <div id="about_us_image_preview" class="file-preview"></div>
+                    </div>
+
+                    <h3 style="margin-top: 30px; margin-bottom: 20px; font-size: 1.2rem; color: var(--primary-color);">
+                        Vizyon Bölümü</h3>
+                    <div class="form-group">
+                        <label>Vizyon Başlığı</label>
+                        <input type="text" id="vision_title" class="form-control" placeholder="Vizyonumuz">
+                    </div>
+                    <div class="form-group">
+                        <label>Vizyon Açıklaması</label>
+                        <textarea id="vision_desc" class="form-control" rows="3"
+                            placeholder="Vizyon metni..."></textarea>
+                    </div>
+
+                    <h3 style="margin-top: 30px; margin-bottom: 20px; font-size: 1.2rem; color: var(--primary-color);">
+                        İletişim Kartı</h3>
+                    <div class="form-group">
+                        <label>Kart Başlığı</label>
+                        <input type="text" id="contact_card_title" class="form-control"
+                            placeholder="Bizimle İletişime Geçin">
+                    </div>
+                    <div class="form-group">
+                        <label>Kart Açıklaması</label>
+                        <textarea id="contact_card_desc" class="form-control" rows="2"
+                            placeholder="Fikirlerinizi duymaktan mutluluk duyarız."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta Adresi (Buton)</label>
+                        <input type="text" id="contact_card_email" class="form-control" placeholder="info@aperion.com">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Kaydet</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal-overlay" id="confirmDataModal">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="ph-fill ph-warning"></i></div>
+            <h3 class="modal-title">Emin misiniz?</h3>
+            <p class="modal-desc" id="confirmModalText">Bu işlemi geri alamazsınız.</p>
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" onclick="closeConfirmModal()">Vazgeç</button>
+                <button class="modal-btn btn-confirm" id="confirmActionBtn">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !user || user.role !== 'admin') {
+            window.location.href = 'index.html';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // --- Category Management ---
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${API_URL}/categories`);
+                if (!res.ok) return;
+                const categories = await res.json();
+
+                const list = document.getElementById('categories-list');
+                list.innerHTML = '';
+
+                categories.forEach(cat => {
+                    const item = document.createElement('div');
+                    item.className = 'draggable-item';
+                    item.style.cursor = 'default'; // Not draggable for now
+                    item.innerHTML = `
+                        <span id="cat-name-${cat.id}" style="font-weight: 500;">${escapeHtml(cat.name)}</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-sm" style="background: #e0e7ff; color: #4338ca; padding: 6px 12px;" onclick="editCategory(${cat.id}, '${escapeHtml(cat.name)}')"><i class="ph-bold ph-pencil-simple"></i></button>
+                            <button class="btn btn-sm btn-danger" style="padding: 6px 12px;" onclick="deleteCategory(${cat.id})"><i class="ph-bold ph-trash"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function addCategory() {
+            const input = document.getElementById('new-category-input');
+            const name = input.value.trim();
+            if (!name) return showToast('Kategori adı boş olamaz.', 'error');
+
+            try {
+                const res = await fetch(`${API_URL}/categories`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Kategori eklendi.', 'success');
+                    input.value = '';
+                    loadCategories();
+                } else {
+                    showToast(data.message || 'Hata oluştu.', 'error');
+                }
+            } catch (e) {
+                showToast('Sunucu hatası.', 'error');
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/categories/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    showToast('Kategori silindi.', 'success');
+                    loadCategories();
+                } else {
+                    showToast('Silinemedi.', 'error');
+                }
+            } catch (e) {
+                showToast('Hata oluştu.', 'error');
+            }
+        }
+
+        async function editCategory(id, currentName) {
+            const newName = prompt('Yeni kategori adı:', currentName);
+            if (newName && newName.trim() !== '' && newName !== currentName) {
+                try {
+                    const res = await fetch(`${API_URL}/categories/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ name: newName.trim() })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast('Kategori güncellendi.', 'success');
+                        loadCategories();
+                    } else {
+                        showToast(data.message || 'Güncellenemedi', 'error');
+                    }
+                } catch (e) {
+                    showToast('Hata oluştu.', 'error');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadStats();
+            loadUsers();
+            loadHeroSlides();
+            loadCategories(); // Added
+            loadAllArticles(); // Added
+            loadMenuItems();
+
+            // Force only dashboard active to fix layout glitch
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const dash = document.getElementById('dashboard');
+            if (dash) dash.classList.add('active');
+        });
+
+
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                const settings = await res.json();
+
+                // Update Logo in Sidebar
+                const brandText = document.getElementById('brand-text');
+                const brandLogoContainer = document.getElementById('logo-img-container');
+                const defaultIcon = document.getElementById('default-logo-icon');
+
+                if (settings.site_logo && settings.site_logo.trim() !== "") {
+                    if (defaultIcon) defaultIcon.style.display = 'none';
+                    brandLogoContainer.innerHTML = `<img src="${settings.site_logo}" alt="Logo" style="height: 36px; border-radius: 4px;">`;
+                }
+
+                if (settings.site_favicon && settings.site_favicon.trim() !== "") {
+                    const fav = document.getElementById('favicon');
+                    if (fav) fav.href = settings.site_favicon;
+                }
+
+                if (settings.site_title) {
+                    const title = settings.site_title;
+                    if (title.endsWith('X')) {
+                        brandText.innerHTML = `${title.slice(0, -1)}<span style="color: var(--primary-accent)">X</span>`;
+                    } else {
+                        brandText.innerHTML = title;
+                    }
+                    // Populate Form
+                    document.getElementById('site_title').value = settings.site_title;
+                }
+                if (settings.site_description) document.getElementById('site_description').value = settings.site_description;
+                if (settings.contact_email) document.getElementById('contact_email').value = settings.contact_email;
+                if (settings.social_twitter) document.getElementById('social_twitter').value = settings.social_twitter;
+                if (settings.social_instagram) document.getElementById('social_instagram').value = settings.social_instagram;
+                if (settings.social_linkedin) document.getElementById('social_linkedin').value = settings.social_linkedin;
+                if (settings.social_youtube) document.getElementById('social_youtube').value = settings.social_youtube;
+                if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
+                if (settings.footer_copyright) document.getElementById('footer_copyright').value = settings.footer_copyright;
+
+                // New Text Settings
+                if (settings.hero_btn_text) document.getElementById('hero_btn_text').value = settings.hero_btn_text;
+                if (settings.showcase_badge) document.getElementById('showcase_badge').value = settings.showcase_badge;
+                if (settings.showcase_title) document.getElementById('showcase_title').value = settings.showcase_title;
+                if (settings.showcase_desc) document.getElementById('showcase_desc').value = settings.showcase_desc;
+                if (settings.showcase_btn_text) document.getElementById('showcase_btn_text').value = settings.showcase_btn_text;
+                if (settings.auth_login_text) document.getElementById('auth_login_text').value = settings.auth_login_text;
+                if (settings.auth_signup_text) document.getElementById('auth_signup_text').value = settings.auth_signup_text;
+                if (settings.articles_hero_title) document.getElementById('articles_hero_title').value = settings.articles_hero_title;
+                if (settings.articles_hero_desc) document.getElementById('articles_hero_desc').value = settings.articles_hero_desc;
+                if (settings.articles_hero_title_color) {
+                    document.getElementById('articles_hero_title_color').value = settings.articles_hero_title_color;
+                    document.getElementById('articles_hero_title_color_hex').value = settings.articles_hero_title_color;
+                }
+
+                // About settings
+                if (settings.about_hero_title) document.getElementById('about_hero_title').value = settings.about_hero_title;
+                if (settings.about_hero_desc) document.getElementById('about_hero_desc').value = settings.about_hero_desc;
+
+                // Articles Page Settings
+                if (settings.articles_hero_title) document.getElementById('articles_hero_title').value = settings.articles_hero_title;
+                if (settings.articles_hero_desc) document.getElementById('articles_hero_desc').value = settings.articles_hero_desc;
+                if (settings.articles_list_title) document.getElementById('articles_list_title').value = settings.articles_list_title;
+
+                // About Us Content Settings
+                if (settings.about_us_title) document.getElementById('about_us_title').value = settings.about_us_title;
+                if (settings.about_us_desc) document.getElementById('about_us_desc').value = settings.about_us_desc;
+                if (settings.about_us_image) {
+                    document.getElementById('about_us_image_preview').innerHTML = `<img src="${settings.about_us_image}" style="max-height: 100px; border-radius: 8px;">`;
+                }
+                if (settings.vision_title) document.getElementById('vision_title').value = settings.vision_title;
+                if (settings.vision_desc) document.getElementById('vision_desc').value = settings.vision_desc;
+
+                // --- NEW: Populate Consolidated Heading Settings ---
+                // Homepage
+                if (settings.homepage_hero_title) document.getElementById('homepage_hero_title').value = settings.homepage_hero_title;
+                if (settings.homepage_hero_desc) document.getElementById('homepage_hero_desc').value = settings.homepage_hero_desc;
+                if (settings.homepage_hero_title_color) document.getElementById('homepage_hero_title_color').value = settings.homepage_hero_title_color;
+
+                // Articles
+                if (settings.articles_hero_title) {
+                    if (document.getElementById('articles_hero_title')) document.getElementById('articles_hero_title').value = settings.articles_hero_title;
+                    if (document.getElementById('articles_hero_title_mgmt')) document.getElementById('articles_hero_title_mgmt').value = settings.articles_hero_title;
+                }
+                if (settings.articles_hero_desc) {
+                    if (document.getElementById('articles_hero_desc')) document.getElementById('articles_hero_desc').value = settings.articles_hero_desc;
+                    if (document.getElementById('articles_hero_desc_mgmt')) document.getElementById('articles_hero_desc_mgmt').value = settings.articles_hero_desc;
+                }
+                if (settings.articles_hero_title_color) {
+                    if (document.getElementById('articles_hero_title_color')) document.getElementById('articles_hero_title_color').value = settings.articles_hero_title_color;
+                    if (document.getElementById('articles_hero_title_color_hex')) document.getElementById('articles_hero_title_color_hex').value = settings.articles_hero_title_color;
+                }
+
+                // About
+                if (settings.about_hero_title) document.getElementById('about_hero_title').value = settings.about_hero_title;
+                if (settings.about_hero_desc) document.getElementById('about_hero_desc').value = settings.about_hero_desc;
+                if (settings.about_hero_title_color) {
+                    document.getElementById('about_hero_title_color').value = settings.about_hero_title_color;
+                    if (document.getElementById('about_hero_title_color_hex')) document.getElementById('about_hero_title_color_hex').value = settings.about_hero_title_color;
+                }
+                if (settings.contact_card_title) document.getElementById('contact_card_title').value = settings.contact_card_title;
+                if (settings.contact_card_desc) document.getElementById('contact_card_desc').value = settings.contact_card_desc;
+                if (settings.contact_card_email) document.getElementById('contact_card_email').value = settings.contact_card_email;
+
+                // Heading Settings - Homepage
+                if (settings.homepage_hero_title) document.getElementById('homepage_hero_title').value = settings.homepage_hero_title;
+                if (settings.homepage_hero_desc) document.getElementById('homepage_hero_desc').value = settings.homepage_hero_desc;
+                if (settings.homepage_hero_title_color) {
+                    document.getElementById('homepage_hero_title_color').value = settings.homepage_hero_title_color;
+                    document.getElementById('homepage_hero_title_color_hex').value = settings.homepage_hero_title_color;
+                }
+
+                // Heading Settings - Articles
+                if (settings.articles_hero_title) document.getElementById('articles_hero_title').value = settings.articles_hero_title;
+                if (settings.articles_hero_desc) document.getElementById('articles_hero_desc').value = settings.articles_hero_desc;
+                if (settings.articles_hero_title_color) {
+                    document.getElementById('articles_hero_title_color').value = settings.articles_hero_title_color;
+                    document.getElementById('articles_hero_title_color_hex').value = settings.articles_hero_title_color;
+                }
+
+                // Heading Settings - About
+                if (settings.about_hero_title) document.getElementById('about_hero_title').value = settings.about_hero_title;
+                if (settings.about_hero_desc) document.getElementById('about_hero_desc').value = settings.about_hero_desc;
+                if (settings.about_hero_title_color) {
+                    document.getElementById('about_hero_title_color').value = settings.about_hero_title_color;
+                    document.getElementById('about_hero_title_color_hex').value = settings.about_hero_title_color;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Old Articles Hero Form Listener Removed
+
+
+        // Sync Articles Hero Color
+        const artColorPicker = document.getElementById('articles_hero_title_color');
+        const artColorHex = document.getElementById('articles_hero_title_color_hex');
+        if (artColorPicker && artColorHex) {
+            artColorPicker.addEventListener('input', (e) => { artColorHex.value = e.target.value; });
+            artColorHex.addEventListener('input', (e) => {
+                if (e.target.value.startsWith('#') && e.target.value.length === 7) artColorPicker.value = e.target.value;
+            });
+        }
+
+        // Sync Homepage Hero Color
+        const homeColorPicker = document.getElementById('homepage_hero_title_color');
+        const homeColorHex = document.getElementById('homepage_hero_title_color_hex');
+        if (homeColorPicker && homeColorHex) {
+            homeColorPicker.addEventListener('input', (e) => { homeColorHex.value = e.target.value; });
+            homeColorHex.addEventListener('input', (e) => {
+                if (e.target.value.startsWith('#') && e.target.value.length === 7) homeColorPicker.value = e.target.value;
+            });
+        }
+
+        // Sync About Hero Color
+        const aboutColorPicker = document.getElementById('about_hero_title_color');
+        const aboutColorHex = document.getElementById('about_hero_title_color_hex');
+        if (aboutColorPicker && aboutColorHex) {
+            aboutColorPicker.addEventListener('input', (e) => { aboutColorHex.value = e.target.value; });
+            aboutColorHex.addEventListener('input', (e) => {
+                if (e.target.value.startsWith('#') && e.target.value.length === 7) aboutColorPicker.value = e.target.value;
+            });
+        }
+
+        // Handle Heading Settings Submit
+        document.getElementById('headingSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+
+            // Homepage
+            formData.append('homepage_hero_title', document.getElementById('homepage_hero_title').value);
+            formData.append('homepage_hero_desc', document.getElementById('homepage_hero_desc').value);
+            formData.append('homepage_hero_title_color', document.getElementById('homepage_hero_title_color').value);
+
+            // Articles
+            formData.append('articles_hero_title', document.getElementById('articles_hero_title').value);
+            formData.append('articles_hero_desc', document.getElementById('articles_hero_desc').value);
+            formData.append('articles_hero_title_color', document.getElementById('articles_hero_title_color').value);
+
+            // About
+            formData.append('about_hero_title', document.getElementById('about_hero_title').value);
+            formData.append('about_hero_desc', document.getElementById('about_hero_desc').value);
+            formData.append('about_hero_title_color', document.getElementById('about_hero_title_color').value);
+
+            try {
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                if (res.ok) {
+                    showToast('Başlık ayarları güncellendi.', 'success');
+                } else {
+                    showToast('Hata oluştu.', 'error');
+                }
+            } catch (e) {
+                showToast('Sunucu hatası.', 'error');
+            }
+        });
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('site_title', document.getElementById('site_title').value);
+            formData.append('site_description', document.getElementById('site_description').value);
+
+            if (document.getElementById('site_logo').files[0]) {
+                formData.append('site_logo', document.getElementById('site_logo').files[0]);
+            }
+            if (document.getElementById('site_favicon').files[0]) {
+                formData.append('site_favicon', document.getElementById('site_favicon').files[0]);
+            }
+            // New fields
+            formData.append('contact_email', document.getElementById('contact_email').value);
+            formData.append('social_twitter', document.getElementById('social_twitter').value);
+            formData.append('social_instagram', document.getElementById('social_instagram').value);
+            formData.append('social_linkedin', document.getElementById('social_linkedin').value);
+            formData.append('social_youtube', document.getElementById('social_youtube').value);
+            formData.append('footer_desc', document.getElementById('footer_desc').value);
+            formData.append('footer_copyright', document.getElementById('footer_copyright').value);
+
+            // Text Settings
+            formData.append('hero_btn_text', document.getElementById('hero_btn_text').value);
+            formData.append('showcase_badge', document.getElementById('showcase_badge').value);
+            formData.append('showcase_title', document.getElementById('showcase_title').value);
+            formData.append('showcase_desc', document.getElementById('showcase_desc').value);
+            formData.append('showcase_btn_text', document.getElementById('showcase_btn_text').value);
+            formData.append('auth_login_text', document.getElementById('auth_login_text').value);
+            formData.append('auth_signup_text', document.getElementById('auth_signup_text').value);
+            formData.append('articles_hero_title', document.getElementById('articles_hero_title').value);
+            formData.append('articles_hero_title_color', document.getElementById('articles_hero_title_color').value);
+            formData.append('articles_hero_desc', document.getElementById('articles_hero_desc').value);
+            formData.append('articles_page_slider_title', document.getElementById('articles_page_slider_title').value);
+            formData.append('articles_page_list_title', document.getElementById('articles_page_list_title').value);
+
+
+            try {
+                // Use JSON for text fields if possible, but FormData is already set up for files.
+                // Since our server handles fields from req.body with multer, this is fine.
+
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                if (res.ok) {
+                    showToast('Ayarlar güncellendi', 'success');
+                    loadSettings();
+                } else showToast('Hata', 'error');
+            } catch (e) { showToast('Sunucu hatası', 'error'); }
+        });
+
+        async function loadUsers() {
+            const tbody = document.getElementById('users-table-body');
+            try {
+                const res = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const users = await res.json();
+                tbody.innerHTML = '';
+                users.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 12px; font-weight: 500;">${u.fullname}</td>
+                            <td style="padding: 12px; color: #6b7280;">${u.email}</td>
+                            <td style="padding: 12px;"><span style="background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">${u.role}</span></td>
+                            <td style="padding: 12px;">
+                                <button onclick="deleteUser(${u.id})" class="btn" style="padding: 6px 12px; background: #fee2e2; color: #ef4444;"><i class="ph ph-trash"></i></button>
+                            </td>
+                        </tr>
+                     `;
+                });
+            } catch (e) { }
+        }
+
+        function showAddUserModal() {
+            document.getElementById('add-user-form').style.display = 'block';
+        }
+
+        document.getElementById('newUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullname = document.getElementById('new_fullname').value;
+            const email = document.getElementById('new_email').value;
+            const password = document.getElementById('new_password').value;
+            const role = document.getElementById('new_role').value;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ fullname, email, password, role })
+                });
+                if (res.ok) {
+                    showToast('Kullanıcı eklendi', 'success');
+                    document.getElementById('newUserForm').reset();
+                    document.getElementById('add-user-form').style.display = 'none';
+                    loadUsers();
+                } else {
+                    const d = await res.json();
+                    showToast(d.error || 'Hata', 'error');
+                }
+            } catch (e) { showToast('Hata', 'error'); }
+        });
+
+        function deleteUser(id) {
+            showConfirmModal('Bu kullanıcıyı kalıcı olarak silmek istediğinize emin misiniz?', async () => {
+                await fetch(`${API_URL}/admin/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                loadUsers();
+                showToast('Kullanıcı silindi', 'success');
+            });
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const stats = await res.json();
+                document.getElementById('stat-users').innerText = stats.users;
+                document.getElementById('stat-articles').innerText = stats.articles;
+                document.getElementById('stat-views').innerText = stats.views;
+                document.getElementById('stat-likes').innerText = stats.likes;
+                document.getElementById('stat-comments').innerText = stats.comments;
+
+                loadDetailedStats();
+                loadCharts(); // New: Load Charts
+            } catch (e) { }
+        }
+
+        async function loadCharts() {
+            try {
+                const res = await fetch(`${API_URL}/admin/chart-data`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                renderCharts(data);
+            } catch (e) { console.error('Chart load error:', e); }
+        }
+
+        let viewsChartInstance = null;
+        let usersChartInstance = null;
+
+        function renderCharts(data) {
+            // Update Monthly Stats (30-day summary)
+            if (data.monthlyStats) {
+                if (document.getElementById('m-views')) document.getElementById('m-views').innerText = data.monthlyStats.views;
+                if (document.getElementById('m-likes')) document.getElementById('m-likes').innerText = data.monthlyStats.likes;
+                if (document.getElementById('m-comments')) document.getElementById('m-comments').innerText = data.monthlyStats.comments;
+                if (document.getElementById('m-users')) document.getElementById('m-users').innerText = data.monthlyStats.users;
+                if (document.getElementById('m-articles')) document.getElementById('m-articles').innerText = data.monthlyStats.articles;
+            }
+
+            // Update Monthly History Table
+            if (data.monthlyHistory) {
+                const tbody = document.getElementById('monthly-history-body');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    if (data.monthlyHistory.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center; color:#94a3b8;">Veri bulunamadı.</td></tr>';
+                    } else {
+                        data.monthlyHistory.forEach(m => {
+                            const dateObj = new Date(m.month + '-01');
+                            const monthName = dateObj.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+
+                            tbody.innerHTML += `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding:16px; font-weight:500;">${monthName}</td>
+                                    <td style="padding:16px;">${m.views}</td>
+                                    <td style="padding:16px;">${m.likes}</td>
+                                    <td style="padding:16px;">${m.comments}</td>
+                                    <td style="padding:16px;">${m.users}</td>
+                                    <td style="padding:16px;">${m.articles}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                }
+            }
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: "'Outfit', sans-serif" }, color: '#64748b' }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                }
+            };
+
+            const ctxViews = document.getElementById('viewsChart');
+            const ctxUsers = document.getElementById('usersChart');
+
+            if (ctxViews) {
+                if (viewsChartInstance) viewsChartInstance.destroy();
+                viewsChartInstance = new Chart(ctxViews.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.views.map(d => formatDateShort(d.date)),
+                        datasets: [{
+                            label: 'Günlük Okunma',
+                            data: data.views.map(d => d.count),
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#6366f1',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: commonOptions
+                });
+            }
+
+            if (ctxUsers) {
+                if (usersChartInstance) usersChartInstance.destroy();
+                usersChartInstance = new Chart(ctxUsers.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.users.map(d => formatDateShort(d.date)),
+                        datasets: [{
+                            label: 'Yeni Üye',
+                            data: data.users.map(d => d.count),
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 6,
+                            hoverBackgroundColor: '#7c3aed'
+                        }]
+                    },
+                    options: commonOptions
+                });
+            }
+        }
+
+        function formatDateShort(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+        }
+
+        async function loadDetailedStats() {
+            const tbody = document.getElementById('detailed-stats-body');
+            try {
+                const res = await fetch(`${API_URL}/admin/detailed-stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const rows = await res.json();
+
+                tbody.innerHTML = '';
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Veri bulunamadı.</td></tr>';
+                    return;
+                }
+
+                rows.forEach(row => {
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 16px; font-weight: 600; color: #334155;">${escapeHtml(row.title)}</td>
+                            <td style="padding: 16px; color: #64748b;">${escapeHtml(row.author_name)}</td>
+                            <td style="padding: 16px;"><span style="background: #f3e8ff; color: #9333ea; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${row.views}</span></td>
+                            <td style="padding: 16px; color: #ef4444;"><i class="ph-fill ph-heart"></i> ${row.like_count}</td>
+                            <td style="padding: 16px; color: #f59e0b;"><i class="ph-fill ph-chat-circle-text"></i> ${row.comment_count}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadHeroSliderData() {
+            // Load Images
+            loadHeroSlides();
+
+            // Load Text Settings
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                const settings = await res.json();
+
+                if (settings.homepage_hero_title) document.getElementById('homepage_hero_title').value = settings.homepage_hero_title;
+                if (settings.homepage_hero_desc) document.getElementById('homepage_hero_desc').value = settings.homepage_hero_desc;
+                if (settings.hero_btn_text) document.getElementById('homepage_hero_btn_text').value = settings.hero_btn_text;
+
+                // Populate Colors
+                if (settings.homepage_hero_title_color) {
+                    const el = document.getElementById('homepage_hero_title_color');
+                    const hex = document.getElementById('homepage_hero_title_color_hex');
+                    if (el) el.value = settings.homepage_hero_title_color;
+                    if (hex) hex.value = settings.homepage_hero_title_color;
+                }
+                if (settings.articles_hero_title_color) {
+                    const el = document.getElementById('articles_hero_title_color');
+                    const hex = document.getElementById('articles_hero_title_color_hex');
+                    if (el) el.value = settings.articles_hero_title_color;
+                    if (hex) hex.value = settings.articles_hero_title_color;
+                }
+                if (settings.about_hero_title_color) {
+                    const el = document.getElementById('about_hero_title_color');
+                    const hex = document.getElementById('about_hero_title_color_hex');
+                    if (el) el.value = settings.about_hero_title_color;
+                    if (hex) hex.value = settings.about_hero_title_color;
+                }
+
+                // Color Loader
+                if (settings.homepage_hero_title_color) {
+                    document.getElementById('homepage_hero_title_color').value = settings.homepage_hero_title_color;
+                    document.getElementById('homepage_hero_title_color_hex').value = settings.homepage_hero_title_color;
+                }
+
+                // Sync Hex and Picker
+                const colorPicker = document.getElementById('homepage_hero_title_color');
+                const colorHex = document.getElementById('homepage_hero_title_color_hex');
+
+                colorPicker.addEventListener('input', (e) => {
+                    colorHex.value = e.target.value;
+                });
+
+                colorHex.addEventListener('input', (e) => {
+                    if (e.target.value.startsWith('#') && e.target.value.length === 7) {
+                        colorPicker.value = e.target.value;
+                    }
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadHeroSlides() {
+            const container = document.getElementById('hero-slides-list');
+            try {
+                const res = await fetch(`${API_URL}/hero-slides`);
+                const slides = await res.json();
+                container.innerHTML = '';
+                slides.forEach(s => {
+                    container.innerHTML += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f9fafb; padding: 10px; border-radius: 8px;">
+                            <img src="${s.image_url}" style="height: 60px; border-radius: 4px; object-fit: cover;">
+                            <button onclick="deleteSlide(${s.id})" class="btn btn-danger" style="padding: 6px 12px;"><i class="ph ph-trash"></i></button>
+                        </div>
+                     `;
+                });
+            } catch (e) { }
+        }
+
+        // Hero Slider Text Form Submit
+        const heroSliderTextForm = document.getElementById('heroSliderTextForm');
+        if (heroSliderTextForm) {
+            heroSliderTextForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append('homepage_hero_title', document.getElementById('homepage_hero_title').value);
+                formData.append('homepage_hero_desc', document.getElementById('homepage_hero_desc').value);
+                formData.append('hero_btn_text', document.getElementById('homepage_hero_btn_text').value);
+                formData.append('homepage_hero_title_color', document.getElementById('homepage_hero_title_color').value);
+
+                try {
+                    const res = await fetch(`${API_URL}/settings`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    if (res.ok) showToast('Hero Slider metinleri güncellendi.', 'success');
+                    else showToast('Hata oluştu.', 'error');
+                } catch (e) { showToast('Sunucu hatası.', 'error'); }
+            });
+        }
+
+        // --- Custom Modal Logic ---
+        let pendingAction = null;
+        function showConfirmModal(message, action) {
+            document.getElementById('confirmModalText').innerText = message;
+            document.getElementById('confirmDataModal').classList.add('show');
+            pendingAction = action;
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmDataModal').classList.remove('show');
+            pendingAction = null;
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if (pendingAction) pendingAction();
+            closeConfirmModal();
+        });
+
+        async function uploadHeroSlide() {
+            const file = document.getElementById('heroImageInput').files[0];
+            if (!file) return;
+            const fd = new FormData();
+            fd.append('image', file);
+            await fetch(`${API_URL}/hero-slides`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+            loadHeroSlides();
+        }
+
+        function deleteSlide(id) {
+            showConfirmModal('Bu slayt görselini silmek istediğinize emin misiniz?', async () => {
+                await fetch(`${API_URL}/hero-slides/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                loadHeroSlides();
+                showToast('Slayt silindi', 'success');
+            });
+        }
+
+        async function loadPendingArticles() {
+            const container = document.querySelector('#pending-articles .card');
+            try {
+                // Admin can use editor endpoint
+                const res = await fetch(`${API_URL}/editor/pending-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const articles = await res.json();
+
+                if (articles.length === 0) {
+                    container.innerHTML = '<p>Onay bekleyen makale yok.</p>';
+                    return;
+                }
+
+                let html = '<ul style="list-style:none; padding:0;">';
+                articles.forEach(art => {
+                    html += `
+                        <li style="border-bottom:1px solid #eee; padding:15px 0; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong>${art.title}</strong><br>
+                                <span style="font-size:0.9rem; color:#666;">Yazar: ${art.author_name} - ${new Date(art.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <div>
+                                <a href="editor.html" class="btn btn-primary" style="text-decoration:none; font-size:0.9rem;">İncele</a>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                container.innerHTML = html;
+            } catch (e) { console.error(e); }
+        }
+
+        // Call loadPendingArticles on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPendingArticles();
+        });
+
+        function showToast(msg, type) {
+            const div = document.createElement('div');
+            div.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            div.style.color = 'white';
+            div.style.padding = '12px 24px';
+            div.style.borderRadius = '8px';
+            div.style.marginTop = '10px';
+            div.innerText = msg;
+            document.getElementById('toast-container').appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+        async function loadArticleDetailSettings() {
+            const res = await fetch(`${API_URL}/settings`);
+            const settings = await res.json();
+            if (settings.article_detail_slider_title) {
+                const el = document.getElementById('article_detail_slider_title');
+                if (el) el.value = settings.article_detail_slider_title;
+            }
+        }
+
+        // Article Detail Settings Submit
+        const articleDetailForm = document.getElementById('articleDetailSettingsForm');
+        if (articleDetailForm) {
+            articleDetailForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const title = document.getElementById('article_detail_slider_title').value;
+                try {
+                    const formData = new FormData(); // Use JSON for simplicity if preferred, but existing uses FormData sometimes
+                    // Actually server accepts body keys too for this endpoint, let's use JSON
+                    const res = await fetch(`${API_URL}/settings`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ article_detail_slider_title: title })
+                    });
+                    if (res.ok) {
+                        showToast('Ayarlar kaydedildi', 'success');
+                    } else {
+                        showToast('Hata oluştu', 'error');
+                    }
+                } catch (err) { console.error(err); }
+            });
+        }
+
+        // Initial Load Call
+        loadArticleDetailSettings();
+        loadArticlesPageSettings();
+
+        // --- Articles Page Settings Logic ---
+        async function loadArticlesPageSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                const settings = await res.json();
+
+                if (settings.articles_page_slider_title) document.getElementById('articles_page_slider_title').value = settings.articles_page_slider_title;
+                if (settings.articles_page_list_title) document.getElementById('articles_page_list_title').value = settings.articles_page_list_title;
+
+                // Also load newsletter settings into main settings form if specific IDs exist there
+                if (settings.newsletter_section_title && document.getElementById('newsletter_section_title'))
+                    document.getElementById('newsletter_section_title').value = settings.newsletter_section_title;
+                if (settings.newsletter_section_desc && document.getElementById('newsletter_section_desc'))
+                    document.getElementById('newsletter_section_desc').value = settings.newsletter_section_desc;
+
+            } catch (e) { console.error(e); }
+        }
+
+        const articlesSettingsForm = document.getElementById('articlesPageSettingsForm');
+        if (articlesSettingsForm) {
+            articlesSettingsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const sliderTitle = document.getElementById('articles_page_slider_title').value;
+                const listTitle = document.getElementById('articles_page_list_title').value;
+
+                try {
+                    const res = await fetch(`${API_URL}/settings`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            articles_page_slider_title: sliderTitle,
+                            articles_page_list_title: listTitle
+                        })
+                    });
+                    if (res.ok) showToast('Ayarlar kaydedildi', 'success');
+                    else showToast('Hata oluştu', 'error');
+                } catch (e) { console.error(e); }
+            });
+        }
+
+        // --- All Articles Management Logic ---
+        async function loadAllArticles() {
+            const tableBody = document.getElementById('all-articles-table-body');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/all-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const articles = await res.json();
+
+                tableBody.innerHTML = '';
+                if (articles.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Makale bulunamadı.</td></tr>';
+                    return;
+                }
+
+                articles.forEach(art => {
+                    let statusBadge = '';
+                    if (art.status === 'published') statusBadge = '<span style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Yayında</span>';
+                    else if (art.status === 'pending') statusBadge = '<span style="background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Onay Bekliyor</span>';
+                    else if (art.status === 'draft') statusBadge = '<span style="background:#f3f4f6; color:#374151; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Taslak</span>';
+                    else if (art.status === 'rejected') statusBadge = '<span style="background:#fee2e2; color:#b91c1c; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Reddedildi</span>';
+                    else if (art.status === 'trash') statusBadge = '<span style="background:#f3f4f6; color:#9ca3af; padding:4px 8px; border-radius:4px; font-size:0.85rem; text-decoration:line-through;">Çöp</span>';
+                    else statusBadge = `<span style="background:#f3f4f6;">${art.status}</span>`;
+
+                    tableBody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding:12px;">#${art.id}</td>
+                            <td style="padding:12px; font-weight:500;">
+                                <a href="article-detail.html?id=${art.id}" target="_blank" style="text-decoration:none; color:inherit;">${escapeHtml(art.title)}</a>
+                            </td>
+                            <td style="padding:12px;">${escapeHtml(art.author_name)}</td>
+                            <td style="padding:12px;">${statusBadge}</td>
+                            <td style="padding:12px; color:#6b7280; font-size:0.9rem;">${new Date(art.created_at).toLocaleDateString('tr-TR')}</td>
+                            <td style="padding:12px;">
+                                <div style="display:flex; gap:6px;">
+                                    <a href="editor.html?edit=${art.id}" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca;"><i class="ph-bold ph-pencil-simple"></i></a>
+                                    <button onclick="deleteArticle(${art.id})" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#fee2e2; color:#ef4444;"><i class="ph-bold ph-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Hata oluştu.</td></tr>';
+            }
+        }
+
+        // Load articles when section is shown
+        // We need to hook into showSection or just call it if section is active.
+        // Or updated showSection to call loaders.
+
+        // Simple Delete (reuse or new)
+        async function deleteArticle(id) {
+            if (!confirm('Bu makaleyi silmek istediğinize emin misiniz?')) return;
+            try {
+                const res = await fetch(`${API_URL}/articles/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showToast('Makale silindi', 'success');
+                    loadAllArticles();
+                } else {
+                    showToast('Hata', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadLikes() {
+            const tbody = document.getElementById('likes-table-body');
+            try {
+                const res = await fetch(`${API_URL}/admin/likes`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const rows = await res.json();
+
+                tbody.innerHTML = '';
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Henüz beğeni yok.</td></tr>';
+                    return;
+                }
+
+                rows.forEach(row => {
+                    const date = new Date(row.created_at).toLocaleDateString('tr-TR');
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 16px; color: #334155; font-weight: 500;">${escapeHtml(row.user_name)}</td>
+                            <td style="padding: 16px; color: #64748b;">${escapeHtml(row.article_title)}</td>
+                            <td style="padding: 16px; color: #94a3b8;">${date}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) { console.error(e); tbody.innerHTML = '<tr><td colspan="3" style="padding:20px; text-align:center; color:red;">Hata oluştu</td></tr>'; }
+        }
+
+
+        // --- Menu Editor Logic ---
+        async function loadMenuItems() {
+            const container = document.getElementById('menu-items-list');
+            try {
+                const res = await fetch(`${API_URL}/menu`);
+                const items = await res.json();
+                container.innerHTML = '';
+                if (items.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#999;">Henüz menü öğesi eklenmemiş.</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    container.innerHTML += `
+                        <div class="draggable-item" data-id="${item.id}">
+                            <div>
+                                <strong>${item.label}</strong> <span style="color:#666; font-size:0.9em;">(${item.url})</span>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.9rem;"><i class="ph ph-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function addMenuItem() {
+            const label = document.getElementById('menuLabel').value;
+            const url = document.getElementById('menuUrl').value;
+            if (!label || !url) return showToast('Lütfen başlık ve URL girin.', 'error');
+
+            try {
+                const res = await fetch(`${API_URL}/menu`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ label, url })
+                });
+                if (res.ok) {
+                    document.getElementById('menuLabel').value = '';
+                    document.getElementById('menuUrl').value = '';
+                    loadMenuItems();
+                    showToast('Menü öğesi eklendi', 'success');
+                } else showToast('Hata oluştu', 'error');
+            } catch (e) { console.error(e); }
+        }
+
+        function deleteMenuItem(id) {
+            showConfirmModal('Bu menü öğesini silmek istediğinize emin misiniz?', async () => {
+                await fetch(`${API_URL}/menu/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                loadMenuItems();
+                showToast('Silindi', 'success');
+            });
+        }
+
+        // Add to DOMContentLoaded
+        const originalOnLoad = window.onload; // Just in case, broadly speaking we are inside DOMContentLoaded already or appending manually.
+        // Actually, we are inside DOMContentLoaded in line 538. Let's act like we are appending.
+        loadMenuItems();
+
+
+
+        // === COMMENTS ===
+        async function loadAllComments() {
+            try {
+                // Fetch all comments (API updated to return all)
+                const res = await fetch(`${API_URL}/admin/comments`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const rows = await res.json();
+                const tbody = document.getElementById('comments-table-body');
+                tbody.innerHTML = '';
+
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Yorum bulunamadı.</td></tr>';
+                    return;
+                }
+
+                rows.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f1f5f9';
+                    tr.innerHTML = `
+                        <td style="padding:12px;">${c.fullname || 'Misafir'}</td>
+                        <td style="padding:12px;">${c.article_title || '-'}</td>
+                        <td style="padding:12px; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.content}</td>
+                        <td style="padding:12px;">${new Date(c.created_at).toLocaleDateString('tr-TR')}</td>
+                        <td style="padding:12px;">
+                            <button onclick="deleteComment(${c.id})" class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;"><i class="ph-bold ph-trash"></i> Sil</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Yorumu silmek istediğinize emin misiniz?')) return;
+            try {
+                // Reusing the reject endpoint which performs a DELETE
+                await fetch(`${API_URL}/admin/comments/${id}/reject`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                showToast('Yorum silindi', 'success');
+                loadAllComments();
+            } catch (e) { console.error(e); }
+        }
+
+        loadAllComments();
+
+
+        // About Settings Submit
+        document.getElementById('aboutSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('about_hero_title').value;
+            const desc = document.getElementById('about_hero_desc').value;
+            const usTitle = document.getElementById('about_us_title').value;
+            const usDesc = document.getElementById('about_us_desc').value;
+            const usImageFile = document.getElementById('about_us_image').files[0];
+            const visionTitle = document.getElementById('vision_title').value;
+            const visionDesc = document.getElementById('vision_desc').value;
+
+            // Checking for Contact Card elements before accessing values
+            const contactTitle = document.getElementById('contact_card_title') ? document.getElementById('contact_card_title').value : '';
+            const contactDesc = document.getElementById('contact_card_desc') ? document.getElementById('contact_card_desc').value : '';
+            const contactEmail = document.getElementById('contact_card_email') ? document.getElementById('contact_card_email').value : '';
+
+            try {
+                const formData = new FormData();
+                formData.append('about_hero_title', title);
+                formData.append('about_hero_desc', desc);
+                formData.append('about_us_title', usTitle);
+                formData.append('about_us_desc', usDesc);
+                formData.append('vision_title', visionTitle);
+                formData.append('vision_desc', visionDesc);
+                formData.append('contact_card_title', contactTitle);
+                formData.append('contact_card_desc', contactDesc);
+                formData.append('contact_card_email', contactEmail);
+
+                if (usImageFile) {
+                    formData.append('about_us_image', usImageFile);
+                }
+
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    showToast('Hakkımızda ayarları güncellendi', 'success');
+                    // Optional: refresh settings to ensure everything is synced?
+                    // loadSettings(); 
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Hata oluştu', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Sunucu hatası', 'error');
+            }
+        });
+
+        // Load Homepage Settings specific logic
+        async function loadHomepageSettings() {
+            try {
+                // 1. Load Articles for Dropdowns
+                const articlesRes = await fetch('/api/articles?limit=100'); // Fetch enough to choose from
+                const articles = await articlesRes.json();
+
+                const selects = ['homepage_article_1', 'homepage_article_2', 'homepage_article_3'];
+
+                selects.forEach(id => {
+                    const select = document.getElementById(id);
+                    // Keep first option
+                    const firstOption = select.options[0];
+                    select.innerHTML = '';
+                    select.appendChild(firstOption);
+
+                    articles.forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a.id;
+                        opt.innerText = `${a.title} (${new Date(a.created_at).toLocaleDateString()})`;
+                        select.appendChild(opt);
+                    });
+                });
+
+                // 2. Load Current Settings
+                const settingsRes = await fetch('/api/settings');
+                const settings = await settingsRes.json();
+
+                if (settings.homepage_hero_title) document.getElementById('homepage_hero_title').value = settings.homepage_hero_title;
+                if (settings.homepage_hero_desc) document.getElementById('homepage_hero_desc').value = settings.homepage_hero_desc;
+                if (settings.hero_btn_text) document.getElementById('homepage_hero_btn_text').value = settings.hero_btn_text; // Re-use existing key for button if preferred, or new one. Let's use generic `hero_btn_text` mapped to this input, but user asked for "homepage management". I'll use `hero_btn_text` as the underlying key since it was already there, but update the UI to be here. 
+                // Ah, wait, I introduced `homepage_hero_btn_text` ID in HTML. Let's map it to `hero_btn_text` in DB to avoid dupes, OR separate it. 
+                // Let's use `hero_btn_text` key for consistency with previous setup.
+
+                if (settings.homepage_article_1) document.getElementById('homepage_article_1').value = settings.homepage_article_1;
+                if (settings.homepage_article_2) document.getElementById('homepage_article_2').value = settings.homepage_article_2;
+                if (settings.homepage_article_3) document.getElementById('homepage_article_3').value = settings.homepage_article_3;
+
+                if (settings.newsletter_title) document.getElementById('newsletter_title').value = settings.newsletter_title;
+                if (settings.newsletter_desc) document.getElementById('newsletter_desc').value = settings.newsletter_desc;
+
+            } catch (e) {
+                console.error('Homepage settings load error', e);
+            }
+        }
+
+        // Listen for section change to load data
+        // We can hook into `showSection` or just load on init if lightweight
+        // Let's expose it globally or add event listener
+        document.getElementById('homepageSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+
+            // Text fields
+            formData.append('homepage_hero_title', document.getElementById('homepage_hero_title').value);
+            formData.append('homepage_hero_desc', document.getElementById('homepage_hero_desc').value);
+            formData.append('hero_btn_text', document.getElementById('homepage_hero_btn_text').value);
+            formData.append('newsletter_title', document.getElementById('newsletter_title').value);
+            formData.append('newsletter_desc', document.getElementById('newsletter_desc').value);
+
+
+            // Article Selections
+            formData.append('homepage_article_1', document.getElementById('homepage_article_1').value);
+            formData.append('homepage_article_2', document.getElementById('homepage_article_2').value);
+            formData.append('homepage_article_3', document.getElementById('homepage_article_3').value);
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }, // Form Data content type handled auto
+                    body: formData // Wait, /api/settings uses multer `upload.fields`. It expects FormData.
+                });
+
+                if (res.ok) {
+                    showToast('Ana Sayfa ayarları başarıyla kaydedildi!', 'success');
+                } else {
+                    showToast('Ayarlar kaydedilirken bir hata oluştu.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Beklenmedik bir hata oluştu.', 'error');
+            }
+        });
+
+        // --- SUBSCRIBER MANAGEMENT ---
+        async function loadSubscribers() {
+            const tbody = document.getElementById('subscribers-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/subscribers`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const rows = await res.json();
+                tbody.innerHTML = '';
+
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Henüz abone yok.</td></tr>';
+                    return;
+                }
+
+                rows.forEach(sub => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f1f5f9';
+                    tr.innerHTML = `
+                        <td style="padding:12px;">${sub.id}</td>
+                        <td style="padding:12px;">${sub.email}</td>
+                        <td style="padding:12px;">${new Date(sub.created_at).toLocaleDateString('tr-TR')}</td>
+                        <td style="padding:12px;">
+                            <button onclick="deleteSubscriber(${sub.id})" class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;">Sil</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">Hata oluştu.</td></tr>';
+            }
+        }
+
+        function deleteSubscriber(id) {
+            if (!confirm('Bu aboneyi silmek istediğinize emin misiniz?')) return;
+            fetch(`${API_URL}/subscribers/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => {
+                if (res.ok) {
+                    showToast('Abone silindi', 'success');
+                    loadSubscribers();
+                } else showToast('Hata oluştu', 'error');
+            }).catch(e => showToast('Hata', 'error'));
+        }
+
+        // Hook automatic loading when section is shown
+        // We can simply modify existing showSection to call this if needed, or user manually refreshes.
+
+        // Simpler hook for sidebar links
+        const subscriberLink = document.querySelector('a[onclick*="newsletter-subscribers"]');
+        if (subscriberLink) {
+            subscriberLink.addEventListener('click', () => {
+                loadSubscribers();
+            });
+        }
+
+        // Hook automatic loading when section is shown
+        // We can simply modify existing showSection to call this if needed, or user manually refreshes.
+        // Or simpler:
+        document.querySelector('a[onclick*="newsletter-subscribers"]').addEventListener('click', () => {
+            loadSubscribers();
+        });
+
+
+        // Initial Load
+        loadHomepageSettings();
+
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+
+            // Mobile logic
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                document.getElementById('brand-logo').classList.toggle('collapsed');
+                const content = document.getElementById('main-content');
+                const icon = document.getElementById('toggle-icon');
+
+                if (sidebar.classList.contains('collapsed')) {
+                    content.style.marginLeft = 'var(--sidebar-width-collapsed)';
+                    icon.classList.remove('ph-caret-left');
+                    icon.classList.add('ph-caret-right');
+                } else {
+                    content.style.marginLeft = 'var(--sidebar-width)';
+                    icon.classList.remove('ph-caret-right');
+                    icon.classList.add('ph-caret-left');
+                }
+            }
+        }
+
+        // --- Show Section Logic (Ensuring Article Detail Page Works) ---
+        window.showSection = function (sectionId, linkEl) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            // Show target
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.classList.add('active');
+
+                // Load Section Specific Data
+                if (sectionId === 'articles-management') loadAllArticles();
+                if (sectionId === 'article-detail-management') loadArticleDetailSettings();
+                if (sectionId === 'homepage-management') loadHomepageSettings();
+                if (sectionId === 'newsletter-subscribers') loadSubscribers();
+                if (sectionId === 'categories') loadCategories();
+                if (sectionId === 'comments-moderation') loadAllComments();
+                if (sectionId === 'menu-editor') loadMenuItems();
+                if (sectionId === 'hero-slider') loadHeroSliderData();
+                if (sectionId === 'likes-management') loadLikes();
+                if (sectionId === 'site-settings') loadSettings();
+                if (sectionId === 'charts-section') loadCharts();
+
+            } else {
+                console.error('Section not found:', sectionId);
+            }
+
+            // Active Menu Item
+            if (linkEl) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                linkEl.classList.add('active');
+            }
+        }
+
+        // DARK MODE LOGIC
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+        }
+
+        // Init Dark Mode
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = 'ph ph-sun';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AperionX - Uzay ve Bilim</title>
+    <link rel="stylesheet" href="style.css?v=97">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="ph-fill ph-planet"></i>
+                </div>
+                <span class="logo-text">AperionX</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link active">Ana Sayfa</a>
+                <a href="articles.html" class="nav-link">Makaleler</a>
+                <a href="#" class="nav-link">Kategoriler</a>
+                <a href="#" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Search Container -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <button class="icon-btn theme-toggle" id="themeToggle">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <!-- Auth Buttons will be injected here if not logged in -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section class="hero-slider">
+        <div class="slider-container" id="slider-container">
+            <!-- Dynamic Slides will be inserted here -->
+        </div>
+
+        <!-- Dark Gradient Overlay -->
+        <div class="hero-overlay"></div>
+
+        <!-- Content -->
+        <div class="hero-content">
+            <h1 class="hero-title" id="hero-title">Aperion | X</h1>
+            <p class="hero-description" id="hero-description">Bilim ve teknolojinin sınırlarını zorlayan en güncel
+                makaleler ve keşifler.</p>
+            <div class="hero-buttons">
+                <a href="#showcase" class="btn hero-btn" id="hero-main-btn">Keşfetmeye Başla</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase Section -->
+    <section class="showcase" id="showcase">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="badge" id="showcase-badge-span"><i class="ph-fill ph-star" style="margin-right:6px;"></i>
+                    <span id="showcase-badge-text">Öne Çıkan
+                        İçerikler</span></span>
+                <h2 class="section-title" id="showcase-title-text">Bu Hafta En Çok <span class="text-gradient">Okunan
+                        Makaleler</span></h2>
+                <p class="section-description" id="showcase-desc-text">Editörlerimiz tarafından seçilen, bilim
+                    dünyasında ses getiren en önemli
+                    araştırma sonuçları ve keşifler.</p>
+            </div>
+
+            <div class="showcase-grid" id="showcase-grid">
+                <!-- Large Card (Left) -->
+                <article class="featured-card large" id="showcase-card-1">
+                    <!-- Dynamic Content -->
+                </article>
+
+                <!-- Small Cards (Right) -->
+                <div class="showcase-right-col">
+                    <article class="featured-card small" id="showcase-card-2">
+                        <!-- Dynamic Content -->
+                    </article>
+                    <article class="featured-card small" id="showcase-card-3">
+                        <!-- Dynamic Content -->
+                    </article>
+                </div>
+            </div>
+
+            <!-- View All Button (Dynamic) -->
+            <div class="showcase-footer">
+                <a href="/articles.html" class="showcase-view-all-btn" id="showcase-view-all-text">Tüm Makalelere Göz At
+                    <i class="ph-bold ph-arrow-right" style="margin-left:8px;"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-box">
+
+                <div class="newsletter-icon-wrapper">
+                    <i class="ph-fill ph-paper-plane-tilt newsletter-icon"></i>
+                </div>
+
+                <h2 class="newsletter-title" id="newsletter-title-text">
+                    Yeni Makalelerden Haberdar Olun</h2>
+                <p class="newsletter-desc" id="newsletter-desc-text">Güncel biyoloji
+                    araştırmalarını kaçırmayın</p>
+
+                <form id="newsletter-form" class="newsletter-form">
+                    <input type="email" id="newsletter-email" class="newsletter-input" placeholder="E-posta adresiniz"
+                        required>
+                    <button type="submit" class="btn btn-primary newsletter-btn">
+                        <i class="ph-bold ph-envelope-simple" style="margin-right: 8px;"></i> Bültene Abone Ol
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <!-- Brand Column -->
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon">
+                        <i class="ph-fill ph-planet"></i>
+                    </div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler
+                    ve keşifler.</p>
+                <div class="footer-socials">
+                    <a href="#" id="footer-twitter" target="_blank" class="social-link"><i
+                            class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" id="footer-instagram" target="_blank" class="social-link"><i
+                            class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="#" class="social-link"><i class="ph-fill ph-linkedin-logo"></i></a>
+                </div>
+            </div>
+
+            <!-- Links Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Ana Sayfa</a></li>
+                    <li><a href="#">Makaleler</a></li>
+                    <li><a href="#">Kategoriler</a></li>
+                    <li><a href="#">Hakkımızda</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact/Legal Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" id="footer-email">info@aperionx.com</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Kullanım Şartları</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 <span id="footer-copyright-name">AperionX</span>. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Links injected by JS -->
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 20px; font-size: 0.9rem;">
+                    <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal')"
+                        style="color: var(--primary-color); text-decoration: none;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-user"></i> -->
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal (Normally hidden, triggered by JS) -->
+    <div class="modal-overlay" id="resetPasswordModal">
+        <div class="modal">
+            <!-- No close button or it closes the flow. Optionally allow close. -->
+            <button class="modal-close" onclick="closeModal('resetPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Yeni Şifre Belirle</h2>
+                <p>Lütfen yeni şifrenizi girin.</p>
+            </div>
+            <form id="reset-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="reset-new-password" placeholder="Yeni Şifre" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Şifreyi Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js?v=64"></script>
+</body>
+
+</html>

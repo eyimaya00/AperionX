@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkımızda - AperionX</title>
+    <link rel="stylesheet" href="style.css?v=99">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        .about-content-section {
+            padding: 80px 0;
+            background: var(--bg-color);
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+        }
+
+        .about-text h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="ph-fill ph-planet"></i>
+                </div>
+                <span class="logo-text">AperionX</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="articles.html" class="nav-link">Makaleler</a>
+                <a href="#" class="nav-link">Kategoriler</a>
+                <a href="about.html" class="nav-link active">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <button class="icon-btn theme-toggle" id="themeToggle">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Slider (Same as Index) -->
+    <section class="hero-slider" id="about-hero-slider"
+        style="display: flex !important; align-items: center !important; justify-content: center !important; position: relative; height: 55vh !important; min-height: 350px;">
+        <div class="slider-container" id="slider-container"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+            <!-- Dynamic Slides will be inserted here by script.js -->
+        </div>
+
+        <div class="hero-overlay" style="z-index: 2;"></div>
+
+        <div class="hero-content" style="
+            position: relative; 
+            z-index: 3; 
+            top: auto; 
+            bottom: auto; 
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important; 
+            text-align: center !important; 
+            margin: 0 !important; 
+            width: 100% !important; 
+            max-width: 100% !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        ">
+            <h1 class="hero-title" id="about-hero-title" style="text-align: center; width: 100%; margin-top: 60px;">Biz
+                <span>Kimiz?</span>
+            </h1>
+            <p class="hero-description" id="about-hero-description"
+                style="text-align: center; max-width: 800px; margin: 0 auto;">Bilimin ışığında geleceği aydınlatıyoruz.
+            </p>
+            <!-- Buttons Removed -->
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="about-content-section" id="about-section" style="padding: 80px 0; background: var(--bg-color);">
+        <div class="container"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; width: 90%; max-width: 1200px; margin: 0 auto;">
+
+            <!-- Text Column -->
+            <div class="about-text-col">
+                <h2 id="about-us-title-display" style="
+                    font-size: 2.75rem; 
+                    font-weight: 700; 
+                    margin-bottom: 24px; 
+                    border-left: 6px solid var(--primary-color); 
+                    padding-left: 20px; 
+                    line-height: 1.1;
+                ">
+                    Biz Kimiz?
+                </h2>
+                <div id="about-us-desc-display"
+                    style="font-size: 1.15rem; line-height: 1.8; font-family: 'Roboto', sans-serif; font-weight: 400;">
+                    <p>Aperion, ismini Antik Yunan felsefesindeki "Apeiron" (Sınırsız) kavramından alır. Nasıl ki
+                        evrenin ve maddenin özü sınırsızsa, bilimin sunduğu keşifler de sonsuzdur.</p>
+                    <p>Biz, mikroskobik dünyadan galaksilerin derinliklerine uzanan bu sonsuz yolculukta, bilimin
+                        ışığını herkes için erişilebilir kılmayı hedefliyoruz.</p>
+                </div>
+            </div>
+
+            <!-- Image Column -->
+            <div class="about-image-col" style="position: relative; display: flex; justify-content: center;">
+                <div class="about-image-wrapper" style="width: 100%; position: relative;">
+                    <!-- Decorative Frame -->
+                    <div class="image-frame-decor"></div>
+
+                    <img id="about-us-image-display" src="https://images.unsplash.com/photo-1507413245164-6160d8298b31"
+                        alt="Biz Kimiz" class="about-image">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="vision-section" style="padding-bottom: 80px; background: var(--bg-color);">
+        <div class="container" style="display: flex; justify-content: center; padding: 0 20px;">
+            <div class="vision-card info-card">
+                <!-- Icon -->
+                <div style="
+                    width: 64px; 
+                    height: 64px; 
+                    background: rgba(99, 102, 241, 0.1); 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    margin: 0 auto 24px auto;
+                ">
+                    <i class="ph ph-eye" style="font-size: 32px; color: #6366f1;"></i>
+                </div>
+
+                <h3 id="vision-title-display" style="
+                    font-size: 2rem; 
+                    font-weight: 700; 
+                    margin-bottom: 16px; 
+                    font-family: 'Inter', sans-serif;
+                ">
+                    Vizyonumuz
+                </h3>
+
+                <p id="vision-desc-display" style="
+                    font-size: 1.1rem; 
+                    line-height: 1.6; 
+                    max-width: 700px; 
+                    margin: 0 auto;
+                ">
+                    Karmaşık bilimsel verileri sade, anlaşılır ve estetik bir dille sunarak, toplumda bilimsel
+                    okuryazarlığı artırmak ve gelecek nesil araştırmacılara ilham kaynağı olmak.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Card Section -->
+    <section class="contact-card-section" style="padding-bottom: 80px; background: var(--bg-color);">
+        <div class="container" style="display: flex; justify-content: center; padding: 0 20px;">
+            <div class="contact-card info-card">
+                <h3 id="contact-card-title-display" style="
+                    font-size: 2.25rem; 
+                    font-weight: 700; 
+                    margin-bottom: 24px; 
+                    font-family: 'Inter', sans-serif;
+                ">
+                    Bizimle İletişime Geçin
+                </h3>
+
+                <p id="contact-card-desc-display" style="
+                    font-size: 1.1rem; 
+                    line-height: 1.6; 
+                    max-width: 600px; 
+                    margin: 0 auto 32px auto;
+                ">
+                    Fikirlerinizi, sorularınızı ve önerilerinizi duymaktan mutluluk duyarız.
+                </p>
+
+                <a id="contact-card-email-btn" href="mailto:info@aperion.com" style="
+                    display: inline-flex;
+                    align-items: center;
+                    background: #6366f1;
+                    color: white;
+                    padding: 16px 32px;
+                    border-radius: 50px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 30px rgba(99, 102, 241, 0.5)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(99, 102, 241, 0.4)'">
+                    <i class="ph-fill ph-envelope-simple" style="margin-right: 10px; font-size: 1.3rem;"></i>
+                    <span id="contact-card-email-text">info@aperion.com</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Typography & Grid Mobile Fixes */
+        @media (max-width: 900px) {
+            .about-content-section .container {
+                grid-template-columns: 1fr !important;
+                gap: 40px !important;
+            }
+
+            #about-us-title-display {
+                font-size: 2rem !important;
+            }
+        }
+
+        /* Image Styling & Animation */
+        .about-image {
+            width: 100%;
+            border-radius: 20px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+
+        .about-image-wrapper:hover .about-image {
+            transform: scale(1.03);
+            box-shadow: 0 30px 60px rgba(99, 102, 241, 0.15);
+            /* Soft primary glow */
+        }
+
+        /* Decorative Background Frame */
+        .image-frame-decor {
+            position: absolute;
+            inset: -15px;
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            border-radius: 32px;
+            z-index: 0;
+            transition: all 0.4s ease;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+        }
+
+        .about-image-wrapper:hover .image-frame-decor {
+            inset: -20px;
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: rotate(2deg);
+            /* Subtle playful rotation */
+        }
+    </style>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <!-- Brand Column -->
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon">
+                        <i class="ph-fill ph-planet"></i>
+                    </div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler
+                    ve keşifler.</p>
+                <div class="footer-socials">
+                    <a href="#" id="footer-twitter" target="_blank" class="social-link"><i
+                            class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" id="footer-instagram" target="_blank" class="social-link"><i
+                            class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="#" class="social-link"><i class="ph-fill ph-linkedin-logo"></i></a>
+                </div>
+            </div>
+
+            <!-- Links Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Ana Sayfa</a></li>
+                    <li><a href="articles.html">Makaleler</a></li>
+                    <li><a href="#">Kategoriler</a></li>
+                    <li><a href="about.html" class="active">Hakkımızda</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact/Legal Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" id="footer-email">info@aperionx.com</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Kullanım Şartları</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 <span id="footer-copyright-name">AperionX</span>. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Modals (Copied for consistency) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=86"></script>
+</body>
+
+</html>

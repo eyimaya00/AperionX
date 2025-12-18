@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makaleler - AperionX</title>
+    <link rel="stylesheet" href="style.css?v=117">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+</head>
+
+<body>
+
+    <!-- Header (Same as Index) -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="ph-fill ph-planet"></i>
+                </div>
+                <span class="logo-text">AperionX</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="articles.html" class="nav-link active">Makaleler</a>
+                <a href="#" class="nav-link">Kategoriler</a>
+                <a href="#" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Search Container (Added) -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <button class="icon-btn theme-toggle" id="themeToggle">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <!-- Auth Buttons will be injected here if not logged in -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Slider (Replicated from Homepage) -->
+    <!-- Hero Slider (Replicated from Homepage) -->
+    <section class="hero-slider articles-hero-section">
+        <div class="slider-container" id="slider-container">
+            <!-- Dynamic Slides will be inserted here -->
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="articles-page-title" id="articles-hero-title"><span style="color: #ffffff">Maka</span><span
+                    style="color: #6366f1">leler</span></h1>
+            <p class="articles-page-description" id="articles-hero-description"
+                style="color: rgba(255, 255, 255, 0.9);">En güncel bilimsel içerikleri keşfedin.
+            </p>
+        </div>
+    </section>
+
+    <!-- Featured Slider -->
+    <section class="featured-slider-section">
+        <div class="container section-header">
+            <!-- Title removed -->
+        </div>
+        <div class="slider-container">
+            <!-- Dynamic Slider Content Will Be Loaded Here -->
+        </div>
+    </section>
+
+    <!-- Filter & Search Section -->
+    <div class="filter-section">
+        <div class="container">
+            <div class="filter-container">
+                <!-- Categories with Scroll -->
+                <div class="category-scroll-wrapper">
+                    <button class="scroll-btn left" id="cat-scroll-left"><i class="ph ph-caret-left"></i></button>
+                    <div class="category-filters" id="category-filters">
+                        <button class="filter-chip active" onclick="filterPageArticles('all', this)">Tümü</button>
+                        <!-- Dynamic Categories will be injected here -->
+                    </div>
+                    <button class="scroll-btn right" id="cat-scroll-right"><i class="ph ph-caret-right"></i></button>
+                </div>
+
+                <!-- Search -->
+                <div class="article-search">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" placeholder="Makale ara..." id="article-search-input"
+                        oninput="searchPageArticles(this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Articles Grid -->
+    <section class="articles-grid-section">
+        <div class="grid-header container">
+            <!-- Title removed -->
+        </div>
+        <div class="container">
+            <div class="articles-grid" id="articles-grid">
+                <!-- Dynamic Content Will Be Loaded Here -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p style="margin-top: 10px;">Makaleler yükleniyor...</p>
+                </div>
+            </div>
+
+            <div class="pagination-container" id="pagination-container" style="display:none;">
+                <button class="load-more-btn" onclick="loadMoreArticles()">Daha Fazla Göster</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel
+                    makaleler
+                    ve keşifler.</p>
+                <div class="footer-socials">
+                    <a href="#" id="footer-twitter" target="_blank" class="social-link"><i
+                            class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" id="footer-instagram" target="_blank" class="social-link"><i
+                            class="ph-fill ph-instagram-logo"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Ana Sayfa</a></li>
+                    <li><a href="articles.html" class="active">Makaleler</a></li>
+                    <li><a href="#">Kategoriler</a></li>
+                    <li><a href="#">Hakkımızda</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" id="footer-email">info@aperionx.com</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Kullanım Şartları</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 <span id="footer-copyright-name">AperionX</span>. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş
+                        Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js?v=12"></script>
+    <script>
+        // Inline logic to trigger load on this page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadArticlesPage === 'function') {
+                loadArticlesPage();
+            } else {
+                console.warn('loadArticlesPage function not found yet.');
+            }
+        });
+
+        // Category Scroll Logic
+        const filterContainer = document.getElementById('category-filters');
+        const scrollLeftBtn = document.getElementById('cat-scroll-left');
+        const scrollRightBtn = document.getElementById('cat-scroll-right');
+
+        if (filterContainer && scrollLeftBtn && scrollRightBtn) {
+            scrollLeftBtn.addEventListener('click', () => {
+                filterContainer.scrollBy({ left: -200, behavior: 'smooth' });
+            });
+
+            scrollRightBtn.addEventListener('click', () => {
+                filterContainer.scrollBy({ left: 200, behavior: 'smooth' });
+            });
+        }
+    </script>
+</body>
+
+</html>

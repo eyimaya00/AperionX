@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AperionX bilim ve teknoloji makaleleri">
+    <meta property="og:title" content="AperionX">
+    <meta property="og:description" content="Bilim ve teknolojinin sınırlarını zorlayın.">
+    <meta property="og:image" content="">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Makale Yükleniyor... - AperionX</title>
+    <link rel="stylesheet" href="style.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        /* Author Beautiful Button */
+        #detail-author {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 50px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        #detail-author i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        #detail-author:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+            background: white;
+            border-color: var(--primary-color);
+        }
+
+        [data-theme="dark"] #detail-author {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] #detail-author:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: var(--primary-color);
+        }
+
+        .article-detail-container {
+            padding-top: 80px;
+            /* Exact Header Height */
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+            /* Mobile padding */
+        }
+
+        /* Force Header to match Index (Solid White) */
+        .header {
+            background-color: var(--card-bg) !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Header Area */
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            /* Slate-500 */
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .article-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .article-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        /* Hero Image - Corrected Class */
+        .detail-hero-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            border-radius: 24px;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.8s ease;
+            margin-top: 20px;
+            /* Small gap from header */
+        }
+
+        /* Page Background Override for Contrast */
+        body {
+            background-color: #f8fafc;
+            /* Slate-50 */
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+            /* Slate-900 */
+        }
+
+        /* Unified Card Style */
+        /* Unified Card Style */
+        .unified-article-card {
+            background: var(--card-bg);
+            /* White in light mode */
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            /* Enhanced shadow */
+            margin-bottom: 20px;
+        }
+
+        /* Content Area - Clean & Readability Focused */
+        .article-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin-top: 30px;
+            background: transparent !important;
+            /* Force transparent */
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Fix for User Issue: Images having unwanted 'layers' */
+        .article-content img {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 20px 0;
+            max-width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .article-content h2 {
+            font-size: 1.8rem;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Summary Box - Distinct Background */
+        .article-summary-simple {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(99, 102, 241, 0.04);
+            /* Light Indigo Tint */
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        [data-theme="dark"] .article-summary-simple {
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark mode tint */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* References Section - Simple */
+        .references-section-simple {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .ref-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+        }
+
+        .ref-list {
+            padding-left: 20px;
+            color: #475569;
+        }
+
+        .ref-list li {
+            margin-bottom: 8px;
+        }
+
+        /* Mobile adjustment for card */
+        @media (max-width: 768px) {
+            .unified-article-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
+
+        /* Share Buttons */
+        .share-section {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .share-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .share-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .share-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .share-twitter {
+            background: #000000;
+        }
+
+        /* X brand color */
+        .share-facebook {
+            background: #1877f2;
+        }
+
+        .share-linkedin {
+            background: #0a66c2;
+        }
+
+        .share-whatsapp {
+            background: #25d366;
+        }
+
+        /* Customized Back Button Style (Matching Login Button) */
+        .btn-back-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            background: rgba(99, 102, 241, 0.1);
+            /* Light Purple Tint */
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back-custom:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Typography Review Override (Ensuring comfort) */
+        .article-content {
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            /* Slate 700 - slightly softer than black */
+            font-weight: 400;
+        }
+
+        [data-theme="dark"] .article-content {
+            color: #e2e8f0;
+            /* Slate 200 */
+        }
+
+        /* Meta Footer */
+        .article-footer-meta {
+            margin-top: 10px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            /* Reduced space from content */
+            margin-bottom: 20px;
+            justify-content: flex-start;
+            /* Left aligned */
+        }
+
+        /* Updated Tag Pill Style - Neutral & Transparent */
+        .tag-pill {
+            background: transparent;
+            color: #64748b;
+            /* Slate-500 */
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            /* Slate-300 */
+            display: inline-block;
+        }
+
+        .tag-pill:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .tag-pill {
+            color: #94a3b8;
+            border-color: #334155;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Dark Mode for Right Actions container */
+        [data-theme="dark"] .right-actions {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-like {
+            background: rgba(99, 102, 241, 0.1);
+            /* Primary instead of red */
+            color: var(--primary-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-like:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-like.liked {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .share-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        .share-icons-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .share-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        [data-theme="dark"] .share-label {
+            color: #94a3b8;
+        }
+
+        .share-icon {
+            color: #64748b;
+            font-size: 1.3rem;
+            /* Slightly bigger */
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dark Mode Share Icons */
+        [data-theme="dark"] .share-icon {
+            color: #cbd5e1;
+            /* Much lighter slate */
+        }
+
+        .share-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .share-icon.twitter:hover {
+            color: #1da1f2;
+        }
+
+        .share-icon.instagram:hover {
+            color: #e1306c;
+        }
+
+        .share-icon.linkedin:hover {
+            color: #0077b5;
+        }
+
+        .share-icon.whatsapp:hover {
+            color: #25d366;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 60px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comments-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .comment-form-wrapper textarea {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .comment-form-wrapper textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .comments-list {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .comment-body {
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .login-prompt {
+            text-align: center;
+            background: rgba(99, 102, 241, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            color: #64748b;
+        }
+
+        .login-prompt a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .action-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .right-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* Mobile Optimizations */
+            .article-title {
+                font-size: 2rem;
+                /* Reduced from 2.8rem */
+                line-height: 1.2;
+            }
+
+            .detail-hero-image {
+                height: 250px;
+                /* Reduced from 450px */
+                margin-bottom: 30px;
+            }
+
+            .article-detail-container {
+                padding-top: 20px;
+                /* Reduced spacing */
+                padding-bottom: 40px;
+                width: 95%;
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .unified-article-card {
+                padding: 24px 20px;
+                /* tighter padding */
+                border-radius: 20px;
+                border: none;
+                /* Cleaner look on mobile */
+                box-shadow: none;
+                /* Flat look for performance/cleanliness */
+                background: transparent;
+                /* Seamless integration */
+            }
+
+            .article-content {
+                font-size: 1.05rem;
+                /* Slightly smaller for mobile reading */
+            }
+        }
+
+        /* Modern Comment Section */
+        .comments-section {
+            margin-top: 60px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background: #f8fafc;
+            /* Light Gray Layer */
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item:hover {
+            border-color: var(--primary-color);
+            background: #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .comment-item {
+            background: #334155;
+            /* Slate 700 - Lighter than bg #1e293b */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .comment-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .comment-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-accent);
+        }
+
+        .comment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .comment-content-wrapper {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .comment-body {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .comment-status-pending {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .comment-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-link {
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-link:hover {
+            color: var(--primary-accent);
+        }
+
+        .action-link.delete:hover {
+            color: #ef4444;
+        }
+
+        .edit-area {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            margin-top: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        /* Comment Form */
+        #comment-form-container textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            min-height: 120px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        #comment-form-container textarea:focus {
+            border-color: var(--primary-accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Updated Slider UI - Full Image Overlay */
+        .slider-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        [data-theme="dark"] .slider-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .slider-nav-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .similar-article-card {
+            min-width: 280px;
+            width: 280px;
+            height: 380px;
+            /* Taller fixed height */
+            background-color: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 1px solid transparent;
+            /* No visible border usually, relies on image */
+        }
+
+        .similar-article-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        /* Gradient Overlay */
+        .similar-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .similar-article-card:hover .similar-card-overlay {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0.95) 100%);
+        }
+
+        .similar-card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+            /* Always white on overlay */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* Allow more lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-decoration: none;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .similar-card-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .category-badge-slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* Moved to left usually looks better on these cards */
+            right: auto;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .media-slider-container {
+            /* Wrapper to ensure buttons don't overlap awkwardly if we move them */
+        }
+
+        @media (max-width: 768px) {
+            .similar-article-card {
+                min-width: 260px;
+                width: 260px;
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="ph-fill ph-planet"></i>
+                </div>
+                <span class="logo-text">AperionX</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="articles.html" class="nav-link active">Makaleler</a>
+                <a href="#" class="nav-link">Kategoriler</a>
+                <a href="#" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Search Container -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <button class="icon-btn theme-toggle" id="themeToggle">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container article-detail-container">
+        <!-- Loading State -->
+        <div id="loading-indicator" style="text-align: center; padding: 100px;">
+            <i class="ph ph-spinner ph-spin" style="font-size: 3rem; color: var(--primary-color);"></i>
+        </div>
+
+        <!-- Content -->
+        <!-- Content -->
+        <main id="article-wrapper" style="display: none;">
+
+            <!-- Hero Image -->
+            <img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">
+
+            <!-- Unified Card -->
+            <div class="unified-article-card">
+                <div class="article-header">
+                    <div class="article-meta">
+                        <span class="article-badge" id="detail-category">Teknoloji</span>
+                        <span id="detail-date"><i class="ph ph-calendar"></i> 10 Aralık 2025</span>
+                        <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
+                    </div>
+                    <h1 class="article-title" id="detail-title">Makale Başlığı</h1>
+                </div>
+
+                <!-- Summary -->
+                <div class="article-summary-simple" id="summary-box">
+                    <div class="summary-title"><i class="ph-fill ph-sparkle"></i> Bu Makalede Neler Öğreneceğiz?</div>
+                    <div class="summary-text" id="detail-excerpt">
+                        <!-- Excerpt will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="article-content-simple">
+                    <div class="article-content" id="detail-content">
+                        <!-- Inner HTML will be injected here -->
+                    </div>
+                </div>
+
+                <!-- References -->
+                <div class="references-section-simple" id="references-section" style="display: none;">
+                    <h3 class="references-title">Kaynakça</h3>
+                    <ul class="references-list" id="references-list"></ul>
+                </div>
+
+                <!-- Tags (Moved to Bottom) -->
+                <div class="tags-container" id="detail-tags"></div>
+            </div>
+
+            <!-- Meta Footer (Actions) -->
+            <div class="article-footer-meta">
+                <!-- Action Row (Back | Like | Share) -->
+                <div class="action-row">
+                    <!-- Left: Back Button -->
+                    <a href="articles.html" class="btn-back-custom">
+                        <i class="ph-bold ph-arrow-left"></i> Diğer Makalelere Göz At
+                    </a>
+
+                    <!-- Right: Like & Share -->
+                    <div class="right-actions">
+                        <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                            <i class="ph ph-heart"></i> <span id="like-count">0</span> Destek Ol
+                        </button>
+
+                        <div class="share-divider"></div>
+
+                        <div class="share-icons-row">
+                            <span class="share-label">Paylaş:</span>
+                            <a href="#" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                            <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                            <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                            <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
+
+                <!-- Comment Form -->
+                <div class="comment-form-wrapper" id="comment-form-container">
+                    <!-- Injected via JS if logged in, else login prompt -->
+                    <p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal('loginModal')">giriş
+                            yapmalısınız</a>.</p>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-list" id="comments-list">
+                    <!-- Injected via JS -->
+                    <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+                </div>
+            </div>
+            <!-- Similar Articles Slider -->
+            <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 id="similar-articles-title" style="font-size: 1.5rem; color: var(--text-color); margin: 0;">
+                        Diğer Makalelere Göz At</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="slider-nav-btn" onclick="slideArticles('left')"><i
+                                class="ph ph-caret-left"></i></button>
+                        <button class="slider-nav-btn" onclick="slideArticles('right')"><i
+                                class="ph ph-caret-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
+                    <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;">
+                        <!-- JS Injected Cards -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer (Copied from articles.html) -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler ve keşifler.
+                </p>
+                <div class="footer-socials">
+                    <a href="#" class="social-link"><i class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" class="social-link"><i class="ph-fill ph-instagram-logo"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Ana Sayfa</a></li>
+                    <li><a href="articles.html">Makaleler</a></li>
+                    <li><a href="#">Kategoriler</a></li>
+                    <li><a href="#">Hakkımızda</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <ul class="footer-links">
+                    <li><a href="#">info@aperionx.com</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Kullanım Şartları</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2025 AperionX. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Modals (Simplified, logic handled by script.js) -->
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-user"></i> -->
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js?v=4"></script>
+    <script>
+        // Use API_URL from script.js or default
+        const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:3000/api';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadArticleDetail();
+        });
+
+        async function loadArticleDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                window.location.href = 'articles.html';
+                return;
+            }
+
+            try {
+                // Fetch Article
+                const res = await fetch(`${API_BASE}/articles/${id}`);
+                if (!res.ok) throw new Error('Not found');
+                const article = await res.json();
+
+                // Populate UI
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.getElementById('article-wrapper').style.display = 'block';
+
+                document.title = article.title + ' - AperionX';
+
+                // Hero Image
+                const img = document.getElementById('detail-image');
+                if (article.image_url) {
+                    img.src = article.image_url;
+                    img.style.display = 'block';
+                } else {
+                    img.style.display = 'none';
+                }
+
+                // Meta
+                document.getElementById('detail-category').innerText = article.category || 'Genel';
+                document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
+                document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Admin'}`;
+
+                // Content
+                document.getElementById('detail-title').innerText = article.title;
+                document.getElementById('detail-excerpt').innerText = article.excerpt || '';
+                document.getElementById('detail-content').innerHTML = article.content;
+
+                // References
+                const refList = document.getElementById('references-list');
+                if (article.references_list) {
+                    document.getElementById('references-section').style.display = 'block';
+                    refList.innerHTML = article.references_list.split('\n').map(r => `<li>${r}</li>`).join('');
+                }
+
+                // Tags
+                const tagsContainer = document.getElementById('detail-tags');
+                if (article.tags) {
+                    tagsContainer.innerHTML = article.tags.split(',').map(t => `<span class="tag-pill">#${t.trim()}</span>`).join('');
+                }
+
+                // Share Links
+                const currentUrl = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent(article.title);
+                document.querySelector('.share-icon.twitter').href = `https://twitter.com/intent/tweet?text=${text}&url=${currentUrl}`;
+                document.querySelector('.share-icon.linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
+                document.querySelector('.share-icon.whatsapp').href = `https://wa.me/?text=${text} ${currentUrl}`;
+                // Instagram doesn't support direct link sharing via URL scheme easily, usually just opens app
+                document.querySelector('.share-icon.instagram').href = `https://www.instagram.com/`;
+
+                // Load Interactions
+                loadLikes(id);
+                loadComments(id);
+                // Load Similar Articles Slider
+                if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
+
+            } catch (e) {
+                console.error(e);
+                // document.getElementById('loading-indicator').innerText = 'Makale bulunamadı.';
+                window.location.href = 'articles.html';
+            }
+        }
+
+        async function loadLikes(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`${API_BASE}/articles/${id}/like`, { headers });
+                const data = await res.json();
+
+                const btn = document.getElementById('like-btn');
+                // Hiding count as requested
+                // const count = document.getElementById('like-count'); 
+                // count.innerText = data.count;
+
+                if (data.liked) {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                } else {
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+                }
+            } catch (e) { console.error('Like load', e); }
+        }
+
+        async function toggleLike() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                openModal('loginModal');
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const btn = document.getElementById('like-btn');
+
+            try {
+                // Optimistic UI
+                const isLiked = btn.classList.contains('liked');
+
+                if (isLiked) {
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+                } else {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                }
+
+                const res = await fetch(`${API_BASE}/articles/${id}/like`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    loadLikes(id); // Revert on error
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadComments(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                // Fetch with Auth to see my pending comments and is_mine
+                const res = await fetch(`${API_BASE}/articles/${id}/comments`, { headers });
+                const comments = await res.json();
+
+                document.getElementById('comment-count').innerText = comments.length;
+                const list = document.getElementById('comments-list');
+
+                if (comments.length === 0) {
+                    list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
+                } else {
+                    list.innerHTML = comments.map(c => {
+                        const initials = c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        return `
+                        <div class="comment-item" id="comment-${c.id}">
+                            <div class="comment-avatar">${initials}</div>
+                            <div class="comment-content-wrapper">
+                                <div class="comment-header">
+                                    <span class="comment-author">${c.fullname}</span>
+                                    ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                                    <div class="comment-actions">
+                                        <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                                        ${c.is_mine ? `
+                                            <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                            <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
+                                            <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="comment-body" id="body-${c.id}">${c.content}</div>
+                                <div id="edit-form-${c.id}" style="display:none;"></div>
+                            </div>
+                        </div>
+                    `}).join('');
+                }
+
+                // Setup Form
+                const formContainer = document.getElementById('comment-form-container');
+                if (token) {
+                    formContainer.innerHTML = `
+                        <textarea id="comment-input" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                        <button class="btn-primary" onclick="postComment()" style="float: right;">Yorum Yap</button>
+                        <div style="clear: both;"></div>
+                    `;
+                } else {
+                    formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
+                }
+
+            } catch (e) { console.error(e); }
+        }
+
+        async function postComment() {
+            const content = document.getElementById('comment-input').value;
+            if (!content || !content.trim()) return showToast('Lütfen bir yorum yazın', 'error');
+
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const token = localStorage.getItem('token');
+
+            try {
+                const res = await fetch(`${API_BASE}/articles/${id}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yorumunuz başarıyla yayınlandı!', 'success');
+                    document.getElementById('comment-input').value = '';
+                    loadComments(id);
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Edit Functions
+        function startEdit(id) {
+            const bodyEl = document.getElementById(`body-${id}`);
+            const currentContent = bodyEl.innerText;
+            const formContainer = document.getElementById(`edit-form-${id}`);
+
+            bodyEl.style.display = 'none';
+            formContainer.style.display = 'block';
+            formContainer.innerHTML = `
+                <textarea class="edit-area" id="edit-input-${id}" rows="3">${currentContent}</textarea>
+                <div style="margin-top: 8px; text-align: right;">
+                    <button class="btn btn-login" style="padding: 6px 12px; font-size: 0.8rem;" onclick="cancelEdit(${id})">İptal</button>
+                    <button class="btn btn-signup" style="padding: 6px 12px; font-size: 0.8rem;" onclick="saveEdit(${id})">Kaydet</button>
+                </div>
+            `;
+        }
+
+        function cancelEdit(id) {
+            document.getElementById(`body-${id}`).style.display = 'block';
+            document.getElementById(`edit-form-${id}`).style.display = 'none';
+        }
+
+        async function saveEdit(id) {
+            const content = document.getElementById(`edit-input-${id}`).value;
+            if (!content.trim()) return showToast('Yorum boş olamaz', 'error');
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yorum başarıyla güncellendi.', 'success');
+                    const params = new URLSearchParams(window.location.search);
+                    loadComments(params.get('id'));
+                } else {
+                    showToast('Güncelleme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    showToast('Yorum silindi', 'success');
+                    document.getElementById(`comment-${id}`).remove();
+                    // optional: update count
+                } else {
+                    showToast('Silme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+    </script>
+
+</body>
+
+</html>

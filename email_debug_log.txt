@@ -1,0 +1,2 @@
+Error Code: EDNS
+Message: queryA ETIMEOUT smtp.gmail.com
