@@ -145,71 +145,70 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                align-items: flex-start;
+                /* Allow scrolling if really needed, but try to fit */
+                padding-top: 10vh;
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+                /* Enable scrolling if it really doesn't fit */
+            }
+
             .container {
                 padding: 1rem;
-                /* Reduce padding */
-                transform: translateY(-20px);
-                /* Move everything up */
+                max-width: 100%;
+                transform: none;
+                /* Reset transform */
+                margin-top: -20px;
             }
 
             .logo-icon {
-                font-size: 6rem;
-                /* Smaller Mobile Logo */
-                margin-bottom: -1rem;
+                font-size: 4rem;
+                /* Much Smaller */
+                margin-bottom: -0.5rem;
             }
 
             .brand-name {
-                font-size: 2.5rem;
-                /* Smaller Mobile Text */
+                font-size: 2rem;
+                /* Much Smaller */
             }
 
             .brand-wrapper {
-                margin-bottom: 0.5rem;
-                /* Tight gap */
+                margin-bottom: 1rem;
+                /* minimal specific gap */
             }
 
             h1.main-title {
-                margin-top: 0px;
-                font-size: 2rem;
-                /* Fit text better */
+                font-size: 1.6rem;
                 margin-bottom: 0.5rem;
+                margin-top: 10px;
             }
 
             p.desc {
-                font-size: 1rem;
+                font-size: 0.95rem;
                 margin-bottom: 1.5rem;
-                /* Pull timer up */
+                line-height: 1.4;
             }
 
-            /* Timer specific fixes */
+            /* Compact Timer */
             .countdown {
-                gap: 10px;
-                /* Tighter buttons */
+                gap: 8px;
             }
 
             .time-box {
-                padding: 1rem;
-                /* Smaller boxes */
-                min-width: 100px;
+                padding: 0.8rem;
+                min-width: 80px;
+                /* narrowed */
+                border-radius: 12px;
             }
 
             .time-value {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
             .time-label {
-                font-size: 0.8rem;
-            }
-
-            /* Mobile Logo Adjustments */
-            .dynamic-logo {
-                max-height: 320px !important;
-                /* Larger on mobile */
-            }
-
-            .brand-wrapper::before {
-                width: 200px;
-                height: 200px;
+                font-size: 0.75rem;
             }
         }
 
