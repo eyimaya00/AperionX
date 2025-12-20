@@ -2,16 +2,27 @@
 <html lang="tr">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yazar Paneli - AperionX</title>
     <link rel="icon" type="image/x-icon" href="uploads/favicon.ico" id="favicon">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
-    <!-- Phosphor Icons -->
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+    <link href="quill-overrides.css" rel="stylesheet">
     <style>
         :root {
             --admin-bg: #f8fafc;
@@ -60,90 +71,136 @@
             overflow-x: hidden;
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR GLASSMORPHISM DESIGN */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--sidebar-bg);
+            background: rgba(15, 23, 42, 0.95);
+            /* Deep Dark Blue, almost opaque */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             height: 100vh;
             position: fixed;
-            padding: 24px 16px;
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             z-index: 100;
-            /* High z-index */
-            transition: width var(--transition-speed);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            /* Subtle border */
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+            /* Deep shadow */
         }
 
         .sidebar.collapsed {
             width: var(--sidebar-width-collapsed);
+            padding: 32px 12px;
         }
 
         .sidebar.collapsed .logo span,
         .sidebar.collapsed .menu-item span,
-        .sidebar.collapsed .logout-btn span {
+        .sidebar.collapsed .logout-btn span,
+        .sidebar.collapsed .section-label {
             display: none;
         }
 
         .sidebar.collapsed .logo {
             justify-content: center;
             padding-left: 0;
+            margin-bottom: 40px;
         }
 
         .sidebar.collapsed .menu-item,
         .sidebar.collapsed .logout-btn {
             justify-content: center;
-            padding: 12px;
+            padding: 14px;
         }
 
+        /* LOGO */
         .logo {
             font-size: 1.6rem;
-            font-weight: 700;
-            color: white;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 40px;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
+            gap: 16px;
+            margin-bottom: 50px;
             padding-left: 8px;
+            position: relative;
         }
 
         .logo img {
-            height: 36px;
-            border-radius: 4px;
+            height: 42px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
+        /* MENU ITEMS */
         .menu-item {
-            padding: 14px 16px;
-            color: var(--sidebar-text);
+            padding: 16px 20px;
+            color: #94a3b8;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-radius: 8px;
+            gap: 16px;
+            border-radius: 16px;
+            /* softer roundness */
             margin-bottom: 8px;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             font-weight: 500;
             white-space: nowrap;
+            position: relative;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
         }
 
-        .menu-item:hover,
-        .menu-item.active {
-            background: rgba(99, 102, 241, 0.1);
+        .menu-item:hover {
             color: white;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(6px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .menu-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+            font-weight: 700;
+        }
+
+        /* Active Indicator Line */
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 20px;
+            width: 4px;
             background: var(--primary-accent);
-            color: white;
-            box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.4);
+            border-radius: 0 4px 4px 0;
+            display: none;
+            /* Optional: Enable if preferred over full bg */
         }
 
         .menu-item i {
             font-size: 1.4rem;
+            transition: color 0.2s;
+        }
+
+        .menu-item:hover i {
+            color: var(--primary-accent);
+        }
+
+        .menu-item.active i {
+            color: #818cf8;
         }
 
         /* CONTENT */
@@ -421,24 +478,36 @@
         .logout-btn {
             margin-top: auto;
             color: #ef4444;
-            background: rgba(239, 68, 68, 0.05);
-            border: 1px solid transparent;
+            background: rgba(239, 68, 68, 0.08);
+            /* Slightly more visible bg */
+            border: 1px solid rgba(239, 68, 68, 0.1);
             cursor: pointer;
-            padding: 14px 16px;
+            padding: 16px 20px;
+            /* Match menu item padding */
             border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            /* Match menu item gap */
             font-weight: 600;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
             text-align: left;
             font-family: inherit;
             white-space: nowrap;
             margin-bottom: 20px;
+            font-size: 0.95rem;
         }
 
-        /* MOBILE RESPONSIVE */
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        /* MOBILE RESPONSIVE & PREMIUM OVERRIDES */
         @media (max-width: 768px) {
             :root {
                 --sidebar-width: 0px;
@@ -450,6 +519,8 @@
                 position: fixed;
                 z-index: 1001;
                 height: 100vh;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+                /* Stronger shadow for mobile drawer */
             }
 
             .sidebar.active {
@@ -473,13 +544,6 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-            border-color: rgba(239, 68, 68, 0.2);
-            transform: translateY(-2px);
         }
 
         .status-badge {
@@ -970,19 +1034,26 @@
                 <button class="icon-btn" onclick="toggleNotificationDropdown()" title="Bildirimler">
                     <i class="ph ph-bell"></i>
                     <div id="notif-badge"
-                        style="display:none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
+                        style="display:none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
                         0</div>
                 </button>
-            </div>
-            <span id="notif-badge"
-                style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 11px; padding: 2px 6px; border-radius: 50%; display: none;">0</span>
 
-            <!-- DROPDOWN -->
-            <div id="notif-dropdown"
-                style="display: none; position: absolute; top: 40px; right: 0; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0;">
-                <div style="padding: 15px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Bildirimler</div>
-                <div id="notif-list" style="max-height: 300px; overflow-y: auto;">
-                    <div style="padding: 20px; text-align: center; color: #94a3b8;">Bildirim yok.</div>
+                <!-- DROPDOWN -->
+                <div id="notif-dropdown"
+                    style="display: none; position: absolute; top: 50px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0; animation: fadeIn 0.2s ease;">
+                    <div
+                        style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: #1e293b;">Bildirimler</span>
+                        <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;"
+                            onclick="loadNotifications()">Yenile</span>
+                    </div>
+                    <div id="notif-list" style="max-height: 350px; overflow-y: auto;">
+                        <div
+                            style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <span>Bildiriminiz yok.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1210,7 +1281,7 @@
                         <button type="button" class="btn btn-secondary" onclick="submitArticle('draft')">Taslak Olarak
                             Kaydet</button>
                         <button type="button" class="btn btn-primary"
-                            onclick="submitArticle('published')">Yayınla</button>
+                            onclick="submitArticle('pending')">Yayınla</button>
                     </div>
                 </div>
             </form>
@@ -1490,6 +1561,7 @@
         }
 
         let editingArticleId = null;
+        let currentArticleFilter = 'all'; // Moved to top scope
 
         // Trash State
         let isTrashView = false;
@@ -1760,12 +1832,32 @@
             } catch (e) { }
         }
 
+        // Register the image resize module
+        /* global ImageResize */
+        // Check if ImageResize is defined to avoid errors if script fails to load
+        console.log('Checking ImageResize:', typeof ImageResize);
+
+        let ImageResizeModule = null;
+        if (typeof ImageResize !== 'undefined') {
+            ImageResizeModule = ImageResize;
+            // Handle default export if present (common in some builds)
+            if (ImageResize.default) {
+                ImageResizeModule = ImageResize.default;
+            }
+            console.log('Registering ImageResize module...');
+            Quill.register('modules/imageResize', ImageResizeModule);
+        } else {
+            console.error('ImageResize module NOT found!');
+            // Fallback warning or toast could go here
+        }
+
         var quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
-                imageResize: {
+                // Only enable if module is loaded
+                imageResize: ImageResizeModule ? {
                     displaySize: true
-                },
+                } : false,
                 toolbar: {
                     container: [
                         [{ 'header': [1, 2, 3, false] }],
@@ -1785,6 +1877,10 @@
         });
 
         function imageHandler() {
+            // Capture the quill instance from the handler context (this.quill is bound by standard Quill toolbar)
+            // If that fails, fallback to the global 'quill' variable, though 'this.quill' is safer.
+            const q = this.quill || quill;
+
             const input = document.createElement('input');
             input.setAttribute('type', 'file');
             input.setAttribute('accept', 'image/*');
@@ -1797,24 +1893,29 @@
                 const formData = new FormData();
                 formData.append('image', file);
 
-                // Save cursor
-                const range = quill.getSelection(true);
-
                 try {
+                    // Use the captured instance 'q'
+                    q.focus();
+                    let range = q.getSelection();
+                    if (!range) {
+                        range = { index: q.getLength() - 1, length: 0 };
+                    }
+
                     const res = await fetch(`${API_URL}/upload`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` },
                         body: formData
                     });
 
-                    if (!res.ok) throw new Error('Upload failed');
+                    if (!res.ok) throw new Error('Yükleme başarısız');
 
                     const data = await res.json();
 
                     // Insert image
-                    quill.insertEmbed(range.index, 'image', data.url);
+                    q.insertEmbed(range.index, 'image', data.url);
+
                     // Move cursor
-                    quill.setSelection(range.index + 1);
+                    q.setSelection(range.index + 1);
 
                 } catch (e) {
                     console.error('Image upload failed:', e);
@@ -1883,7 +1984,7 @@
                     return;
                 }
 
-                formData.append('status', status === 'draft' ? 'draft' : 'published');
+                formData.append('status', status === 'draft' ? 'draft' : 'pending');
 
                 const imageFile = document.getElementById('imageInput').files[0];
                 const pdfFile = document.getElementById('pdfInput').files[0];
@@ -1899,8 +2000,9 @@
                 console.log('Response status:', res.status);
 
                 if (res.ok) {
-                    showToast(editingArticleId ? 'Makale güncellendi!' : 'Makale başarıyla kaydedildi!', 'success');
-                    if (status !== 'draft') {
+                    const isDraft = status === 'draft';
+                    showToast(isDraft ? 'Taslak kaydedildi' : 'Makale onay için editöre gönderildi.', 'success');
+                    if (!isDraft) {
                         showSection('my-articles', document.querySelectorAll('.menu-item')[1]); resetForm();
                     }
                 } else {
@@ -1954,7 +2056,6 @@
             }
         }
 
-        let currentArticleFilter = 'all';
 
         function setArticleFilter(filter) {
             if (currentArticleFilter === filter) {
@@ -1974,7 +2075,7 @@
 
         async function loadMyArticles() {
             const container = document.getElementById('articles-list');
-            // If we are doing a background refresh (silent) we might not want to clear HTML, but for now it's fine
+            if (!container) return;
             container.innerHTML = '<div style="text-align:center; padding: 20px;">Yükleniyor...</div>';
 
             // Show/Hide filters based on Trash View
@@ -1983,7 +2084,17 @@
 
             try {
                 const res = await fetch(`${API_URL}/articles/my-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Sunucu hatası: ${res.status}`);
+                }
                 const data = await res.json();
+
+                if (!Array.isArray(data)) {
+                    console.error('Data is not array:', data);
+                    throw new Error('Veri formatı geçersiz.');
+                }
+
                 container.innerHTML = '';
 
                 // CALCULATE COUNTS (Excluding Trash)
@@ -2066,7 +2177,10 @@
                         </div>
                     `;
                 });
-            } catch (e) { container.innerHTML = 'Yüklenemedi.'; }
+            } catch (e) {
+                console.error(e);
+                if (container) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">Yüklenirken hata oluştu: ${e.message}</div>`;
+            }
         }
 
         // --- CUSTOM MODAL LOGIC ---
@@ -2391,37 +2505,53 @@
 
                 const badge = document.getElementById('notif-badge');
                 if (data.unread > 0) {
-                    badge.style.display = 'block';
+                    badge.style.display = 'flex'; // Changed from block to flex
                     badge.innerText = data.unread;
                 } else {
                     badge.style.display = 'none';
                 }
 
                 const list = document.getElementById('notif-list');
-                if (data.notifications.length === 0) return;
+                if (data.notifications.length === 0) {
+                    list.innerHTML = `
+                        <div style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <span>Bildiriminiz yok.</span>
+                        </div>`;
+                    return;
+                }
 
                 list.innerHTML = '';
                 data.notifications.forEach(n => {
-                    const icon = n.type === 'success' ? 'ph-check-circle' : (n.type === 'error' ? 'ph-x-circle' : 'ph-info');
+                    const icon = n.type === 'success' ? 'ph-check-circle' : (n.type === 'error' ? 'ph-warning-circle' : 'ph-info');
                     const color = n.type === 'success' ? '#10b981' : (n.type === 'error' ? '#ef4444' : '#3b82f6');
+                    const bg = n.is_read ? 'white' : '#f0f9ff';
 
                     const item = document.createElement('div');
-                    item.style.padding = '12px 15px';
+                    item.className = 'notif-item';
+                    item.style.padding = '16px';
                     item.style.borderBottom = '1px solid #f1f5f9';
                     item.style.display = 'flex';
-                    item.style.gap = '10px';
-                    item.style.background = n.is_read ? 'white' : '#f8fafc';
+                    item.style.gap = '12px';
+                    item.style.background = bg;
                     item.style.cursor = 'pointer';
-                    item.className = 'notif-item';
+                    item.style.transition = 'background 0.2s';
+
+                    item.onmouseover = () => { if (n.is_read) item.style.background = '#f8fafc'; };
+                    item.onmouseout = () => { if (n.is_read) item.style.background = 'white'; };
                     item.onclick = async () => { await markRead(n.id); };
 
                     item.innerHTML = `
-                        <div style="color: ${color}; font-size: 20px;"><i class="ph-fill ${icon}"></i></div>
-                        <div>
-                            <p style="margin: 0; font-size: 0.9rem; color: #334155;">${n.message}</p>
-                            <span style="font-size: 0.75rem; color: #94a3b8;">${new Date(n.created_at).toLocaleTimeString()}</span>
+                        <div style="color: ${color}; font-size: 24px; display: flex; align-items: flex-start; margin-top: 2px;"><i class="ph-fill ${icon}"></i></div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #334155; line-height: 1.4;">${n.message}</p>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px;">
+                                <i class="ph ph-clock"></i> ${new Date(n.created_at).toLocaleString('tr-TR')}
+                            </span>
                         </div>
+                        ${!n.is_read ? '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-top: 6px;"></div>' : ''}
                     `;
+
                     list.appendChild(item);
                 });
             } catch (e) { }

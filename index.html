@@ -2,9 +2,38 @@
 <html lang="tr">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AperionX - Bilim, teknoloji ve uzay hakkında en güncel makaleler, keşifler ve detaylı analizler.">
+    <meta name="keywords" content="bilim, uzay, teknoloji, makale, araştırma, aperionx">
+    <meta name="author" content="AperionX">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/">
+    <meta property="og:title" content="AperionX - Uzay ve Bilim">
+    <meta property="og:description" content="Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler.">
+    <meta property="og:image" content="https://aperionx.com/uploads/site_logo_default.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://aperionx.com/">
+    <meta property="twitter:title" content="AperionX - Uzay ve Bilim">
+    <meta property="twitter:description" content="Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler.">
+    <meta property="twitter:image" content="https://aperionx.com/uploads/site_logo_default.png">
+
     <title>AperionX - Uzay ve Bilim</title>
+    <link rel="icon" type="image/x-icon" href="uploads/favicon.ico">
     <link rel="stylesheet" href="style.css?v=97">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
@@ -212,7 +241,7 @@
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-envelope-simple"></i> -->
-                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -221,9 +250,9 @@
                         <input type="password" id="login-password" placeholder="Şifre" required>
                     </div>
                 </div>
-                <div style="text-align: right; margin-bottom: 20px; font-size: 0.9rem;">
+                <div style="text-align: right; margin-bottom: 10px;">
                     <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal')"
-                        style="color: var(--primary-color); text-decoration: none;">Şifremi Unuttum?</a>
+                        class="forgot-password-link">Şifremi Unuttum?</a>
                 </div>
                 <button type="submit" class="btn-primary">Giriş Yap</button>
             </form>
@@ -245,6 +274,11 @@
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-user"></i> -->
                         <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
                     </div>
                 </div>
                 <div class="input-group">

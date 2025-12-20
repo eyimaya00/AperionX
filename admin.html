@@ -2,6 +2,15 @@
 <html lang="tr">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Paneli - AperionX</title>
@@ -749,49 +758,54 @@
             <a href="#" class="menu-item active" onclick="showSection('dashboard', this)">
                 <i class="ph ph-house"></i> <span>Ana Sayfa</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('charts-section', this)">
+            <a href="#" class="menu-item" onclick="showSection('charts-section', this); loadCharts();">
                 <i class="ph ph-chart-line-up"></i> <span>Grafikler</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('site-settings', this)">
+            <a href="#" class="menu-item" onclick="showSection('site-settings', this); loadSettings();">
                 <i class="ph ph-gear"></i> <span>Site Ayarları</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('heading-settings', this)">
+            <a href="#" class="menu-item" onclick="showSection('maintenance-mode', this); loadMaintenanceSettings();">
+                <i class="ph ph-wrench"></i> <span>Bakım Modu</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('heading-settings', this); loadSettings();">
                 <i class="ph ph-text-t"></i> <span>Başlık Ayarları</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('homepage-management', this)">
+            <a href="#" class="menu-item" onclick="showSection('homepage-management', this); loadSettings();">
                 <i class="ph ph-house"></i> <span>Ana Sayfa Yönetimi</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('articles-management', this)">
+            <a href="#" class="menu-item" onclick="showSection('articles-management', this); loadAllArticles();">
                 <i class="ph ph-article"></i> <span>Makale Yönetimi</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('newsletter-subscribers', this)">
+            <a href="#" class="menu-item" onclick="showSection('newsletter-subscribers', this); loadSubscribers();">
                 <i class="ph ph-envelope-simple"></i> <span>Bülten Aboneleri</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('likes-management', this)">
+            <a href="#" class="menu-item" onclick="showSection('likes-management', this); loadLikes();">
                 <i class="ph ph-heart"></i> <span>Beğeniler</span>
             </a>
 
-            <a href="#" class="menu-item" onclick="showSection('user-management', this)">
-                <i class="ph ph-users"></i> <span>Kullanıcılar</span>
+            <a href="#" class="menu-item" onclick="showSection('user-management', this); loadUsers();">
+                <i class="ph ph-users"></i>
+                <span>Kullanıcı Yönetimi</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('hero-slider', this)">
+            <a href="#" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
+                <i class="ph ph-envelope-simple"></i>
+                <span>E-posta Şablonları</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('hero-slider', this); loadHeroSlides();">
                 <i class="ph ph-image"></i> <span>Hero Slider</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('categories', this)">
+            <a href="#" class="menu-item" onclick="showSection('categories', this); loadCategories();">
                 <i class="ph ph-bookmarks"></i> <span>Kategoriler</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('menu-editor', this)">
+            <a href="#" class="menu-item" onclick="showSection('menu-editor', this); loadMenuItems();">
                 <i class="ph ph-list"></i> <span>Menü Düzenle</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('comments-moderation', this)">
+            <a href="#" class="menu-item" onclick="showSection('comments-moderation', this); loadAllComments();">
                 <i class="ph ph-chat-text"></i> <span>Yorumlar</span>
             </a>
-            <a href="#" class="menu-item" onclick="showSection('about-management', this)">
+            <a href="#" class="menu-item" onclick="showSection('about-management', this); loadSettings();">
                 <i class="ph ph-info"></i> <span>Hakkında Yönetimi</span>
             </a>
-            <!-- <a href="#" class="menu-item" onclick="showSection('pending-articles', this)">
-                <i class="ph ph-check-circle"></i> <span>Onay Bekleyenler</span>
-            </a> -->
         </nav>
 
         <button onclick="logout()" class="logout-btn">
@@ -806,6 +820,140 @@
             <button class="icon-btn mobile-menu-toggle" onclick="toggleSidebar()" title="Menü">
                 <i class="ph ph-list"></i>
             </button>
+        </div>
+
+        <!-- Email Settings Section -->
+        <div id="email-settings" class="section">
+            <div class="header-section">
+                <div>
+                    <h1>E-posta Şablonları</h1>
+                    <p class="subtitle">Hoş geldin ve şifre sıfırlama maillerinin içeriğini düzenleyin.</p>
+                </div>
+                <button class="btn btn-primary" onclick="saveEmailSettings()">
+                    <i class="ph ph-floppy-disk"></i>
+                    Kaydet
+                </button>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Welcome Email -->
+                <div class="card p-4">
+                    <h3 class="mb-4">Hoş Geldin Maili</h3>
+                    <div class="form-group">
+                        <label>Konu (Subject)</label>
+                        <input type="text" id="email_welcome_subject" class="form-control"
+                            placeholder="Örn: Aramıza Hoş Geldiniz">
+                    </div>
+                    <div class="form-group">
+                        <label>İçerik (HTML)</label>
+                        <textarea id="email_welcome_body" class="form-control" style="min-height: 200px;"
+                            placeholder="Mail içeriği..."></textarea>
+                        <small style="color: #64748b; display: block; margin-top: 5px;">Kullanılabilir değişkenler:
+                            {name}</small>
+                    </div>
+                </div>
+
+                <!-- Reset Password Email -->
+                <div class="card p-4">
+                    <h3 class="mb-4">Şifre Sıfırlama Maili</h3>
+                    <div class="form-group">
+                        <label>Konu (Subject)</label>
+                        <input type="text" id="email_reset_subject" class="form-control"
+                            placeholder="Örn: Şifre Sıfırlama Talebi">
+                    </div>
+                    <div class="form-group">
+                        <label>İçerik (HTML)</label>
+                        <textarea id="email_reset_body" class="form-control" style="min-height: 200px;"
+                            placeholder="Mail içeriği..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Mode Section -->
+        <div id="maintenance-mode" class="section">
+            <div class="header-section">
+                <div>
+                    <h1 class="page-title">Bakım Modu</h1>
+                    <p class="subtitle">Siteyi ziyaretçilere kapatın ve sadece sihirli link ile erişim sağlayın.</p>
+                </div>
+            </div>
+
+            <div class="card p-4" style="max-width: 800px;">
+                <form id="maintenanceSettingsForm">
+
+                    <!-- Mode Toggle -->
+                    <div class="form-group"
+                        style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div>
+                            <label style="margin:0; font-size: 1.1rem;">Bakım Modu Durumu</label>
+                            <small id="maintenance-status-text" style="color: #64748b;">Şu an: Kapalı</small>
+                        </div>
+                        <label class="switch"
+                            style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                            <input type="checkbox" id="maintenance_mode">
+                            <span class="slider round"
+                                style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;"></span>
+                            <style>
+                                .slider:before {
+                                    position: absolute;
+                                    content: "";
+                                    height: 26px;
+                                    width: 26px;
+                                    left: 4px;
+                                    bottom: 4px;
+                                    background-color: white;
+                                    transition: .4s;
+                                    border-radius: 50%;
+                                }
+
+                                input:checked+.slider {
+                                    background-color: #ef4444;
+                                }
+
+                                input:checked+.slider:before {
+                                    transform: translateX(26px);
+                                }
+                            </style>
+                        </label>
+                    </div>
+
+                    <!-- Target Date -->
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label>Hedef Bitiş Tarihi (Sayaç İçin)</label>
+                        <input type="datetime-local" id="maintenance_target_date" class="form-control">
+                        <small style="color: #64748b;">Bu tarihe kadar geri sayım yapılacaktır. Tarih dolduğunda mod
+                            otomatik kapanmaz, elle kapatmalısınız.</small>
+                    </div>
+
+                    <!-- Magic Link -->
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label>Sihirli Erişim Linki (Admin Girişi İçin)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="maintenance_magic_link" class="form-control" readonly
+                                style="background: #f1f5f9; color: #475569;" value="Yükleniyor...">
+                            <button type="button" class="btn btn-primary" onclick="copyMagicLink()"
+                                title="Linki Kopyala">
+                                <i class="ph ph-copy"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="regenerateMagicKey()"
+                                title="Linki Değiştir/Sıfırla">
+                                <i class="ph ph-arrows-clockwise"></i>
+                            </button>
+                        </div>
+                        <small style="color: #d946ef; font-weight: 500; display: block; margin-top: 8px;">
+                            <i class="ph-fill ph-warning"></i> Dikkat: Bakım modu açıkken "Giriş Yap" butonu gizlenir.
+                            İçeri girmek için bu linke tıklamanız şarttır. Linki bir yere not edin!
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: right;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ph ph-floppy-disk"></i> Ayarları Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Dashboard Section -->
@@ -928,7 +1076,7 @@
                         <h3 class="card-title"><i class="ph-duotone ph-info"></i> Genel Bilgiler</h3>
                         <div class="form-group">
                             <label>Site Başlığı</label>
-                            <input type="text" id="site_title" class="form-control" required placeholder="Site adı...">
+                            <input type="text" id="site_title" class="form-control" placeholder="Site adı...">
                         </div>
                         <div class="form-group">
                             <label>Site Açıklaması</label>
@@ -949,6 +1097,12 @@
                             <input type="file" id="site_logo" class="form-control" accept="image/*">
                             <small style="display:block; margin-top:8px; color:#94a3b8;">Mevcut logoyu değiştirmek
                                 için yeni dosya seçin.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Logo Yüksekliği (px)</label>
+                            <input type="number" id="logo_height" class="form-control" placeholder="Örn: 36">
+                            <small style="display:block; margin-top:8px; color:#94a3b8;">Logonuzun headerdaki boyutu.
+                                Boş bırakılırsa varsayılan (36px) kullanılır.</small>
                         </div>
                         <div class="form-group">
                             <label>Favicon</label>
@@ -1273,10 +1427,36 @@
                 <a href="author" class="btn btn-primary" target="_blank"><i class="ph ph-plus"></i> Yeni Makale
                     Yaz</a>
             </div>
-            <div class="card" style="margin-bottom: 24px;">
-                <!-- Articles Hero Form Removed (Consolidated into Heading Settings) -->
-
+            <!-- Stats Cards for Articles -->
+            <div class="stats-grid"
+                style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+                <div class="card stat-card click-filter" onclick="filterArticles('all')"
+                    style="border-left: 4px solid #6366f1; cursor: pointer;">
+                    <h3>Toplam Makale</h3>
+                    <p class="stat-value" id="stats-total-articles">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterArticles('published')"
+                    style="border-left: 4px solid #10b981; cursor: pointer;">
+                    <h3>Yayında</h3>
+                    <p class="stat-value" id="stats-published-articles">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterArticles('pending')"
+                    style="border-left: 4px solid #f59e0b; cursor: pointer;">
+                    <h3>Onay Bekleyen</h3>
+                    <p class="stat-value" id="stats-pending-articles">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterArticles('rejected')"
+                    style="border-left: 4px solid #ef4444; cursor: pointer;">
+                    <h3>Reddedilen</h3>
+                    <p class="stat-value" id="stats-rejected-articles">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterArticles('draft')"
+                    style="border-left: 4px solid #64748b; cursor: pointer;">
+                    <h3>Taslak</h3>
+                    <p class="stat-value" id="stats-draft-articles">0</p>
+                </div>
             </div>
+
             <div class="card">
                 <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
                     <button class="btn btn-primary" onclick="loadAllArticles()"><i class="ph ph-arrows-clockwise"></i>
@@ -1290,6 +1470,7 @@
                                 <th style="padding: 12px;">ID</th>
                                 <th style="padding: 12px;">Başlık</th>
                                 <th style="padding: 12px;">Yazar</th>
+                                <th style="padding: 12px;">Onaylayan</th>
                                 <th style="padding: 12px;">Durum</th>
                                 <th style="padding: 12px;">Tarih</th>
                                 <th style="padding: 12px;">İşlemler</th>
@@ -1434,6 +1615,39 @@
                 <h1 class="page-title">Kullanıcı Yönetimi</h1>
                 <button class="btn btn-primary" onclick="showAddUserModal()"><i class="ph ph-user-plus"></i> Yeni
                     Kullanıcı</button>
+            </div>
+
+            <div class="stats-grid"
+                style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="card" onclick="filterUsers('user')"
+                    style="padding: 24px; text-align: center; border-left: 4px solid #6366f1; cursor: pointer; transition: transform 0.2s;">
+                    <div style="color: #6366f1; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-users"></i>
+                    </div>
+                    <h3 id="count-user" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                    <p style="margin: 0; color: #64748b;">Standart Üye</p>
+                </div>
+                <div class="card" onclick="filterUsers('author')"
+                    style="padding: 24px; text-align: center; border-left: 4px solid #f43f5e; cursor: pointer; transition: transform 0.2s;">
+                    <div style="color: #f43f5e; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-pen-nib"></i>
+                    </div>
+                    <h3 id="count-author" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                    <p style="margin: 0; color: #64748b;">Yazar</p>
+                </div>
+                <div class="card" onclick="filterUsers('editor')"
+                    style="padding: 24px; text-align: center; border-left: 4px solid #10b981; cursor: pointer; transition: transform 0.2s;">
+                    <div style="color: #10b981; font-size: 2rem; margin-bottom: 10px;"><i
+                            class="ph ph-check-circle"></i>
+                    </div>
+                    <h3 id="count-editor" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                    <p style="margin: 0; color: #64748b;">Editör</p>
+                </div>
+                <div class="card" onclick="filterUsers('')"
+                    style="padding: 24px; text-align: center; border-left: 4px solid #64748b; cursor: pointer; transition: transform 0.2s;">
+                    <div style="color: #64748b; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-list"></i>
+                    </div>
+                    <h3 style="font-size: 2rem; margin: 0; color: #1e293b;">Tümü</h3>
+                    <p style="margin: 0; color: #64748b;">Listeyi Sıfırla</p>
+                </div>
             </div>
             <div class="card">
                 <!-- Add User Form Hidden by default or inside modal, simpler for now inline -->
@@ -1756,6 +1970,51 @@
             }
         }
 
+        async function loadEmailSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.email_welcome_subject) document.getElementById('email_welcome_subject').value = data.email_welcome_subject;
+                if (data.email_welcome_body) document.getElementById('email_welcome_body').value = data.email_welcome_body;
+                if (data.email_reset_subject) document.getElementById('email_reset_subject').value = data.email_reset_subject;
+                if (data.email_reset_body) document.getElementById('email_reset_body').value = data.email_reset_body;
+            } catch (error) {
+                console.error('Error loading email settings:', error);
+            }
+        }
+
+        async function saveEmailSettings() {
+            const settings = {
+                email_welcome_subject: document.getElementById('email_welcome_subject').value,
+                email_welcome_body: document.getElementById('email_welcome_body').value,
+                email_reset_subject: document.getElementById('email_reset_subject').value,
+                email_reset_body: document.getElementById('email_reset_body').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/settings_v2`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (res.ok) {
+                    showToast('Şablonlar başarıyla güncellendi!', 'success');
+                } else {
+                    showToast('Hata oluştu.', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showToast('Sunucu hatası.', 'error');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             loadStats();
@@ -1764,6 +2023,7 @@
             loadCategories(); // Added
             loadAllArticles(); // Added
             loadMenuItems();
+            loadEmailSettings(); // Added
 
             // Force only dashboard active to fix layout glitch
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1781,7 +2041,7 @@
 
         async function loadSettings() {
             try {
-                const res = await fetch(`${API_URL}/settings`);
+                const res = await fetch(`${API_URL}/settings_v2`);
                 const settings = await res.json();
 
                 // Update Logo in Sidebar
@@ -1811,6 +2071,7 @@
                 }
                 if (settings.site_description) document.getElementById('site_description').value = settings.site_description;
                 if (settings.contact_email) document.getElementById('contact_email').value = settings.contact_email;
+                if (settings.logo_height) document.getElementById('logo_height').value = settings.logo_height;
                 if (settings.social_twitter) document.getElementById('social_twitter').value = settings.social_twitter;
                 if (settings.social_instagram) document.getElementById('social_instagram').value = settings.social_instagram;
                 if (settings.social_linkedin) document.getElementById('social_linkedin').value = settings.social_linkedin;
@@ -1962,7 +2223,7 @@
             formData.append('about_hero_title_color', document.getElementById('about_hero_title_color').value);
 
             try {
-                const res = await fetch(`${API_URL}/settings`, {
+                const res = await fetch(`${API_URL}/settings_v2`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
@@ -1982,6 +2243,7 @@
             const formData = new FormData();
             formData.append('site_title', document.getElementById('site_title').value);
             formData.append('site_description', document.getElementById('site_description').value);
+            formData.append('logo_height', document.getElementById('logo_height').value);
 
             if (document.getElementById('site_logo').files[0]) {
                 formData.append('site_logo', document.getElementById('site_logo').files[0]);
@@ -2017,7 +2279,7 @@
                 // Use JSON for text fields if possible, but FormData is already set up for files.
                 // Since our server handles fields from req.body with multer, this is fine.
 
-                const res = await fetch(`${API_URL}/settings`, {
+                const res = await fetch(`${API_URL}/settings_v2`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
@@ -2029,25 +2291,104 @@
             } catch (e) { showToast('Sunucu hatası', 'error'); }
         });
 
+        let allUsers = []; // Store globally for filtering
+
         async function loadUsers() {
+            // alert('Debug: Loading Users...'); // Removed for production
+            console.log('Debug: loadUsers called');
             const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#6b7280;">Yükleniyor...</td></tr>';
+
             try {
                 const res = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const users = await res.json();
-                tbody.innerHTML = '';
-                users.forEach(u => {
-                    tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #f3f4f6;">
-                            <td style="padding: 12px; font-weight: 500;">${u.fullname}</td>
-                            <td style="padding: 12px; color: #6b7280;">${u.email}</td>
-                            <td style="padding: 12px;"><span style="background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">${u.role}</span></td>
-                            <td style="padding: 12px;">
-                                <button onclick="deleteUser(${u.id})" class="btn" style="padding: 6px 12px; background: #fee2e2; color: #ef4444;"><i class="ph ph-trash"></i></button>
-                            </td>
-                        </tr>
-                     `;
-                });
-            } catch (e) { }
+                console.log('Debug: API Response Status:', res.status);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+                allUsers = await res.json();
+
+                // Update Stats
+                updateUserStats(allUsers);
+
+                // Initial Render
+                renderUsers(allUsers);
+
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:red;">Veriler yüklenemedi: ${e.message}</td></tr>`;
+            }
+        }
+
+        function updateUserStats(users) {
+            let countUser = 0;
+            let countAuthor = 0;
+            let countEditor = 0;
+
+            users.forEach(u => {
+                if (u.role === 'user') countUser++;
+                else if (u.role === 'author') countAuthor++;
+                else if (u.role === 'editor') countEditor++;
+            });
+
+            document.getElementById('count-user').innerText = countUser;
+            document.getElementById('count-author').innerText = countAuthor;
+            document.getElementById('count-editor').innerText = countEditor;
+        }
+
+        function renderUsers(usersToRender) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            if (usersToRender.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#6b7280;">Kullanıcı bulunamadı.</td></tr>';
+                return;
+            }
+
+            usersToRender.forEach(u => {
+                // Role formatting
+                let roleDisplay = 'Standart Üye'; // Default
+                let roleBg = '#e0e7ff';
+                let roleColor = '#4338ca';
+
+                if (u.role === 'admin') {
+                    roleDisplay = 'Yönetici';
+                    roleBg = '#fee2e2';
+                    roleColor = '#ef4444';
+                }
+                else if (u.role === 'editor') {
+                    roleDisplay = 'Editör';
+                    roleBg = '#dcfce7';
+                    roleColor = '#166534';
+                }
+                else if (u.role === 'author') {
+                    roleDisplay = 'Yazar';
+                    roleBg = '#ffedd5';
+                    roleColor = '#c2410c';
+                }
+
+                tbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px; font-weight: 500;">${escapeHtml(u.fullname)}</td>
+                        <td style="padding: 12px; color: #6b7280;">${escapeHtml(u.email)}</td>
+                        <td style="padding: 12px;">
+                            <span style="background: ${roleBg}; color: ${roleColor}; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight:500;">
+                                ${escapeHtml(roleDisplay)}
+                            </span>
+                        </td>
+                        <td style="padding: 12px;">
+                            <button onclick="deleteUser(${u.id})" class="btn" style="padding: 6px 12px; background: #fee2e2; color: #ef4444;"><i class="ph ph-trash"></i></button>
+                        </td>
+                    </tr>
+                 `;
+            });
+        }
+
+        function filterUsers(role) {
+            if (!role) {
+                renderUsers(allUsers); // Show all
+            } else {
+                const filtered = allUsers.filter(u => u.role === role);
+                renderUsers(filtered);
+            }
         }
 
         function showAddUserModal() {
@@ -2502,53 +2843,88 @@
         }
 
         // --- All Articles Management Logic ---
+        let allArticlesData = [];
+
         async function loadAllArticles() {
             const tableBody = document.getElementById('all-articles-table-body');
             if (!tableBody) return;
-
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Yükleniyor...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Yükleniyor...</td></tr>';
 
             try {
                 const res = await fetch(`${API_URL}/admin/all-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const articles = await res.json();
+                allArticlesData = await res.json();
 
-                tableBody.innerHTML = '';
-                if (articles.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Makale bulunamadı.</td></tr>';
-                    return;
-                }
-
-                articles.forEach(art => {
-                    let statusBadge = '';
-                    if (art.status === 'published') statusBadge = '<span style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Yayında</span>';
-                    else if (art.status === 'pending') statusBadge = '<span style="background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Onay Bekliyor</span>';
-                    else if (art.status === 'draft') statusBadge = '<span style="background:#f3f4f6; color:#374151; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Taslak</span>';
-                    else if (art.status === 'rejected') statusBadge = '<span style="background:#fee2e2; color:#b91c1c; padding:4px 8px; border-radius:4px; font-size:0.85rem;">Reddedildi</span>';
-                    else if (art.status === 'trash') statusBadge = '<span style="background:#f3f4f6; color:#9ca3af; padding:4px 8px; border-radius:4px; font-size:0.85rem; text-decoration:line-through;">Çöp</span>';
-                    else statusBadge = `<span style="background:#f3f4f6;">${art.status}</span>`;
-
-                    tableBody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding:12px;">#${art.id}</td>
-                            <td style="padding:12px; font-weight:500;">
-                                <a href="article-detail.html?id=${art.id}" target="_blank" style="text-decoration:none; color:inherit;">${escapeHtml(art.title)}</a>
-                            </td>
-                            <td style="padding:12px;">${escapeHtml(art.author_name)}</td>
-                            <td style="padding:12px;">${statusBadge}</td>
-                            <td style="padding:12px; color:#6b7280; font-size:0.9rem;">${new Date(art.created_at).toLocaleDateString('tr-TR')}</td>
-                            <td style="padding:12px;">
-                                <div style="display:flex; gap:6px;">
-                                    <a href="editor.html?edit=${art.id}" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca;"><i class="ph-bold ph-pencil-simple"></i></a>
-                                    <button onclick="deleteArticle(${art.id})" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#fee2e2; color:#ef4444;"><i class="ph-bold ph-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
+                updateArticleStats();
+                renderArticles(allArticlesData);
             } catch (e) {
                 console.error(e);
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Hata oluştu.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:red;">Hata oluştu.</td></tr>';
             }
+        }
+
+        function updateArticleStats() {
+            const total = allArticlesData.length;
+            const published = allArticlesData.filter(a => a.status === 'published').length;
+            const pending = allArticlesData.filter(a => a.status === 'pending').length;
+            const rejected = allArticlesData.filter(a => a.status === 'rejected').length;
+            const draft = allArticlesData.filter(a => a.status === 'draft').length;
+
+            if (document.getElementById('stats-total-articles')) document.getElementById('stats-total-articles').innerText = total;
+            if (document.getElementById('stats-published-articles')) document.getElementById('stats-published-articles').innerText = published;
+            if (document.getElementById('stats-pending-articles')) document.getElementById('stats-pending-articles').innerText = pending;
+            if (document.getElementById('stats-rejected-articles')) document.getElementById('stats-rejected-articles').innerText = rejected;
+            if (document.getElementById('stats-draft-articles')) document.getElementById('stats-draft-articles').innerText = draft;
+        }
+
+        function filterArticles(status) {
+            let filtered = [];
+            if (status === 'all') {
+                filtered = allArticlesData;
+            } else {
+                filtered = allArticlesData.filter(a => a.status === status);
+            }
+            renderArticles(filtered);
+        }
+
+        function renderArticles(articles) {
+            const tableBody = document.getElementById('all-articles-table-body');
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+
+            if (articles.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Makale bulunamadı.</td></tr>';
+                return;
+            }
+
+            articles.forEach(art => {
+                let statusBadge = '';
+                if (art.status === 'published') statusBadge = '<span class="badge badge-published">Yayında</span>';
+                else if (art.status === 'pending') statusBadge = '<span class="badge badge-pending">Onay Bekliyor</span>';
+                else if (art.status === 'rejected') statusBadge = '<span class="badge badge-rejected">Reddedildi</span>';
+                else if (art.status === 'draft') statusBadge = '<span class="badge badge-draft">Taslak</span>';
+                else statusBadge = `<span style="background:#f3f4f6;">${art.status}</span>`;
+
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding:12px;">#${art.id}</td>
+                        <td style="padding:12px; font-weight:500;">
+                            <a href="article-detail.html?id=${art.id}" target="_blank" style="text-decoration:none; color:inherit;">${escapeHtml(art.title)}</a>
+                        </td>
+                        <td style="padding:12px;">${escapeHtml(art.author_name)}</td>
+                        <td style="padding:12px;">
+                            ${art.approver_name ? `<span style="color:#059669; font-weight:500;">${escapeHtml(art.approver_name)}</span>` : '<span style="color:#9ca3af;">-</span>'}
+                        </td>
+                        <td style="padding:12px;">${statusBadge}</td>
+                        <td style="padding:12px; color:#6b7280; font-size:0.9rem;">${new Date(art.created_at).toLocaleDateString('tr-TR')}</td>
+                        <td style="padding:12px;">
+                            <div style="display:flex; gap:6px;">
+                                <a href="editor.html?edit=${art.id}" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca;"><i class="ph-bold ph-pencil-simple"></i></a>
+                                <button onclick="deleteArticle(${art.id})" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#fee2e2; color:#ef4444;"><i class="ph-bold ph-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
         // Load articles when section is shown
@@ -2721,33 +3097,38 @@
             const contactEmail = document.getElementById('contact_card_email') ? document.getElementById('contact_card_email').value : '';
 
             try {
-                const formData = new FormData();
-                formData.append('about_hero_title', title);
-                formData.append('about_hero_desc', desc);
-                formData.append('about_us_title', usTitle);
-                formData.append('about_us_desc', usDesc);
-                formData.append('vision_title', visionTitle);
-                formData.append('vision_desc', visionDesc);
-                formData.append('contact_card_title', contactTitle);
-                formData.append('contact_card_desc', contactDesc);
-                formData.append('contact_card_email', contactEmail);
-
-                if (usImageFile) {
-                    formData.append('about_us_image', usImageFile);
-                }
+                // Server expects JSON for text settings currently
+                const settings = {
+                    about_hero_title: title,
+                    about_hero_desc: desc,
+                    about_us_title: usTitle,
+                    about_us_desc: usDesc,
+                    vision_title: visionTitle,
+                    vision_desc: visionDesc,
+                    contact_card_title: contactTitle,
+                    contact_card_desc: contactDesc,
+                    contact_card_email: contactEmail
+                };
 
                 const res = await fetch(`${API_URL}/settings`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer ' + token
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
                     },
-                    body: formData
+                    body: JSON.stringify(settings)
                 });
 
                 if (res.ok) {
                     showToast('Hakkımızda ayarları güncellendi', 'success');
-                    // Optional: refresh settings to ensure everything is synced?
-                    // loadSettings(); 
+
+                    // Handle Image Upload Separately if exists (Future: Implement specific upload route if needed)
+                    // Currently /api/settings doesn't support file upload.
+                    if (usImageFile) {
+                        console.warn('Image upload not supported in this fix yet.');
+                        showToast('Görsel yükleme şu an desteklenmiyor, sadece metinler güncellendi.', 'warning');
+                    }
+
                 } else {
                     const data = await res.json();
                     showToast(data.message || 'Hata oluştu', 'error');
@@ -2961,6 +3342,9 @@
                 if (sectionId === 'likes-management') loadLikes();
                 if (sectionId === 'site-settings') loadSettings();
                 if (sectionId === 'charts-section') loadCharts();
+                if (sectionId === 'charts-section') loadCharts();
+                if (sectionId === 'email-settings') loadEmailSettings();
+                if (sectionId === 'maintenance-mode') loadMaintenanceSettings(); // Added
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -2971,6 +3355,91 @@
                 document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
                 linkEl.classList.add('active');
             }
+        }
+
+        // === MAINTENANCE MODE LOGIC ===
+        async function loadMaintenanceSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings?t=${Date.now()}`);
+                const settings = await res.json();
+
+                // Status
+                const isActive = settings.maintenance_mode === 'true';
+                document.getElementById('maintenance_mode').checked = isActive;
+                document.getElementById('maintenance-status-text').innerText = isActive ? 'Şu an: AÇIK 🔴 (Ziyaretçiler siteye giremiyor)' : 'Şu an: KAPALI 🟢 (Site herkese açık)';
+                document.getElementById('maintenance-status-text').style.color = isActive ? '#ef4444' : '#10b981';
+
+                // Date (Format for datetime-local: YYYY-MM-DDTHH:mm)
+                if (settings.maintenance_target_date) {
+                    // DB returns '2025-12-22 09:00:00', input needs '2025-12-22T09:00'
+                    // Or if ISO string, slice it.
+                    let d = new Date(settings.maintenance_target_date);
+                    // Adjust for timezone offset if needed, but simple ISO slice is safer for local input usually
+                    // Use local time string for input
+                    const offset = d.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
+                    document.getElementById('maintenance_target_date').value = localISOTime;
+                }
+
+                // Magic Link
+                const secret = settings.maintenance_secret || 'Henüz Oluşturulmadı';
+                const link = `${window.location.origin}/maintenance-access?key=${secret}`;
+                document.getElementById('maintenance_magic_link').value = link;
+
+            } catch (e) {
+                console.error('Maintenance settings error:', e);
+            }
+        }
+
+        document.getElementById('maintenanceSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const isActive = document.getElementById('maintenance_mode').checked;
+            const targetDate = document.getElementById('maintenance_target_date').value;
+
+            try {
+                // We send as individual settings
+                const settings = {
+                    maintenance_mode: isActive.toString(),
+                    maintenance_target_date: targetDate
+                };
+
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+
+                if (res.ok) {
+                    showToast('Bakım modu ayarları güncellendi', 'success');
+                    loadMaintenanceSettings(); // Reload to update UI text
+                } else showToast('Hata oluştu', 'error');
+            } catch (e) { console.error(e); }
+        });
+
+        async function regenerateMagicKey() {
+            if (!confirm('DİKKAT: Sihirli anahtarı değiştirirseniz, eski linklere sahip olanlar (siz dahil) siteye tekrar erişemez. Yeni linki kullanmanız gerekir. Emin misiniz?')) return;
+
+            const newSecret = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            try {
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ maintenance_secret: newSecret })
+                });
+                if (res.ok) {
+                    showToast('Yeni anahtar oluşturuldu. Lütfen yeni linki kopyalayın.', 'success');
+                    loadMaintenanceSettings();
+                } else showToast('Hata', 'error');
+            } catch (e) { console.error(e); }
+        }
+
+        function copyMagicLink() {
+            const input = document.getElementById('maintenance_magic_link');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                showToast('Link kopyalandı! 📋', 'success');
+            });
         }
 
         // DARK MODE LOGIC

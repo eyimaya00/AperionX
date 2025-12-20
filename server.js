@@ -12,15 +12,106 @@ const DOMPurify = require('isomorphic-dompurify');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'gizli_anahtar';
+const cookieParser = require('cookie-parser'); // Import cookie-parser
+
+// Security Middleware
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+}));
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    message: 'Too many requests from this IP, please try again later.'
+});
+app.use(limiter);
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json({ limit: '100mb' }));
+app.use(cookieParser()); // Use cookie-parser
+
+// === MAINTENANCE MODE GATEKEEPER ===
+app.use(async (req, res, next) => {
+    // 1. Check for bypass cookie
+    if (req.cookies.maintenance_bypass) {
+        return next();
+    }
+
+    // 2. Allow whitelisted paths (static assets, login API for bypass, etc.)
+    const whitelist = [
+        '/maintenance.html',
+        '/maintenance-access',
+        '/api/settings', // Needed for countdown
+        '/uploads',
+        '/robots.txt',   // SEO
+        '/sitemap.xml',  // SEO
+    ];
+
+    // Check if path starts with whitelist item
+    if (whitelist.some(path => req.path.startsWith(path))) {
+        return next();
+    }
+
+    // 3. Check DB setting
+    try {
+        const [rows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_mode'");
+        if (rows.length > 0 && rows[0].setting_value === 'true') {
+            // Maintenance Active -> Block
+            if (req.accepts('html')) {
+                const maintenanceFile = path.resolve(__dirname, 'maintenance.html');
+                fs.readFile(maintenanceFile, 'utf8', (err, data) => {
+                    if (err) {
+                        console.error('Error reading maintenance file:', err);
+                        return res.status(503).send('Site Bakımda (Hata: Dosya Okunamadı)');
+                    }
+                    res.status(503).send(data);
+                });
+                return; // Stop execution to prevent calling next()
+            } else {
+                return res.status(503).json({ message: 'Site is under maintenance.' });
+            }
+        }
+    } catch (e) {
+        console.error('Maintenance Check Error:', e);
+    }
+
+    next();
+});
+
+// === MAGIC LINK ROUTE ===
+app.get('/maintenance-access', async (req, res) => {
+    const { key } = req.query;
+    if (!key) return res.status(400).send('Anahtar gerekli.');
+
+    try {
+        const [rows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_secret'");
+        if (rows.length === 0) return res.status(500).send('Sistem hatası.');
+
+        const secret = rows[0].setting_value;
+        if (key === secret) {
+            // Valid Key -> Set Cookie (30 days)
+            res.cookie('maintenance_bypass', 'true', {
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                httpOnly: true
+            });
+            res.redirect('/');
+        } else {
+            res.status(403).send('Geçersiz anahtar.');
+        }
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
 
 // === DYNAMIC SEO: Article Detail ===
 // Intercept /article-detail.html to inject meta tags
@@ -83,6 +174,34 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
+// Schema Migration for Username
+async function ensureSchema() {
+    try {
+        // Check if username column exists
+        const [columns] = await pool.query("SHOW COLUMNS FROM users LIKE 'username'");
+        if (columns.length === 0) {
+            console.log('Migrating: Adding username column to users table...');
+            await pool.query("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE AFTER fullname");
+            console.log('Migration Code: Users table updated with username column.');
+        }
+    } catch (e) {
+        console.error('Schema Ensure Error:', e);
+    }
+
+    try {
+        // Add approved_by column to articles if not exists
+        await pool.query("SELECT approved_by FROM articles LIMIT 1");
+    } catch (e) {
+        if (e.code === 'ER_BAD_FIELD_ERROR') {
+            try {
+                await pool.query("ALTER TABLE articles ADD COLUMN approved_by INT DEFAULT NULL");
+                console.log("Added 'approved_by' column to articles table.");
+            } catch (alterErr) { console.error("Error adding approved_by column:", alterErr); }
+        }
+    }
+}
+// Run on start
+ensureSchema();
 
 
 // DB Config
@@ -164,9 +283,173 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// === ROUTES ===
+// Email Helper
+async function sendDynamicEmail(to, type, variables = {}) {
+    try {
+        // Fetch Settings
+        const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key LIKE ? OR setting_key LIKE ?', [`email_${type}_subject`, `email_${type}_body`]);
+        const settings = {};
+        rows.forEach(r => settings[r.setting_key] = r.setting_value);
 
-// 1. Site Settings (Generic)
+        // Fallbacks
+        let subject = settings[`email_${type}_subject`] || 'AperionX Bildirim';
+        let body = settings[`email_${type}_body`] || 'Merhaba, bir bildiriminiz var.';
+
+        // Replace Variables
+        // variables: { name: 'Ali', link: '...' }
+        Object.keys(variables).forEach(key => {
+            const regex = new RegExp(`{${key}}`, 'g');
+            subject = subject.replace(regex, variables[key]);
+            body = body.replace(regex, variables[key]);
+        });
+
+        // Logo Handling (Ensure absolute URL)
+        let logoLink = variables.logoUrl || 'https://ui-avatars.com/api/?name=AX&background=random';
+        // HTML Template
+        const html = `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb; padding: 40px 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <div style="background-color: #ffffff; padding: 30px; text-align: center; border-bottom: 2px solid #f3f4f6;">
+                         <img src="${logoLink}" alt="AperionX" style="height: 48px; object-fit: contain;">
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 40px 30px; color: #374151; line-height: 1.6;">
+                        ${body}
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="background-color: #f3f4f6; padding: 20px; text-align: center; color: #6b7280; font-size: 13px;">
+                        <p>&copy; ${new Date().getFullYear()} AperionX. Tüm hakları saklıdır.</p>
+                        <p>Bu otomatik bir mesajdır, lütfen yanıtlamayınız.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Send
+        let transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: `"AperionX" <${process.env.SMTP_USER}>`,
+            to: to,
+            subject: subject,
+            html: html
+        });
+
+        console.log(`[Email] Sent '${type}' email to ${to}`);
+        return true;
+
+    } catch (e) {
+        console.error('[Email Helper Error]:', e);
+        return false;
+    }
+}
+
+// 4. Ensure Template Defaults
+async function ensureEmailTemplateSettings() {
+    try {
+        const [rows] = await pool.query("SELECT setting_key FROM site_settings WHERE setting_key LIKE 'email_%'");
+        const keys = rows.map(r => r.setting_key);
+
+        const defaults = {
+            'email_welcome_subject': 'AperionX Ailesine Hoş Geldiniz! 🚀',
+            'email_welcome_body': '<h2 style="color: #4f46e5; margin-bottom: 20px;">Hoş Geldin {name}!</h2><p>Aramıza katılmana çok sevindik. Bilim, teknoloji ve sanatın buluşma noktası olan AperionX\'te keşfedecek çok şey var.</p><p>Hesabın başarıyla oluşturuldu.</p><div style="text-align: center; margin: 30px 0;"><a href="{actionLink}" style="background-color: #4f46e5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">{actionText}</a></div><p>İyi okumalar dileriz!</p>',
+            'email_reset_subject': 'Şifre Sıfırlama Talebi 🔒',
+            'email_reset_body': '<h2 style="color: #ef4444; margin-bottom: 20px;">Şifre Sıfırlama</h2><p>Hesabınız için bir şifre sıfırlama talebi aldık. Eğer bu talebi siz yaptıysanız, aşağıdaki butona tıklayarak yeni şifrenizi belirleyebilirsiniz:</p><div style="text-align: center; margin: 30px 0;"><a href="{actionLink}" style="background-color: #ef4444; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">{actionText}</a></div><p style="font-size: 0.9em; color: #666;">Bu işlemi siz yapmadıysanız, hesabınız güvendedir. Bu e-postayı görmezden gelebilirsiniz.</p>'
+        };
+
+        for (const [key, val] of Object.entries(defaults)) {
+            if (!keys.includes(key)) {
+                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, val]);
+                console.log(`[SEED] Added default setting for ${key}`);
+            }
+        }
+    } catch (e) { console.error('Template Seed Error:', e); }
+}
+ensureEmailTemplateSettings();
+
+
+// === SEO & ROBOTS ===
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send(`User-agent: *\nAllow: /\nSitemap: https://${req.get('host')}/sitemap.xml`);
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const [articles] = await pool.query("SELECT id, slug, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        // Base Routes
+        const baseUrl = `https://${req.get('host')}`; // Ideally use env var for protocol
+        const routes = ['/', '/about.html', '/articles.html', '/author.html'];
+
+        routes.forEach(route => {
+            xml += `
+    <url>
+        <loc>${baseUrl}${route}</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+        });
+
+        // Article Routes
+        articles.forEach(article => {
+            const date = new Date(article.updated_at).toISOString();
+            xml += `
+    <url>
+        <loc>${baseUrl}/article-detail.html?id=${article.id}</loc> <!-- Or slug if implemented -->
+        <lastmod>${date}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>`;
+        });
+
+        xml += '</urlset>';
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+
+    } catch (error) {
+        console.error('Sitemap Error:', error);
+        res.status(500).send('Sitemap generation error');
+    }
+});
+
+// === AUTH ROUTES ===
+
+// 1. Site Settings (Generic) - Updated to handle POST updates
+app.post('/api/settings', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const settings = req.body; // { key: value, key2: value2 }
+
+    try {
+        for (const [key, value] of Object.entries(settings)) {
+            // Check if exists
+            const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key = ?', [key]);
+            if (rows.length > 0) {
+                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+            } else {
+                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+            }
+        }
+        res.json({ message: 'Ayarlar güncellendi.' });
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
 app.get('/api/settings', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM site_settings');
@@ -441,6 +724,26 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
             [title, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
         );
         console.log('Route: Article inserted successfully');
+
+        // NOTIFY EDITORS & ADMINS if Pending
+        if (finalStatus === 'pending') {
+            try {
+                // Get author name
+                const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const authorName = authors[0]?.fullname || 'Bir Yazar';
+
+                // Get all editors/admins
+                const [destUsers] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+
+                const msg = `Yeni makale onayı bekliyor: ${title.substring(0, 30)}... - ${authorName}`;
+                for (const u of destUsers) {
+                    if (u.id !== req.user.id) { // Don't notify self if admin
+                        await createNotification(u.id, msg, 'info');
+                    }
+                }
+            } catch (notifErr) { console.error('Notif failed:', notifErr); }
+        }
+
         res.status(201).json({ message: 'Article created', status: finalStatus });
     } catch (e) {
         console.error('Route: DB Error:', e);
@@ -510,6 +813,55 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         }
     }
     res.json({ message: 'Updated' });
+});
+
+// Editor Decision Endpoint (Approve/Reject)
+app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const articleId = req.params.id;
+    const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
+
+    try {
+        const [rows] = await pool.query('SELECT author_id, title FROM articles WHERE id = ?', [articleId]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Article not found' });
+
+        const authorId = rows[0].author_id;
+        const title = rows[0].title;
+
+        let status = '';
+        let msg = '';
+        let type = '';
+        let updateQuery = '';
+        let queryParams = [];
+
+        if (decision === 'approve') {
+            status = 'published';
+            msg = `Makaleniz yayına alındı: ${title}`;
+            type = 'success';
+            updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL WHERE id = ?";
+            queryParams = [articleId];
+        } else if (decision === 'reject') {
+            status = 'rejected';
+            msg = `Makaleniz reddedildi: ${title}. ${rejection_reason ? 'Sebep: ' + rejection_reason : ''}`;
+            type = 'error';
+            updateQuery = "UPDATE articles SET status = 'rejected', rejection_reason = ? WHERE id = ?";
+            queryParams = [rejection_reason, articleId];
+        } else {
+            return res.status(400).json({ message: 'Invalid decision' });
+        }
+
+        await pool.query(updateQuery, queryParams);
+
+        // Notify Author
+        await createNotification(authorId, msg, type);
+
+        res.json({ message: `Article ${status}` });
+
+    } catch (e) {
+        console.error('Decision Error:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Soft Delete
@@ -689,8 +1041,12 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
     const status = decision === 'approve' ? 'published' : 'rejected';
     const reasonValue = decision === 'reject' ? rejection_reason : null;
 
+    // If approving, save who approved it
+    let approvedBy = null;
+    if (decision === 'approve') approvedBy = req.user.id;
+
     try {
-        await pool.query('UPDATE articles SET status = ?, rejection_reason = ? WHERE id = ?', [status, reasonValue, req.params.id]);
+        await pool.query('UPDATE articles SET status = ?, rejection_reason = ?, approved_by = ? WHERE id = ?', [status, reasonValue, approvedBy, req.params.id]);
         res.json({ message: `Article ${status}` });
     } catch (e) {
         res.status(500).send(e.toString());
@@ -806,6 +1162,9 @@ app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'E-posta adresi gerekli.' });
 
+    // Dynamic Logo URL based on current host
+    const logoUrl = `${req.protocol}://${req.get('host')}/uploads/logo.png`;
+
     try {
         const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
         if (users.length === 0) {
@@ -819,40 +1178,14 @@ app.post('/api/forgot-password', async (req, res) => {
 
         await pool.query('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [token, expires, user.id]);
 
-        // SMTP Transporter Setup
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
+        const resetLink = `${req.protocol}://${req.get('host')}/index.html?token=${token}`;
+
+        // Send Email via Helper
+        sendDynamicEmail(email, 'reset', {
+            logoUrl,
+            actionLink: resetLink,
+            actionText: 'Yeni Şifre Oluştur'
         });
-
-        const resetLink = `http://localhost:3000/index.html?token=${token}`;
-
-        const mailOptions = {
-            from: `"AperionX Destek" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: 'Şifre Sıfırlama İsteği - AperionX',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-                    <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h2 style="color: #6366f1; text-align: center;">Şifre Sıfırlama</h2>
-                        <p>Merhaba,</p>
-                        <p>AperionX hesabınız için şifre sıfırlama talebinde bulundunuz. Aşağıdaki butona tıklayarak yeni şifrenizi belirleyebilirsiniz:</p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="${resetLink}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Şifreni Sıfırla</a>
-                        </div>
-                        <p style="font-size: 12px; color: #888;">Bu işlemi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>
-                        <p style="font-size: 12px; color: #888; text-align: center; margin-top: 20px;">&copy; 2025 AperionX</p>
-                    </div>
-                </div>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
 
         console.log(`[DEV] Password Reset Link (Backup Log) for ${email}: ${resetLink}`);
 
@@ -891,21 +1224,45 @@ app.post('/api/reset-password', async (req, res) => {
 });
 // User Auth Routes
 app.post('/api/register', async (req, res) => {
-    const { fullname, email, password } = req.body;
+    const { fullname, email, username, password } = req.body;
     try {
+        // Validate Username uniqueness if provided
+        if (username) {
+            const [existing] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
+            if (existing.length > 0) return res.status(400).json({ message: 'Bu kullanıcı adı zaten alınmış.' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Default role is 'reader'
-        await pool.query('INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)', [fullname, email, hashedPassword, 'reader']);
+        await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader']);
+
+        // Send Welcome Email
+        const logoUrl = `${req.protocol}://${req.get('host')}/uploads/logo.png`;
+        const actionLink = `${req.protocol}://${req.get('host')}/index.html`;
+
+        sendDynamicEmail(email, 'welcome', {
+            name: fullname,
+            logoUrl,
+            actionLink,
+            actionText: 'Keşfetmeye Başla'
+        });
+
         res.status(201).json({ message: 'User registered' });
     } catch (error) {
+        console.error('Register Error:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ message: 'Bu e-posta veya kullanıcı adı zaten kullanımda.' });
+        }
         res.status(500).json({ message: 'Error registering user' });
     }
 });
 
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body; // 'identifier' is email OR username
+    // Backward compatibility: if 'email' is sent instead of 'identifier'
+    const loginInput = identifier || req.body.email;
+
     try {
-        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ? OR username = ?', [loginInput, loginInput]);
         if (rows.length === 0) return res.status(400).json({ message: 'User not found' });
 
         const user = rows[0];
@@ -914,12 +1271,11 @@ app.post('/api/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
 
-        // Return explicit redirect URLs based on role
-        let redirectUrl = 'index.html'; // Default for reader
-        if (user.role === 'admin') redirectUrl = 'admin'; // served by endpoint
+        let redirectUrl = 'index.html';
+        if (user.role === 'admin') redirectUrl = 'admin';
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
-        else if (user.role === 'reader') redirectUrl = 'index.html'; // Explicitly reader
+        else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
             token,
@@ -927,6 +1283,7 @@ app.post('/api/login', async (req, res) => {
                 id: user.id,
                 fullname: user.fullname,
                 email: user.email,
+                username: user.username,
                 role: user.role,
                 avatar_url: user.avatar_url,
                 bio: user.bio,
@@ -1131,18 +1488,70 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), async (req, 
 
 
 // Admin: Get All Articles
+// Admin: Get All Articles
 app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.status, a.created_at, u.fullname as author_name 
+            SELECT a.id, a.title, a.status, a.created_at, 
+                   u.fullname as author_name,
+                   u2.fullname as approver_name
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
+            LEFT JOIN users u2 ON a.approved_by = u2.id
             ORDER BY a.created_at DESC
         `);
         res.json(rows);
     } catch (e) {
         res.status(500).send(e.toString());
+    }
+});
+
+// Admin: Get All Users
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query('SELECT id, fullname, email, role, created_at FROM users ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin: Create User
+app.post('/api/admin/users', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { fullname, email, password, role } = req.body;
+    if (!fullname || !email || !password || !role) return res.status(400).json({ error: 'Tüm alanlar zorunludur' });
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        // Ensure username is handled if column exists, otherwise standard insert
+        // Since we added username column earlier, we should ideally handle it, but admin form doesn't seem to send it?
+        // Admin form in lines 1512-1520 sends: fullname, email, password, role. No username.
+        // We will generate a username from email or leave it null if allowed.
+        // Schema says username is distinct but defaults/nullable might depend. 
+        // Let's generate a basic username from email to be safe if it's required.
+        const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+
+        await pool.query('INSERT INTO users (fullname, email, password, role, username) VALUES (?, ?, ?, ?, ?)',
+            [fullname, email, hashedPassword, role, username]);
+
+        res.sendStatus(201);
+    } catch (e) {
+        if (e.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'Bu e-posta veya kullanıcı adı zaten kayıtlı.' });
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin: Delete User
+app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+        res.sendStatus(200);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 
@@ -1255,9 +1664,122 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
 
 
 
+// === SITE SETTINGS ===
+app.get('/api/settings_v2', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM site_settings');
+        const settings = {};
+        rows.forEach(r => settings[r.setting_key] = r.setting_value);
+        res.json(settings);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
+app.post('/api/settings_v2', authenticateToken, (req, res, next) => {
+    upload.fields([
+        { name: 'site_logo', maxCount: 1 },
+        { name: 'site_favicon', maxCount: 1 }
+    ])(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ error: 'Upload failed: ' + err.message });
+        }
+        next();
+    });
+}, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const updates = [];
+
+        // Safety check
+        const body = req.body || {};
+
+        // Handle uploaded files
+        if (req.files) {
+            if (req.files['site_logo']) {
+                updates.push({ key: 'site_logo', value: 'uploads/' + req.files['site_logo'][0].filename });
+            }
+            if (req.files['site_favicon']) {
+                updates.push({ key: 'site_favicon', value: 'uploads/' + req.files['site_favicon'][0].filename });
+            }
+        }
+
+        // Handle text fields
+        for (const [key, value] of Object.entries(body)) {
+            if (value !== undefined) {
+                updates.push({ key, value });
+            }
+        }
+
+        // Upsert logic
+        for (const item of updates) {
+            await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?', [item.key, item.value, item.value]);
+        }
+
+        res.json({ message: 'Settings updated successfully' });
+    } catch (e) {
+        console.error('Settings Update Error:', e);
+        res.status(500).send(e.stack || e.toString());
+    }
+});
+
 // Serve Admin Panel
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Serve Author Panel
+app.get('/author', (req, res) => {
+    res.sendFile(path.join(__dirname, 'author.html'));
+});
+
+// Serve Editor Panel
+app.get('/editor', (req, res) => {
+    res.sendFile(path.join(__dirname, 'editor.html'));
+});
+
+// Dynamic SEO for Article Detail
+app.get('/article-detail.html', async (req, res) => {
+    const filePath = path.join(__dirname, 'article-detail.html');
+    const id = req.query.id;
+
+    if (!id) {
+        return res.sendFile(filePath);
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT title, excerpt, image_url, author_name FROM articles WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            return res.sendFile(filePath);
+        }
+
+        const article = rows[0];
+        let html = fs.readFileSync(filePath, 'utf8');
+
+        // Replace Meta Tags
+        const title = article.title + ' - AperionX';
+        const desc = article.excerpt || article.title;
+        const img = article.image_url ?
+            (article.image_url.startsWith('http') ? article.image_url : `${req.protocol}://${req.get('host')}/${article.image_url.replace(/\\/g, '/')}`)
+            : `${req.protocol}://${req.get('host')}/uploads/logo.png`;
+        const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+        html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
+            .replace(/property="og:title" content=".*?"/, `property="og:title" content="${title}"`)
+            .replace(/property="og:description" content=".*?"/, `property="og:description" content="${desc}"`)
+            .replace(/name="description" content=".*?"/, `name="description" content="${desc}"`)
+            .replace(/property="og:image" content=".*?"/, `property="og:image" content="${img}"`)
+            .replace(/property="og:url" content=".*?"/, `property="og:url" content="${url}"`)
+            .replace(/name="twitter:title" content=".*?"/, `name="twitter:title" content="${title}"`)
+            .replace(/name="twitter:description" content=".*?"/, `name="twitter:description" content="${desc}"`)
+            .replace(/name="twitter:image" content=".*?"/, `name="twitter:image" content="${img}"`);
+
+        res.send(html);
+
+    } catch (e) {
+        console.error('SEO Injection Error:', e);
+        res.sendFile(filePath);
+    }
 });
 
 // Serve Author Panel
@@ -1526,56 +2048,7 @@ app.get('/sitemap.xml', async (req, res) => {
 });
 
 
-// === SITE SETTINGS ===
-app.get('/api/settings', async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT setting_key, setting_value FROM site_settings');
-        const settings = {};
-        rows.forEach(row => {
-            if (row.setting_key) {
-                settings[row.setting_key] = row.setting_value;
-            }
-        });
-        res.json(settings);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
 
-app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const updates = req.body;
-
-        // Merge file uploads into updates
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => {
-                // Determine the key from fieldname
-                // Multer saves with unique filename, we want to store the path "uploads/filename"
-                updates[file.fieldname] = file.path.replace(/\\/g, '/');
-            });
-        }
-
-        const keys = Object.keys(updates);
-
-        if (keys.length === 0) return res.json({ message: 'No settings to update' });
-
-        for (const key of keys) {
-            const val = updates[key];
-            if (val !== undefined) {
-                await pool.query(
-                    'INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
-                    [key, val, val]
-                );
-            }
-        }
-
-        res.json({ message: 'Settings saved' });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: e.message });
-    }
-});
 
 // Start Server
 app.listen(PORT, () => {

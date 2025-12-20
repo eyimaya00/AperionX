@@ -191,7 +191,33 @@ async function loadHero() {
             // Dynamic accent color based on ID
             let accentColor = settings.homepage_hero_title_color;
             if (heroTitle) {
-                if (heroTitle.id === 'articles-hero-title') accentColor = settings.articles_hero_title_color;
+                let customRendered = false;
+
+                if (heroTitle.id === 'articles-hero-title') {
+                    accentColor = settings.articles_hero_title_color;
+
+                    if (titleToUse.trim().toLowerCase().includes('makale')) {
+                        heroTitle.innerHTML = `<span style="color: #ffffff;">Maka</span><span style="color: #6366f1 !important;">leler</span>`;
+                        customRendered = true;
+                    }
+                }
+
+                // Specific Layout for "Modern Bilim"
+                // Req: Line 1: Modern (White)
+                //      Line 2: Bilimin (White) Dijital (Purple)
+                //      Line 3: Platformu (Purple)
+                // We assume this is the main hero title if it matches content
+                if (!customRendered && (titleToUse.includes('Modern Bilimin') || titleToUse.includes('Modern Bilim'))) {
+                    // Check if this is likely the homepage hero (checked via ID logic externally but here we match content)
+                    // Reconstruct strict HTML:
+                    // <span white>Modern <br mobile> Bilimin</span> <span purple>Dijital <br mobile> Platformu</span>
+                    const p1 = "Modern <br class='mobile-br'> Bilimin";
+                    const p2 = "Dijital <br class='mobile-br'> Platformu";
+
+                    heroTitle.innerHTML = `<span style="color: #ffffff;">${p1}</span> <span style="color: ${settings.homepage_hero_title_color || '#6366f1'} !important;">${p2}</span>`;
+                    customRendered = true;
+                }
+
                 if (heroTitle.id === 'about-hero-title') accentColor = settings.about_hero_title_color;
 
                 heroTitle.classList.remove('gradient-text');
@@ -204,58 +230,49 @@ async function loadHero() {
                 heroTitle.style.backgroundClip = '';
                 heroTitle.style.display = '';
 
-                const isCleanWhite = !accentColor || accentColor.toLowerCase() === '#ffffff';
-                // Note: We'll modify isCleanWhite inside specific blocks if needed, so use let if strictly necessary, 
-                // but local scope variable shading is safer.
-                let useCleanWhite = isCleanWhite;
+                if (!customRendered) {
+                    const isCleanWhite = !accentColor || accentColor.toLowerCase() === '#ffffff';
+                    let useCleanWhite = isCleanWhite;
 
-                // 1. Decode HTML entities
-                const txt = document.createElement('textarea');
-                txt.innerHTML = titleToUse;
-                let decodedTitle = txt.value;
+                    // 1. Decode HTML entities
+                    const txt = document.createElement('textarea');
+                    txt.innerHTML = titleToUse;
+                    let decodedTitle = txt.value;
 
-                // 2. Normalize Vertical Bars
-                decodedTitle = decodedTitle.replace(/[¦│｜∣￨]/g, '|');
+                    // 2. Normalize Vertical Bars
+                    decodedTitle = decodedTitle.replace(/[¦│｜∣￨]/g, '|');
 
-                // 3. Simple Split Strategy
-                let parts = null;
+                    // 3. Simple Split Strategy
+                    let parts = null;
 
-                if (decodedTitle.includes('|')) {
-                    parts = decodedTitle.split('|');
-                }
-                // SPECIAL CASE: User just typed "Makaleler" without pipe
-                else if (heroTitle.id === 'articles-hero-title' && decodedTitle.trim().toLowerCase().includes('makale')) {
-                    parts = ['Maka', 'leler'];
-                    // Force color if white
-                    if (useCleanWhite) {
-                        accentColor = '#6366f1';
-                        useCleanWhite = false;
+                    if (decodedTitle.includes('|')) {
+                        parts = decodedTitle.split('|');
                     }
-                }
 
-                if (parts && parts.length > 1) {
-                    const part1 = parts[0].trim();
-                    const part2 = parts.slice(1).join(' ').trim();
+                    if (parts && parts.length > 1) {
+                        const part1 = parts[0].trim();
+                        const part2 = parts.slice(1).join(' ').trim();
 
-                    if (useCleanWhite) {
-                        heroTitle.innerHTML = `<span style="color: #ffffff;">${part1}</span><span style="color: #ffffff;">${part2}</span>`;
+                        if (useCleanWhite) {
+                            heroTitle.innerHTML = `<span style="color: #ffffff;">${part1}</span> <span style="color: #ffffff;">${part2}</span>`;
+                        } else {
+                            heroTitle.innerHTML = `<span style="color: #ffffff !important;">${part1}</span> <span style="color: ${accentColor.trim()} !important;">${part2}</span>`;
+                        }
                     } else {
-                        heroTitle.innerHTML = `<span style="color: #ffffff !important;">${part1}</span><span class="articles-gradient-span" style="color: ${accentColor.trim()} !important;">${part2}</span>`;
+                        heroTitle.innerHTML = titleToUse;
+                        if (useCleanWhite) {
+                            heroTitle.style.color = '#ffffff';
+                        } else {
+                            heroTitle.style.color = accentColor;
+                        }
+                        // Reset lingering styles
+                        heroTitle.style.background = 'none';
+                        heroTitle.style.webkitTextFillColor = 'initial';
+                        heroTitle.style.webkitBackgroundClip = 'initial';
+                        heroTitle.style.backgroundClip = 'initial';
+                        heroTitle.style.opacity = '1';
+                        heroTitle.style.display = 'block';
                     }
-                } else {
-                    heroTitle.innerHTML = titleToUse;
-                    if (useCleanWhite) {
-                        heroTitle.style.color = '#ffffff';
-                    } else {
-                        heroTitle.style.color = accentColor;
-                    }
-                    // Reset lingering styles
-                    heroTitle.style.background = 'none';
-                    heroTitle.style.webkitTextFillColor = 'initial';
-                    heroTitle.style.webkitBackgroundClip = 'initial';
-                    heroTitle.style.backgroundClip = 'initial';
-                    heroTitle.style.opacity = '1';
-                    heroTitle.style.display = 'block';
                 }
             }
 
@@ -447,28 +464,36 @@ async function loadSettings() {
             const logoContainer = document.querySelector('.logo');
             if (logoContainer) {
                 logoContainer.innerHTML = '';
+
+                // 1. Image
                 const img = document.createElement('img');
                 img.src = settings.site_logo;
                 img.alt = settings.site_title || 'Logo';
-                img.style.height = '40px';
+
+                // Height Logic
+                const height = settings.logo_height ? `${settings.logo_height}px` : '36px';
+                img.style.height = height;
                 img.style.width = 'auto';
                 img.style.borderRadius = '8px';
-                img.style.marginRight = '8px';
-
-                const span = document.createElement('span');
-                span.className = 'logo-text';
-
-                const title = settings.site_title || 'AperionX';
-                // Style 'X' if present
-                if (title.endsWith('X')) {
-                    span.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
-                } else {
-                    span.innerText = title;
-                }
-                span.style.color = 'var(--logo-color)';
 
                 logoContainer.appendChild(img);
-                logoContainer.appendChild(span);
+
+                // 2. Text (Optional)
+                if (settings.site_title && settings.site_title.trim() !== "") {
+                    // Start with margin if image exists
+                    const span = document.createElement('span');
+                    span.className = 'logo-text';
+                    // span.style.marginLeft = '8px'; // Removed: Handled by CSS .logo gap:8px
+                    span.style.color = 'var(--logo-color)';
+
+                    const title = settings.site_title;
+                    if (title.endsWith('X')) {
+                        span.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
+                    } else {
+                        span.innerText = title;
+                    }
+                    logoContainer.appendChild(span);
+                }
             }
         } else {
             // Text-only fallback
@@ -574,10 +599,19 @@ async function loadSettings() {
             document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
                 el.href = settings.social_twitter; el.style.display = 'flex';
             });
+        } else {
+            document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
+                el.style.display = 'none';
+            });
         }
+
         if (settings.social_instagram) {
             document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
                 el.href = settings.social_instagram; el.style.display = 'flex';
+            });
+        } else {
+            document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
+                el.style.display = 'none';
             });
         }
 
@@ -868,12 +902,13 @@ if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fullname = document.getElementById('signup-fullname').value;
+        const username = document.getElementById('signup-username').value; // Added
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const confirm = document.getElementById('signup-confirm').value;
 
         if (password !== confirm) {
-            showToast('Åifreler eşleşmiyor!', 'error');
+            showToast('Şifreler eşleşmiyor!', 'error');
             return;
         }
 
@@ -881,7 +916,7 @@ if (signupForm) {
             const res = await fetch(`${API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullname, email, password })
+                body: JSON.stringify({ fullname, username, email, password })
             });
 
             const data = await res.json();
@@ -904,14 +939,14 @@ const loginForm = document.querySelector('#loginModal form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
+        const identifier = document.getElementById('login-email').value; // Email or Username
         const password = document.getElementById('login-password').value;
 
         try {
             const res = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ identifier, password })
             });
 
             const data = await res.json();

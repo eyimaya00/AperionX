@@ -1,51 +1,97 @@
-const fetch = require('node-fetch');
-const FormData = require('form-data');
+const http = require('http');
 
-// Use the token hardcoded or retrieved from a known valid session if possible.
-// Since we are running in node, we'll manually authenticate or simulate it.
-// Wait, we need a valid token. Let's use the login endpoint first.
-
-const API_URL = 'http://localhost:3000/api';
-
-async function testPost() {
-    try {
-        // 1. Login
-        const loginRes = await fetch(`${API_URL}/login`, {
+// Helper to login and get token
+function login(email, password) {
+    return new Promise((resolve, reject) => {
+        const data = JSON.stringify({ identifier: email, password: password });
+        const options = {
+            hostname: 'localhost',
+            port: 3000,
+            path: '/api/login',
             method: 'POST',
-            body: JSON.stringify({ email: 'admin@aperionx.com', password: '123456' }),
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data.length
+            }
+        };
+
+        const req = http.request(options, (res) => {
+            let body = '';
+            res.on('data', chunk => body += chunk);
+            res.on('end', () => {
+                if (res.statusCode === 200) {
+                    const json = JSON.parse(body);
+                    resolve(json.token);
+                } else {
+                    reject(`Login failed: ${res.statusCode} ${body}`);
+                }
+            });
         });
-        const loginData = await loginRes.json();
-        const token = loginData.token;
+        req.write(data);
+        req.end();
+    });
+}
 
-        if (!token) {
-            console.error('Login failed:', loginData);
-            return;
-        }
+// POST with FormData simulation (using boundary)
+function postSettings(token) {
+    return new Promise((resolve, reject) => {
+        const boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';
 
-        console.log('Login successful, token:', token);
+        // Construct multipart body manually
+        let body = '';
 
-        // 2. Post Settings simulating Admin Panel FormData
-        const form = new FormData();
-        form.append('site_title', 'AperionX Test');
-        form.append('contact_email', 'newemail@test.com');
+        // Text field: site_title
+        body += `--${boundary}\r\n`;
+        body += `Content-Disposition: form-data; name="site_title"\r\n\r\n`;
+        body += `AperionX Updated\r\n`;
 
-        const res = await fetch(`${API_URL}/settings`, {
+        // Text field: site_description
+        body += `--${boundary}\r\n`;
+        body += `Content-Disposition: form-data; name="site_description"\r\n\r\n`;
+        body += `Testing Description Update\r\n`;
+
+        body += `--${boundary}--\r\n`;
+
+        const options = {
+            hostname: 'localhost',
+            port: 3000,
+            path: '/api/settings_v2',
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                // FormData headers (boundary) are managed by the form-data library
-                ...form.getHeaders()
-            },
-            body: form
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': Buffer.byteLength(body)
+            }
+        };
+
+        const req = http.request(options, (res) => {
+            let resBody = '';
+            res.on('data', chunk => resBody += chunk);
+            res.on('end', () => {
+                console.log(`POST /api/settings - Status: ${res.statusCode}`);
+                console.log('Body:', resBody);
+                resolve();
+            });
         });
 
-        const data = await res.json();
-        console.log('Post response:', data);
+        req.on('error', (e) => reject(e));
+        req.write(body);
+        req.end();
+    });
+}
+
+async function run() {
+    try {
+        console.log('Logging in as admin...');
+        const token = await login('admin@aperion.com', '123admin');
+        console.log('Login successful. Token acquired.');
+
+        console.log('Sending POST /api/settings...');
+        await postSettings(token);
 
     } catch (e) {
-        console.error(e);
+        console.error('Error:', e);
     }
 }
 
-testPost();
+run();

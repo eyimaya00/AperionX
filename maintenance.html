@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AperionX - Yakında Yayındayız</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Icons (Matching Index.html) -->
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --bg-dark: #050510;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            /* Lighter for better visibility */
+            --neon-blue: #6366F1;
+            /* Primary Indigo */
+            --neon-purple: #818cf8;
+            /* Lighter Indigo for gradients */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            /* Slightly more visible */
+            --glass-border: rgba(99, 102, 241, 0.3);
+            /* Tinted border */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Futuristic Background Pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.4;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Glow Effect - Slightly reduced for better text contrast */
+        .glow-spot {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+            max-width: 1000px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+            transform: translateY(-60px);
+            /* Lifted slightly more */
+            padding-bottom: 2rem;
+            /* Add breathing room at bottom */
+        }
+
+        /* Logo Area */
+        .brand-wrapper {
+            margin-bottom: -2rem;
+            /* Negative margin to pull text closer */
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            /* For glow positioning */
+        }
+
+        /* Backlight Glow for Logo */
+        .brand-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 60%;
+            /* Lowered to be behind text */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            /* Massive spread cover */
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
+            /* Very faint (0.1) */
+            filter: blur(80px);
+            /* Diffuse ambient light */
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.4));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .brand-name {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+            line-height: 1;
+        }
+
+        /* Headlines */
+        h1.main-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            /* Reduced from 1.5rem */
+            line-height: 1.2;
+            color: rgba(255, 255, 255, 0.88);
+            /* Slightly softer white */
+            text-shadow: 0 4px 30px rgba(99, 102, 241, 0.3);
+            /* Softer indigo glow instead of hard shadow */
+        }
+
+        p.desc {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            /* Reduced from 4rem */
+            font-weight: 400;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* Countdown */
+        .countdown {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .time-box {
+            background: rgba(255, 255, 255, 0.05);
+            /* Clearer background */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            min-width: 150px;
+            /* Increased width */
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            /* Removed overflow: hidden to prevent clipping */
+            transition: transform 0.3s ease;
+        }
+
+        .time-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+        }
+
+        .time-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+            opacity: 0.8;
+        }
+
+        .time-value {
+            display: block;
+            font-size: 4rem;
+            font-weight: 700;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.1;
+            /* Adjusted line-height */
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Changed label color from neon-blue to white/light-gray as requested */
+        .time-label {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1.main-title {
+                font-size: 2.2rem;
+            }
+
+            .brand-name {
+                font-size: 2.2rem;
+            }
+
+            .logo-icon {
+                font-size: 3rem;
+            }
+
+            .time-box {
+                min-width: 90px;
+                padding: 1.2rem;
+                flex: 1 1 40%;
+            }
+
+            .time-value {
+                font-size: 2.8rem;
+            }
+
+            .countdown {
+                gap: 12px;
+            }
+
+            p.desc {
+                font-size: 1.1rem;
+                padding: 0 20px;
+            }
+
+            /* Mobile Logo Adjustments */
+            .dynamic-logo {
+                max-height: 320px !important;
+                /* Larger on mobile */
+            }
+
+            .brand-wrapper::before {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        /* Dynamic Logo Class for easier control */
+        .dynamic-logo {
+            max-height: 450px;
+            /* Huge on desktop */
+            max-width: 90vw;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
+            /* Sharp edge glow */
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glow-spot"></div>
+
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="brand-wrapper">
+            <i class="ph-fill ph-planet logo-icon"></i>
+            <div class="brand-name">AperionX</div>
+        </div>
+
+        <!-- Content -->
+        <!-- Solid white color ensured by CSS class -->
+        <h1 class="main-title">Sonsuz bilgiyle, daha güçlü yarınlara.</h1>
+        <p class="desc">Arka planda son hazırlıkları yapıyoruz. Beklediğinize değecek.</p>
+
+        <!-- Countdown -->
+        <div class="countdown" id="countdown">
+            <div class="time-box">
+                <span class="time-value" id="days">00</span>
+                <span class="time-label">GÜN</span>
+            </div>
+            <div class="time-box">
+                <span class="time-value" id="hours">00</span>
+                <span class="time-label">SAAT</span>
+            </div>
+            <div class="time-box">
+                <span class="time-value" id="minutes">00</span>
+                <span class="time-label">DAKİKA</span>
+            </div>
+            <div class="time-box">
+                <span class="time-value" id="seconds">00</span>
+                <span class="time-label">SANİYE</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch settings (target date and logo)
+        async function initPage() {
+            let targetDate;
+
+            // Try to get from API (Allowed by whitelist)
+            try {
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const settings = await res.json();
+
+                    // 1. SET DATE
+                    if (settings.maintenance_target_date) {
+                        targetDate = new Date(settings.maintenance_target_date).getTime();
+                    }
+
+                    // 2. SET LOGO & FAVICON
+                    if (settings.site_logo) {
+                        // Logo in body
+                        const wrapper = document.querySelector('.brand-wrapper');
+                        if (wrapper) {
+                            wrapper.innerHTML = `<img src="${settings.site_logo}" alt="AperionX Logo" class="dynamic-logo">`;
+                        }
+                    }
+
+                    // Favicon logic (Use specific favicon if exists, else use logo, else default)
+                    const faviconUrl = settings.site_favicon || settings.site_logo || 'uploads/favicon.ico';
+                    let link = document.querySelector("link[rel~='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = faviconUrl;
+                }
+            } catch (e) {
+                console.log("Settings fetch error", e);
+            }
+
+            // Fallback: Next Monday 9:00 AM
+            if (!targetDate || isNaN(targetDate)) {
+                const d = new Date();
+                d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+                d.setHours(9, 0, 0, 0);
+                targetDate = d.getTime();
+            }
+
+            const els = {
+                d: document.getElementById('days'),
+                h: document.getElementById('hours'),
+                m: document.getElementById('minutes'),
+                s: document.getElementById('seconds')
+            };
+
+            function update() {
+                const now = new Date().getTime();
+                const dist = targetDate - now;
+
+                if (dist < 0) {
+                    Object.values(els).forEach(el => el.innerText = "00");
+                    return;
+                }
+
+                const d = Math.floor(dist / (1000 * 60 * 60 * 24));
+                const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((dist % (1000 * 60)) / 1000);
+
+                els.d.innerText = d < 10 ? '0' + d : d;
+                els.h.innerText = h < 10 ? '0' + h : h;
+                els.m.innerText = m < 10 ? '0' + m : m;
+                els.s.innerText = s < 10 ? '0' + s : s;
+            }
+
+            setInterval(update, 1000);
+            update();
+        }
+
+        initPage();
+    </script>
+</body>
+
+</html>

@@ -337,7 +337,8 @@ a {
 }
 
 /* "All" button full width styling */
-.dropdown-link:first-child {
+/* "All" button full width styling REMOVED as per logical fix */
+/* .dropdown-link:first-child {
     grid-column: 1 / -1;
     background: var(--nav-hover-bg);
     border: none;
@@ -348,7 +349,7 @@ a {
 
 [data-theme="dark"] .dropdown-link:first-child {
     background: rgba(255, 255, 255, 0.08);
-}
+} */
 
 /* Header Actions */
 .header-actions {
@@ -997,6 +998,8 @@ i[class*=" ph"] {
     line-height: 1.1;
     background-color: transparent;
     color: #ffffff;
+    letter-spacing: 1px;
+    word-spacing: 2px;
     /* Removed Gradient Properties per user request for solid color */
     /* Drop shadow via filter works better with gradient text than text-shadow */
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
@@ -2092,7 +2095,7 @@ i[class*=" ph"] {
 
 /* Decoupled Articles Title - Reverted to Clean White per request */
 .articles-page-title {
-    font-size: 3.5rem;
+    font-size: 4.0rem;
     font-weight: 800;
     margin-bottom: 16px;
     line-height: 1.1;
@@ -3786,16 +3789,25 @@ i[class*=" ph"] {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px 24px 0 0;
+    border-radius: 0;
+    /* Align with footer */
     padding: 60px 40px;
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-bottom: none;
+    border-left: none;
+    /* Flush */
+    border-right: none;
+    /* Flush */
     box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.05);
     text-align: center;
     position: relative;
     bottom: -1px;
-    /* Overlap footer border */
     margin-bottom: 0;
+    max-width: 100%;
+    /* Match Footer */
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 /* Dark Mode Newsletter Box (Navy Blue) */
@@ -3892,16 +3904,15 @@ i[class*=" ph"] {
 
 /* Static Button under Input */
 .newsletter-btn {
-    width: 100%;
-    /* Full width matching input */
+    width: auto;
     position: relative;
     right: auto;
     top: auto;
     bottom: auto;
     border-radius: 50px;
     height: 42px;
-    /* Reduced Height to match input */
     padding: 0 24px;
+    /* Tighter padding */
     font-size: 0.9rem;
     line-height: 1;
     background: var(--primary-color);
@@ -3909,17 +3920,16 @@ i[class*=" ph"] {
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     white-space: nowrap;
+
     flex-shrink: 0;
-    /* Don't shrink */
     flex-grow: 0;
-    /* Don't grow */
-    width: auto;
-    /* Don't span 100% */
+    min-width: 0;
+    /* No forced width */
 }
 
 .newsletter-btn i {
@@ -4055,12 +4065,29 @@ i[class*=" ph"] {
 
     .hero-title {
         font-size: 5rem;
-        /* Increased to 4.2rem per user request */
-        line-height: 1.2;
+        line-height: 1.1;
+        margin-bottom: 24px;
     }
 
     .hero-description {
         font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .hero-btn {
+        /* Keep button sizing as is or revert if needed? User didn't explicitly complain about button, but "yazıyı küçültme". Let's removing my shrinking override. */
+    }
+}
+
+.mobile-br {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-br {
+        display: block;
+        content: "";
+        margin: 5px 0;
     }
 }
 
@@ -4319,4 +4346,153 @@ i[class*=" ph"] {
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     background: #64748b;
+}
+
+/* Forgot Password Link Styling - User Request */
+.forgot-password-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    /* Slight adjust */
+    color: var(--primary-color);
+    background: transparent;
+    /* No background */
+    padding: 0;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    /* Opacity removed */
+}
+
+[data-theme="dark"] .forgot-password-link {
+    background: transparent;
+    color: #a5b4fc;
+}
+
+.forgot-password-link:hover {
+    background: transparent;
+    color: var(--primary-hover);
+    text-decoration: underline;
+    /* Standard link hover */
+    box-shadow: none;
+    transform: none;
+}
+
+/* Fix for Missing btn-primary (User Feedback Issue) */
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(1px) scale(0.98);
+    /* Tactile click effect */
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+    background: #4338ca;
+    /* Darker shade */
+}
+
+/* Admin Stats Cards Click Filter */
+.click-filter {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.click-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.click-filter:active {
+    transform: scale(0.98);
+}
+
+/* Status Badges */
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-published {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-draft {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+[data-theme='dark'] .badge-published {
+    background: #064e3b;
+    color: #d1fae5;
+}
+
+[data-theme='dark'] .badge-pending {
+    background: #78350f;
+    color: #fef3c7;
+}
+
+[data-theme='dark'] .badge-rejected {
+    background: #7f1d1d;
+    color: #fee2e2;
+}
+
+[data-theme='dark'] .badge-draft {
+    background: #374151;
+    color: #f3f4f6;
+}
+
+
+/* Stats Card Styling Refinement */
+.stat-card h3 {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-top: 8px;
+    color: var(--text-color);
+    line-height: 1;
+    letter-spacing: -1px;
+    /* Tighter tracking for big numbers */
+}
+
+[data-theme='dark'] .stat-card h3 {
+    color: #94a3b8;
 }

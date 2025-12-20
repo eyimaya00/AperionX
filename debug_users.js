@@ -1,20 +1,29 @@
-const mysql = require('mysql2/promise');
 require('dotenv').config();
+const mysql = require('mysql2/promise');
 
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'aperionx_db'
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'aperionx_db'
 };
 
-async function checkUsers() {
-    let connection;
+(async () => {
     try {
-        connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.query("SELECT id, email, role FROM users");
-        console.log(rows);
-    } catch (e) { console.error(e); }
-    finally { if (connection) connection.end(); }
-}
-checkUsers();
+        const conn = await mysql.createConnection(dbConfig);
+        console.log('Connected to DB.');
+
+        // 1. Check Schema
+        const [cols] = await conn.query("SHOW COLUMNS FROM users");
+        console.log('Columns:', cols.map(c => c.Field).join(', '));
+
+        // 2. Check User
+        const [rows] = await conn.query("SELECT id, fullname, email, username, role FROM users");
+        console.log('Users found:', rows.length);
+        console.table(rows);
+
+        await conn.end();
+    } catch (e) {
+        console.error(e);
+    }
+})();

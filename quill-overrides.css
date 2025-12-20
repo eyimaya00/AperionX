@@ -1,0 +1,25 @@
+/* Quill Image Resize Overrides */
+
+/* Ensure the editor allows overlay elements to overflow (handles might stick out) */
+.ql-editor {
+    overflow: visible !important;
+}
+
+/* Ensure images are blocks so they can be resized properly */
+.ql-editor img {
+    display: inline-block;
+}
+
+/* 
+   The ImageResize module creates an overlay div. 
+   We don't know the exact class it generates (often no class, just inline styles),
+   but we can try to target it if needed. 
+   Usually, ensuring the container has visible overflow is enough.
+*/
+
+/* Fix for cursor focus alignment */
+.ql-container {
+    position: relative;
+    overflow: visible !important;
+    /* Important for resize handles */
+}
