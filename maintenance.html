@@ -98,7 +98,8 @@
             display: inline-flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 0px;
+            /* Removed gap */
             position: relative;
             /* For glow positioning */
         }
@@ -123,20 +124,42 @@
         }
 
         .logo-icon {
-            font-size: 7rem;
+            font-size: 14rem;
+            /* HUGE DESKTOP LOGO */
             color: var(--neon-blue);
-            filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.5));
+            filter: drop-shadow(0 0 35px rgba(0, 243, 255, 0.6));
             animation: float 6s ease-in-out infinite;
+            margin-bottom: -2rem;
+            /* Pull closer to text */
         }
 
         .brand-name {
-            font-size: 4rem;
+            font-size: 6rem;
+            /* HUGE DESKTOP TEXT */
             font-weight: 800;
             letter-spacing: 4px;
             text-transform: uppercase;
             color: white;
             text-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
             line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            .logo-icon {
+                font-size: 8rem;
+                /* Mobile Size */
+                margin-bottom: -0.5rem;
+            }
+
+            .brand-name {
+                font-size: 3rem;
+                /* Mobile Size */
+            }
+
+            .brand-wrapper {
+                margin-bottom: 2rem;
+                /* Restore normal margin on mobile */
+            }
         }
 
         /* Headlines */
