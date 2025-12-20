@@ -202,31 +202,47 @@
                 overflow: hidden;
             }
 
-            /* Compact Timer */
+            /* Compact Timer - 2x2 GRID */
             .countdown {
-                gap: 8px;
+                display: grid;
+                /* Force Grid */
+                grid-template-columns: 1fr 1fr;
+                /* 2 Columns */
+                gap: 12px;
+                /* Nice gap */
                 width: 100%;
+                max-width: 280px;
+                /* Limit width to keep boxes square-ish */
                 justify-content: center;
+                margin: 0 auto;
             }
 
             .time-box {
-                padding: 0.6rem;
-                min-width: 70px;
-                /* narrowed */
-                max-width: 85px;
+                padding: 1rem 0.5rem;
+                /* Taller boxes */
+                min-width: 0;
+                /* Allow shrinking */
+                width: 100%;
+                max-width: none;
+                border-radius: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .time-value {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
+                line-height: 1.2;
             }
 
             .time-label {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
+                margin-top: 4px;
             }
 
             .glow-spot {
                 opacity: 0.5;
-                /* Reduce glow distraction on mobile */
             }
         }
 
