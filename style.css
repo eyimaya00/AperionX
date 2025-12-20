@@ -413,13 +413,25 @@ i[class*=" ph"] {
 /* Mobile Padding adjustment */
 @media (max-width: 900px) {
     .header {
-        padding: 0 20px;
+        padding: 0 15px;
+        /* Reduced padding */
     }
 
     .header-content {
         display: flex;
-        /* Flex for mobile layout */
         justify-content: space-between;
+    }
+
+    /* Fix Logo Size on Mobile */
+    .logo,
+    .logo-icon {
+        font-size: 1.2rem !important;
+        /* Force smaller size */
+    }
+
+    .logo-icon {
+        width: 28px;
+        height: 28px;
     }
 }
 
