@@ -501,7 +501,8 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
         }
         res.json({ message: 'Ayarlar güncellendi.' });
     } catch (e) {
-        res.status(500).send(e.toString());
+        console.error('DEBUG: Settings Error:', e);
+        res.status(500).send('Hata: ' + e.message);
     }
 });
 
@@ -577,7 +578,10 @@ app.post('/api/menu', authenticateToken, async (req, res) => {
         const nextOrder = (max[0].maxOrder || 0) + 1;
         await pool.query('INSERT INTO menu_items (label, url, order_index) VALUES (?, ?, ?)', [label, url, nextOrder]);
         res.status(201).json({ message: 'Menu item added' });
-    } catch (e) { res.status(500).send(e.toString()); }
+    } catch (e) {
+        console.error('DEBUG: Menu Add Error:', e);
+        res.status(500).send(e.toString());
+    }
 });
 
 app.delete('/api/menu/:id', authenticateToken, async (req, res) => {
@@ -1464,6 +1468,7 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
         await pool.query('INSERT INTO categories (name) VALUES (?)', [name]);
         res.json({ message: 'Category added' });
     } catch (e) {
+        console.error('DEBUG: Category Error:', e);
         res.status(500).json({ message: e.message });
     }
 });
