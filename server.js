@@ -18,6 +18,7 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Nginx/CloudPanel)
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'gizli_anahtar';
 const cookieParser = require('cookie-parser'); // Import cookie-parser
