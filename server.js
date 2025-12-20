@@ -429,10 +429,64 @@ app.get('/sitemap.xml', async (req, res) => {
 
 // === AUTH ROUTES ===
 
+// Register
+app.post('/api/register', async (req, res) => {
+    const { fullname, email, password, username } = req.body;
+    if (!fullname || !email || !password) return res.status(400).json({ message: 'Tüm alanlar gerekli.' });
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        // Ensure username is not null if column requires it
+        const finalUsername = username || email.split('@')[0] + Math.floor(Math.random() * 1000);
+
+        await pool.query('INSERT INTO users (fullname, username, email, password) VALUES (?, ?, ?, ?)', [fullname, finalUsername, email, hashedPassword]);
+        res.status(201).json({ message: 'Kayıt başarılı! Lütfen giriş yapın.' });
+    } catch (e) {
+        if (e.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı.' });
+        }
+        res.status(500).send(e.toString());
+    }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+    const { identifier, password } = req.body; // identifier = email or username
+    if (!identifier || !password) return res.status(400).json({ message: 'E-posta ve şifre gerekli.' });
+
+    try {
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ? OR username = ?', [identifier, identifier]);
+        if (users.length === 0) return res.status(400).json({ message: 'Kullanıcı bulunamadı.' });
+
+        const user = users[0];
+        if (await bcrypt.compare(password, user.password)) {
+            const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '2h' });
+
+            // Update local storage object
+            const userObj = {
+                id: user.id,
+                fullname: user.fullname,
+                email: user.email,
+                role: user.role,
+                avatar_url: user.avatar_url
+            };
+
+            res.json({ token, user: userObj });
+        } else {
+            res.status(403).json({ message: 'Hatalı şifre.' });
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Giriş hatası.');
+    }
+});
+
+
 // 1. Site Settings (Generic) - Updated to handle POST updates
 app.post('/api/settings', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const settings = req.body; // { key: value, key2: value2 }
+    const settings = req.body;
+    console.log('DEBUG: Received settings update:', settings); // Debug Log
 
     try {
         for (const [key, value] of Object.entries(settings)) {

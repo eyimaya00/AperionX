@@ -95,12 +95,13 @@ a {
     border-bottom: 1px solid var(--header-border);
     z-index: 1000;
     transition: all 0.3s ease;
-    padding: 0 40px;
+    padding: 0 20px;
+    /* Reduced from 40px to pull logo left */
     /* Desktop Padding */
     display: flex;
-    /* Flex container for direct alignment if needed, but inner container handles grid */
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    /* Replaces center */
 }
 
 [data-theme="dark"] .header {
@@ -130,10 +131,10 @@ a {
 
 .header-content {
     height: 100%;
+    width: 100%;
+    /* Force Full Width */
     display: flex;
-    /* Switched to Flex */
     justify-content: space-between;
-    /* Space Between */
     align-items: center;
 }
 
