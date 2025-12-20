@@ -146,69 +146,87 @@
 
         @media (max-width: 768px) {
             body {
-                align-items: flex-start;
-                /* Allow scrolling if really needed, but try to fit */
-                padding-top: 10vh;
-                height: auto;
-                min-height: 100vh;
-                overflow-y: auto;
-                /* Enable scrolling if it really doesn't fit */
+                height: 100dvh;
+                /* Dynamic Viewport Height */
+                width: 100%;
+                overflow: hidden;
+                /* FORCE NO SCROLL */
+                display: flex;
+                align-items: center;
+                /* Center vertically */
+                justify-content: center;
+                padding: 0;
             }
 
             .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                max-height: 100dvh;
                 padding: 1rem;
-                max-width: 100%;
-                transform: none;
-                /* Reset transform */
-                margin-top: -20px;
-            }
-
-            .logo-icon {
-                font-size: 4rem;
-                /* Much Smaller */
-                margin-bottom: -0.5rem;
-            }
-
-            .brand-name {
-                font-size: 2rem;
-                /* Much Smaller */
+                transform: scale(0.9);
+                /* Zoom out slightly to ensure fit */
             }
 
             .brand-wrapper {
                 margin-bottom: 1rem;
-                /* minimal specific gap */
+                flex-shrink: 1;
+                /* Allow shrinking */
+            }
+
+            .logo-icon {
+                font-size: 5rem;
+                /* Balanced Mobile Size */
+                margin-bottom: 0;
+            }
+
+            .brand-name {
+                font-size: 2.2rem;
             }
 
             h1.main-title {
-                font-size: 1.6rem;
-                margin-bottom: 0.5rem;
-                margin-top: 10px;
+                font-size: 1.5rem;
+                margin: 0.5rem 0;
+                line-height: 1.2;
             }
 
             p.desc {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
                 margin-bottom: 1.5rem;
-                line-height: 1.4;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                /* Limit text lines */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
 
             /* Compact Timer */
             .countdown {
                 gap: 8px;
+                width: 100%;
+                justify-content: center;
             }
 
             .time-box {
-                padding: 0.8rem;
-                min-width: 80px;
+                padding: 0.6rem;
+                min-width: 70px;
                 /* narrowed */
-                border-radius: 12px;
+                max-width: 85px;
             }
 
             .time-value {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
 
             .time-label {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+            }
+
+            .glow-spot {
+                opacity: 0.5;
+                /* Reduce glow distraction on mobile */
             }
         }
 
