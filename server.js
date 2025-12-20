@@ -441,6 +441,18 @@ app.post('/api/register', async (req, res) => {
         const finalUsername = username || email.split('@')[0] + Math.floor(Math.random() * 1000);
 
         await pool.query('INSERT INTO users (fullname, username, email, password) VALUES (?, ?, ?, ?)', [fullname, finalUsername, email, hashedPassword]);
+
+        // Send Welcome Email
+        const logoUrl = `${req.protocol}://${req.get('host')}/uploads/logo.png`;
+        const loginLink = `${req.protocol}://${req.get('host')}/index.html?login=true`;
+
+        sendDynamicEmail(email, 'welcome', {
+            name: fullname.split(' ')[0], // First Name
+            logoUrl: logoUrl,
+            actionLink: loginLink,
+            actionText: 'Giriş Yap'
+        });
+
         res.status(201).json({ message: 'Kayıt başarılı! Lütfen giriş yapın.' });
     } catch (e) {
         if (e.code === 'ER_DUP_ENTRY') {
