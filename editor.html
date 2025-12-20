@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editör Paneli - AperionX</title>
+    <link rel="icon" type="image/x-icon" href="uploads/favicon.ico" id="favicon">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+
+    <style>
+        :root {
+            --admin-bg: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --primary-accent: #6366f1;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --border-color: #e2e8f0;
+            --sidebar-width-collapsed: 80px;
+            --transition-speed: 0.3s;
+        }
+
+        .data-table {
+            width: 100%;
+            table-layout: fixed;
+            /* Force fixed layout to respect width */
+        }
+
+        .mobile-toggle-btn {
+            display: none;
+            /* Hidden by default on desktop */
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle-btn {
+                display: flex !important;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 200;
+                background: var(--sidebar-bg);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                height: 100vh;
+                z-index: 300;
+                width: 260px !important;
+                /* Full width on mobile when open */
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0 !important;
+                padding: 20px;
+                width: 100%;
+            }
+
+            /* Overlay */
+            #mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 250;
+            }
+
+            /* Hide sidebar toggle on mobile since we have mobile toggle */
+            .sidebar-toggle {
+                display: none !important;
+            }
+        }
+
+        /* SIDEBAR GLASSMORPHISM DESIGN */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(15, 23, 42, 0.95);
+            /* Deep Dark Blue */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            height: 100vh;
+            position: fixed;
+            padding: 32px 20px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            z-index: 100;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
+            padding: 32px 12px;
+        }
+
+        .sidebar.collapsed .logo span,
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .logout-btn span {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo {
+            justify-content: center;
+            padding-left: 0;
+            margin-bottom: 40px;
+        }
+
+        .sidebar.collapsed .menu-item,
+        .sidebar.collapsed .logout-btn {
+            justify-content: center;
+            padding: 14px;
+        }
+
+        /* LOGO */
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 50px;
+            padding-left: 8px;
+            position: relative;
+        }
+
+        .logo img {
+            height: 42px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+            /* Optional: Add background if scrolling content goes behind */
+            /* background: var(--admin-bg); */
+        }
+
+        /* MENU ITEMS */
+        .menu-item {
+            padding: 16px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            white-space: nowrap;
+            position: relative;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(6px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+            font-weight: 700;
+        }
+
+        .menu-item i {
+            font-size: 1.4rem;
+            transition: color 0.2s;
+        }
+
+        .menu-item:hover i {
+            color: var(--primary-accent);
+        }
+
+        .menu-item.active i {
+            color: #818cf8;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            cursor: pointer;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            white-space: nowrap;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 28px;
+            right: -15px;
+            background: var(--primary-accent);
+            color: white;
+            border: 4px solid var(--admin-bg);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 101;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CONTENT */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            flex: 1;
+            width: 100%;
+            /* Force full width availability */
+            /* min-width: 0; REMOVED to prevent shrinking too small */
+            flex-shrink: 0;
+            /* Prevent shrinking */
+            /* Enable flex item shrinking if needed but prevents overflow issues */
+            max-width: 100%;
+            /* Prevent overflow */
+            box-sizing: border-box;
+            transition: margin-left var(--transition-speed);
+        }
+
+        .content.expanded {
+            margin-left: var(--sidebar-width-collapsed);
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        /* Explicit Stat Info Visibility */
+        .stat-info h3 {
+            color: #1e293b !important;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .stat-info p {
+            color: #64748b !important;
+            font-size: 0.9rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* COMMON CARD */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+            padding: 24px;
+            overflow-x: auto;
+            width: 100%;
+            /* Force full width */
+            box-sizing: border-box;
+            /* Include padding in width */
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 30px 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-accent);
+            color: white;
+            border-color: var(--primary-accent);
+        }
+
+        /* STATUS BADGES */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .bg-pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .bg-published {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .bg-rejected {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            width: 95%;
+            max-width: 1400px;
+            /* Larger max-width */
+            height: 90vh;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-content {
+            padding: 40px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background: #f8fafc;
+        }
+
+        /* FORM STYLES FOR PROFILE */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            /* removed white-space: nowrap to allow wrapping if needed, check if this helps */
+        }
+
+        .data-table th:nth-child(1) {
+            width: 35%;
+        }
+
+        /* Title */
+        .data-table th:nth-child(2) {
+            width: 15%;
+        }
+
+        /* Author */
+        .data-table th:nth-child(3) {
+            width: 10%;
+        }
+
+        /* Category */
+        .data-table th:nth-child(4) {
+            width: 10%;
+        }
+
+        /* Status */
+        .data-table th:nth-child(5) {
+            width: 15%;
+        }
+
+        /* Date */
+        .data-table th:nth-child(6) {
+            width: 15%;
+        }
+
+        /* Actions */
+
+        .data-table td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block !important;
+        }
+
+        #analysis-dashboard.section.active {
+            display: block !important;
+        }
+
+        /* CUSTOM CONFIRM MODAL STYLES */
+        #confirm-modal .modal-box {
+            width: 400px;
+            height: auto;
+            max-width: 90%;
+            text-align: center;
+            padding: 32px;
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #ef4444;
+            font-size: 32px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .modal-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal-confirm:hover {
+            background: #dc2626;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+            gap: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: #f8fafc;
+            color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        body.dark-mode .icon-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        body.dark-mode .icon-btn:hover {
+            color: white;
+            border-color: var(--primary-accent);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 0px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+                /* Restore width for when open */
+            }
+
+            .sidebar.active {
+                /* Use 'active' for mobile open state */
+                transform: translateX(0);
+                width: 260px;
+            }
+
+            .sidebar-toggle {
+                display: none !important;
+            }
+
+            .content {
+                margin-left: 0 !important;
+                padding: 20px;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .mobile-toggle-btn {
+                display: flex;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                width: 40px;
+                height: 40px;
+                z-index: 2100;
+                /* Higher than anything */
+                background: white;
+                color: #0f172a;
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            body.dark-mode .mobile-toggle-btn {
+                background: #1e293b;
+                color: white;
+                border-color: #334155;
+            }
+
+            .top-bar {
+                justify-content: flex-end;
+                width: 100%;
+                box-sizing: border-box;
+                margin-top: 40px;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                width: 100%;
+            }
+
+            .data-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Adjust Profile Form */
+            #profile .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- MOBILE MENU BTN -->
+    <button class="mobile-toggle-btn" onclick="toggleSidebar()">
+        <i class="ph ph-list"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" id="toggle-btn">
+            <i class="ph ph-caret-left" id="toggle-icon"></i>
+        </button>
+
+        <a href="#" class="logo">
+            <span id="logo-img-container"><i class="ph-duotone ph-atom" id="default-logo-icon"></i></span>
+            <span id="brand-text">AperionX</span>
+        </a>
+
+        <div style="flex: 1; display: flex; flex-direction: column; margin-top: 10px;">
+            <a href="javascript:void(0)" class="menu-item active" onclick="showSection('home', this)">
+                <i class="ph ph-house"></i> <span>Genel Bakış</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-item"
+                onclick="showSection('dashboard', this); setTimeout(() => filterArticles('all'), 50);">
+                <i class="ph ph-kanban"></i> <span>Makale Yönetimi</span>
+            </a>
+
+
+            <!-- STATS MENU -->
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('section-stats-final', this)">
+                <i class="ph ph-chart-bar"></i> <span>İstatistikler</span>
+            </a>
+
+            <!-- PROFILE MENU -->
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this); loadProfile();">
+                <i class="ph ph-user"></i> <span>Profilim</span>
+            </a>
+        </div>
+
+        <button onclick="logout()" class="logout-btn"><i class="ph ph-sign-out"></i> <span>Güvenli Çıkış</span></button>
+    </aside>
+
+    <div id="main-content" class="content">
+
+        <!-- GLOBAL TOP BAR -->
+        <div class="top-bar">
+            <!-- Theme Toggle -->
+            <button class="icon-btn" id="themeToggle" title="Tema Değiştir">
+                <i class="ph ph-moon" id="theme-icon"></i>
+            </button>
+
+            <!-- Notification Bell -->
+            <div style="position: relative;">
+                <button class="icon-btn" onclick="toggleNotificationDropdown()" title="Bildirimler">
+                    <i class="ph ph-bell"></i>
+                    <div id="notif-badge"
+                        style="display:none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
+                        0</div>
+                </button>
+
+                <!-- DROPDOWN -->
+                <div id="notif-dropdown"
+                    style="display: none; position: absolute; top: 50px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0; animation: fadeIn 0.2s ease;">
+                    <div
+                        style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: #1e293b;">Bildirimler</span>
+                        <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;"
+                            onclick="loadNotifications()">Yenile</span>
+                    </div>
+                    <div id="notif-list" style="max-height: 350px; overflow-y: auto;">
+                        <div
+                            style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <span>Bildiriminiz yok.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME / OVERVIEW SECTION -->
+        <div id="home" class="section active">
+            <h1 class="page-title">Genel Bakış</h1>
+            <!-- ROW 1: STATUS -->
+            <div class="dashboard-stats">
+                <div class="stat-card"
+                    onclick="showSection('dashboard'); setTimeout(() => filterArticles('pending'), 50)">
+                    <div class="stat-icon" style="background: #fff7ed; color: #f97316;"><i
+                            class="ph-duotone ph-clock"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-pending">0</h3>
+                        <p>Onay Bekleyen</p>
+                    </div>
+                </div>
+                <div class="stat-card"
+                    onclick="showSection('dashboard'); setTimeout(() => filterArticles('published'), 50)">
+                    <div class="stat-icon" style="background: #dcfce7; color: #16a34a;"><i
+                            class="ph-duotone ph-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-published">0</h3>
+                        <p>Yayında</p>
+                    </div>
+                </div>
+                <div class="stat-card"
+                    onclick="showSection('dashboard'); setTimeout(() => filterArticles('rejected'), 50)">
+                    <div class="stat-icon" style="background: #fee2e2; color: #ef4444;"><i
+                            class="ph-duotone ph-x-circle"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-rejected">0</h3>
+                        <p>Reddedilen</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2: ENGAGEMENT -->
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 20px 0 15px 0;">Etkileşim İstatistikleri</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('section-stats-final', document.querySelector('a[onclick*=\'section-stats-final\']'))">
+                    <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i
+                            class="ph-duotone ph-eye"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-views">0</h3>
+                        <p>Toplam Okunma</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('section-stats-final', document.querySelector('a[onclick*=\'section-stats-final\']'))">
+                    <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i
+                            class="ph-duotone ph-heart"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-likes">0</h3>
+                        <p>Toplam Beğeni</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('section-stats-final', document.querySelector('a[onclick*=\'section-stats-final\']'))">
+                    <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;"><i
+                            class="ph-duotone ph-chat-text"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-comments">0</h3>
+                        <p>Toplam Yorum</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <!-- PROFILE SECTION moved outside -->
+        <div id="profile" class="section">
+            <h1 class="page-title">Profilim</h1>
+            <div class="card" style="max-width: 600px;">
+                <form onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label>Ad Soyad</label>
+                        <input type="text" id="p-fullname" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta Adresi</label>
+                        <input type="email" id="p-email" class="form-control" disabled
+                            style="background:#f1f5f9; cursor:not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+                        <input type="password" id="p-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Bilgileri
+                        Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS / ANALYSIS SECTION (Final) -->
+    <div id="section-stats-final" class="section">
+        <h1 class="page-title">Yazar İstatistikleri</h1>
+
+        <!-- Author Filter Bar -->
+        <div class="card" style="margin-bottom: 20px; padding: 15px; overflow-x: auto;">
+            <div id="stats-author-filters" style="display: flex; gap: 10px; padding-bottom: 5px;">
+                <!-- JS populated -->
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card" style="cursor: default;">
+                <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="ph-duotone ph-eye"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="stats-views">0</h3>
+                    <p>Toplam Okunma</p>
+                </div>
+            </div>
+            <div class="stat-card" style="cursor: default;">
+                <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i class="ph-duotone ph-heart"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="stats-likes">0</h3>
+                    <p>Toplam Beğeni</p>
+                </div>
+            </div>
+            <div class="stat-card" style="cursor: default;">
+                <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;"><i
+                        class="ph-duotone ph-chat-text"></i></div>
+                <div class="stat-info">
+                    <h3 id="stats-comments">0</h3>
+                    <p>Toplam Yorum</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article List -->
+        <div class="card" style="margin-top: 20px;">
+            <h3 style="margin: 0 0 20px 0; font-size: 1.2rem;">Makale Listesi</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Başlık</th>
+                        <th style="width: 15%;">Yazar</th>
+                        <th style="width: 12%;">Kategori</th>
+                        <th style="width: 12%;">Tarih</th>
+                        <th style="width: 7%; text-align: center;">Okunma</th>
+                        <th style="width: 7%; text-align: center;">Beğeni</th>
+                        <th style="width: 7%; text-align: center;">Yorum</th>
+                    </tr>
+                </thead>
+                <tbody id="stats-article-list">
+                    <!-- JS populated -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (Article List) SECTION -->
+    <div id="dashboard" class="section">
+        <h1 class="page-title">Makale Yönetimi</h1>
+
+        <style>
+            .dashboard-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+                margin-bottom: 32px;
+                width: 100%;
+                /* Ensure grid takes full width */
+                box-sizing: border-box;
+            }
+
+            .stat-card {
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                border-color: #cbd5e1;
+            }
+
+            .stat-card-content {
+                padding: 24px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                flex: 1;
+            }
+
+            .stat-icon-wrapper {
+                width: 64px;
+                height: 64px;
+                border-radius: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                transition: transform 0.3s ease;
+            }
+
+            .stat-card:hover .stat-icon-wrapper {
+                transform: scale(1.1) rotate(6deg);
+            }
+
+            .stat-details h3 {
+                font-size: 2rem;
+                font-weight: 800;
+                margin: 0;
+                line-height: 1.1;
+                color: #0f172a;
+            }
+
+            .stat-details p {
+                margin: 4px 0 0 0;
+                color: #64748b;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .stat-card-footer {
+                padding: 14px 24px;
+                background: #f8fafc;
+                border-top: 1px solid #f1f5f9;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #64748b;
+                transition: color 0.2s, background 0.2s;
+            }
+
+            .stat-card:hover .stat-card-footer {
+                background: #f1f5f9;
+                color: #334155;
+            }
+
+            .stat-card-footer i {
+                transition: transform 0.2s;
+            }
+
+            .stat-card:hover .stat-card-footer i {
+                transform: translateX(4px);
+            }
+        </style>
+
+        <div class="dashboard-stats">
+            <!-- PENDING CARD -->
+            <div class="stat-card" onclick="filterArticles('pending')">
+                <div class="stat-card-content">
+                    <div class="stat-icon-wrapper"
+                        style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #f97316;">
+                        <i class="ph-duotone ph-clock-countdown"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="count-pending-dash">0</h3>
+                        <p>Onay Bekleyen</p>
+                    </div>
+                </div>
+                <div class="stat-card-footer">
+                    <span>Makaleleri Görüntüle</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- PUBLISHED CARD -->
+            <div class="stat-card" onclick="filterArticles('published')">
+                <div class="stat-card-content">
+                    <div class="stat-icon-wrapper"
+                        style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a;">
+                        <i class="ph-duotone ph-check-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="count-published-dash">0</h3>
+                        <p>Yayında Olan</p>
+                    </div>
+                </div>
+                <div class="stat-card-footer">
+                    <span>Makaleleri Görüntüle</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- REJECTED CARD -->
+            <div class="stat-card" onclick="filterArticles('rejected')">
+                <div class="stat-card-content">
+                    <div class="stat-icon-wrapper"
+                        style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #ef4444;">
+                        <i class="ph-duotone ph-x-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="count-rejected-dash">0</h3>
+                        <p>Reddedilen</p>
+                    </div>
+                </div>
+                <div class="stat-card-footer">
+                    <span>Makaleleri Görüntüle</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="card"
+            style="min-height: 600px; display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap:wrap; gap:10px;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin:0;">Makale Yönetimi</h2>
+                <div class="filter-bar">
+                    <button class="filter-btn active" onclick="filterArticles('all')" id="btn-all">Tümü</button>
+                    <button class="filter-btn" onclick="filterArticles('pending')" id="btn-pending">Onay
+                        Bekleyenler</button>
+                </div>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Yazar</th>
+                        <th>Kategori</th>
+                        <th>Durum</th>
+                        <th>Tarih</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="unified-article-list">
+                    <!-- JS populated -->
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                <button onclick="filterArticles('trash')"
+                    style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:#94a3b8; display:inline-flex; align-items:center; gap:5px; transition:color 0.2s;"
+                    onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                    <i class="ph ph-trash"></i> Çöp Kutusunu Görüntüle (<span id="count-trash-btn">0</span>)
+                </button>
+            </div>
+        </div>
+
+
+
+
+
+
+
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="review-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 style="margin: 0; font-size: 1.5rem;" id="modal-title">Makale Başlığı</h2>
+                <button onclick="closeModal()"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <div class="modal-content" id="modal-body"></div>
+            <div class="modal-footer">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Edit Article Modal (Copied/Adapted from Author) -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box" style="height: 90vh; max-width: 1000px;">
+            <div class="modal-header">
+                <h2 style="margin: 0; font-size: 1.5rem;">Makale Düzenle</h2>
+                <button onclick="closeEditModal()"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <div class="modal-content" style="padding: 20px;">
+                <form id="editArticleForm" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label>Makale Başlığı</label>
+                        <input type="text" id="edit-title" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="edit-category" class="form-control">
+                            <option value="Biyoloji">Biyoloji</option>
+                            <option value="Fizik">Fizik</option>
+                            <option value="Astronomi">Astronomi</option>
+                            <option value="Teknoloji">Teknoloji</option>
+                            <option value="Psikoloji">Psikoloji</option>
+                            <option value="Sağlık">Sağlık</option>
+                            <option value="other">Diğer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="section-header">
+                            <i class="ph-fill ph-books section-icon"></i>
+                            <h3 class="section-label">Kaynakça</h3>
+                        </div>
+                        <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.9rem;">Makalede
+                            kullandığınız kaynakları buraya ekleyin.</label>
+                        <textarea id="references" class="form-control" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kısa Özet</label>
+                        <textarea id="edit-excerpt" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Etiketler</label>
+                        <input type="text" id="edit-tags" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>İçerik</label>
+                        <div id="editor-container" style="height: 300px;"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveEditedArticle()">Değişiklikleri Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div class="modal-overlay" id="confirm-modal" style="z-index: 2000;">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <i class="ph-fill ph-warning-circle"></i>
+            </div>
+            <h3 class="modal-title">Emin misiniz?</h3>
+            <p class="modal-desc" id="confirm-desc">Bu işlem geri alınamaz.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-cancel" onclick="closeConfirmModal()">Vazgeç</button>
+                <button class="modal-btn modal-confirm" id="confirm-yes-btn">Evet, Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000;"></div>
+
+    <script>
+        // console.log('Script loaded and running');
+
+        const API_URL = '/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        let currentArticleId = null;
+        let allArticles = [];
+
+        if (!token || !user || (user.role !== 'editor' && user.role !== 'admin')) {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadDashboardStats();
+            loadAllArticles();
+            loadProfile();
+            loadAnalysisAuthors(); // Init analysis module
+
+            // Initialize Quill for Edit Modal
+            quillEdit = new Quill('#editor-container', {
+                theme: 'snow',
+                modules: {
+                    imageResize: {},
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'],
+                        ['blockquote', 'code-block'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']
+                    ]
+                }
+            });
+        });
+
+        // --- STATS / ANALYSIS MODULE ---
+        async function loadAnalysisAuthors() {
+            try {
+                const res = await fetch(`${API_URL}/editor/authors`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const authors = await res.json();
+
+                const container = document.getElementById('stats-author-filters');
+                if (!container) return; // Safety check
+
+                container.innerHTML = `
+                    <button class="filter-btn active" onclick="selectAnalysisAuthor('all')" id="btn-auth-all">
+                        <i class="ph-fill ph-users"></i> Tümü
+                    </button>
+                `;
+
+                authors.forEach(auth => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.id = `btn-auth-${auth.id}`;
+                    btn.onclick = () => selectAnalysisAuthor(auth.id);
+                    btn.innerHTML = `${auth.fullname}`;
+                    container.appendChild(btn);
+                });
+
+                // Load initial data for 'all'
+                selectAnalysisAuthor('all');
+            } catch (e) { console.error('Authors error:', e); }
+        }
+
+        async function selectAnalysisAuthor(authorId) {
+            // 1. Update Buttons
+            document.querySelectorAll('#stats-author-filters .filter-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-auth-${authorId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // 2. Fetch Stats & Articles
+            try {
+                const query = authorId === 'all' ? '' : `?author_id=${authorId}`;
+                const res = await fetch(`${API_URL}/editor/stats${query}`, { headers: { 'Authorization': `Bearer ${token}` } });
+
+                if (res.ok) {
+                    const stats = await res.json();
+
+                    // Update Stats Cards
+                    if (document.getElementById('stats-views')) document.getElementById('stats-views').innerText = stats.total_views || 0;
+                    if (document.getElementById('stats-likes')) document.getElementById('stats-likes').innerText = stats.total_likes || 0;
+                    if (document.getElementById('stats-comments')) document.getElementById('stats-comments').innerText = stats.total_comments || 0;
+
+                    // Populate Article List from the SAME response
+                    const tbody = document.getElementById('stats-article-list');
+                    if (!tbody) return;
+                    tbody.innerHTML = '';
+
+                    // FILTER: Show ONLY Pending Articles? NO, USER SAID PUBLISHED.
+                    // "sadece yayınlanan makaleler görünsün"
+                    const articles = (stats.articles || []).filter(a => a.status === 'published');
+
+                    if (articles.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">Henüz yayınlanmış bir makale bulunmuyor.</td></tr>';
+                    } else {
+                        articles.forEach(article => {
+                            const date = new Date(article.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                            // Design: Distinct, "Beautiful" row style
+                            // Using inline styles for immediate effect as requested without touching css file too much if possible,
+                            // but cleaner to use class if I could. I will use a mix of existing classes and inline overrides for the "pop".
+
+                            const row = `
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s; cursor: default;">
+                            <td style="padding: 16px; font-weight: 600; color: #1e293b;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 4px; height: 40px; background: #10b981; border-radius: 4px;"></div>
+                                    <div>
+                                        <div style="font-size: 1rem;">${article.title}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 16px; color: #475569; font-weight: 500;">${article.author_name || 'Bilinmiyor'}</td>
+                            <td style="padding: 16px;"><span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569;">${article.category}</span></td>
+                            <td style="padding: 16px; color: #64748b; font-size: 0.9rem;">${date}</td>
+                            <td style="padding: 16px;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; color: #3b82f6;">
+                                    <i class="ph-duotone ph-eye" style="font-size: 1.1rem; display:inline-block !important; visibility:visible !important;"></i> ${article.views || 0}
+                                </div>
+                            </td>
+                            <td style="padding: 16px;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; color: #10b981;">
+                                    <i class="ph-duotone ph-heart" style="font-size: 1.1rem; display:inline-block !important; visibility:visible !important;"></i> ${article.like_count || 0}
+                                </div>
+                            </td>
+                            <td style="padding: 16px;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; color: #f59e0b;">
+                                    <i class="ph-duotone ph-chat-text" style="font-size: 1.1rem; display:inline-block !important; visibility:visible !important;"></i> ${article.comment_count || 0}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                            tbody.innerHTML += row;
+                        });
+                    }
+                }
+            } catch (e) { console.error('Stats/Articles error:', e); }
+        }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.getElementById('toggle-icon');
+
+            // Mobile toggle
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                document.getElementById('main-content').classList.toggle('expanded');
+            }
+
+            icon.className = (sidebar.classList.contains('collapsed') || !sidebar.classList.contains('active'))
+                ? 'ph ph-caret-right' : 'ph ph-caret-left';
+        }
+
+        function showSection(id, el) {
+            console.log('Switching to section:', id);
+            const target = document.getElementById(id);
+
+            if (!target) {
+                console.error('Section not found:', id);
+                // CRITICAL DEBUG: Alert user if ID is missing
+                alert('HATA: Bölüm bulunamadı -> ' + id + '\nLütfen sayfayı yenileyin veya geliştiriciye bildirin.');
+                return;
+            }
+
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
+            });
+
+            target.classList.add('active');
+            target.style.display = 'block';
+            target.style.setProperty('display', 'block', 'important'); // FORCE VISIBILITY
+
+            if (el) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                el.classList.add('active');
+            }
+
+            // Auto-load data for stats section
+            if (id === 'section-stats-final') {
+                loadAnalysisAuthors();
+            }
+        }
+
+
+
+        function loadProfile() {
+            document.getElementById('p-fullname').value = user.fullname;
+            document.getElementById('p-email').value = user.email;
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const fullname = document.getElementById('p-fullname').value;
+            const password = document.getElementById('p-password').value;
+
+            const body = { fullname };
+            if (password) body.password = password;
+
+            try {
+                const res = await fetch(`${API_URL}/profile`, { // Corrected Endpoint
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    user.fullname = fullname;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    showToast('Profil güncellendi', 'success');
+                } else {
+                    showToast('Güncelleme başarısız', 'error');
+                }
+            } catch (e) {
+                // Fallback if generic endpoint doesn't exist, we might need to create it
+                // But for now let's assume it exists or fail safely
+                showToast('Sunucu hatası', 'error');
+            }
+        }
+
+        // GLOBAL SCOPE FUNCTIONS (Fixed nesting)
+        let quillEdit;
+        let confirmCallback = null;
+        let currentFilter = 'all'; // Fixed: Defined global variable
+
+        function updateNotifications() {
+            // Basic implementation to update any notification UI if exists
+            // For now, we can just log or check if there's a badge to update
+            const pendingCount = parseInt(document.getElementById('count-pending')?.innerText || '0');
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                if (pendingCount > 0) {
+                    badge.style.display = 'flex';
+                    badge.innerText = pendingCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('show');
+        }
+
+        function showConfirm(message, callback) {
+            document.getElementById('confirm-desc').innerText = message;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('show');
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            closeConfirmModal();
+        });
+
+        async function editArticle(id) {
+            const article = allArticles.find(a => a.id === id);
+            if (!article) return;
+
+            currentArticleId = article.id;
+            document.getElementById('edit-title').value = article.title;
+            document.getElementById('edit-category').value = article.category; // Simple match, can be improved for custom
+            document.getElementById('edit-excerpt').value = article.excerpt;
+            document.getElementById('edit-tags').value = article.tags || '';
+            quillEdit.root.innerHTML = article.content;
+
+            document.getElementById('edit-modal').classList.add('show');
+        }
+
+        async function saveEditedArticle() {
+            if (!currentArticleId) return;
+
+            const title = document.getElementById('edit-title').value;
+            const category = document.getElementById('edit-category').value;
+            const excerpt = document.getElementById('edit-excerpt').value;
+            const tags = document.getElementById('edit-tags').value;
+            const content = quillEdit.root.innerHTML;
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('excerpt', excerpt);
+            formData.append('tags', tags);
+            formData.append('content', content);
+
+            try {
+                const res = await fetch(`${API_URL}/articles/${currentArticleId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    showToast('Makale güncellendi', 'success');
+                    closeEditModal();
+                    loadAllArticles();
+                } else {
+                    const txt = await res.text();
+                    showToast('Hata: ' + txt, 'error');
+                }
+            } catch (e) { showToast('Sunucu hatası', 'error'); }
+        }
+
+        async function deleteArticle(id, permanent = false) {
+            const msg = permanent
+                ? 'Bu makaleyi KALICI OLARAK silmek istediğinize emin misiniz? Bu işlem geri alınamaz!'
+                : 'Bu makaleyi çöp kutusuna taşımak istediğinize emin misiniz?';
+
+            showConfirm(msg, async () => {
+                try {
+                    const endpoint = permanent ? `/articles/permanent/${id}` : `/articles/${id}`;
+                    const res = await fetch(`${API_URL}${endpoint}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        showToast(permanent ? 'Makale kalıcı olarak silindi' : 'Makale çöp kutusuna taşındı', 'success');
+                        loadAllArticles();
+                        loadDashboardStats(); // Refresh stats to update counts
+                    } else {
+                        const txt = await res.text();
+                        showToast('Hata: ' + txt, 'error');
+                    }
+                } catch (e) { showToast('Sunucu hatası', 'error'); }
+            });
+        }
+
+        async function restoreArticle(id) {
+            showConfirm('Bu makaleyi geri yüklemek istediğinize emin misiniz? (Taslak durumuna döner)', async () => {
+                try {
+                    const res = await fetch(`${API_URL}/articles/restore/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        showToast('Makale geri yüklendi', 'success');
+                        loadAllArticles();
+                        loadDashboardStats();
+                    } else {
+                        const txt = await res.text();
+                        showToast('Hata: ' + txt, 'error');
+                    }
+                } catch (e) { showToast('Sunucu hatası', 'error'); }
+            });
+        }
+
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch(`${API_URL}/editor/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const stats = await res.json();
+                if (res.ok) {
+                    // Home Stats
+                    document.getElementById('count-pending').innerText = stats.pending || 0;
+                    document.getElementById('count-published').innerText = stats.published || 0;
+                    document.getElementById('count-rejected').innerText = stats.rejected || 0;
+
+                    // Dashboard Stats (Duplicates)
+                    if (document.getElementById('count-pending-dash')) document.getElementById('count-pending-dash').innerText = stats.pending || 0;
+                    if (document.getElementById('count-published-dash')) document.getElementById('count-published-dash').innerText = stats.published || 0;
+                    if (document.getElementById('count-rejected-dash')) document.getElementById('count-rejected-dash').innerText = stats.rejected || 0;
+
+                    // Engagement
+                    if (document.getElementById('count-views')) document.getElementById('count-views').innerText = stats.total_views || 0;
+                    if (document.getElementById('count-likes')) document.getElementById('count-likes').innerText = stats.total_likes || 0;
+                    if (document.getElementById('count-comments')) document.getElementById('count-comments').innerText = stats.total_comments || 0;
+                }
+            } catch (e) { console.error('Stats error:', e); }
+        }
+
+        async function loadAllArticles() {
+            try {
+                // Fetch data in parallel
+                const [resPending, resHistory, resTrash, resAuthors] = await Promise.all([
+                    fetch(`${API_URL}/editor/pending-articles`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/editor/history`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/editor/trash`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/editor/authors`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                // Safe parsing helper
+                const safeJson = async (r) => r.ok ? await r.json() : [];
+
+                const pending = await safeJson(resPending);
+                const history = await safeJson(resHistory);
+                const trash = await safeJson(resTrash);
+                const authors = await safeJson(resAuthors);
+
+                // Author Helper
+                const getAuthorName = (id) => {
+                    const auth = authors.find(a => a.id === id);
+                    return auth ? auth.fullname : 'Bilinmiyor';
+                };
+
+                // Merge for display
+                allArticles = [...(pending || []), ...(history || []), ...(trash || [])];
+
+                const tbody = document.getElementById('unified-article-list');
+                const filter = currentFilter;
+
+                let displayArticles = [];
+
+                if (filter === 'all') displayArticles = allArticles;
+                else if (filter === 'pending') displayArticles = pending || [];
+                else if (filter === 'published') displayArticles = (history || []).filter(a => a.status === 'published');
+                else if (filter === 'rejected') displayArticles = (history || []).filter(a => a.status === 'rejected');
+                else if (filter === 'trash') displayArticles = trash || [];
+
+                tbody.innerHTML = '';
+
+                if (displayArticles.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; height:300px; vertical-align:middle; color:#94a3b8;"><div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><i class="ph-duotone ph-folder-open" style="font-size:3rem; opacity:0.5;"></i><span>Makale bulunamadı.</span></div></td></tr>';
+                } else {
+                    displayArticles.forEach(article => {
+                        const date = new Date(article.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                        let statusBadge = '';
+                        let actions = '';
+
+                        if (filter === 'trash') {
+                            statusBadge = '<span class="status-badge status-trash">Çöp Kutusu</span>';
+                            actions = `
+                                <button class="btn btn-success-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="restoreArticle(${article.id})"><i class="ph-bold ph-arrow-u-up-left"></i> Geri Yükle</button>
+                                <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteArticle(${article.id}, true)"><i class="ph-bold ph-trash"></i> Kalıcı Sil</button>
+                            `;
+                        } else {
+                            if (article.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
+                            else if (article.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                            else if (article.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
+
+                            actions = `
+                                <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="openReview(${article.id})"><i class="ph-bold ph-eye"></i> İncele</button>
+                                <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="editArticle(${article.id})"><i class="ph-bold ph-pencil-simple"></i> Düzenle</button>
+                                <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteArticle(${article.id})"><i class="ph-bold ph-trash"></i> Sil</button>
+                            `;
+                        }
+
+                        // BEAUTIFIED CARD STYLE ROW
+                        const row = `
+                            <tr style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s;">
+                                <td style="padding: 16px; font-weight: 600; color: #1e293b;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 4px; height: 40px; background: ${article.status === 'published' ? '#10b981' : (article.status === 'rejected' ? '#ef4444' : '#f59e0b')}; border-radius: 4px;"></div>
+                                        <div>
+                                            <div style="font-size: 1rem;">${escapeHtml(article.title)}</div>
+                                            <div style="font-size: 0.75rem; color: #64748b; font-weight: normal;">${article.status === 'published' ? 'Yayında' : (article.status === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor')}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 16px; font-weight: 500; color: #475569;">${escapeHtml(getAuthorName(article.author_id))}</td>
+                                <td style="padding: 16px;"><span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569;">${escapeHtml(article.category)}</span></td>
+                                <td style="padding: 16px;">${statusBadge}</td>
+                                <td style="padding: 16px; color: #64748b; font-size: 0.9rem;">${date}</td>
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        ${actions}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                }
+
+                // Update Counts
+                document.getElementById('count-pending').innerText = pending?.length || 0;
+                document.getElementById('count-pending-dash').innerText = pending?.length || 0;
+                document.getElementById('count-published').innerText = history?.filter(a => a.status === 'published').length || 0;
+                document.getElementById('count-published-dash').innerText = history?.filter(a => a.status === 'published').length || 0;
+                document.getElementById('count-rejected').innerText = history?.filter(a => a.status === 'rejected').length || 0;
+                document.getElementById('count-rejected-dash').innerText = history?.filter(a => a.status === 'rejected').length || 0;
+
+                const trashBtn = document.getElementById('count-trash-btn');
+                if (trashBtn) trashBtn.innerText = trash?.length || 0;
+
+                // Update Notifications
+                updateNotifications();
+
+                // Initial Render
+                filterArticles('all');
+            } catch (e) {
+                console.error('Load Error:', e);
+                const list = document.getElementById('unified-article-list');
+                if (list) list.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Yükleme hatası: ${e.message}</td></tr>`;
+            }
+        }
+
+        function filterArticles(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            let activeBtnId = 'btn-all';
+            if (status !== 'all') activeBtnId = `btn-${status}`;
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const tbody = document.getElementById('unified-article-list');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            // Filter logic
+            let filtered = [];
+            if (status === 'all') filtered = allArticles;
+            else if (status === 'trash') filtered = allArticles.filter(a => a.status === 'trash'); // Assumes separate fetch added trash to allArticles or separate list?
+            // Note: In loadAllArticles we merge trash into allArticles? 
+            // Previous implementation used separate 'trash' array. Let's assume allArticles contains everything or we need to handle trash separately.
+            // Simplified: We will filter allArticles. If trash is not in allArticles, we can't show it.
+            // Let's ensure loadAllArticles puts trash in allArticles.
+
+            filtered = allArticles.filter(a => {
+                if (status === 'all') return a.status !== 'trash'; // Don't show trash in 'all'
+                return a.status === status;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; height:300px; vertical-align:middle; color:#94a3b8;"><div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><i class="ph-duotone ph-folder-open" style="font-size:3rem; opacity:0.5;"></i><span>Kayıt bulunamadı.</span></div></td></tr>';
+                return;
+            }
+
+            filtered.forEach(article => {
+                const date = new Date(article.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                let statusBadge = '';
+                let actions = '';
+
+                if (article.status === 'trash') {
+                    statusBadge = '<span class="status-badge status-trash">Çöp Kutusu</span>';
+                    actions = `
+                        <button class="btn btn-success-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="restoreArticle(${article.id})"><i class="ph-bold ph-arrow-u-up-left"></i></button>
+                        <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteArticle(${article.id}, true)"><i class="ph-bold ph-trash"></i></button>
+                    `;
+                } else {
+                    if (article.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
+                    else if (article.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                    else if (article.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
+
+                    actions = `
+                        <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="openReview(${article.id})"><i class="ph-bold ph-eye"></i></button>
+                        <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="editArticle(${article.id})"><i class="ph-bold ph-pencil-simple"></i></button>
+                        <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteArticle(${article.id})"><i class="ph-bold ph-trash"></i></button>
+                    `;
+                }
+
+                const row = `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s;">
+                        <td style="padding: 16px; font-weight: 600; color: #1e293b;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 4px; height: 40px; background: ${article.status === 'published' ? '#10b981' : (article.status === 'rejected' ? '#ef4444' : '#f59e0b')}; border-radius: 4px;"></div>
+                                <div>
+                                    <div style="font-size: 1rem;">${article.title}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: normal;">${article.status === 'published' ? 'Yayında' : (article.status === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 16px; font-weight: 500; color: #475569;">${article.author_name || 'Bilinmiyor'}</td>
+                        <td style="padding: 16px;"><span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569;">${article.category}</span></td>
+                        <td style="padding: 16px;">${statusBadge}</td>
+                        <td style="padding: 16px; color: #64748b; font-size: 0.9rem;">${date}</td>
+                        <td style="padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                ${actions}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // DARK MODE LOGIC
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+        }
+
+        // Init Dark Mode
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = 'ph ph-sun';
+        }
+
+        // Update Notifications
+        function updateNotifications() {
+            const pendingCount = allArticles.filter(a => a.status === 'pending').length;
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                badge.innerText = pendingCount;
+                badge.style.display = pendingCount > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function openReview(id) {
+            const article = allArticles.find(a => a.id === id);
+            if (!article) return;
+
+            currentArticleId = article.id;
+            document.getElementById('modal-title').innerText = article.title;
+            const isPending = article.status === 'pending';
+
+            let rejectionHtml = '';
+            if (article.status === 'rejected' && article.rejection_reason) {
+                rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
+                    <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
+                    ${article.rejection_reason}
+                </div>`;
+            }
+
+            let html = `
+                ${rejectionHtml}
+                <div style="margin-bottom: 20px; text-align:center; background:#f1f5f9; border-radius:12px; overflow:hidden;">
+                    <img src="${article.image_url || 'https://via.placeholder.com/800x400'}" style="width: 100%; max-width: 800px; height: auto; max-height: 500px; object-fit: contain; border-radius: 12px;">
+                </div>
+                <div style="font-size: 1.1rem; line-height: 1.8; color:#334155;">${article.content}</div>
+                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; font-size:0.95rem; color:#475569;">
+                    <div><strong>Kategori:</strong> ${article.category || '-'}</div>
+                    <div><strong>Etiketler:</strong> ${article.tags || '-'}</div>
+                </div>
+                <div style="margin-top:20px;">
+                    <strong>Kaynakça:</strong>
+                    <p style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:5px;">${article.references_list || 'Belirtilmemiş'}</p>
+                </div>
+                ${article.pdf_url ? `<div style="margin-top:20px;"><a href="${article.pdf_url}" target="_blank" class="btn btn-secondary"><i class="ph ph-file-pdf"></i> PDF Dosyasını İndir</a></div>` : ''}
+            `;
+
+            document.getElementById('modal-body').innerHTML = html;
+
+            const footer = document.querySelector('#review-modal .modal-footer');
+            if (isPending) {
+                footer.innerHTML = `
+                    <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                        <textarea id="reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                            <button class="btn btn-danger" onclick="toggleRejectInput()">Reddet...</button>
+                            <button class="btn btn-primary" onclick="submitDecision('approve')">Yayına Al</button>
+                        </div>
+                        <div id="confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
+                            <button class="btn btn-danger" onclick="submitDecision('reject')">Reddet ve Bitir</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Kapat</button>`;
+            }
+
+            document.getElementById('review-modal').classList.add('show');
+        }
+
+        function toggleRejectInput() {
+            const area = document.getElementById('reject-reason');
+            const confirmArea = document.getElementById('confirm-reject-area');
+            if (area.style.display === 'none') {
+                area.style.display = 'block';
+                confirmArea.style.display = 'flex';
+                area.focus();
+            } else {
+                area.style.display = 'none';
+                confirmArea.style.display = 'none';
+            }
+        }
+
+        async function submitDecision(decision) {
+            if (!currentArticleId) return;
+
+            let body = { decision };
+
+            if (decision === 'reject') {
+                const reason = document.getElementById('reject-reason').value;
+                if (!reason || !reason.trim()) {
+                    showToast('Lütfen red sebebini yazınız.', 'error');
+                    return;
+                }
+                body.rejection_reason = reason;
+                performSubmit();
+            } else {
+                showConfirm('Bu makaleyi yayına almak istediğinize emin misiniz?', performSubmit);
+            }
+
+            async function performSubmit() {
+                try {
+                    const res = await fetch(`${API_URL}/editor/decide/${currentArticleId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (res.ok) {
+                        showToast(decision === 'approve' ? 'Makale başarıyla yayınlandı!' : 'Makale reddedildi.', 'success');
+                        closeModal();
+                        loadDashboardStats();
+                        loadAllArticles();
+                    } else {
+                        const txt = await res.text();
+                        showToast('Hata: ' + txt, 'error');
+                    }
+                } catch (e) { showToast('Sunucu hatası', 'error'); }
+            }
+            // End submit helper
+            return;
+        }
+
+        // --- THEME LOGIC (Newly Added) ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const icon = document.getElementById('theme-icon');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                if (icon) icon.className = 'ph ph-sun';
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (icon) icon.className = 'ph ph-moon';
+            }
+
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDark = document.body.classList.contains('dark-mode');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+                });
+            }
+        }
+
+        // Call initTheme on load
+        initTheme();
+
+        // --- NOTIFICATION LOGIC (Ported from Author Panel) ---
+        let isNotifOpen = false;
+        async function loadNotifications() {
+            try {
+                // Determine user role or just fetch general notifications
+                const res = await fetch(`${API_URL}/notifications`, { headers: { 'Authorization': `Bearer ${token}` } });
+
+                // If endpoint doesn't exist for editors yet, it might return empty. 
+                // However, editors usually get notifications about new submissions.
+                // Assuming standard endpoint works.
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                const badge = document.getElementById('notif-badge');
+                if (data.unread > 0) {
+                    badge.style.display = 'flex';
+                    badge.innerText = data.unread;
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                const list = document.getElementById('notif-list');
+                if (data.notifications.length === 0) {
+                    list.innerHTML = `
+                        <div style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <span>Bildiriminiz yok.</span>
+                        </div>`;
+                    return;
+                }
+
+                list.innerHTML = '';
+                data.notifications.forEach(n => {
+                    const icon = n.type === 'success' ? 'ph-check-circle' : (n.type === 'error' ? 'ph-warning-circle' : 'ph-info');
+                    const color = n.type === 'success' ? '#10b981' : (n.type === 'error' ? '#ef4444' : '#3b82f6');
+                    const bg = n.is_read ? 'white' : '#f0f9ff';
+
+                    const item = document.createElement('div');
+                    item.style.padding = '16px';
+                    item.style.borderBottom = '1px solid #f1f5f9';
+                    item.style.display = 'flex';
+                    item.style.gap = '12px';
+                    item.style.background = bg;
+                    item.style.cursor = 'pointer';
+                    item.style.transition = 'background 0.2s';
+
+                    item.onmouseover = () => { if (n.is_read) item.style.background = '#f8fafc'; };
+                    item.onmouseout = () => { if (n.is_read) item.style.background = 'white'; };
+                    item.onclick = async () => { await markRead(n.id); };
+
+                    item.innerHTML = `
+                        <div style="color: ${color}; font-size: 24px; display: flex; align-items: flex-start; margin-top: 2px;"><i class="ph-fill ${icon}"></i></div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #334155; line-height: 1.4;">${n.message}</p>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px;">
+                                <i class="ph ph-clock"></i> ${new Date(n.created_at).toLocaleString('tr-TR')}
+                            </span>
+                        </div>
+                        ${!n.is_read ? '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-top: 6px;"></div>' : ''}
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (e) { console.error('Notif error', e); }
+        }
+
+        async function markRead(id) {
+            await fetch(`${API_URL}/notifications/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+            loadNotifications();
+        }
+
+        function toggleNotificationDropdown() {
+            const dd = document.getElementById('notif-dropdown');
+            if (!dd) return;
+            isNotifOpen = !isNotifOpen;
+            dd.style.display = isNotifOpen ? 'block' : 'none';
+            if (isNotifOpen) loadNotifications();
+        }
+
+        // Initial Load
+        loadNotifications();
+        // Periodically check
+        setInterval(loadNotifications, 60000);
+
+        /* Original try-catch block removed for refactoring */
+
+        function closeModal() {
+            document.getElementById('review-modal').classList.remove('show');
+            currentArticleId = null;
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                const settings = await res.json();
+
+                const brandText = document.getElementById('brand-text');
+                const brandLogoContainer = document.getElementById('logo-img-container');
+                const defaultIcon = document.getElementById('default-logo-icon');
+
+                if (settings.site_logo && settings.site_logo.trim() !== "") {
+                    if (defaultIcon) defaultIcon.style.display = 'none';
+                    brandLogoContainer.innerHTML = `<img src="${settings.site_logo}" alt="Logo" style="height: 36px; border-radius: 4px;">`;
+                }
+                if (settings.site_favicon && settings.site_favicon.trim() !== "") {
+                    const fav = document.getElementById('favicon');
+                    if (fav) fav.href = settings.site_favicon;
+                }
+                if (settings.site_title) {
+                    const title = settings.site_title;
+                    if (title.endsWith('X')) brandText.innerHTML = `${title.slice(0, -1)}<span style="color: var(--primary-accent)">X</span>`;
+                    else brandText.innerHTML = title;
+                }
+            } catch (e) { }
+        }
+
+        function showToast(msg, type) {
+            const div = document.createElement('div');
+            div.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            div.style.color = 'white'; div.style.padding = '12px 24px'; div.style.borderRadius = '8px'; div.style.marginTop = '10px';
+            div.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            div.className = 'toast-msg';
+            div.innerText = msg;
+            document.getElementById('toast-container').appendChild(div);
+            setTimeout(() => div.remove(), 3500);
+        }
+
+
+
+        // === MOBILE MENU LOGIC ===
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                if (overlay) overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('mobile-open');
+                if (overlay) overlay.style.display = 'block';
+            }
+        }
+
+        // Initialize Stats when section is shown
+        // We can hook into showSection or just load it once if we want
+        // Let's modify showSection to lazy load, OR just load on init.
+        // loadAnalysisAuthors(); // Moved to init
+
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html'; }
+    </script>
+    <!-- === COMMENTS === -->
+
+</body>
+
+</html>
+```

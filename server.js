@@ -56,6 +56,12 @@ app.use(async (req, res, next) => {
         '/uploads',
         '/robots.txt',   // SEO
         '/sitemap.xml',  // SEO
+        '/admin.html',   // Allow Admin access (still protected by login)
+        '/editor.html',  // Allow Editor access
+        '/author.html',  // Allow Author access
+        '/index.html',   // Allow Login on index
+        '/api/login',    // Allow login API
+        '/api/register', // Allow register API
     ];
 
     // Check if path starts with whitelist item
