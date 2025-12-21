@@ -442,6 +442,12 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
                 const [logoRow] = await pool.query("SELECT setting_value FROM settings WHERE setting_key = 'site_logo'");
                 if (logoRow.length > 0 && logoRow[0].setting_value) {
                     logoLink = logoRow[0].setting_value;
+                    // FIX: Process relative paths (uploads/...) to be absolute
+                    if (logoLink && !logoLink.startsWith('http')) {
+                        // Ensure it starts with / if missing (though usually saved as uploads/...)
+                        const cleanPath = logoLink.startsWith('/') ? logoLink.substring(1) : logoLink;
+                        logoLink = 'https://aperionx.com/' + cleanPath;
+                    }
                 }
             } catch (e) { /* ignore db error for logo */ }
         }
@@ -1430,12 +1436,13 @@ app.post('/api/register', async (req, res) => {
         try {
             const welcomeTitle = "Aramıza Hoş Geldiniz - AperionX";
             const welcomeBody = `
-                <h2>Merhaba ${fullname} 🎉,</h2>
-                <p>AperionX ailesine katıldığınız için çok mutluyuz! Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika. 🚀</p>
-                <p>Hesabınızla giriş yaparak makaleleri okuyabilir 📚, yorum yapabilir 💬 ve kendi içeriklerinizi oluşturabilirsiniz ✍️.</p>
+                <h2>AperionX Ailesine Hoş Geldiniz! 🚀</h2>
+                <p>Merhaba ${fullname},</p>
+                <p>AperionX ailesine katıldığınız için çok mutluyuz! Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
+                <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
                 <br>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://aperionx.com" style="display:inline-block; padding:12px 24px; background-color:#6366F1; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:16px;">AperionX'i Keşfet 🌍</a>
+                    <a href="https://aperionx.com" style="display:inline-block; padding:12px 24px; background-color:#6366F1; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:16px;">AperionX'i Keşfet</a>
                 </div>
             `;
             // Retrieve latest settings for SMTP
