@@ -238,6 +238,14 @@ async function ensureSchema() {
             }
         }
 
+        // Fix 'Data truncated for column role' - Ensure role is VARCHAR(50)
+        try {
+            await pool.query("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) DEFAULT 'reader'");
+            console.log('Migrating: users.role column modified to VARCHAR(50)');
+        } catch (err) {
+            console.error('Migration Error (Role Column):', err);
+        }
+
         // Ensure 'articles' content is LONGTEXT
         try {
             await pool.query("ALTER TABLE articles MODIFY COLUMN content LONGTEXT");
