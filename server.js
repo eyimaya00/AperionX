@@ -203,7 +203,7 @@ async function ensureSchema() {
         // Ensure 'likes' table exists
         await pool.query(`
             CREATE TABLE IF NOT EXISTS likes (
-                id INT AUTO_INCREMENT PRIMARY_KEY,
+                id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 article_id INT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
