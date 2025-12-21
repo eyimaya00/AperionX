@@ -446,7 +446,13 @@ async function loadSettings() {
         // Update Title
         if (settings.site_title) {
             document.title = settings.site_title;
-            document.querySelectorAll('.logo-text').forEach(el => el.innerText = settings.site_title);
+            document.querySelectorAll('.logo-text').forEach(el => {
+                el.innerText = settings.site_title;
+                el.style.display = 'block'; // Show if text exists
+            });
+        } else {
+            // If empty, hide the element entirely
+            document.querySelectorAll('.logo-text').forEach(el => el.style.display = 'none');
         }
 
         // Update Logo (Header & Favicon)
