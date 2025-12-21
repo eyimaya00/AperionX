@@ -1311,7 +1311,13 @@
                 loadLikes(id);
                 loadComments(id);
                 // Load Similar Articles Slider
-                if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
+                // Load Similar Articles Slider
+                console.log('Attempting to load slider...');
+                if (typeof loadArticleSlider === 'function') {
+                    loadArticleSlider(id);
+                } else {
+                    console.error('loadArticleSlider function not found!');
+                }
 
             } catch (e) {
                 console.error(e);
@@ -1543,14 +1549,20 @@
         let sliderIndex = 0;
 
         async function loadArticleSlider(currentId) {
+            console.log('loadArticleSlider called for ID:', currentId);
             try {
                 // Fetch recent articles (simplest "related" logic for now)
                 const res = await fetch(`${API_BASE}/articles?limit=10`);
-                if (!res.ok) return;
+                if (!res.ok) {
+                    console.error('Slider fetch failed:', res.status);
+                    return;
+                }
 
                 const all = await res.json();
+                console.log('Slider fetched articles:', all.length);
                 // Filter out current article
                 similarArticles = all.filter(a => a.id != currentId);
+                console.log('Slider relevant articles:', similarArticles.length);
 
                 renderSlider();
             } catch (e) {
