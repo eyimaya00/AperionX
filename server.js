@@ -208,7 +208,10 @@ async function ensureSchema() {
     }
 }
 // Run on start
+// Run on start
 ensureSchema();
+
+
 
 
 // DB Config
@@ -537,6 +540,43 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
+// 1.1 Universal Settings Update (V2) - Handles all settings forms including files
+app.post('/api/settings_v2', authenticateToken, upload.any(), async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    console.log('DEBUG: POST /api/settings_v2', { body: req.body, files: req.files ? req.files.length : 0 });
+
+    try {
+        const settingsToUpdate = { ...req.body };
+
+        // Handle Files
+        if (req.files) {
+            req.files.forEach(file => {
+                // Key is the fieldname (e.g., 'site_logo', 'about_us_image')
+                // Value is the relative path
+                settingsToUpdate[file.fieldname] = 'uploads/' + file.filename;
+            });
+        }
+
+        // Batch Update
+        for (const [key, value] of Object.entries(settingsToUpdate)) {
+            // Upsert
+            const [rows] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [key]);
+            if (rows.length > 0) {
+                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+            } else {
+                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+            }
+        }
+
+        res.json({ message: 'Ayarlar başarıyla güncellendi.' });
+
+    } catch (e) {
+        console.error('Settings V2 Error:', e);
+        res.status(500).json({ message: 'Sunucu hatası: ' + e.message });
+    }
+});
+
 
 
 // Newsletter Subscribe
@@ -800,6 +840,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
             'INSERT INTO articles (title, category, content, image_url, author_id, excerpt, status, tags, references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [title, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
         );
+
         console.log('Route: Article inserted successfully');
 
         // NOTIFY EDITORS & ADMINS if Pending
