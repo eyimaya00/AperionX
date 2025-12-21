@@ -647,7 +647,8 @@
                         <i class="ph ph-sign-out" style="font-size: 48px; margin-bottom: 10px; display:block;"></i>
                         Oturum süreniz doldu. Lütfen tekrar giriş yapın.
                     </div>`;
-                        showToast('Oturum süreniz doldu.', 'error');
+                        console.error('Session expired (401/403). Clearing token...');
+                        showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'error');
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
                         setTimeout(() => window.location.href = 'index.html', 2000);
