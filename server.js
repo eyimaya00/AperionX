@@ -2227,21 +2227,23 @@ app.get('/api/settings', async (req, res) => {
 });
 
 // SAVE Settings (Admin Only)
-app.post('/api/settings', authenticateToken, upload.fields([
-    { name: 'site_logo', maxCount: 1 },
-    { name: 'site_favicon', maxCount: 1 },
-    { name: 'about_us_image', maxCount: 1 }
-]), async (req, res) => {
+// SAVE Settings (Admin Only) - ROBUST VERSION
+app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    console.log('DEBUG: Settings POST started', { files: req.files ? req.files.length : 0 });
 
     try {
         const settings = req.body || {};
-        const files = req.files || {};
 
-        // Handle File Uploads (Override strings with file paths if new file uploaded)
-        if (files.site_logo) settings.site_logo = 'uploads/' + files.site_logo[0].filename; // Removed leading slash for DB consistency
-        if (files.site_favicon) settings.site_favicon = 'uploads/' + files.site_favicon[0].filename;
-        if (files.about_us_image) settings.about_us_image = 'uploads/' + files.about_us_image[0].filename;
+        // Handle Files from upload.any() (req.files is an array)
+        if (req.files && req.files.length > 0) {
+            req.files.forEach(file => {
+                // Determine field name and map to settings
+                // Example: file.fieldname = 'site_logo'
+                settings[file.fieldname] = 'uploads/' + file.filename;
+            });
+        }
 
         // Save each setting
         for (const [key, value] of Object.entries(settings)) {
@@ -2257,8 +2259,8 @@ app.post('/api/settings', authenticateToken, upload.fields([
         res.json({ message: 'Ayarlar başarıyla kaydedildi' });
 
     } catch (e) {
-        console.error('Settings Save Error:', e);
-        res.status(500).json({ error: e.message });
+        console.error('Settings Save Error (Detailed):', e);
+        res.status(500).json({ error: 'Sunucu Hatası: ' + e.message, stack: e.stack });
     }
 });
 
