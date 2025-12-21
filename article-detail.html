@@ -1134,8 +1134,7 @@
         </div>
     </div>
 
-    <!-- Modals (Simplified, logic handled by script.js) -->
-    <!-- Modals -->
+    <!-- Modals (Copied for consistency) -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
             <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
@@ -1147,7 +1146,7 @@
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-envelope-simple"></i> -->
-                        <input type="email" id="login-email" placeholder="E-posta Adresi" required>
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -1155,6 +1154,10 @@
                         <!-- <i class="ph ph-lock-key"></i> -->
                         <input type="password" id="login-password" placeholder="Şifre" required>
                     </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal')"
+                        class="forgot-password-link">Şifremi Unuttum?</a>
                 </div>
                 <button type="submit" class="btn-primary">Giriş Yap</button>
             </form>
@@ -1180,6 +1183,11 @@
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
                         <!-- <i class="ph ph-envelope-simple"></i> -->
                         <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
                     </div>
@@ -1199,8 +1207,29 @@
                 <button type="submit" class="btn-primary">Üye Ol</button>
             </form>
             <div class="modal-footer">
-                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a>
-                </p>
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
             </div>
         </div>
     </div>

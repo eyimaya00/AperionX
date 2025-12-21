@@ -681,13 +681,31 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 
 app.post('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const { fullname, email, password, role } = req.body;
+    const { fullname, email, username, password, role } = req.body;
     if (!fullname || !email || !password || !role) return res.status(400).json({ error: 'Tüm alanlar gerekli.' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query('INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)', [fullname, email, hashedPassword, role]);
-        res.status(201).json({ message: 'User created' });
+        const [result] = await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)',
+            [fullname, email, username, hashedPassword, role]);
+
+        // Send Welcome Email
+        try {
+            const welcomeTitle = "Aramıza Hoş Geldiniz - AperionX";
+            const welcomeBody = `
+                <h2>Merhaba ${fullname},</h2>
+                <p>AperionX ailesine katıldığınız için çok mutluyuz. Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
+                <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
+                <br>
+                <a href="https://aperionx.com" style="display:inline-block; padding:10px 20px; background-color:#6366F1; color:white; text-decoration:none; border-radius:5px;">AperionX'i Keşfet</a>
+            `;
+            await sendDynamicEmail(email, welcomeTitle, welcomeBody, 'welcome');
+        } catch (emailErr) {
+            console.error('Welcome Email Failed:', emailErr);
+            // Don't fail registration just because email failed
+        }
+
+        res.status(201).json({ message: 'Kayıt başarılı! Giriş yapabilirsiniz.' });
     } catch (e) { res.status(500).json({ error: 'E-posta kullanılıyor olabilir.' }); }
 });
 
@@ -1386,15 +1404,23 @@ app.post('/api/register', async (req, res) => {
         await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader']);
 
         // Send Welcome Email
-        const logoUrl = `${req.protocol}://${req.get('host')}/uploads/logo.png`;
-        const actionLink = `${req.protocol}://${req.get('host')}/index.html`;
+        try {
+            const welcomeTitle = "Aramıza Hoş Geldiniz - AperionX";
+            const welcomeBody = `
+                <h2>Merhaba ${fullname},</h2>
+                <p>AperionX ailesine katıldığınız için çok mutluyuz. Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
+                <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
+                <br>
+                <a href="https://aperionx.com" style="display:inline-block; padding:10px 20px; background-color:#6366F1; color:white; text-decoration:none; border-radius:5px;">AperionX'i Keşfet</a>
+            `;
+            // Retrieve latest settings for SMTP
+            await sendDynamicEmail(email, welcomeTitle, welcomeBody, 'welcome');
+        } catch (emailErr) {
+            console.error('Welcome Email Failed:', emailErr);
+        }
 
-        sendDynamicEmail(email, 'welcome', {
-            name: fullname,
-            logoUrl,
-            actionLink,
-            actionText: 'Keşfetmeye Başla'
-        });
+        // Send Welcome Email (Legacy / Duplicate removal if needed, but keeping this block clean)
+        // const logoUrl ... (Removing old commented out or placeholder logic if any)
 
         res.status(201).json({ message: 'User registered' });
     } catch (error) {
