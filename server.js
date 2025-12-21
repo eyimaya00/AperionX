@@ -206,6 +206,30 @@ async function ensureSchema() {
             } catch (alterErr) { console.error("Error adding approved_by column:", alterErr); }
         }
     }
+
+    try {
+        // Auto-migration for other missing columns
+        const neededColumns = [
+            { name: 'category', def: "VARCHAR(100) DEFAULT 'Genel'" },
+            { name: 'tags', def: "TEXT" },
+            { name: 'references_list', def: "TEXT" },
+            { name: 'pdf_url', def: "VARCHAR(255)" }
+        ];
+
+        for (const col of neededColumns) {
+            try {
+                await pool.query(`SELECT ${col.name} FROM articles LIMIT 1`);
+            } catch (err) {
+                if (err.code === 'ER_BAD_FIELD_ERROR') {
+                    console.log(`Migrating: Adding ${col.name} to articles...`);
+                    await pool.query(`ALTER TABLE articles ADD COLUMN ${col.name} ${col.def}`);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Auto-migration Error:', e);
+    }
+}
 }
 // Run on start
 // Run on start
