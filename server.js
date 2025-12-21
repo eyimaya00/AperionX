@@ -233,7 +233,15 @@ async function ensureSchema() {
             }
         }
 
-        console.log('Schema Check: Likes, Comments, Bio/Job Title ensured.');
+        // Ensure 'articles' content is LONGTEXT
+        try {
+            await pool.query("ALTER TABLE articles MODIFY COLUMN content LONGTEXT");
+            console.log('Migrating: articles content column set to LONGTEXT');
+        } catch (err) {
+            console.error('Migration Error (Content LONGTEXT):', err);
+        }
+
+        console.log('Schema Check: Likes, Comments, Bio/Job Title, LONGTEXT ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
