@@ -561,81 +561,8 @@ app.get('/sitemap.xml', async (req, res) => {
 // Auth routes consolidated below
 
 
-// 1. Site Settings (Generic) - Updated to handle POST updates
-app.post('/api/settings', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-    const settings = req.body;
-    console.log('DEBUG: Received settings update:', settings); // Debug Log
+// [REMOVED DUPLICATE SETTINGS ROUTES] - Authenticated settings logic moved to end of file
 
-    try {
-        for (const [key, value] of Object.entries(settings)) {
-            // Check if exists
-            const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key = ?', [key]);
-            if (rows.length > 0) {
-                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
-            } else {
-                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
-            }
-        }
-        res.json({ message: 'Ayarlar güncellendi.' });
-    } catch (e) {
-        console.error('DEBUG: Settings Error:', e);
-        res.status(500).send('Hata: ' + e.message);
-    }
-});
-
-app.get('/api/settings', async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM site_settings');
-        const settings = {};
-        rows.forEach(row => {
-            settings[row.setting_key] = row.setting_value;
-        });
-        // Safety Fallback for Site Title
-        if (!settings.site_title) settings.site_title = "AperionX";
-
-        res.json(settings);
-    } catch (e) {
-        res.status(500).send(e.toString());
-    }
-});
-
-// 1.1 Universal Settings Update (V2) - Handles all settings forms including files
-app.post('/api/settings_v2', authenticateToken, upload.any(), async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-
-    console.log('DEBUG: POST /api/settings_v2', { body: req.body, files: req.files ? req.files.length : 0 });
-
-    try {
-        const settingsToUpdate = { ...req.body };
-
-        // Handle Files
-        if (req.files) {
-            req.files.forEach(file => {
-                // Key is the fieldname (e.g., 'site_logo', 'about_us_image')
-                // Value is the relative path
-                settingsToUpdate[file.fieldname] = 'uploads/' + file.filename;
-            });
-        }
-
-        // Batch Update
-        for (const [key, value] of Object.entries(settingsToUpdate)) {
-            // Upsert
-            const [rows] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [key]);
-            if (rows.length > 0) {
-                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
-            } else {
-                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
-            }
-        }
-
-        res.json({ message: 'Ayarlar başarıyla güncellendi.' });
-
-    } catch (e) {
-        console.error('Settings V2 Error:', e);
-        res.status(500).json({ message: 'Sunucu hatası: ' + e.message });
-    }
-});
 
 
 
@@ -2299,6 +2226,23 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
+// === SETTINGS API ===
+
+// GET Settings
+app.get('/api/settings', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM site_settings');
+        const settings = {};
+        rows.forEach(row => {
+            settings[row.setting_key] = row.setting_value;
+        });
+        res.json(settings);
+    } catch (e) {
+        console.error('Settings Fetch Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // SAVE Settings (Admin Only)
 app.post('/api/settings', authenticateToken, upload.fields([
     { name: 'site_logo', maxCount: 1 },
@@ -2311,19 +2255,20 @@ app.post('/api/settings', authenticateToken, upload.fields([
         const settings = req.body;
         const files = req.files || {};
 
-        // Handle File Uploads
-        if (files.site_logo) settings.site_logo = '/uploads/' + files.site_logo[0].filename;
-        if (files.site_favicon) settings.site_favicon = '/uploads/' + files.site_favicon[0].filename;
-        if (files.about_us_image) settings.about_us_image = '/uploads/' + files.about_us_image[0].filename;
+        // Handle File Uploads (Override strings with file paths if new file uploaded)
+        if (files.site_logo) settings.site_logo = 'uploads/' + files.site_logo[0].filename; // Removed leading slash for DB consistency
+        if (files.site_favicon) settings.site_favicon = 'uploads/' + files.site_favicon[0].filename;
+        if (files.about_us_image) settings.about_us_image = 'uploads/' + files.about_us_image[0].filename;
 
         // Save each setting
         for (const [key, value] of Object.entries(settings)) {
-            // Upsert
-            await pool.query(`
-                INSERT INTO settings (setting_key, setting_value) 
-                VALUES (?, ?) 
-                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
-            `, [key, value]);
+            // Upsert into site_settings
+            const [rows] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [key]);
+            if (rows.length > 0) {
+                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+            } else {
+                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+            }
         }
 
         res.json({ message: 'Ayarlar başarıyla kaydedildi' });
