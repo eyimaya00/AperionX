@@ -182,7 +182,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Explici
 
 // Database Connection
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'aperionx_db'
@@ -222,6 +222,14 @@ async function ensureSchema() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        // Ensure 'is_approved' exists in comments (Fix for existing tables)
+        try {
+            const [cCols] = await pool.query("SHOW COLUMNS FROM comments LIKE 'is_approved'");
+            if (cCols.length === 0) {
+                console.log('Migrating: Adding is_approved to comments...');
+                await pool.query("ALTER TABLE comments ADD COLUMN is_approved TINYINT(1) DEFAULT 0");
+            }
+        } catch (e) { console.error('Migration Error (Comments):', e); }
 
         // Ensure 'bio' and 'job_title' columns in users
         // Ensure 'bio', 'job_title', 'avatar_url' columns in users
