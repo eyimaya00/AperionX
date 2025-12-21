@@ -232,7 +232,6 @@ async function ensureSchema() {
 }
 }
 // Run on start
-// Run on start
 ensureSchema();
 
 
