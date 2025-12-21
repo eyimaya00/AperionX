@@ -2287,8 +2287,11 @@
                 if (res.ok) {
                     showToast('Ayarlar güncellendi', 'success');
                     loadSettings();
-                } else showToast('Hata', 'error');
-            } catch (e) { showToast('Sunucu hatası', 'error'); }
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast(errData.error || errData.message || 'Hata: ' + res.status, 'error');
+                }
+            } catch (e) { showToast('Sunucu hatası: ' + e.message, 'error'); }
         });
 
         let allUsers = []; // Store globally for filtering
