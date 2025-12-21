@@ -1430,11 +1430,13 @@ app.post('/api/register', async (req, res) => {
         try {
             const welcomeTitle = "Aramıza Hoş Geldiniz - AperionX";
             const welcomeBody = `
-                <h2>Merhaba ${fullname},</h2>
-                <p>AperionX ailesine katıldığınız için çok mutluyuz. Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
-                <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
+                <h2>Merhaba ${fullname} 🎉,</h2>
+                <p>AperionX ailesine katıldığınız için çok mutluyuz! Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika. 🚀</p>
+                <p>Hesabınızla giriş yaparak makaleleri okuyabilir 📚, yorum yapabilir 💬 ve kendi içeriklerinizi oluşturabilirsiniz ✍️.</p>
                 <br>
-                <a href="https://aperionx.com" style="display:inline-block; padding:10px 20px; background-color:#6366F1; color:white; text-decoration:none; border-radius:5px;">AperionX'i Keşfet</a>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://aperionx.com" style="display:inline-block; padding:12px 24px; background-color:#6366F1; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:16px;">AperionX'i Keşfet 🌍</a>
+                </div>
             `;
             // Retrieve latest settings for SMTP
             console.log(`[Register] Sending welcome email to ${email}...`);
