@@ -224,12 +224,19 @@ async function ensureSchema() {
         `);
 
         // Ensure 'bio' and 'job_title' columns in users
+        // Ensure 'bio', 'job_title', 'avatar_url' columns in users
         try {
-            await pool.query("SELECT bio FROM users LIMIT 1");
+            await pool.query("SELECT bio, avatar_url FROM users LIMIT 1");
         } catch (err) {
             if (err.code === 'ER_BAD_FIELD_ERROR') {
-                console.log('Migrating: Adding bio and job_title to users...');
-                await pool.query("ALTER TABLE users ADD COLUMN bio TEXT, ADD COLUMN job_title VARCHAR(100)");
+                console.log('Migrating: Adding bio, job_title, avatar_url to users...');
+                // We use multiple ALTER statements or one combined. Safe approach:
+                // Check individually or just try add and ignore 'duplicate column' error? 
+                // Better: catch specific missing column. 
+                // Simple wide net:
+                try { await pool.query("ALTER TABLE users ADD COLUMN bio TEXT"); } catch (e) { }
+                try { await pool.query("ALTER TABLE users ADD COLUMN job_title VARCHAR(100)"); } catch (e) { }
+                try { await pool.query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255)"); } catch (e) { }
             }
         }
 
