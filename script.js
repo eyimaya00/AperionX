@@ -444,229 +444,248 @@ async function loadSettings() {
         const settings = await res.json();
 
         // Update Title
-        if (settings.site_title) {
-            document.title = settings.site_title;
+        if (settings.site_title !== undefined && settings.site_title !== null) {
+            document.title = settings.site_title || 'AperionX'; // Keep default for browser tab if completely empty string? No, user wants empty.
+            if (settings.site_title.trim() === '') {
+                document.title = 'AperionX'; // Fallback for tab title only
+            } else {
+                document.title = settings.site_title;
+            }
+
             document.querySelectorAll('.logo-text').forEach(el => {
-                el.innerText = settings.site_title;
-                el.style.display = 'block'; // Show if text exists
+                if (settings.site_title.trim() === '') {
+                    el.style.display = 'none';
+                } else {
+                    el.innerText = settings.site_title;
+                    el.style.display = 'block';
+                }
             });
         } else {
-            // If empty, hide the element entirely
-            document.querySelectorAll('.logo-text').forEach(el => el.style.display = 'none');
+            // If API returns nothing about title, assume default behavior (show AperionX) OR hide?
+            // Safest is to respect the "missing" as "do nothing" or use existing HTML.
+            // But if user wants to hide, we should ensure logic covers it.
         }
+        document.querySelectorAll('.logo-text').forEach(el => {
+            el.innerText = settings.site_title;
+            el.style.display = 'block'; // Show if text exists
+        });
+    } else {
+        // If empty, hide the element entirely
+        document.querySelectorAll('.logo-text').forEach(el => el.style.display = 'none');
+    }
 
-        // Update Logo (Header & Favicon)
-        if (settings.site_logo) {
-            // Update Favicon
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) {
-                link = document.createElement('link');
-                link.rel = 'icon';
-                document.head.appendChild(link);
+    // Update Logo (Header & Favicon)
+    if (settings.site_logo) {
+        // Update Favicon
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = settings.site_logo;
+
+        // Update Header Logo
+        const logoContainer = document.querySelector('.logo');
+        if (logoContainer) {
+            logoContainer.innerHTML = '';
+
+            // 1. Image
+            const img = document.createElement('img');
+            img.src = settings.site_logo;
+            img.alt = settings.site_title || 'Logo';
+
+            // Height Logic
+            const height = settings.logo_height ? `${settings.logo_height}px` : '36px';
+            img.style.height = height;
+            img.style.width = 'auto';
+            img.style.borderRadius = '8px';
+
+            logoContainer.appendChild(img);
+
+            // 2. Text (Optional)
+            if (settings.site_title && settings.site_title.trim() !== "") {
+                // Start with margin if image exists
+                const span = document.createElement('span');
+                span.className = 'logo-text';
+                // span.style.marginLeft = '8px'; // Removed: Handled by CSS .logo gap:8px
+                span.style.color = 'var(--logo-color)';
+
+                const title = settings.site_title;
+                if (title.endsWith('X')) {
+                    span.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
+                } else {
+                    span.innerText = title;
+                }
+                logoContainer.appendChild(span);
             }
-            link.href = settings.site_logo;
+        }
+    } else {
+        // Text-only fallback
+        document.querySelectorAll('.logo-text').forEach(el => {
+            const title = settings.site_title || 'AperionX';
+            if (title.endsWith('X')) {
+                el.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
+            } else {
+                el.innerText = title;
+            }
+        });
+    }
 
-            // Update Header Logo
-            const logoContainer = document.querySelector('.logo');
-            if (logoContainer) {
-                logoContainer.innerHTML = '';
+    if (settings.site_favicon) {
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = settings.site_favicon;
+    }
 
-                // 1. Image
+    // Apply Text Settings
+    if (settings.hero_btn_text) {
+        const el = document.getElementById('hero-main-btn');
+        if (el) el.innerText = settings.hero_btn_text;
+    }
+
+    // Showcase Settings
+    if (settings.showcase_badge) {
+        const el = document.getElementById('showcase-badge-text');
+        if (el) el.innerText = settings.showcase_badge;
+    }
+    if (settings.showcase_title) {
+        const el = document.getElementById('showcase-title-text');
+        if (el) el.innerHTML = settings.showcase_title;
+    }
+    if (settings.showcase_desc) {
+        const el = document.getElementById('showcase-desc-text');
+        if (el) el.innerText = settings.showcase_desc;
+    }
+    if (settings.showcase_btn_text) {
+        const el = document.getElementById('showcase-view-all-text');
+        if (el) el.innerHTML = `${settings.showcase_btn_text} <i class="ph-bold ph-arrow-right" style="margin-left:8px;"></i>`;
+    }
+
+    // Auth Buttons
+    if (settings.auth_login_text) {
+        document.querySelectorAll('.btn-login').forEach(btn => {
+            if (btn.innerText !== 'Çıkış') btn.innerText = settings.auth_login_text;
+        });
+    }
+    if (settings.auth_signup_text) {
+        document.querySelectorAll('.btn-signup').forEach(btn => btn.innerText = settings.auth_signup_text);
+    }
+
+    // --- FOOTER DYNAMIC CONTENT ---
+    // Footer Description
+    if (settings.footer_desc || settings.site_description) {
+        document.querySelectorAll('#footer-desc, .footer-desc').forEach(el => {
+            el.innerText = settings.footer_desc || settings.site_description;
+        });
+    }
+
+    // Footer Copyright
+    if (settings.footer_copyright || settings.site_title) {
+        const el = document.getElementById('footer-copyright-name');
+        if (el) el.innerText = settings.footer_copyright || settings.site_title;
+    }
+
+    // Footer Logo Text matches Site Title
+    if (settings.site_title) {
+        const footerLogoText = document.querySelector('.footer-logo .logo-text');
+        if (footerLogoText) footerLogoText.innerText = settings.site_title;
+    }
+
+    // Footer Logo Image
+    if (settings.site_logo) {
+        const footerLogoLink = document.querySelector('.footer-logo');
+        if (footerLogoLink) {
+            const iconBox = footerLogoLink.querySelector('.logo-icon');
+            if (iconBox) {
                 const img = document.createElement('img');
                 img.src = settings.site_logo;
-                img.alt = settings.site_title || 'Logo';
-
-                // Height Logic
-                const height = settings.logo_height ? `${settings.logo_height}px` : '36px';
-                img.style.height = height;
+                img.alt = settings.site_title || 'Site Logo';
+                img.style.height = '48px';
                 img.style.width = 'auto';
                 img.style.borderRadius = '8px';
-
-                logoContainer.appendChild(img);
-
-                // 2. Text (Optional)
-                if (settings.site_title && settings.site_title.trim() !== "") {
-                    // Start with margin if image exists
-                    const span = document.createElement('span');
-                    span.className = 'logo-text';
-                    // span.style.marginLeft = '8px'; // Removed: Handled by CSS .logo gap:8px
-                    span.style.color = 'var(--logo-color)';
-
-                    const title = settings.site_title;
-                    if (title.endsWith('X')) {
-                        span.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
-                    } else {
-                        span.innerText = title;
-                    }
-                    logoContainer.appendChild(span);
-                }
-            }
-        } else {
-            // Text-only fallback
-            document.querySelectorAll('.logo-text').forEach(el => {
-                const title = settings.site_title || 'AperionX';
-                if (title.endsWith('X')) {
-                    el.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
-                } else {
-                    el.innerText = title;
-                }
-            });
-        }
-
-        if (settings.site_favicon) {
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) {
-                link = document.createElement('link');
-                link.rel = 'icon';
-                document.head.appendChild(link);
-            }
-            link.href = settings.site_favicon;
-        }
-
-        // Apply Text Settings
-        if (settings.hero_btn_text) {
-            const el = document.getElementById('hero-main-btn');
-            if (el) el.innerText = settings.hero_btn_text;
-        }
-
-        // Showcase Settings
-        if (settings.showcase_badge) {
-            const el = document.getElementById('showcase-badge-text');
-            if (el) el.innerText = settings.showcase_badge;
-        }
-        if (settings.showcase_title) {
-            const el = document.getElementById('showcase-title-text');
-            if (el) el.innerHTML = settings.showcase_title;
-        }
-        if (settings.showcase_desc) {
-            const el = document.getElementById('showcase-desc-text');
-            if (el) el.innerText = settings.showcase_desc;
-        }
-        if (settings.showcase_btn_text) {
-            const el = document.getElementById('showcase-view-all-text');
-            if (el) el.innerHTML = `${settings.showcase_btn_text} <i class="ph-bold ph-arrow-right" style="margin-left:8px;"></i>`;
-        }
-
-        // Auth Buttons
-        if (settings.auth_login_text) {
-            document.querySelectorAll('.btn-login').forEach(btn => {
-                if (btn.innerText !== 'Çıkış') btn.innerText = settings.auth_login_text;
-            });
-        }
-        if (settings.auth_signup_text) {
-            document.querySelectorAll('.btn-signup').forEach(btn => btn.innerText = settings.auth_signup_text);
-        }
-
-        // --- FOOTER DYNAMIC CONTENT ---
-        // Footer Description
-        if (settings.footer_desc || settings.site_description) {
-            document.querySelectorAll('#footer-desc, .footer-desc').forEach(el => {
-                el.innerText = settings.footer_desc || settings.site_description;
-            });
-        }
-
-        // Footer Copyright
-        if (settings.footer_copyright || settings.site_title) {
-            const el = document.getElementById('footer-copyright-name');
-            if (el) el.innerText = settings.footer_copyright || settings.site_title;
-        }
-
-        // Footer Logo Text matches Site Title
-        if (settings.site_title) {
-            const footerLogoText = document.querySelector('.footer-logo .logo-text');
-            if (footerLogoText) footerLogoText.innerText = settings.site_title;
-        }
-
-        // Footer Logo Image
-        if (settings.site_logo) {
-            const footerLogoLink = document.querySelector('.footer-logo');
-            if (footerLogoLink) {
-                const iconBox = footerLogoLink.querySelector('.logo-icon');
-                if (iconBox) {
-                    const img = document.createElement('img');
-                    img.src = settings.site_logo;
-                    img.alt = settings.site_title || 'Site Logo';
-                    img.style.height = '48px';
-                    img.style.width = 'auto';
-                    img.style.borderRadius = '8px';
-                    footerLogoLink.replaceChild(img, iconBox);
-                }
+                footerLogoLink.replaceChild(img, iconBox);
             }
         }
-
-        // Contact & Socials
-        if (settings.contact_email) {
-            const el = document.getElementById('footer-email');
-            if (el) { el.innerText = settings.contact_email; el.href = 'mailto:' + settings.contact_email; }
-        }
-
-        // Social Links Update using classes for broader reach
-        if (settings.social_twitter) {
-            document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
-                el.href = settings.social_twitter; el.style.display = 'flex';
-            });
-        } else {
-            document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
-                el.style.display = 'none';
-            });
-        }
-
-        if (settings.social_instagram) {
-            document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
-                el.href = settings.social_instagram; el.style.display = 'flex';
-            });
-        } else {
-            document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
-                el.style.display = 'none';
-            });
-        }
-
-        // Ensure Social Container exists for LinkedIn/YouTube
-        const socialContainer = document.querySelector('.footer-socials');
-        if (socialContainer) {
-            // LinkedIn
-            let lnk = document.getElementById('footer-linkedin');
-            if (settings.social_linkedin) {
-                if (!lnk) {
-                    lnk = document.createElement('a');
-                    lnk.id = 'footer-linkedin';
-                    lnk.className = 'social-link';
-                    lnk.target = '_blank';
-                    lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
-                    socialContainer.appendChild(lnk);
-                }
-                lnk.href = settings.social_linkedin;
-                lnk.style.display = 'flex';
-            } else if (lnk) { lnk.style.display = 'none'; }
-
-            // YouTube
-            let yt = document.getElementById('footer-youtube');
-            if (settings.social_youtube) {
-                if (!yt) {
-                    yt = document.createElement('a');
-                    yt.id = 'footer-youtube';
-                    yt.className = 'social-link';
-                    yt.target = '_blank';
-                    yt.innerHTML = '<i class="ph-fill ph-youtube-logo"></i>';
-                    socialContainer.appendChild(yt);
-                }
-                yt.href = settings.social_youtube;
-                yt.style.display = 'flex';
-            } else if (yt) { yt.style.display = 'none'; }
-        }
-
-        if (settings.newsletter_title) {
-            const el = document.getElementById('newsletter-title');
-            if (el) el.innerText = settings.newsletter_title;
-        }
-        if (settings.newsletter_desc) {
-            const el = document.getElementById('newsletter-desc');
-            if (el) el.innerText = settings.newsletter_desc;
-        }
-
-    } catch (error) {
-        console.error('Settings load error:', error);
     }
+
+    // Contact & Socials
+    if (settings.contact_email) {
+        const el = document.getElementById('footer-email');
+        if (el) { el.innerText = settings.contact_email; el.href = 'mailto:' + settings.contact_email; }
+    }
+
+    // Social Links Update using classes for broader reach
+    if (settings.social_twitter) {
+        document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
+            el.href = settings.social_twitter; el.style.display = 'flex';
+        });
+    } else {
+        document.querySelectorAll('#footer-twitter, .footer-twitter').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+
+    if (settings.social_instagram) {
+        document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
+            el.href = settings.social_instagram; el.style.display = 'flex';
+        });
+    } else {
+        document.querySelectorAll('#footer-instagram, .footer-instagram').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+
+    // Ensure Social Container exists for LinkedIn/YouTube
+    const socialContainer = document.querySelector('.footer-socials');
+    if (socialContainer) {
+        // LinkedIn
+        let lnk = document.getElementById('footer-linkedin');
+        if (settings.social_linkedin) {
+            if (!lnk) {
+                lnk = document.createElement('a');
+                lnk.id = 'footer-linkedin';
+                lnk.className = 'social-link';
+                lnk.target = '_blank';
+                lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
+                socialContainer.appendChild(lnk);
+            }
+            lnk.href = settings.social_linkedin;
+            lnk.style.display = 'flex';
+        } else if (lnk) { lnk.style.display = 'none'; }
+
+        // YouTube
+        let yt = document.getElementById('footer-youtube');
+        if (settings.social_youtube) {
+            if (!yt) {
+                yt = document.createElement('a');
+                yt.id = 'footer-youtube';
+                yt.className = 'social-link';
+                yt.target = '_blank';
+                yt.innerHTML = '<i class="ph-fill ph-youtube-logo"></i>';
+                socialContainer.appendChild(yt);
+            }
+            yt.href = settings.social_youtube;
+            yt.style.display = 'flex';
+        } else if (yt) { yt.style.display = 'none'; }
+    }
+
+    if (settings.newsletter_title) {
+        const el = document.getElementById('newsletter-title');
+        if (el) el.innerText = settings.newsletter_title;
+    }
+    if (settings.newsletter_desc) {
+        const el = document.getElementById('newsletter-desc');
+        if (el) el.innerText = settings.newsletter_desc;
+    }
+
+} catch (error) {
+    console.error('Settings load error:', error);
+}
 }
 
 // --- Dynamic Menus ---
