@@ -308,7 +308,7 @@ async function ensureSchema() {
 }
 
 // Run on start
-console.log('--- APERIONX SERVER VERSION 2.0 (FIXED) STARTING ---');
+console.log('--- APERIONX SERVER VERSION 2.1 (EMAIL DEBUG & SESSION FIX) STARTING ---');
 ensureSchema();
 
 
@@ -451,10 +451,15 @@ async function sendDynamicEmail(to, type, variables = {}) {
             auth: {
                 user: smtpConfig.smtp_user || process.env.SMTP_USER,
                 pass: smtpConfig.smtp_pass || process.env.SMTP_PASS
-            }
+            },
+            // Debug options
+            logger: true,
+            debug: true
         });
 
-        await transporter.sendMail({
+        console.log(`[EMAIL-DEBUG] Sending to: ${to}, ConfigHost: ${smtpConfig.smtp_host || process.env.SMTP_HOST}`);
+
+        const info = await transporter.sendMail({
             from: `"AperionX" <${process.env.SMTP_USER}>`,
             to: to,
             subject: subject,
