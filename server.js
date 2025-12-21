@@ -316,7 +316,7 @@ async function ensureSchema() {
 }
 
 // Run on start
-console.log('--- APERIONX SERVER VERSION 2.1 (EMAIL DEBUG & SESSION FIX) STARTING ---');
+console.log('--- APERIONX SERVER VERSION 2.2 (SETTINGS FIX & RENAME) STARTING ---');
 ensureSchema();
 
 
@@ -2235,7 +2235,7 @@ app.post('/api/settings', authenticateToken, upload.fields([
     if (req.user.role !== 'admin') return res.sendStatus(403);
 
     try {
-        const settings = req.body;
+        const settings = req.body || {};
         const files = req.files || {};
 
         // Handle File Uploads (Override strings with file paths if new file uploaded)
