@@ -402,27 +402,37 @@ function authenticateToken(req, res, next) {
 }
 
 // Email Helper
-async function sendDynamicEmail(to, type, variables = {}) {
+async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
     try {
-        // Fetch Settings
-        const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key LIKE ? OR setting_key LIKE ?', [`email_${type}_subject`, `email_${type}_body`]);
-        const settings = {};
-        rows.forEach(r => settings[r.setting_key] = r.setting_value);
+        let subject = 'AperionX Bildirim';
+        let body = '';
 
-        // Fallbacks
-        let subject = settings[`email_${type}_subject`] || 'AperionX Bildirim';
-        let body = settings[`email_${type}_body`] || 'Merhaba, bir bildiriminiz var.';
+        if (type === 'custom') {
+            // Direct send mode
+            subject = subjectOverride || 'AperionX Bildirim';
+            body = typeof variablesOrBody === 'string' ? variablesOrBody : JSON.stringify(variablesOrBody);
+        } else {
+            // Template mode
+            const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key LIKE ? OR setting_key LIKE ?', [`email_${type}_subject`, `email_${type}_body`]);
+            const settings = {};
+            rows.forEach(r => settings[r.setting_key] = r.setting_value);
 
-        // Replace Variables
-        // variables: { name: 'Ali', link: '...' }
-        Object.keys(variables).forEach(key => {
-            const regex = new RegExp(`{${key}}`, 'g');
-            subject = subject.replace(regex, variables[key]);
-            body = body.replace(regex, variables[key]);
-        });
+            subject = settings[`email_${type}_subject`] || 'AperionX Bildirim';
+            body = settings[`email_${type}_body`] || 'Merhaba, bir bildiriminiz var.';
+        }
+
+        // Replace Variables if variablesOrBody is an object
+        if (typeof variablesOrBody === 'object') {
+            Object.keys(variablesOrBody).forEach(key => {
+                const regex = new RegExp(`{${key}}`, 'g');
+                subject = subject.replace(regex, variablesOrBody[key]);
+                body = body.replace(regex, variablesOrBody[key]);
+            });
+        }
 
         // Logo Handling (Ensure absolute URL)
-        let logoLink = variables.logoUrl || 'https://ui-avatars.com/api/?name=AX&background=random';
+        let logoLink = 'https://ui-avatars.com/api/?name=AX&background=random'; // Default
+        if (typeof variablesOrBody === 'object' && variablesOrBody.logoUrl) logoLink = variablesOrBody.logoUrl;
         // HTML Template
         const html = `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb; padding: 40px 0;">
@@ -1415,7 +1425,9 @@ app.post('/api/register', async (req, res) => {
                 <a href="https://aperionx.com" style="display:inline-block; padding:10px 20px; background-color:#6366F1; color:white; text-decoration:none; border-radius:5px;">AperionX'i Keşfet</a>
             `;
             // Retrieve latest settings for SMTP
-            await sendDynamicEmail(email, welcomeTitle, welcomeBody, 'welcome');
+            console.log(`[Register] Sending welcome email to ${email}...`);
+            await sendDynamicEmail(email, 'custom', welcomeBody, welcomeTitle);
+            console.log(`[Register] Welcome email sent.`);
         } catch (emailErr) {
             console.error('Welcome Email Failed:', emailErr);
         }
