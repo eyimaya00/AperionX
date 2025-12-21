@@ -79,7 +79,7 @@ app.use(async (req, res, next) => {
 
     // 3. Check DB setting
     try {
-        const [rows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_mode'");
+        const [rows] = await pool.query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
         if (rows.length > 0 && rows[0].setting_value === 'true') {
             // Maintenance Active -> Block
             if (req.accepts('html')) {
