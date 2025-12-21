@@ -1,13 +1,25 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+// --- DEBUG LOGGING ---
+const logFile = path.join(__dirname, 'server_debug.log');
+function logDebug(msg) {
+    const time = new Date().toISOString();
+    fs.appendFileSync(logFile, `[${time}] ${msg}\n`);
+}
+logDebug('--- SERVER STARTING ---');
+logDebug(`CWD: ${process.cwd()}`);
+logDebug(`NODE_ENV: ${process.env.NODE_ENV}`);
+logDebug(`PORT: ${process.env.PORT}`);
+
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
+const multer = require('multer');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const DOMPurify = require('dompurify')(new JSDOM('').window);
 const crypto = require('crypto');

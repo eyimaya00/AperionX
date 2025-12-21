@@ -1,0 +1,133 @@
+Schema Table Creation Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at ensureSchema (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:197:38)
+    at Object.<anonymous> (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:328:1)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+Template Seed Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at ensureEmailTemplateSettings (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:526:35)
+    at Object.<anonymous> (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:544:1)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+Maintenance Check Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:82:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:48:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+Maintenance Check Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:82:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:48:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+Maintenance Check Error: Error: Unknown column 'setting_value' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:82:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:48:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_value' in 'field list'"
+}
+C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:20
+const path = require('path');
+      ^
+
+SyntaxError: Identifier 'path' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1662:18)
+    at Module._compile (node:internal/modules/cjs/loader:1704:20)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.17.1
+C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:20
+const path = require('path');
+      ^
+
+SyntaxError: Identifier 'path' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1662:18)
+    at Module._compile (node:internal/modules/cjs/loader:1704:20)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.17.1
+C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:20
+const path = require('path');
+      ^
+
+SyntaxError: Identifier 'path' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1662:18)
+    at Module._compile (node:internal/modules/cjs/loader:1704:20)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.17.1
