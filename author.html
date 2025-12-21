@@ -2427,9 +2427,10 @@
             setInterval(loadNotifications, 30000);
 
             // Load Theme
-            if (localStorage.getItem('theme') === 'dark') {
+            if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
-                document.getElementById('dark-mode-icon').className = 'ph-fill ph-sun';
+                const icon = document.getElementById('theme-icon');
+                if (icon) icon.className = 'ph-fill ph-sun';
             }
 
             // Load Profile Info
