@@ -1342,8 +1342,7 @@ app.post('/api/forgot-password', async (req, res) => {
         // Send Email via Helper
         const resetSubject = "AperionX Şifre Sıfırlama Talebi";
         const resetBody = `
-            <h2>Şifre Sıfırlama Talebi 🔐</h2>
-            <p>Merhaba ${user.fullname || 'Kullanıcı'},</p>
+            <h2>Merhaba ${user.fullname || 'Kullanıcı'},</h2>
             <p>Hesabınız için bir şifre sıfırlama talebi aldık. Eğer bu işlemi siz yapmadıysanız, bu maili dikkate almayınız.</p>
             <p>Şifrenizi yenilemek için aşağıdaki butona tıklayın:</p>
             <br>
