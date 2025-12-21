@@ -310,7 +310,7 @@ async function ensureSchema() {
 }
 
 // Run on start
-console.log('--- APERIONX SERVER VERSION 1.1 STARTING ---');
+console.log('--- APERIONX SERVER VERSION 2.0 (FIXED) STARTING ---');
 ensureSchema();
 
 

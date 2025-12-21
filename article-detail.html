@@ -1286,8 +1286,12 @@
 
             } catch (e) {
                 console.error(e);
-                // document.getElementById('loading-indicator').innerText = 'Makale bulunamadı.';
-                window.location.href = 'articles.html';
+                document.getElementById('loading-indicator').innerHTML = `<div style="text-align:center; color:red;">
+                    <h2>Hata Oluştu!</h2>
+                    <p>Makale yüklenemedi: ${e.message}</p>
+                    <p>Lütfen sunucu konsolunu kontrol edin veya yöneticiye başvurun.</p>
+                </div>`;
+                // window.location.href = 'articles.html';
             }
         }
 

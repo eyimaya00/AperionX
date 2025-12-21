@@ -429,6 +429,11 @@ i[class*=" ph"] {
         /* Force smaller size */
     }
 
+    .hero-title {
+        font-size: 2.5rem !important;
+        /* Increased from default */
+    }
+
     .logo-icon {
         width: 28px;
         height: 28px;
@@ -4104,9 +4109,7 @@ i[class*=" ph"] {
         margin-bottom: 30px;
     }
 
-    .hero-btn {
-        /* Keep button sizing as is or revert if needed? User didn't explicitly complain about button, but "yazıyı küçültme". Let's removing my shrinking override. */
-    }
+
 }
 
 .mobile-br {
