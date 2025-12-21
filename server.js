@@ -1434,10 +1434,10 @@ app.post('/api/register', async (req, res) => {
 
         // Send Welcome Email
         try {
-            const welcomeTitle = "Aramıza Hoş Geldiniz - AperionX";
+            const welcomeTitle = "AperionX Ailesine Hoş Geldiniz! 🚀";
             const welcomeBody = `
                 <h2>AperionX Ailesine Hoş Geldiniz! 🚀</h2>
-                <p>Merhaba ${fullname},</p>
+                <h3>Merhaba ${username},</h3>
                 <p>AperionX ailesine katıldığınız için çok mutluyuz! Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
                 <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
                 <br>
