@@ -430,9 +430,21 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
             });
         }
 
-        // Logo Handling (Ensure absolute URL)
-        let logoLink = 'https://ui-avatars.com/api/?name=AX&background=random'; // Default
-        if (typeof variablesOrBody === 'object' && variablesOrBody.logoUrl) logoLink = variablesOrBody.logoUrl;
+        // Logo Handling
+        // 1. Fetch site_logo from settings if not provided
+        let logoLink = 'https://ui-avatars.com/api/?name=AX&background=random'; // Default fallback
+
+        if (typeof variablesOrBody === 'object' && variablesOrBody.logoUrl) {
+            logoLink = variablesOrBody.logoUrl;
+        } else {
+            // Try to find logo in DB settings
+            try {
+                const [logoRow] = await pool.query("SELECT setting_value FROM settings WHERE setting_key = 'site_logo'");
+                if (logoRow.length > 0 && logoRow[0].setting_value) {
+                    logoLink = logoRow[0].setting_value;
+                }
+            } catch (e) { /* ignore db error for logo */ }
+        }
         // HTML Template
         const html = `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb; padding: 40px 0;">
