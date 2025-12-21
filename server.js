@@ -467,8 +467,9 @@ async function sendDynamicEmail(to, type, variables = {}) {
 
         console.log(`[EMAIL-DEBUG] Sending to: ${to}, ConfigHost: ${smtpConfig.smtp_host || process.env.SMTP_HOST}`);
 
+        const senderEmail = smtpConfig.smtp_user || process.env.SMTP_USER;
         const info = await transporter.sendMail({
-            from: `"AperionX" <${process.env.SMTP_USER}>`,
+            from: `"AperionX" <${senderEmail}>`,
             to: to,
             subject: subject,
             html: html
