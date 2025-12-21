@@ -200,8 +200,42 @@ async function ensureSchema() {
             await pool.query("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE AFTER fullname");
             console.log('Migration Code: Users table updated with username column.');
         }
+        // Ensure 'likes' table exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS likes (
+                id INT AUTO_INCREMENT PRIMARY_KEY,
+                user_id INT NOT NULL,
+                article_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_like (user_id, article_id)
+            )
+        `);
+
+        // Ensure 'comments' table exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS comments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                article_id INT NOT NULL,
+                content TEXT NOT NULL,
+                is_approved BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Ensure 'bio' and 'job_title' columns in users
+        try {
+            await pool.query("SELECT bio FROM users LIMIT 1");
+        } catch (err) {
+            if (err.code === 'ER_BAD_FIELD_ERROR') {
+                console.log('Migrating: Adding bio and job_title to users...');
+                await pool.query("ALTER TABLE users ADD COLUMN bio TEXT, ADD COLUMN job_title VARCHAR(100)");
+            }
+        }
+
+        console.log('Schema Check: Likes, Comments, Bio/Job Title ensured.');
     } catch (e) {
-        console.error('Schema Ensure Error:', e);
+        console.error('Schema Table Creation Error:', e);
     }
 
     try {
@@ -506,6 +540,9 @@ app.get('/api/settings', async (req, res) => {
         rows.forEach(row => {
             settings[row.setting_key] = row.setting_value;
         });
+        // Safety Fallback for Site Title
+        if (!settings.site_title) settings.site_title = "AperionX";
+
         res.json(settings);
     } catch (e) {
         res.status(500).send(e.toString());
@@ -1772,6 +1809,9 @@ app.get('/api/settings_v2', async (req, res) => {
         const [rows] = await pool.query('SELECT * FROM site_settings');
         const settings = {};
         rows.forEach(r => settings[r.setting_key] = r.setting_value);
+        // Safety Fallback
+        if (!settings.site_title) settings.site_title = "AperionX";
+
         res.json(settings);
     } catch (e) {
         res.status(500).send(e.toString());
