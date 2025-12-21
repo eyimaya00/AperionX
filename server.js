@@ -316,7 +316,7 @@ async function ensureSchema() {
 }
 
 // Run on start
-console.log('--- APERIONX SERVER VERSION 2.2 (SETTINGS FIX & RENAME) STARTING ---');
+console.log('--- APERIONX SERVER VERSION 2.3 FINAL (ROBUST SETTINGS) STARTING ---');
 ensureSchema();
 
 

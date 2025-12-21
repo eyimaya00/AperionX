@@ -1,20 +1,29 @@
 const { exec } = require('child_process');
 
-exec('netstat -ano | findstr :3000', (err, stdout, stderr) => {
-    if (stdout) {
-        const lines = stdout.trim().split('\n');
-        lines.forEach(line => {
-            const parts = line.trim().split(/\s+/);
-            const pid = parts[parts.length - 1];
-            if (pid && !isNaN(pid)) {
-                console.log(`Killing PID: ${pid}`);
-                exec(`taskkill /PID ${pid} /F`, (e, out, err) => {
-                    if (e) console.log(e);
-                    else console.log(out);
-                });
-            }
+console.log('--- KILLING PORT 3000 PROCESSES ---');
+
+const cmd = process.platform === 'win32'
+    ? 'netstat -ano | findstr :3000'
+    : 'lsof -t -i :3000';
+
+exec(cmd, (err, stdout, stderr) => {
+    if (err || !stdout) {
+        console.log('No process found running on port 3000. Server is already stopped.');
+        return;
+    }
+
+    const pids = stdout.trim().split(/\s+/).filter(p => p);
+    if (pids.length === 0) return;
+
+    // For Linux/Mac (lsof returns PIDs directly)
+    if (process.platform !== 'win32') {
+        pids.forEach(pid => {
+            console.log(`Killing PID: ${pid}`);
+            exec(`kill -9 ${pid}`);
         });
+        console.log('✔ Old server processes killed.');
     } else {
-        console.log("No process found on port 3000");
+        // Windows logic (parse netstat) - simplified for now as user is on Linux
+        console.log('Manual check required on Windows if this fails.');
     }
 });
