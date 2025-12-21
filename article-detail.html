@@ -1380,13 +1380,38 @@
         }
 
         async function loadComments(id) {
+            const token = localStorage.getItem('token');
+            const formContainer = document.getElementById('comment-form-container');
+
+            // 1. Initial Form Setup (Render immediately)
+            if (formContainer) {
+                if (token) {
+                    formContainer.innerHTML = `
+                        <div class="comment-form">
+                            <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                            <div class="form-actions">
+                                <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
+                }
+            }
+
             try {
-                const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-                // Fetch with Auth to see my pending comments and is_mine
+                // 2. Fetch Comments
                 const res = await fetch(`${API_BASE}/articles/${id}/comments`, { headers });
-                const comments = await res.json();
+                let comments = [];
+                
+                if (res.ok) {
+                    comments = await res.json();
+                }
+                
+                // Safety check
+                if (!Array.isArray(comments)) comments = [];
 
                 document.getElementById('comment-count').innerText = comments.length;
                 const list = document.getElementById('comments-list');
@@ -1395,13 +1420,13 @@
                     list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
                 } else {
                     list.innerHTML = comments.map(c => {
-                        const initials = c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
                         return `
                         <div class="comment-item" id="comment-${c.id}">
                             <div class="comment-avatar">${initials}</div>
                             <div class="comment-content-wrapper">
                                 <div class="comment-header">
-                                    <span class="comment-author">${c.fullname}</span>
+                                    <span class="comment-author">${c.fullname || 'Kullanıcı'}</span>
                                     ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
                                     <div class="comment-actions">
                                         <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
@@ -1416,26 +1441,10 @@
                                 <div id="edit-form-${c.id}" style="display:none;"></div>
                             </div>
                         </div>
-                    `}).join('');
+                    `;}).join('');
                 }
 
-                // Setup Form
-                const formContainer = document.getElementById('comment-form-container');
-                if (formContainer) {
-                    if (token) {
-                        formContainer.innerHTML = `
-                            <div class="comment-form">
-                                <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
-                                <div class="form-actions">
-                                    <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
-                    }
-                }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error('Comment load error:', e); }
         }
 
         async function postComment() {
