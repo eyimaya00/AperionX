@@ -1337,14 +1337,23 @@ app.post('/api/forgot-password', async (req, res) => {
 
         await pool.query('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [token, expires, user.id]);
 
-        const resetLink = `${req.protocol}://${req.get('host')}/index.html?token=${token}`;
+        const resetLink = `https://${req.get('host')}/index.html?modal=reset-password&token=${token}`;
 
         // Send Email via Helper
-        sendDynamicEmail(email, 'reset', {
-            logoUrl,
-            actionLink: resetLink,
-            actionText: 'Yeni Şifre Oluştur'
-        });
+        const resetSubject = "AperionX Şifre Sıfırlama Talebi";
+        const resetBody = `
+            <h2>Şifre Sıfırlama Talebi 🔐</h2>
+            <p>Merhaba ${user.fullname || 'Kullanıcı'},</p>
+            <p>Hesabınız için bir şifre sıfırlama talebi aldık. Eğer bu işlemi siz yapmadıysanız, bu maili dikkate almayınız.</p>
+            <p>Şifrenizi yenilemek için aşağıdaki butona tıklayın:</p>
+            <br>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetLink}" style="display:inline-block; padding:12px 24px; background-color:#6366F1; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:16px;">Şifremi Sıfırla</a>
+            </div>
+            <p style="font-size:12px; color:#999;">Link çalışmıyorsa: <a href="${resetLink}">${resetLink}</a></p>
+        `;
+
+        await sendDynamicEmail(email, 'custom', resetBody, resetSubject);
 
         console.log(`[DEV] Password Reset Link (Backup Log) for ${email}: ${resetLink}`);
 
