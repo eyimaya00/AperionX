@@ -1995,7 +1995,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/settings_v2`, {
+                const res = await fetch(`${API_URL}/settings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2041,7 +2041,7 @@
 
         async function loadSettings() {
             try {
-                const res = await fetch(`${API_URL}/settings_v2`);
+                const res = await fetch(`${API_URL}/settings`);
                 const settings = await res.json();
 
                 // Update Logo in Sidebar
@@ -2223,7 +2223,7 @@
             formData.append('about_hero_title_color', document.getElementById('about_hero_title_color').value);
 
             try {
-                const res = await fetch(`${API_URL}/settings_v2`, {
+                const res = await fetch(`${API_URL}/settings`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
@@ -2279,7 +2279,7 @@
                 // Use JSON for text fields if possible, but FormData is already set up for files.
                 // Since our server handles fields from req.body with multer, this is fine.
 
-                const res = await fetch(`${API_URL}/settings_v2`, {
+                const res = await fetch(`${API_URL}/settings`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
