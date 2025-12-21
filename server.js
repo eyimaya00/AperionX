@@ -1484,7 +1484,7 @@ app.post('/api/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
-        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
 
         let redirectUrl = 'index.html';
         if (user.role === 'admin') redirectUrl = 'admin';
