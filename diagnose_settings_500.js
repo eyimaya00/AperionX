@@ -1,5 +1,6 @@
 const http = require('http');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // 1. Setup Admin Token (Matches server.js secret)
 const secret = process.env.JWT_SECRET || 'gizli_anahtar';
