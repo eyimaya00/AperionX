@@ -440,30 +440,19 @@ function showToast(message, type = 'info') {
 async function loadSettings() {
     try {
         const res = await fetch(`${API_URL}/settings`);
-        if (!res.ok) return;
-        const settings = await res.json();
+        const settings = res.ok ? await res.json() : {};
 
-        // Update Title
-        if (settings.site_title !== undefined && settings.site_title !== null) {
-            document.title = settings.site_title || 'AperionX'; // Keep default for browser tab if completely empty string? No, user wants empty.
-            if (settings.site_title.trim() === '') {
-                document.title = 'AperionX'; // Fallback for tab title only
-            } else {
-                document.title = settings.site_title;
-            }
-
-            document.querySelectorAll('.logo-text').forEach(el => {
-                if (settings.site_title.trim() === '') {
-                    el.style.display = 'none';
-                } else {
-                    el.innerText = settings.site_title;
-                    el.style.display = 'block';
-                }
-            });
+        // Update Title - Safe Check
+        const siteTitle = settings.site_title || '';
+        if (siteTitle.trim() === '') {
+            if (!document.title.includes(' - ')) document.title = 'AperionX'; // Default only if no specific page title
+            document.querySelectorAll('.logo-text').forEach(el => el.style.display = 'none');
         } else {
-            // If API returns nothing about title, assume default behavior (show AperionX) OR hide?
-            // Safest is to respect the "missing" as "do nothing" or use existing HTML.
-            // But if user wants to hide, we should ensure logic covers it.
+            document.title = siteTitle;
+            document.querySelectorAll('.logo-text').forEach(el => {
+                el.innerText = siteTitle;
+                el.style.display = 'block';
+            });
         }
         // Continue to other settings
 
