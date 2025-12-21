@@ -1,29 +1,15 @@
 const { exec } = require('child_process');
 
-console.log('--- KILLING PORT 3000 PROCESSES ---');
+console.log('--- KILLING OLD SERVER ---');
 
-const cmd = process.platform === 'win32'
-    ? 'netstat -ano | findstr :3000'
-    : 'lsof -t -i :3000';
-
-exec(cmd, (err, stdout, stderr) => {
-    if (err || !stdout) {
-        console.log('No process found running on port 3000. Server is already stopped.');
-        return;
-    }
-
-    const pids = stdout.trim().split(/\s+/).filter(p => p);
-    if (pids.length === 0) return;
-
-    // For Linux/Mac (lsof returns PIDs directly)
-    if (process.platform !== 'win32') {
-        pids.forEach(pid => {
-            console.log(`Killing PID: ${pid}`);
-            exec(`kill -9 ${pid}`);
-        });
-        console.log('✔ Old server processes killed.');
-    } else {
-        // Windows logic (parse netstat) - simplified for now as user is on Linux
-        console.log('Manual check required on Windows if this fails.');
-    }
-});
+if (process.platform === 'win32') {
+    console.log('⚠ Windows detected. Please restart manually or use Task Manager.');
+} else {
+    // Linux/Mac: Force kill port 3000
+    // using fuser -k 3000/tcp is robust
+    exec('fuser -k 3000/tcp', (err, stdout, stderr) => {
+        // fuser returns exit code 1 if no process found (which is fine)
+        console.log('✔ Port 3000 cleared (if it was open).');
+        console.log('ready to start again...');
+    });
+}
