@@ -12,6 +12,16 @@
         gtag('config', 'G-Z5WGJ7ME86');
     </script>
     <meta charset="UTF-8">
+    <script>
+        // DEBUG: Capture and alert global errors
+        window.onerror = function (msg, url, line, col, error) {
+            alert("Sistem Hatası:\n" + msg + "\nSatır: " + line);
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function (event) {
+            alert("Bağlantı Hatası (Promise):\n" + event.reason);
+        });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yazar Paneli - AperionX</title>
     <link rel="icon" type="image/x-icon" href="uploads/favicon.ico" id="favicon">
@@ -1547,6 +1557,7 @@
 
     <script>
         const API_URL = '/api';
+        console.log('Author Scripts Starting...');
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user'));
 
