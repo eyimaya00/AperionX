@@ -248,7 +248,27 @@ async function ensureSchema() {
             console.error('Migration Error (Content LONGTEXT):', err);
         }
 
-        console.log('Schema Check: Likes, Comments, Bio/Job Title, LONGTEXT ensured.');
+        // Ensure 'article_views' table exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS article_views (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                article_id INT NOT NULL,
+                ip_address VARCHAR(45),
+                viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_article_views (article_id, ip_address, viewed_at)
+            )
+        `);
+
+        // Ensure 'settings' table exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                setting_key VARCHAR(255) UNIQUE NOT NULL,
+                setting_value TEXT
+            )
+        `);
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, & Users ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -1342,7 +1362,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
     } catch (error) {
         console.error('Email error:', error);
-        res.status(500).json({ message: 'E-posta gönderilirken bir hata oluştu. Lütfen sunucu ayarlarını kontrol edin.' });
+        res.status(500).json({ message: 'E-posta gönderilemedi: ' + (error.message || 'Bilinmeyen sunucu hatası') });
     }
 });
 
@@ -1401,7 +1421,7 @@ app.post('/api/register', async (req, res) => {
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ message: 'Bu e-posta veya kullanıcı adı zaten kullanımda.' });
         }
-        res.status(500).json({ message: 'Error registering user' });
+        res.status(500).json({ message: 'Kayıt sırasında hata: ' + (error.message || 'Sunucu hatası') });
     }
 });
 
