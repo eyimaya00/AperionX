@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AperionX - Yakında Yayındayız</title>
+    <title>AperionX - Yakında Yayındayız (v1.1)</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -93,15 +93,16 @@
 
         /* Logo Area */
         .brand-wrapper {
-            margin-bottom: -4rem;
-            /* Pulled up closer */
+            margin-bottom: -2rem;
             display: inline-flex;
             flex-direction: column;
             align-items: center;
             gap: 0px;
-            /* Removed gap */
             position: relative;
-            /* For glow positioning */
+            max-width: 100%;
+            /* Prevent overflow */
+            overflow: visible;
+            /* Allow glow to spill but not layout */
         }
 
         /* Backlight Glow for Logo */
@@ -112,9 +113,9 @@
             /* Lowered to be behind text */
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 800px;
-            /* Massive spread cover */
-            height: 600px;
+            width: 600px;
+            /* Reduced spread */
+            height: 400px;
             background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
             /* Very faint (0.1) */
             filter: blur(80px);
@@ -124,18 +125,18 @@
         }
 
         .logo-icon {
-            font-size: 14rem;
-            /* HUGE DESKTOP LOGO */
+            font-size: 6rem;
+            /* Reduced Desktop Size */
             color: var(--neon-blue);
             filter: drop-shadow(0 0 35px rgba(0, 243, 255, 0.6));
             animation: float 6s ease-in-out infinite;
-            margin-bottom: -2rem;
+            margin-bottom: -1.5rem;
             /* Pull closer to text */
         }
 
         .brand-name {
-            font-size: 6rem;
-            /* HUGE DESKTOP TEXT */
+            font-size: 3rem;
+            /* Reduced Desktop Size */
             font-weight: 800;
             letter-spacing: 4px;
             text-transform: uppercase;
@@ -197,6 +198,7 @@
                 margin-bottom: 1.5rem;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
+                line-clamp: 2;
                 /* Limit text lines */
                 -webkit-box-orient: vertical;
                 overflow: hidden;
@@ -403,11 +405,12 @@
 
         /* Dynamic Logo Class for easier control */
         .dynamic-logo {
-            max-height: 450px;
-            /* Huge on desktop */
-            max-width: 90vw;
+            max-height: 15vh !important;
+            /* Force smaller height */
+            max-width: 80vw !important;
+            width: auto;
+            object-fit: contain;
             filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
-            /* Sharp edge glow */
             animation: float 6s ease-in-out infinite;
         }
     </style>

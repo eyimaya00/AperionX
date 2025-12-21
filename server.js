@@ -42,6 +42,12 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(cookieParser()); // Use cookie-parser
 
+// GLOBAL REQUEST LOGGER
+app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.url} - IP: ${req.ip}`);
+    next();
+});
+
 // === MAINTENANCE MODE GATEKEEPER ===
 app.use(async (req, res, next) => {
     // 1. Check for bypass cookie
@@ -60,6 +66,7 @@ app.use(async (req, res, next) => {
         '/admin.html',   // Allow Admin access (still protected by login)
         '/editor.html',  // Allow Editor access
         '/author.html',  // Allow Author access
+        '/author_v2',    // Allow Debug Author access
         '/index.html',   // Allow Login on index
         '/api/login',    // Allow login API
         '/api/register', // Allow register API
@@ -82,6 +89,7 @@ app.use(async (req, res, next) => {
                         console.error('Error reading maintenance file:', err);
                         return res.status(503).send('Site Bakımda (Hata: Dosya Okunamadı)');
                     }
+                    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
                     res.status(503).send(data);
                 });
                 return; // Stop execution to prevent calling next()
@@ -465,68 +473,7 @@ app.get('/sitemap.xml', async (req, res) => {
 // === AUTH ROUTES ===
 
 // Register
-app.post('/api/register', async (req, res) => {
-    const { fullname, email, password, username } = req.body;
-    if (!fullname || !email || !password) return res.status(400).json({ message: 'Tüm alanlar gerekli.' });
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        // Ensure username is not null if column requires it
-        const finalUsername = username || email.split('@')[0] + Math.floor(Math.random() * 1000);
-
-        await pool.query('INSERT INTO users (fullname, username, email, password) VALUES (?, ?, ?, ?)', [fullname, finalUsername, email, hashedPassword]);
-
-        // Send Welcome Email
-        const logoUrl = `${req.protocol}://${req.get('host')}/uploads/logo.png`;
-        const loginLink = `${req.protocol}://${req.get('host')}/index.html?login=true`;
-
-        sendDynamicEmail(email, 'welcome', {
-            name: fullname.split(' ')[0], // First Name
-            logoUrl: logoUrl,
-            actionLink: loginLink,
-            actionText: 'Giriş Yap'
-        });
-
-        res.status(201).json({ message: 'Kayıt başarılı! Lütfen giriş yapın.' });
-    } catch (e) {
-        if (e.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı.' });
-        }
-        res.status(500).send(e.toString());
-    }
-});
-
-// Login
-app.post('/api/login', async (req, res) => {
-    const { identifier, password } = req.body; // identifier = email or username
-    if (!identifier || !password) return res.status(400).json({ message: 'E-posta ve şifre gerekli.' });
-
-    try {
-        const [users] = await pool.query('SELECT * FROM users WHERE email = ? OR username = ?', [identifier, identifier]);
-        if (users.length === 0) return res.status(400).json({ message: 'Kullanıcı bulunamadı.' });
-
-        const user = users[0];
-        if (await bcrypt.compare(password, user.password)) {
-            const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '2h' });
-
-            // Update local storage object
-            const userObj = {
-                id: user.id,
-                fullname: user.fullname,
-                email: user.email,
-                role: user.role,
-                avatar_url: user.avatar_url
-            };
-
-            res.json({ token, user: userObj });
-        } else {
-            res.status(403).json({ message: 'Hatalı şifre.' });
-        }
-    } catch (e) {
-        console.error(e);
-        res.status(500).send('Giriş hatası.');
-    }
-});
+// Auth routes consolidated below
 
 
 // 1. Site Settings (Generic) - Updated to handle POST updates
@@ -811,6 +758,7 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 
 
 app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
+    console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
     try {
         const [rows] = await pool.query(`
             SELECT a.*, 
@@ -821,7 +769,13 @@ app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
             ORDER BY created_at DESC
         `, [req.user.id]);
         res.json(rows);
-    } catch (e) { res.status(500).send(e.toString()); }
+    } catch (e) {
+        console.error('CRITICAL ERROR in /api/articles/my-articles:', e);
+        const fs = require('fs');
+        const logMsg = `[${new Date().toISOString()}] ERROR /api/articles/my-articles: ${e.stack || e}\n`;
+        try { fs.appendFileSync('server_error.log', logMsg); } catch (err) { console.error(err); }
+        res.status(500).send('DB_ERR: ' + e.toString());
+    }
 });
 
 app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
@@ -1523,6 +1477,10 @@ app.get('/author', (req, res) => {
     res.sendFile('author.html', { root: __dirname });
 });
 
+app.get('/author_v2', (req, res) => {
+    res.sendFile('author_v2.html', { root: __dirname });
+});
+
 app.get('/editor', (req, res) => {
     console.log('Serving editor_panel.html');
     res.set('Cache-Control', 'no-store');
@@ -2193,6 +2151,12 @@ app.get('/sitemap.xml', async (req, res) => {
 
 
 
+
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+    console.error('[GLOBAL ERROR HANDLER]', err);
+    res.status(500).json({ error: 'Global Server Error', details: err.message });
+});
 
 // Start Server
 app.listen(PORT, () => {
