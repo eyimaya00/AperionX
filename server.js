@@ -441,13 +441,18 @@ async function sendDynamicEmail(to, type, variables = {}) {
         `;
 
         // Send
+        // Fetch SMTP Settings
+        const [smtpRows] = await pool.query('SELECT * FROM settings WHERE setting_key LIKE ?', ['smtp_%']);
+        const smtpConfig = {};
+        smtpRows.forEach(r => smtpConfig[r.setting_key] = r.setting_value);
+
         let transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true',
+            host: smtpConfig.smtp_host || process.env.SMTP_HOST,
+            port: smtpConfig.smtp_port || process.env.SMTP_port || 587,
+            secure: (smtpConfig.smtp_secure === 'true') || (process.env.SMTP_SECURE === 'true'),
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
+                user: smtpConfig.smtp_user || process.env.SMTP_USER,
+                pass: smtpConfig.smtp_pass || process.env.SMTP_PASS
             }
         });
 
@@ -1391,11 +1396,49 @@ app.post('/api/reset-password', async (req, res) => {
         res.status(500).json({ message: 'Sunucu hatası.' });
     }
 });
+// === USER PROFILE ROUTES ===
+app.get('/api/user/liked-articles', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT a.id, a.title, a.category, a.image_url, l.created_at as liked_at
+            FROM articles a
+            JOIN likes l ON a.id = l.article_id
+            WHERE l.user_id = ? AND a.status = 'published'
+            ORDER BY l.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Database error' });
+    }
+});
+
+app.get('/api/user/comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT c.id, c.content, c.is_approved, c.created_at, c.article_id, a.title as article_title
+            FROM comments c
+            JOIN articles a ON c.article_id = a.id
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Database error' });
+    }
+});
+
 // User Auth Routes
 app.post('/api/register', async (req, res) => {
     const { fullname, email, username, password } = req.body;
     try {
         // Validate Username uniqueness if provided
+
         if (username) {
             const [existing] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
             if (existing.length > 0) return res.status(400).json({ message: 'Bu kullanıcı adı zaten alınmış.' });
