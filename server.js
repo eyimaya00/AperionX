@@ -1436,8 +1436,7 @@ app.post('/api/register', async (req, res) => {
         try {
             const welcomeTitle = "AperionX Ailesine Hoş Geldiniz! 🚀";
             const welcomeBody = `
-                <h2>AperionX Ailesine Hoş Geldiniz! 🚀</h2>
-                <h3>Merhaba ${username},</h3>
+                <h2>Merhaba ${fullname},</h2>
                 <p>AperionX ailesine katıldığınız için çok mutluyuz! Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
                 <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
                 <br>
