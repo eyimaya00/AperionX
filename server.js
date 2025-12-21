@@ -8,7 +8,8 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
-const DOMPurify = require('isomorphic-dompurify');
+const { JSDOM } = require('jsdom');
+const DOMPurify = require('dompurify')(new JSDOM('').window);
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
