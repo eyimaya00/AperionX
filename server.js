@@ -2226,23 +2226,6 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
-// === SETTINGS API ===
-
-// GET Settings
-app.get('/api/settings', async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM site_settings');
-        const settings = {};
-        rows.forEach(row => {
-            settings[row.setting_key] = row.setting_value;
-        });
-        res.json(settings);
-    } catch (e) {
-        console.error('Settings Fetch Error:', e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
 // SAVE Settings (Admin Only)
 app.post('/api/settings', authenticateToken, upload.fields([
     { name: 'site_logo', maxCount: 1 },
@@ -2262,12 +2245,12 @@ app.post('/api/settings', authenticateToken, upload.fields([
 
         // Save each setting
         for (const [key, value] of Object.entries(settings)) {
-            // Upsert into site_settings
-            const [rows] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [key]);
+            // Upsert into settings (NOT site_settings)
+            const [rows] = await pool.query('SELECT setting_key FROM settings WHERE setting_key = ?', [key]);
             if (rows.length > 0) {
-                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+                await pool.query('UPDATE settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
             } else {
-                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+                await pool.query('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
             }
         }
 
