@@ -230,7 +230,7 @@ async function ensureSchema() {
         console.error('Auto-migration Error:', e);
     }
 }
-}
+
 // Run on start
 ensureSchema();
 
