@@ -1421,118 +1421,113 @@
 
                 // Setup Form
                 const formContainer = document.getElementById('comment-form-container');
-                if (token) {
-                    formContainer.innerHTML = `
-                        <textarea id="comment-input" placeholder="Düşüncelerinizi paylaşın..."></textarea>
-                        <button class="btn-primary" onclick="postComment()" style="float: right;">Yorum Yap</button>
-                        <div style="clear: both;"></div>
-                    `;
+                if (formContainer) {
                     if (token) {
                         formContainer.innerHTML = `
-                        <div class="comment-form">
-                            <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
-                            <div class="form-actions">
-                                <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                            <div class="comment-form">
+                                <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                                <div class="form-actions">
+                                    <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                     } else {
                         formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
                     }
-
-                } catch (e) { console.error(e); }
-            }
+                }
+            } catch (e) { console.error(e); }
+        }
 
         async function postComment() {
-                const content = document.getElementById('comment-input').value;
-                if (!content || !content.trim()) return showToast('Lütfen bir yorum yazın', 'error');
+            const content = document.getElementById('comment-input').value;
+            if (!content || !content.trim()) return showToast('Lütfen bir yorum yazın', 'error');
 
-                const params = new URLSearchParams(window.location.search);
-                const id = params.get('id');
-                const token = localStorage.getItem('token');
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const token = localStorage.getItem('token');
 
-                try {
-                    const res = await fetch(`${API_BASE}/articles/${id}/comments`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ content })
-                    });
+            try {
+                const res = await fetch(`${API_BASE}/articles/${id}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
 
-                    if (res.ok) {
-                        showToast('Yorumunuz başarıyla yayınlandı!', 'success');
-                        document.getElementById('comment-input').value = '';
-                        loadComments(id);
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Hata oluştu', 'error');
-                    }
-                } catch (e) { console.error(e); }
-            }
+                if (res.ok) {
+                    showToast('Yorumunuz başarıyla yayınlandı!', 'success');
+                    document.getElementById('comment-input').value = '';
+                    loadComments(id);
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
 
-            // Edit Functions
-            function startEdit(id) {
-                const bodyEl = document.getElementById(`body-${id}`);
-                const currentContent = bodyEl.innerText;
-                const formContainer = document.getElementById(`edit-form-${id}`);
+        // Edit Functions
+        function startEdit(id) {
+            const bodyEl = document.getElementById(`body-${id}`);
+            const currentContent = bodyEl.innerText;
+            const formContainer = document.getElementById(`edit-form-${id}`);
 
-                bodyEl.style.display = 'none';
-                formContainer.style.display = 'block';
-                formContainer.innerHTML = `
+            bodyEl.style.display = 'none';
+            formContainer.style.display = 'block';
+            formContainer.innerHTML = `
                 <textarea class="edit-area" id="edit-input-${id}" rows="3">${currentContent}</textarea>
                 <div style="margin-top: 8px; text-align: right;">
                     <button class="btn btn-login" style="padding: 6px 12px; font-size: 0.8rem;" onclick="cancelEdit(${id})">İptal</button>
                     <button class="btn btn-signup" style="padding: 6px 12px; font-size: 0.8rem;" onclick="saveEdit(${id})">Kaydet</button>
                 </div>
             `;
-            }
+        }
 
-            function cancelEdit(id) {
-                document.getElementById(`body-${id}`).style.display = 'block';
-                document.getElementById(`edit-form-${id}`).style.display = 'none';
-            }
+        function cancelEdit(id) {
+            document.getElementById(`body-${id}`).style.display = 'block';
+            document.getElementById(`edit-form-${id}`).style.display = 'none';
+        }
 
-            async function saveEdit(id) {
-                const content = document.getElementById(`edit-input-${id}`).value;
-                if (!content.trim()) return showToast('Yorum boş olamaz', 'error');
+        async function saveEdit(id) {
+            const content = document.getElementById(`edit-input-${id}`).value;
+            if (!content.trim()) return showToast('Yorum boş olamaz', 'error');
 
-                const token = localStorage.getItem('token');
-                try {
-                    const res = await fetch(`${API_BASE}/comments/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ content })
-                    });
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
 
-                    if (res.ok) {
-                        showToast('Yorum başarıyla güncellendi.', 'success');
-                        const params = new URLSearchParams(window.location.search);
-                        loadComments(params.get('id'));
-                    } else {
-                        showToast('Güncelleme başarısız', 'error');
-                    }
-                } catch (e) { console.error(e); }
-            }
+                if (res.ok) {
+                    showToast('Yorum başarıyla güncellendi.', 'success');
+                    const params = new URLSearchParams(window.location.search);
+                    loadComments(params.get('id'));
+                } else {
+                    showToast('Güncelleme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
 
-            async function deleteComment(id) {
-                if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
-                const token = localStorage.getItem('token');
-                try {
-                    const res = await fetch(`${API_BASE}/comments/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                    if (res.ok) {
-                        showToast('Yorum silindi', 'success');
-                        document.getElementById(`comment-${id}`).remove();
-                        // optional: update count
-                    } else {
-                        showToast('Silme başarısız', 'error');
-                    }
-                } catch (e) { console.error(e); }
-            }
+        async function deleteComment(id) {
+            if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    showToast('Yorum silindi', 'success');
+                    document.getElementById(`comment-${id}`).remove();
+                    // optional: update count
+                } else {
+                    showToast('Silme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
     </script>
 
 
