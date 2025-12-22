@@ -507,26 +507,15 @@ i[class*=" ph"] {
     max-width: 320px;
 }
 
-.icon-btn {
-    background: none;
-    border: none;
-    color: var(--nav-text);
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Duplicate .icon-btn block removed */
+
+/* Mobile Menu Btn */
+.mobile-menu-btn {
+    /* Inherits .icon-btn styles (width, height, border, bg) */
+    font-size: 1.3rem;
+    /* Slightly larger icon */
 }
 
-.icon-btn:hover {
-    background: var(--nav-hover-bg);
-    color: var(--primary-color);
-}
-
-/* Expanding Search Bar */
 .search-container {
     display: flex;
     align-items: center;
