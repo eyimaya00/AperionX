@@ -2328,7 +2328,15 @@
             formData.append('logo_height', document.getElementById('logo_height').value);
 
             // New fields
-            formData.append('contact_email', document.getElementById('contact_email').value);
+            const contactEmail = document.getElementById('contact_email').value;
+            // Custom Soft Validation: Check if it looks like an email (has @ and .)
+            // We use a loose regex to allow Turkish chars but ensure basic structure.
+            if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) { // Simple regex verify
+                showToast('Lütfen geçerli bir e-posta adresi giriniz. (Örn: isim@alanadı.com)', 'warning');
+                return; // Stop submission
+            }
+            formData.append('contact_email', contactEmail);
+
             formData.append('social_twitter', document.getElementById('social_twitter').value);
             formData.append('social_instagram', document.getElementById('social_instagram').value);
             formData.append('social_linkedin', document.getElementById('social_linkedin').value);
