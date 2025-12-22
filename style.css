@@ -655,18 +655,26 @@ i[class*=" ph"] {
     /* Solid background for readability on mobile */
     background: var(--bg-color);
     border-bottom: 1px solid var(--header-border);
-    padding: 24px;
+    padding: 16px;
+    /* Reduced from 24px */
     display: none;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
+    /* Reduced from 16px */
     z-index: 999;
     align-items: center;
     /* Center horizontally */
     text-align: center;
-    height: calc(100vh - 72px);
-    /* Full height */
+    height: auto;
+    /* Changed from calc(100vh - 72px) */
+    max-height: 80vh;
+    /* Prevent overflowing screen if too many items */
     overflow-y: auto;
     /* Scrollable */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    /* Add shadow since it floats */
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 .mobile-menu.active {
