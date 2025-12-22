@@ -14,9 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Sunucuya bağlanılamadı. Lütfen node server.js çalıştığından emin olun.', 'error');
         });
 
-    loadSettings();
+    // --- Global Loader Logic ---
+    Promise.all([
+        loadSettings(),
+        loadHero(),
+        // Add a minimum delay to prevent flickering
+        new Promise(resolve => setTimeout(resolve, 800))
+    ]).then(() => {
+        hideLoader();
+    }).catch(err => {
+        console.error('Loader Promise Error:', err);
+        hideLoader(); // Hide anyway on error
+    });
+
+    // Fallback safety timeout
+    setTimeout(hideLoader, 3000);
+
     loadMenus();
-    loadHero(); // New Hero Loader
     checkAuthStatus();
     initTheme();
     initSearch();
@@ -1964,5 +1978,16 @@ function initHeroScroll() {
                 window.location.href = 'articles.html';
             }
         });
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('global-loader');
+    if (loader && !loader.classList.contains('hidden')) {
+        loader.classList.add('hidden');
+        // Remove from DOM after transition
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500);
     }
 }
