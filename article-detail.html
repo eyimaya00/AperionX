@@ -926,8 +926,10 @@
     <div id="global-loader">
         <div class="loader-content">
             <div class="loader-logo-container">
+                <!-- Fallback Icon (Initial State) -->
                 <div class="loader-icon"><i class="ph-fill ph-planet"></i></div>
-                <span class="loader-text">AperionX</span>
+                <!-- Dynamic Image (Hidden until loaded) -->
+                <img id="loader-logo-img" src="" alt="Site Logo" style="display: none; max-width: 150px; height: auto;">
             </div>
         </div>
     </div>

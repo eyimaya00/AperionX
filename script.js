@@ -249,16 +249,6 @@ async function loadHero() {
 
                 if (heroTitle.id === 'about-hero-title') accentColor = settings.about_hero_title_color;
 
-                heroTitle.classList.remove('gradient-text');
-
-                // Clean slate styles
-                heroTitle.style.color = '';
-                heroTitle.style.background = '';
-                heroTitle.style.webkitBackgroundClip = '';
-                heroTitle.style.webkitTextFillColor = '';
-                heroTitle.style.backgroundClip = '';
-                heroTitle.style.display = '';
-
                 if (!customRendered) {
                     const isCleanWhite = !accentColor || accentColor.toLowerCase() === '#ffffff';
                     let useCleanWhite = isCleanWhite;
