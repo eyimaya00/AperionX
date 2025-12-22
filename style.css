@@ -4695,10 +4695,23 @@ i[class*=" ph"] {
     gap: 15px;
 }
 
-.loader-logo {
-    font-size: 4rem;
-    color: var(--primary-color);
+.loader-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
     animation: pulse-logo 1.5s infinite ease-in-out;
+}
+
+.loader-icon {
+    font-size: 3.5rem;
+    color: var(--primary-color);
+}
+
+.loader-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
 }
 
 @keyframes pulse-logo {
@@ -4708,9 +4721,8 @@ i[class*=" ph"] {
     }
 
     50% {
-        transform: scale(1.1);
+        transform: scale(1.05);
         opacity: 1;
-        text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
     }
 
     100% {
