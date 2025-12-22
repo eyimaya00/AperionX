@@ -357,6 +357,7 @@ a {
     display: flex;
     align-items: center;
     gap: 12px;
+    /* Consistent gap */
 }
 
 /* Icon Buttons */
@@ -526,7 +527,8 @@ i[class*=" ph"] {
     position: relative;
     background: var(--nav-hover-bg);
     border-radius: 20px;
-    padding: 2px;
+    padding: 0;
+    /* Changed from 2px to 0 to fix spacing inequality */
     /* transition: all 0.3s ease; */
 }
 
