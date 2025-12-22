@@ -4516,7 +4516,7 @@ i[class*=" ph"] {
     color: #94a3b8;
 }
 
-/* --- Related Articles Redesign --- */
+/* --- Related Articles Redesign (Full Image Style) --- */
 .related-articles-section {
     margin-top: 60px;
     padding-top: 40px;
@@ -4540,79 +4540,94 @@ i[class*=" ph"] {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    background: var(--card-bg);
-    /* Glassmorphism supported via var */
+    justify-content: flex-end;
+    /* Push content to bottom */
+    background: #000;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    height: 400px;
+    /* Tall card */
     border: 1px solid var(--border-color);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    height: 380px;
-    /* Fixed height for uniformity */
+    isolation: isolate;
+    /* Create stacking context */
 }
 
 .related-article-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
     border-color: var(--primary-color);
 }
 
+/* Image acts as background now */
 .related-card-image-wrapper {
-    height: 200px;
-    /* Taller image */
-    overflow: hidden;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
 }
 
 .related-card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.7s ease;
 }
 
 .related-article-card:hover .related-card-img {
-    transform: scale(1.05);
+    transform: scale(1.1);
+}
+
+/* Gradient Overlay for Readability */
+.related-article-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.1) 100%);
+    z-index: 0;
+    pointer-events: none;
 }
 
 .related-card-category {
     position: absolute;
     top: 15px;
     left: 15px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
+    background: rgba(255, 255, 255, 0.2);
+    /* Glassy white */
+    backdrop-filter: blur(8px);
     padding: 6px 14px;
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-[data-theme="dark"] .related-card-category {
-    background: rgba(15, 23, 42, 0.9);
-    color: var(--primary-accent);
+    z-index: 2;
 }
 
 .related-card-content {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    padding: 24px;
+    position: relative;
+    z-index: 2;
+    /* Sit on top of gradient */
+    width: 100%;
 }
 
 .related-card-title {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-color);
-    margin: 0 0 10px 0;
+    color: #fff;
+    /* Always white on dark overlay */
+    margin: 0 0 12px 0;
     line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    /* Limit to 2 lines */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -4624,33 +4639,33 @@ i[class*=" ph"] {
 }
 
 .related-card-title a:hover {
-    color: var(--primary-color);
+    color: var(--primary-accent);
 }
 
 .related-card-footer {
-    margin-top: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 0.85rem;
-    color: #64748b;
-    /* Slate 500 */
-    border-top: 1px dashed var(--border-color);
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 10px;
     padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] .related-card-footer {
-    color: #94a3b8;
-    /* Slate 400 */
+    color: rgba(255, 255, 255, 0.8);
+    /* Keep light for visibility on overlay */
 }
 
 .related-card-author {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-weight: 500;
 }
 
 .related-card-author i {
-    color: var(--primary-color);
+    color: var(--primary-accent);
+    /* Make icon pop */
 }
