@@ -8,7 +8,7 @@ var svc = new Service({
     env: [
         {
             name: "PORT",
-            value: "3000"
+            value: "80"
         },
         {
             name: "NODE_ENV",

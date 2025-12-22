@@ -1,20 +1,2 @@
-2025-12-21 22:10:06 - Starting C:\Program Files\nodejs\node.exe  --harmony --max_old_space_size=4096 C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\node-windows\lib\wrapper.js --file C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js --scriptoptions= --log "AperionX Server wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
-2025-12-21 22:10:06 - Started 12440
-2025-12-21 22:29:03 - Stopping aperionxserver.exe
-2025-12-21 22:29:03 - ProcessKill 12440
-2025-12-21 22:29:03 - Shutdown exception
-Message:Sistem kapatma işlemi sürüyor.
-
-Stacktrace:   konum: System.Runtime.InteropServices.Marshal.ThrowExceptionForHRInternal(Int32 errorCode, IntPtr errorInfo)
-   konum: System.Management.ManagementScope.InitializeGuts(Object o)
-   konum: System.Management.ManagementScope.Initialize()
-   konum: System.Management.ManagementObjectSearcher.Initialize()
-   konum: System.Management.ManagementObjectSearcher.Get()
-   konum: winsw.WrapperService.GetChildPids(Int32 pid)
-   konum: winsw.WrapperService.StopProcessAndChildren(Int32 pid)
-   konum: winsw.WrapperService.StopIt()
-   konum: winsw.WrapperService.OnShutdown()
-2025-12-21 22:29:52 - Starting C:\Program Files\nodejs\node.exe  --harmony --max_old_space_size=4096 C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\node-windows\lib\wrapper.js --file C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js --scriptoptions= --log "AperionX Server wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
-2025-12-21 22:29:52 - Started 8492
-2025-12-21 22:35:09 - Starting C:\Program Files\nodejs\node.exe  --harmony --max_old_space_size=4096 C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\node-windows\lib\wrapper.js --file C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js --scriptoptions= --log "AperionX Server wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
-2025-12-21 22:35:09 - Started 4764
+2025-12-22 21:34:24 - Starting C:\Program Files\nodejs\node.exe  --harmony --max_old_space_size=4096 C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\node-windows\lib\wrapper.js --file C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js --scriptoptions= --log "AperionX Server wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2025-12-22 21:34:24 - Started 16552
