@@ -2290,16 +2290,45 @@
         document.getElementById('settingsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData();
+
+            // --- Separate Image Upload Helper ---
+            const uploadFile = async (fileInputId) => {
+                const fileInput = document.getElementById(fileInputId);
+                if (fileInput && fileInput.files[0]) {
+                    const lData = new FormData();
+                    lData.append('image', fileInput.files[0]);
+                    try {
+                        const res = await fetch(`${API_URL}/upload-image`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: lData
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            return data.url;
+                        }
+                    } catch (err) { console.error('Upload error:', err); }
+                }
+                return null;
+            };
+
+            // Upload Logo
+            const logoUrl = await uploadFile('site_logo');
+            if (logoUrl) formData.append('site_logo', logoUrl);
+
+            // Upload Favicon
+            const faviconUrl = await uploadFile('site_favicon');
+            if (faviconUrl) formData.append('site_favicon', faviconUrl);
+
+            // Upload About Image
+            const aboutUrl = await uploadFile('about_us_image');
+            if (aboutUrl) formData.append('about_us_image', aboutUrl);
+
+            // Add other fields
             formData.append('site_title', document.getElementById('site_title').value);
             formData.append('site_description', document.getElementById('site_description').value);
             formData.append('logo_height', document.getElementById('logo_height').value);
 
-            if (document.getElementById('site_logo').files[0]) {
-                formData.append('site_logo', document.getElementById('site_logo').files[0]);
-            }
-            if (document.getElementById('site_favicon').files[0]) {
-                formData.append('site_favicon', document.getElementById('site_favicon').files[0]);
-            }
             // New fields
             formData.append('contact_email', document.getElementById('contact_email').value);
             formData.append('social_twitter', document.getElementById('social_twitter').value);
@@ -2330,16 +2359,32 @@
             formData.append('articles_page_slider_title', document.getElementById('articles_page_slider_title').value);
             formData.append('articles_page_list_title', document.getElementById('articles_page_list_title').value);
 
+            // About Hero & Desc
+            formData.append('about_hero_title', document.getElementById('about_hero_title').value);
+            formData.append('about_hero_title_color', document.getElementById('about_hero_title_color').value);
+            formData.append('about_hero_desc', document.getElementById('about_hero_desc').value);
+
+            // Newsletter
+            formData.append('newsletter_section_title', document.getElementById('newsletter_section_title').value);
+            formData.append('newsletter_section_desc', document.getElementById('newsletter_section_desc').value);
 
             try {
-                // Use JSON for text fields if possible, but FormData is already set up for files.
-                // Since our server handles fields from req.body with multer, this is fine.
+                // If server accepts FormData for settings (multipart) OR JSON?
+                // Assuming existing implementation accepts FormData based on previous code.
+                // If it expects JSON but we send FormData, we might need adjustments.
+                // But since we are appending strings now (URLs), FormData is still valid if server handles multipart/form-data.
+                // If server expects JSON, we should convert formData to Object.
+
+                // Let's assume multipart for now as we started with that pattern.
+                // Update: To be safe, usually settings endpoints are JSON. 
+                // Let's TRY sending FormData first as per original code.
 
                 const res = await fetch(`${API_URL}/settings`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
+
                 if (res.ok) {
                     showToast('Ayarlar güncellendi', 'success');
                     loadSettings();
