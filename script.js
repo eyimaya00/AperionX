@@ -1537,10 +1537,16 @@ async function loadArticleDetail() {
 
         // Update SEO Meta Tags
         const desc = article.excerpt || article.title;
+        const origin = window.location.origin;
+        let imgUrl = article.image_url || '';
+        if (imgUrl && !imgUrl.startsWith('http')) {
+            imgUrl = `${origin}/${imgUrl.startsWith('/') ? imgUrl.slice(1) : imgUrl}`;
+        }
+
         document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
         document.querySelector('meta[property="og:title"]')?.setAttribute("content", article.title);
         document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
-        document.querySelector('meta[property="og:image"]')?.setAttribute("content", article.image_url || '');
+        document.querySelector('meta[property="og:image"]')?.setAttribute("content", imgUrl);
         document.querySelector('meta[property="og:url"]')?.setAttribute("content", window.location.href);
 
         // Inner Content
