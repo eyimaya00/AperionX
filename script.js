@@ -159,12 +159,27 @@ async function loadHero() {
             }
         }
 
-        if (aboutUsDescEl && settings.about_us_desc) {
-            aboutUsDescEl.innerHTML = settings.about_us_desc.split('\n').map(line => `<p style="margin-bottom: 16px;">${line}</p>`).join('');
-        }
+        if (aboutUsDescEl && settings.about_us_desc) aboutUsDescEl.innerHTML = settings.about_us_desc.split('\n').map(line => `<p style="margin-bottom: 16px;">${line}</p>`).join('');
+        if (aboutUsImgEl && settings.about_us_image) aboutUsImgEl.src = settings.about_us_image;
 
-        if (aboutUsImgEl && settings.about_us_image) {
-            aboutUsImgEl.src = settings.about_us_image;
+        // Footer Socials (Dynamic Visibility)
+        const socialMap = {
+            'footer-twitter': settings.social_twitter,
+            'footer-instagram': settings.social_instagram,
+            'footer-linkedin': settings.social_linkedin,
+            'footer-youtube': settings.social_youtube
+        };
+
+        for (const [id, url] of Object.entries(socialMap)) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (url && url.trim() !== '') {
+                    el.href = url;
+                    el.style.display = 'inline-flex'; // Show
+                } else {
+                    el.style.display = 'none'; // Hide
+                }
+            }
         }
 
         // Render Vision Content
