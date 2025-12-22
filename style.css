@@ -361,14 +361,17 @@ a {
 
 /* Icon Buttons */
 .icon-btn {
-    width: 40px;
+    width: 36px;
+    /* Reduced from 40px */
     /* Precise Width */
-    height: 40px;
+    height: 36px;
+    /* Reduced from 40px */
     /* Precise Height */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    /* Reduced from 1.1rem */
     /* 17.6px */
     border-radius: 50%;
     /* Circle */
@@ -512,7 +515,7 @@ i[class*=" ph"] {
 /* Mobile Menu Btn */
 .mobile-menu-btn {
     /* Inherits .icon-btn styles (width, height, border, bg) */
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     /* Slightly larger icon */
 }
 
