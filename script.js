@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSettings(),
         loadHero(),
         // Add a minimum delay to prevent flickering
-        new Promise(resolve => setTimeout(resolve, 800))
+        new Promise(resolve => setTimeout(resolve, 300))
     ]).then(() => {
         hideLoader();
     }).catch(err => {
@@ -215,6 +215,56 @@ async function loadHero() {
             if (contactEmailTextEl) contactEmailTextEl.textContent = settings.contact_card_email;
             if (contactEmailBtnEl) contactEmailBtnEl.href = `mailto:${settings.contact_card_email}`;
         }
+
+        if (titleToUse) {
+            // Dynamic accent color based on ID
+            let accentColor = settings.homepage_hero_title_color;
+            if (heroTitle) {
+                let customRendered = false;
+
+                if (heroTitle.id === 'articles-hero-title') {
+                    accentColor = settings.articles_hero_title_color;
+
+                    if (titleToUse.trim().toLowerCase().includes('makale')) {
+                        heroTitle.innerHTML = `<span style="color: #ffffff;">Maka</span><span style="color: #6366f1 !important;">leler</span>`;
+                        customRendered = true;
+                    }
+                }
+
+                // Specific Layout for "Modern Bilim"
+                // Req: Line 1: Modern (White)
+                //      Line 2: Bilimin (White) Dijital (Purple)
+                //      Line 3: Platformu (Purple)
+                // We assume this is the main hero title if it matches content
+                if (!customRendered && (titleToUse.includes('Modern Bilimin') || titleToUse.includes('Modern Bilim'))) {
+                    // Check if this is likely the homepage hero (checked via ID logic externally but here we match content)
+                    // Reconstruct strict HTML:
+                    // <span white>Modern <br mobile> Bilimin</span> <span purple>Dijital <br mobile> Platformu</span>
+                    const p1 = "Modern <br class='mobile-br'> Bilimin";
+                    const p2 = "Dijital <br class='mobile-br'> Platformu";
+
+                    heroTitle.innerHTML = `<span style="color: #ffffff;">${p1}</span> <span style="color: ${settings.homepage_hero_title_color || '#6366f1'} !important;">${p2}</span>`;
+                    customRendered = true;
+                }
+
+                if (heroTitle.id === 'about-hero-title') accentColor = settings.about_hero_title_color;
+            }
+        }
+
+        // --- Global Loader Logo Logic ---
+        const loaderLogoImg = document.getElementById('loader-logo-img');
+        const loaderIcon = document.querySelector('.loader-icon');
+
+        // If settings has a logo URL, swap the icon for the image
+        if (settings.site_logo && settings.site_logo.trim() !== "" && loaderLogoImg) {
+            console.log('Setting loader logo:', settings.site_logo); // Debug
+            loaderLogoImg.src = settings.site_logo;
+            loaderLogoImg.style.display = 'block';
+            if (loaderIcon) loaderIcon.style.display = 'none';
+        }
+
+        console.log('Settings loaded:', settings);
+        // --- END PART 1 ---
 
         if (titleToUse) {
             // Dynamic accent color based on ID
