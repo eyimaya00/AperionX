@@ -311,6 +311,14 @@ async function ensureSchema() {
         }
     }
 
+    // Force fix status column length (Fix for 'Data truncated' error)
+    try {
+        await pool.query("ALTER TABLE articles MODIFY COLUMN status VARCHAR(50) DEFAULT 'draft'");
+        console.log("Ensured articles.status is VARCHAR(50)");
+    } catch (e) {
+        console.error("Status Column Modification Error (Ignore if not needed):", e);
+    }
+
     try {
         // Auto-migration for other missing columns
         const neededColumns = [
@@ -1046,12 +1054,17 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
 // Soft Delete
 app.delete('/api/articles/:id', authenticateToken, async (req, res) => {
     // Owner or Admin
-    const [check] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [req.params.id]);
-    if (check.length === 0) return res.status(404).json({ message: 'Not found' });
-    if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        const [check] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [req.params.id]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-    await pool.query("UPDATE articles SET status = 'trash' WHERE id = ?", [req.params.id]);
-    res.json({ message: 'Moved to trash' });
+        await pool.query("UPDATE articles SET status = 'trash' WHERE id = ?", [req.params.id]);
+        res.json({ message: 'Moved to trash' });
+    } catch (e) {
+        console.error('Delete Error:', e);
+        res.status(500).json({ error: 'Global Server Error', details: e.message });
+    }
 });
 
 app.delete('/api/articles/permanent/:id', authenticateToken, async (req, res) => {
