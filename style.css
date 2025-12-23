@@ -4732,7 +4732,6 @@ i[class*=" ph"] {
 }
 
 /* FIX: Text Alignment on Mobile */
-/* FIX: Text Alignment on Mobile */
 @media (max-width: 768px) {
 
     /* Fix header overlap */
@@ -4742,8 +4741,9 @@ i[class*=" ph"] {
     }
 
     /* Justify text with hyphens to prevent large gaps */
+    /* USER UPDATE: Reverting to LEFT alignment because justify causes large gaps on narrow screens */
     .article-content {
-        text-align: justify !important;
+        text-align: left !important;
         -webkit-hyphens: auto;
         -moz-hyphens: auto;
         -ms-hyphens: auto;
@@ -4751,10 +4751,26 @@ i[class*=" ph"] {
     }
 
     .article-content p {
-        text-align: justify !important;
-        text-justify: inter-word;
-        /* Improves spacing */
+        text-align: left !important;
+        /* text-justify: inter-word; REMOVED */
     }
+
+    /* Make images full width on mobile */
+    .article-content img {
+        width: 100% !important;
+        height: auto !important;
+        margin: 10px 0;
+    }
+}
+
+/* Reference List Fix: Remove double bullets if user typed them */
+.ref-list {
+    list-style-type: none !important;
+    padding-left: 0 !important;
+}
+
+.ref-list li {
+    padding-left: 0;
 }
 
 /* Lightbox Feature Styles */

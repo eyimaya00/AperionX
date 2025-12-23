@@ -1336,7 +1336,7 @@ if (newsletterForm) {
 let pageArticles = [];
 let filteredArticles = [];
 let currentPage = 1;
-const itemsPerPage = 9;
+const itemsPerPage = 6;
 
 
 

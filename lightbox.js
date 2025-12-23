@@ -18,19 +18,18 @@ document.addEventListener('DOMContentLoaded', function () {
     lightboxOverlay.appendChild(lightboxClose);
     document.body.appendChild(lightboxOverlay);
 
-    // 2. Select all images in article content AND the hero image
-    const articleImages = document.querySelectorAll('.article-content img, .detail-hero-image');
+    // 2. Event Delegation for Images (Handles dynamic content)
+    document.body.addEventListener('click', function (e) {
+        if (e.target.tagName === 'IMG' &&
+            (e.target.closest('.article-content') || e.target.classList.contains('detail-hero-image'))) {
 
-    // 3. Add click event to each image
-    articleImages.forEach(img => {
-        img.addEventListener('click', function () {
-            const src = this.getAttribute('src');
+            const src = e.target.getAttribute('src');
             if (src) {
                 lightboxImage.src = src;
                 lightboxOverlay.classList.add('active');
                 document.body.style.overflow = 'hidden'; // Prevent scrolling
             }
-        });
+        }
     });
 
     // 4. Close functions
