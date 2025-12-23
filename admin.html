@@ -3090,9 +3090,14 @@
                     showToast('Makale silindi', 'success');
                     loadAllArticles();
                 } else {
-                    showToast('Hata', 'error');
+                    // Try to get text or json
+                    const text = await res.text();
+                    showToast('Hata: ' + (text || res.statusText), 'error');
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                showToast('Sunucu hatası: ' + e.message, 'error');
+            }
         }
 
         async function loadLikes() {
