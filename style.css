@@ -4782,26 +4782,31 @@ i[class*=" ph"] {
         line-height: 1.6 !important;
         color: var(--text-color);
         width: 100% !important;
-        letter-spacing: -0.02em !important;
-        /* Tighten slightly to fit more words */
+        letter-spacing: normal !important;
+        /* Reset to natural spacing */
+
+        /* Modern Typography Standard */
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
     }
 
     .article-content p {
-        text-align: justify !important;
-        text-justify: inter-word;
+        /* MODERN STANDARD: Left Align is used by Medium, NYT, BBC on mobile to prevent gaps. */
+        text-align: left !important;
 
-        /* Smart Hyphenation */
+        /* Ensure normal behavior */
+        text-justify: auto;
+        word-spacing: normal !important;
+
+        /* Keep hyphenation for better flow even in left align */
         -webkit-hyphens: auto !important;
         -moz-hyphens: auto !important;
         -ms-hyphens: auto !important;
         hyphens: auto !important;
 
-        /* The "Middle Ground" - Break words only if necessary to avoid rivers */
+        /* Standard breaking */
         word-break: normal !important;
-        overflow-wrap: anywhere !important;
-
-        word-spacing: -0.5px !important;
-        /* Subtly tighten word gaps */
+        overflow-wrap: break-word !important;
 
         margin-bottom: 16px !important;
         line-height: 1.7 !important;
