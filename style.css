@@ -4775,33 +4775,40 @@ i[class*=" ph"] {
         margin: 10px 0;
     }
 
-    /* Reduce paragraph spacing on mobile */
+    /* Reduce paragraph spacing and optimize alignment on mobile */
     .article-content {
-        /* Mobile readability optimization (SEO friendly) */
-        font-size: 1.1rem !important;
-        /* Standard readable size */
+        /* Mobile readability optimization */
+        font-size: 1.05rem !important;
+        /* Reduced from 1.1rem to fit more words */
         line-height: 1.6 !important;
         color: var(--text-color);
+        width: 100% !important;
+        /* Ensure full width usage */
     }
 
     .article-content p {
-        text-align: left !important;
+        text-align: justify !important;
+        /* Fully justified text */
+        text-justify: inter-word;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
+        /* IMPORTANT: Prevents river gaps in justified text */
         margin-bottom: 16px !important;
-        /* Balanced spacing */
         line-height: 1.7 !important;
-        /* Easier reading */
     }
 
     /* Fix Headings Gap & Size on Mobile */
     .article-content h2,
     .article-content h3,
     .article-content h4 {
-        margin-top: 30px !important;
-        /* Reduced from likely global defaults */
-        margin-bottom: 12px !important;
+        margin-top: 25px !important;
+        margin-bottom: 10px !important;
         line-height: 1.3 !important;
         font-weight: 700;
         color: var(--text-color);
+        text-align: left !important;
     }
 
     .article-content h2 {
