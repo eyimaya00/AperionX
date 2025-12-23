@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
     lightboxOverlay.appendChild(lightboxClose);
     document.body.appendChild(lightboxOverlay);
 
-    // 2. Select all images in article content
-    const articleImages = document.querySelectorAll('.article-content img');
+    // 2. Select all images in article content AND the hero image
+    const articleImages = document.querySelectorAll('.article-content img, .detail-hero-image');
 
     // 3. Add click event to each image
     articleImages.forEach(img => {

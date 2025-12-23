@@ -4732,14 +4732,28 @@ i[class*=" ph"] {
 }
 
 /* FIX: Text Alignment on Mobile */
+/* FIX: Text Alignment on Mobile */
 @media (max-width: 768px) {
+
+    /* Fix header overlap */
+    .article-detail-container {
+        padding-top: 100px !important;
+        /* Increased from 20px to clear fixed header */
+    }
+
+    /* Justify text with hyphens to prevent large gaps */
     .article-content {
-        text-align: left !important;
+        text-align: justify !important;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
     }
 
     .article-content p {
-        text-align: left !important;
-        text-justify: auto;
+        text-align: justify !important;
+        text-justify: inter-word;
+        /* Improves spacing */
     }
 }
 
