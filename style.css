@@ -4774,6 +4774,26 @@ i[class*=" ph"] {
         height: auto !important;
         margin: 10px 0;
     }
+
+    /* Reduce paragraph spacing on mobile */
+    .article-content p {
+        text-align: left !important;
+        margin-bottom: 14px !important;
+        /* Reduced from 24px */
+        line-height: 1.6 !important;
+    }
+
+    /* Hide empty paragraphs that cause huge gaps */
+    .article-content p:empty {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Fix for Quill empty lines <p><br></p> */
+    .article-content p br:only-child {
+        display: none;
+    }
 }
 
 /* Reference List Fix: Remove double bullets if user typed them */
