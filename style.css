@@ -1725,10 +1725,27 @@ i[class*=" ph"] {
 .card-bg {
     position: absolute;
     inset: 0;
-    background-size: cover;
+    background-size: contain;
+    /* Changed from cover to contain */
+    background-repeat: no-repeat;
+    background-color: #000;
+    /* Fill gaps */
     background-position: center;
     transition: transform 0.5s ease;
     z-index: -2;
+}
+
+.article-card img {
+    width: 100%;
+    height: auto !important;
+    /* Allow image to dictate height naturally */
+    min-height: 200px;
+    /* Minimum size */
+    max-height: 500px;
+    /* Cap at reasonable size */
+    object-fit: contain !important;
+    background-color: #0f172a;
+    border-radius: 12px;
 }
 
 .featured-card:hover .card-bg {
@@ -3978,16 +3995,7 @@ i[class*=" ph"] {
     flex-direction: column;
 }
 
-.article-card img {
-    width: 100%;
-    height: 250px;
-    /* Keep fixed height for grid alignment */
-    object-fit: contain !important;
-    /* Never crop the image, show it fully */
-    background-color: #0f172a;
-    /* Dark background for empty space (letterboxing) */
-    border-radius: 12px;
-}
+/* .article-card img rule consolidated */
 
 /* --- Restored Hero Styles --- */
 .hero-slider {
