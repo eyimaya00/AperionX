@@ -2403,6 +2403,17 @@
 
         let allUsers = []; // Store globally for filtering
 
+        // Helper to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         async function loadUsers() {
             // alert('Debug: Loading Users...'); // Removed for production
             console.log('Debug: loadUsers called');
