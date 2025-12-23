@@ -4779,30 +4779,29 @@ i[class*=" ph"] {
     .article-content {
         /* Mobile readability optimization */
         font-size: 1.05rem !important;
-        /* Standard size */
         line-height: 1.6 !important;
         color: var(--text-color);
         width: 100% !important;
-        letter-spacing: normal !important;
-        /* Reset weird spacing */
+        letter-spacing: -0.02em !important;
+        /* Tighten slightly to fit more words */
     }
 
     .article-content p {
         text-align: justify !important;
-        /* Fully justified text */
         text-justify: inter-word;
 
-        /* Enable Smart Hyphenation (The proper way for Turkish) */
+        /* Smart Hyphenation */
         -webkit-hyphens: auto !important;
         -moz-hyphens: auto !important;
         -ms-hyphens: auto !important;
         hyphens: auto !important;
 
-        /* Do NOT break words arbitrarily */
+        /* The "Middle Ground" - Break words only if necessary to avoid rivers */
         word-break: normal !important;
-        overflow-wrap: break-word !important;
+        overflow-wrap: anywhere !important;
 
-        word-spacing: normal !important;
+        word-spacing: -0.5px !important;
+        /* Subtly tighten word gaps */
 
         margin-bottom: 16px !important;
         line-height: 1.7 !important;
