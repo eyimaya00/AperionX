@@ -3981,10 +3981,11 @@ i[class*=" ph"] {
 .article-card img {
     width: 100%;
     height: 250px;
-    /* Fixed height for uniformity */
-    object-fit: cover;
-    /* Fill the card area neatly */
-    background-color: transparent;
+    /* Keep fixed height for grid alignment */
+    object-fit: contain !important;
+    /* Never crop the image, show it fully */
+    background-color: #0f172a;
+    /* Dark background for empty space (letterboxing) */
     border-radius: 12px;
 }
 
