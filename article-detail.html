@@ -129,19 +129,19 @@
         .detail-hero-image {
             width: 100%;
             height: auto;
-            max-height: 650px;
-            /* Prevent too tall images */
+            max-height: none;
+            /* Allow full height */
             object-fit: contain;
             background-color: transparent;
-            /* No black bars */
             border-radius: 24px;
             margin-bottom: 30px;
-            /* box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15); Removed for cleaner look with transparent bg */
             animation: slideUp 0.8s ease;
             margin-top: 20px;
             display: block;
             margin-left: auto;
             margin-right: auto;
+            box-shadow: none;
+            /* Remove shadow if it looks like a border */
         }
 
         /* Page Background Override for Contrast */

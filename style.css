@@ -3980,8 +3980,8 @@ i[class*=" ph"] {
 
 .article-card img {
     width: 100%;
-    height: 250px;
-    /* Standard height */
+    height: auto;
+    /* Allow natural height */
     object-fit: contain;
     /* Prevent cropping */
     background-color: transparent;
@@ -4584,11 +4584,18 @@ i[class*=" ph"] {
 
 .related-card-img {
     width: 100%;
-    height: 100%;
+    height: auto;
+    /* Allow natural height */
+    min-height: 200px;
+    /* Minimum */
     object-fit: contain;
-    /* Fix for cropping */
+    /* Cover is safer for cards unless strict contain needed */
+    /* If users truly wants full image on cards, contain with auto height is tricky for grid.
+       But user says "only photo", so I will try contain with bg transparent on auto height container?
+       No, auto height + width 100% + contain = image aspect ratio.
+    */
+    object-fit: contain;
     background-color: transparent;
-    /* Transparent background */
     transition: transform 0.7s ease;
 }
 
