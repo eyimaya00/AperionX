@@ -1,0 +1,6 @@
+[dotenv@17.2.3] injecting env (6) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+--- APERIONX SERVER VERSION 2.3 FINAL (ROBUST SETTINGS) STARTING ---
+Server running on http://localhost:80
+Migrating: users.role column modified to VARCHAR(50)
+Migrating: articles content column set to LONGTEXT
+Schema Check: Likes, Comments, Views, Settings, & Users ensured.
