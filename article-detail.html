@@ -610,6 +610,8 @@
                 font-size: 2rem;
                 /* Reduced from 2.8rem */
                 line-height: 1.2;
+                text-align: left !important;
+                /* Fix for word spacing gaps */
             }
 
             .detail-hero-image {
@@ -677,6 +679,13 @@
         [data-theme="dark"] .comment-item:hover {
             background: rgba(30, 41, 59, 0.8);
             border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* Force light text in dark mode for comments */
+        [data-theme="dark"] .comment-author,
+        [data-theme="dark"] .comment-body,
+        [data-theme="dark"] .comment-date {
+            color: #f1f5f9 !important;
         }
 
         .comment-item:hover {
