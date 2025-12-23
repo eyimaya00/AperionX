@@ -44,10 +44,10 @@ app.use(helmet({
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 5000, // Increased for development/testing comfort
     message: 'Too many requests from this IP, please try again later.'
 });
-app.use(limiter);
+app.use('/api', limiter); /* Apply ONLY to API routes */
 
 // Middleware
 app.use(cors());
