@@ -4778,12 +4778,15 @@ i[class*=" ph"] {
     /* Reduce paragraph spacing and optimize alignment on mobile */
     .article-content {
         /* Mobile readability optimization */
-        font-size: 1.05rem !important;
-        /* Reduced from 1.1rem to fit more words */
+        font-size: 1rem !important;
+        /* 16px standard - Fits more words */
+        /* Reduced from 1.1rem */
         line-height: 1.6 !important;
         color: var(--text-color);
         width: 100% !important;
         /* Ensure full width usage */
+        letter-spacing: -0.01em;
+        /* Tighter tracking helps with justification */
     }
 
     .article-content p {
@@ -4795,6 +4798,8 @@ i[class*=" ph"] {
         -ms-hyphens: auto;
         hyphens: auto;
         /* IMPORTANT: Prevents river gaps in justified text */
+        word-break: break-word;
+        /* Crucial for preventing huge gaps with long urls/words */
         margin-bottom: 16px !important;
         line-height: 1.7 !important;
     }
