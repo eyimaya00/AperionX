@@ -4778,16 +4778,12 @@ i[class*=" ph"] {
     /* Reduce paragraph spacing and optimize alignment on mobile */
     .article-content {
         /* Mobile readability optimization */
-        font-size: 0.98rem !important;
-        /* Slightly smaller for better fit */
-        /* 16px standard - Fits more words */
-        /* Reduced from 1.1rem */
+        font-size: 1.1rem !important;
+        /* Reverted to larger size as requested */
         line-height: 1.6 !important;
         color: var(--text-color);
         width: 100% !important;
-        /* Ensure full width usage */
-        letter-spacing: -0.015em;
-        /* Tighter tracking helps with justification */
+        letter-spacing: -0.01em;
     }
 
     .article-content p {
