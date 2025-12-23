@@ -3984,8 +3984,8 @@ i[class*=" ph"] {
     /* Standard height */
     object-fit: contain;
     /* Prevent cropping */
-    background-color: #000;
-    /* Dark background */
+    background-color: transparent;
+    /* Transparent background */
     border-radius: 12px;
 }
 
@@ -4587,8 +4587,8 @@ i[class*=" ph"] {
     height: 100%;
     object-fit: contain;
     /* Fix for cropping */
-    background-color: #000;
-    /* Dark background for uncropped images */
+    background-color: transparent;
+    /* Transparent background */
     transition: transform 0.7s ease;
 }
 
