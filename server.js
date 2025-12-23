@@ -1063,6 +1063,24 @@ app.delete('/api/articles/:id', authenticateToken, async (req, res) => {
         res.json({ message: 'Moved to trash' });
     } catch (e) {
         console.error('Delete Error:', e);
+
+        // DEBUG: Log deep details to file
+        try {
+            const fs = require('fs');
+            const [dbName] = await pool.query('SELECT DATABASE() as db');
+            const [cols] = await pool.query("SHOW COLUMNS FROM articles LIKE 'status'");
+            const debugInfo = `
+[${new Date().toISOString()}] DELETE ERROR
+Error: ${e.message}
+Connected DB: ${dbName[0].db}
+Column Schema: ${JSON.stringify(cols)}
+User: ${req.user.username} (ID: ${req.user.id}, Role: ${req.user.role})
+            `;
+            fs.appendFileSync('server_debug.log', debugInfo);
+        } catch (logErr) {
+            console.error('Failed to write debug log:', logErr);
+        }
+
         res.status(500).json({ error: 'Global Server Error', details: e.message });
     }
 });
