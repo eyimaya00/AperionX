@@ -4779,32 +4779,33 @@ i[class*=" ph"] {
     .article-content {
         /* Mobile readability optimization */
         font-size: 1.05rem !important;
-        /* Slightly smaller than 1.1rem for better fit */
-        line-height: 1.7 !important;
+        /* Standard size */
+        line-height: 1.6 !important;
         color: var(--text-color);
         width: 100% !important;
-        letter-spacing: -0.01em;
+        letter-spacing: normal !important;
+        /* Reset weird spacing */
     }
 
     .article-content p {
         text-align: justify !important;
         /* Fully justified text */
         text-justify: inter-word;
-        -webkit-hyphens: auto;
-        -moz-hyphens: auto;
-        -ms-hyphens: auto;
-        hyphens: auto;
 
-        /* NUCLEAR OPTION: break-all forces no gaps at any cost */
-        word-break: break-all !important;
-        overflow-wrap: anywhere !important;
+        /* Enable Smart Hyphenation (The proper way for Turkish) */
+        -webkit-hyphens: auto !important;
+        -moz-hyphens: auto !important;
+        -ms-hyphens: auto !important;
+        hyphens: auto !important;
 
-        /* Reset word spacing to normal since we are breaking words */
+        /* Do NOT break words arbitrarily */
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+
         word-spacing: normal !important;
 
         margin-bottom: 16px !important;
-        line-height: 1.8 !important;
-        /* Increase readability */
+        line-height: 1.7 !important;
     }
 
     /* IMPORTANT: Prevents river gaps in justified text */
