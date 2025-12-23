@@ -4666,9 +4666,17 @@ i[class*=" ph"] {
     border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-[data-theme="dark"] .related-card-footer {
-    color: rgba(255, 255, 255, 0.8);
-    /* Keep light for visibility on overlay */
+[data-theme="dark"] .article-content,
+[data-theme="dark"] .article-content * {
+    color: #e2e8f0 !important;
+    /* Nuclear option: Overrides inline styles from Word/Docs */
+    background-color: transparent !important;
+    /* prevents white backgrounds on pasted text */
+}
+
+/* Exception for code blocks or specific elements if needed later */
+[data-theme="dark"] .article-content a {
+    color: var(--primary-color) !important;
 }
 
 .related-card-author {
