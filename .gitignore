@@ -4,3 +4,5 @@ node_modules/
 uploads/
 npm-debug.log
 .vscode/
+*.log
+daemon/*.log

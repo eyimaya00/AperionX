@@ -2434,41 +2434,41 @@
         });
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('main-content');
-            const icon = document.getElementById('toggle-icon');
-            const overlay = document.getElementById('sidebar-overlay');
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const content = document.getElementById('main-content');
+                const icon = document.getElementById('toggle-icon');
+                const overlay = document.getElementById('sidebar-overlay');
 
-            if (window.innerWidth <= 991) {
-                // Mobile behavior
-                if (sidebar) sidebar.classList.toggle('active');
-                if (sidebar && sidebar.classList.contains('active')) {
-                    if (overlay) overlay.classList.add('show');
-                    if (icon) {
-                        icon.classList.remove('ph-caret-left');
-                        icon.classList.add('ph-caret-right');
+                if (window.innerWidth <= 991) {
+                    // Mobile behavior
+                    if (sidebar) sidebar.classList.toggle('active');
+                    if (sidebar && sidebar.classList.contains('active')) {
+                        if (overlay) overlay.classList.add('show');
+                        if (icon) icon.classList.remove('ph-caret-left');
+                        if (icon) icon.classList.add('ph-caret-right');
+                    } else {
+                        if (overlay) overlay.classList.remove('show');
+                        if (icon) icon.classList.remove('ph-caret-right');
+                        if (icon) icon.classList.add('ph-caret-left');
                     }
                 } else {
-                    if (overlay) overlay.classList.remove('show');
-                    if (icon) {
-                        icon.classList.remove('ph-caret-right');
-                        icon.classList.add('ph-caret-left');
-                    }
-                }
-            } else {
-                // Desktop behavior
-                if (sidebar) sidebar.classList.toggle('collapsed');
-                if (content) content.classList.toggle('expanded');
+                    // Desktop behavior
+                    if (sidebar) sidebar.classList.toggle('collapsed');
+                    if (content) content.classList.toggle('expanded');
 
-                if (icon) {
-                    if (sidebar && sidebar.classList.contains('collapsed')) {
-                        icon.classList.remove('ph-caret-left');
-                        icon.classList.add('ph-caret-right');
-                    } else {
-                        icon.classList.remove('ph-caret-right');
-                        icon.classList.add('ph-caret-left');
+                    if (icon) {
+                        if (sidebar && sidebar.classList.contains('collapsed')) {
+                            icon.classList.remove('ph-caret-left');
+                            icon.classList.add('ph-caret-right');
+                        } else {
+                            icon.classList.remove('ph-caret-right');
+                            icon.classList.add('ph-caret-left');
+                        }
                     }
                 }
+            } catch (err) {
+                console.error("Sidebar Toggle Error:", err);
             }
         }
 

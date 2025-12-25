@@ -15,7 +15,9 @@
     <script>
         // DEBUG: Capture and alert global errors
         window.onerror = function (msg, url, line, col, error) {
-            alert("Sistem Hatası:\n" + msg + "\nSatır: " + line);
+            console.error("Global Error:", msg, "Line:", line); // Enhanced logging
+            // Avoid alerting for known safe handled errors if possible, or keep alert but precise
+            alert("Sistem Hatası (v3.0 - Fix Applied):\n" + msg + "\nSatır: " + line);
             return false;
         };
         window.addEventListener('unhandledrejection', function (event) {
@@ -2446,35 +2448,39 @@
         });
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('main-content');
-            const icon = document.getElementById('toggle-icon');
-            const overlay = document.getElementById('sidebar-overlay');
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const content = document.getElementById('main-content');
+                const icon = document.getElementById('toggle-icon');
+                const overlay = document.getElementById('sidebar-overlay');
 
-            if (window.innerWidth <= 991) {
-                // Mobile behavior
-                if (sidebar) sidebar.classList.toggle('active');
-                if (sidebar && sidebar.classList.contains('active')) {
-                    if (overlay) overlay.classList.add('show');
-                    if (icon) icon.classList.remove('ph-caret-left');
-                    if (icon) icon.classList.add('ph-caret-right');
+                if (window.innerWidth <= 991) {
+                    // Mobile behavior
+                    if (sidebar) sidebar.classList.toggle('active');
+                    if (sidebar && sidebar.classList.contains('active')) {
+                        if (overlay) overlay.classList.add('show');
+                        if (icon) icon.classList.remove('ph-caret-left');
+                        if (icon) icon.classList.add('ph-caret-right');
+                    } else {
+                        if (overlay) overlay.classList.remove('show');
+                        if (icon) icon.classList.remove('ph-caret-right');
+                        if (icon) icon.classList.add('ph-caret-left');
+                    }
                 } else {
-                    if (overlay) overlay.classList.remove('show');
-                    if (icon) icon.classList.remove('ph-caret-right');
-                    if (icon) icon.classList.add('ph-caret-left');
-                }
-            } else {
-                // Desktop behavior
-                if (sidebar) sidebar.classList.toggle('collapsed');
-                if (content) content.classList.toggle('expanded');
+                    // Desktop behavior
+                    if (sidebar) sidebar.classList.toggle('collapsed');
+                    if (content) content.classList.toggle('expanded');
 
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    if (icon) icon.classList.remove('ph-caret-left');
-                    if (icon) icon.classList.add('ph-caret-right');
-                } else {
-                    if (icon) icon.classList.remove('ph-caret-right');
-                    if (icon) icon.classList.add('ph-caret-left');
+                    if (sidebar && sidebar.classList.contains('collapsed')) {
+                        if (icon) icon.classList.remove('ph-caret-left');
+                        if (icon) icon.classList.add('ph-caret-right');
+                    } else {
+                        if (icon) icon.classList.remove('ph-caret-right');
+                        if (icon) icon.classList.add('ph-caret-left');
+                    }
                 }
+            } catch (err) {
+                console.error("Sidebar Toggle Error:", err);
             }
         }
 
