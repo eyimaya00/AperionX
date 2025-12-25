@@ -2595,13 +2595,32 @@
         // Chart Logic
         let dashboardChart = null;
         function renderDashboardChart() {
-            const ctx = document.getElementById('dashboardChart');
-            if (!ctx) return;
+            let canvasElement = document.getElementById('dashboardChart');
+            if (!canvasElement) return;
 
-            // Fix: Destroy existing chart instance on canvas
-            const existingChart = Chart.getChart(ctx);
-            if (existingChart) existingChart.destroy();
-            if (dashboardChart) dashboardChart.destroy();
+            // ULTRA-FIX: Replace the canvas entirely to bypass any Chart.js 'already in use' glitches
+            // This is the most robust way to ensure a fresh chart context
+            const parent = canvasElement.parentNode;
+            const newCanvas = document.createElement('canvas');
+            newCanvas.id = 'dashboardChart';
+            // Copy relevant attributes if needed
+            if (canvasElement.className) newCanvas.className = canvasElement.className;
+
+            // Destroy old chart if we can catch it, just in case
+            try {
+                const oldChart = Chart.getChart(canvasElement);
+                if (oldChart) oldChart.destroy();
+            } catch (e) { console.warn("Chart destroy warning", e); }
+
+            // Swap in DOM
+            parent.replaceChild(newCanvas, canvasElement);
+            const ctx = newCanvas.getContext('2d');
+
+            // Also reset global var
+            if (dashboardChart) {
+                try { dashboardChart.destroy(); } catch (e) { }
+                dashboardChart = null;
+            }
 
             fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(r => r.json())
