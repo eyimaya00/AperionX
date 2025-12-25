@@ -2441,8 +2441,8 @@
 
             if (window.innerWidth <= 991) {
                 // Mobile behavior
-                sidebar.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
+                if (sidebar) sidebar.classList.toggle('active');
+                if (sidebar && sidebar.classList.contains('active')) {
                     if (overlay) overlay.classList.add('show');
                     if (icon) {
                         icon.classList.remove('ph-caret-left');
@@ -2457,11 +2457,11 @@
                 }
             } else {
                 // Desktop behavior
-                sidebar.classList.toggle('collapsed');
+                if (sidebar) sidebar.classList.toggle('collapsed');
                 if (content) content.classList.toggle('expanded');
 
                 if (icon) {
-                    if (sidebar.classList.contains('collapsed')) {
+                    if (sidebar && sidebar.classList.contains('collapsed')) {
                         icon.classList.remove('ph-caret-left');
                         icon.classList.add('ph-caret-right');
                     } else {
@@ -2585,6 +2585,10 @@
         function renderDashboardChart() {
             const ctx = document.getElementById('dashboardChart');
             if (!ctx) return;
+
+            // Fix: Destroy existing chart instance on canvas
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
             if (dashboardChart) dashboardChart.destroy();
 
             fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })

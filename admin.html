@@ -3452,21 +3452,23 @@
 
             // Mobile logic
             if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('active');
+                if (sidebar) sidebar.classList.toggle('active');
             } else {
-                sidebar.classList.toggle('collapsed');
-                document.getElementById('brand-logo').classList.toggle('collapsed');
+                if (sidebar) sidebar.classList.toggle('collapsed');
+                const logo = document.getElementById('brand-logo');
+                if (logo) logo.classList.toggle('collapsed');
+
                 const content = document.getElementById('main-content');
                 const icon = document.getElementById('toggle-icon');
 
-                if (sidebar.classList.contains('collapsed')) {
-                    content.style.marginLeft = 'var(--sidebar-width-collapsed)';
-                    icon.classList.remove('ph-caret-left');
-                    icon.classList.add('ph-caret-right');
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    if (content) content.style.marginLeft = 'var(--sidebar-width-collapsed)';
+                    if (icon) icon.classList.remove('ph-caret-left');
+                    if (icon) icon.classList.add('ph-caret-right');
                 } else {
-                    content.style.marginLeft = 'var(--sidebar-width)';
-                    icon.classList.remove('ph-caret-right');
-                    icon.classList.add('ph-caret-left');
+                    if (content) content.style.marginLeft = 'var(--sidebar-width)';
+                    if (icon) icon.classList.remove('ph-caret-right');
+                    if (icon) icon.classList.add('ph-caret-left');
                 }
             }
         }

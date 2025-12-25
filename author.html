@@ -2453,27 +2453,27 @@
 
             if (window.innerWidth <= 991) {
                 // Mobile behavior
-                sidebar.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    overlay.classList.add('show');
-                    icon.classList.remove('ph-caret-left');
-                    icon.classList.add('ph-caret-right');
+                if (sidebar) sidebar.classList.toggle('active');
+                if (sidebar && sidebar.classList.contains('active')) {
+                    if (overlay) overlay.classList.add('show');
+                    if (icon) icon.classList.remove('ph-caret-left');
+                    if (icon) icon.classList.add('ph-caret-right');
                 } else {
-                    overlay.classList.remove('show');
-                    icon.classList.remove('ph-caret-right');
-                    icon.classList.add('ph-caret-left');
+                    if (overlay) overlay.classList.remove('show');
+                    if (icon) icon.classList.remove('ph-caret-right');
+                    if (icon) icon.classList.add('ph-caret-left');
                 }
             } else {
                 // Desktop behavior
-                sidebar.classList.toggle('collapsed');
-                content.classList.toggle('expanded');
+                if (sidebar) sidebar.classList.toggle('collapsed');
+                if (content) content.classList.toggle('expanded');
 
-                if (sidebar.classList.contains('collapsed')) {
-                    icon.classList.remove('ph-caret-left');
-                    icon.classList.add('ph-caret-right');
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    if (icon) icon.classList.remove('ph-caret-left');
+                    if (icon) icon.classList.add('ph-caret-right');
                 } else {
-                    icon.classList.remove('ph-caret-right');
-                    icon.classList.add('ph-caret-left');
+                    if (icon) icon.classList.remove('ph-caret-right');
+                    if (icon) icon.classList.add('ph-caret-left');
                 }
             }
         }
@@ -2591,6 +2591,10 @@
         function renderDashboardChart() {
             const ctx = document.getElementById('dashboardChart');
             if (!ctx) return;
+
+            // Fix: Destroy existing chart instance on canvas
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
             if (dashboardChart) dashboardChart.destroy();
 
             fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })

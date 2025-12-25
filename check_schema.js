@@ -1,20 +1,22 @@
-require('dotenv').config();
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-async function check() {
-    const pool = mysql.createPool({
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASS || '',
-        database: process.env.DB_NAME || 'aperionx_db'
-    });
+const dbConfig = {
+    host: 'localhost',
+    user: 'root',
+    password: process.env.DB_PASSWORD || 'root',
+    database: 'aperionx_db'
+};
 
+async function checkSchema() {
     try {
-        const [rows] = await pool.query('DESCRIBE comments');
-        console.table(rows);
-    } catch (e) {
-        console.error(e);
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.query("DESCRIBE articles");
+        console.log(JSON.stringify(rows, null, 2));
+        await connection.end();
+    } catch (error) {
+        console.error('Error:', error);
     }
-    process.exit();
 }
-check();
+
+checkSchema();
