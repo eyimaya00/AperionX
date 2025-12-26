@@ -1540,8 +1540,12 @@ function renderPaginationControls() {
 
 // Load Article Detail Page
 async function loadArticleDetail() {
+    console.log('[DEBUG] loadArticleDetail called');
+    console.log('[DEBUG] window.SERVER_ARTICLE:', window.SERVER_ARTICLE);
+
     // 1. Check for SSR Preloaded Data (Hydration)
     if (window.SERVER_ARTICLE) {
+        console.log('[DEBUG] Calling renderArticleDetail with SSR data');
         renderArticleDetail(window.SERVER_ARTICLE);
         return;
     }
