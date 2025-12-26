@@ -1760,13 +1760,7 @@ function renderArticleDetail(article) {
     }
 
 
-} catch (err) {
-    console.error(err);
-    showToast('Makale yüklenirken hata oluştu.', 'error');
-    setTimeout(() => {
-        // window.location.href = 'articles.html';
-    }, 3000);
-}
+
 }
 
 // --- Dynamic Frontend Categories & Settings ---
