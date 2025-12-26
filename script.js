@@ -1555,12 +1555,12 @@ async function loadArticleDetail() {
         const pathParts = window.location.pathname.split('/');
         const possibleSlug = pathParts[pathParts.length - 1]; // naive check
         if (!possibleSlug || possibleSlug === 'article-detail.html') {
-            window.location.href = 'articles.html';
+            window.location.href = '/articles.html';
             return;
         }
         // If we implemented an API to fetch by slug, we'd use it here.
         // For now, assume if no ID and no SSR, we redirect.
-        window.location.href = 'articles.html';
+        window.location.href = '/articles.html';
         return;
     }
 
