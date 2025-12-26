@@ -1717,9 +1717,9 @@ function renderArticleDetail(article) {
     }
 
     // References
-    const refList = document.getElementById('ref-list');
-    const refSection = document.getElementById('detail-references');
-    if (article.references_list) {
+    const refList = document.getElementById('references-list');
+    const refSection = document.getElementById('references-section');
+    if (article.references_list && refList && refSection) {
         refList.innerHTML = '';
         // Split by newline or just render generic if it's a blob
         // Assuming newline separated for now, or just HTML
@@ -1731,7 +1731,7 @@ function renderArticleDetail(article) {
             }
         });
         refSection.style.display = 'block';
-    } else {
+    } else if (refSection) {
         refSection.style.display = 'none';
     }
 
