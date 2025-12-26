@@ -1,6 +1,9 @@
 ﻿// Base API URL
 const API_URL = '/api';
 
+// Global Article ID for interactions
+window.currentArticleId = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
 
@@ -1742,6 +1745,7 @@ function renderArticleDetail(article) {
 
     // Load Interactions
     const articleId = article.id;
+    window.currentArticleId = articleId; // Store globally for like/comment functions
     loadLikes(articleId);
     loadComments(articleId);
     if (typeof loadArticleSlider === 'function') loadArticleSlider(articleId);
@@ -2017,9 +2021,12 @@ async function toggleLike() {
         return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    if (!id) return;
+    // Use global article ID instead of URL params (fixes clean URL support)
+    const id = window.currentArticleId;
+    if (!id) {
+        console.error('toggleLike: No article ID found');
+        return;
+    }
 
     try {
         const res = await fetch(`${API_URL}/articles/${id}/like`, {
@@ -2088,8 +2095,13 @@ async function postComment() {
         return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    // Use global article ID instead of URL params (fixes clean URL support)
+    const id = window.currentArticleId;
+    if (!id) {
+        console.error('postComment: No article ID found');
+        showToast('Hata: Makale bulunamadı.', 'error');
+        return;
+    }
     const input = document.getElementById('comment-input');
     const content = input.value.trim();
 
@@ -2127,8 +2139,8 @@ async function deleteComment(commentId) {
 
         if (res.ok) {
             showToast('Yorum silindi.', 'success');
-            const params = new URLSearchParams(window.location.search);
-            loadComments(params.get('id'));
+            // Use global article ID instead of URL params (fixes clean URL support)
+            loadComments(window.currentArticleId);
         } else {
             showToast('Silme başarısız.', 'error');
         }

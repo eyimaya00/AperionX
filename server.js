@@ -1748,6 +1748,9 @@ app.get('/api/articles/:id', async (req, res) => {
             return res.status(404).json({ error: 'Makale bulunamadı veya yayında değil.' });
         }
 
+        // Get the article ID from the fetched row (for view counting)
+        const articleId = rows[0].id;
+
         // Secure View Counting
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
