@@ -1568,8 +1568,8 @@ async function loadArticleDetail() {
             return;
         } catch (e) {
             console.error('Slug fetch failed:', e);
-            // alert('Hata: ' + e.toString()); // Temporary debug
-            window.location.href = '/articles.html';
+            document.body.innerHTML = '<h1 style="color:red; padding:50px;">HATA: Makale Yüklenemedi</h1><p style="padding:0 50px;">' + e.toString() + '</p>';
+            // window.location.href = '/articles.html'; // DISABLE REDIRECT FOR DEBUGGING
             return;
         }
     }
