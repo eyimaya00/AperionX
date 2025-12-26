@@ -650,6 +650,27 @@
             }
         }
 
+        .btn-show-more-comments {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-show-more-comments:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
         /* Modern Comment Section */
         .comments-section {
             margin-top: 60px;
@@ -1434,6 +1455,10 @@
             } catch (e) { console.error(e); }
         }
 
+        // Global state for comments
+        let allComments = [];
+        const COMMENT_INITIAL_LIMIT = 2; // User requested 2 example comments
+
         async function loadComments(id) {
             const token = localStorage.getItem('token');
             const formContainer = document.getElementById('comment-form-container');
@@ -1459,48 +1484,86 @@
 
                 // 2. Fetch Comments
                 const res = await fetch(`${API_BASE}/articles/${id}/comments`, { headers });
-                let comments = [];
 
                 if (res.ok) {
-                    comments = await res.json();
+                    allComments = await res.json();
+                } else {
+                    allComments = [];
                 }
 
                 // Safety check
-                if (!Array.isArray(comments)) comments = [];
+                if (!Array.isArray(allComments)) allComments = [];
 
-                document.getElementById('comment-count').innerText = comments.length;
-                const list = document.getElementById('comments-list');
+                document.getElementById('comment-count').innerText = allComments.length;
 
-                if (comments.length === 0) {
-                    list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
-                } else {
-                    list.innerHTML = comments.map(c => {
-                        const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
-                        return `
-                        <div class="comment-item" id="comment-${c.id}">
-                            <div class="comment-avatar">${initials}</div>
-                            <div class="comment-content-wrapper">
-                                <div class="comment-header">
-                                    <span class="comment-author">${c.fullname || 'Kullanıcı'}</span>
-                                    ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
-                                    <div class="comment-actions">
-                                        <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
-                                        ${c.is_mine ? `
-                                            <span style="margin: 0 8px; color:#cbd5e1;">|</span>
-                                            <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
-                                            <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                <div class="comment-body" id="body-${c.id}">${c.content}</div>
-                                <div id="edit-form-${c.id}" style="display:none;"></div>
-                            </div>
-                        </div>
-                    `;
-                    }).join('');
-                }
+                // Render with initial limit
+                renderCommentsList(COMMENT_INITIAL_LIMIT);
 
             } catch (e) { console.error('Comment load error:', e); }
+        }
+
+        function renderCommentsList(limit) {
+            const list = document.getElementById('comments-list');
+            // Determine which comments to show
+            const visibleComments = (limit && limit < allComments.length)
+                ? allComments.slice(0, limit)
+                : allComments;
+
+            if (allComments.length === 0) {
+                list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
+                return;
+            }
+
+            // Generate HTML for visible comments
+            let html = visibleComments.map(c => generateCommentHTML(c)).join('');
+
+            // Append "Show More" button if needed
+            if (limit && allComments.length > limit) {
+                const remaining = allComments.length - limit;
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(null)" class="btn-show-more-comments">
+                            Tüm Yorumları Gör (+${remaining}) <i class="ph ph-caret-down"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (!limit && allComments.length > COMMENT_INITIAL_LIMIT) {
+                // Optional: "Show Less" button when fully expanded
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(COMMENT_INITIAL_LIMIT)" class="btn-show-more-comments">
+                            Daha Az Göster <i class="ph ph-caret-up"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            list.innerHTML = html;
+        }
+
+        function generateCommentHTML(c) {
+            const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+            return `
+                <div class="comment-item" id="comment-${c.id}">
+                    <div class="comment-avatar">${initials}</div>
+                    <div class="comment-content-wrapper">
+                        <div class="comment-header">
+                            <span class="comment-author">${c.fullname || 'Kullanıcı'}</span>
+                            ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                            <div class="comment-actions">
+                                <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                                ${c.is_mine ? `
+                                    <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                    <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
+                                    <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="comment-body" id="body-${c.id}">${c.content}</div>
+                        <div id="edit-form-${c.id}" style="display:none;"></div>
+                    </div>
+                </div>
+            `;
         }
 
         async function postComment() {
