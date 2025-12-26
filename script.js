@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArticlesPage();
     }
 
-    if (window.location.pathname.includes('article-detail.html')) {
+    if (window.location.pathname.includes('article-detail.html') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/')) {
         loadArticleDetail();
     }
 
@@ -1568,6 +1568,7 @@ async function loadArticleDetail() {
             return;
         } catch (e) {
             console.error('Slug fetch failed:', e);
+            // alert('Hata: ' + e.toString()); // Temporary debug
             window.location.href = '/articles.html';
             return;
         }
