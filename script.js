@@ -592,6 +592,33 @@ async function loadSettings() {
             link.href = settings.site_favicon;
         }
 
+        // --- GLOBAL SEO / SOCIAL SHARE UPDATE ---
+        // If we are NOT on an article detail page (which handles its own tags),
+        // set the default site image/logo for social sharing.
+        if (!window.location.pathname.includes('article-detail.html')) {
+            const logoUrl = settings.site_logo
+                ? (settings.site_logo.startsWith('http') ? settings.site_logo : window.location.origin + '/' + settings.site_logo.replace(/^\//, ''))
+                : window.location.origin + '/uploads/logo.png';
+
+            // Open Graph
+            let ogImg = document.querySelector('meta[property="og:image"]');
+            if (!ogImg) {
+                ogImg = document.createElement('meta');
+                ogImg.setAttribute('property', 'og:image');
+                document.head.appendChild(ogImg);
+            }
+            ogImg.setAttribute('content', logoUrl);
+
+            // Twitter
+            let twImg = document.querySelector('meta[name="twitter:image"]');
+            if (!twImg) {
+                twImg = document.createElement('meta');
+                twImg.name = 'twitter:image';
+                document.head.appendChild(twImg);
+            }
+            twImg.content = logoUrl;
+        }
+
         // Apply Text Settings
         if (settings.hero_btn_text) {
             const el = document.getElementById('hero-main-btn');
@@ -1534,18 +1561,75 @@ async function loadArticleDetail() {
         document.title = `${article.title} - AperionX`;
 
         // Update SEO Meta Tags
+        // Update SEO Meta Tags
         const desc = article.excerpt || article.title;
         const origin = window.location.origin;
+
+        // 1. Determine Article Image URL
         let imgUrl = article.image_url || '';
         if (imgUrl && !imgUrl.startsWith('http')) {
             imgUrl = `${origin}/${imgUrl.startsWith('/') ? imgUrl.slice(1) : imgUrl}`;
         }
 
+        // 2. Fetch Site Logo for Fallback logic
+        let siteLogoUrl = '';
+        try {
+            // Retrieve from settings if already loaded, otherwise fetch or default
+            const settingsRes = await fetch(`${API_URL}/settings`);
+            const settings = await settingsRes.json();
+            if (settings.site_logo) {
+                siteLogoUrl = settings.site_logo;
+                if (!siteLogoUrl.startsWith('http')) {
+                    siteLogoUrl = `${origin}/${siteLogoUrl.startsWith('/') ? siteLogoUrl.slice(1) : siteLogoUrl}`;
+                }
+            }
+        } catch (e) { }
+
+        // 3. Final Image Decision (Article Image > Site Logo > Default Placeholder)
+        const finalImg = imgUrl || siteLogoUrl || `${origin}/uploads/logo.png`;
+
+        // --- Standard Meta ---
         document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
+
+        // --- Open Graph (Facebook/WhatsApp/LinkedIn) ---
         document.querySelector('meta[property="og:title"]')?.setAttribute("content", article.title);
         document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
-        document.querySelector('meta[property="og:image"]')?.setAttribute("content", imgUrl);
+        document.querySelector('meta[property="og:image"]')?.setAttribute("content", finalImg);
         document.querySelector('meta[property="og:url"]')?.setAttribute("content", window.location.href);
+        document.querySelector('meta[property="og:type"]')?.setAttribute("content", "article");
+
+        // --- Twitter Card ---
+        let twCard = document.querySelector('meta[name="twitter:card"]');
+        if (!twCard) {
+            twCard = document.createElement('meta');
+            twCard.name = "twitter:card";
+            document.head.appendChild(twCard);
+        }
+        twCard.content = "summary_large_image";
+
+        let twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (!twTitle) {
+            twTitle = document.createElement('meta');
+            twTitle.name = "twitter:title";
+            document.head.appendChild(twTitle);
+        }
+        twTitle.content = article.title;
+
+        let twDesc = document.querySelector('meta[name="twitter:description"]');
+        if (!twDesc) {
+            twDesc = document.createElement('meta');
+            twDesc.name = "twitter:description";
+            document.head.appendChild(twDesc);
+        }
+        twDesc.content = desc;
+
+        let twImg = document.querySelector('meta[name="twitter:image"]');
+        if (!twImg) {
+            twImg = document.createElement('meta');
+            twImg.name = "twitter:image";
+            document.head.appendChild(twImg);
+        }
+        twImg.content = finalImg;
 
         // Inner Content
         document.getElementById('detail-category').innerText = article.category || 'Genel';
