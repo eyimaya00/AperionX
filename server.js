@@ -1721,15 +1721,28 @@ app.get('/api/articles', async (req, res) => {
 // Public: Get Single Article by ID
 app.get('/api/articles/:id', async (req, res) => {
     try {
-        const articleId = req.params.id;
-        // Verify it is published!
-        const [rows] = await pool.query(
-            `SELECT a.*, u.fullname as author_name 
+        const param = req.params.id;
+
+        let query = `
+             SELECT a.*, u.fullname as author_name 
              FROM articles a 
              LEFT JOIN users u ON a.author_id = u.id 
-             WHERE a.id = ? AND a.status = 'published'`,
-            [articleId]
-        );
+             WHERE a.status = 'published' AND `;
+
+        const sqlParams = [];
+
+        // Check if param is numeric (ID) or string (Slug)
+        // Basic check: if it contains only digits, assume ID (unless slug is also digits, unlikely)
+        if (/^\d+$/.test(param)) {
+            query += "a.id = ?";
+            sqlParams.push(param);
+        } else {
+            query += "a.slug = ?";
+            sqlParams.push(param);
+        }
+
+        const [rows] = await pool.query(query, sqlParams);
+
 
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Makale bulunamadı veya yayında değil.' });

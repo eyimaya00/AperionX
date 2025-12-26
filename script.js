@@ -1558,10 +1558,19 @@ async function loadArticleDetail() {
             window.location.href = '/articles.html';
             return;
         }
-        // If we implemented an API to fetch by slug, we'd use it here.
-        // For now, assume if no ID and no SSR, we redirect.
-        window.location.href = '/articles.html';
-        return;
+        // Fetch by slug if logic allows
+        try {
+            const res = await fetch(`/api/articles/${possibleSlug}`);
+            if (!res.ok) throw new Error('Makale bulunamadı');
+
+            const article = await res.json();
+            renderArticleDetail(article);
+            return;
+        } catch (e) {
+            console.error('Slug fetch failed:', e);
+            window.location.href = '/articles.html';
+            return;
+        }
     }
 
     try {
