@@ -4717,7 +4717,7 @@ i[class*=" ph"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 #global-loader.hidden {

@@ -17,9 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global Loader Logic ---
     Promise.all([
         loadSettings(),
-        loadHero(),
-        // Add a minimum delay to prevent flickering
-        new Promise(resolve => setTimeout(resolve, 300))
+        loadHero()
     ]).then(() => {
         hideLoader();
     }).catch(err => {
