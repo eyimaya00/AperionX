@@ -141,52 +141,155 @@ app.get('/maintenance-access', async (req, res) => {
     }
 });
 
-// === DYNAMIC SEO: Article Detail ===
-// Intercept /article-detail.html to inject meta tags
+// === SEO & SLUG HELPERS ===
+function slugify(text) {
+    if (!text) return '';
+    const trMap = {
+        'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ş': 's', 'Ş': 's',
+        'ü': 'u', 'Ü': 'u', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'Ö': 'o'
+    };
+    return text.toString()
+        .split('')
+        .map(c => trMap[c] || c)
+        .join('')
+        .toLowerCase()
+        .replace(/\s+/g, '-')     // Replace spaces with -
+        .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')   // Replace multiple - with single -
+        .replace(/^-+/, '')       // Trim - from start
+        .replace(/-+$/, '');      // Trim - from end
+}
+
+async function getUniqueSlug(pool, title, excludeId = null) {
+    let slug = slugify(title);
+    let originalSlug = slug;
+    let counter = 1;
+    let exists = true;
+    while (exists) {
+        let query = "SELECT id FROM articles WHERE slug = ?";
+        let params = [slug];
+        if (excludeId) {
+            query += " AND id != ?";
+            params.push(excludeId);
+        }
+        const [rows] = await pool.query(query, params);
+        if (rows.length === 0) {
+            exists = false;
+        } else {
+            slug = `${originalSlug}-${counter}`;
+            counter++;
+        }
+    }
+    return slug;
+}
+
+// === DYNAMIC SEO ROUTES (SSR) ===
+
+// 1. Slug Route (Canonical)
+app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
+    const slug = req.params.slug;
+    try {
+        // Fetch article by slug
+        const [rows] = await pool.query('SELECT * FROM articles WHERE slug = ?', [slug]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Makale bulunamadı (404)');
+        }
+
+        const article = rows[0];
+
+        // Read Template
+        const filePath = path.join(__dirname, 'article-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                // Use JSDOM for robust manipulation
+                const dom = new JSDOM(htmlData);
+                const document = dom.window.document;
+                const origin = `${req.protocol}://${req.get('host')}`;
+
+                // Get Author Name
+                let authorName = 'AperionX Yazarı';
+                try {
+                    const [uRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
+                    if (uRows.length > 0) authorName = uRows[0].fullname;
+                } catch (e) { }
+
+                // Prepare Content
+                const title = article.title;
+                const summary = article.excerpt || article.title;
+                const img = article.image_url
+                    ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
+                    : `${origin}/uploads/logo.png`; // Fallback to site logo if generic? Or fetch settings?
+                const url = `${origin}/makale/${article.slug}`;
+
+                // --- INJECT META TAGS ---
+                document.title = `${title} - AperionX`;
+
+                const setMeta = (selector, value) => {
+                    let el = document.querySelector(selector);
+                    if (!el) {
+                        // Creating basic support if missing
+                        if (selector.startsWith('meta[name')) {
+                            el = document.createElement('meta');
+                            el.name = selector.match(/name="([^"]+)"/)[1];
+                            document.head.appendChild(el);
+                        } else if (selector.startsWith('meta[property')) {
+                            el = document.createElement('meta');
+                            el.setAttribute('property', selector.match(/property="([^"]+)"/)[1]);
+                            document.head.appendChild(el);
+                        }
+                    }
+                    if (el) el.setAttribute('content', value);
+                };
+
+                setMeta('meta[name="description"]', summary);
+                setMeta('meta[property="og:title"]', title);
+                setMeta('meta[property="og:description"]', summary);
+                setMeta('meta[property="og:image"]', img);
+                setMeta('meta[property="og:url"]', url);
+                setMeta('meta[property="og:type"]', 'article');
+
+                // Twitter
+                setMeta('meta[name="twitter:card"]', 'summary_large_image');
+                setMeta('meta[name="twitter:title"]', title);
+                setMeta('meta[name="twitter:description"]', summary);
+                setMeta('meta[name="twitter:image"]', img);
+
+                // --- INJECT PRELOADED DATA ---
+                // This allows client-side JS to render instantly without 2nd fetch
+                const script = document.createElement('script');
+                script.textContent = `window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";`;
+                document.head.appendChild(script);
+
+                res.send(dom.serialize());
+
+            } catch (parseErr) {
+                console.error('SSR Parse Error:', parseErr);
+                res.status(500).send(parseErr.toString());
+            }
+        });
+
+    } catch (e) {
+        console.error('DB Error:', e);
+        next();
+    }
+});
+
+// 2. Legacy Route Interceptor (Redirects to Slug)
 app.get('/article-detail.html', async (req, res, next) => {
     const articleId = req.query.id;
     if (!articleId) return next();
 
     try {
-        const [rows] = await pool.query('SELECT title, summary, image_url, created_at FROM articles WHERE id = ?', [articleId]);
-        if (rows.length === 0) return next();
-
-        const article = rows[0];
-        const filePath = path.join(__dirname, 'article-detail.html');
-
-        fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) return next();
-
-            const title = article.title.replace(/"/g, '&quot;');
-            const summary = article.summary ? article.summary.replace(/"/g, '&quot;') : 'AperionX Makalesi';
-            const image = article.image_url ? `${req.protocol}://${req.get('host')}/${article.image_url.replace(/\\/g, '/')}` : '';
-            const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-
-            // Format Date for SEO
-            const date = new Date(article.created_at).toISOString();
-
-            let html = data
-                // Basic
-                .replace('<title>Makale Yükleniyor... - AperionX</title>', `<title>${title} - AperionX</title>`)
-                .replace('<meta name="description" content="AperionX bilim ve teknoloji makaleleri">', `<meta name="description" content="${summary}">`)
-                // Open Graph
-                .replace('<meta property="og:title" content="AperionX">', `<meta property="og:title" content="${title}">`)
-                .replace('<meta property="og:description" content="Bilim ve teknolojinin sınırlarını zorlayın.">', `<meta property="og:description" content="${summary}">`)
-                .replace('<meta property="og:image" content="">', `<meta property="og:image" content="${image}">`)
-                .replace('<meta property="og:url" content="">', `<meta property="og:url" content="${url}">`)
-                // Twitter
-                .replace('<meta name="twitter:card" content="summary_large_image">',
-                    `<meta name="twitter:card" content="summary_large_image">
-                     <meta name="twitter:title" content="${title}">
-                     <meta name="twitter:description" content="${summary}">
-                     <meta name="twitter:image" content="${image}">`);
-
-            res.send(html);
-        });
-    } catch (e) {
-        console.error('SEO Injection Error:', e);
-        next();
-    }
+        const [rows] = await pool.query('SELECT slug FROM articles WHERE id = ?', [articleId]);
+        if (rows.length > 0 && rows[0].slug) {
+            // Permanent Redirect to new SEO URL
+            return res.redirect(301, `/makale/${rows[0].slug}`);
+        }
+        next(); // fallback if no slug
+    } catch (e) { next(); }
 });
 app.use(express.static(__dirname)); // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Explicitly serve uploads
@@ -905,9 +1008,12 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
         // Sanitize Content
         const cleanContent = DOMPurify.sanitize(content);
 
+        // Generate Slug
+        const slug = await getUniqueSlug(pool, title);
+
         await pool.query(
-            'INSERT INTO articles (title, category, content, image_url, author_id, excerpt, status, tags, references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
+            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
         );
 
         console.log('Route: Article inserted successfully');
@@ -965,7 +1071,15 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     let updates = [];
     let params = [];
 
-    if (title) { updates.push('title = ?'); params.push(title); }
+    if (title) {
+        updates.push('title = ?');
+        params.push(title);
+
+        // Update slug if title changes
+        const newSlug = await getUniqueSlug(pool, title, articleId);
+        updates.push('slug = ?');
+        params.push(newSlug);
+    }
     if (category) { updates.push('category = ?'); params.push(category); }
     if (content) {
         updates.push('content = ?');
@@ -1572,7 +1686,7 @@ app.get('/api/articles', async (req, res) => {
         const { category, search, page = 1, limit = 9 } = req.query;
         // Truncate excerpt to avoid huge packet sizes if it contains full content
         let query = `
-            SELECT a.id, a.title, a.category, u.fullname as author_name, a.image_url, a.created_at, a.views, LEFT(a.excerpt, 300) as excerpt 
+            SELECT a.id, a.slug, a.title, a.category, u.fullname as author_name, a.image_url, a.created_at, a.views, LEFT(a.excerpt, 300) as excerpt 
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
             WHERE a.status = 'published'

@@ -1269,8 +1269,8 @@ async function loadShowcase() {
                         </div>
                     </div>
                     
-                    <a href="article-detail.html?id=${item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
-                    <a href="article-detail.html?id=${item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
+                    <a href="/makale/${item.slug || 'article-detail.html?id=' + item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
+                    <a href="/makale/${item.slug || 'article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
                 `;
             }
         });
@@ -1475,7 +1475,7 @@ function renderArticlesGrid() {
         const safeAuthor = escapeHtml(article.author_name || 'Yazar');
 
         const html = `
-            <article class="featured-card small" style="min-height: 350px; cursor: pointer;" onclick="window.location.href='article-detail.html?id=${article.id}'">
+            <article class="featured-card small" style="min-height: 350px; cursor: pointer;" onclick="window.location.href='/makale/${article.slug || 'article-detail.html?id=' + article.id}'">
                 <div class="card-bg" style="background-image: url('${bgMeasure}')"></div>
                 <div class="card-overlay"></div>
                 
@@ -1490,7 +1490,7 @@ function renderArticlesGrid() {
                     </div>
                 </div>
 
-                <a href="article-detail.html?id=${article.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="/makale/${article.slug || 'article-detail.html?id=' + article.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
             </article>
         `;
         grid.innerHTML += html;
@@ -1539,11 +1539,28 @@ function renderPaginationControls() {
 
 // Load Article Detail Page
 async function loadArticleDetail() {
+    // 1. Check for SSR Preloaded Data (Hydration)
+    if (window.SERVER_ARTICLE) {
+        renderArticleDetail(window.SERVER_ARTICLE);
+        return;
+    }
+
+    // 2. Fallback: Client-side Fetch (e.g. if navigated via SPA or legacy link without redirect)
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
 
     if (!id) {
-        window.location.href = 'articles.html'; // Redirect if no ID
+        // Try parsing slug from path if not query param
+        // e.g. /makale/slug-name
+        const pathParts = window.location.pathname.split('/');
+        const possibleSlug = pathParts[pathParts.length - 1]; // naive check
+        if (!possibleSlug || possibleSlug === 'article-detail.html') {
+            window.location.href = 'articles.html';
+            return;
+        }
+        // If we implemented an API to fetch by slug, we'd use it here.
+        // For now, assume if no ID and no SSR, we redirect.
+        window.location.href = 'articles.html';
         return;
     }
 
@@ -1552,188 +1569,204 @@ async function loadArticleDetail() {
         if (!res.ok) throw new Error('Makale bulunamadı');
 
         const article = await res.json();
+        renderArticleDetail(article);
 
-        // Render content
-        document.getElementById('loading-indicator').style.display = 'none';
-        document.getElementById('article-wrapper').style.display = 'block';
+    } catch (e) { console.error(e); }
+}
 
-        // Set Meta & Title
-        document.title = `${article.title} - AperionX`;
+function renderArticleDetail(article) {
+    // Render content
+    document.getElementById('loading-indicator').style.display = 'none';
+    document.getElementById('article-wrapper').style.display = 'block';
 
-        // Update SEO Meta Tags
-        // Update SEO Meta Tags
-        const desc = article.excerpt || article.title;
-        const origin = window.location.origin;
+    // Set Meta & Title
+    document.title = `${article.title} - AperionX`;
 
-        // 1. Determine Article Image URL
-        let imgUrl = article.image_url || '';
-        if (imgUrl && !imgUrl.startsWith('http')) {
-            imgUrl = `${origin}/${imgUrl.startsWith('/') ? imgUrl.slice(1) : imgUrl}`;
-        }
+    // Update SEO Meta Tags
+    // Update SEO Meta Tags
+    const desc = article.excerpt || article.title;
+    const origin = window.location.origin;
 
-        // 2. Fetch Site Logo for Fallback logic
-        let siteLogoUrl = '';
-        try {
-            // Retrieve from settings if already loaded, otherwise fetch or default
-            const settingsRes = await fetch(`${API_URL}/settings`);
-            const settings = await settingsRes.json();
+    // 1. Determine Article Image URL
+    let imgUrl = article.image_url ? article.image_url.replace(/\\/g, '/') : '';
+    if (imgUrl && !imgUrl.startsWith('http')) {
+        imgUrl = `${origin}/${imgUrl.startsWith('/') ? imgUrl.slice(1) : imgUrl}`;
+    }
+
+    // 2. Fetch Site Logo for Fallback logic
+    let siteLogoUrl = '';
+    try {
+        // Retrieve from settings if already loaded, otherwise fetch or default
+        // This part might need to be adjusted if settings are not globally available or preloaded
+        // For now, assuming API_URL is defined and settings can be fetched.
+        // If settings are always preloaded, this fetch can be removed.
+        const settingsRes = fetch(`${API_URL}/settings`); // Use fetch directly, not await here
+        settingsRes.then(res => res.json()).then(settings => {
             if (settings.site_logo) {
                 siteLogoUrl = settings.site_logo;
                 if (!siteLogoUrl.startsWith('http')) {
                     siteLogoUrl = `${origin}/${siteLogoUrl.startsWith('/') ? siteLogoUrl.slice(1) : siteLogoUrl}`;
                 }
             }
-        } catch (e) { }
+            // Re-evaluate finalImg and update meta tags after siteLogoUrl is determined
+            const finalImg = imgUrl || siteLogoUrl || `${origin}/uploads/logo.png`;
+            document.querySelector('meta[property="og:image"]')?.setAttribute("content", finalImg);
+            document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", finalImg);
+        }).catch(e => console.error("Failed to load settings for site logo:", e));
 
-        // 3. Final Image Decision (Article Image > Site Logo > Default Placeholder)
-        const finalImg = imgUrl || siteLogoUrl || `${origin}/uploads/logo.png`;
+    } catch (e) { } // Catch for the initial try block, not the promise
 
-        // --- Standard Meta ---
-        document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
-
-        // --- Open Graph (Facebook/WhatsApp/LinkedIn) ---
-        document.querySelector('meta[property="og:title"]')?.setAttribute("content", article.title);
-        document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
-        document.querySelector('meta[property="og:image"]')?.setAttribute("content", finalImg);
-        document.querySelector('meta[property="og:url"]')?.setAttribute("content", window.location.href);
-        document.querySelector('meta[property="og:type"]')?.setAttribute("content", "article");
-
-        // --- Twitter Card ---
-        let twCard = document.querySelector('meta[name="twitter:card"]');
-        if (!twCard) {
-            twCard = document.createElement('meta');
-            twCard.name = "twitter:card";
-            document.head.appendChild(twCard);
-        }
-        twCard.content = "summary_large_image";
-
-        let twTitle = document.querySelector('meta[name="twitter:title"]');
-        if (!twTitle) {
-            twTitle = document.createElement('meta');
-            twTitle.name = "twitter:title";
-            document.head.appendChild(twTitle);
-        }
-        twTitle.content = article.title;
-
-        let twDesc = document.querySelector('meta[name="twitter:description"]');
-        if (!twDesc) {
-            twDesc = document.createElement('meta');
-            twDesc.name = "twitter:description";
-            document.head.appendChild(twDesc);
-        }
-        twDesc.content = desc;
-
-        let twImg = document.querySelector('meta[name="twitter:image"]');
-        if (!twImg) {
-            twImg = document.createElement('meta');
-            twImg.name = "twitter:image";
-            document.head.appendChild(twImg);
-        }
-        twImg.content = finalImg;
-
-        // Inner Content
-        document.getElementById('detail-category').innerText = article.category || 'Genel';
-        document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-        document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Gizli Yazar'}`;
-        document.getElementById('detail-title').innerText = article.title;
-
-        // Excerpt
-        const excerptEl = document.getElementById('detail-excerpt');
-        if (article.excerpt) {
-            excerptEl.innerText = article.excerpt;
-            document.getElementById('summary-box').style.display = 'block';
-        } else {
-            document.getElementById('summary-box').style.display = 'none';
-        }
-
-        const img = document.getElementById('detail-image');
-        if (article.image_url) {
-            img.src = article.image_url;
-            img.alt = article.title; // SEO Alt Tag
-        } else {
-            img.style.display = 'none';
-        }
-
-        // Tags
-        const tagsContainer = document.getElementById('detail-tags');
-        if (article.tags) {
-            tagsContainer.innerHTML = '';
-            const tags = article.tags.split(',').map(t => t.trim());
-            tags.forEach(tag => {
-                if (tag) {
-                    tagsContainer.innerHTML += `<span class="tag-chip">#${tag}</span>`;
-                }
-            });
-        } else {
-            tagsContainer.style.display = 'none';
-        }
-
-        // References
-        const refList = document.getElementById('ref-list');
-        const refSection = document.getElementById('detail-references');
-        if (article.references_list) {
-            refList.innerHTML = '';
-            // Split by newline or just render generic if it's a blob
-            // Assuming newline separated for now, or just HTML
-            // If it is simple text with newlines:
-            const refs = article.references_list.split('\n');
-            refs.forEach(ref => {
-                if (ref.trim()) {
-                    refList.innerHTML += `<li>${escapeHtml(ref)}</li>`;
-                }
-            });
-            refSection.style.display = 'block';
-        } else {
-            refSection.style.display = 'none';
-        }
-
-        // Content & Image Fix (Windows Path)
-        let contentHtml = article.content || '';
-        contentHtml = contentHtml.replace(/\\/g, '/'); // Fix all backslashes
-        document.getElementById('detail-content').innerHTML = contentHtml;
-
-        // Load Interactions
-        loadLikes(id);
-        loadComments(id);
-        if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
-
-        // --- Social Share Buttons ---
-        const twitterBtn = document.querySelector('.share-twitter');
-        const whatsappBtn = document.querySelector('.share-whatsapp');
-        const linkedinBtn = document.querySelector('.share-linkedin');
-
-        const shareUrl = window.location.href;
-        const shareTitle = article.title;
-
-        if (twitterBtn) {
-            twitterBtn.onclick = (e) => {
-                e.preventDefault();
-                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-            };
-        }
-
-        if (whatsappBtn) {
-            whatsappBtn.onclick = (e) => {
-                e.preventDefault();
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + ' ' + shareUrl)}`, '_blank');
-            };
-        }
-
-        if (linkedinBtn) {
-            linkedinBtn.onclick = (e) => {
-                e.preventDefault();
-                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
-            };
-        }
+    // 3. Final Image Decision (Article Image > Site Logo > Default Placeholder)
+    // This will be initially set, and potentially updated by the settings fetch above
+    const finalImg = imgUrl || siteLogoUrl || `${origin}/uploads/logo.png`;
 
 
-    } catch (err) {
-        console.error(err);
-        showToast('Makale yüklenirken hata oluştu.', 'error');
-        setTimeout(() => {
-            // window.location.href = 'articles.html';
-        }, 3000);
+    // --- Standard Meta ---
+    document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
+
+    // --- Open Graph (Facebook/WhatsApp/LinkedIn) ---
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", article.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
+    document.querySelector('meta[property="og:image"]')?.setAttribute("content", finalImg);
+    document.querySelector('meta[property="og:url"]')?.setAttribute("content", window.location.href);
+    document.querySelector('meta[property="og:type"]')?.setAttribute("content", "article");
+
+    // --- Twitter Card ---
+    let twCard = document.querySelector('meta[name="twitter:card"]');
+    if (!twCard) {
+        twCard = document.createElement('meta');
+        twCard.name = "twitter:card";
+        document.head.appendChild(twCard);
     }
+    twCard.content = "summary_large_image";
+
+    let twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (!twTitle) {
+        twTitle = document.createElement('meta');
+        twTitle.name = "twitter:title";
+        document.head.appendChild(twTitle);
+    }
+    twTitle.content = article.title;
+
+    let twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (!twDesc) {
+        twDesc = document.createElement('meta');
+        twDesc.name = "twitter:description";
+        document.head.appendChild(twDesc);
+    }
+    twDesc.content = desc;
+
+    let twImg = document.querySelector('meta[name="twitter:image"]');
+    if (!twImg) {
+        twImg = document.createElement('meta');
+        twImg.name = "twitter:image";
+        document.head.appendChild(twImg);
+    }
+    twImg.content = finalImg;
+
+    // Inner Content
+    document.getElementById('detail-category').innerText = article.category || 'Genel';
+    document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
+    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Gizli Yazar'}`;
+    document.getElementById('detail-title').innerText = article.title;
+
+    // Excerpt
+    const excerptEl = document.getElementById('detail-excerpt');
+    if (article.excerpt) {
+        excerptEl.innerText = article.excerpt;
+        document.getElementById('summary-box').style.display = 'block';
+    } else {
+        document.getElementById('summary-box').style.display = 'none';
+    }
+
+    const img = document.getElementById('detail-image');
+    if (article.image_url) {
+        img.src = article.image_url;
+        img.alt = article.title; // SEO Alt Tag
+    } else {
+        img.style.display = 'none';
+    }
+
+    // Tags
+    const tagsContainer = document.getElementById('detail-tags');
+    if (article.tags) {
+        tagsContainer.innerHTML = '';
+        const tags = article.tags.split(',').map(t => t.trim());
+        tags.forEach(tag => {
+            if (tag) {
+                tagsContainer.innerHTML += `<span class="tag-chip">#${tag}</span>`;
+            }
+        });
+    } else {
+        tagsContainer.style.display = 'none';
+    }
+
+    // References
+    const refList = document.getElementById('ref-list');
+    const refSection = document.getElementById('detail-references');
+    if (article.references_list) {
+        refList.innerHTML = '';
+        // Split by newline or just render generic if it's a blob
+        // Assuming newline separated for now, or just HTML
+        // If it is simple text with newlines:
+        const refs = article.references_list.split('\n');
+        refs.forEach(ref => {
+            if (ref.trim()) {
+                refList.innerHTML += `<li>${escapeHtml(ref)}</li>`;
+            }
+        });
+        refSection.style.display = 'block';
+    } else {
+        refSection.style.display = 'none';
+    }
+
+    // Content & Image Fix (Windows Path)
+    let contentHtml = article.content || '';
+    contentHtml = contentHtml.replace(/\\/g, '/'); // Fix all backslashes
+    document.getElementById('detail-content').innerHTML = contentHtml;
+
+    // Load Interactions
+    loadLikes(id);
+    loadComments(id);
+    if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
+
+    // --- Social Share Buttons ---
+    const twitterBtn = document.querySelector('.share-twitter');
+    const whatsappBtn = document.querySelector('.share-whatsapp');
+    const linkedinBtn = document.querySelector('.share-linkedin');
+
+    const shareUrl = window.location.href;
+    const shareTitle = article.title;
+
+    if (twitterBtn) {
+        twitterBtn.onclick = (e) => {
+            e.preventDefault();
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+        };
+    }
+
+    if (whatsappBtn) {
+        whatsappBtn.onclick = (e) => {
+            e.preventDefault();
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + ' ' + shareUrl)}`, '_blank');
+        };
+    }
+
+    if (linkedinBtn) {
+        linkedinBtn.onclick = (e) => {
+            e.preventDefault();
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+        };
+    }
+
+
+} catch (err) {
+    console.error(err);
+    showToast('Makale yüklenirken hata oluştu.', 'error');
+    setTimeout(() => {
+        // window.location.href = 'articles.html';
+    }, 3000);
+}
 }
 
 // --- Dynamic Frontend Categories & Settings ---
@@ -1886,7 +1919,7 @@ function slideArticles(direction) {
 async function loadArticleSlider(currentId) {
     try {
         // Fetch Settings for Title
-        const settingsRes = await fetch(`${API_BASE}/settings`);
+        const settingsRes = await fetch(`${API_URL}/settings`);
         const settings = await settingsRes.json();
         if (settings.article_detail_slider_title) {
             const titleEl = document.getElementById('similar-articles-title');
@@ -1894,7 +1927,7 @@ async function loadArticleSlider(currentId) {
         }
 
         // Fetch Articles
-        const res = await fetch(`${API_BASE}/articles`);
+        const res = await fetch(`${API_URL}/articles`);
         if (!res.ok) return;
         const allArticles = await res.json();
 
@@ -1913,7 +1946,7 @@ async function loadArticleSlider(currentId) {
             const card = document.createElement('div');
             card.className = 'similar-article-card';
             // Set Background Image directly
-            const bgUrl = art.image_url || 'https://via.placeholder.com/300x400';
+            const bgUrl = art.image_url ? art.image_url.replace(/\\/g, '/') : 'https://via.placeholder.com/300x400';
             card.style.backgroundImage = `url('${bgUrl}')`;
 
             // New "Full Image" Overlay Structure
@@ -1922,7 +1955,7 @@ async function loadArticleSlider(currentId) {
                      <span class="category-badge-slider">${art.category || 'Genel'}</span>
                      
                      <div class="content-bottom">
-                        <a href="article-detail.html?id=${art.id}" class="similar-card-title">${art.title}</a>
+                        <a href="/makale/${art.slug || 'article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
                         <div class="similar-card-meta">
                             <span>${art.author_name || 'Admin'}</span>
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
@@ -1935,7 +1968,7 @@ async function loadArticleSlider(currentId) {
             card.onclick = (e) => {
                 // Prevent double click if clicking title
                 if (!e.target.closest('a')) {
-                    window.location.href = `article-detail.html?id=${art.id}`;
+                    window.location.href = `/makale/${art.slug || 'article-detail.html?id=' + art.id}`;
                 }
             };
 
