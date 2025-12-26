@@ -934,6 +934,25 @@
                 width: 260px;
                 height: 350px;
             }
+
+            /* Mobile: Allow manual scrolling for Similar Articles */
+            .similar-slider-wrapper {
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px;
+                /* Space for scrollbar if any, though usually hidden on mobile */
+            }
+
+            /* Disable JS transform on mobile to prevent conflict */
+            #similar-slider-track {
+                transform: none !important;
+            }
+
+            /* Hide Slider Navigation Buttons on Mobile */
+            .slider-nav-btn {
+                display: none !important;
+            }
         }
     </style>
 </head>
