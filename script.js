@@ -1751,9 +1751,10 @@ function renderArticleDetail(article) {
     if (typeof loadArticleSlider === 'function') loadArticleSlider(articleId);
 
     // --- Social Share Buttons ---
-    const twitterBtn = document.querySelector('.share-twitter');
-    const whatsappBtn = document.querySelector('.share-whatsapp');
-    const linkedinBtn = document.querySelector('.share-linkedin');
+    const twitterBtn = document.querySelector('.share-icon.twitter');
+    const whatsappBtn = document.querySelector('.share-icon.whatsapp');
+    const linkedinBtn = document.querySelector('.share-icon.linkedin');
+    const instagramBtn = document.querySelector('.share-icon.instagram');
 
     const shareUrl = window.location.href;
     const shareTitle = article.title;
@@ -1776,6 +1777,18 @@ function renderArticleDetail(article) {
         linkedinBtn.onclick = (e) => {
             e.preventDefault();
             window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+        };
+    }
+
+    if (instagramBtn) {
+        instagramBtn.onclick = (e) => {
+            e.preventDefault();
+            // Instagram doesn't support direct URL sharing, copy link to clipboard
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('Bağlantı kopyalandı! Instagram\'da paylaşabilirsiniz.', 'success');
+            }).catch(() => {
+                showToast('Bağlantı kopyalanamadı.', 'error');
+            });
         };
     }
 

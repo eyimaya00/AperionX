@@ -258,6 +258,40 @@
             margin-bottom: 8px;
         }
 
+        /* References List (ul#references-list) */
+        .references-list {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 0;
+        }
+
+        .references-list li {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .references-list li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        [data-theme="dark"] .references-list li {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .references-list li {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
         /* Mobile adjustment for card */
         @media (max-width: 768px) {
             .unified-article-card {
