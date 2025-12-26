@@ -1774,6 +1774,17 @@ app.get('/api/articles/:id', async (req, res) => {
     }
 });
 
+// DEBUG: Check IP Address
+app.get('/api/debug-ip', (req, res) => {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    res.json({
+        ip: ip,
+        remoteAddress: req.socket.remoteAddress,
+        xForwardedFor: req.headers['x-forwarded-for'],
+        headers: req.headers
+    });
+});
+
 // Clean URLs
 app.get('/admin', (req, res) => {
     res.sendFile('admin.html', { root: __dirname });
