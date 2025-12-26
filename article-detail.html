@@ -1307,25 +1307,13 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script src="script.js?v=3.4"></script>
+    <script src="script.js?v=3.5"></script>
     <script>
         // Use API_URL from script.js or default
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // If SSR data exists, render it immediately
-            if (window.SERVER_ARTICLE) {
-                // Render the article content
-                if (typeof renderArticleDetail === 'function') {
-                    renderArticleDetail(window.SERVER_ARTICLE);
-                }
-                // Load additional interactions
-                const id = window.SERVER_ARTICLE.id;
-                if (typeof loadLikes === 'function') loadLikes(id);
-                if (typeof loadComments === 'function') loadComments(id);
-                if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
-            }
-        });
+        // script.js handles loadArticleDetail on DOMContentLoaded for /makale/ URLs
+        // No need for duplicate handler here
 
         async function loadLikes(id) {
             try {
