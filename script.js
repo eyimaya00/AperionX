@@ -1475,22 +1475,23 @@ function renderArticlesGrid() {
         const safeAuthor = escapeHtml(article.author_name || 'Yazar');
 
         const html = `
-            <article class="featured-card small" style="min-height: 350px; cursor: pointer;" onclick="window.location.href='${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}'">
+            <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
                 <div class="card-bg" style="background-image: url('${bgMeasure}')"></div>
-                <div class="card-overlay"></div>
+                <div class="card-overlay" style="pointer-events: none;"></div>
                 
-                <div class="card-top-content">
+                <div class="card-top-content" style="pointer-events: none;">
                      <span class="category-badge-glass">${safecategory}</span>
                 </div>
                 
-                <div class="card-bottom-content">
+                <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
                     <div class="author-name" style="font-size: 0.85rem; opacity: 0.9;">
                         ${safeAuthor}
                     </div>
                 </div>
 
-                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;"></a>
             </article>
         `;
         grid.innerHTML += html;
