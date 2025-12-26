@@ -1313,15 +1313,17 @@
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
 
         document.addEventListener('DOMContentLoaded', () => {
-            // loadArticleDetail is now handled by script.js which supports SSR and slug URLs
-            // We only need to load additional interactions if SSR data exists
+            // If SSR data exists, render it immediately
             if (window.SERVER_ARTICLE) {
-                const id = window.SERVER_ARTICLE.id;
-                loadLikes(id);
-                loadComments(id);
-                if (typeof loadArticleSlider === 'function') {
-                    loadArticleSlider(id);
+                // Render the article content
+                if (typeof renderArticleDetail === 'function') {
+                    renderArticleDetail(window.SERVER_ARTICLE);
                 }
+                // Load additional interactions
+                const id = window.SERVER_ARTICLE.id;
+                if (typeof loadLikes === 'function') loadLikes(id);
+                if (typeof loadComments === 'function') loadComments(id);
+                if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
             }
         });
 
