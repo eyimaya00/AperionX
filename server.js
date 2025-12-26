@@ -188,6 +188,11 @@ async function getUniqueSlug(pool, title, excludeId = null) {
 // 1. Slug Route (Canonical)
 app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
+
+    // EDGE CASE FIX: Redirect incorrect /makale/articles.html links -> /articles.html
+    if (slug === 'articles.html' || slug === 'article-detail.html') {
+        return res.redirect(301, '/articles.html');
+    }
     try {
         // Fetch article by slug
         const [rows] = await pool.query('SELECT * FROM articles WHERE slug = ?', [slug]);
