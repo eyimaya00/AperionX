@@ -1359,7 +1359,12 @@
                 const refList = document.getElementById('references-list');
                 if (article.references_list) {
                     document.getElementById('references-section').style.display = 'block';
-                    refList.innerHTML = article.references_list.split('\n').map(r => `<li>${r}</li>`).join('');
+                    refList.innerHTML = article.references_list
+                        .split('\n')
+                        .map(r => r.trim()) // Trim whitespace
+                        .filter(r => r.length > 0) // Filter out empty lines
+                        .map(r => `<li>${r}</li>`)
+                        .join('');
                 }
 
                 // Tags
