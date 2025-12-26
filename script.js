@@ -1678,7 +1678,7 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Gizli Yazar'}`;
+    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar'}`;
     document.getElementById('detail-title').innerText = article.title;
 
     // Excerpt
@@ -1737,9 +1737,10 @@ function renderArticleDetail(article) {
     document.getElementById('detail-content').innerHTML = contentHtml;
 
     // Load Interactions
-    loadLikes(id);
-    loadComments(id);
-    if (typeof loadArticleSlider === 'function') loadArticleSlider(id);
+    const articleId = article.id;
+    loadLikes(articleId);
+    loadComments(articleId);
+    if (typeof loadArticleSlider === 'function') loadArticleSlider(articleId);
 
     // --- Social Share Buttons ---
     const twitterBtn = document.querySelector('.share-twitter');
