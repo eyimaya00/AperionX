@@ -1307,104 +1307,23 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script src="script.js?v=3.2"></script>
+    <script src="script.js?v=3.3"></script>
     <script>
         // Use API_URL from script.js or default
-        const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:3000/api';
+        const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadArticleDetail();
-        });
-
-        async function loadArticleDetail() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-
-            if (!id) {
-                window.location.href = 'articles.html';
-                return;
-            }
-
-            try {
-                // Fetch Article
-                const res = await fetch(`${API_BASE}/articles/${id}`);
-                if (!res.ok) throw new Error('Not found');
-                const article = await res.json();
-
-                // Populate UI
-                document.getElementById('loading-indicator').style.display = 'none';
-                document.getElementById('article-wrapper').style.display = 'block';
-
-                document.title = article.title + ' - AperionX';
-
-                // Hero Image
-                const img = document.getElementById('detail-image');
-                if (article.image_url) {
-                    img.src = article.image_url;
-                    img.style.display = 'block';
-                } else {
-                    img.style.display = 'none';
-                }
-
-                // Meta
-                document.getElementById('detail-category').innerText = article.category || 'Genel';
-                document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-                document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Admin'}`;
-
-                // Content
-                document.getElementById('detail-title').innerText = article.title;
-                document.getElementById('detail-excerpt').innerText = article.excerpt || '';
-                document.getElementById('detail-content').innerHTML = article.content;
-
-                // References
-                const refList = document.getElementById('references-list');
-                if (article.references_list) {
-                    document.getElementById('references-section').style.display = 'block';
-                    refList.innerHTML = article.references_list
-                        .split('\n')
-                        .map(r => r.trim()) // Trim whitespace
-                        .filter(r => r.length > 0) // Filter out empty lines
-                        .map(r => `<li>${r}</li>`)
-                        .join('');
-                }
-
-                // Tags
-                const tagsContainer = document.getElementById('detail-tags');
-                if (article.tags) {
-                    tagsContainer.innerHTML = article.tags.split(',').map(t => `<span class="tag-pill">#${t.trim()}</span>`).join('');
-                }
-
-                // Share Links
-                const currentUrl = encodeURIComponent(window.location.href);
-                const text = encodeURIComponent(article.title);
-                document.querySelector('.share-icon.twitter').href = `https://twitter.com/intent/tweet?text=${text}&url=${currentUrl}`;
-                document.querySelector('.share-icon.linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
-                document.querySelector('.share-icon.whatsapp').href = `https://wa.me/?text=${text} ${currentUrl}`;
-                // Instagram doesn't support direct link sharing via URL scheme easily, usually just opens app
-                document.querySelector('.share-icon.instagram').href = `https://www.instagram.com/`;
-
-                // Load Interactions
+            // loadArticleDetail is now handled by script.js which supports SSR and slug URLs
+            // We only need to load additional interactions if SSR data exists
+            if (window.SERVER_ARTICLE) {
+                const id = window.SERVER_ARTICLE.id;
                 loadLikes(id);
                 loadComments(id);
-                // Load Similar Articles Slider
-                // Load Similar Articles Slider
-                console.log('Attempting to load slider...');
                 if (typeof loadArticleSlider === 'function') {
                     loadArticleSlider(id);
-                } else {
-                    console.error('loadArticleSlider function not found!');
                 }
-
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loading-indicator').innerHTML = `<div style="text-align:center; color:red;">
-                    <h2>Hata Oluştu!</h2>
-                    <p>Makale yüklenemedi: ${e.message}</p>
-                    <p>Lütfen sunucu konsolunu kontrol edin veya yöneticiye başvurun.</p>
-                </div>`;
-                // window.location.href = 'articles.html';
             }
-        }
+        });
 
         async function loadLikes(id) {
             try {
