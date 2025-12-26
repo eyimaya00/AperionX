@@ -1269,8 +1269,8 @@ async function loadShowcase() {
                         </div>
                     </div>
                     
-                    <a href="/makale/${item.slug || 'article-detail.html?id=' + item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
-                    <a href="/makale/${item.slug || 'article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
                 `;
             }
         });
@@ -1475,7 +1475,7 @@ function renderArticlesGrid() {
         const safeAuthor = escapeHtml(article.author_name || 'Yazar');
 
         const html = `
-            <article class="featured-card small" style="min-height: 350px; cursor: pointer;" onclick="window.location.href='/makale/${article.slug || 'article-detail.html?id=' + article.id}'">
+            <article class="featured-card small" style="min-height: 350px; cursor: pointer;" onclick="window.location.href='${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}'">
                 <div class="card-bg" style="background-image: url('${bgMeasure}')"></div>
                 <div class="card-overlay"></div>
                 
@@ -1490,7 +1490,7 @@ function renderArticlesGrid() {
                     </div>
                 </div>
 
-                <a href="/makale/${article.slug || 'article-detail.html?id=' + article.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
             </article>
         `;
         grid.innerHTML += html;
@@ -1959,7 +1959,7 @@ async function loadArticleSlider(currentId) {
                      <span class="category-badge-slider">${art.category || 'Genel'}</span>
                      
                      <div class="content-bottom">
-                        <a href="/makale/${art.slug || 'article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
+                        <a href="${art.slug ? '/makale/' + art.slug : '/article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
                         <div class="similar-card-meta">
                             <span>${art.author_name || 'Admin'}</span>
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
@@ -1972,7 +1972,7 @@ async function loadArticleSlider(currentId) {
             card.onclick = (e) => {
                 // Prevent double click if clicking title
                 if (!e.target.closest('a')) {
-                    window.location.href = `/makale/${art.slug || 'article-detail.html?id=' + art.id}`;
+                    window.location.href = art.slug ? '/makale/' + art.slug : '/article-detail.html?id=' + art.id;
                 }
             };
 
