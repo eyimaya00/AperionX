@@ -1743,17 +1743,21 @@ app.get('/api/articles/:id', async (req, res) => {
         // Use req.ip which is reliable with 'trust proxy' enabled
         const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-        // Check if this IP viewed this article in last 1 hour
+        // Check if this IP viewed this article in last 10 SECONDS (Temporary Debug)
+        // Original: INTERVAL 1 HOUR
         const [viewCheck] = await pool.query(
             `SELECT id FROM article_views 
-             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
+             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
             [articleId, ip]
         );
 
         if (viewCheck.length === 0) {
+            console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} from IP ${ip}`);
             // New view
             await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
             await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
+        } else {
+            console.log(`[VIEW-DEBUG] View TROTTLED for Article ${articleId} from IP ${ip} (Already viewed in last 10s)`);
         }
 
         res.json(rows[0]);
