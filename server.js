@@ -880,24 +880,7 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'User deleted' });
 });
 
-app.get('/api/admin/stats', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [u] = await pool.query('SELECT COUNT(*) as count FROM users');
-        const [a] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'");
-        const [v] = await pool.query("SELECT SUM(views) as count FROM articles");
-        const [l] = await pool.query("SELECT COUNT(*) as count FROM likes");
-        const [c] = await pool.query("SELECT COUNT(*) as count FROM comments");
 
-        res.json({
-            users: u[0].count,
-            articles: a[0].count,
-            views: v[0].count || 0,
-            likes: l[0].count,
-            comments: c[0].count
-        });
-    } catch (e) { res.status(500).send(e.toString()); }
-});
 
 app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
