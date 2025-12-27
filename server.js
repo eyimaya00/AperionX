@@ -1704,6 +1704,11 @@ app.get('/api/articles', async (req, res) => {
 // Public: Get Single Article by ID
 app.get('/api/articles/:id', async (req, res) => {
     try {
+        // Disable caching to ensure view counts are always processed
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+
         const param = req.params.id;
 
         let query = `
