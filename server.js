@@ -203,6 +203,31 @@ app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
 
         const article = rows[0];
 
+        // ============ VIEW COUNTING LOGIC ============
+        const articleId = article.id;
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        console.log(`[VIEW-COUNT] Article ${articleId} (${slug}) accessed from IP: ${ip}`);
+
+        try {
+            const [viewCheck] = await pool.query(
+                `SELECT id FROM article_views 
+                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
+                [articleId, ip]
+            );
+
+            if (viewCheck.length === 0) {
+                console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} from IP ${ip}`);
+                await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
+                await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
+            } else {
+                console.log(`[VIEW-DEBUG] View THROTTLED for Article ${articleId} from IP ${ip}`);
+            }
+        } catch (vcErr) {
+            console.error('[VIEW-COUNT] Error:', vcErr.message);
+        }
+        // ============ END VIEW COUNTING ============
+
         // Read Template
         const filePath = path.join(__dirname, 'article-detail.html');
         fs.readFile(filePath, 'utf8', async (err, htmlData) => {
