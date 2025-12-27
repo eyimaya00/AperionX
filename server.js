@@ -1978,13 +1978,13 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
 app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        // 1. Daily Views (Last 7 Days)
-        // Note: Using article_views table which tracks unique views by IP/Hour
+        // 1. Daily Views (Last 7 Days) - Published Only
         const [viewsRows] = await pool.query(`
-            SELECT DATE(viewed_at) as date, COUNT(*) as count 
-            FROM article_views 
-            WHERE viewed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
-            GROUP BY DATE(viewed_at) 
+            SELECT DATE(v.viewed_at) as date, COUNT(*) as count 
+            FROM article_views v
+            JOIN articles a ON v.article_id = a.id
+            WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+            GROUP BY DATE(v.viewed_at) 
             ORDER BY date ASC
         `);
 
@@ -2020,8 +2020,14 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             });
         };
 
-        // 3. Monthly Calculated Stats (Last 30 Days)
-        const [mViews] = await pool.query('SELECT COUNT(*) as count FROM article_views WHERE viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
+        // 3. Monthly Calculated Stats (Last 30 Days) - Published Only
+        const [mViews] = await pool.query(`
+            SELECT COUNT(*) as count 
+            FROM article_views v 
+            JOIN articles a ON v.article_id = a.id 
+            WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        `);
+
         const [mLikes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mComments] = await pool.query('SELECT COUNT(*) as count FROM comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mUsers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
@@ -2030,16 +2036,30 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
         // 4. Historical Data (Monthly) - Fetch last 12 months
         // Helper to format Date to YYYY-MM
         const getMonthGroups = async (table, dateCol) => {
+            // Generic fallback for non-article tables
             const [rows] = await pool.query(`SELECT DATE_FORMAT(${dateCol}, '%Y-%m') as month, COUNT(*) as count FROM ${table} GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
+
+        // Specific for views to filter published
+        const getViewMonthGroups = async () => {
+            const [rows] = await pool.query(`
+                SELECT DATE_FORMAT(v.viewed_at, '%Y-%m') as month, COUNT(*) as count 
+                FROM article_views v
+                JOIN articles a ON v.article_id = a.id
+                WHERE a.status = 'published'
+                GROUP BY month ORDER BY month DESC LIMIT 12
+            `);
+            return rows;
+        };
+
         // Articles extra condition
         const getArticleMonthGroups = async () => {
             const [rows] = await pool.query(`SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
 
-        const hViews = await getMonthGroups('article_views', 'viewed_at');
+        const hViews = await getViewMonthGroups();
         const hLikes = await getMonthGroups('likes', 'created_at');
         const hComments = await getMonthGroups('comments', 'created_at');
         const hUsers = await getMonthGroups('users', 'created_at');
@@ -2547,7 +2567,7 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
         const [rejected] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'rejected'");
 
         // Engagement Stats
-        const [views] = await pool.query("SELECT SUM(views) as total FROM articles");
+        const [views] = await pool.query("SELECT SUM(views) as total FROM articles WHERE status = 'published'");
         const [likes] = await pool.query("SELECT COUNT(*) as total FROM likes");
         const [comments] = await pool.query("SELECT COUNT(*) as total FROM comments");
 
