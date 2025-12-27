@@ -1974,6 +1974,31 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Admin: Get Dashboard Stats
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
+        const [articles] = await pool.query('SELECT COUNT(*) as count FROM articles'); // Total articles (all statuses)
+
+        // Views: Only from published articles
+        const [views] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published'");
+
+        const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes');
+        const [comments] = await pool.query('SELECT COUNT(*) as count FROM comments');
+
+        res.json({
+            users: users[0].count,
+            articles: articles[0].count,
+            views: views[0].count || 0,
+            likes: likes[0].count,
+            comments: comments[0].count
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Admin: Get Chart Data
 app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
