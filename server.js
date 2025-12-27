@@ -2202,10 +2202,12 @@ app.get('/editor', (req, res) => {
 
 // SEO-Friendly Article URLs with View Counting
 app.get('/makale/:slug', async (req, res) => {
+    console.log('[SLUG-ROUTE] Called with slug:', req.params.slug);
     const filePath = path.join(__dirname, 'article-detail.html');
     const slug = req.params.slug;
 
     try {
+        console.log('[SLUG-ROUTE] Fetching article from DB...');
         // Fetch article by slug
         const [rows] = await pool.query(
             `SELECT a.*, u.fullname as author_name 
@@ -2215,15 +2217,20 @@ app.get('/makale/:slug', async (req, res) => {
             [slug]
         );
 
+        console.log('[SLUG-ROUTE] Query returned', rows.length, 'rows');
+
         if (rows.length === 0) {
+            console.log('[SLUG-ROUTE] No article found for slug:', slug);
             return res.status(404).sendFile(filePath);
         }
 
         const article = rows[0];
         const articleId = article.id;
+        console.log('[SLUG-ROUTE] Found article ID:', articleId, 'Title:', article.title);
 
         // VIEW COUNTING LOGIC (Same as API endpoint)
         const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.log('[SLUG-ROUTE] IP detected:', ip);
 
         const [viewCheck] = await pool.query(
             `SELECT id FROM article_views 
@@ -2231,15 +2238,19 @@ app.get('/makale/:slug', async (req, res) => {
             [articleId, ip]
         );
 
+        console.log('[SLUG-ROUTE] View check returned', viewCheck.length, 'recent views from this IP');
+
         if (viewCheck.length === 0) {
             console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} (slug: ${slug}) from IP ${ip}`);
             await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
             await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
+            console.log('[SLUG-ROUTE] View count updated successfully');
         } else {
             console.log(`[VIEW-DEBUG] View THROTTLED for Article ${articleId} (slug: ${slug}) from IP ${ip} (Already viewed in last 10s)`);
         }
 
         // SEO Meta Tag Injection
+        console.log('[SLUG-ROUTE] Injecting SEO meta tags...');
         let html = fs.readFileSync(filePath, 'utf8');
 
         const title = article.title + ' - AperionX';
@@ -2259,10 +2270,12 @@ app.get('/makale/:slug', async (req, res) => {
             .replace(/name="twitter:description" content=".*?"/, `name="twitter:description" content="${desc}"`)
             .replace(/name="twitter:image" content=".*?"/, `name="twitter:image" content="${img}"`);
 
+        console.log('[SLUG-ROUTE] Sending HTML response');
         res.send(html);
 
     } catch (e) {
-        console.error('Slug Route Error:', e);
+        console.error('[SLUG-ROUTE] ERROR:', e.message);
+        console.error('[SLUG-ROUTE] STACK:', e.stack);
         res.status(500).sendFile(filePath);
     }
 });
