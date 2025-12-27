@@ -2867,6 +2867,8 @@
                 const res = await fetch(`${API_URL}/editor/pending-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const articles = await res.json();
 
+                if (!container) return; // FIX: Prevent error if element missing
+
                 if (articles.length === 0) {
                     container.innerHTML = '<p>Onay bekleyen makale yok.</p>';
                     return;
