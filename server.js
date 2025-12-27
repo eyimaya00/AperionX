@@ -1735,7 +1735,8 @@ app.get('/api/articles/:id', async (req, res) => {
         const articleId = rows[0].id;
 
         // Secure View Counting
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        // Use req.ip which is reliable with 'trust proxy' enabled
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
         // Check if this IP viewed this article in last 1 hour
         const [viewCheck] = await pool.query(
@@ -1759,9 +1760,10 @@ app.get('/api/articles/:id', async (req, res) => {
 
 // DEBUG: Check IP Address
 app.get('/api/debug-ip', (req, res) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     res.json({
-        ip: ip,
+        reqIP: req.ip, // Express resolved IP
+        computedIP: ip,
         remoteAddress: req.socket.remoteAddress,
         xForwardedFor: req.headers['x-forwarded-for'],
         headers: req.headers
