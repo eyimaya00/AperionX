@@ -2200,6 +2200,73 @@ app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'editor.html'));
 });
 
+// SEO-Friendly Article URLs with View Counting
+app.get('/makale/:slug', async (req, res) => {
+    const filePath = path.join(__dirname, 'article-detail.html');
+    const slug = req.params.slug;
+
+    try {
+        // Fetch article by slug
+        const [rows] = await pool.query(
+            `SELECT a.*, u.fullname as author_name 
+             FROM articles a 
+             LEFT JOIN users u ON a.author_id = u.id 
+             WHERE a.slug = ? AND a.status = 'published'`,
+            [slug]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).sendFile(filePath);
+        }
+
+        const article = rows[0];
+        const articleId = article.id;
+
+        // VIEW COUNTING LOGIC (Same as API endpoint)
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        const [viewCheck] = await pool.query(
+            `SELECT id FROM article_views 
+             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
+            [articleId, ip]
+        );
+
+        if (viewCheck.length === 0) {
+            console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} (slug: ${slug}) from IP ${ip}`);
+            await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
+            await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
+        } else {
+            console.log(`[VIEW-DEBUG] View THROTTLED for Article ${articleId} (slug: ${slug}) from IP ${ip} (Already viewed in last 10s)`);
+        }
+
+        // SEO Meta Tag Injection
+        let html = fs.readFileSync(filePath, 'utf8');
+
+        const title = article.title + ' - AperionX';
+        const desc = article.excerpt || article.title;
+        const img = article.image_url ?
+            (article.image_url.startsWith('http') ? article.image_url : `${req.protocol}://${req.get('host')}/${article.image_url.replace(/\\/g, '/')}`)
+            : `${req.protocol}://${req.get('host')}/uploads/logo.png`;
+        const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+        html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
+            .replace(/property="og:title" content=".*?"/, `property="og:title" content="${title}"`)
+            .replace(/property="og:description" content=".*?"/, `property="og:description" content="${desc}"`)
+            .replace(/name="description" content=".*?"/, `name="description" content="${desc}"`)
+            .replace(/property="og:image" content=".*?"/, `property="og:image" content="${img}"`)
+            .replace(/property="og:url" content=".*?"/, `property="og:url" content="${url}"`)
+            .replace(/name="twitter:title" content=".*?"/, `name="twitter:title" content="${title}"`)
+            .replace(/name="twitter:description" content=".*?"/, `name="twitter:description" content="${desc}"`)
+            .replace(/name="twitter:image" content=".*?"/, `name="twitter:image" content="${img}"`);
+
+        res.send(html);
+
+    } catch (e) {
+        console.error('Slug Route Error:', e);
+        res.status(500).sendFile(filePath);
+    }
+});
+
 // Dynamic SEO for Article Detail
 app.get('/article-detail.html', async (req, res) => {
     const filePath = path.join(__dirname, 'article-detail.html');
