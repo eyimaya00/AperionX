@@ -1568,7 +1568,8 @@ async function loadArticleDetail() {
         }
         // Fetch by slug if logic allows
         try {
-            const res = await fetch(`/api/articles/${possibleSlug}`);
+            // Force cache busting with timestamp
+            const res = await fetch(`/api/articles/${possibleSlug}?t=${Date.now()}`);
             if (!res.ok) throw new Error('Makale bulunamadı');
 
             const article = await res.json();
@@ -1583,7 +1584,8 @@ async function loadArticleDetail() {
     }
 
     try {
-        const res = await fetch(`/api/articles/${id}`);
+        // Force cache busting with timestamp
+        const res = await fetch(`/api/articles/${id}?t=${Date.now()}`);
         if (!res.ok) throw new Error('Makale bulunamadı');
 
         const article = await res.json();
