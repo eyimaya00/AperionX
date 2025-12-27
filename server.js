@@ -1977,6 +1977,7 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
 // Admin: Get Dashboard Stats
 app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
+    console.log('[DEBUG] /api/admin/stats CALLED');
     try {
         const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
         const [articles] = await pool.query('SELECT COUNT(*) as count FROM articles'); // Total articles (all statuses)
