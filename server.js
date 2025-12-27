@@ -212,7 +212,7 @@ app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
         try {
             const [viewCheck] = await pool.query(
                 `SELECT id FROM article_views 
-                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
+                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
                 [articleId, ip]
             );
 
@@ -1768,11 +1768,10 @@ app.get('/api/articles/:id', async (req, res) => {
         // Use req.ip which is reliable with 'trust proxy' enabled
         const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-        // Check if this IP viewed this article in last 10 SECONDS (Temporary Debug)
-        // Original: INTERVAL 1 HOUR
+        // Check if this IP viewed this article in last 1 HOUR
         const [viewCheck] = await pool.query(
             `SELECT id FROM article_views 
-             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
+             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
             [articleId, ip]
         );
 
