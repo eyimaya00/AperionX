@@ -1998,7 +1998,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     console.log('[DEBUG] /api/admin/stats CALLED');
     try {
         const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
-        const [articles] = await pool.query('SELECT COUNT(*) as count FROM articles'); // Total articles (all statuses)
+        const [articles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'"); // Published articles only
 
         // Views: Only from published articles
         const [views] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published'");
