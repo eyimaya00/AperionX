@@ -668,7 +668,8 @@ i[class*=" ph"] {
     /* Solid background for readability on mobile */
     background: var(--bg-color);
     border-bottom: 1px solid var(--header-border);
-    padding: 16px;
+    padding: 16px 16px 60px 16px;
+    /* Increased bottom padding */
     /* Reduced from 24px */
     display: none;
     flex-direction: column;
@@ -680,7 +681,8 @@ i[class*=" ph"] {
     text-align: center;
     height: auto;
     /* Changed from calc(100vh - 72px) */
-    max-height: 80vh;
+    max-height: 90vh;
+    /* Increased from 80vh */
     /* Prevent overflowing screen if too many items */
     overflow-y: auto;
     /* Scrollable */
