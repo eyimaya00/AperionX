@@ -1059,73 +1059,58 @@ function setupMobileMenu() {
             }
         };
 
-        mobileGlobalBtn.appendChild(langBtn);
-        document.body.appendChild(mobileGlobalBtn);
+        document.body.appendChild(btn);
     }
 
-    // --- ROBUST EVENT-DRIVEN VISIBILITY ---
-    // We toggle visibility DIRECTLY when the menu state changes.
-    // This avoids polling issues.
+    // Run immediately
+    initMobileLangHack();
 
-    const setBtnState = (visible) => {
-        if (!mobileGlobalBtn) return;
-        const isMobile = window.innerWidth <= 1024;
-
-        if (visible && isMobile) {
-            mobileGlobalBtn.style.display = 'flex';
-            // Force redraw/paint
-            mobileGlobalBtn.style.opacity = '1';
-        } else {
-            mobileGlobalBtn.style.display = 'none';
+    // Also run on resize to toggle visibility
+    window.addEventListener('resize', () => {
+        const el = document.getElementById('mobile-lang-hack-btn');
+        if (el) {
+            el.style.display = window.innerWidth <= 1024 ? 'flex' : 'none';
         }
-    };
+    });
 
     if (btn && nav) {
         btn.addEventListener('click', () => {
-            // Toggle logic
-            const willBeActive = !nav.classList.contains('active');
-
             nav.classList.toggle('active');
             btn.classList.toggle('active');
 
-            // Sync Button
-            setBtnState(willBeActive);
-
             // Lock body
-            if (willBeActive) {
+            if (nav.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
             } else {
                 document.body.style.overflow = '';
             }
         });
 
-        // Close when clicking links
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
-                setBtnState(false); // HIDE
                 document.body.style.overflow = '';
             });
         });
 
-        // Close on click outside
         document.addEventListener('click', (e) => {
             if (!nav.contains(e.target) && !btn.contains(e.target) && nav.classList.contains('active')) {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
-                setBtnState(false); // HIDE
                 document.body.style.overflow = '';
             }
         });
 
-        // Handle Resize (Hide if desktop)
+        // Handle Resize (Hide if desktop) - The mobile language button now handles its own resize logic.
         window.addEventListener('resize', () => {
             if (window.innerWidth > 1024) {
-                setBtnState(false);
-            } else {
-                // If menu is active, show it
-                if (nav.classList.contains('active')) setBtnState(true);
+                // If the menu is active on desktop, close it and unlock scroll
+                if (nav.classList.contains('active')) {
+                    nav.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             }
         });
     }
