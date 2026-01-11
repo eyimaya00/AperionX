@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 
+
+const logFile = 'server_debug.log';
+
 function logDebug(msg) {
     const time = new Date().toISOString();
     fs.appendFileSync(logFile, `[${time}] ${msg}\n`);
