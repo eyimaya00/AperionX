@@ -2403,16 +2403,23 @@ function hideLoader() {
 function initLanguageSwitcher_OLD() {
     const isEnglish = window.location.pathname.startsWith('/en');
 
-    // Update ALL language buttons
-    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
+    // Update ALL language buttons (including mobile static)
+    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn, #mobile-lang-btn-static');
 
     btns.forEach(btn => {
         // Set visual state
+        // Use span if it exists inside, otherwise innerHTML
+        const span = btn.querySelector('span');
+
         if (isEnglish) {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+            if (span) span.innerText = 'TR';
+            else btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+
             btn.title = "Türkçe'ye Geç";
         } else {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+            if (span) span.innerText = 'EN';
+            else btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+
             btn.title = "Switch to English";
         }
 

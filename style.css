@@ -5091,6 +5091,7 @@ i[class*=" ph"] {
         display: none;
     }
 }
+
 @media (max-width: 768px) {
     #lang-switch-btn {
         display: none !important;
