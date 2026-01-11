@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMenus();
     checkAuthStatus();
     initTheme();
+    initSearch(); // Initialize Search
     initLanguageSwitcher(); // Add Language Support
     loadUserInfo();
     setupMobileMenu();
