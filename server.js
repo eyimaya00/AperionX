@@ -2555,12 +2555,18 @@ app.post('/api/admin/comments/:id/reject', authenticateToken, async (req, res) =
 });
 
 // --- SEO: Sitemap.xml ---
+// --- SEO: Sitemap.xml ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT id, title, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query("SELECT id, slug, updated_at, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
 
-        const baseUrl = 'http://localhost:3000'; // Or your production URL
+        // Use dynamic host but prefer https://www.aperionx.com if host header matches
+        let baseUrl = `https://${req.get('host')}`;
+        // Force production URL if easy to guess, or keep dynamic for flexibility
+        if (req.get('host').includes('aperionx.com')) {
+            baseUrl = 'https://www.aperionx.com';
+        }
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -2590,12 +2596,13 @@ app.get('/sitemap.xml', async (req, res) => {
     </url>`;
         });
 
-        // Articles
+        // Articles (Using Slugs)
         articles.forEach(art => {
+            const lastMod = art.updated_at ? new Date(art.updated_at).toISOString() : new Date(art.created_at).toISOString();
             xml += `
     <url>
-        <loc>${baseUrl}/article-detail.html?id=${art.id}</loc>
-        <lastmod>${new Date(art.created_at).toISOString()}</lastmod>
+        <loc>${baseUrl}/makale/${art.slug}</loc>
+        <lastmod>${lastMod}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>`;
