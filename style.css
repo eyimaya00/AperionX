@@ -5101,39 +5101,43 @@ i[class*=" ph"] {
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY --- */
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY V2 --- */
 @media (max-width: 768px) {
-    .nav-menu {
-        position: relative;
-        /* Ensure absolute children are relative to this */
-        padding-bottom: 80px;
-        /* Make space for buttons */
+    #mobile-lang-btn-static {
+        display: none !important;
+        /* Hidden by default until active */
     }
 
-    #mobile-lang-btn-static {
+    /* ONLY show when nav-menu is active */
+    .nav-menu.active #mobile-lang-btn-static {
         display: flex !important;
-        position: absolute;
-        /* Float it */
+        position: fixed;
+        /* Fix to viewport */
         bottom: 120px;
-        /* Position above the auth buttons (assuming they are at bottom ~0-60px) */
+        /* Above auth buttons */
         left: 50%;
         transform: translateX(-50%);
         width: 80%;
-        z-index: 9999;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        z-index: 999999;
+        /* Ensure on top of everything */
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         color: white !important;
-        /* Force white text */
-        font-weight: bold;
-        border-radius: 12px;
-        height: 50px;
+        font-weight: 700;
+        border-radius: 16px;
+        height: 56px;
         align-items: center;
         justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
     }
 
-    [data-theme="light"] #mobile-lang-btn-static {
+    [data-theme="light"] .nav-menu.active #mobile-lang-btn-static {
         background: white;
         color: #333 !important;
-        border-color: #eee;
+        border-color: #e2e8f0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
 }
