@@ -600,9 +600,15 @@ i[class*=" ph"] {
 }
 
 .btn-signup {
-    background: var(--primary-color);
-    color: white;
+    background: #6366f1 !important;
+    color: white !important;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+#hero-main-btn {
+    background: #6366f1 !important;
+    color: white !important;
+    border: none !important;
 }
 
 .btn-signup:hover {
