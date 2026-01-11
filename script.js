@@ -1001,7 +1001,10 @@ function closeModal(modalId) {
 
 // --- Mobile Menu Logic ---
 function setupMobileMenu() {
+    console.log("MOBILE MENU SETUP RUNNING V2"); // Debug
     const btn = document.getElementById('hamburgerBtn');
+    if (btn) btn.style.border = "1px solid red"; // VISUAL DEBUG: Red border means script updated
+
     const nav = document.querySelector('.nav-menu');
     const header = document.querySelector('.header');
 
