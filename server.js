@@ -22,8 +22,8 @@ const cors = require('cors');
 const multer = require('multer');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-// const { JSDOM } = require('jsdom'); // DISABLED to fix 502
-// const DOMPurify = require('dompurify')(new JSDOM('').window); // DISABLED to fix 502
+// // const { JSDOM } = require('jsdom'); // DISABLED to fix 502
+// // const DOMPurify = require('dompurify')(new JSDOM('').window); // DISABLED to fix 502
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -248,10 +248,8 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
         fs.readFile(filePath, 'utf8', async (err, htmlData) => {
             if (err) return next(err);
 
-            try {
-                // Use JSDOM for robust manipulation
-                const dom = new JSDOM(htmlData);
-                const document = dom.window.document;
+                        try {
+                // Use String Replacement instead of JSDOM to avoid dependency issues on server
                 const origin = `${req.protocol}://${req.get('host')}`;
 
                 // Get Author Name
@@ -266,55 +264,49 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const summary = article.excerpt || article.title;
                 const img = article.image_url
                     ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
-                    : `${origin}/uploads/logo.png`; // Fallback to site logo if generic? Or fetch settings?
-
-                // Determine current URL structure based on request
+                    : `${origin}/uploads/logo.png`; 
+                
+                // Determine current URL structure
                 const isEnglish = req.path.startsWith('/en/');
                 const urlPrefix = isEnglish ? `${origin}/en` : origin;
                 const url = `${urlPrefix}/makale/${article.slug}`;
+                
+                // Fix: Sanitize potential nulls
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const safeImg = (img || '').replace(/"/g, '&quot;');
+                const safeUrl = (url || '').replace(/"/g, '&quot;');
 
-                // --- INJECT META TAGS ---
-                document.title = `${title} - AperionX`;
-
-                const setMeta = (selector, value) => {
-                    let el = document.querySelector(selector);
-                    if (!el) {
-                        // Creating basic support if missing
-                        if (selector.startsWith('meta[name')) {
-                            el = document.createElement('meta');
-                            el.name = selector.match(/name="([^"]+)"/)[1];
-                            document.head.appendChild(el);
-                        } else if (selector.startsWith('meta[property')) {
-                            el = document.createElement('meta');
-                            el.setAttribute('property', selector.match(/property="([^"]+)"/)[1]);
-                            document.head.appendChild(el);
-                        }
-                    }
-                    if (el) el.setAttribute('content', value);
+                // REPLACEMENT LOGIC
+                let html = htmlData;
+                
+                // Title
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
+                
+                // Meta Tags (Regex replace)
+                const replaceMeta = (name, content) => {
+                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    html = html.replace(regex, `$1${content}$3`);
                 };
 
-                setMeta('meta[name="description"]', summary);
-                setMeta('meta[property="og:title"]', title);
-                setMeta('meta[property="og:description"]', summary);
-                setMeta('meta[property="og:image"]', img);
-                setMeta('meta[property="og:url"]', url);
-                setMeta('meta[property="og:type"]', 'article');
+                replaceMeta('description', safeSummary);
+                replaceMeta('og:title', safeTitle);
+                replaceMeta('og:description', safeSummary);
+                replaceMeta('og:image', safeImg);
+                replaceMeta('og:url', safeUrl);
+                
+                replaceMeta('twitter:title', safeTitle);
+                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:image', safeImg);
 
-                // Twitter
-                setMeta('meta[name="twitter:card"]', 'summary_large_image');
-                setMeta('meta[name="twitter:title"]', title);
-                setMeta('meta[name="twitter:description"]', summary);
-                setMeta('meta[name="twitter:image"]', img);
+                // Inject Preloaded Data Script
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
+                html = html.replace('</head>', `${scriptTag}\n</head>`);
 
-                // --- INJECT PRELOADED DATA ---
-                // This allows client-side JS to render instantly without 2nd fetch
-                const script = document.createElement('script');
-                script.textContent = `window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";`;
-                document.head.appendChild(script);
+                res.send(html);
 
-                res.send(dom.serialize());
-
-            } catch (parseErr) {
+            }  
+ } catch (parseErr) {
                 console.error('SSR Parse Error:', parseErr);
                 res.status(500).send(parseErr.toString());
             }
