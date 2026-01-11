@@ -1295,6 +1295,60 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Restored to draft' });
 });
 
+// Create Article
+app.post('/api/articles', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+        const { title, content, category, tags, status } = req.body;
+        const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+        const author_id = req.user.id;
+        const slug = slugify(title, { lower: true, strict: true }) + '-' + Date.now();
+
+        await pool.query(
+            'INSERT INTO articles (author_id, title, content, image_url, category, tags, status, slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [author_id, title, content, image_url, category, tags, status || 'pending', slug]
+        );
+
+        res.status(201).json({ message: 'Article created successfully' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update Article
+app.put('/api/articles/:id', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+        const { title, content, category, tags, status } = req.body;
+        const articleId = req.params.id;
+
+        // Check ownership
+        const [check] = await pool.query('SELECT author_id, image_url FROM articles WHERE id = ?', [articleId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        let image_url = check[0].image_url;
+        if (req.file) image_url = `/uploads/${req.file.filename}`;
+
+        await pool.query(
+            'UPDATE articles SET title = ?, content = ?, category = ?, tags = ?, status = ?, image_url = ?, updated_at = NOW() WHERE id = ?',
+            [title, content, category, tags, status, image_url, articleId]
+        );
+
+        res.json({ message: 'Article updated' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Get My Articles
+app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM articles WHERE author_id = ? ORDER BY created_at DESC', [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
 // Author Stats Endpoint
 app.get('/api/author/stats', authenticateToken, async (req, res) => {
     try {
