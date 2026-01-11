@@ -2548,14 +2548,26 @@ function initLanguageSwitcher() {
                     btnElement.style.opacity = '0.7';
                 }
 
+                // NUCLEAR CLEAR
                 deleteCookie('googtrans');
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.aperionx.com";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=aperionx.com";
 
                 if (isEnglish) {
-                    setCookie('googtrans', '/tr/tr');
+                    // Switch to Turkish
+                    document.cookie = "googtrans=/tr/tr; path=/";
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=.aperionx.com";
                 } else {
-                    setCookie('googtrans', '/tr/en');
+                    // Switch to English
+                    document.cookie = "googtrans=/tr/en; path=/";
+                    document.cookie = "googtrans=/tr/en; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/en; path=/; domain=.aperionx.com";
                 }
 
+                console.log("Language Switched. Reloading...");
                 setTimeout(() => window.location.reload(), 200);
             };
 
