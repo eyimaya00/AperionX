@@ -1,6 +1,16 @@
 ﻿// Base API URL
 const API_URL = '/api';
 
+// --- HELPER: Resolve Image Path ---
+function resolveImagePath(url) {
+    if (!url) return null;
+    if (url.startsWith('http') || url.startsWith('//') || url.startsWith('data:')) return url;
+    url = url.replace(/\\/g, '/');
+    if (url.startsWith('/')) return url;
+    return '/' + url;
+}
+
+
 // Global Article ID for interactions
 window.currentArticleId = null;
 
@@ -2297,7 +2307,7 @@ function hideLoader() {
 
 
 // --- Language Switcher ---
-function initLanguageSwitcher() {
+function initLanguageSwitcher_OLD() {
     const isEnglish = window.location.pathname.startsWith('/en');
 
     // Update ALL language buttons
@@ -2429,5 +2439,86 @@ function updateActiveNavLink() {
         if (link.getAttribute('href') === path) {
             link.classList.add('active');
         }
+    });
+}
+
+
+function initLanguageSwitcher() {
+    // 1. Inject Google Translate Script if not present
+    if (!document.querySelector('#google-translate-script')) {
+        const script = document.createElement('script');
+        script.id = 'google-translate-script';
+        script.type = 'text/javascript';
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        document.head.appendChild(script);
+
+        // Add hidden element for Google Translate
+        const div = document.createElement('div');
+        div.id = 'google_translate_element';
+        div.style.display = 'none'; // Hide default widget
+        document.body.appendChild(div);
+
+        // Add CSS to hide Google Top Bar
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .goog-te-banner-frame.skiptranslate { display: none !important; } 
+            body { top: 0px !important; }
+            #google_translate_element { display: none !important; }
+            .goog-tooltip { display: none !important; }
+            .goog-te-gadget-simple { display: none !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 2. Define Init Function Global
+    window.googleTranslateElementInit = function() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'tr',
+            includedLanguages: 'en,tr',
+            autoDisplay: false
+        }, 'google_translate_element');
+    };
+
+    // 3. Read Cookie to determine state
+    function getCookie(name) {
+        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+
+    function setCookie(name, value, days) {
+        const d = new Date();
+        d.setTime(d.getTime() + 24*60*60*1000*days);
+        document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
+    }
+
+    // Check current state
+    const currentLang = getCookie('googtrans');
+    const isEnglish = currentLang === '/tr/en';
+
+    // Update Buttons
+    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
+    btns.forEach(btn => {
+        if (isEnglish) {
+            btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+            btn.title = "Türkçe'ye dön";
+        } else {
+            btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+            btn.title = "Translate to English";
+        }
+
+        btn.onclick = (e) => {
+            e.preventDefault();
+            if (isEnglish) {
+                // Switch to TR
+                setCookie('googtrans', '/tr/tr', 1);
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+                window.location.reload();
+            } else {
+                // Switch to EN
+                setCookie('googtrans', '/tr/en', 1);
+                window.location.reload();
+            }
+        };
     });
 }
