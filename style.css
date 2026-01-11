@@ -175,7 +175,7 @@ a {
     visibility: hidden;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
     .nav-menu {
         display: flex;
         position: absolute;
@@ -650,7 +650,7 @@ i[class*=" ph"] {
 /* Mobile Menu Btn */
 
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
     .mobile-menu-btn {
         display: none !important;
     }
