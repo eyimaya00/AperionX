@@ -2502,127 +2502,216 @@ function updateActiveNavLink() {
 
 
 // --- Language Switcher (Robust / "Nuclear" Version) ---
+// --- Language Switcher (Robust / "Nuclear" Version) ---
 function initLanguageSwitcher() {
-            .skiptranslate { display: none!important; }
-    iframe.goog - te - banner - frame { display: none!important; }
+    const enforceLanguageButtons = () => {
+        try {
+            // --- COOKIE HELPERS ---
+            function getCookie(name) {
+                const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                return v ? v[2] : null;
+            }
+            function setCookie(name, value) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=${value}; path=/`;
+                document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+                document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
+            }
+            function deleteCookie(name) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+            }
 
-            /* Force Body/HTML to top */
-            body { top: 0px!important; position: inherit!important; margin - top: 0!important; }
-            html { top: 0px!important; margin - top: 0!important; }
+            // --- STATE ---
+            const currentTrans = getCookie('googtrans');
+            const isEnglish = currentTrans === '/tr/en';
 
-    /* Hide Widget */
-    #google_translate_element { display: none!important; }
-            .goog - tooltip { display: none!important; }
-            .goog - te - gadget - simple { display: none!important; }
-            
-            font { background - color: transparent!important; box - shadow: none!important; }
-    `;
-        document.head.appendChild(style);
+            // --- SVG FLAGS ---
+            const trFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#e30a17"/><circle cx="13" cy="16" r="6" fill="#fff"/><circle cx="14.5" cy="16" r="5" fill="#e30a17"/><path d="M19 16 L20.5 14.5 L20.5 17.5 Z" fill="#fff" stroke="#fff" stroke-width="2"/></svg>`;
+            const enFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#00247d"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#fff" stroke-width="6"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#fff" stroke-width="10"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#cf142b" stroke-width="3"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#cf142b" stroke-width="6"/></svg>`;
 
-        // --- Mobile Menu Injection ---
-        const mobileMenu = document.querySelector('.nav-links'); // This is usually the container
-        // Or specifically for mobile-menu specific div if it exists. 
-        // In this theme, .nav-links becomes the mobile menu on small screens.
+            const labelContent = isEnglish
+                ? `<div style="display:flex; align-items:center; gap:6px;">${trFlag} <span style="font-weight:700;">TR</span></div>`
+                : `<div style="display:flex; align-items:center; gap:6px;">${enFlag} <span style="font-weight:700;">EN</span></div>`;
 
-        // We want to append a list item for the language Switcher at the bottom of the list
-        if (mobileMenu && !document.getElementById('mobile-lang-btn-li')) {
-            const li = document.createElement('li');
-            li.id = 'mobile-lang-btn-li';
-            li.className = 'mobile-only'; // Ensure it can be styled if needed
-            li.style.marginTop = '20px';
-            li.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-            li.style.paddingTop = '10px';
+            // --- HANDLER --- 
+            const handleLangClick = (e, btnElement) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-            const a = document.createElement('a');
-            a.href = '#';
-            a.id = 'mobile-lang-switch-btn';
-            a.className = 'lang-btn';
-            a.style.justifyContent = 'center'; // Center text
+                if (btnElement) {
+                    btnElement.style.transform = 'scale(0.95)';
+                    setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
+                    btnElement.style.opacity = '0.7';
+                }
 
-            // Initial Text (will be updated by the logic below)
-            a.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+                deleteCookie('googtrans');
 
-            li.appendChild(a);
-            mobileMenu.appendChild(li);
+                if (isEnglish) {
+                    setCookie('googtrans', '/tr/tr');
+                } else {
+                    setCookie('googtrans', '/tr/en');
+                }
+
+                setTimeout(() => window.location.reload(), 200);
+            };
+
+            // --- 1. MOBILE MENU BUTTON ---
+            const mobileMenu = document.querySelector('.mobile-menu');
+            if (mobileMenu) {
+                let mobileBtn = document.getElementById('nuclear-mobile-btn');
+                // Ensure it exists and is inside the menu
+                if (!mobileBtn || mobileBtn.parentNode !== mobileMenu) {
+                    if (mobileBtn) mobileBtn.remove();
+                    mobileBtn = document.createElement('a');
+                    mobileBtn.id = 'nuclear-mobile-btn';
+                    mobileBtn.href = "#";
+                    mobileBtn.setAttribute('role', 'button');
+                    // Static Styles
+                    mobileBtn.style.cssText = `
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 8px !important;
+                        padding: 12px 25px !important;
+                        border-radius: 50px !important;
+                        background-color: rgba(255,255,255,0.1) !important;
+                        border: 1px solid rgba(255,255,255,0.2) !important;
+                        color: var(--text-color, #fff) !important;
+                        font-family: sans-serif !important;
+                        font-weight: bold !important;
+                        font-size: 14px !important;
+                        margin-bottom: 15px !important;
+                        width: auto !important;
+                        max-width: 200px !important;
+                        cursor: pointer !important;
+                        transition: transform 0.1s !important;
+                    `;
+                    mobileMenu.prepend(mobileBtn);
+                    mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                }
+                // Update Content
+                if (!mobileBtn.innerHTML.includes('svg')) {
+                    mobileBtn.innerHTML = labelContent;
+                }
+            }
+
+            // --- 2. DESKTOP BUTTON ---
+            let desktopBtn = document.getElementById('lang-switch-btn');
+            if (desktopBtn) {
+                // Enforce Styles
+                desktopBtn.style.width = 'auto';
+                desktopBtn.style.height = '36px';
+                desktopBtn.style.padding = '0 12px';
+                desktopBtn.style.borderRadius = '20px';
+                desktopBtn.style.display = 'flex';
+                desktopBtn.style.alignItems = 'center';
+                desktopBtn.style.justifyContent = 'center';
+                desktopBtn.style.gap = '6px';
+                desktopBtn.style.fontSize = '14px';
+
+                // Enforce Content
+                if (!desktopBtn.innerHTML.includes('svg')) {
+                    desktopBtn.innerHTML = labelContent;
+                }
+
+                // Attach Click
+                if (!desktopBtn.dataset.hasNuclearClick) {
+                    const newDesktopBtn = desktopBtn.cloneNode(true);
+                    desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                    newDesktopBtn.dataset.hasNuclearClick = "true";
+                    newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                    desktopBtn = newDesktopBtn;
+                }
+            }
+
+        } catch (e) {
+            console.error("Lang Enforce Error", e);
         }
-
-
-        // AGGRESSIVE REMOVAL: Force remove the banner from DOM
-        const removeBanner = setInterval(() => {
-            // Remove iframe
-            const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
-            iframes.forEach(el => el.remove());
-
-            // Remove skiptranslate divs
-            const banners = document.querySelectorAll('.goog-te-banner-frame');
-            banners.forEach(el => el.remove());
-
-            // Force body/html styles
-            if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
-                document.body.style.top = '0px';
-                document.body.style.marginTop = '0px';
-                document.body.style.position = 'inherit';
-            }
-            if (document.documentElement.style.top !== '0px' || document.documentElement.style.marginTop !== '0px') {
-                document.documentElement.style.top = '0px';
-                document.documentElement.style.marginTop = '0px';
-                document.documentElement.style.height = '100%';
-            }
-        }, 10); // Check every 10ms
-
-        // Run for 10 seconds to cover slow loads
-        setTimeout(() => clearInterval(removeBanner), 10000);
-    }
-
-    // 2. Define Init Function Global
-    window.googleTranslateElementInit = function () {
-        new google.translate.TranslateElement({
-            pageLanguage: 'tr',
-            includedLanguages: 'en,tr',
-            autoDisplay: false
-        }, 'google_translate_element');
     };
 
-    // 3. Read Cookie to determine state
-    function getCookie(name) {
-        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-        return v ? v[2] : null;
+    // Run Logic
+    enforceLanguageButtons();
+    // Run periodically to handle dynamic content/late loads
+    setInterval(enforceLanguageButtons, 1000);
+}
+const removeBanner = setInterval(() => {
+    // Remove iframe
+    const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
+    iframes.forEach(el => el.remove());
+
+    // Remove skiptranslate divs
+    const banners = document.querySelectorAll('.goog-te-banner-frame');
+    banners.forEach(el => el.remove());
+
+    // Force body/html styles
+    if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
+        document.body.style.top = '0px';
+        document.body.style.marginTop = '0px';
+        document.body.style.position = 'inherit';
+    }
+    if (document.documentElement.style.top !== '0px' || document.documentElement.style.marginTop !== '0px') {
+        document.documentElement.style.top = '0px';
+        document.documentElement.style.marginTop = '0px';
+        document.documentElement.style.height = '100%';
+    }
+}, 10); // Check every 10ms
+
+// Run for 10 seconds to cover slow loads
+setTimeout(() => clearInterval(removeBanner), 10000);
     }
 
-    function setCookie(name, value, days) {
-        const d = new Date();
-        d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
-        document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
+// 2. Define Init Function Global
+window.googleTranslateElementInit = function () {
+    new google.translate.TranslateElement({
+        pageLanguage: 'tr',
+        includedLanguages: 'en,tr',
+        autoDisplay: false
+    }, 'google_translate_element');
+};
+
+// 3. Read Cookie to determine state
+function getCookie(name) {
+    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+
+function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
+    document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
+}
+
+// Check current state
+const currentLang = getCookie('googtrans');
+const isEnglish = currentLang === '/tr/en';
+
+// Update Buttons
+const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
+btns.forEach(btn => {
+    if (isEnglish) {
+        btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+        btn.title = "Türkçe'ye dön";
+    } else {
+        btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+        btn.title = "Translate to English";
     }
 
-    // Check current state
-    const currentLang = getCookie('googtrans');
-    const isEnglish = currentLang === '/tr/en';
-
-    // Update Buttons
-    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
-    btns.forEach(btn => {
+    btn.onclick = (e) => {
+        e.preventDefault();
         if (isEnglish) {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
-            btn.title = "Türkçe'ye dön";
+            // Switch to TR
+            setCookie('googtrans', '/tr/tr', 1);
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+            window.location.reload();
         } else {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
-            btn.title = "Translate to English";
+            // Switch to EN
+            setCookie('googtrans', '/tr/en', 1);
+            window.location.reload();
         }
-
-        btn.onclick = (e) => {
-            e.preventDefault();
-            if (isEnglish) {
-                // Switch to TR
-                setCookie('googtrans', '/tr/tr', 1);
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
-                window.location.reload();
-            } else {
-                // Switch to EN
-                setCookie('googtrans', '/tr/en', 1);
-                window.location.reload();
-            }
-        };
-    });
+    };
+});
 }
