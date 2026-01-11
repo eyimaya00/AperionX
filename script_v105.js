@@ -1,5 +1,5 @@
 ﻿// Base API URL
-const API_URL = '/api';
+var API_URL = '/api';
 
 // --- HELPER: Resolve Image Path ---
 function resolveImagePath(url) {
