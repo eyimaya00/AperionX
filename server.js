@@ -962,7 +962,14 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 
 
 // 3. Articles (GET Public, POST Author)
-// Duplicate route removed
+app.get('/api/articles', async (req, res) => {
+    try {
+        const [articles] = await pool.query("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        res.json(articles);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
 
 
 app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
