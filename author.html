@@ -1258,13 +1258,13 @@
 
                             <label
                                 style="display:block; margin-top: 15px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Metindeki
-                                Kaynakçalar</label>
+                                Kaynaklar</label>
                             <textarea id="text-references" class="form-control" rows="4"
                                 placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın.&#10;Örn:&#10;Yazar Adı, Kitap Adı, Yıl...&#10;Diğer Yazar, Makale Adı, Yıl..."></textarea>
 
                             <label
                                 style="display:block; margin-top: 20px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Görseldeki
-                                Kaynakçalar</label>
+                                Kaynaklar</label>
                             <textarea id="image-references" class="form-control" rows="4"
                                 placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın.&#10;Örn:&#10;Unsplash - Fotoğrafçı Adı&#10;WikiMedia Commons"></textarea>
 
@@ -2437,11 +2437,23 @@
             const content = quill.root.innerHTML;
             const modal = document.getElementById('preview-modal');
             const container = document.getElementById('preview-content');
+            const category = document.getElementById('category').value;
+            const authorName = user ? user.fullname : 'Yazar';
 
+            // Replicate structure of article-detail.html
             container.innerHTML = `
-                <h1 style="font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main);">${title}</h1>
-                <div class="article-body" style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main);">
-                    ${content}
+                <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px; background: var(--card-bg); border-radius: 20px;">
+                    <span class="category-chip" style="margin-bottom: 15px; display: inline-block;">${category === 'other' ? 'Genel' : category}</span>
+                    <h1 class="article-title">${title}</h1>
+                    
+                    <div class="article-meta" style="margin-bottom: 30px; display: flex; align-items: center; gap: 15px; color: var(--text-color); opacity: 0.8;">
+                        <span class="meta-item"><i class="ph ph-user"></i> ${authorName}</span>
+                        <span class="meta-item"><i class="ph ph-calendar"></i> ${new Date().toLocaleDateString('tr-TR')}</span>
+                    </div>
+
+                    <div class="article-content" style="color: var(--text-color);">
+                        ${content}
+                    </div>
                 </div>
             `;
             modal.style.display = 'block';

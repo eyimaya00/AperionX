@@ -1727,11 +1727,13 @@ function renderArticleDetail(article) {
         // Clear and rebuild section content
         refSection.innerHTML = '';
 
-        // Add Main Title (preserving existing class)
+        // Removed Main "Kaynakça" Title as requested
+        /* 
         const mainTitle = document.createElement('h3');
         mainTitle.className = 'references-title';
         mainTitle.innerText = 'Kaynakça';
-        refSection.appendChild(mainTitle);
+        refSection.appendChild(mainTitle); 
+        */
 
         const allRefs = article.references_list;
         let textRefs = [];
@@ -1751,7 +1753,7 @@ function renderArticleDetail(article) {
             groupDiv.style.marginTop = '20px';
 
             const subHeader = document.createElement('h4');
-            subHeader.innerText = 'Metindeki Kaynakçalar';
+            subHeader.innerText = 'Metindeki Kaynaklar';
             // Styling to look clean and standard
             subHeader.style.cssText = 'color: var(--text-color); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; border-left: 4px solid var(--primary-accent); padding-left: 10px;';
             groupDiv.appendChild(subHeader);
@@ -1780,7 +1782,7 @@ function renderArticleDetail(article) {
             groupDiv.style.marginTop = '30px';
 
             const subHeader = document.createElement('h4');
-            subHeader.innerText = 'Görseldeki Kaynakçalar';
+            subHeader.innerText = 'Görseldeki Kaynaklar';
             subHeader.style.cssText = 'color: var(--text-color); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; border-left: 4px solid var(--primary-accent); padding-left: 10px;';
             groupDiv.appendChild(subHeader);
 
@@ -1820,12 +1822,13 @@ function renderArticleDetail(article) {
                             const target = document.getElementById(targetId);
                             if (target) {
                                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                target.style.transition = 'background 0.5s';
-                                target.style.backgroundColor = 'rgba(255, 251, 235, 1)'; // Soft yellow background
+                                target.style.transition = 'background 0.3s ease-out';
+                                // Use a more subtle highlight color that works in both modes
+                                target.style.backgroundColor = 'rgba(99, 102, 241, 0.2)'; // Primary color low opacity
                                 target.style.borderRadius = '4px';
                                 setTimeout(() => {
                                     target.style.backgroundColor = 'transparent';
-                                }, 2000);
+                                }, 800); // Reduced from 2000ms to 800ms
                             }
                         };
                     }
