@@ -1007,15 +1007,13 @@ function setupMobileMenu() {
     const header = document.querySelector('.header');
 
     // --- GLOBAL BODY-LEVEL MOBILE LANGUAGE TOGGLE ---
-    // Defined outside to be accessible, but updated inside logic
     let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
 
     if (!mobileGlobalBtn) {
         mobileGlobalBtn = document.createElement('div');
         mobileGlobalBtn.id = 'global-mobile-lang-btn';
         mobileGlobalBtn.style.position = 'fixed';
-        // Position it nicely above the bottom (approx where auth buttons would be)
-        mobileGlobalBtn.style.bottom = '110px';
+        mobileGlobalBtn.style.bottom = '130px'; // Positioned above bottom auth area
         mobileGlobalBtn.style.left = '50%';
         mobileGlobalBtn.style.transform = 'translateX(-50%)';
         mobileGlobalBtn.style.zIndex = '2147483647'; // Max Z-Index
@@ -1024,28 +1022,28 @@ function setupMobileMenu() {
         // Inner content
         const langBtn = document.createElement('button');
         langBtn.className = 'lang-btn';
-        langBtn.style.padding = '12px 28px';
+        langBtn.style.padding = '12px 30px';
         langBtn.style.borderRadius = '30px';
-        langBtn.style.border = '1px solid rgba(255,255,255,0.15)';
-        langBtn.style.background = 'rgba(20, 20, 20, 0.9)'; // Sleek Dark
-        langBtn.style.backdropFilter = 'blur(12px)';
+        langBtn.style.border = '1px solid rgba(255,255,255,0.2)';
+        langBtn.style.background = '#0f172a'; // Solid dark color
         langBtn.style.color = 'white';
         langBtn.style.fontSize = '15px';
-        langBtn.style.fontWeight = '600';
-        langBtn.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+        langBtn.style.fontWeight = '700';
+        langBtn.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
         langBtn.style.display = 'flex';
         langBtn.style.alignItems = 'center';
         langBtn.style.gap = '8px';
         langBtn.style.cursor = 'pointer';
-        langBtn.style.transition = 'all 0.2s ease';
+        langBtn.style.pointerEvents = 'auto'; // Ensure clickable
 
         // Determine state
         const isEnglish = document.cookie.includes('googtrans=/tr/en');
-        langBtn.innerHTML = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN';
+        langBtn.innerHTML = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN/TR';
 
         langBtn.onclick = (e) => {
             e.preventDefault();
-            // Cookie Logic
+            e.stopPropagation(); // Stop event bubbling
+
             function setCookie(name, value, days) {
                 const d = new Date();
                 d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
@@ -1054,8 +1052,6 @@ function setupMobileMenu() {
 
             if (document.cookie.includes('googtrans=/tr/en')) {
                 setCookie('googtrans', '/tr/tr', 1);
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
                 window.location.reload();
             } else {
                 setCookie('googtrans', '/tr/en', 1);
@@ -1064,27 +1060,26 @@ function setupMobileMenu() {
         };
 
         mobileGlobalBtn.appendChild(langBtn);
-        // Only append if screen is small (simple check, or CSS media query could handle display)
-        // But since we control display via JS below, it's fine.
         document.body.appendChild(mobileGlobalBtn);
     }
 
-    // Visibility Helper
-    const updateBtnVisibility = () => {
-        if (nav && nav.classList.contains('active')) {
-            if (mobileGlobalBtn) {
-                // Check if mobile/tablet
-                if (window.innerWidth <= 1024) {
-                    mobileGlobalBtn.style.display = 'block';
-                    // Small animation
-                    mobileGlobalBtn.style.opacity = '0';
-                    setTimeout(() => mobileGlobalBtn.style.opacity = '1', 50);
-                }
+    // --- ROBUST VISIBILITY LOOP ---
+    // Instead of relying on events which might fail or be overwritten,
+    // we poll the state of that menu class.
+    setInterval(() => {
+        const navActive = nav && nav.classList.contains('active');
+        const isMobile = window.innerWidth <= 1024;
+
+        if (navActive && isMobile) {
+            if (mobileGlobalBtn.style.display !== 'flex') {
+                mobileGlobalBtn.style.display = 'flex';
             }
         } else {
-            if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'none';
+            if (mobileGlobalBtn.style.display !== 'none') {
+                mobileGlobalBtn.style.display = 'none';
+            }
         }
-    };
+    }, 200); // Check every 200ms
 
     if (btn && nav) {
         btn.addEventListener('click', () => {
@@ -1097,8 +1092,6 @@ function setupMobileMenu() {
             } else {
                 document.body.style.overflow = '';
             }
-
-            setTimeout(updateBtnVisibility, 50);
         });
 
         // Close when clicking links
@@ -1107,7 +1100,6 @@ function setupMobileMenu() {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
-                setTimeout(updateBtnVisibility, 50);
             });
         });
 
@@ -1117,16 +1109,6 @@ function setupMobileMenu() {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
-                setTimeout(updateBtnVisibility, 50);
-            }
-        });
-
-        // Handle Resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 1024) {
-                if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'none';
-            } else {
-                updateBtnVisibility();
             }
         });
     }
