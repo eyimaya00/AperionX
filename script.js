@@ -992,9 +992,11 @@ function openModal(modalId) {
 }
 
 function closeModal(modalId) {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-}
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 // --- Mobile Menu Logic ---
