@@ -2555,10 +2555,9 @@ app.post('/api/admin/comments/:id/reject', authenticateToken, async (req, res) =
 });
 
 // --- SEO: Sitemap.xml ---
-// --- SEO: Sitemap.xml ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT id, slug, updated_at, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query("SELECT id, slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
 
         // Use dynamic host but prefer https://www.aperionx.com if host header matches
@@ -2598,7 +2597,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // Articles (Using Slugs)
         articles.forEach(art => {
-            const lastMod = art.updated_at ? new Date(art.updated_at).toISOString() : new Date(art.created_at).toISOString();
+            const lastMod = new Date(art.created_at).toISOString();
             xml += `
     <url>
         <loc>${baseUrl}/makale/${art.slug}</loc>
@@ -2615,7 +2614,7 @@ app.get('/sitemap.xml', async (req, res) => {
         res.send(xml);
 
     } catch (e) {
-        console.error(e);
+        console.error('Sitemap Error:', e);
         res.status(500).end();
     }
 });
