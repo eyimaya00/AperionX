@@ -1589,7 +1589,10 @@
         // Trash State
         let isTrashView = false;
 
-        if (!token || !user) window.location.href = 'index.html';
+        if (!token || !user) {
+            console.error('Auth Check Failed:', { token, user });
+            // window.location.href = 'index.html'; // TEMPORARILY DISABLED FOR DEBUGGING
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
