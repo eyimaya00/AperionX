@@ -2906,6 +2906,12 @@ async function ensureTrashStatus() {
 }
 ensureTrashStatus();
 
+// GLOBAL 404 HANDLER (MUST BE LAST)
+app.use((req, res) => {
+    console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ message: `Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
