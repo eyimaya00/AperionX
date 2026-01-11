@@ -2461,17 +2461,24 @@ function initLanguageSwitcher() {
         // Add CSS to hide Google Top Bar
         const style = document.createElement('style');
         style.innerHTML = `
+            /* Hide Google Translate Top Banner */
             .goog-te-banner-frame.skiptranslate { display: none !important; } 
-            body { top: 0px !important; }
+            iframe.goog-te-banner-frame { display: none !important; }
+            body { top: 0px !important; position: static !important; }
+            
+            /* Hide Translate Widget */
             #google_translate_element { display: none !important; }
             .goog-tooltip { display: none !important; }
             .goog-te-gadget-simple { display: none !important; }
+            
+            /* Remove blue hover borders injected by Google */
+            font { background-color: transparent !important; box-shadow: none !important; }
         `;
         document.head.appendChild(style);
     }
 
     // 2. Define Init Function Global
-    window.googleTranslateElementInit = function() {
+    window.googleTranslateElementInit = function () {
         new google.translate.TranslateElement({
             pageLanguage: 'tr',
             includedLanguages: 'en,tr',
@@ -2487,7 +2494,7 @@ function initLanguageSwitcher() {
 
     function setCookie(name, value, days) {
         const d = new Date();
-        d.setTime(d.getTime() + 24*60*60*1000*days);
+        d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
         document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
     }
 
