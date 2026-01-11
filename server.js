@@ -248,7 +248,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
         fs.readFile(filePath, 'utf8', async (err, htmlData) => {
             if (err) return next(err);
 
-                        try {
+            try {
                 // Use String Replacement instead of JSDOM to avoid dependency issues on server
                 const origin = `${req.protocol}://${req.get('host')}`;
 
@@ -264,13 +264,13 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const summary = article.excerpt || article.title;
                 const img = article.image_url
                     ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
-                    : `${origin}/uploads/logo.png`; 
-                
+                    : `${origin}/uploads/logo.png`;
+
                 // Determine current URL structure
                 const isEnglish = req.path.startsWith('/en/');
                 const urlPrefix = isEnglish ? `${origin}/en` : origin;
                 const url = `${urlPrefix}/makale/${article.slug}`;
-                
+
                 // Fix: Sanitize potential nulls
                 const safeTitle = (title || '').replace(/"/g, '&quot;');
                 const safeSummary = (summary || '').replace(/"/g, '&quot;');
@@ -279,10 +279,10 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 // REPLACEMENT LOGIC
                 let html = htmlData;
-                
+
                 // Title
                 html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
-                
+
                 // Meta Tags (Regex replace)
                 const replaceMeta = (name, content) => {
                     const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
@@ -294,7 +294,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 replaceMeta('og:description', safeSummary);
                 replaceMeta('og:image', safeImg);
                 replaceMeta('og:url', safeUrl);
-                
+
                 replaceMeta('twitter:title', safeTitle);
                 replaceMeta('twitter:description', safeSummary);
                 replaceMeta('twitter:image', safeImg);
@@ -305,8 +305,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 res.send(html);
 
-            }  
- } catch (parseErr) {
+            } catch (parseErr) {
                 console.error('SSR Parse Error:', parseErr);
                 res.status(500).send(parseErr.toString());
             }
