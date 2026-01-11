@@ -2504,7 +2504,35 @@ function updateActiveNavLink() {
 
 // --- Language Switcher (Robust / "Nuclear" Version) ---
 // --- Language Switcher (Robust / "Nuclear" Version) ---
+// --- Language Switcher (Robust / "Nuclear" Version) ---
 function initLanguageSwitcher() {
+    // 0. INJECT GOOGLE TRANSLATE SCRIPT IF MISSING
+    if (!document.getElementById('google-translate-script')) {
+        const script = document.createElement('script');
+        script.id = 'google-translate-script';
+        script.type = 'text/javascript';
+        script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        document.head.appendChild(script);
+
+        // Add hidden target element
+        if (!document.getElementById('google_translate_element')) {
+            const div = document.createElement('div');
+            div.id = 'google_translate_element';
+            div.style.display = 'none';
+            document.body.appendChild(div);
+        }
+
+        // Init Callback
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement({
+                pageLanguage: 'tr',
+                includedLanguages: 'en,tr',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        };
+    }
+
     const enforceLanguageButtons = () => {
         try {
             // --- COOKIE HELPERS ---
