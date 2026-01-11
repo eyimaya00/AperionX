@@ -987,6 +987,45 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
+// GET Single Article by ID or Slug for Frontend API
+app.get('/api/articles/:key', async (req, res) => {
+    const key = req.params.key;
+    try {
+        let sql = 'SELECT * FROM articles WHERE ';
+        let params = [];
+
+        // Check if numeric ID
+        if (/^\d+$/.test(key)) {
+            sql += 'id = ?';
+            params = [key];
+        } else {
+            sql += 'slug = ?';
+            params = [key];
+        }
+
+        const [rows] = await pool.query(sql, params);
+        if (rows.length === 0) return res.status(404).json({ message: 'Makale bulunamadı' });
+
+        const article = rows[0];
+
+        // Fetch Author
+        try {
+            const [uRows] = await pool.query('SELECT fullname, avatar FROM users WHERE id = ?', [article.author_id]);
+            if (uRows.length > 0) {
+                article.author_name = uRows[0].fullname;
+                article.author_avatar = uRows[0].avatar;
+            } else {
+                article.author_name = 'Yazar';
+            }
+        } catch (e) { article.author_name = 'Yazar'; }
+
+        res.json(article);
+    } catch (e) {
+        console.error('API Article Detail Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
 
 app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
     console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
