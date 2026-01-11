@@ -1040,7 +1040,7 @@ function setupMobileMenu() {
 
         // Handle Resize (Hide if desktop)
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 1024) {
+            if (window.innerWidth > 1200) {
                 // If the menu is active on desktop, close it and unlock scroll
                 if (nav.classList.contains('active')) {
                     nav.classList.remove('active');
@@ -2680,7 +2680,25 @@ function initLanguageSwitcher() {
                         cursor: pointer !important;
                         transition: transform 0.1s !important;
                     `;
-                    mobileMenu.prepend(mobileBtn);
+
+                    // --- POSITIONING FIX ---
+                    // Want it explicitly at the bottom, after auth buttons
+                    const authSection = mobileMenu.querySelector('.mobile-auth');
+
+                    if (authSection) {
+                        // Insert AFTER auth section
+                        if (mobileBtn.parentNode !== mobileMenu || mobileBtn.previousElementSibling !== authSection) {
+                            // Check if already after
+                            if (authSection.nextSibling !== mobileBtn) {
+                                authSection.parentNode.insertBefore(mobileBtn, authSection.nextSibling);
+                            }
+                        }
+                    } else {
+                        // Fallback: Append to end
+                        mobileMenu.appendChild(mobileBtn);
+                    }
+
+                    mobileBtn.style.marginTop = '15px'; // Force separation
                     mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
                 }
                 // Update Content
