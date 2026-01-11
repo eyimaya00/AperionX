@@ -2,16 +2,15 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-// --- DEBUG LOGGING ---
-const logFile = path.join(__dirname, 'server_debug.log');
+
 function logDebug(msg) {
     const time = new Date().toISOString();
     fs.appendFileSync(logFile, `[${time}] ${msg}\n`);
 }
-logDebug('--- SERVER STARTING ---');
+
 logDebug(`CWD: ${process.cwd()}`);
 logDebug(`NODE_ENV: ${process.env.NODE_ENV}`);
-logDebug(`PORT: ${process.env.PORT}`);
+
 
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -36,7 +35,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'gizli_anahtar';
 const cookieParser = require('cookie-parser'); // Import cookie-parser
 
-// Security Middleware
+
 app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false
@@ -44,23 +43,19 @@ app.use(helmet({
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5000, // Increased for development/testing comfort
+    max: 5000,
     message: 'Too many requests from this IP, please try again later.'
 });
-app.use('/api', limiter); /* Apply ONLY to API routes */
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json({ limit: '100mb' }));
-app.use(cookieParser()); // Use cookie-parser
-
-// GLOBAL REQUEST LOGGER
+app.use(cookieParser());
 app.use((req, res, next) => {
     console.log(`[REQUEST] ${req.method} ${req.url} - IP: ${req.ip}`);
     next();
 });
 
-// === MAINTENANCE MODE GATEKEEPER ===
+
 app.use(async (req, res, next) => {
     // 1. Check for bypass cookie
     if (req.cookies.maintenance_bypass) {
@@ -307,7 +302,6 @@ app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
     }
 });
 
-// 2. Legacy Route Interceptor (Redirects to Slug)
 app.get('/article-detail.html', async (req, res, next) => {
     const articleId = req.query.id;
     if (!articleId) return next();
@@ -315,17 +309,17 @@ app.get('/article-detail.html', async (req, res, next) => {
     try {
         const [rows] = await pool.query('SELECT slug FROM articles WHERE id = ?', [articleId]);
         if (rows.length > 0 && rows[0].slug) {
-            // Permanent Redirect to new SEO URL
+
             return res.redirect(301, `/makale/${rows[0].slug}`);
         }
-        next(); // fallback if no slug
+        next();
     } catch (e) { next(); }
 });
-app.use(express.static(__dirname)); // Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Explicitly serve uploads
+app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-// Database Connection
+
 const dbConfig = {
     host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
@@ -335,17 +329,16 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-// Schema Migration for Username
 async function ensureSchema() {
     try {
-        // Check if username column exists
+
         const [columns] = await pool.query("SHOW COLUMNS FROM users LIKE 'username'");
         if (columns.length === 0) {
             console.log('Migrating: Adding username column to users table...');
             await pool.query("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE AFTER fullname");
             console.log('Migration Code: Users table updated with username column.');
         }
-        // Ensure 'likes' table exists
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS likes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -356,7 +349,7 @@ async function ensureSchema() {
             )
         `);
 
-        // Ensure 'comments' table exists
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS comments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -367,7 +360,7 @@ async function ensureSchema() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        // Ensure 'is_approved' exists in comments (Fix for existing tables)
+
         try {
             const [cCols] = await pool.query("SHOW COLUMNS FROM comments LIKE 'is_approved'");
             if (cCols.length === 0) {
@@ -376,8 +369,7 @@ async function ensureSchema() {
             }
         } catch (e) { console.error('Migration Error (Comments):', e); }
 
-        // Ensure 'bio' and 'job_title' columns in users
-        // Ensure 'bio', 'job_title', 'avatar_url' columns in users
+
         try {
             await pool.query("SELECT bio, avatar_url, reset_token FROM users LIMIT 1");
         } catch (err) {
@@ -391,7 +383,7 @@ async function ensureSchema() {
             }
         }
 
-        // Fix 'Data truncated for column role' - Ensure role is VARCHAR(50)
+
         try {
             await pool.query("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) DEFAULT 'reader'");
             console.log('Migrating: users.role column modified to VARCHAR(50)');
@@ -399,7 +391,7 @@ async function ensureSchema() {
             console.error('Migration Error (Role Column):', err);
         }
 
-        // Ensure 'articles' content is LONGTEXT
+
         try {
             await pool.query("ALTER TABLE articles MODIFY COLUMN content LONGTEXT");
             console.log('Migrating: articles content column set to LONGTEXT');
@@ -407,7 +399,7 @@ async function ensureSchema() {
             console.error('Migration Error (Content LONGTEXT):', err);
         }
 
-        // Ensure 'article_views' table exists
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS article_views (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -418,7 +410,7 @@ async function ensureSchema() {
             )
         `);
 
-        // Ensure 'settings' table exists
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS settings (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -433,7 +425,7 @@ async function ensureSchema() {
     }
 
     try {
-        // Add approved_by column to articles if not exists
+
         await pool.query("SELECT approved_by FROM articles LIMIT 1");
     } catch (e) {
         if (e.code === 'ER_BAD_FIELD_ERROR') {
@@ -444,7 +436,7 @@ async function ensureSchema() {
         }
     }
 
-    // Force fix status column length (Fix for 'Data truncated' error)
+
     try {
         await pool.query("ALTER TABLE articles MODIFY COLUMN status VARCHAR(50) DEFAULT 'draft'");
         console.log("Ensured articles.status is VARCHAR(50)");
@@ -453,7 +445,7 @@ async function ensureSchema() {
     }
 
     try {
-        // Auto-migration for other missing columns
+
         const neededColumns = [
             { name: 'category', def: "VARCHAR(100) DEFAULT 'Genel'" },
             { name: 'tags', def: "TEXT" },
@@ -476,16 +468,13 @@ async function ensureSchema() {
     }
 }
 
-// Run on start
+
 console.log('--- APERIONX SERVER VERSION 2.3 FINAL (ROBUST SETTINGS) STARTING ---');
 ensureSchema();
 
 
 
 
-// DB Config
-
-// File Upload Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = 'uploads/';
@@ -516,7 +505,6 @@ const upload = multer({
     }
 });
 
-// Article Image Storage
 const articleStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = 'uploads/article_images/';
@@ -531,17 +519,12 @@ const articleStorage = multer.diskStorage({
 });
 const uploadArticleImage = multer({ storage: articleStorage });
 
-// Upload Endpoint
 app.post('/api/upload', authenticateToken, uploadArticleImage.single('image'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    // Return relative path
+
     res.json({ url: `uploads/article_images/${req.file.filename}` });
 });
 
-// === HELPER === 
-// Check Auth Middleware
-// Check Auth Middleware
-// Check Auth Middleware
 function authenticateToken(req, res, next) {
     console.log('Middleware: authenticateToken called');
     const authHeader = req.headers['authorization'];
@@ -562,18 +545,17 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Email Helper
 async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
     try {
         let subject = 'AperionX Bildirim';
         let body = '';
 
         if (type === 'custom') {
-            // Direct send mode
+
             subject = subjectOverride || 'AperionX Bildirim';
             body = typeof variablesOrBody === 'string' ? variablesOrBody : JSON.stringify(variablesOrBody);
         } else {
-            // Template mode
+
             const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key LIKE ? OR setting_key LIKE ?', [`email_${type}_subject`, `email_${type}_body`]);
             const settings = {};
             rows.forEach(r => settings[r.setting_key] = r.setting_value);
@@ -582,7 +564,7 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
             body = settings[`email_${type}_body`] || 'Merhaba, bir bildiriminiz var.';
         }
 
-        // Replace Variables if variablesOrBody is an object
+
         if (typeof variablesOrBody === 'object') {
             Object.keys(variablesOrBody).forEach(key => {
                 const regex = new RegExp(`{${key}}`, 'g');
@@ -591,9 +573,8 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
             });
         }
 
-        // Logo Handling
         // 1. Fetch site_logo from settings if not provided
-        let logoLink = 'https://ui-avatars.com/api/?name=AX&background=random'; // Default fallback
+        let logoLink = 'https://ui-avatars.com/api/?name=AX&background=random';
 
         if (typeof variablesOrBody === 'object' && variablesOrBody.logoUrl) {
             logoLink = variablesOrBody.logoUrl;

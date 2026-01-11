@@ -2,7 +2,6 @@
 <html lang="tr">
 
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -1098,97 +1097,94 @@
                 <div class="article-summary-simple" id="summary-box">
                     <div class="summary-title"><i class="ph-fill ph-sparkle"></i> Bu Makalede Neler Öğreneceğiz?</div>
                     <div class="summary-text" id="detail-excerpt">
-                        <!-- Excerpt will be injected here -->
+                        <div class="summary-text" id="detail-excerpt">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Main Content -->
-                <div class="article-content-simple">
-                    <div class="article-content" id="detail-content">
-                        <!-- Inner HTML will be injected here -->
+                    <!-- Main Content -->
+                    <div class="article-content-simple">
+                        <div class="article-content" id="detail-content">
+                            <div class="article-content" id="detail-content">
+                            </div>
+                        </div>
                     </div>
+
+
+                    <div class="references-section-simple" id="references-section" style="display: none;">
+                        <h3 class="references-title">Kaynakça</h3>
+                        <ul class="references-list" id="references-list"></ul>
+                    </div>
+
+                    <div class="tags-container" id="detail-tags"></div>
                 </div>
 
-                <!-- References -->
-                <div class="references-section-simple" id="references-section" style="display: none;">
-                    <h3 class="references-title">Kaynakça</h3>
-                    <ul class="references-list" id="references-list"></ul>
-                </div>
+                <div class="article-footer-meta">
+                    <div class="action-row">
 
-                <!-- Tags (Moved to Bottom) -->
-                <div class="tags-container" id="detail-tags"></div>
-            </div>
+                        <a href="articles.html" class="btn-back-custom">
+                            <i class="ph-bold ph-arrow-left"></i> Diğer Makalelere Göz At
+                        </a>
 
-            <!-- Meta Footer (Actions) -->
-            <div class="article-footer-meta">
-                <!-- Action Row (Back | Like | Share) -->
-                <div class="action-row">
-                    <!-- Left: Back Button -->
-                    <a href="articles.html" class="btn-back-custom">
-                        <i class="ph-bold ph-arrow-left"></i> Diğer Makalelere Göz At
-                    </a>
 
-                    <!-- Right: Like & Share -->
-                    <div class="right-actions">
-                        <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                            <i class="ph ph-heart"></i> Destek Ol
-                        </button>
+                        <div class="right-actions">
+                            <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                                <i class="ph ph-heart"></i> Destek Ol
+                            </button>
 
-                        <div class="share-divider"></div>
+                            <div class="share-divider"></div>
 
-                        <div class="share-icons-row">
-                            <span class="share-label">Paylaş:</span>
-                            <a href="#" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
-                            <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
-                            <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
-                            <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
-                            <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
-                                title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                            <div class="share-icons-row">
+                                <span class="share-label">Paylaş:</span>
+                                <a href="#" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                                <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                                <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                                <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                                <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
+                                    title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Comments Section -->
-            <div class="comments-section">
-                <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
 
-                <!-- Comment Form -->
-                <div class="comment-form-wrapper" id="comment-form-container">
-                    <!-- Injected via JS if logged in, else login prompt -->
-                    <p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal('loginModal')">giriş
-                            yapmalısınız</a>.</p>
-                </div>
+                <div class="comments-section">
+                    <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
 
-                <!-- Comments List -->
-                <div class="comments-list" id="comments-list">
-                    <!-- Injected via JS -->
-                    <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
-                </div>
-            </div>
-            <!-- Similar Articles Slider -->
-            <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 class="related-articles-title">
-                        Diğer Makalelere Göz At</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="slider-nav-btn" onclick="slideArticles('left')"><i
-                                class="ph ph-caret-left"></i></button>
-                        <button class="slider-nav-btn" onclick="slideArticles('right')"><i
-                                class="ph ph-caret-right"></i></button>
+                    <div class="comment-form-wrapper" id="comment-form-container">
+                        <p class="login-prompt">Yorum yapabilmek için <a href="#"
+                                onclick="openModal('loginModal')">giriş
+                                yapmalısınız</a>.</p>
+                    </div>
+
+                    <div class="comments-list" id="comments-list">
+                        <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
                     </div>
                 </div>
 
-                <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
-                    <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;">
-                        <!-- JS Injected Cards -->
+                <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 class="related-articles-title">
+                            Diğer Makalelere Göz At</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="slider-nav-btn" onclick="slideArticles('left')"><i
+                                    class="ph ph-caret-left"></i></button>
+                            <button class="slider-nav-btn" onclick="slideArticles('right')"><i
+                                    class="ph ph-caret-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
+                        <div id="similar-slider-track"
+                            style="display: flex; gap: 20px; transition: transform 0.4s ease;">
+                            <!-- JS Injected Cards -->
+                        </div>
                     </div>
                 </div>
-            </div>
         </main>
     </div>
 
-    <!-- Footer (Copied from articles.html) -->
+
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-col brand-col">
@@ -1233,7 +1229,7 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu -->
+
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-auth">
             <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
@@ -1241,7 +1237,7 @@
         </div>
     </div>
 
-    <!-- Modals (Copied for consistency) -->
+
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
             <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
@@ -1319,7 +1315,7 @@
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
+
     <div class="modal-overlay" id="forgotPasswordModal">
         <div class="modal">
             <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
@@ -1348,8 +1344,7 @@
         // Use API_URL from script.js or default
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
 
-        // script.js handles loadArticleDetail on DOMContentLoaded for /makale/ URLs
-        // No need for duplicate handler here
+
 
         async function loadLikes(id) {
             try {
@@ -1359,9 +1354,6 @@
                 const data = await res.json();
 
                 const btn = document.getElementById('like-btn');
-                // Hiding count as requested
-                // const count = document.getElementById('like-count'); 
-                // count.innerText = data.count;
 
                 if (data.liked) {
                     btn.classList.add('liked');
@@ -1379,7 +1371,6 @@
                 return;
             }
 
-            // Use global article ID from script.js (fixes clean URL support)
             const id = window.currentArticleId;
             if (!id) {
                 console.error('toggleLike: No article ID found');
@@ -1388,7 +1379,6 @@
             const btn = document.getElementById('like-btn');
 
             try {
-                // Optimistic UI
                 const isLiked = btn.classList.contains('liked');
 
                 if (isLiked) {
@@ -1525,7 +1515,6 @@
             const content = document.getElementById('comment-input').value;
             if (!content || !content.trim()) return showToast('Lütfen bir yorum yazın', 'error');
 
-            // Use global article ID from script.js (fixes clean URL support)
             const id = window.currentArticleId;
             if (!id) {
                 console.error('postComment: No article ID found');
