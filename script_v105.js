@@ -1006,73 +1006,7 @@ function setupMobileMenu() {
     const nav = document.querySelector('.nav-menu');
     const header = document.querySelector('.header');
 
-    // --- GLOBAL BODY-LEVEL MOBILE LANGUAGE TOGGLE ---
-    let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
-
-    if (!mobileGlobalBtn) {
-        mobileGlobalBtn = document.createElement('div');
-        mobileGlobalBtn.id = 'global-mobile-lang-btn';
-        mobileGlobalBtn.style.position = 'fixed';
-        mobileGlobalBtn.style.bottom = '130px'; // Positioned above bottom auth area
-        mobileGlobalBtn.style.left = '50%';
-        mobileGlobalBtn.style.transform = 'translateX(-50%)';
-        mobileGlobalBtn.style.zIndex = '2147483647'; // Max Z-Index
-        mobileGlobalBtn.style.display = 'none'; // Hidden by default
-
-        // Inner content
-        const langBtn = document.createElement('button');
-        langBtn.className = 'lang-btn';
-        langBtn.style.padding = '12px 30px';
-        langBtn.style.borderRadius = '30px';
-        langBtn.style.border = '1px solid rgba(255,255,255,0.2)';
-        langBtn.style.background = '#0f172a'; // Solid dark color
-        langBtn.style.color = 'white';
-        langBtn.style.fontSize = '15px';
-        langBtn.style.fontWeight = '700';
-        langBtn.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
-        langBtn.style.display = 'flex';
-        langBtn.style.alignItems = 'center';
-        langBtn.style.gap = '8px';
-        langBtn.style.cursor = 'pointer';
-        langBtn.style.pointerEvents = 'auto'; // Ensure clickable
-
-        // Determine state
-        const isEnglish = document.cookie.includes('googtrans=/tr/en');
-        langBtn.innerHTML = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN/TR';
-
-        langBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Stop event bubbling
-
-            function setCookie(name, value, days) {
-                const d = new Date();
-                d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
-                document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
-            }
-
-            if (document.cookie.includes('googtrans=/tr/en')) {
-                setCookie('googtrans', '/tr/tr', 1);
-                window.location.reload();
-            } else {
-                setCookie('googtrans', '/tr/en', 1);
-                window.location.reload();
-            }
-        };
-
-        document.body.appendChild(btn);
-    }
-
-    // Run immediately
-    initMobileLangHack();
-
-    // Also run on resize to toggle visibility
-    window.addEventListener('resize', () => {
-        const el = document.getElementById('mobile-lang-hack-btn');
-        if (el) {
-            el.style.display = window.innerWidth <= 1024 ? 'flex' : 'none';
-        }
-    });
-
+    // --- Mobile Menu Toggle Logic ---
     if (btn && nav) {
         btn.addEventListener('click', () => {
             nav.classList.toggle('active');
@@ -1102,7 +1036,7 @@ function setupMobileMenu() {
             }
         });
 
-        // Handle Resize (Hide if desktop) - The mobile language button now handles its own resize logic.
+        // Handle Resize (Hide if desktop)
         window.addEventListener('resize', () => {
             if (window.innerWidth > 1024) {
                 // If the menu is active on desktop, close it and unlock scroll
