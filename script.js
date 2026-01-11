@@ -2479,6 +2479,34 @@ function initLanguageSwitcher() {
         `;
         document.head.appendChild(style);
 
+    // --- Mobile Menu Injection ---
+    const mobileMenu = document.querySelector('.nav-links'); // This is usually the container
+    // Or specifically for mobile-menu specific div if it exists. 
+    // In this theme, .nav-links becomes the mobile menu on small screens.
+    
+    // We want to append a list item for the language Switcher at the bottom of the list
+    if (mobileMenu && !document.getElementById('mobile-lang-btn-li')) {
+        const li = document.createElement('li');
+        li.id = 'mobile-lang-btn-li';
+        li.className = 'mobile-only'; // Ensure it can be styled if needed
+        li.style.marginTop = '20px';
+        li.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+        li.style.paddingTop = '10px';
+        
+        const a = document.createElement('a');
+        a.href = '#';
+        a.id = 'mobile-lang-switch-btn';
+        a.className = 'lang-btn';
+        a.style.justifyContent = 'center'; // Center text
+        
+        // Initial Text (will be updated by the logic below)
+        a.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+        
+        li.appendChild(a);
+        mobileMenu.appendChild(li);
+    }
+
+
         // AGGRESSIVE REMOVAL: Force remove the banner from DOM
         const removeBanner = setInterval(() => {
             // Remove iframe
