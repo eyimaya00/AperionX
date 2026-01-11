@@ -2513,10 +2513,16 @@ function hideGoogleBanner() {
     // 2. Also check specifically for iframes that might be the banner
     const iframes = document.querySelectorAll('iframe');
     iframes.forEach(iframe => {
+        // Log found iframes for debugging
+        // console.log("Checking iframe:", iframe.id, iframe.className, iframe.parentElement);
+
         if (iframe.className.includes('goog-te-banner-frame') ||
             iframe.id === 'goog-te-banner-frame' ||
-            (iframe.src && iframe.src.includes('google.com/translate'))
+            (iframe.src && iframe.src.includes('google.com/translate')) ||
+            // AGGRESSIVE: If it's fixed at top and has no ID/Class, it might be it
+            (getComputedStyle(iframe).position === 'fixed' && getComputedStyle(iframe).top === '0px')
         ) {
+            console.log("Killing Google Banner Iframe:", iframe);
             iframe.remove();
         }
     });
