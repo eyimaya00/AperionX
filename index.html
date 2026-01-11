@@ -384,6 +384,97 @@
         </div>
     </div>
 
+    <!-- NUCLEAR INLINE SCRIPT FOR MOBILE BUTTON -->
+    <script>
+        (function () {
+            try {
+                // Remove existing if any
+                const existing = document.getElementById('nuclear-mobile-btn');
+                if (existing) existing.remove();
+
+                const btn = document.createElement('a');
+                btn.id = 'nuclear-mobile-btn';
+                btn.href = "#";
+                btn.setAttribute('role', 'button');
+
+                // FORCE STYLES (Inline to override everything)
+                btn.style.cssText = `
+                    position: fixed !important;
+                    bottom: 25px !important;
+                    left: 25px !important;
+                    z-index: 2147483647 !important;
+                    background-color: #000 !important;
+                    color: #fff !important;
+                    padding: 12px 25px !important;
+                    border-radius: 50px !important;
+                    text-decoration: none !important;
+                    font-family: sans-serif !important;
+                    font-weight: bold !important;
+                    font-size: 14px !important;
+                    display: none; /* Default hidden, shown via media query logic below */
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+                    align-items: center !important;
+                    gap: 8px !important;
+                    cursor: pointer !important;
+                    pointer-events: auto !important;
+                `;
+
+                // Logic to show only on mobile
+                if (window.innerWidth <= 1024) {
+                    btn.style.display = 'flex';
+                }
+
+                window.addEventListener('resize', function () {
+                    if (window.innerWidth <= 1024) {
+                        btn.style.display = 'flex';
+                    } else {
+                        btn.style.display = 'none';
+                    }
+                });
+
+                // Cookie Logic
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                }
+
+                const currentTrans = getCookie('googtrans');
+                const isEnglish = currentTrans && currentTrans.includes('/en');
+
+                btn.innerHTML = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
+
+                btn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (isEnglish) {
+                        document.cookie = "googtrans=/tr/tr; path=/; domain=" + window.location.hostname;
+                        document.cookie = "googtrans=/tr/tr; path=/";
+                    } else {
+                        document.cookie = "googtrans=/tr/en; path=/; domain=" + window.location.hostname;
+                        document.cookie = "googtrans=/tr/en; path=/";
+                    }
+                    window.location.reload();
+                };
+
+                document.body.appendChild(btn);
+                console.log('Mobile Button Injected Successfully');
+
+            } catch (e) {
+                console.error('Mobile Button Injection Failed:', e);
+                // Fallback visual error
+                const errDiv = document.createElement('div');
+                errDiv.style.position = 'fixed';
+                errDiv.style.top = '0';
+                errDiv.style.background = 'yellow';
+                errDiv.style.color = 'black';
+                errDiv.innerText = 'JS ERR: ' + e.message;
+                document.body.appendChild(errDiv);
+            }
+        })();
+    </script>
+
     <script src="/script_v105.js"></script>
 </body>
 
