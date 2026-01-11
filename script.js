@@ -1036,60 +1036,96 @@ function setupMobileMenu() {
             }
         });
 
-        // --- INJECT MOBILE LANGUAGE SWITCHER ---
-        if (!document.getElementById('mobile-lang-btn')) {
-            const mobileBtn = document.createElement('a');
-            mobileBtn.href = "#";
-            mobileBtn.className = "nav-link lang-btn mobile-only";
-            mobileBtn.id = "mobile-lang-btn";
-            mobileBtn.style.marginTop = "auto";
-            mobileBtn.style.textAlign = "center";
-            mobileBtn.style.justifyContent = "center";
-            mobileBtn.style.display = "flex";
-            mobileBtn.style.alignItems = "center";
-            mobileBtn.style.gap = "8px";
-            mobileBtn.style.borderTop = "1px solid rgba(255,255,255,0.1)";
-            mobileBtn.style.padding = "15px";
+        // --- GLOBAL BODY-LEVEL MOBILE LANGUAGE TOGGLE ---
+        // We append to body to avoid z-index/overflow issues within nav containers
+        let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
 
-            // Check cookie
+        if (!mobileGlobalBtn) {
+            mobileGlobalBtn = document.createElement('div'); // Wrapper to be safe
+            mobileGlobalBtn.id = 'global-mobile-lang-btn';
+            mobileGlobalBtn.style.position = 'fixed';
+            mobileGlobalBtn.style.bottom = '110px'; // Adjust height above bottom
+            mobileGlobalBtn.style.left = '50%';
+            mobileGlobalBtn.style.transform = 'translateX(-50%)';
+            mobileGlobalBtn.style.zIndex = '2147483647'; // Max Z-Index
+            mobileGlobalBtn.style.display = 'none'; // Hidden by default
+
+            // Inner content
+            const btn = document.createElement('button');
+            btn.className = 'lang-btn';
+            btn.style.padding = '12px 24px';
+            btn.style.borderRadius = '30px';
+            btn.style.border = '1px solid rgba(255,255,255,0.2)';
+            btn.style.background = 'rgba(20, 20, 20, 0.9)'; // Dark backdrop
+            btn.style.backdropFilter = 'blur(10px)';
+            btn.style.color = 'white';
+            btn.style.fontSize = '16px';
+            btn.style.fontWeight = '600';
+            btn.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.gap = '10px';
+            btn.style.cursor = 'pointer';
+
+            // Determine state
             const isEnglish = document.cookie.includes('googtrans=/tr/en');
+            btn.innerHTML = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN';
 
-            if (isEnglish) {
-                mobileBtn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
-            } else {
-                mobileBtn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
-            }
-
-            // Copy click logic from initLanguageSwitcher
-            mobileBtn.onclick = (e) => {
+            btn.onclick = (e) => {
                 e.preventDefault();
-                function getCookie(name) {
-                    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-                    return v ? v[2] : null;
-                }
+                // Cookie Logic
                 function setCookie(name, value, days) {
                     const d = new Date();
                     d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
                     document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
                 }
 
-                const currentIsEnglish = getCookie('googtrans') === '/tr/en';
-                if (currentIsEnglish) {
-                    // Switch to TR
+                if (document.cookie.includes('googtrans=/tr/en')) {
                     setCookie('googtrans', '/tr/tr', 1);
                     document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                     document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
                     window.location.reload();
                 } else {
-                    // Switch to EN
                     setCookie('googtrans', '/tr/en', 1);
                     window.location.reload();
                 }
             };
 
-            // Append to .nav-menu
-            nav.appendChild(mobileBtn);
+            mobileGlobalBtn.appendChild(btn);
+            document.body.appendChild(mobileGlobalBtn);
         }
+
+        // --- Toggle Visibility Logic ---
+        // We hook into the existing click listeners by wrapping them or adding new ones
+
+        // Helper to update visibility check
+        const updateBtnVisibility = () => {
+            if (nav.classList.contains('active')) {
+                if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'block';
+            } else {
+                if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'none';
+            }
+        };
+
+        // Attach to Hamburger
+        const originalBtnClick = btn.onclick;
+        // Note: we added event listener before, so we just add another one
+        btn.addEventListener('click', () => {
+            // Wait for class toggle to happen (it happens in the other listener)
+            setTimeout(updateBtnVisibility, 50);
+        });
+
+        // Attach to Links close
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                setTimeout(updateBtnVisibility, 50);
+            });
+        });
+
+        // Attach to Outside Click
+        document.addEventListener('click', (e) => {
+            setTimeout(updateBtnVisibility, 50); // Check state after click processes
+        });
     }
 }
 function switchModal(closeId, openId) {
