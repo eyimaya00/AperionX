@@ -496,56 +496,55 @@
                         }
                     }
 
-                    // Always update content
-                    if (!mobileBtn.innerHTML.includes('svg')) {
-                        mobileBtn.innerHTML = labelContent;
-                    }
+
+                    mobileBtn.innerHTML = labelContent;
+                }
 
                     // --- 2. DESKTOP BUTTON ---
                     let desktopBtn = document.getElementById('lang-switch-btn');
-                    if (desktopBtn) {
-                        // Enforce Styles for PILL SHAPE
-                        desktopBtn.style.width = 'auto'; // Release fixed width
-                        desktopBtn.style.height = '36px'; // Keep height
-                        desktopBtn.style.padding = '0 12px'; // Add padding for text
-                        desktopBtn.style.borderRadius = '20px'; // Rounded pill
-                        desktopBtn.style.display = 'flex';
-                        desktopBtn.style.alignItems = 'center';
-                        desktopBtn.style.justifyContent = 'center';
-                        desktopBtn.style.gap = '6px';
-                        desktopBtn.style.fontSize = '14px';
+                if (desktopBtn) {
+                    // Enforce Styles for PILL SHAPE
+                    desktopBtn.style.width = 'auto'; // Release fixed width
+                    desktopBtn.style.height = '36px'; // Keep height
+                    desktopBtn.style.padding = '0 12px'; // Add padding for text
+                    desktopBtn.style.borderRadius = '20px'; // Rounded pill
+                    desktopBtn.style.display = 'flex';
+                    desktopBtn.style.alignItems = 'center';
+                    desktopBtn.style.justifyContent = 'center';
+                    desktopBtn.style.gap = '6px';
+                    desktopBtn.style.fontSize = '14px';
 
-                        // Enforce Content
-                        if (!desktopBtn.innerHTML.includes('svg')) {
-                            desktopBtn.innerHTML = labelContent;
-                        }
-
-                        // Attach Click (Idempotent)
-                        if (!desktopBtn.dataset.hasNuclearClick) {
-                            const newDesktopBtn = desktopBtn.cloneNode(true);
-                            desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
-                            newDesktopBtn.dataset.hasNuclearClick = "true";
-                            newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
-                            // Re-assign local variable to new element so styling updates work in next loop
-                            desktopBtn = newDesktopBtn;
-                        }
+                    // Enforce Content
+                    if (!desktopBtn.innerHTML.includes('svg')) {
+                        desktopBtn.innerHTML = labelContent;
                     }
 
-                } catch (e) {
-                    console.error("Lang Enforce Error", e);
+                    // Attach Click (Idempotent)
+                    if (!desktopBtn.dataset.hasNuclearClick) {
+                        const newDesktopBtn = desktopBtn.cloneNode(true);
+                        desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                        newDesktopBtn.dataset.hasNuclearClick = "true";
+                        newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                        // Re-assign local variable to new element so styling updates work in next loop
+                        desktopBtn = newDesktopBtn;
+                    }
                 }
-            };
 
-            // Run Immediately
-            enforceLanguageButtons();
+            } catch (e) {
+                console.error("Lang Enforce Error", e);
+            }
+        };
 
-            // Run on Load
-            window.addEventListener('load', enforceLanguageButtons);
+        // Run Immediately
+        enforceLanguageButtons();
 
-            // Run periodically
-            setInterval(enforceLanguageButtons, 250);
+        // Run on Load
+        window.addEventListener('load', enforceLanguageButtons);
 
-        })();
+        // Run periodically
+        setInterval(enforceLanguageButtons, 250);
+
+        }) ();
     </script>
 
     <script src="/script_v105.js"></script>
