@@ -443,50 +443,57 @@
                         setTimeout(() => window.location.reload(), 200);
                     };
 
-                    // --- 1. MOBILE BUTTON ---
-                    let mobileBtn = document.getElementById('nuclear-mobile-btn');
-                    if (!mobileBtn) {
-                        mobileBtn = document.createElement('a');
-                        mobileBtn.id = 'nuclear-mobile-btn';
-                        mobileBtn.href = "#";
-                        mobileBtn.setAttribute('role', 'button');
-                        mobileBtn.style.cssText = `
-                            position: fixed !important;
-                            bottom: 25px !important;
-                            left: 25px !important;
-                            z-index: 2147483647 !important;
-                            background-color: #000 !important;
-                            color: #fff !important;
-                            padding: 10px 20px !important;
-                            border-radius: 50px !important;
-                            text-decoration: none !important;
-                            font-family: sans-serif !important;
-                            font-weight: bold !important;
-                            font-size: 14px !important;
-                            display: none;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-                            align-items: center !important;
-                            justify-content: center !important;
-                            gap: 8px !important;
-                            cursor: pointer !important;
-                            pointer-events: auto !important;
-                            transition: transform 0.1s !important;
-                            width: auto !important; /* Force Pill Shape */
-                        `;
+                    // --- 1. MOBILE MENU BUTTON ---
+                    // Try to find the mobile menu container (created by script.js)
+                    const mobileMenu = document.querySelector('.mobile-menu');
 
-                        // Mobile Visibility
-                        const checkMobile = () => {
-                            if (window.innerWidth < 1200) {
-                                mobileBtn.style.display = 'flex';
-                            } else {
-                                mobileBtn.style.display = 'none';
-                            }
-                        };
-                        checkMobile();
-                        window.addEventListener('resize', checkMobile);
-                        document.body.appendChild(mobileBtn);
+                    if (mobileMenu) {
+                        let mobileBtn = document.getElementById('nuclear-mobile-btn');
 
-                        mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                        // If button doesn't exist, OR it exists but is attached to body (fixed), we move/create it
+                        if (!mobileBtn || mobileBtn.parentNode !== mobileMenu) {
+                            if (mobileBtn) mobileBtn.remove(); // Remove old fixed one
+
+                            mobileBtn = document.createElement('a');
+                            mobileBtn.id = 'nuclear-mobile-btn';
+                            mobileBtn.href = "#";
+                            mobileBtn.setAttribute('role', 'button');
+
+                            // STATIC STYLES FOR MENU
+                            mobileBtn.style.cssText = `
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                gap: 8px !important;
+                                padding: 12px 25px !important;
+                                border-radius: 50px !important;
+                                background-color: rgba(255,255,255,0.1) !important;
+                                border: 1px solid rgba(255,255,255,0.2) !important;
+                                color: var(--text-color, #fff) !important;
+                                font-family: sans-serif !important;
+                                font-weight: bold !important;
+                                font-size: 14px !important;
+                                margin-top: 15px !important;
+                                width: auto !important;
+                                max-width: 200px !important;
+                                cursor: pointer !important;
+                                transition: transform 0.1s !important;
+                             `;
+
+                            mobileMenu.appendChild(mobileBtn);
+                            mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                        }
+
+                        // Always update content
+                        if (!mobileBtn.innerHTML.includes('svg')) {
+                            mobileBtn.innerHTML = labelContent;
+                        }
+                    } else {
+                        // If mobile menu doesn't exist yet, we remove any old fixed button to keep screen clean
+                        const oldFixed = document.getElementById('nuclear-mobile-btn');
+                        if (oldFixed && oldFixed.parentNode === document.body) {
+                            oldFixed.remove();
+                        }
                     }
 
                     // Always update content
