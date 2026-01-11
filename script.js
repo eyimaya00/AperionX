@@ -1040,9 +1040,9 @@ function setupMobileMenu() {
         if (!document.getElementById('mobile-lang-btn')) {
             const mobileBtn = document.createElement('a');
             mobileBtn.href = "#";
-            mobileBtn.className = "nav-link lang-btn mobile-only"; // Use nav-link style
+            mobileBtn.className = "nav-link lang-btn mobile-only";
             mobileBtn.id = "mobile-lang-btn";
-            mobileBtn.style.marginTop = "auto"; // Push to bottom if flex column
+            mobileBtn.style.marginTop = "auto";
             mobileBtn.style.textAlign = "center";
             mobileBtn.style.justifyContent = "center";
             mobileBtn.style.display = "flex";
