@@ -2501,40 +2501,22 @@ function updateActiveNavLink() {
 }
 
 
+// --- Language Switcher (Robust / "Nuclear" Version) ---
 function initLanguageSwitcher() {
-    // 1. Inject Google Translate Script if not present
-    if (!document.querySelector('#google-translate-script')) {
-        const script = document.createElement('script');
-        script.id = 'google-translate-script';
-        script.type = 'text/javascript';
-        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-        document.head.appendChild(script);
+            .skiptranslate { display: none!important; }
+    iframe.goog - te - banner - frame { display: none!important; }
 
-        // Add hidden element for Google Translate
-        const div = document.createElement('div');
-        div.id = 'google_translate_element';
-        div.style.display = 'none'; // Hide default widget
-        document.body.appendChild(div);
-
-        // Add CSS to hide Google Top Bar
-        const style = document.createElement('style');
-        style.innerHTML = `
-            /* NUCLEAR OPTION: Hide Google Translate Top Banner */
-            .goog-te-banner-frame { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; }
-            .skiptranslate { display: none !important; } 
-            iframe.goog-te-banner-frame { display: none !important; }
-            
             /* Force Body/HTML to top */
-            body { top: 0px !important; position: inherit !important; margin-top: 0 !important; }
-            html { top: 0px !important; margin-top: 0 !important; }
+            body { top: 0px!important; position: inherit!important; margin - top: 0!important; }
+            html { top: 0px!important; margin - top: 0!important; }
+
+    /* Hide Widget */
+    #google_translate_element { display: none!important; }
+            .goog - tooltip { display: none!important; }
+            .goog - te - gadget - simple { display: none!important; }
             
-            /* Hide Widget */
-            #google_translate_element { display: none !important; }
-            .goog-tooltip { display: none !important; }
-            .goog-te-gadget-simple { display: none !important; }
-            
-            font { background-color: transparent !important; box-shadow: none !important; }
-        `;
+            font { background - color: transparent!important; box - shadow: none!important; }
+    `;
         document.head.appendChild(style);
 
         // --- Mobile Menu Injection ---
