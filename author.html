@@ -2117,7 +2117,8 @@
             if (filters) filters.style.display = isTrashView ? 'none' : 'grid';
 
             try {
-                const res = await fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                // FETCH FROM NEW ENDPOINT (Avoids /articles/:key collision)
+                const res = await fetch(`${API_URL}/author/articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) {
                     const text = await res.text();
                     console.error('Fetch Error:', text);

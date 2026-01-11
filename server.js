@@ -987,8 +987,8 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
-// Get My Articles (MUST BE BEFORE /:key)
-app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
+// Get My Articles (Moved to /api/author namespace to avoid collision)
+app.get('/api/author/articles', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM articles WHERE author_id = ? ORDER BY created_at DESC', [req.user.id]);
         res.json(rows);
