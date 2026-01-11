@@ -2330,3 +2330,78 @@ function initLanguageSwitcher() {
         };
     });
 }
+
+
+// --- Restore: Load User Info ---
+async function loadUserInfo() {
+    const token = localStorage.getItem('token');
+    const userMenuContainer = document.getElementById('user-menu-container');
+    const mobileAuth = document.querySelector('.mobile-auth');
+
+    if (token) {
+        try {
+            const res = await fetch(`${API_URL}/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const user = await res.json();
+                
+                // Desktop Header
+                if (userMenuContainer) {
+                    userMenuContainer.innerHTML = `
+                        <div class="user-dropdown">
+                            <button class="user-btn" onclick="toggleUserDropdown()">
+                                <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User" class="user-avatar-small">
+                                <span>${user.fullname.split(' ')[0]}</span>
+                                <i class="ph-bold ph-caret-down"></i>
+                            </button>
+                            <div class="dropdown-menu" id="user-dropdown-menu">
+                                ${user.role === 'admin' ? '<a href="admin.html"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
+                                ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                                <a href="profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
+                                <a href="#" onclick="logout()"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Mobile Menu
+                if (mobileAuth) {
+                    mobileAuth.innerHTML = `
+                        <div class="mobile-user-profile">
+                            <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User">
+                            <div class="mobile-user-info">
+                                <span class="name">${user.fullname}</span>
+                                <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'author' ? 'Yazar' : 'Üye')}</span>
+                            </div>
+                        </div>
+                        <div class="mobile-user-links">
+                            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
+                            ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                            <a href="profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
+                            <button onclick="logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
+                        </div>
+                    `;
+                }
+            } else {
+                localStorage.removeItem('token'); // Invalid token
+            }
+        } catch (e) {
+            console.error('User info load error:', e);
+        }
+    } else {
+        // Not logged in (Default state is already static HTML, but ensure correctness)
+    }
+}
+
+function toggleUserDropdown() {
+    const menu = document.getElementById('user-dropdown-menu');
+    if (menu) menu.classList.toggle('active');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    showToast('Çıkış yapıldı', 'success');
+    setTimeout(() => window.location.reload(), 1000);
+}
