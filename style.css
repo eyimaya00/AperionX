@@ -951,7 +951,7 @@ i[class*=" ph"] {
 }
 
 /* Mobile Toast Adjustment */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .toast-container {
         top: auto;
         bottom: 24px;
@@ -1123,7 +1123,7 @@ i[class*=" ph"] {
     background: var(--primary-hover) !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .hero-title {
         font-size: 2.5rem !important;
         /* Smaller on mobile */
@@ -1232,7 +1232,7 @@ i[class*=" ph"] {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .articles-grid {
         grid-template-columns: 1fr;
         padding: 0 20px;
@@ -1740,7 +1740,7 @@ i[class*=" ph"] {
     /* Removed shadow for soft look */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .showcase-view-all-btn {
         width: auto !important;
         /* Prevent full width */
@@ -1967,7 +1967,7 @@ i[class*=" ph"] {
 }
 
 /* Mobile Category Scroll & Hide Buttons */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .scroll-btn {
         display: none !important;
     }
@@ -2296,7 +2296,7 @@ i[class*=" ph"] {
 
 /* Stack filters on mobile */
 /* Stack filters on mobile - REVERTED per user request */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     /* .filter-container {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -2559,7 +2559,7 @@ i[class*=" ph"] {
     }
 
     /* --- NUCLEAR FIX FOR MOBILE SCROLL BACKGROUND --- */
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
 
         /* Target every single container in the chain */
         .filter-section,
@@ -2710,7 +2710,7 @@ i[class*=" ph"] {
         border: 1px solid rgba(99, 102, 241, 0.1) !important;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
 
         /* Responsive Tables */
         .table-container {
@@ -2758,7 +2758,7 @@ i[class*=" ph"] {
     /* --- MOBILE FIXES --- */
 
     /* 1. Mobile Showcase & Cards Optimization */
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
 
         /* 1a. Showcase Grid Structure */
         .showcase-grid {
@@ -2887,7 +2887,7 @@ i[class*=" ph"] {
         /* --- ULTIMATE MOBILE MENU CONSISTENCY FIX --- */
         /* This block overrides EVERYTHING to ensure uniformity */
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
 
             /* 1. Reset the Wrapper (Transparent container) */
             div.mobile-nav-dropdown {
@@ -3119,7 +3119,7 @@ i[class*=" ph"] {
 }
 
 /* --- FORCE MOBILE SCROLL BUTTONS --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .category-scroll-wrapper {
         padding: 0 !important;
         /* Remove padding as buttons are gone */
@@ -3439,7 +3439,7 @@ i[class*=" ph"] {
 }
 
 /* 4. Mobile Search Override (Ensure Compactness) */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .filter-section .article-search {
         max-width: 220px !important;
         /* Force same balanced size on mobile */
@@ -3529,7 +3529,7 @@ i[class*=" ph"] {
 }
 
 /* 3. Mobile Padding - Target Direct Parents */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
     /* Target the actual containers holding the grids */
     .articles-page-container,
@@ -3597,7 +3597,7 @@ i[class*=" ph"] {
 /* --- ULTIMATE FINAL MOBILE OVERRIDES (Corrected) --- */
 
 /* Force all mobile menu items (links, dropdown headers, auth buttons) to be SOLID CARDS */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
     /* 1. Target EVERYTHING that looks like a menu item */
     .mobile-link-item,
@@ -3884,7 +3884,7 @@ i[class*=" ph"] {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .articles-grid {
         grid-template-columns: 1fr;
     }
@@ -3966,7 +3966,7 @@ i[class*=" ph"] {
 }
 
 /* Responsive Stack for Mobile (Already handled by default column logic above) */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .newsletter-form {
         max-width: 100%;
         padding: 0 20px;
@@ -4127,7 +4127,7 @@ i[class*=" ph"] {
 }
 
 /* Mobile Hero Optimizations */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .hero-overlay {
         position: absolute;
         top: 0;
@@ -4171,7 +4171,7 @@ i[class*=" ph"] {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .hero-slider {
         height: 115vh !important;
         min-height: 115vh !important;
@@ -4198,7 +4198,7 @@ i[class*=" ph"] {
     display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .mobile-br {
         display: block;
         content: "";
@@ -4338,7 +4338,7 @@ i[class*=" ph"] {
 
 
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .articles-hero-section {
         height: 55vh !important;
         /* Match desktop/mobile */
@@ -4871,7 +4871,7 @@ i[class*=" ph"] {
 }
 
 /* FIX: Text Alignment on Mobile */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
     /* Fix header overlap */
     .article-detail-container {
@@ -5073,7 +5073,7 @@ i[class*=" ph"] {
 }
 
 /* Mobile Optimizations for Categories */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .category-scroll-wrapper .scroll-btn {
         display: none !important;
     }
@@ -5092,7 +5092,7 @@ i[class*=" ph"] {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     #lang-switch-btn {
         display: none !important;
     }
@@ -5100,7 +5100,7 @@ i[class*=" ph"] {
 
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY --- */
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY V2 --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     #mobile-lang-btn-static {
         display: none !important;
         /* Hidden by default until active */
