@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Header Scroll Effect
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.header');
+        if (!header) return; // FIX: Author panel has no .header
         if (window.scrollY > 20) {
             header.classList.add('scrolled');
         } else {
