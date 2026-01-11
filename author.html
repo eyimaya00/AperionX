@@ -1255,10 +1255,20 @@
                                 <i class="ph-fill ph-books section-icon"></i>
                                 <h3 class="section-label">Kaynakça</h3>
                             </div>
-                            <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.9rem;">Makalede
-                                kullandığınız kaynakları buraya ekleyin (Her satıra bir kaynak).</label>
-                            <textarea id="references" class="form-control" rows="4"
+
+                            <label
+                                style="display:block; margin-top: 15px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Metindeki
+                                Kaynakçalar</label>
+                            <textarea id="text-references" class="form-control" rows="4"
                                 placeholder="Örn: Yazar Adı, Kitap Adı, Yıl..."></textarea>
+
+                            <label
+                                style="display:block; margin-top: 20px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Görseldeki
+                                Kaynakçalar</label>
+                            <textarea id="image-references" class="form-control" rows="4"
+                                placeholder="Örn: Görsel Kaynağı (URL veya Açıklama)..."></textarea>
+
+                            <!-- Hidden input to maintain compatibility if needed, though we will construct the data on submit -->
                         </div>
 
                         <div class="form-group full-width">
@@ -1874,7 +1884,11 @@
                 toolbar: {
                     container: [
                         [{ 'header': [1, 2, 3, false] }],
+                        [{ 'header': [1, 2, 3, false] }],
                         ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'script': 'sub' }, { 'script': 'super' }],
+                        [{ 'align': [] }],
+                        ['blockquote', 'code-block'],
                         [{ 'align': [] }],
                         ['blockquote', 'code-block'],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -1987,7 +2001,11 @@
 
                 formData.append('tags', document.getElementById('tags').value);
                 formData.append('excerpt', document.getElementById('excerpt').value);
-                formData.append('references_list', document.getElementById('references').value);
+                // Combine references
+                const textRefs = document.getElementById('text-references').value;
+                const imgRefs = document.getElementById('image-references').value;
+                const combinedRefs = textRefs + '\n[IMAGES]\n' + imgRefs;
+                formData.append('references_list', combinedRefs);
 
                 if (quill && quill.root) {
                     formData.append('content', quill.root.innerHTML);
@@ -2257,7 +2275,18 @@
                 document.getElementById('title').value = article.title;
                 document.getElementById('tags').value = article.tags || '';
                 document.getElementById('excerpt').value = article.excerpt || '';
-                document.getElementById('references').value = article.references_list || '';
+
+                // Split references
+                const allRefs = article.references_list || '';
+                if (allRefs.includes('[IMAGES]')) {
+                    const parts = allRefs.split('[IMAGES]');
+                    document.getElementById('text-references').value = parts[0].trim();
+                    document.getElementById('image-references').value = parts[1].trim();
+                } else {
+                    document.getElementById('text-references').value = allRefs.trim();
+                    document.getElementById('image-references').value = '';
+                }
+
                 quill.root.innerHTML = article.content || '';
 
                 const categorySelect = document.getElementById('category');
@@ -2281,6 +2310,8 @@
             editingArticleId = null;
             document.getElementById('articleForm').reset();
             quill.setContents([]);
+            document.getElementById('text-references').value = '';
+            document.getElementById('image-references').value = '';
             document.getElementById('form-title').innerText = 'İçerik Stüdyosu';
             document.getElementById('reset-form-btn').style.display = 'none';
             document.getElementById('custom-category-group').style.display = 'none';

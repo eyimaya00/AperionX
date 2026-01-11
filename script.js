@@ -1724,18 +1724,74 @@ function renderArticleDetail(article) {
     // References
     const refList = document.getElementById('references-list');
     const refSection = document.getElementById('references-section');
+
     if (article.references_list && refList && refSection) {
         refList.innerHTML = '';
-        // Split by newline or just render generic if it's a blob
-        // Assuming newline separated for now, or just HTML
-        // If it is simple text with newlines:
-        const refs = article.references_list.split('\n');
-        refs.forEach(ref => {
-            if (ref.trim()) {
-                refList.innerHTML += `<li>${escapeHtml(ref)}</li>`;
-            }
-        });
+        const allRefs = article.references_list;
+
+        let textRefs = [];
+        let imgRefs = [];
+
+        if (allRefs.includes('[IMAGES]')) {
+            const parts = allRefs.split('[IMAGES]');
+            textRefs = parts[0].trim().split('\n').filter(r => r.trim());
+            imgRefs = parts[1].trim().split('\n').filter(r => r.trim());
+        } else {
+            textRefs = allRefs.split('\n').filter(r => r.trim());
+        }
+
+        // 1. Text References
+        if (textRefs.length > 0) {
+            refList.innerHTML += `<h4 style="margin: 20px 0 10px; color: var(--primary-accent); font-size: 1.1rem;">Metindeki Kaynakçalar</h4>`;
+            textRefs.forEach((ref, index) => {
+                // Add ID for linking: ref-text-1, ref-text-2, etc.
+                refList.innerHTML += `<li id="ref-text-${index + 1}"><span class="ref-num">[${index + 1}]</span> ${escapeHtml(ref)}</li>`;
+            });
+        }
+
+        // 2. Image References
+        if (imgRefs.length > 0) {
+            refList.innerHTML += `<h4 style="margin: 25px 0 10px; color: var(--primary-accent); font-size: 1.1rem; border-top: 1px dashed #e2e8f0; padding-top: 15px;">Görseldeki Kaynakçalar</h4>`;
+            imgRefs.forEach((ref, index) => {
+                refList.innerHTML += `<li id="ref-img-${index + 1}"><i class="ph-fill ph-image" style="margin-right:5px; color:#64748b;"></i> ${escapeHtml(ref)}</li>`;
+            });
+        }
+
         refSection.style.display = 'block';
+
+        // --- Handle Superscript Clicks in Content ---
+        // We do this AFTER references are rendered so targets exist.
+        // We wait for content to be rendered (it happens right after this block usually, but let's ensure order)
+        setTimeout(() => {
+            const contentDiv = document.getElementById('detail-content');
+            if (contentDiv) {
+                const sups = contentDiv.getElementsByTagName('sup');
+                Array.from(sups).forEach(sup => {
+                    const txt = sup.innerText.trim();
+                    // Check if it's a number
+                    if (/^\d+$/.test(txt)) {
+                        sup.style.cursor = 'pointer';
+                        sup.style.color = 'var(--primary-accent)';
+                        sup.style.fontWeight = 'bold';
+                        sup.title = 'Kaynağa Git';
+                        sup.onclick = () => {
+                            const targetId = `ref-text-${txt}`;
+                            const target = document.getElementById(targetId);
+                            if (target) {
+                                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // Highlight effect
+                                target.style.transition = 'background 0.5s';
+                                target.style.backgroundColor = '#fffbeb'; // yellow-100
+                                setTimeout(() => {
+                                    target.style.backgroundColor = 'transparent';
+                                }, 2000);
+                            }
+                        };
+                    }
+                });
+            }
+        }, 100);
+
     } else if (refSection) {
         refSection.style.display = 'none';
     }
