@@ -4765,6 +4765,38 @@ i[class*=" ph"] {
     color: var(--primary-color) !important;
 }
 
+/* --- Standardized Article Spacing --- */
+.article-content p {
+    margin-bottom: 1.5rem !important;
+    /* Enforce standard gap */
+    line-height: 1.8;
+}
+
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.article-content ul,
+.article-content ol {
+    margin-bottom: 1.5rem;
+}
+
+.article-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* Hide empty paragraphs containing only breaks (Quill double spacing fix) */
+.article-content p:empty,
+.article-content p>br:only-child {
+    display: none !important;
+    margin: 0 !important;
+    height: 0 !important;
+}
+
 .related-card-author {
     display: flex;
     align-items: center;

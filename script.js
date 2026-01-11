@@ -1717,18 +1717,23 @@ function renderArticleDetail(article) {
                 tagsContainer.innerHTML += `<span class="tag-chip">#${tag}</span>`;
             }
         });
-    } else {
         tagsContainer.style.display = 'none';
     }
 
     // References
-    const refList = document.getElementById('references-list');
     const refSection = document.getElementById('references-section');
 
-    if (article.references_list && refList && refSection) {
-        refList.innerHTML = '';
-        const allRefs = article.references_list;
+    if (article.references_list && refSection) {
+        // Clear and rebuild section content
+        refSection.innerHTML = '';
 
+        // Add Main Title (preserving existing class)
+        const mainTitle = document.createElement('h3');
+        mainTitle.className = 'references-title';
+        mainTitle.innerText = 'Kaynakça';
+        refSection.appendChild(mainTitle);
+
+        const allRefs = article.references_list;
         let textRefs = [];
         let imgRefs = [];
 
@@ -1742,33 +1747,69 @@ function renderArticleDetail(article) {
 
         // 1. Text References
         if (textRefs.length > 0) {
-            refList.innerHTML += `<h4 style="margin: 20px 0 10px; color: var(--primary-accent); font-size: 1.1rem;">Metindeki Kaynakçalar</h4>`;
+            const groupDiv = document.createElement('div');
+            groupDiv.style.marginTop = '20px';
+
+            const subHeader = document.createElement('h4');
+            subHeader.innerText = 'Metindeki Kaynakçalar';
+            // Styling to look clean and standard
+            subHeader.style.cssText = 'color: var(--text-color); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; border-left: 4px solid var(--primary-accent); padding-left: 10px;';
+            groupDiv.appendChild(subHeader);
+
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none'; // Remove default numbering
+            ul.style.padding = '0';
+            ul.style.margin = '0';
+
             textRefs.forEach((ref, index) => {
-                // Add ID for linking: ref-text-1, ref-text-2, etc.
-                refList.innerHTML += `<li id="ref-text-${index + 1}"><span class="ref-num">[${index + 1}]</span> ${escapeHtml(ref)}</li>`;
+                const li = document.createElement('li');
+                li.id = `ref-text-${index + 1}`;
+                li.style.cssText = 'margin-bottom: 12px; line-height: 1.6; font-size: 0.95rem; color: var(--text-color); padding-left: 0;';
+
+                // Manual numbering to match superscript format [1]
+                li.innerHTML = `<span style="font-weight: 700; color: var(--primary-accent); margin-right: 8px;">[${index + 1}]</span>${escapeHtml(ref)}`;
+                ul.appendChild(li);
             });
+            groupDiv.appendChild(ul);
+            refSection.appendChild(groupDiv);
         }
 
         // 2. Image References
         if (imgRefs.length > 0) {
-            refList.innerHTML += `<h4 style="margin: 25px 0 10px; color: var(--primary-accent); font-size: 1.1rem; border-top: 1px dashed #e2e8f0; padding-top: 15px;">Görseldeki Kaynakçalar</h4>`;
+            const groupDiv = document.createElement('div');
+            groupDiv.style.marginTop = '30px';
+
+            const subHeader = document.createElement('h4');
+            subHeader.innerText = 'Görseldeki Kaynakçalar';
+            subHeader.style.cssText = 'color: var(--text-color); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; border-left: 4px solid var(--primary-accent); padding-left: 10px;';
+            groupDiv.appendChild(subHeader);
+
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            ul.style.margin = '0';
+
             imgRefs.forEach((ref, index) => {
-                refList.innerHTML += `<li id="ref-img-${index + 1}"><i class="ph-fill ph-image" style="margin-right:5px; color:#64748b;"></i> ${escapeHtml(ref)}</li>`;
+                const li = document.createElement('li');
+                li.id = `ref-img-${index + 1}`;
+                li.style.cssText = 'margin-bottom: 10px; line-height: 1.6; font-size: 0.95rem; color: var(--text-color); display: flex; align-items: start;';
+
+                li.innerHTML = `<i class="ph-fill ph-image" style="margin-right: 8px; margin-top: 4px; color: var(--primary-accent);"></i><span>${escapeHtml(ref)}</span>`;
+                ul.appendChild(li);
             });
+            groupDiv.appendChild(ul);
+            refSection.appendChild(groupDiv);
         }
 
         refSection.style.display = 'block';
 
         // --- Handle Superscript Clicks in Content ---
-        // We do this AFTER references are rendered so targets exist.
-        // We wait for content to be rendered (it happens right after this block usually, but let's ensure order)
         setTimeout(() => {
             const contentDiv = document.getElementById('detail-content');
             if (contentDiv) {
                 const sups = contentDiv.getElementsByTagName('sup');
                 Array.from(sups).forEach(sup => {
                     const txt = sup.innerText.trim();
-                    // Check if it's a number
                     if (/^\d+$/.test(txt)) {
                         sup.style.cursor = 'pointer';
                         sup.style.color = 'var(--primary-accent)';
@@ -1779,9 +1820,9 @@ function renderArticleDetail(article) {
                             const target = document.getElementById(targetId);
                             if (target) {
                                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                // Highlight effect
                                 target.style.transition = 'background 0.5s';
-                                target.style.backgroundColor = '#fffbeb'; // yellow-100
+                                target.style.backgroundColor = 'rgba(255, 251, 235, 1)'; // Soft yellow background
+                                target.style.borderRadius = '4px';
                                 setTimeout(() => {
                                     target.style.backgroundColor = 'transparent';
                                 }, 2000);
