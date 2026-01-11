@@ -2294,3 +2294,39 @@ function hideLoader() {
         }, 500);
     }
 }
+
+
+// --- Language Switcher ---
+function initLanguageSwitcher() {
+    const isEnglish = window.location.pathname.startsWith('/en');
+
+    // Update ALL language buttons
+    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
+    
+    btns.forEach(btn => {
+        // Set visual state
+        if (isEnglish) {
+            btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+            btn.title = "Türkçe'ye Geç";
+        } else {
+            btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+            btn.title = "Switch to English";
+        }
+
+        // Click Handler
+        btn.onclick = (e) => {
+            e.preventDefault();
+            if (isEnglish) {
+                // Return to Turkish (Remove /en)
+                let newPath = window.location.pathname.replace(/^\/en/, '');
+                if (newPath === '') newPath = '/';
+                window.location.href = newPath + window.location.search;
+            } else {
+                // Switch to English (Prepend /en)
+                let current = window.location.pathname;
+                if (current === '/') current = '';
+                window.location.href = '/en' + current + window.location.search;
+            }
+        };
+    });
+}
