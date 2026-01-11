@@ -360,6 +360,13 @@ a {
     /* Consistent gap */
 }
 
+@media (max-width: 768px) {
+    .header-actions {
+        gap: 6px !important;
+        /* Tighter gap for mobile */
+    }
+}
+
 /* Icon Buttons */
 .icon-btn {
     width: 36px;

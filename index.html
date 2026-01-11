@@ -388,7 +388,7 @@
     <script>
         (function () {
             try {
-                // Remove existing if any
+                // Remove existing
                 const existing = document.getElementById('nuclear-mobile-btn');
                 if (existing) existing.remove();
 
@@ -397,7 +397,7 @@
                 btn.href = "#";
                 btn.setAttribute('role', 'button');
 
-                // FORCE STYLES (Inline to override everything)
+                // STYLES
                 btn.style.cssText = `
                     position: fixed !important;
                     bottom: 25px !important;
@@ -411,66 +411,82 @@
                     font-family: sans-serif !important;
                     font-weight: bold !important;
                     font-size: 14px !important;
-                    display: none; /* Default hidden, shown via media query logic below */
+                    display: none;
                     box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
                     align-items: center !important;
                     gap: 8px !important;
                     cursor: pointer !important;
                     pointer-events: auto !important;
+                    transition: transform 0.1s !important;
                 `;
 
-                // Logic to show only on mobile
-                if (window.innerWidth <= 1024) {
-                    btn.style.display = 'flex';
-                }
-
-                window.addEventListener('resize', function () {
+                // Mobile Only Logic
+                const checkMobile = () => {
                     if (window.innerWidth <= 1024) {
                         btn.style.display = 'flex';
                     } else {
                         btn.style.display = 'none';
                     }
-                });
+                };
+                checkMobile();
+                window.addEventListener('resize', checkMobile);
 
-                // Cookie Logic
+                // --- ROBUST COOKIE LOGIC ---
                 function getCookie(name) {
-                    const value = `; ${document.cookie}`;
-                    const parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) return parts.pop().split(';').shift();
+                    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                    return v ? v[2] : null;
+                }
+
+                function setCookie(name, value) {
+                    const domain = window.location.hostname;
+                    document.cookie = `${name}=${value}; path=/`;
+                    document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+                    document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
+                }
+
+                function deleteCookie(name) {
+                    const domain = window.location.hostname;
+                    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                    document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                    document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
                 }
 
                 const currentTrans = getCookie('googtrans');
-                const isEnglish = currentTrans && currentTrans.includes('/en');
+                // Check exact string match because Google Translate values are specific
+                const isEnglish = currentTrans === '/tr/en';
 
+                // Initial State
                 btn.innerHTML = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
 
                 btn.onclick = function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
+                    // Feedback
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => btn.style.transform = 'scale(1)', 100);
+                    btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+
+                    // Clear everything first
+                    deleteCookie('googtrans');
+
                     if (isEnglish) {
-                        document.cookie = "googtrans=/tr/tr; path=/; domain=" + window.location.hostname;
-                        document.cookie = "googtrans=/tr/tr; path=/";
+                        // Switch to Turkish (or clear to default)
+                        setCookie('googtrans', '/tr/tr');
+                        // Actually clearing it usually reverts to default (TR), but setting /tr/tr forces it
                     } else {
-                        document.cookie = "googtrans=/tr/en; path=/; domain=" + window.location.hostname;
-                        document.cookie = "googtrans=/tr/en; path=/";
+                        // Switch to English
+                        setCookie('googtrans', '/tr/en');
                     }
-                    window.location.reload();
+
+                    // Force Reload
+                    setTimeout(() => window.location.reload(), 200);
                 };
 
                 document.body.appendChild(btn);
-                console.log('Mobile Button Injected Successfully');
 
             } catch (e) {
-                console.error('Mobile Button Injection Failed:', e);
-                // Fallback visual error
-                const errDiv = document.createElement('div');
-                errDiv.style.position = 'fixed';
-                errDiv.style.top = '0';
-                errDiv.style.background = 'yellow';
-                errDiv.style.color = 'black';
-                errDiv.innerText = 'JS ERR: ' + e.message;
-                document.body.appendChild(errDiv);
+                console.error('Btn Inj Err', e);
             }
         })();
     </script>
