@@ -1063,31 +1063,36 @@ function setupMobileMenu() {
         document.body.appendChild(mobileGlobalBtn);
     }
 
-    // --- ROBUST VISIBILITY LOOP ---
-    // Instead of relying on events which might fail or be overwritten,
-    // we poll the state of that menu class.
-    setInterval(() => {
-        const navActive = nav && nav.classList.contains('active');
+    // --- ROBUST EVENT-DRIVEN VISIBILITY ---
+    // We toggle visibility DIRECTLY when the menu state changes.
+    // This avoids polling issues.
+
+    const setBtnState = (visible) => {
+        if (!mobileGlobalBtn) return;
         const isMobile = window.innerWidth <= 1024;
 
-        if (navActive && isMobile) {
-            if (mobileGlobalBtn.style.display !== 'flex') {
-                mobileGlobalBtn.style.display = 'flex';
-            }
+        if (visible && isMobile) {
+            mobileGlobalBtn.style.display = 'flex';
+            // Force redraw/paint
+            mobileGlobalBtn.style.opacity = '1';
         } else {
-            if (mobileGlobalBtn.style.display !== 'none') {
-                mobileGlobalBtn.style.display = 'none';
-            }
+            mobileGlobalBtn.style.display = 'none';
         }
-    }, 200); // Check every 200ms
+    };
 
     if (btn && nav) {
         btn.addEventListener('click', () => {
+            // Toggle logic
+            const willBeActive = !nav.classList.contains('active');
+
             nav.classList.toggle('active');
             btn.classList.toggle('active');
 
-            // Lock body scroll logic
-            if (nav.classList.contains('active')) {
+            // Sync Button
+            setBtnState(willBeActive);
+
+            // Lock body
+            if (willBeActive) {
                 document.body.style.overflow = 'hidden';
             } else {
                 document.body.style.overflow = '';
@@ -1099,6 +1104,7 @@ function setupMobileMenu() {
             link.addEventListener('click', () => {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
+                setBtnState(false); // HIDE
                 document.body.style.overflow = '';
             });
         });
@@ -1108,7 +1114,18 @@ function setupMobileMenu() {
             if (!nav.contains(e.target) && !btn.contains(e.target) && nav.classList.contains('active')) {
                 nav.classList.remove('active');
                 btn.classList.remove('active');
+                setBtnState(false); // HIDE
                 document.body.style.overflow = '';
+            }
+        });
+
+        // Handle Resize (Hide if desktop)
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 1024) {
+                setBtnState(false);
+            } else {
+                // If menu is active, show it
+                if (nav.classList.contains('active')) setBtnState(true);
             }
         });
     }
