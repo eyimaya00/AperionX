@@ -387,128 +387,141 @@
     <!-- NUCLEAR INLINE SCRIPT FOR LANGUAGE BUTTONS (MOBILE & DESKTOP) -->
     <script>
         (function () {
-            try {
-                // --- 1. MOBILE BUTTON CREATION (Existing Logic) ---
-                const existing = document.getElementById('nuclear-mobile-btn');
-                if (existing) existing.remove();
-
-                const mobileBtn = document.createElement('a');
-                mobileBtn.id = 'nuclear-mobile-btn';
-                mobileBtn.href = "#";
-                mobileBtn.setAttribute('role', 'button');
-
-                // Styles
-                mobileBtn.style.cssText = `
-                    position: fixed !important;
-                    bottom: 25px !important;
-                    left: 25px !important;
-                    z-index: 2147483647 !important;
-                    background-color: #000 !important;
-                    color: #fff !important;
-                    padding: 12px 25px !important;
-                    border-radius: 50px !important;
-                    text-decoration: none !important;
-                    font-family: sans-serif !important;
-                    font-weight: bold !important;
-                    font-size: 14px !important;
-                    display: none;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-                    align-items: center !important;
-                    gap: 8px !important;
-                    cursor: pointer !important;
-                    pointer-events: auto !important;
-                    transition: transform 0.1s !important;
-                `;
-
-                // Mobile Persistence
-                const checkMobile = () => {
-                    if (window.innerWidth <= 1024) {
-                        mobileBtn.style.display = 'flex';
-                    } else {
-                        mobileBtn.style.display = 'none';
+            // Function to enforce state
+            const enforceLanguageButtons = () => {
+                try {
+                    // --- COOKIE HELPERS ---
+                    function getCookie(name) {
+                        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                        return v ? v[2] : null;
                     }
-                };
-                checkMobile();
-                window.addEventListener('resize', checkMobile);
-
-                document.body.appendChild(mobileBtn);
-
-                // --- 2. SHARED LOGIC ---
-                function getCookie(name) {
-                    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-                    return v ? v[2] : null;
-                }
-
-                function setCookie(name, value) {
-                    const domain = window.location.hostname;
-                    document.cookie = `${name}=${value}; path=/`;
-                    document.cookie = `${name}=${value}; path=/; domain=${domain}`;
-                    document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
-                }
-
-                function deleteCookie(name) {
-                    const domain = window.location.hostname;
-                    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
-                    document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
-                    document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
-                }
-
-                const currentTrans = getCookie('googtrans');
-                const isEnglish = currentTrans === '/tr/en';
-
-                const labelContent = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
-
-                // Update Mobile Btn
-                mobileBtn.innerHTML = labelContent;
-
-                // Update Desktop Btn (if exists)
-                const desktopBtn = document.getElementById('lang-switch-btn');
-                if (desktopBtn) {
-                    desktopBtn.innerHTML = labelContent;
-                    desktopBtn.style.display = 'flex';
-                    desktopBtn.style.alignItems = 'center';
-                    desktopBtn.style.justifyContent = 'center';
-                    desktopBtn.style.gap = '6px';
-                    desktopBtn.style.fontSize = '14px';
-                }
-
-                // Click Handler
-                const handleLangClick = (e, btnElement) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (btnElement) {
-                        btnElement.style.transform = 'scale(0.95)';
-                        setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
-                        btnElement.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+                    function setCookie(name, value) {
+                        const domain = window.location.hostname;
+                        document.cookie = `${name}=${value}; path=/`;
+                        document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+                        document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
+                    }
+                    function deleteCookie(name) {
+                        const domain = window.location.hostname;
+                        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                        document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                        document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
                     }
 
-                    deleteCookie('googtrans');
+                    // --- STATE ---
+                    const currentTrans = getCookie('googtrans');
+                    const isEnglish = currentTrans === '/tr/en';
+                    const labelContent = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
 
-                    if (isEnglish) {
-                        setCookie('googtrans', '/tr/tr');
-                    } else {
-                        setCookie('googtrans', '/tr/en');
+                    // --- HANDLER --- (Defined here to be accessible by both buttons)
+                    const handleLangClick = (e, btnElement) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        if (btnElement) {
+                            btnElement.style.transform = 'scale(0.95)';
+                            setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
+                            btnElement.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+                        }
+
+                        deleteCookie('googtrans');
+
+                        if (isEnglish) {
+                            setCookie('googtrans', '/tr/tr');
+                        } else {
+                            setCookie('googtrans', '/tr/en');
+                        }
+
+                        setTimeout(() => window.location.reload(), 200);
+                    };
+
+                    // --- 1. MOBILE BUTTON ---
+                    let mobileBtn = document.getElementById('nuclear-mobile-btn');
+                    if (!mobileBtn) {
+                        mobileBtn = document.createElement('a');
+                        mobileBtn.id = 'nuclear-mobile-btn';
+                        mobileBtn.href = "#";
+                        mobileBtn.setAttribute('role', 'button');
+                        mobileBtn.style.cssText = `
+                            position: fixed !important;
+                            bottom: 25px !important;
+                            left: 25px !important;
+                            z-index: 2147483647 !important;
+                            background-color: #000 !important;
+                            color: #fff !important;
+                            padding: 12px 25px !important;
+                            border-radius: 50px !important;
+                            text-decoration: none !important;
+                            font-family: sans-serif !important;
+                            font-weight: bold !important;
+                            font-size: 14px !important;
+                            display: none;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+                            align-items: center !important;
+                            gap: 8px !important;
+                            cursor: pointer !important;
+                            pointer-events: auto !important;
+                            transition: transform 0.1s !important;
+                        `;
+                        // Mobile Visibility
+                        const checkMobile = () => {
+                            if (window.innerWidth <= 1024) {
+                                mobileBtn.style.display = 'flex';
+                            } else {
+                                mobileBtn.style.display = 'none';
+                            }
+                        };
+                        checkMobile();
+                        window.addEventListener('resize', checkMobile);
+                        document.body.appendChild(mobileBtn);
+
+                        mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
                     }
 
-                    setTimeout(() => window.location.reload(), 200);
-                };
+                    // Always update content if not in loading state
+                    if (mobileBtn.innerHTML !== labelContent && !mobileBtn.innerHTML.includes('spinner')) {
+                        mobileBtn.innerHTML = labelContent;
+                    }
 
-                // Attach Events
-                mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                    // --- 2. DESKTOP BUTTON ---
+                    let desktopBtn = document.getElementById('lang-switch-btn');
+                    if (desktopBtn) {
+                        // Enforce Styles
+                        desktopBtn.style.display = 'flex';
+                        desktopBtn.style.alignItems = 'center';
+                        desktopBtn.style.justifyContent = 'center';
+                        desktopBtn.style.gap = '6px';
+                        desktopBtn.style.fontSize = '14px';
 
-                if (desktopBtn) {
-                    // Remove old listeners by cloning (optional but safer)
-                    const newDesktopBtn = desktopBtn.cloneNode(true);
-                    desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
-                    newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                        // Enforce Content if not loading
+                        if (desktopBtn.innerHTML !== labelContent && !desktopBtn.innerHTML.includes('spinner')) {
+                            desktopBtn.innerHTML = labelContent;
+                        }
+
+                        // Attach Click (Idempotent)
+                        if (!desktopBtn.dataset.hasNuclearClick) {
+                            const newDesktopBtn = desktopBtn.cloneNode(true);
+                            desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                            newDesktopBtn.dataset.hasNuclearClick = "true";
+                            newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                        }
+                    }
+
+                } catch (e) {
+                    console.error("Lang Enforce Error", e);
                 }
+            };
 
-                console.log('Language Buttons (Mobile+Desktop) Initialized');
+            // Run Immediately
+            enforceLanguageButtons();
 
-            } catch (e) {
-                console.error('Lang Init Error:', e);
-            }
+            // Run on Load
+            window.addEventListener('load', enforceLanguageButtons);
+
+            // Run periodically for 3 seconds to catch any late overwrites
+            const interval = setInterval(enforceLanguageButtons, 100);
+            setTimeout(() => clearInterval(interval), 3000);
+
         })();
     </script>
 
