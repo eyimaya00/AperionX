@@ -5097,20 +5097,43 @@ i[class*=" ph"] {
         display: none !important;
     }
 }
+
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY --- */
+/* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY V2 --- */
 @media (max-width: 768px) {
+    .nav-menu {
+        position: relative;
+        /* Ensure absolute children are relative to this */
+        padding-bottom: 80px;
+        /* Make space for buttons */
+    }
+
     #mobile-lang-btn-static {
         display: flex !important;
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--nav-text);
-        border: 1px solid rgba(255,255,255,0.1);
-        margin-top: 20px;
-        border-radius: 8px;
+        position: absolute;
+        /* Float it */
+        bottom: 120px;
+        /* Position above the auth buttons (assuming they are at bottom ~0-60px) */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        color: white !important;
+        /* Force white text */
+        font-weight: bold;
+        border-radius: 12px;
+        height: 50px;
+        align-items: center;
+        justify-content: center;
     }
-    
-    /* Ensure Nav Menu has flex layout to support column ordering */
-    .nav-menu.active {
-        display: flex !important;
-        flex-direction: column;
+
+    [data-theme="light"] #mobile-lang-btn-static {
+        background: white;
+        color: #333 !important;
+        border-color: #eee;
     }
 }
