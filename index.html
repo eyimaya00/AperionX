@@ -411,7 +411,8 @@
                     // --- STATE ---
                     const currentTrans = getCookie('googtrans');
                     const isEnglish = currentTrans === '/tr/en';
-                    const labelContent = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
+                    // USE ICONS INSTEAD OF EMOJI FLAGS TO AVOID "TR TR" WINDOWS ISSUE
+                    const labelContent = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN';
 
                     // --- HANDLER --- (Defined here to be accessible by both buttons)
                     const handleLangClick = (e, btnElement) => {
@@ -465,7 +466,7 @@
                         `;
                         // Mobile Visibility
                         const checkMobile = () => {
-                            if (window.innerWidth <= 1024) {
+                            if (window.innerWidth < 1024) { // Changed to match strict match logic
                                 mobileBtn.style.display = 'flex';
                             } else {
                                 mobileBtn.style.display = 'none';
@@ -519,8 +520,7 @@
             window.addEventListener('load', enforceLanguageButtons);
 
             // Run periodically for 3 seconds to catch any late overwrites
-            const interval = setInterval(enforceLanguageButtons, 100);
-            setTimeout(() => clearInterval(interval), 3000);
+            setInterval(enforceLanguageButtons, 500); // Continuous check is safer for this user's caching issues
 
         })();
     </script>
