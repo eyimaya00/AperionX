@@ -367,6 +367,12 @@ a {
     }
 }
 
+.body {
+    top: 0px !important;
+    margin-top: 0px !important;
+    position: static !important;
+}
+
 /* Icon Buttons */
 .icon-btn {
     width: 36px;

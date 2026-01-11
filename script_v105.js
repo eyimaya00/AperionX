@@ -2502,8 +2502,30 @@ function updateActiveNavLink() {
 }
 
 
-// --- Language Switcher (Robust / "Nuclear" Version) ---
-// --- Language Switcher (Robust / "Nuclear" Version) ---
+// --- GOOGLE BANNER KILLER ---
+function hideGoogleBanner() {
+    const selector = '.goog-te-banner-frame';
+    const banner = document.querySelector(selector);
+    if (banner) {
+        banner.style.display = 'none';
+        banner.style.visibility = 'hidden';
+        banner.style.height = '0';
+    }
+
+    // Always force body top to 0
+    if (document.body.style.top !== '0px') {
+        document.body.style.top = '0px';
+        document.body.style.marginTop = '0px';
+    }
+
+    // Hide the icon
+    const icon = document.querySelector('.goog-te-gadget-icon');
+    if (icon) icon.style.display = 'none';
+}
+// Run aggressively
+setInterval(hideGoogleBanner, 500);
+
+
 // --- Language Switcher (Robust / "Nuclear" Version) ---
 function initLanguageSwitcher() {
     // 0. INJECT GOOGLE TRANSLATE SCRIPT IF MISSING
