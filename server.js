@@ -958,7 +958,13 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // 3. Articles (GET Public, POST Author)
 app.get('/api/articles', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query(`
+            SELECT a.*, u.fullname AS author_name 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.status = 'published' 
+            ORDER BY a.created_at DESC
+        `);
         res.json(articles);
     } catch (e) {
         res.status(500).send(e.toString());
