@@ -2504,26 +2504,40 @@ function updateActiveNavLink() {
 
 // --- GOOGLE BANNER KILLER ---
 function hideGoogleBanner() {
-    const selector = '.goog-te-banner-frame';
-    const banner = document.querySelector(selector);
-    if (banner) {
-        banner.style.display = 'none';
-        banner.style.visibility = 'hidden';
-        banner.style.height = '0';
+    // 1. Remove the Banner Frame completely
+    const startBanner = document.querySelector('.goog-te-banner-frame');
+    if (startBanner) {
+        startBanner.remove(); // DELETE IT
     }
 
-    // Always force body top to 0
-    if (document.body.style.top !== '0px') {
+    // 2. Also check specifically for iframes that might be the banner
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        if (iframe.className.includes('goog-te-banner-frame') ||
+            iframe.id === 'goog-te-banner-frame' ||
+            (iframe.src && iframe.src.includes('google.com/translate'))
+        ) {
+            iframe.remove();
+        }
+    });
+
+    // 3. Force Body Reset
+    if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
         document.body.style.top = '0px';
         document.body.style.marginTop = '0px';
+        document.body.classList.remove('translated-ltr'); // Remove Google class
     }
 
-    // Hide the icon
+    // 4. Hide Gadget Icon
     const icon = document.querySelector('.goog-te-gadget-icon');
     if (icon) icon.style.display = 'none';
+
+    // 5. Hide Tooltip
+    const tooltip = document.querySelector('.goog-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
 }
-// Run aggressively
-setInterval(hideGoogleBanner, 500);
+// Run extremely aggressively at start, then periodically
+setInterval(hideGoogleBanner, 100);
 
 
 // --- Language Switcher (Robust / "Nuclear" Version) ---
