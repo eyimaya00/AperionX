@@ -2475,6 +2475,26 @@ function initLanguageSwitcher() {
             font { background-color: transparent !important; box-shadow: none !important; }
         `;
         document.head.appendChild(style);
+
+        // AGGRESSIVE REMOVAL: Force remove the banner from DOM
+        const removeBanner = setInterval(() => {
+            const banner = document.querySelector('.goog-te-banner-frame');
+            const skipTranslate = document.querySelector('.skiptranslate');
+
+            if (banner) {
+                banner.remove();
+                console.log('Google Banner removed via JS');
+            }
+
+            // Force body top to 0
+            if (document.body.style.top !== '0px') {
+                document.body.style.top = '0px';
+                document.body.style.position = 'static';
+            }
+        }, 50);
+
+        // Stop checking after 5 seconds to save resources
+        setTimeout(() => clearInterval(removeBanner), 5000);
     }
 
     // 2. Define Init Function Global
