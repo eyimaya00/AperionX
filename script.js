@@ -1260,8 +1260,10 @@ async function loadShowcase() {
                 const category = item.category || 'Genel';
 
                 // Text-Over-Image Structure for ALL cards
+                console.log(`[DEBUG] Rendering Card ${index + 1}:`, { title: item.title, author, bgImage });
+
                 card.innerHTML = `
-                    <div class="card-bg" style="background-image: url('${bgImage}')"></div>
+                    <div class="card-bg" style="background-image: url('${bgImage}'); background-color: #1e293b;"></div>
                     <div class="card-overlay"></div>
                     
                     <div class="card-top-content">
