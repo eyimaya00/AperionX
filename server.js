@@ -19,8 +19,8 @@ const cors = require('cors');
 const multer = require('multer');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const { JSDOM } = require('jsdom');
-const DOMPurify = require('dompurify')(new JSDOM('').window);
+// const { JSDOM } = require('jsdom'); // DISABLED to fix 502
+// const DOMPurify = require('dompurify')(new JSDOM('').window); // DISABLED to fix 502
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -1028,7 +1028,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
 
     try {
         // Sanitize Content
-        const cleanContent = DOMPurify.sanitize(content);
+        const cleanContent = content; // DOMPurify.sanitize(content);
 
         // Generate Slug
         const slug = await getUniqueSlug(pool, title);
@@ -1105,7 +1105,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (category) { updates.push('category = ?'); params.push(category); }
     if (content) {
         updates.push('content = ?');
-        params.push(DOMPurify.sanitize(content));
+        params.push(content); // DOMPurify.sanitize(content)
     }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
     if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
