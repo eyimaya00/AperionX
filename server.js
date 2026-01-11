@@ -137,6 +137,23 @@ app.get('/maintenance-access', async (req, res) => {
 });
 
 // === SEO & SLUG HELPERS ===
+// Serve index.html for /en root
+app.get(['/en', '/en/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve static HTML pages on /en path
+app.get('/en/:page', (req, res, next) => {
+    const page = req.params.page;
+    if (page.endsWith('.html')) {
+        const filePath = path.join(__dirname, page);
+        if (fs.existsSync(filePath)) {
+            return res.sendFile(filePath);
+        }
+    }
+    next();
+});
+
 function slugify(text) {
     if (!text) return '';
     const trMap = {
@@ -181,7 +198,7 @@ async function getUniqueSlug(pool, title, excludeId = null) {
 // === DYNAMIC SEO ROUTES (SSR) ===
 
 // 1. Slug Route (Canonical)
-app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
+app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
 
     // EDGE CASE FIX: Redirect incorrect /makale/articles.html links -> /articles.html
@@ -247,7 +264,11 @@ app.get(['/makale/:slug', '/article/:slug'], async (req, res, next) => {
                 const img = article.image_url
                     ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
                     : `${origin}/uploads/logo.png`; // Fallback to site logo if generic? Or fetch settings?
-                const url = `${origin}/makale/${article.slug}`;
+
+                // Determine current URL structure based on request
+                const isEnglish = req.path.startsWith('/en/');
+                const urlPrefix = isEnglish ? `${origin}/en` : origin;
+                const url = `${urlPrefix}/makale/${article.slug}`;
 
                 // --- INJECT META TAGS ---
                 document.title = `${title} - AperionX`;

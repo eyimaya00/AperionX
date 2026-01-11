@@ -34,7 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMenus();
     checkAuthStatus();
     initTheme();
-    initSearch();
+    initLanguageSwitcher(); // Add Language Support
+    loadUserInfo();
+    setupMobileMenu();
+    updateActiveNavLink();
 
     loadShowcase();
     loadFrontendCategories(); // Dynamic Categories
