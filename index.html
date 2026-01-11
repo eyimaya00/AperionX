@@ -384,21 +384,21 @@
         </div>
     </div>
 
-    <!-- NUCLEAR INLINE SCRIPT FOR MOBILE BUTTON -->
+    <!-- NUCLEAR INLINE SCRIPT FOR LANGUAGE BUTTONS (MOBILE & DESKTOP) -->
     <script>
         (function () {
             try {
-                // Remove existing
+                // --- 1. MOBILE BUTTON CREATION (Existing Logic) ---
                 const existing = document.getElementById('nuclear-mobile-btn');
                 if (existing) existing.remove();
 
-                const btn = document.createElement('a');
-                btn.id = 'nuclear-mobile-btn';
-                btn.href = "#";
-                btn.setAttribute('role', 'button');
+                const mobileBtn = document.createElement('a');
+                mobileBtn.id = 'nuclear-mobile-btn';
+                mobileBtn.href = "#";
+                mobileBtn.setAttribute('role', 'button');
 
-                // STYLES
-                btn.style.cssText = `
+                // Styles
+                mobileBtn.style.cssText = `
                     position: fixed !important;
                     bottom: 25px !important;
                     left: 25px !important;
@@ -420,18 +420,20 @@
                     transition: transform 0.1s !important;
                 `;
 
-                // Mobile Only Logic
+                // Mobile Persistence
                 const checkMobile = () => {
                     if (window.innerWidth <= 1024) {
-                        btn.style.display = 'flex';
+                        mobileBtn.style.display = 'flex';
                     } else {
-                        btn.style.display = 'none';
+                        mobileBtn.style.display = 'none';
                     }
                 };
                 checkMobile();
                 window.addEventListener('resize', checkMobile);
 
-                // --- ROBUST COOKIE LOGIC ---
+                document.body.appendChild(mobileBtn);
+
+                // --- 2. SHARED LOGIC ---
                 function getCookie(name) {
                     const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
                     return v ? v[2] : null;
@@ -452,41 +454,60 @@
                 }
 
                 const currentTrans = getCookie('googtrans');
-                // Check exact string match because Google Translate values are specific
                 const isEnglish = currentTrans === '/tr/en';
 
-                // Initial State
-                btn.innerHTML = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
+                const labelContent = isEnglish ? '🇹🇷 TR' : '🇬🇧 EN';
 
-                btn.onclick = function (e) {
+                // Update Mobile Btn
+                mobileBtn.innerHTML = labelContent;
+
+                // Update Desktop Btn (if exists)
+                const desktopBtn = document.getElementById('lang-switch-btn');
+                if (desktopBtn) {
+                    desktopBtn.innerHTML = labelContent;
+                    desktopBtn.style.display = 'flex';
+                    desktopBtn.style.alignItems = 'center';
+                    desktopBtn.style.justifyContent = 'center';
+                    desktopBtn.style.gap = '6px';
+                    desktopBtn.style.fontSize = '14px';
+                }
+
+                // Click Handler
+                const handleLangClick = (e, btnElement) => {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // Feedback
-                    btn.style.transform = 'scale(0.95)';
-                    setTimeout(() => btn.style.transform = 'scale(1)', 100);
-                    btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+                    if (btnElement) {
+                        btnElement.style.transform = 'scale(0.95)';
+                        setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
+                        btnElement.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+                    }
 
-                    // Clear everything first
                     deleteCookie('googtrans');
 
                     if (isEnglish) {
-                        // Switch to Turkish (or clear to default)
                         setCookie('googtrans', '/tr/tr');
-                        // Actually clearing it usually reverts to default (TR), but setting /tr/tr forces it
                     } else {
-                        // Switch to English
                         setCookie('googtrans', '/tr/en');
                     }
 
-                    // Force Reload
                     setTimeout(() => window.location.reload(), 200);
                 };
 
-                document.body.appendChild(btn);
+                // Attach Events
+                mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+
+                if (desktopBtn) {
+                    // Remove old listeners by cloning (optional but safer)
+                    const newDesktopBtn = desktopBtn.cloneNode(true);
+                    desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                    newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                }
+
+                console.log('Language Buttons (Mobile+Desktop) Initialized');
 
             } catch (e) {
-                console.error('Btn Inj Err', e);
+                console.error('Lang Init Error:', e);
             }
         })();
     </script>
