@@ -992,13 +992,104 @@ function openModal(modalId) {
 }
 
 function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
 }
 
+// --- Mobile Menu Logic ---
+function setupMobileMenu() {
+    const btn = document.getElementById('hamburgerBtn');
+    const nav = document.querySelector('.nav-menu');
+    const header = document.querySelector('.header');
+
+    if (btn && nav) {
+        btn.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            btn.classList.toggle('active');
+
+            // Lock body scroll logic
+            if (nav.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close when clicking links
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('active');
+                btn.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && !btn.contains(e.target) && nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                btn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // --- INJECT MOBILE LANGUAGE SWITCHER ---
+        if (!document.getElementById('mobile-lang-btn')) {
+            const mobileBtn = document.createElement('a');
+            mobileBtn.href = "#";
+            mobileBtn.className = "nav-link lang-btn mobile-only"; // Use nav-link style
+            mobileBtn.id = "mobile-lang-btn";
+            mobileBtn.style.marginTop = "auto"; // Push to bottom if flex column
+            mobileBtn.style.textAlign = "center";
+            mobileBtn.style.justifyContent = "center";
+            mobileBtn.style.display = "flex";
+            mobileBtn.style.alignItems = "center";
+            mobileBtn.style.gap = "8px";
+            mobileBtn.style.borderTop = "1px solid rgba(255,255,255,0.1)";
+            mobileBtn.style.padding = "15px";
+
+            // Check cookie
+            const isEnglish = document.cookie.includes('googtrans=/tr/en');
+
+            if (isEnglish) {
+                mobileBtn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+            } else {
+                mobileBtn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+            }
+
+            // Copy click logic from initLanguageSwitcher
+            mobileBtn.onclick = (e) => {
+                e.preventDefault();
+                function getCookie(name) {
+                    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                    return v ? v[2] : null;
+                }
+                function setCookie(name, value, days) {
+                    const d = new Date();
+                    d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
+                    document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
+                }
+
+                const currentIsEnglish = getCookie('googtrans') === '/tr/en';
+                if (currentIsEnglish) {
+                    // Switch to TR
+                    setCookie('googtrans', '/tr/tr', 1);
+                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+                    window.location.reload();
+                } else {
+                    // Switch to EN
+                    setCookie('googtrans', '/tr/en', 1);
+                    window.location.reload();
+                }
+            };
+
+            // Append to .nav-menu
+            nav.appendChild(mobileBtn);
+        }
+    }
+}
 function switchModal(closeId, openId) {
     closeModal(closeId);
     setTimeout(() => openModal(openId), 200); // Small delay for smooth transition
@@ -2458,7 +2549,7 @@ function initLanguageSwitcher() {
         div.style.display = 'none'; // Hide default widget
         document.body.appendChild(div);
 
-                // Add CSS to hide Google Top Bar
+        // Add CSS to hide Google Top Bar
         const style = document.createElement('style');
         style.innerHTML = `
             /* NUCLEAR OPTION: Hide Google Translate Top Banner */
@@ -2479,32 +2570,32 @@ function initLanguageSwitcher() {
         `;
         document.head.appendChild(style);
 
-    // --- Mobile Menu Injection ---
-    const mobileMenu = document.querySelector('.nav-links'); // This is usually the container
-    // Or specifically for mobile-menu specific div if it exists. 
-    // In this theme, .nav-links becomes the mobile menu on small screens.
-    
-    // We want to append a list item for the language Switcher at the bottom of the list
-    if (mobileMenu && !document.getElementById('mobile-lang-btn-li')) {
-        const li = document.createElement('li');
-        li.id = 'mobile-lang-btn-li';
-        li.className = 'mobile-only'; // Ensure it can be styled if needed
-        li.style.marginTop = '20px';
-        li.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-        li.style.paddingTop = '10px';
-        
-        const a = document.createElement('a');
-        a.href = '#';
-        a.id = 'mobile-lang-switch-btn';
-        a.className = 'lang-btn';
-        a.style.justifyContent = 'center'; // Center text
-        
-        // Initial Text (will be updated by the logic below)
-        a.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
-        
-        li.appendChild(a);
-        mobileMenu.appendChild(li);
-    }
+        // --- Mobile Menu Injection ---
+        const mobileMenu = document.querySelector('.nav-links'); // This is usually the container
+        // Or specifically for mobile-menu specific div if it exists. 
+        // In this theme, .nav-links becomes the mobile menu on small screens.
+
+        // We want to append a list item for the language Switcher at the bottom of the list
+        if (mobileMenu && !document.getElementById('mobile-lang-btn-li')) {
+            const li = document.createElement('li');
+            li.id = 'mobile-lang-btn-li';
+            li.className = 'mobile-only'; // Ensure it can be styled if needed
+            li.style.marginTop = '20px';
+            li.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+            li.style.paddingTop = '10px';
+
+            const a = document.createElement('a');
+            a.href = '#';
+            a.id = 'mobile-lang-switch-btn';
+            a.className = 'lang-btn';
+            a.style.justifyContent = 'center'; // Center text
+
+            // Initial Text (will be updated by the logic below)
+            a.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
+
+            li.appendChild(a);
+            mobileMenu.appendChild(li);
+        }
 
 
         // AGGRESSIVE REMOVAL: Force remove the banner from DOM
@@ -2512,7 +2603,7 @@ function initLanguageSwitcher() {
             // Remove iframe
             const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
             iframes.forEach(el => el.remove());
-            
+
             // Remove skiptranslate divs
             const banners = document.querySelectorAll('.goog-te-banner-frame');
             banners.forEach(el => el.remove());
