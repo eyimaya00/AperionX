@@ -1096,91 +1096,83 @@
                 <!-- Summary -->
                 <div class="article-summary-simple" id="summary-box">
                     <div class="summary-title"><i class="ph-fill ph-sparkle"></i> Bu Makalede Neler Öğreneceğiz?</div>
-                    <div class="summary-text" id="detail-excerpt">
-                        <div class="summary-text" id="detail-excerpt">
-                        </div>
-                    </div>
-
-                    <!-- Main Content -->
-                    <div class="article-content-simple">
-                        <div class="article-content" id="detail-content">
-                            <div class="article-content" id="detail-content">
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="references-section-simple" id="references-section" style="display: none;">
-                        <h3 class="references-title">Kaynakça</h3>
-                        <ul class="references-list" id="references-list"></ul>
-                    </div>
-
-                    <div class="tags-container" id="detail-tags"></div>
+                    <div class="summary-text" id="detail-excerpt"></div>
                 </div>
 
-                <div class="article-footer-meta">
-                    <div class="action-row">
-
-                        <a href="articles.html" class="btn-back-custom">
-                            <i class="ph-bold ph-arrow-left"></i> Diğer Makalelere Göz At
-                        </a>
-
-
-                        <div class="right-actions">
-                            <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                                <i class="ph ph-heart"></i> Destek Ol
-                            </button>
-
-                            <div class="share-divider"></div>
-
-                            <div class="share-icons-row">
-                                <span class="share-label">Paylaş:</span>
-                                <a href="#" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
-                                <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
-                                <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
-                                <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
-                                <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
-                                    title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Main Content -->
+                <div class="article-content-simple">
+                    <div class="article-content" id="detail-content"></div>
                 </div>
 
 
-                <div class="comments-section">
-                    <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
+                <div class="references-section-simple" id="references-section" style="display: none;">
+                    <h3 class="references-title">Kaynakça</h3>
+                    <ul class="references-list" id="references-list"></ul>
+                </div>
 
-                    <div class="comment-form-wrapper" id="comment-form-container">
-                        <p class="login-prompt">Yorum yapabilmek için <a href="#"
-                                onclick="openModal('loginModal')">giriş
-                                yapmalısınız</a>.</p>
+                <div class="tags-container" id="detail-tags"></div>
+            </div>
+
+            <div class="article-footer-meta">
+                <div class="action-row">
+
+                    <a href="articles.html" class="btn-back-custom">
+                        <i class="ph-bold ph-arrow-left"></i> Diğer Makalelere Göz At
+                    </a>
+
+
+                    <div class="right-actions">
+                        <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                            <i class="ph ph-heart"></i> Destek Ol
+                        </button>
+
+                        <div class="share-divider"></div>
+
+                        <div class="share-icons-row">
+                            <span class="share-label">Paylaş:</span>
+                            <a href="#" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                            <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                            <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                            <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                            <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
+                                title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="comments-list" id="comments-list">
-                        <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+
+            <div class="comments-section">
+                <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
+
+                <div class="comment-form-wrapper" id="comment-form-container">
+                    <p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal('loginModal')">giriş
+                            yapmalısınız</a>.</p>
+                </div>
+
+                <div class="comments-list" id="comments-list">
+                    <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+                </div>
+            </div>
+
+            <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="related-articles-title">
+                        Diğer Makalelere Göz At</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="slider-nav-btn" onclick="slideArticles('left')"><i
+                                class="ph ph-caret-left"></i></button>
+                        <button class="slider-nav-btn" onclick="slideArticles('right')"><i
+                                class="ph ph-caret-right"></i></button>
                     </div>
                 </div>
 
-                <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 class="related-articles-title">
-                            Diğer Makalelere Göz At</h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="slider-nav-btn" onclick="slideArticles('left')"><i
-                                    class="ph ph-caret-left"></i></button>
-                            <button class="slider-nav-btn" onclick="slideArticles('right')"><i
-                                    class="ph ph-caret-right"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
-                        <div id="similar-slider-track"
-                            style="display: flex; gap: 20px; transition: transform 0.4s ease;">
-                            <!-- JS Injected Cards -->
-                        </div>
+                <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
+                    <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;">
+                        <!-- JS Injected Cards -->
                     </div>
                 </div>
+            </div>
         </main>
     </div>
 
