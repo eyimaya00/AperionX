@@ -958,13 +958,29 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // 3. Articles (GET Public, POST Author)
 app.get('/api/articles', async (req, res) => {
     try {
-        const [articles] = await pool.query(`
-            SELECT a.*, u.fullname AS author_name 
-            FROM articles a 
-            LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.status = 'published' 
-            ORDER BY a.created_at DESC
-        `);
+        // 1. Fetch Articles
+        const [articles] = await pool.query("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+
+        if (articles.length > 0) {
+            // 2. Extract Author IDs
+            const authorIds = [...new Set(articles.map(a => a.author_id).filter(id => id))];
+
+            if (authorIds.length > 0) {
+                // 3. Fetch Author Names
+                // Create placeholders (?,?,?)
+                const placeholders = authorIds.map(() => '?').join(',');
+                const [authors] = await pool.query(`SELECT id, fullname FROM users WHERE id IN (${placeholders})`, authorIds);
+
+                // 4. Map back to articles
+                const authorMap = {};
+                authors.forEach(u => authorMap[u.id] = u.fullname);
+
+                articles.forEach(a => {
+                    a.author_name = authorMap[a.author_id] || 'Yazar';
+                });
+            }
+        }
+
         res.json(articles);
     } catch (e) {
         res.status(500).send(e.toString());
