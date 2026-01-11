@@ -1255,7 +1255,7 @@ async function loadShowcase() {
             if (card) {
                 // Determine category or other meta if available, else static
                 // Using image_url from article or default
-                const bgImage = item.image_url ? item.image_url.replace(/\\/g, '/') : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop';
+                const bgImage = resolveImagePath(item.image_url) || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop';
                 const author = item.author_name || 'Aperion Yazar';
                 const category = item.category || 'Genel';
 
@@ -1477,7 +1477,7 @@ function renderArticlesGrid() {
     }
 
     toRender.forEach(article => {
-        const bgMeasure = article.image_url ? article.image_url.replace(/\\/g, '/') : 'https://via.placeholder.com/600x400';
+        const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
         const safeTitle = escapeHtml(article.title);
         const safecategory = escapeHtml(article.category || 'Genel');
         const safeAuthor = escapeHtml(article.author_name || 'Yazar');
@@ -1706,7 +1706,7 @@ function renderArticleDetail(article) {
 
     const img = document.getElementById('detail-image');
     if (article.image_url) {
-        img.src = article.image_url;
+        img.src = resolveImagePath(article.image_url);
         img.alt = article.title; // SEO Alt Tag
     } else {
         img.style.display = 'none';
@@ -2302,7 +2302,7 @@ function initLanguageSwitcher() {
 
     // Update ALL language buttons
     const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
-    
+
     btns.forEach(btn => {
         // Set visual state
         if (isEnglish) {
@@ -2346,7 +2346,7 @@ async function loadUserInfo() {
 
             if (res.ok) {
                 const user = await res.json();
-                
+
                 // Desktop Header
                 if (userMenuContainer) {
                     userMenuContainer.innerHTML = `
@@ -2424,7 +2424,7 @@ function setupMobileMenu() {
 function updateActiveNavLink() {
     const links = document.querySelectorAll('.nav-links a');
     const path = window.location.pathname;
-    
+
     links.forEach(link => {
         if (link.getAttribute('href') === path) {
             link.classList.add('active');
