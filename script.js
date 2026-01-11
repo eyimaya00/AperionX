@@ -1001,12 +1001,52 @@ function closeModal(modalId) {
 
 // --- Mobile Menu Logic ---
 function setupMobileMenu() {
-    console.log("MOBILE MENU SETUP RUNNING V2"); // Debug
-    const btn = document.getElementById('hamburgerBtn');
-    if (btn) btn.style.border = "1px solid red"; // VISUAL DEBUG: Red border means script updated
+    console.log("MOBILE MENU SETUP RUNNING V3 (DEBUG MODE)");
 
+    // --- GLOBAL DEBUG BUTTON (ALWAYS VISIBLE) ---
+    // This part runs regardless of hamburger btn existence
+    let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
+    if (!mobileGlobalBtn) {
+        mobileGlobalBtn = document.createElement('div');
+        mobileGlobalBtn.id = 'global-mobile-lang-btn';
+        mobileGlobalBtn.style.position = 'fixed';
+        mobileGlobalBtn.style.bottom = '150px'; // High up
+        mobileGlobalBtn.style.left = '50%';
+        mobileGlobalBtn.style.transform = 'translateX(-50%)';
+        mobileGlobalBtn.style.zIndex = '2147483647';
+        mobileGlobalBtn.style.display = 'flex'; // ALWAYS VISIBLE FOR TEST
+
+        const btn = document.createElement('button');
+        btn.className = 'lang-btn';
+        btn.innerHTML = '<i class="ph-bold ph-globe"></i> LANG TEST';
+        btn.style.padding = '15px 30px';
+        btn.style.borderRadius = '50px';
+        btn.style.background = 'red'; // VISIBLE RED
+        btn.style.color = 'white';
+        btn.style.fontWeight = 'bold';
+        btn.style.boxShadow = '0 0 20px rgba(255,0,0,0.5)';
+
+        btn.onclick = (e) => {
+            e.preventDefault();
+            // Simple toggle for test
+            if (btn.innerText.includes('EN')) {
+                btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
+            } else {
+                btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN/TR TEST';
+            }
+            // Add cookie logic later
+        };
+
+        mobileGlobalBtn.appendChild(btn);
+        document.body.appendChild(mobileGlobalBtn);
+    }
+
+    const btn = document.getElementById('hamburgerBtn');
     const nav = document.querySelector('.nav-menu');
     const header = document.querySelector('.header');
+
+    if (btn) btn.style.border = "2px solid red"; // BORDER TEST
+    if (nav) nav.style.borderBottom = "2px solid red"; // NAV BORDER TEST
 
     if (btn && nav) {
         btn.addEventListener('click', () => {
@@ -1041,94 +1081,8 @@ function setupMobileMenu() {
 
         // --- GLOBAL BODY-LEVEL MOBILE LANGUAGE TOGGLE ---
         // We append to body to avoid z-index/overflow issues within nav containers
-        let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
-
-        if (!mobileGlobalBtn) {
-            mobileGlobalBtn = document.createElement('div'); // Wrapper to be safe
-            mobileGlobalBtn.id = 'global-mobile-lang-btn';
-            mobileGlobalBtn.style.position = 'fixed';
-            mobileGlobalBtn.style.bottom = '110px'; // Adjust height above bottom
-            mobileGlobalBtn.style.left = '50%';
-            mobileGlobalBtn.style.transform = 'translateX(-50%)';
-            mobileGlobalBtn.style.zIndex = '2147483647'; // Max Z-Index
-            mobileGlobalBtn.style.display = 'none'; // Hidden by default
-
-            // Inner content
-            const btn = document.createElement('button');
-            btn.className = 'lang-btn';
-            btn.style.padding = '12px 24px';
-            btn.style.borderRadius = '30px';
-            btn.style.border = '1px solid rgba(255,255,255,0.2)';
-            btn.style.background = 'rgba(20, 20, 20, 0.9)'; // Dark backdrop
-            btn.style.backdropFilter = 'blur(10px)';
-            btn.style.color = 'white';
-            btn.style.fontSize = '16px';
-            btn.style.fontWeight = '600';
-            btn.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'center';
-            btn.style.gap = '10px';
-            btn.style.cursor = 'pointer';
-
-            // Determine state
-            const isEnglish = document.cookie.includes('googtrans=/tr/en');
-            btn.innerHTML = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN';
-
-            btn.onclick = (e) => {
-                e.preventDefault();
-                // Cookie Logic
-                function setCookie(name, value, days) {
-                    const d = new Date();
-                    d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
-                    document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
-                }
-
-                if (document.cookie.includes('googtrans=/tr/en')) {
-                    setCookie('googtrans', '/tr/tr', 1);
-                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
-                    window.location.reload();
-                } else {
-                    setCookie('googtrans', '/tr/en', 1);
-                    window.location.reload();
-                }
-            };
-
-            mobileGlobalBtn.appendChild(btn);
-            document.body.appendChild(mobileGlobalBtn);
-        }
-
-        // --- Toggle Visibility Logic ---
-        // We hook into the existing click listeners by wrapping them or adding new ones
-
-        // Helper to update visibility check
-        const updateBtnVisibility = () => {
-            if (nav.classList.contains('active')) {
-                if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'block';
-            } else {
-                if (mobileGlobalBtn) mobileGlobalBtn.style.display = 'none';
-            }
-        };
-
-        // Attach to Hamburger
-        const originalBtnClick = btn.onclick;
-        // Note: we added event listener before, so we just add another one
-        btn.addEventListener('click', () => {
-            // Wait for class toggle to happen (it happens in the other listener)
-            setTimeout(updateBtnVisibility, 50);
-        });
-
-        // Attach to Links close
-        nav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                setTimeout(updateBtnVisibility, 50);
-            });
-        });
-
-        // Attach to Outside Click
-        document.addEventListener('click', (e) => {
-            setTimeout(updateBtnVisibility, 50); // Check state after click processes
-        });
+        // The button creation is now at the top and always visible for testing.
+        // The original visibility logic is removed.
     }
 }
 function switchModal(closeId, openId) {
