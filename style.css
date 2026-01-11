@@ -5101,7 +5101,7 @@ i[class*=" ph"] {
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     #lang-switch-btn {
         display: none !important;
     }
@@ -5109,7 +5109,7 @@ i[class*=" ph"] {
 
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY --- */
 /* --- CRITICAL FIX: MOBILE LANGUAGE SWITCHER VISIBILITY V2 --- */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     #mobile-lang-btn-static {
         display: none !important;
         /* Hidden by default until active */
@@ -5152,7 +5152,7 @@ i[class*=" ph"] {
 }
 
 /* Fix Headings Gap & Size on Mobile */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
 
     .article-content h2,
     .article-content h3,
