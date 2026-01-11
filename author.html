@@ -2668,6 +2668,10 @@
             fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(r => r.json())
                 .then(articles => {
+                    if (!Array.isArray(articles)) {
+                        console.error('Chart Data Error (Not Array):', articles);
+                        return;
+                    }
                     const active = articles.filter(a => a.status !== 'trash');
                     // Sort by views but stick to top 5-7 to keep it clean
                     const topItems = active.sort((a, b) => b.views - a.views).slice(0, 7);
