@@ -987,6 +987,16 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
+// Get My Articles (MUST BE BEFORE /:key)
+app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM articles WHERE author_id = ? ORDER BY created_at DESC', [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
 // GET Single Article by ID or Slug for Frontend API
 app.get('/api/articles/:key', async (req, res) => {
     const key = req.params.key;
@@ -1339,15 +1349,7 @@ app.put('/api/articles/:id', authenticateToken, upload.single('image'), async (r
     }
 });
 
-// Get My Articles
-app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM articles WHERE author_id = ? ORDER BY created_at DESC', [req.user.id]);
-        res.json(rows);
-    } catch (e) {
-        res.status(500).send(e.toString());
-    }
-});
+
 
 // Author Stats Endpoint
 app.get('/api/author/stats', authenticateToken, async (req, res) => {
