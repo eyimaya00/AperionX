@@ -411,8 +411,14 @@
                     // --- STATE ---
                     const currentTrans = getCookie('googtrans');
                     const isEnglish = currentTrans === '/tr/en';
-                    // USE ICONS INSTEAD OF EMOJI FLAGS TO AVOID "TR TR" WINDOWS ISSUE
-                    const labelContent = isEnglish ? '<i class="ph-bold ph-globe"></i> TR' : '<i class="ph-bold ph-globe"></i> EN';
+
+                    // --- SVG FLAGS (Guaranteed to work on Windows) ---
+                    const trFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#e30a17"/><circle cx="13" cy="16" r="6" fill="#fff"/><circle cx="14.5" cy="16" r="5" fill="#e30a17"/><path d="M19 16 L20.5 14.5 L20.5 17.5 Z" fill="#fff" stroke="#fff" stroke-width="2"/></svg>`;
+                    const enFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#00247d"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#fff" stroke-width="6"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#fff" stroke-width="10"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#cf142b" stroke-width="3"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#cf142b" stroke-width="6"/></svg>`;
+
+                    const labelContent = isEnglish
+                        ? `<div style="display:flex; align-items:center; gap:6px;">${trFlag} <span style="font-weight:700;">TR</span></div>`
+                        : `<div style="display:flex; align-items:center; gap:6px;">${enFlag} <span style="font-weight:700;">EN</span></div>`;
 
                     // --- HANDLER --- (Defined here to be accessible by both buttons)
                     const handleLangClick = (e, btnElement) => {
@@ -422,7 +428,8 @@
                         if (btnElement) {
                             btnElement.style.transform = 'scale(0.95)';
                             setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
-                            btnElement.innerHTML = '<i class="ph ph-spinner ph-spin"></i> ...';
+                            // Keep content but lower opacity
+                            btnElement.style.opacity = '0.7';
                         }
 
                         deleteCookie('googtrans');
@@ -450,7 +457,7 @@
                             z-index: 2147483647 !important;
                             background-color: #000 !important;
                             color: #fff !important;
-                            padding: 12px 25px !important;
+                            padding: 10px 20px !important;
                             border-radius: 50px !important;
                             text-decoration: none !important;
                             font-family: sans-serif !important;
@@ -459,14 +466,17 @@
                             display: none;
                             box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
                             align-items: center !important;
+                            justify-content: center !important;
                             gap: 8px !important;
                             cursor: pointer !important;
                             pointer-events: auto !important;
                             transition: transform 0.1s !important;
+                            width: auto !important; /* Force Pill Shape */
                         `;
+
                         // Mobile Visibility
                         const checkMobile = () => {
-                            if (window.innerWidth < 1024) { // Changed to match strict match logic
+                            if (window.innerWidth < 1024) {
                                 mobileBtn.style.display = 'flex';
                             } else {
                                 mobileBtn.style.display = 'none';
@@ -479,23 +489,27 @@
                         mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
                     }
 
-                    // Always update content if not in loading state
-                    if (mobileBtn.innerHTML !== labelContent && !mobileBtn.innerHTML.includes('spinner')) {
+                    // Always update content
+                    if (!mobileBtn.innerHTML.includes('svg')) {
                         mobileBtn.innerHTML = labelContent;
                     }
 
                     // --- 2. DESKTOP BUTTON ---
                     let desktopBtn = document.getElementById('lang-switch-btn');
                     if (desktopBtn) {
-                        // Enforce Styles
+                        // Enforce Styles for PILL SHAPE
+                        desktopBtn.style.width = 'auto'; // Release fixed width
+                        desktopBtn.style.height = '36px'; // Keep height
+                        desktopBtn.style.padding = '0 12px'; // Add padding for text
+                        desktopBtn.style.borderRadius = '20px'; // Rounded pill
                         desktopBtn.style.display = 'flex';
                         desktopBtn.style.alignItems = 'center';
                         desktopBtn.style.justifyContent = 'center';
                         desktopBtn.style.gap = '6px';
                         desktopBtn.style.fontSize = '14px';
 
-                        // Enforce Content if not loading
-                        if (desktopBtn.innerHTML !== labelContent && !desktopBtn.innerHTML.includes('spinner')) {
+                        // Enforce Content
+                        if (!desktopBtn.innerHTML.includes('svg')) {
                             desktopBtn.innerHTML = labelContent;
                         }
 
@@ -505,6 +519,8 @@
                             desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
                             newDesktopBtn.dataset.hasNuclearClick = "true";
                             newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                            // Re-assign local variable to new element so styling updates work in next loop
+                            desktopBtn = newDesktopBtn;
                         }
                     }
 
@@ -519,8 +535,8 @@
             // Run on Load
             window.addEventListener('load', enforceLanguageButtons);
 
-            // Run periodically for 3 seconds to catch any late overwrites
-            setInterval(enforceLanguageButtons, 500); // Continuous check is safer for this user's caching issues
+            // Run periodically
+            setInterval(enforceLanguageButtons, 250);
 
         })();
     </script>
