@@ -2458,43 +2458,52 @@ function initLanguageSwitcher() {
         div.style.display = 'none'; // Hide default widget
         document.body.appendChild(div);
 
-        // Add CSS to hide Google Top Bar
+                // Add CSS to hide Google Top Bar
         const style = document.createElement('style');
         style.innerHTML = `
-            /* Hide Google Translate Top Banner */
-            .goog-te-banner-frame.skiptranslate { display: none !important; } 
+            /* NUCLEAR OPTION: Hide Google Translate Top Banner */
+            .goog-te-banner-frame { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; }
+            .skiptranslate { display: none !important; } 
             iframe.goog-te-banner-frame { display: none !important; }
-            body { top: 0px !important; position: static !important; }
             
-            /* Hide Translate Widget */
+            /* Force Body/HTML to top */
+            body { top: 0px !important; position: inherit !important; margin-top: 0 !important; }
+            html { top: 0px !important; margin-top: 0 !important; }
+            
+            /* Hide Widget */
             #google_translate_element { display: none !important; }
             .goog-tooltip { display: none !important; }
             .goog-te-gadget-simple { display: none !important; }
             
-            /* Remove blue hover borders injected by Google */
             font { background-color: transparent !important; box-shadow: none !important; }
         `;
         document.head.appendChild(style);
 
         // AGGRESSIVE REMOVAL: Force remove the banner from DOM
         const removeBanner = setInterval(() => {
-            const banner = document.querySelector('.goog-te-banner-frame');
-            const skipTranslate = document.querySelector('.skiptranslate');
+            // Remove iframe
+            const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
+            iframes.forEach(el => el.remove());
+            
+            // Remove skiptranslate divs
+            const banners = document.querySelectorAll('.goog-te-banner-frame');
+            banners.forEach(el => el.remove());
 
-            if (banner) {
-                banner.remove();
-                console.log('Google Banner removed via JS');
-            }
-
-            // Force body top to 0
-            if (document.body.style.top !== '0px') {
+            // Force body/html styles
+            if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
                 document.body.style.top = '0px';
-                document.body.style.position = 'static';
+                document.body.style.marginTop = '0px';
+                document.body.style.position = 'inherit';
             }
-        }, 50);
+            if (document.documentElement.style.top !== '0px' || document.documentElement.style.marginTop !== '0px') {
+                document.documentElement.style.top = '0px';
+                document.documentElement.style.marginTop = '0px';
+                document.documentElement.style.height = '100%';
+            }
+        }, 10); // Check every 10ms
 
-        // Stop checking after 5 seconds to save resources
-        setTimeout(() => clearInterval(removeBanner), 5000);
+        // Run for 10 seconds to cover slow loads
+        setTimeout(() => clearInterval(removeBanner), 10000);
     }
 
     // 2. Define Init Function Global
