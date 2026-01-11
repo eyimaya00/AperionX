@@ -1131,7 +1131,7 @@
                     <!-- Right: Like & Share -->
                     <div class="right-actions">
                         <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                            <i class="ph ph-heart"></i> <span id="like-count">0</span> Destek Ol
+                            <i class="ph ph-heart"></i> Destek Ol
                         </button>
 
                         <div class="share-divider"></div>
@@ -1142,6 +1142,8 @@
                             <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
                             <a href="#" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
                             <a href="#" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                            <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
+                                title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
                         </div>
                     </div>
                 </div>
@@ -1365,7 +1367,7 @@
                     btn.classList.add('liked');
                     btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
                 } else {
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
                 }
             } catch (e) { console.error('Like load', e); }
         }
@@ -1391,7 +1393,7 @@
 
                 if (isLiked) {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
                 } else {
                     btn.classList.add('liked');
                     btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
@@ -1614,6 +1616,16 @@
                 }
             } catch (e) { console.error(e); }
         }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Link başarıyla kopyalandı!', 'success');
+            }).catch(err => {
+                console.error('Kopyalama başarısız:', err);
+                showToast('Link kopyalanamadı', 'error');
+            });
+        }
+
         // === ARTICLE SLIDER LOGIC ===
         let similarArticles = [];
         let sliderIndex = 0;
