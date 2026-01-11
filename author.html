@@ -2669,7 +2669,7 @@
                 dashboardChart = null;
             }
 
-            fetch(`${API_URL}/articles/my-articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })
+            fetch(`${API_URL}/author/articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(r => r.json())
                 .then(articles => {
                     if (!Array.isArray(articles)) {
