@@ -2522,8 +2522,16 @@ function hideGoogleBanner() {
             // AGGRESSIVE: If it's fixed at top and has no ID/Class, it might be it
             (getComputedStyle(iframe).position === 'fixed' && getComputedStyle(iframe).top === '0px')
         ) {
-            console.log("Killing Google Banner Iframe:", iframe);
-            iframe.remove();
+            console.log("Hiding (NOT Killing) Google Banner Iframe:", iframe);
+            // DO NOT REMOVE! Removing it kills the translation engine.
+            // Just hide it visibly.
+            iframe.style.display = 'none';
+            iframe.style.visibility = 'hidden';
+            iframe.style.height = '0px';
+            iframe.style.width = '0px';
+            iframe.style.opacity = '0';
+            iframe.style.pointerEvents = 'none';
+            iframe.style.zIndex = '-1000';
         }
     });
 
