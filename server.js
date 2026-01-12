@@ -1050,15 +1050,23 @@ app.get('/api/articles/:key', async (req, res) => {
 });
 
 // NEW: Public Author Profile Endpoint
-app.get('/api/public/author/:username', async (req, res) => {
+app.get('/api/public/author/:identifier', async (req, res) => {
     try {
-        const key = req.params.username;
+        const key = req.params.identifier;
+        console.log('[API] Fetching author profile for:', key);
+
+        // 1. Try by Username (Exact match)
         let sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ?';
         let params = [key];
 
-        // If numeric, allow lookup by ID too
+        // 2. Try by ID
         if (/^\d+$/.test(key)) {
             sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE id = ? OR username = ?';
+            params = [key, key];
+        }
+        // 3. Try by Fullname (Fallback if sent directly)
+        else {
+            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR fullname = ?';
             params = [key, key];
         }
 
