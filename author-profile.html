@@ -176,28 +176,27 @@
             padding-bottom: 120px;
         }
 
-        /* STANDARD CARD DESIGN (No Overlay) */
+        /* REFERENCE STYLE OVERLAY CARD DESIGN */
         .article-card {
             position: relative;
-            background: #ffffff;
-            border-radius: 20px;
+            background: #000;
+            border-radius: 30px;
+            /* More rounded */
             overflow: hidden;
             text-decoration: none;
-            color: #1e293b;
-            /* Dark text */
+            color: white;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 480px;
-            /* Taller to fit content below image */
+            height: 380px;
+            /* Full Image Height */
             display: flex;
             flex-direction: column;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .article-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: #cbd5e1;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         .article-card:hover .card-image {
@@ -205,13 +204,13 @@
         }
 
         .card-image-wrapper {
-            position: relative;
-            /* Not absolute anymore */
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 250px;
-            /* Fixed height for image */
-            overflow: hidden;
-            flex-shrink: 0;
+            height: 100%;
+            padding: 0;
+            z-index: 1;
         }
 
         .card-image {
@@ -221,45 +220,58 @@
             transition: transform 0.5s ease;
         }
 
-        /* Remove Gradient Overlay */
+        /* Gradient Overlay - Essential for text readability on overlay cards */
         .article-card::after {
-            display: none;
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+            z-index: 2;
+            display: block;
+            /* Ensure it's visible */
         }
 
         .card-category {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1e293b;
-            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.15);
+            /* Transparent/Glassy */
+            color: white;
+            padding: 6px 16px;
             border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             z-index: 3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .card-content {
             position: relative;
-            /* Normal flow */
             z-index: 3;
+            margin-top: auto;
+            /* Push to bottom */
             padding: 24px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            background: #fff;
+            gap: 10px;
+            background: transparent;
+            /* Overlay style */
         }
 
         .card-title {
-            font-size: 1.35rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            line-height: 1.4;
-            color: #1e293b;
-            /* Dark Title */
-            margin-bottom: 10px;
-            text-shadow: none;
-            /* Remove shadow */
+            line-height: 1.3;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            margin: 0;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -270,17 +282,40 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: auto;
-            /* Push to bottom */
-            border-top: 1px solid #f1f5f9;
-            padding-top: 15px;
+            margin-top: 5px;
+            border-top: none;
+            /* No border for overlay */
+            padding-top: 10px;
         }
 
         .card-date {
-            color: #64748b;
-            /* Muted text */
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 400;
+        }
+
+        /* White Circle Button at Bottom Right (Matching Screenshot) */
+        .circle-arrow-btn {
+            width: 40px;
+            /* Slightly larger */
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e293b;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .article-card:hover .circle-arrow-btn {
+            transform: scale(1.1);
+            background: white;
+            /* Keep white */
+            color: #4f46e5;
+            /* Primary color icon on hover */
         }
 
         /* White Circle Button (Matching articles.html) */
@@ -578,7 +613,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=137"></script>
+    <script src="/script_v105.js?v=138"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
