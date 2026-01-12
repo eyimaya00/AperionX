@@ -1160,6 +1160,23 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
+// NEW: Global Navigation Handler - Defined ONCE globally
+window.navigateToDashboard = function () {
+    // Re-read fresh from storage to be sure
+    const u = JSON.parse(localStorage.getItem('user'));
+    if (!u) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    console.log('Navigating dashboard for role:', u.role);
+
+    if (u.role === 'admin') window.location.href = 'admin.html';
+    else if (u.role === 'author') window.location.href = 'author.html';
+    else if (u.role === 'editor') window.location.href = 'editor.html';
+    else window.location.href = 'profile.html';
+};
+
 // Check Auth & Update UI
 function checkAuthStatus() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -1168,28 +1185,10 @@ function checkAuthStatus() {
 
     if (user) {
         authButtons.forEach(container => {
-            let dashboardAction = "window.location.href='profile.html'";
-            let cursorStyle = 'pointer';
-            let titleAttr = 'Profilime Git';
-            let roleBadge = '';
-
-            if (user.role === 'admin') {
-                dashboardAction = "window.location.href='admin.html'";
-                roleBadge = '<span class="role-badge admin">Admin</span>';
-            } else if (user.role === 'author') {
-                dashboardAction = "window.location.href='author.html'"; // Explicitly author.html
-                roleBadge = '<span class="role-badge author">Yazar</span>';
-            } else if (user.role === 'editor') {
-                dashboardAction = "window.location.href='editor.html'";
-                roleBadge = '<span class="role-badge editor">Editör</span>';
-            } else {
-                // Default user -> profile.html (which might need to exist or be redirect)
-                // For now, let's make it go to index or a toast saying "Profile coming soon" if profile.html is missing
-                // usage: existing logic was profile.html
-            }
+            // Function is already defined globally above
 
             container.innerHTML = `
-                <button class="btn btn-login" onclick="${dashboardAction}" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-login" onclick="navigateToDashboard()" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="user-name">${escapeHtml(user.fullname)}</span>
                     <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
                 </button>
