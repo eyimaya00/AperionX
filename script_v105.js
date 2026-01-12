@@ -1163,25 +1163,27 @@ function escapeHtml(text) {
 // NEW: Global Navigation Handler - Defined ONCE globally at TOP
 window.navigateToDashboard = function () {
     try {
+        // VISIBLE DEBUG - REMOVE AFTER FIX
+        alert("Yönlendirme başlatılıyor...");
+
         console.log("navigateToDashboard called");
         const userStr = localStorage.getItem('user');
         if (!userStr) {
-            console.warn("No user found in localStorage, redirecting to home.");
+            alert("Kullanıcı bilgisi bulunamadı, ana sayfaya dönülüyor.");
             window.location.href = 'index.html';
             return;
         }
 
         const u = JSON.parse(userStr);
-        console.log('Navigating dashboard for role:', u.role);
+        alert("Rol Algılandı: " + u.role);
 
         if (u.role === 'admin') window.location.href = 'admin.html';
         else if (u.role === 'author') window.location.href = 'author.html';
         else if (u.role === 'editor') window.location.href = 'editor.html';
         else window.location.href = 'profile.html';
     } catch (err) {
+        alert("Hata: " + err.message);
         console.error("Navigation Error:", err);
-        alert("Yönlendirme hatası: " + err.message);
-        window.location.href = 'index.html';
     }
 };
 
@@ -1205,26 +1207,14 @@ function checkAuthStatus() {
             else if (user.role === 'author') titleAttr = 'Yazar Paneli';
             else if (user.role === 'editor') titleAttr = 'Editör Paneli';
 
+            // SIMPLE, DIRECT ONCLICK - NO EVENT LISTENERS
             container.innerHTML = `
-                <button class="btn btn-login dashboard-btn-trigger" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-login" onclick="window.navigateToDashboard(); return false;" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <span class="user-name">${escapeHtml(user.fullname)}</span>
                     <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
                 </button>
-                <button class="btn btn-login btn-sm" onclick="window.logout()">Çıkış</button>
+                <button class="btn btn-login btn-sm" onclick="window.logout(); return false;">Çıkış</button>
             `;
-
-            // ROBUST EVENT ATTACHMENT
-            // Inline onclicks can sometimes be blocked or failed to parse if global scope is messy.
-            // Attaching directly guarantees execution if the element exists.
-            const dashBtn = container.querySelector('.dashboard-btn-trigger');
-            if (dashBtn) {
-                dashBtn.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("Dashboard button clicked via JS Handler");
-                    window.navigateToDashboard();
-                };
-            }
 
             // Add Profile/Dashboard Link to Nav if not present
             const navMenu = document.querySelector('.nav-menu');
