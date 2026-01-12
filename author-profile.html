@@ -264,7 +264,8 @@
             align-items: center;
             justify-content: space-between;
             margin-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            /* Border removed for cleaner look with circle button */
+            border-top: none;
             padding-top: 15px;
         }
 
@@ -273,13 +274,25 @@
             font-size: 0.85rem;
         }
 
-        .read-more-btn {
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.9rem;
+        /* White Circle Button (Matching articles.html) */
+        .circle-arrow-btn {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            color: #1e293b;
+            /* Dark text/icon */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .article-card:hover .circle-arrow-btn {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: white;
         }
 
         /* Use existing grid styles from style.css but ensure container */
@@ -602,9 +615,9 @@
                                         <i class="ph ph-calendar-blank" style="vertical-align:middle; margin-right:4px;"></i>
                                         ${new Date(art.created_at).toLocaleDateString('tr-TR')}
                                     </span>
-                                    <span class="read-more-btn">
-                                        Oku <i class="ph-bold ph-arrow-right"></i>
-                                    </span>
+                                    <div class="circle-arrow-btn">
+                                        <i class="ph-bold ph-arrow-right"></i>
+                                    </div>
                                 </div>
                             </div>
                         </a>
