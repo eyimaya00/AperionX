@@ -1047,9 +1047,17 @@ app.get('/api/articles/:key', async (req, res) => {
 // NEW: Public Author Profile Endpoint
 app.get('/api/public/author/:username', async (req, res) => {
     try {
-        const username = req.params.username;
-        // 1. Get User Info (Public fields only)
-        const [users] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ?', [username]);
+        const key = req.params.username;
+        let sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ?';
+        let params = [key];
+
+        // If numeric, allow lookup by ID too
+        if (/^\d+$/.test(key)) {
+            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE id = ? OR username = ?';
+            params = [key, key];
+        }
+
+        const [users] = await pool.query(sql, params);
 
         if (users.length === 0) {
             return res.status(404).json({ message: 'Yazar bulunamadı' });
