@@ -1760,7 +1760,7 @@ function renderArticleDetail(article) {
     const profileKey = article.author_username || article.author_id;
 
     if (profileKey) {
-        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${profileKey}" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${profileKey}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
     } else {
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
     }
