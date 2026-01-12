@@ -1185,7 +1185,17 @@ function checkAuthStatus() {
 
     if (user) {
         authButtons.forEach(container => {
-            // Function is already defined globally above
+            let dashboardAction = "window.location.href='profile.html'"; // Fallback, though navigateToDashboard handles it
+            let titleAttr = 'Profilime Git';
+            let roleBadge = '';
+
+            if (user.role === 'admin') {
+                titleAttr = 'Admin Paneli';
+            } else if (user.role === 'author') {
+                titleAttr = 'Yazar Paneli';
+            } else if (user.role === 'editor') {
+                titleAttr = 'Editör Paneli';
+            }
 
             container.innerHTML = `
                 <button class="btn btn-login" onclick="navigateToDashboard()" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
