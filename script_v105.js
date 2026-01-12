@@ -1161,6 +1161,7 @@ function escapeHtml(text) {
 }
 
 // NEW: Global Navigation Handler - Defined ONCE globally at TOP
+// (Updated v118 - Force Refresh)
 window.navigateToDashboard = function () {
     try {
         console.log("navigateToDashboard called");
