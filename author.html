@@ -2493,10 +2493,19 @@
 
             // Load Profile Info
             if (user) {
-                document.getElementById('profile-name').value = user.fullname || '';
-                document.getElementById('profile-email').value = user.email || '';
-                if (document.getElementById('profile-bio')) document.getElementById('profile-bio').value = user.bio || '';
-                if (document.getElementById('profile-job')) document.getElementById('profile-job').value = user.job_title || '';
+                document.getElementById('profile-name').value = user.fullname;
+                document.getElementById('profile-email').value = user.email; // Read-only usually
+                document.getElementById('profile-job').value = user.job_title || '';
+                document.getElementById('profile-bio').value = user.bio || '';
+
+                // Update "View Profile" Button Link
+                const profileBtn = document.getElementById('view-public-profile-btn');
+                if (profileBtn && user.username) {
+                    profileBtn.href = `author-profile.html?u=${user.username}`;
+                } else if (profileBtn) {
+                    profileBtn.style.display = 'none'; // Hide if no username (shouldn't happen)
+                }
+
                 if (user.avatar_url) document.getElementById('profile-avatar-preview').src = user.avatar_url;
 
                 updateSidebarProfile(user);
@@ -2573,7 +2582,9 @@
         }
 
         function logout() {
-            localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html';
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.replace('index.html'); // Use replace to prevent back button
         }
 
         // Notifications Logic
