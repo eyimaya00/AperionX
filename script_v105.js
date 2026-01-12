@@ -1177,11 +1177,15 @@ function checkAuthStatus() {
                 dashboardAction = "window.location.href='admin.html'";
                 roleBadge = '<span class="role-badge admin">Admin</span>';
             } else if (user.role === 'author') {
-                dashboardAction = "window.location.href='author.html'";
+                dashboardAction = "window.location.href='author.html'"; // Explicitly author.html
                 roleBadge = '<span class="role-badge author">Yazar</span>';
             } else if (user.role === 'editor') {
                 dashboardAction = "window.location.href='editor.html'";
                 roleBadge = '<span class="role-badge editor">Editör</span>';
+            } else {
+                // Default user -> profile.html (which might need to exist or be redirect)
+                // For now, let's make it go to index or a toast saying "Profile coming soon" if profile.html is missing
+                // usage: existing logic was profile.html
             }
 
             container.innerHTML = `
