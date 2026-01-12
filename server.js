@@ -1867,6 +1867,12 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// NEW: Validate Token / Get Current User
+app.get('/api/me', authenticateToken, (req, res) => {
+    // If authenticateToken passes, req.user is set
+    res.json({ user: req.user });
+});
+
 // Public: Get all published articles with filters
 app.get('/api/articles', async (req, res) => {
     try {
