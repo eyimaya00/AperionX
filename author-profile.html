@@ -149,35 +149,41 @@
             .profile-info {
                 text-align: center;
             }
+
+            /* Reset grid for mobile so 450px doesn't break layout */
+            .articles-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .article-card {
+                height: 350px;
+                /* Taller on mobile for stacking */
+            }
         }
 
         /* Explicit Card Styles for Profile Page to ensure visibility */
         .articles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            /* Slightly wider card base */
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            /* Much wider cards */
             gap: 30px;
             padding-bottom: 120px;
-            /* Large spacer for footer visibility */
         }
 
-        /* OVERLAY CARD DESIGN (Requested: Photo with Title on it) */
+        /* OVERLAY CARD DESIGN */
         .article-card {
             position: relative;
             background: #000;
-            /* Fallback */
             border-radius: 24px;
-            /* More rounded */
             overflow: hidden;
             text-decoration: none;
             color: white;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 480px;
-            /* Taller card (requested "large photo") */
+            height: 320px;
+            /* Reduced height for landscape look */
             display: flex;
             flex-direction: column;
             border: none;
-            /* No border for overlay style */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
