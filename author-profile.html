@@ -131,10 +131,11 @@
 
         .section-title {
             text-align: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 40px;
             color: var(--text-color);
+            letter-spacing: -0.5px;
         }
 
         /* Responsive adjustments */
@@ -153,10 +154,11 @@
         /* Explicit Card Styles for Profile Page to ensure visibility */
         .articles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            /* Slightly wider card base */
             gap: 30px;
-            padding-bottom: 60px;
-            /* Spacer for footer */
+            padding-bottom: 120px;
+            /* Large spacer for footer visibility */
         }
 
         /* OVERLAY CARD DESIGN (Requested: Photo with Title on it) */
@@ -170,8 +172,8 @@
             text-decoration: none;
             color: white;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 400px;
-            /* Taller fixed height for visual impact */
+            height: 480px;
+            /* Taller card (requested "large photo") */
             display: flex;
             flex-direction: column;
             border: none;
