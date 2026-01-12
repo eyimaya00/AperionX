@@ -1258,6 +1258,8 @@ function logout() {
     localStorage.removeItem('user');
     window.location.href = 'index.html';
 }
+// Expose globally for onclick handlers
+window.logout = logout;
 
 // --- Mobile Menu Toggle ---
 const hamburgerBtn = document.getElementById('hamburgerBtn');
