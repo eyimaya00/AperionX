@@ -1196,9 +1196,18 @@ window.logout = function () {
 // Check Auth & Update UI
 function checkAuthStatus() {
     const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
     const authButtons = document.querySelectorAll('.auth-buttons, .mobile-auth');
 
-    if (user) {
+    // FIX: Zombie Session Detection
+    // If we have a user object but NO token, the session is invalid.
+    if (user && !token) {
+        console.warn('Zombie session detected (User set, Token missing). Clearing...');
+        localStorage.removeItem('user');
+        // No recursion, just let it fall through to 'else'
+    }
+
+    if (user && token) {
         authButtons.forEach(container => {
             let titleAttr = 'Profilime Git';
             if (user.role === 'admin') titleAttr = 'Admin Paneli';
