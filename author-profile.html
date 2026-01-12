@@ -575,7 +575,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=132"></script>
+    <script src="/script_v105.js?v=133"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
@@ -610,10 +610,13 @@
 
                 document.getElementById('p-name').textContent = profile.fullname;
 
-                // Job Title with Cleanup (Remove slashes)
+                // Job Title with Cleanup (Split by slash for multi-line)
                 const rawJob = profile.job_title || '';
-                const cleanJob = rawJob.replace(/\//g, ' ').replace(/\s+/g, ' ').trim();
-                document.getElementById('p-job').innerText = cleanJob || 'Yazar';
+                // Split by '/', trim whitespace, and rejoin with <br> for stacked layout
+                const cleanJob = rawJob.split('/').map(part => part.trim()).filter(part => part).join('<br>');
+
+                // Use innerHTML to render break tags
+                document.getElementById('p-job').innerHTML = cleanJob || 'Yazar';
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
