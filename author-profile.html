@@ -347,6 +347,13 @@
                     <button class="icon-btn search-btn"><i class="ph ph-magnifying-glass"></i></button>
                 </div>
                 <button class="icon-btn theme-toggle" id="themeToggle"><i class="ph ph-moon"></i></button>
+
+                <!-- Language Switcher -->
+                <a href="#" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
                 <div class="auth-buttons" id="user-menu-container">
                     <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
@@ -379,7 +386,10 @@
                             Onaylı Yazar
                         </div>
                         <h1 class="profile-name" id="p-name"></h1>
-                        <div class="profile-job" id="p-job"></div>
+                        <!-- BEAUTIFIED JOB TITLE -->
+                        <div class="profile-job" id="p-job"
+                            style="text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-width: 600px; margin-left: auto; margin-right: auto; font-weight: 500;">
+                        </div>
                         <p class="profile-bio" id="p-bio"></p>
                     </div>
                 </div>
@@ -565,7 +575,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=129"></script>
+    <script src="/script_v105.js?v=130"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
