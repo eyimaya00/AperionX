@@ -575,7 +575,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=131"></script>
+    <script src="/script_v105.js?v=132"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
@@ -609,8 +609,13 @@
                 document.getElementById('profile-details').style.display = 'block';
 
                 document.getElementById('p-name').textContent = profile.fullname;
-                document.getElementById('p-job').textContent = profile.job_title || 'Yazar';
-                document.getElementById('p-bio').textContent = profile.bio || '';
+
+                // Job Title with Cleanup (Remove slashes)
+                const rawJob = profile.job_title || '';
+                const cleanJob = rawJob.replace(/\//g, ' ').replace(/\s+/g, ' ').trim();
+                document.getElementById('p-job').innerText = cleanJob || 'Yazar';
+
+                document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
                 // 2. Fill Articles
                 const grid = document.getElementById('articles-grid');
