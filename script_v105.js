@@ -1386,10 +1386,9 @@ async function loadShowcase() {
                     <div class="card-bottom-content">
                         <h3 class="card-title">${item.title}</h3>
                         <div class="card-meta-row">
-                             ${item.author_username ?
-                        `<a href="author-profile.html?u=${item.author_username}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>` :
-                        `<span class="author-name">${author}</span>`
-                    }
+                        <div class="card-meta-row">
+                             <a href="author-profile.html?u=${item.author_name}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>
+                        </div>
                         </div>
                     </div>
                     
@@ -1610,7 +1609,7 @@ function renderArticlesGrid() {
                 <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
             <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
-                <a href="author-profile.html?u=${article.author_username || article.author_name}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <a href="author-profile.html?u=${article.author_name}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                     ${safeAuthor}
                 </a>
             </div>
