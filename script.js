@@ -142,6 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal('resetPasswordModal');
         }, 500); // Small delay to ensure modals are ready
     }
+
+    // Check for Login Redirect
+    if (urlParams.has('openLogin')) {
+        setTimeout(() => {
+            openModal('loginModal');
+            showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'warning');
+        }, 500);
+    }
 });
 
 let heroInterval; // Global for sorting or stopping if needed
