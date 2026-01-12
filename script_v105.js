@@ -1758,7 +1758,7 @@ function renderArticleDetail(article) {
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
     const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
     if (article.author_username) {
-        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_username}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_username}" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
     } else {
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
     }

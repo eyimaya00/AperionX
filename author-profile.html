@@ -196,8 +196,129 @@
         </div>
     </footer>
 
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal')"
+                        class="forgot-password-link">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-user"></i> -->
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal (Normally hidden, triggered by JS) -->
+    <div class="modal-overlay" id="resetPasswordModal">
+        <div class="modal">
+            <!-- No close button or it closes the flow. Optionally allow close. -->
+            <button class="modal-close" onclick="closeModal('resetPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Yeni Şifre Belirle</h2>
+                <p>Lütfen yeni şifrenizi girin.</p>
+            </div>
+            <form id="reset-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="reset-new-password" placeholder="Yeni Şifre" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Şifreyi Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+
     <!-- SHARED SCRIPTS -->
-    <script src="script.js?v=2.6"></script>
+    <script src="/script_v105.js?v=106"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
