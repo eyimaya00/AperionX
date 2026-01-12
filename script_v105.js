@@ -897,7 +897,31 @@ async function loadMenus() {
 
             if (!linksContainer) {
                 // Determine insertion point: before auth buttons if they exist
-                const mobileAuth = mobileMenu.querySelector('.mobile-auth');
+                let mobileAuth = mobileMenu.querySelector('.mobile-auth');
+
+                // 1. Ensure Auth Container Exists (Crucial for author-profile.html which starts empty)
+                if (!mobileAuth) {
+                    mobileAuth = document.createElement('div');
+                    mobileAuth.className = 'mobile-auth';
+                    mobileAuth.style.marginTop = 'auto'; // Push to bottom
+                    mobileAuth.style.padding = '20px';
+                    mobileAuth.style.display = 'flex';
+                    mobileAuth.style.flexDirection = 'column';
+                    mobileAuth.style.gap = '10px';
+                    mobileAuth.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+
+                    // Default Content (Login/Signup) - will be updated by checkAuthStatus
+                    mobileAuth.innerHTML = `
+                        <button class="btn btn-login" onclick="openModal('loginModal')" style="width:100%;">Giriş Yap</button>
+                        <button class="btn btn-signup" onclick="openModal('signupModal')" style="width:100%;">Kayıt Ol</button>
+                    `;
+
+                    mobileMenu.appendChild(mobileAuth);
+
+                    // Trigger Re-check to populate if logged in
+                    setTimeout(checkAuthStatus, 100);
+                }
+
                 linksContainer = document.createElement('div');
                 linksContainer.className = 'mobile-links-container';
                 linksContainer.style.width = '100%';
