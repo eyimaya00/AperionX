@@ -1754,7 +1754,7 @@
         function filterAnalytics(type) {
             if (type === 'comments') {
                 renderCommentsTable(commentsData);
-                showToast('Son yorumlar gösteriliyor.');
+                showAuthorToast('Son yorumlar gösteriliyor.');
                 return;
             }
 
@@ -1762,15 +1762,15 @@
             let sorted = [...analyticsData];
             if (type === 'views') {
                 sorted.sort((a, b) => b.views - a.views);
-                showToast('En çok okunanlara göre sıralandı.');
+                showAuthorToast('En çok okunanlara göre sıralandı.');
             } else if (type === 'likes') {
                 sorted.sort((a, b) => b.likes - a.likes);
-                showToast('En çok beğenilenlere göre sıralandı.');
+                showAuthorToast('En çok beğenilenlere göre sıralandı.');
             }
             renderAnalyticsTable(sorted);
         }
 
-        function showToast(message) {
+        function showAuthorToast(message) {
             const toast = document.createElement('div');
             toast.textContent = message;
             toast.style.cssText = `
@@ -1991,7 +1991,7 @@
             console.log('submitArticle called with status:', status);
             try {
                 if (!document.getElementById('title').value) {
-                    showToast('Lütfen başlık giriniz.', 'error');
+                    showAuthorToast('Lütfen başlık giriniz.', 'error');
                     return;
                 }
 
@@ -2014,7 +2014,7 @@
                     formData.append('content', quill.root.innerHTML);
                 } else {
                     console.error('Quill editor not initialized');
-                    showToast('Editör hatası. Sayfayı yenileyin.', 'error');
+                    showAuthorToast('Editör hatası. Sayfayı yenileyin.', 'error');
                     return;
                 }
 
@@ -2035,7 +2035,7 @@
 
                 if (res.ok) {
                     const isDraft = status === 'draft';
-                    showToast(isDraft ? 'Taslak başarıyla kaydedildi!' : 'Makale onay için editöre gönderildi.', 'success');
+                    showAuthorToast(isDraft ? 'Taslak başarıyla kaydedildi!' : 'Makale onay için editöre gönderildi.', 'success');
                     if (!isDraft) {
                         showSection('my-articles', document.querySelectorAll('.menu-item')[1]); resetForm();
                     }
@@ -2094,7 +2094,7 @@
         function setArticleFilter(filter) {
             if (currentArticleFilter === filter) {
                 currentArticleFilter = 'all'; // Toggle off
-                showToast('Tüm makaleler gösteriliyor.');
+                showAuthorToast('Tüm makaleler gösteriliyor.');
             } else {
                 currentArticleFilter = filter;
                 let text = '';
@@ -2102,7 +2102,7 @@
                 if (filter === 'pending') text = 'Onay Bekleyenler';
                 if (filter === 'rejected') text = 'Reddedilenler';
                 if (filter === 'draft') text = 'Taslaklar';
-                showToast(`${text} listeleniyor.`);
+                showAuthorToast(`${text} listeleniyor.`);
             }
             loadMyArticles();
         }
@@ -2236,7 +2236,7 @@
             document.getElementById('modal-desc-text').innerText = "Bu makale çöp kutusuna taşınacak. Daha sonra geri yükleyebilirsiniz.";
         }
 
-        function closeModal() {
+        function closeConfirmModal() {
             const modal = document.getElementById('confirm-modal');
             modal.classList.remove('show');
             modal.style.display = 'none'; // Force hide
@@ -2247,15 +2247,15 @@
         async function executeSoftDelete() {
             if (!deleteId) return;
             await fetch(`${API_URL}/articles/${deleteId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            closeModal();
+            closeConfirmModal();
             loadMyArticles();
-            showToast('Makale çöp kutusuna taşındı.', 'success');
+            showAuthorToast('Makale çöp kutusuna taşındı.', 'success');
         }
 
         async function restoreArticle(id) {
             await fetch(`${API_URL}/articles/restore/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
             loadMyArticles();
-            showToast('Makale geri yüklendi.', 'success');
+            showAuthorToast('Makale geri yüklendi.', 'success');
         }
 
         async function permanentDelete(id) {
@@ -2265,9 +2265,9 @@
             btn.innerText = "Tamamen Sil";
             btn.onclick = async () => {
                 await fetch(`${API_URL}/articles/permanent/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                closeModal();
+                closeConfirmModal();
                 loadMyArticles();
-                showToast('Makale tamamen silindi.', 'success');
+                showAuthorToast('Makale tamamen silindi.', 'success');
             };
             document.getElementById('modal-desc-text').innerText = "Bu işlem geri alınamaz! Makale tamamen silinecektir.";
         }
@@ -2324,7 +2324,7 @@
             document.getElementById('custom-category-group').style.display = 'none';
         }
 
-        function showToast(msg, type) {
+        function showAuthorToast(msg, type) {
             const div = document.createElement('div');
             div.style.background = type === 'success' ? '#10b981' : '#ef4444';
             div.style.color = 'white';
@@ -2386,15 +2386,15 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    showToast('Profil güncellendi!', 'success');
+                    showAuthorToast('Profil güncellendi!', 'success');
                     localStorage.setItem('user', JSON.stringify(data.user));
                     document.getElementById('profile-password').value = '';
                     updateSidebarProfile(data.user);
                 } else {
-                    showToast(data.message, 'error');
+                    showAuthorToast(data.message, 'error');
                 }
             } catch (e) {
-                showToast('Hata oluştu: ' + e.message, 'error');
+                showAuthorToast('Hata oluştu: ' + e.message, 'error');
             }
         }
 
