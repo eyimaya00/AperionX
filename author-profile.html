@@ -222,6 +222,11 @@
                     </div>
 
                     <div id="profile-details" style="display:none;">
+                        <div
+                            style="display:inline-block; background:rgba(99, 102, 241, 0.2); color:#a5b4fc; padding:4px 12px; border-radius:20px; font-size:0.85rem; font-weight:600; margin-bottom:10px; border:1px solid rgba(99, 102, 241, 0.3);">
+                            <i class="ph-fill ph-check-circle" style="vertical-align:middle; margin-right:4px;"></i>
+                            Onaylı Yazar
+                        </div>
                         <h1 class="profile-name" id="p-name"></h1>
                         <div class="profile-job" id="p-job"></div>
                         <p class="profile-bio" id="p-bio"></p>
@@ -459,8 +464,8 @@
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${art.title}</h3>
-                                <p class="card-excerpt">${art.excerpt || ''}</p>
-                                <div class="card-footer">
+                                <!-- Excerpt removed as requested -->
+                                <div class="card-footer" style="margin-top:auto;">
                                     <div class="card-author">
                                         <img src="${profile.avatar_url ? (profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url) : 'uploads/default-avatar.png'}" alt="${profile.fullname}">
                                         <span>${profile.fullname}</span>
