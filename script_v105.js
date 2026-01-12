@@ -1124,9 +1124,19 @@ if (loginForm) {
             if (!res.ok) {
                 showToast(data.message || 'Giriş başarısız.', 'error');
             } else {
+                // DEBUG: Verify Token
+                // alert('Login Response: ' + JSON.stringify(data));
+                if (!data.token) {
+                    alert('HATA: Sunucu token göndermedi! Giriş başarısız sayılıyor.');
+                    return;
+                }
+
                 // Store Token and User Info
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+
+                console.log('Login Success. Token saved:', data.token);
+                // alert('Giriş Başarılı! Token kaydedildi: ' + data.token.substring(0, 10) + '...');
 
                 showToast('Giriş başarılı!', 'success');
                 closeModal('loginModal');
