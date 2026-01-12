@@ -1162,16 +1162,27 @@ function escapeHtml(text) {
 
 // NEW: Global Navigation Handler - Defined ONCE globally at TOP
 window.navigateToDashboard = function () {
-    const u = JSON.parse(localStorage.getItem('user'));
-    if (!u) {
+    try {
+        console.log("navigateToDashboard called");
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            console.warn("No user found in localStorage, redirecting to home.");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const u = JSON.parse(userStr);
+        console.log('Navigating dashboard for role:', u.role);
+
+        if (u.role === 'admin') window.location.href = 'admin.html';
+        else if (u.role === 'author') window.location.href = 'author.html';
+        else if (u.role === 'editor') window.location.href = 'editor.html';
+        else window.location.href = 'profile.html';
+    } catch (err) {
+        console.error("Navigation Error:", err);
+        alert("Yönlendirme hatası: " + err.message);
         window.location.href = 'index.html';
-        return;
     }
-    console.log('Navigating dashboard for role:', u.role);
-    if (u.role === 'admin') window.location.href = 'admin.html';
-    else if (u.role === 'author') window.location.href = 'author.html';
-    else if (u.role === 'editor') window.location.href = 'editor.html';
-    else window.location.href = 'profile.html';
 };
 
 // NEW: Logout Handler - Defined ONCE globally at TOP
