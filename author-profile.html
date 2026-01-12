@@ -162,10 +162,9 @@
         }
 
         body {
-            background-color: #ffffff;
-            /* User requested white */
-            color: #1e293b;
-            /* Dark text */
+            background-color: var(--bg-color);
+            /* Adapts to Dark Mode */
+            color: var(--text-color);
         }
 
         /* Explicit Card Styles for Profile Page to ensure visibility */
@@ -614,7 +613,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=139"></script>
+    <script src="/script_v105.js?v=140"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
