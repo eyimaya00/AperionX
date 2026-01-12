@@ -1387,7 +1387,7 @@ async function loadShowcase() {
                         <h3 class="card-title">${item.title}</h3>
                         <div class="card-meta-row">
                         <div class="card-meta-row">
-                             <a href="author-profile.html?u=${item.author_name}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>
+                             <a href="author-profile.html?u=${(item.author_name || '').replace(/ /g, '-')}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>
                         </div>
                         </div>
                     </div>
@@ -1609,7 +1609,7 @@ function renderArticlesGrid() {
                 <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
             <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
-                <a href="author-profile.html?u=${article.author_name}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                     ${safeAuthor}
                 </a>
             </div>
@@ -1813,7 +1813,8 @@ function renderArticleDetail(article) {
     const profileKey = safeAuthorName;
 
     if (profileKey && profileKey !== 'Gizli Yazar') {
-        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${profileKey}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+        const linkKey = profileKey.replace(/ /g, '-');
+        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${linkKey}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
     } else {
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
     }
