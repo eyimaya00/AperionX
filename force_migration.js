@@ -11,7 +11,7 @@ const dbConfig = {
 };
 
 function slugify(text) {
-    if (!text) return '';
+    if (!text) return 'user-' + Date.now();
     const trMap = {
         'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ş': 's', 'Ş': 's',
         'ü': 'u', 'Ü': 'u', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'Ö': 'o'
@@ -27,22 +27,33 @@ function slugify(text) {
 }
 
 async function run() {
-    console.log('Connecting to DB...');
+    console.log('🔌 Connecting to DB...');
     const pool = mysql.createPool(dbConfig);
 
     try {
-        console.log('Checking for null/empty usernames...');
-        const [users] = await pool.query("SELECT id, fullname, username FROM users WHERE username IS NULL OR username = ''");
+        console.log('🔍 Auditing ALL Users...');
+        const [users] = await pool.query("SELECT id, fullname, username FROM users ORDER BY id ASC");
 
-        console.log(`Found ${users.length} users needing migration.`);
+        console.log(`📋 Total Users Found: ${users.length}`);
+        console.log('---------------------------------------------------');
+        console.log('ID | Name | Current Username | Status');
+        console.log('---------------------------------------------------');
 
-        if (users.length > 0) {
-            for (const u of users) {
+        let fixedCount = 0;
+
+        for (const u of users) {
+            let status = '✅ OK';
+            let needsFix = !u.username || u.username.trim() === '' || u.username === 'NULL';
+
+            if (needsFix) {
+                // Generate Slug
                 let baseSlug = slugify(u.fullname);
-                if (!baseSlug) baseSlug = 'user';
+                if (!baseSlug || baseSlug.length < 3) baseSlug = `user-${u.id}`;
 
                 let uniqueSlug = baseSlug;
                 let counter = 1;
+
+                // Ensure Uniqueness
                 while (true) {
                     const [check] = await pool.query('SELECT id FROM users WHERE username = ? AND id != ?', [uniqueSlug, u.id]);
                     if (check.length === 0) break;
@@ -50,17 +61,20 @@ async function run() {
                     counter++;
                 }
 
+                // Update DB
                 await pool.query('UPDATE users SET username = ? WHERE id = ?', [uniqueSlug, u.id]);
-                console.log(`✅ Fixed: ${u.fullname} -> ${uniqueSlug}`);
+                status = `🛠️ FIXED -> ${uniqueSlug}`;
+                fixedCount++;
             }
-        } else {
-            console.log('✨ All users already have usernames!');
-            const [sample] = await pool.query('SELECT id, fullname, username FROM users LIMIT 3');
-            console.log('Samples:', sample);
+
+            console.log(`${u.id} | ${u.fullname} | ${u.username || '(EMPTY)'} | ${status}`);
         }
 
+        console.log('---------------------------------------------------');
+        console.log(`🏁 Audit Complete. Fixed ${fixedCount} users.`);
+
     } catch (e) {
-        console.error('Error:', e);
+        console.error('❌ Error:', e);
     } finally {
         await pool.end();
         process.exit();
