@@ -2035,7 +2035,7 @@
 
                 if (res.ok) {
                     const isDraft = status === 'draft';
-                    showToast(isDraft ? 'Taslak kaydedildi' : 'Makale onay için editöre gönderildi.', 'success');
+                    showToast(isDraft ? 'Taslak başarıyla kaydedildi!' : 'Makale onay için editöre gönderildi.', 'success');
                     if (!isDraft) {
                         showSection('my-articles', document.querySelectorAll('.menu-item')[1]); resetForm();
                     }
