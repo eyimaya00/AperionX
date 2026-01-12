@@ -1810,9 +1810,9 @@ function renderArticleDetail(article) {
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
     const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
-    const profileKey = article.author_username || article.author_id;
+    const profileKey = safeAuthorName;
 
-    if (profileKey) {
+    if (profileKey && profileKey !== 'Gizli Yazar') {
         document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${profileKey}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
     } else {
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
