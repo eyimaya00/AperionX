@@ -1202,9 +1202,10 @@ function checkAuthStatus() {
     // FIX: Zombie Session Detection
     // If we have a user object but NO token, the session is invalid.
     if (user && !token) {
-        console.warn('Zombie session detected (User set, Token missing). Clearing...');
-        localStorage.removeItem('user');
-        // No recursion, just let it fall through to 'else'
+        console.warn('Zombie session detected (User set, Token missing).');
+        // TEMPORARILY DISABLED AUTO-LOGOUT FOR DEBUGGING
+        // localStorage.removeItem('user'); 
+        // alert('Debug: Token eksik ama oturum açık görünüyor. Lütfen sayfayı yenileyin.');
     }
 
     if (user && token) {
