@@ -966,17 +966,22 @@ app.get('/api/articles', async (req, res) => {
             const authorIds = [...new Set(articles.map(a => a.author_id).filter(id => id))];
 
             if (authorIds.length > 0) {
-                // 3. Fetch Author Names
+                // 3. Fetch Author Names & Usernames
                 // Create placeholders (?,?,?)
                 const placeholders = authorIds.map(() => '?').join(',');
-                const [authors] = await pool.query(`SELECT id, fullname FROM users WHERE id IN (${placeholders})`, authorIds);
+                const [authors] = await pool.query(`SELECT id, fullname, username FROM users WHERE id IN (${placeholders})`, authorIds);
 
                 // 4. Map back to articles
                 const authorMap = {};
-                authors.forEach(u => authorMap[u.id] = u.fullname);
+                const userMap = {};
+                authors.forEach(u => {
+                    authorMap[u.id] = u.fullname;
+                    userMap[u.id] = u.username;
+                });
 
                 articles.forEach(a => {
                     a.author_name = authorMap[a.author_id] || 'Yazar';
+                    a.author_username = userMap[a.author_id] || null;
                 });
             }
         }
@@ -2392,6 +2397,76 @@ app.get('/author', (req, res) => {
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'editor.html'));
 });
+
+// === PUBLIC AUTHOR PROFILE (Username or ID) ===
+app.get('/api/public/author/:identifier', async (req, res) => {
+    const { identifier } = req.params;
+    console.log('[API] Fetching public author profile for:', identifier);
+
+    try {
+        let user;
+        // 1. Try by Username
+        const [byUsername] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE username = ?', [identifier]);
+        if (byUsername.length > 0) {
+            user = byUsername[0];
+        } else {
+            // 2. Try by ID (Fallback)
+            if (!isNaN(identifier)) {
+                const [byId] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE id = ?', [identifier]);
+                if (byId.length > 0) user = byId[0];
+            }
+        }
+
+        if (!user) {
+            console.log('[API] Author not found:', identifier);
+            return res.status(404).json({ message: 'Author not found' });
+        }
+
+        // 3. Fetch Articles
+        const [articles] = await pool.query(`
+            SELECT id, title, slug, image_url, excerpt, created_at, category, views 
+            FROM articles 
+            WHERE author_id = ? AND status = 'published' 
+            ORDER BY created_at DESC
+        `, [user.id]);
+
+        res.json({ profile: user, articles });
+
+    } catch (e) {
+        console.error('[API] Public Author Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Helper: Ensure Usernames are Populated
+async function ensureUsernameMigration() {
+    try {
+        const [users] = await pool.query("SELECT id, fullname FROM users WHERE username IS NULL OR username = ''");
+        if (users.length > 0) {
+            console.log(`[MIGRATION] Found ${users.length} users without username. Backfilling...`);
+            for (const u of users) {
+                let baseSlug = slugify(u.fullname, { lower: true, strict: true });
+                if (!baseSlug) baseSlug = 'user';
+
+                let uniqueSlug = baseSlug;
+                let counter = 1;
+                while (true) {
+                    const [check] = await pool.query('SELECT id FROM users WHERE username = ?', [uniqueSlug]);
+                    if (check.length === 0) break;
+                    uniqueSlug = `${baseSlug}-${counter}`;
+                    counter++;
+                }
+
+                await pool.query('UPDATE users SET username = ? WHERE id = ?', [uniqueSlug, u.id]);
+                console.log(`[MIGRATION] Assigned username '${uniqueSlug}' to User ID ${u.id}`);
+            }
+        }
+    } catch (e) {
+        console.error('[MIGRATION] Username Backfill Error:', e);
+    }
+}
+// Call migration on startup
+setTimeout(ensureUsernameMigration, 5000); // Delay slightly to ensure DB connection
 
 // SEO-Friendly Article URLs with View Counting
 app.get('/makale/:slug', async (req, res) => {

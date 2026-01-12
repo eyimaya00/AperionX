@@ -1375,7 +1375,10 @@ async function loadShowcase() {
                     <div class="card-bottom-content">
                         <h3 class="card-title">${item.title}</h3>
                         <div class="card-meta-row">
-                            <span class="author-name">${author}</span>
+                             ${item.author_username ?
+                        `<a href="author-profile.html?u=${item.author_username}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>` :
+                        `<span class="author-name">${author}</span>`
+                    }
                         </div>
                     </div>
                     
