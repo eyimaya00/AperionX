@@ -1217,9 +1217,16 @@ function checkAuthStatus() {
                 } else if (user.role === 'author') {
                     const authorLink = document.createElement('a');
                     authorLink.href = 'author.html';
-                    authorLink.className = 'nav-link special-nav-link';
-                    authorLink.innerText = 'Yazar Paneli';
+                    authorLink.className = 'nav-link special-nav-link author-link';
+                    authorLink.innerHTML = '<i class="ph-fill ph-pencil-simple"></i> Yazar Paneli';
+                    authorLink.style.color = '#10b981'; // Emerald Green distinction
                     navMenu.appendChild(authorLink);
+                } else if (user.role === 'editor') {
+                    const editorLink = document.createElement('a');
+                    editorLink.href = 'editor.html';
+                    editorLink.className = 'nav-link special-nav-link editor-link';
+                    editorLink.innerText = 'Editör Paneli';
+                    navMenu.appendChild(editorLink);
                 }
             }
         });

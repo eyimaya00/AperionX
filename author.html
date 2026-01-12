@@ -2582,10 +2582,25 @@
         }
 
         function logout() {
+            // Clear all auth data
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.replace('index.html'); // Use replace to prevent back button
+            localStorage.removeItem('user_role'); // Just in case
+
+            // Redirect to index
+            window.location.href = 'index.html';
         }
+
+        // Ensure button works
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
 
         // Notifications Logic
         let isNotifOpen = false;
