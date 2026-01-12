@@ -1027,10 +1027,11 @@ app.get('/api/articles/:key', async (req, res) => {
 
         // Fetch Author
         try {
-            const [uRows] = await pool.query('SELECT fullname, avatar FROM users WHERE id = ?', [article.author_id]);
+            const [uRows] = await pool.query('SELECT fullname, avatar, username FROM users WHERE id = ?', [article.author_id]);
             if (uRows.length > 0) {
                 article.author_name = uRows[0].fullname;
                 article.author_avatar = uRows[0].avatar;
+                article.author_username = uRows[0].username;
             } else {
                 article.author_name = 'Yazar';
             }
@@ -1040,6 +1041,39 @@ app.get('/api/articles/:key', async (req, res) => {
     } catch (e) {
         console.error('API Article Detail Error:', e);
         res.status(500).send(e.toString());
+    }
+});
+
+// NEW: Public Author Profile Endpoint
+app.get('/api/public/author/:username', async (req, res) => {
+    try {
+        const username = req.params.username;
+        // 1. Get User Info (Public fields only)
+        const [users] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ?', [username]);
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Yazar bulunamadı' });
+        }
+
+        const user = users[0];
+
+        // 2. Get Published Articles
+        const [articles] = await pool.query(`
+            SELECT id, title, slug, excerpt, image_url, category, created_at,
+            (SELECT COUNT(*) FROM comments WHERE article_id = articles.id AND is_approved = 1) as comment_count
+            FROM articles 
+            WHERE author_id = ? AND status = 'published'
+            ORDER BY created_at DESC
+        `, [user.id]);
+
+        res.json({
+            profile: user,
+            articles: articles
+        });
+
+    } catch (e) {
+        console.error('Public Author Profile Error:', e);
+        res.status(500).json({ message: 'Sunucu hatası' });
     }
 });
 

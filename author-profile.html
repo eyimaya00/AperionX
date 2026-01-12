@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yazar Profili - AperionX</title>
+    <link rel="icon" type="image/x-icon" href="uploads/favicon.ico" id="favicon">
+    <link rel="stylesheet" href="style.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .profile-hero {
+            position: relative;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 120px 20px 60px;
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+        }
+
+        .profile-avatar-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            object-fit: cover;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            background: #1e293b;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-job {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+        }
+
+        .profile-bio {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--text-color);
+        }
+
+        /* Use existing grid styles from style.css but ensure container */
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header will be loaded by script.js -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="ph-fill ph-planet"></i>
+                </div>
+                <span class="logo-text">AperionX</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Ana Sayfa</a>
+                <a href="articles.html" class="nav-link">Makaleler</a>
+                <a href="about.html" class="nav-link">Hakkımızda</a>
+            </nav>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn"><i class="ph ph-magnifying-glass"></i></button>
+                </div>
+                <button class="icon-btn theme-toggle" id="themeToggle"><i class="ph ph-moon"></i></button>
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn"><i class="ph ph-list"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Links loaded by JS -->
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <section class="profile-hero">
+            <img src="uploads/default-avatar.png" alt="Yazar" class="profile-avatar-large" id="p-avatar">
+            <h1 class="profile-name" id="p-name">Yükleniyor...</h1>
+            <div class="profile-job" id="p-job"></div>
+            <p class="profile-bio" id="p-bio"></p>
+        </section>
+
+        <div class="container-custom">
+            <h2 class="section-title">Yazarın Makaleleri</h2>
+            <div class="articles-grid" id="articles-grid">
+                <!-- Articles will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc">Modern bilimin dijital platformu.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Hızlı Erişim</h4>
+                <ul>
+                    <li><a href="index.html">Ana Sayfa</a></li>
+                    <li><a href="articles.html">Makaleler</a></li>
+                    <li><a href="about.html">Hakkımızda</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Takip Et</h4>
+                <div class="social-icons">
+                    <a href="#" id="footer-twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" id="footer-instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="#" id="footer-linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SHARED SCRIPTS -->
+    <script src="script.js?v=2.6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const username = params.get('u');
+
+            if (!username) {
+                document.querySelector('main').innerHTML = '<div style="text-align:center; padding:100px;"><h2>Kullanıcı bulunamadı.</h2><a href="index.html" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Dön</a></div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/public/author/${username}`);
+                if (!res.ok) throw new Error('Yazar bulunamadı');
+
+                const data = await res.json();
+                const profile = data.profile;
+                const articles = data.articles;
+
+                // 1. Fill Profile
+                document.title = `${profile.fullname} - Yazar Profili | AperionX`;
+
+                // Avatar
+                const avatarEl = document.getElementById('p-avatar');
+                if (profile.avatar_url) {
+                    avatarEl.src = profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url;
+                }
+
+                document.getElementById('p-name').textContent = profile.fullname;
+                document.getElementById('p-job').textContent = profile.job_title || 'Yazar';
+                document.getElementById('p-bio').textContent = profile.bio || '';
+
+                // 2. Fill Articles
+                const grid = document.getElementById('articles-grid');
+                if (articles.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış makalesi yok.</div>';
+                } else {
+                    grid.innerHTML = articles.map(art => `
+                        <a href="article-detail.html?slug=${art.slug || art.id}" class="article-card">
+                            <div class="card-image-wrapper">
+                                <img src="${art.image_url ? (art.image_url.startsWith('http') ? art.image_url : '/' + art.image_url) : 'uploads/default-hero.jpg'}" alt="${art.title}" class="card-image">
+                                <span class="card-category">${art.category}</span>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="card-title">${art.title}</h3>
+                                <p class="card-excerpt">${art.excerpt || ''}</p>
+                                <div class="card-footer">
+                                    <div class="card-author">
+                                        <img src="${profile.avatar_url ? (profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url) : 'uploads/default-avatar.png'}" alt="${profile.fullname}">
+                                        <span>${profile.fullname}</span>
+                                    </div>
+                                    <span class="card-date">${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `).join('');
+                }
+
+            } catch (e) {
+                console.error(e);
+                document.querySelector('main').innerHTML = `<div style="text-align:center; padding:100px;"><h2>Yazar paneli görüntülenemedi.</h2><p>${e.message}</p><a href="index.html" class="btn btn-primary">Ana Sayfa</a></div>`;
+            }
+        });
+    </script>
+</body>
+
+</html>

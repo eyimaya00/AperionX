@@ -1555,9 +1555,11 @@ function renderArticlesGrid() {
                 
                 <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
-                    <div class="author-name" style="font-size: 0.85rem; opacity: 0.9;">
-                        ${safeAuthor}
-                    </div>
+            <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                ${article.author_username ? `<a href="author-profile.html?u=${article.author_username}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">` : ''}
+                ${safeAuthor}
+                ${article.author_username ? `</a>` : ''}
+            </div>
                 </div>
 
                 <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;"><i class="ph-bold ph-arrow-right"></i></a>
@@ -1754,7 +1756,12 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar'}`;
+    const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
+    if (article.author_username) {
+        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_username}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+    } else {
+        document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
+    }
     document.getElementById('detail-title').innerText = article.title;
 
     // Excerpt
