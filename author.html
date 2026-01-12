@@ -1529,7 +1529,7 @@
             <h3 class="modal-title">Emin misiniz?</h3>
             <p class="modal-desc" id="modal-desc-text">Bu işlem geri alınamaz.</p>
             <div class="modal-actions">
-                <button class="modal-btn modal-cancel" onclick="closeModal()">Vazgeç</button>
+                <button class="modal-btn modal-cancel" onclick="closeConfirmModal()">Vazgeç</button>
                 <button class="modal-btn modal-confirm" id="modal-confirm-btn">Evet, Sil</button>
             </div>
         </div>
@@ -2698,7 +2698,7 @@
                                 },
                                 {
                                     label: 'Beğeni',
-                                    data: topItems.map(a => a.like_count),
+                                    data: topItems.map(a => Number(a.like_count || 0)),
                                     backgroundColor: '#10b981', // Emerald
                                     borderRadius: 4,
                                     barPercentage: 0.6,
@@ -2706,7 +2706,7 @@
                                 },
                                 {
                                     label: 'Yorum',
-                                    data: topItems.map(a => a.comment_count),
+                                    data: topItems.map(a => Number(a.comment_count || 0)),
                                     backgroundColor: '#f59e0b', // Amber
                                     borderRadius: 4,
                                     barPercentage: 0.6,
