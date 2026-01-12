@@ -1160,49 +1160,46 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
-// NEW: Global Navigation Handler - Defined ONCE globally
+// NEW: Global Navigation Handler - Defined ONCE globally at TOP
 window.navigateToDashboard = function () {
-    // Re-read fresh from storage to be sure
     const u = JSON.parse(localStorage.getItem('user'));
     if (!u) {
         window.location.href = 'index.html';
         return;
     }
-
     console.log('Navigating dashboard for role:', u.role);
-
     if (u.role === 'admin') window.location.href = 'admin.html';
     else if (u.role === 'author') window.location.href = 'author.html';
     else if (u.role === 'editor') window.location.href = 'editor.html';
     else window.location.href = 'profile.html';
 };
 
+// NEW: Logout Handler - Defined ONCE globally at TOP
+window.logout = function () {
+    console.log('Logging out...');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+};
+
 // Check Auth & Update UI
 function checkAuthStatus() {
     const user = JSON.parse(localStorage.getItem('user'));
-    // Select both desktop and mobile auth containers
     const authButtons = document.querySelectorAll('.auth-buttons, .mobile-auth');
 
     if (user) {
         authButtons.forEach(container => {
-            let dashboardAction = "window.location.href='profile.html'"; // Fallback, though navigateToDashboard handles it
             let titleAttr = 'Profilime Git';
-            let roleBadge = '';
-
-            if (user.role === 'admin') {
-                titleAttr = 'Admin Paneli';
-            } else if (user.role === 'author') {
-                titleAttr = 'Yazar Paneli';
-            } else if (user.role === 'editor') {
-                titleAttr = 'Editör Paneli';
-            }
+            if (user.role === 'admin') titleAttr = 'Admin Paneli';
+            else if (user.role === 'author') titleAttr = 'Yazar Paneli';
+            else if (user.role === 'editor') titleAttr = 'Editör Paneli';
 
             container.innerHTML = `
-                <button class="btn btn-login" onclick="navigateToDashboard()" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-login" onclick="window.navigateToDashboard()" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="user-name">${escapeHtml(user.fullname)}</span>
                     <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
                 </button>
-                <button class="btn btn-login btn-sm" onclick="logout()">Çıkış</button>
+                <button class="btn btn-login btn-sm" onclick="window.logout()">Çıkış</button>
             `;
 
             // Add Profile/Dashboard Link to Nav if not present
