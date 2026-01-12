@@ -1591,7 +1591,7 @@
 
         if (!token || !user) {
             console.error('Auth Check Failed:', { token, user });
-            // window.location.href = 'index.html'; // TEMPORARILY DISABLED FOR DEBUGGING
+            window.location.href = 'index.html';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2271,7 +2271,7 @@
 
         async function editArticle(id) {
             try {
-                const res = await fetch(`${API_URL}/articles/my-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`${API_URL}/author/articles`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const articles = await res.json();
                 const article = articles.find(a => a.id === id);
                 if (!article) return;
