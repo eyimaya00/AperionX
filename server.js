@@ -990,7 +990,14 @@ app.get('/api/articles', async (req, res) => {
 // Get My Articles (Moved to /api/author namespace to avoid collision)
 app.get('/api/author/articles', authenticateToken, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM articles WHERE author_id = ? ORDER BY created_at DESC', [req.user.id]);
+        const [rows] = await pool.query(`
+            SELECT a.*, 
+            (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+            (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a 
+            WHERE author_id = ? 
+            ORDER BY created_at DESC
+        `, [req.user.id]);
         res.json(rows);
     } catch (e) {
         res.status(500).send(e.toString());

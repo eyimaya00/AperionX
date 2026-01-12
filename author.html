@@ -2237,7 +2237,10 @@
         }
 
         function closeModal() {
-            document.getElementById('confirm-modal').classList.remove('show');
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('show');
+            modal.style.display = 'none'; // Force hide
+            setTimeout(() => modal.style.removeProperty('display'), 300); // Reset for css transition
             deleteId = null;
         }
 
@@ -2751,9 +2754,18 @@
             loadNotifications();
             renderDashboardChart();
             setInterval(loadNotifications, 30000);
+
+            // Move toast container if it was auto-generated elsewhere
+            const toastContainer = document.getElementById('toast-container');
+            if (toastContainer) {
+                toastContainer.style.top = 'auto';
+                toastContainer.style.bottom = '20px';
+                toastContainer.style.right = '20px';
+            }
         });
 
     </script>
+    <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
     <script src="script_v105.js"></script>
 </body>
 
