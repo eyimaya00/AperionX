@@ -47,7 +47,30 @@
             margin: 0 auto;
             position: relative;
             z-index: 2;
-            padding: 0 20px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            /* Glass Effect */
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Spinner Animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
 
         .profile-hero::before {
@@ -190,11 +213,19 @@
     <main>
         <section class="profile-hero">
             <div class="profile-hero-content">
-                <img src="uploads/default-avatar.png" alt="Yazar" class="profile-avatar-large" id="p-avatar">
-                <div class="profile-info">
-                    <h1 class="profile-name" id="p-name">Yükleniyor...</h1>
-                    <div class="profile-job" id="p-job"></div>
-                    <p class="profile-bio" id="p-bio"></p>
+                <img src="uploads/default-avatar.png" alt="Yazar" class="profile-avatar-large" id="p-avatar"
+                    style="opacity:0.5;">
+                <div class="profile-info" id="profile-container">
+                    <div id="loading-spinner" style="text-align:center;">
+                        <div class="spinner"></div>
+                        <h2 style="font-size:1.5rem; font-weight:600;">Profil Yükleniyor...</h2>
+                    </div>
+
+                    <div id="profile-details" style="display:none;">
+                        <h1 class="profile-name" id="p-name"></h1>
+                        <div class="profile-job" id="p-job"></div>
+                        <p class="profile-bio" id="p-bio"></p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -404,7 +435,12 @@
                 const avatarEl = document.getElementById('p-avatar');
                 if (profile.avatar_url) {
                     avatarEl.src = profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url;
+                    avatarEl.style.opacity = '1';
                 }
+
+                // Show Details, Hide Spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('profile-details').style.display = 'block';
 
                 document.getElementById('p-name').textContent = profile.fullname;
                 document.getElementById('p-job').textContent = profile.job_title || 'Yazar';
@@ -438,12 +474,20 @@
 
             } catch (e) {
                 console.error(e);
-                document.querySelector('main').innerHTML = `<div style="text-align:center; padding:100px;">
-                    <h2>Profil yüklenirken bir hata oluştu.</h2>
-                    <p style="color: #ef4444; margin: 20px 0;">${e.message}</p>
-                    <p style="font-size: 0.9rem; color: #94a3b8;">Lütfen sayfayı yenileyin veya daha sonra tekrar deneyin.</p>
-                    <a href="index.html" class="btn btn-primary">Ana Sayfa</a>
-                </div>`;
+                document.querySelector('main').innerHTML = `
+                    <div style="text-align:center; padding: 120px 20px;">
+                        <div style="font-size: 4rem; color: #ef4444; margin-bottom: 20px;">
+                            <i class="ph-duotone ph-warning-circle"></i>
+                        </div>
+                        <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 10px;">Profil Yüklenemedi</h2>
+                        <p style="color: #64748b; font-size: 1.1rem; max-width: 500px; margin: 0 auto 30px;">
+                            ${e.message}<br>
+                            Aradığınız yazar kaldırılmış veya bağlantıda bir sorun oluşmuş olabilir.
+                        </p>
+                        <a href="index.html" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem; border-radius: 50px;">
+                            <i class="ph-bold ph-house" style="margin-right: 8px;"></i> Ana Sayfaya Dön
+                        </a>
+                    </div>`;
             }
         });
     </script>
