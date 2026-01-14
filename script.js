@@ -1796,8 +1796,13 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    const authorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
-    const authorAvatar = article.author_avatar || window.SERVER_AUTHOR_AVATAR;
+    let authorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
+    let authorAvatar = article.author_avatar || window.SERVER_AUTHOR_AVATAR;
+
+    // FALLBACK: If render name is Yasin Eyimaya but no avatar, force it.
+    if (!authorAvatar && authorName.includes('Yasin Eyimaya')) {
+        authorAvatar = 'uploads/logo.png'; // Or the UI Avatar URL if preferred
+    }
 
     if (authorAvatar) {
         // Simple path resolution if not absolute
