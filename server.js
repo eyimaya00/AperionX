@@ -886,17 +886,20 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 
 app.post('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const { fullname, email, username, password } = req.body; // Removed 'role' from destructuring
-    if (!fullname || !email || !!password) return res.status(400).json({ error: 'Tüm alanlar gerekli.' });
+    const { fullname, email, username, password, role } = req.body;
+    if (!fullname || !email || !password) return res.status(400).json({ error: 'Tüm alanlar gerekli.' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Default role is 'user' for new users created via admin panel
-        const role = 'user';
+        // Use provided role or default to 'user'
+        const userRole = role || 'user';
+
+        // Generate username from email if not provided
+        const finalUsername = username || email.split('@')[0] + Math.floor(Math.random() * 1000);
 
         const [result] = await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)',
-            [fullname, email, username, hashedPassword, role]);
+            [fullname, email, finalUsername, hashedPassword, userRole]);
 
         // Send Welcome Email
         try {
@@ -905,6 +908,9 @@ app.post('/api/admin/users', authenticateToken, async (req, res) => {
                 <h2>Merhaba ${fullname},</h2>
                 <p>AperionX ailesine katıldığınız için çok mutluyuz. Bilim ve teknolojinin sınırlarını zorlayan bu yolculukta sizinle beraber olmak harika.</p>
                 <p>Hesabınızla giriş yaparak makaleleri okuyabilir, yorum yapabilir ve kendi içeriklerinizi oluşturabilirsiniz.</p>
+                <p><strong>Giriş Bilgileriniz:</strong><br>
+                E-posta: ${email}<br>
+                Şifre: ${password}</p>
                 <br>
                 <a href="https://aperionx.com" style="display:inline-block; padding:10px 20px; background-color:#6366F1; color:white; text-decoration:none; border-radius:5px;">AperionX'i Keşfet</a>
             `;
@@ -915,7 +921,10 @@ app.post('/api/admin/users', authenticateToken, async (req, res) => {
         }
 
         res.status(201).json({ message: 'Kayıt başarılı! Giriş yapabilirsiniz.' });
-    } catch (e) { res.status(500).json({ error: 'E-posta kullanılıyor olabilir.' }); }
+    } catch (e) {
+        console.error('User Create Error:', e);
+        res.status(500).json({ error: 'E-posta veya kullanıcı adı kullanılıyor olabilir. Hata: ' + e.message });
+    }
 });
 
 app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
