@@ -311,9 +311,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
                 // SSR: Render Author Name & Avatar directly
-                // Pattern match existing placeholder: <span class="meta-item" id="detail-author"><i class="ph ph-user"></i> Yazar</span>
-                // Note: The HTML file likely has empty or placeholder text. Let's be robust with Regex.
-                // Looking at view_file result (pending), assume it is: <span class="meta-item" id="detail-author">...</span>
+                // Pattern match existing placeholder: <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
 
                 let authorHtml = '';
                 if (authorAvatar) {
@@ -326,13 +324,13 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                     authorHtml = `<i class="ph ph-user"></i> ${authorName}`;
                 }
 
-                // Replace content OF the span, or the whole span? 
-                // Replacing innerHTML is safer if we match the ID.
-                // Regex to find the opening tag and content up to closing tag is risky if multiline.
-                // Safer: just replace the id locator if unique.
-                // Let's replace the entire element if possible, or use a known marker.
-                // Given I don't see the exact line yet, I will use a precise regex based on the ID.
-                html = html.replace(/<span\s+class="meta-item"\s+id="detail-author">.*?<\/span>/s, `<span class="meta-item" id="detail-author">${authorHtml}</span>`);
+                // Regex update: The HTML is <span id="detail-author">...</span> without class="meta-item"
+                // Using a more flexible regex to catch attributes in any order if they exist, but specifically id="detail-author"
+                html = html.replace(/<span\s+id="detail-author">.*?<\/span>/s, `<span id="detail-author">${authorHtml}</span>`);
+
+                // Fallback: If strict match fails, try sloppy match (in case of double quotes vs single etc) or just exact string from file
+                // But the regex <span\s+id="detail-author"> should match <span id="detail-author">
+
 
                 res.send(html);
 
