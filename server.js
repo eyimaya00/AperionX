@@ -299,6 +299,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 replaceMeta('twitter:description', safeSummary);
                 replaceMeta('twitter:image', safeImg);
 
+                // Canonical Replacement
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+
                 // Inject Preloaded Data Script
                 const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
