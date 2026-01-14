@@ -886,11 +886,15 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 
 app.post('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const { fullname, email, username, password, role } = req.body;
-    if (!fullname || !email || !password || !role) return res.status(400).json({ error: 'Tüm alanlar gerekli.' });
+    const { fullname, email, username, password } = req.body; // Removed 'role' from destructuring
+    if (!fullname || !email || !!password) return res.status(400).json({ error: 'Tüm alanlar gerekli.' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Default role is 'user' for new users created via admin panel
+        const role = 'user';
+
         const [result] = await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)',
             [fullname, email, username, hashedPassword, role]);
 

@@ -2445,7 +2445,7 @@
             let countEditor = 0;
 
             users.forEach(u => {
-                if (u.role === 'user') countUser++;
+                if (u.role === 'user' || !u.role) countUser++;
                 else if (u.role === 'author') countAuthor++;
                 else if (u.role === 'editor') countEditor++;
             });
