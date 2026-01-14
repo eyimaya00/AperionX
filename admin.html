@@ -875,11 +875,56 @@
 
         <!-- NEW Email Management Section -->
         <div id="email-management" class="section">
-            <h1 class="page-title">E-posta Yönetimi</h1>
+            <div class="header-section">
+                <div>
+                    <h1 class="page-title">E-posta Yönetimi</h1>
+                    <p class="subtitle">SMTP ve e-posta gönderim ayarlarını buradan yönetebilirsiniz.</p>
+                </div>
+                <button class="btn btn-primary" onclick="saveSmtpSettings()">
+                    <i class="ph ph-floppy-disk"></i> Kaydet
+                </button>
+            </div>
+
+            <!-- Email (SMTP) Configuration -->
             <div class="card">
-                <p>merhaba</p>
+                <h3 class="card-title"><i class="ph-duotone ph-envelope"></i> E-posta (SMTP) Ayarları</h3>
+                <div class="alert-box"
+                    style="background:#f0f9ff; color:#0369a1; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.9rem;">
+                    <i class="ph-fill ph-info"></i> Bu ayarlar, kayıt olma ve şifre sıfırlama maillerinin
+                    gönderilmesi için zorunludur. Eğer Gmail kullanıyorsanız "Uygulama Şifresi" (App Password)
+                    oluşturup buraya girmeniz gerekir.
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label>SMTP Sunucusu (Host)</label>
+                        <input type="text" id="smtp_host" class="form-control" placeholder="smtp.gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Port</label>
+                        <input type="number" id="smtp_port" class="form-control" placeholder="587">
+                        <small class="text-muted">Genelde 587 (TLS) veya 465 (SSL).</small>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label>SMTP Kullanıcı Adı (E-posta)</label>
+                        <input type="text" id="smtp_user" class="form-control" placeholder="ornek@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Şifre</label>
+                        <input type="password" id="smtp_pass" class="form-control" placeholder="Uygulama Şifreniz">
+                    </div>
+                </div>
+                <div class="form-group"
+                    style="display:flex; align-items:center; gap:12px; margin-top:10px; background:#f8fafc; padding:10px; border-radius:8px;">
+                    <input type="checkbox" id="smtp_secure" style="width:18px; height:18px; cursor:pointer;">
+                    <label for="smtp_secure" style="margin:0; cursor:pointer; font-weight:500;">Secure Bağlantı
+                        (SSL)</label>
+                    <small style="color:#64748b;">(Port 465 kullanıyorsanız işaretleyin)</small>
+                </div>
             </div>
         </div>
+
 
 
         <!-- Maintenance Mode Section -->
@@ -1202,44 +1247,7 @@
                     </div>
                 </div>
 
-                <!-- Email (SMTP) Configuration -->
-                <div class="card">
-                    <h3 class="card-title"><i class="ph-duotone ph-envelope"></i> E-posta (SMTP) Ayarları</h3>
-                    <div class="alert-box"
-                        style="background:#f0f9ff; color:#0369a1; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.9rem;">
-                        <i class="ph-fill ph-info"></i> Bu ayarlar, kayıt olma ve şifre sıfırlama maillerinin
-                        gönderilmesi için zorunludur. Eğer Gmail kullanıyorsanız "Uygulama Şifresi" (App Password)
-                        oluşturup buraya girmeniz gerekir.
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                        <div class="form-group">
-                            <label>SMTP Sunucusu (Host)</label>
-                            <input type="text" id="smtp_host" class="form-control" placeholder="smtp.gmail.com">
-                        </div>
-                        <div class="form-group">
-                            <label>SMTP Port</label>
-                            <input type="number" id="smtp_port" class="form-control" placeholder="587">
-                            <small class="text-muted">Genelde 587 (TLS) veya 465 (SSL).</small>
-                        </div>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                        <div class="form-group">
-                            <label>SMTP Kullanıcı Adı (E-posta)</label>
-                            <input type="text" id="smtp_user" class="form-control" placeholder="ornek@gmail.com">
-                        </div>
-                        <div class="form-group">
-                            <label>SMTP Şifre</label>
-                            <input type="password" id="smtp_pass" class="form-control" placeholder="Uygulama Şifreniz">
-                        </div>
-                    </div>
-                    <div class="form-group"
-                        style="display:flex; align-items:center; gap:12px; margin-top:10px; background:#f8fafc; padding:10px; border-radius:8px;">
-                        <input type="checkbox" id="smtp_secure" style="width:18px; height:18px; cursor:pointer;">
-                        <label for="smtp_secure" style="margin:0; cursor:pointer; font-weight:500;">Secure Bağlantı
-                            (SSL)</label>
-                        <small style="color:#64748b;">(Port 465 kullanıyorsanız işaretleyin)</small>
-                    </div>
-                </div>
+
 
                 <!-- Social Media -->
                 <div class="card">
@@ -2078,6 +2086,32 @@
                 showToast('Sunucu hatası.', 'error');
             }
         }
+
+        async function saveSmtpSettings() {
+            const formData = new FormData();
+            formData.append('smtp_host', document.getElementById('smtp_host').value);
+            formData.append('smtp_port', document.getElementById('smtp_port').value);
+            formData.append('smtp_user', document.getElementById('smtp_user').value);
+            formData.append('smtp_pass', document.getElementById('smtp_pass').value);
+            formData.append('smtp_secure', document.getElementById('smtp_secure').checked ? 'true' : 'false');
+
+            try {
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                if (res.ok) {
+                    showToast('SMTP ayarları başarıyla kaydedildi', 'success');
+                } else {
+                    showToast('Ayarlar kaydedilirken hata oluştu.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Sunucu hatası.', 'error');
+            }
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
@@ -3565,7 +3599,10 @@
                 if (sectionId === 'charts-section') loadCharts();
                 if (sectionId === 'charts-section') loadCharts();
                 if (sectionId === 'email-settings') loadEmailSettings();
-                if (sectionId === 'maintenance-mode') loadMaintenanceSettings(); // Added
+                if (sectionId === 'email-settings') loadEmailSettings();
+                if (sectionId === 'maintenance-mode') loadMaintenanceSettings();
+                if (sectionId === 'email-management') loadSettings(); // Reuse generic settings loader for SMTP
+
 
             } else {
                 console.error('Section not found:', sectionId);
