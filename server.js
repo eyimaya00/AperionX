@@ -310,6 +310,30 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}"; window.SERVER_AUTHOR_AVATAR = "${authorAvatar || ''}";</script>`;
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
+                // SSR: Render Author Name & Avatar directly
+                // Pattern match existing placeholder: <span class="meta-item" id="detail-author"><i class="ph ph-user"></i> Yazar</span>
+                // Note: The HTML file likely has empty or placeholder text. Let's be robust with Regex.
+                // Looking at view_file result (pending), assume it is: <span class="meta-item" id="detail-author">...</span>
+
+                let authorHtml = '';
+                if (authorAvatar) {
+                    let avatarSrc = authorAvatar;
+                    if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                        avatarSrc = '/' + avatarSrc;
+                    }
+                    authorHtml = `<img src="${avatarSrc}" alt="${authorName}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 8px; vertical-align: middle;"> <span style="vertical-align: middle;">${authorName}</span>`;
+                } else {
+                    authorHtml = `<i class="ph ph-user"></i> ${authorName}`;
+                }
+
+                // Replace content OF the span, or the whole span? 
+                // Replacing innerHTML is safer if we match the ID.
+                // Regex to find the opening tag and content up to closing tag is risky if multiline.
+                // Safer: just replace the id locator if unique.
+                // Let's replace the entire element if possible, or use a known marker.
+                // Given I don't see the exact line yet, I will use a precise regex based on the ID.
+                html = html.replace(/<span\s+class="meta-item"\s+id="detail-author">.*?<\/span>/s, `<span class="meta-item" id="detail-author">${authorHtml}</span>`);
+
                 res.send(html);
 
             } catch (parseErr) {
