@@ -252,11 +252,15 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 // Use String Replacement instead of JSDOM to avoid dependency issues on server
                 const origin = `${req.protocol}://${req.get('host')}`;
 
-                // Get Author Name
+                // Get Author Name & Avatar
                 let authorName = 'AperionX Yazarı';
+                let authorAvatar = null;
                 try {
-                    const [uRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
-                    if (uRows.length > 0) authorName = uRows[0].fullname;
+                    const [uRows] = await pool.query('SELECT fullname, avatar_url FROM users WHERE id = ?', [article.author_id]);
+                    if (uRows.length > 0) {
+                        authorName = uRows[0].fullname;
+                        authorAvatar = uRows[0].avatar_url;
+                    }
                 } catch (e) { }
 
                 // Prepare Content
@@ -303,7 +307,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
 
                 // Inject Preloaded Data Script
-                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}"; window.SERVER_AUTHOR_AVATAR = "${authorAvatar || ''}";</script>`;
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
                 res.send(html);
@@ -1928,7 +1932,7 @@ app.get('/api/articles/:id', async (req, res) => {
         const param = req.params.id;
 
         let query = `
-             SELECT a.*, u.fullname as author_name 
+             SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar
              FROM articles a 
              LEFT JOIN users u ON a.author_id = u.id 
              WHERE a.status = 'published' AND `;
@@ -2154,12 +2158,7 @@ app.post('/api/admin/users', authenticateToken, async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Ensure username is handled if column exists, otherwise standard insert
-        // Since we added username column earlier, we should ideally handle it, but admin form doesn't seem to send it?
-        // Admin form in lines 1512-1520 sends: fullname, email, password, role. No username.
-        // We will generate a username from email or leave it null if allowed.
-        // Schema says username is distinct but defaults/nullable might depend. 
-        // Let's generate a basic username from email to be safe if it's required.
+        // Generate a username from email
         const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
 
         await pool.query('INSERT INTO users (fullname, email, password, role, username) VALUES (?, ?, ?, ?, ?)',
