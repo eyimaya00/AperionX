@@ -261,6 +261,11 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                         authorName = uRows[0].fullname;
                         authorAvatar = uRows[0].avatar_url;
                     }
+
+                    // FALLBACK FOR SSR: Ensure Yasin has an avatar if DB is empty
+                    if (!authorAvatar && authorName && authorName.includes('Yasin Eyimaya')) {
+                        authorAvatar = '/uploads/logo.png';
+                    }
                 } catch (e) { }
 
                 // Prepare Content
