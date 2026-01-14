@@ -2445,7 +2445,7 @@
             let countEditor = 0;
 
             users.forEach(u => {
-                if (u.role === 'user' || !u.role) countUser++;
+                if (u.role === 'user' || u.role === 'reader' || !u.role) countUser++;
                 else if (u.role === 'author') countAuthor++;
                 else if (u.role === 'editor') countEditor++;
             });
@@ -2485,6 +2485,7 @@
                     roleBg = '#ffedd5';
                     roleColor = '#c2410c';
                 }
+                // 'user' and 'reader' fall to default
 
                 tbody.innerHTML += `
                     <tr style="border-bottom: 1px solid #f3f4f6;">
@@ -2506,6 +2507,10 @@
         function filterUsers(role) {
             if (!role) {
                 renderUsers(allUsers); // Show all
+            } else if (role === 'user') {
+                // 'user' filter should catch 'user', 'reader', and missing roles
+                const filtered = allUsers.filter(u => u.role === 'user' || u.role === 'reader' || !u.role);
+                renderUsers(filtered);
             } else {
                 const filtered = allUsers.filter(u => u.role === role);
                 renderUsers(filtered);
