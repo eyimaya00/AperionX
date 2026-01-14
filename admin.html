@@ -1388,6 +1388,19 @@
                         gösterilir.
                     </p>
 
+                    <div
+                        style="margin-bottom: 20px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+                        <input type="checkbox" id="showcase_auto_rotate"
+                            style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <label for="showcase_auto_rotate"
+                                style="font-weight: 600; color: #166534; cursor: pointer; display: block; margin-bottom: 4px;">Otomatik
+                                Döngü Modu (Her 3 Saatte Bir Değişir)</label>
+                            <small style="color: #15803d; display: block;">Bu seçenek aktifse, aşağıdaki manuel seçimler
+                                devre dışı kalır ve sistem tüm makaleleri sırayla gösterir.</small>
+                        </div>
+                    </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <!-- Left Big Card -->
                         <div class="form-group" style="grid-column: span 2;">
@@ -3339,10 +3352,32 @@
                 if (settings.newsletter_title) document.getElementById('newsletter_title').value = settings.newsletter_title;
                 if (settings.newsletter_desc) document.getElementById('newsletter_desc').value = settings.newsletter_desc;
 
+                // 3. Handle Auto-Rotate Checkbox
+                const autoRotate = settings.showcase_auto_rotate === 'true';
+                const autoCheck = document.getElementById('showcase_auto_rotate');
+                if (autoCheck) {
+                    autoCheck.checked = autoRotate;
+                    toggleShowcaseControls(autoRotate);
+                }
+
+
             } catch (e) {
                 console.error('Homepage settings load error', e);
             }
         }
+
+        function toggleShowcaseControls(isAuto) {
+            const selects = ['homepage_article_1', 'homepage_article_2', 'homepage_article_3'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = isAuto;
+                    el.style.opacity = isAuto ? '0.5' : '1';
+                    el.style.cursor = isAuto ? 'not-allowed' : 'default';
+                }
+            });
+        }
+
 
         // Listen for section change to load data
         // We can hook into `showSection` or just load on init if lightweight
@@ -3358,6 +3393,10 @@
             formData.append('hero_btn_text', document.getElementById('homepage_hero_btn_text').value);
             formData.append('newsletter_title', document.getElementById('newsletter_title').value);
             formData.append('newsletter_desc', document.getElementById('newsletter_desc').value);
+
+            // Auto Rotate
+            formData.append('showcase_auto_rotate', document.getElementById('showcase_auto_rotate').checked);
+
 
 
             // Article Selections
@@ -3382,6 +3421,15 @@
                 showToast('Beklenmedik bir hata oluştu.', 'error');
             }
         });
+
+        // Auto-Rotate Checkbox Listener
+        const autoRotateCheck = document.getElementById('showcase_auto_rotate');
+        if (autoRotateCheck) {
+            autoRotateCheck.addEventListener('change', (e) => {
+                toggleShowcaseControls(e.target.checked);
+            });
+        }
+
 
         // --- SUBSCRIBER MANAGEMENT ---
         async function loadSubscribers() {

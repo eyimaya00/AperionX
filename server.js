@@ -506,6 +506,80 @@ async function ensureSchema() {
 console.log('--- APERIONX SERVER VERSION 2.3 FINAL (ROBUST SETTINGS) STARTING ---');
 ensureSchema();
 
+// === SHOWCASE ROTATION LOGIC ===
+async function rotateShowcaseArticles() {
+    try {
+        const [rows] = await pool.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')");
+        const settings = {};
+        rows.forEach(r => settings[r.setting_key] = r.setting_value);
+
+        if (settings.showcase_auto_rotate !== 'true') return;
+
+        const lastRotate = settings.showcase_last_rotate_time ? new Date(settings.showcase_last_rotate_time) : new Date(0);
+        const now = new Date();
+        const diffMs = now - lastRotate;
+        const diffHours = diffMs / (1000 * 60 * 60);
+
+        // Rotate every 3 hours
+        if (diffHours >= 3) {
+            console.log('[SHOWCASE] Auto-rotating articles...');
+
+            // 1. Fetch all published articles
+            const [articles] = await pool.query("SELECT id FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+            if (articles.length === 0) return;
+
+            let offset = parseInt(settings.showcase_current_offset || '0');
+            if (isNaN(offset)) offset = 0;
+
+            // Calculate new items
+            // We want 3 items. 
+            // Cycle through the list.
+            const len = articles.length;
+            const newIds = [];
+
+            // Just take next 3, wrapping around
+            for (let i = 0; i < 3; i++) {
+                newIds.push(articles[(offset + i) % len].id);
+            }
+
+            // Update Offset for next time (advance by 3)
+            const newOffset = (offset + 3) % len;
+
+            // 2. Update Settings
+            // homepage_article_1, homepage_article_2, homepage_article_3
+            const updates = [
+                { key: 'homepage_article_1', value: newIds[0] },
+                { key: 'homepage_article_2', value: newIds[1] },
+                { key: 'homepage_article_3', value: newIds[2] },
+                { key: 'showcase_last_rotate_time', value: now.toISOString() },
+                { key: 'showcase_current_offset', value: newOffset }
+            ];
+
+            for (const item of updates) {
+                // Upsert
+                const [check] = await pool.query('SELECT id FROM settings WHERE setting_key = ?', [item.key]);
+                if (check.length > 0) {
+                    await pool.query('UPDATE settings SET setting_value = ? WHERE setting_key = ?', [item.value, item.key]);
+                } else {
+                    await pool.query('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)', [item.key, item.value]);
+                }
+            }
+
+            console.log(`[SHOWCASE] Rotated to IDs: ${newIds.join(', ')}. Next Offset: ${newOffset}`);
+        }
+
+    } catch (e) {
+        console.error('[SHOWCASE] Rotation Error:', e);
+    }
+}
+
+// Run rotation check every minute
+setInterval(rotateShowcaseArticles, 60 * 1000);
+// Also run on startup after a slight delay
+setTimeout(rotateShowcaseArticles, 5000);
+
+
+
 
 
 
