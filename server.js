@@ -256,15 +256,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 let authorName = 'AperionX Yazarı';
                 let authorAvatar = null;
                 try {
-                    const [uRows] = await pool.query('SELECT fullname, avatar_url FROM users WHERE id = ?', [article.author_id]);
+                    const [uRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
                     if (uRows.length > 0) {
                         authorName = uRows[0].fullname;
-                        authorAvatar = uRows[0].avatar_url;
-                    }
-
-                    // FALLBACK FOR SSR: Ensure Yasin has an avatar if DB is empty
-                    if (!authorAvatar && authorName && authorName.includes('Yasin Eyimaya')) {
-                        authorAvatar = '/uploads/logo.png';
                     }
                 } catch (e) { }
 
@@ -312,22 +306,13 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
 
                 // Inject Preloaded Data Script
-                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}"; window.SERVER_AUTHOR_AVATAR = "${authorAvatar || ''}";</script>`;
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
                 // SSR: Render Author Name & Avatar directly
                 // Pattern match existing placeholder: <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
 
-                let authorHtml = '';
-                if (authorAvatar) {
-                    let avatarSrc = authorAvatar;
-                    if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
-                        avatarSrc = '/' + avatarSrc;
-                    }
-                    authorHtml = `<img src="${avatarSrc}" alt="${authorName}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 8px; vertical-align: middle;"> <span style="vertical-align: middle;">${authorName}</span>`;
-                } else {
-                    authorHtml = `<i class="ph ph-user"></i> ${authorName}`;
-                }
+                let authorHtml = `<i class="ph ph-user"></i> ${authorName}`;
 
                 // Regex update: The HTML is <span id="detail-author">...</span> without class="meta-item"
                 // Using a more flexible regex to catch attributes in any order if they exist, but specifically id="detail-author"

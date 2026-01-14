@@ -1796,28 +1796,9 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    let authorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
-    let authorAvatar = article.author_avatar || window.SERVER_AUTHOR_AVATAR;
+    const authorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
 
-    // FALLBACK: If render name is Yasin Eyimaya but no avatar, force it.
-    if (!authorAvatar && authorName.includes('Yasin Eyimaya')) {
-        authorAvatar = 'uploads/logo.png'; // Or the UI Avatar URL if preferred
-    }
-
-    if (authorAvatar) {
-        // Simple path resolution if not absolute
-        let avatarSrc = authorAvatar;
-        if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
-            avatarSrc = '/' + avatarSrc; // Assume relative to root if just 'uploads/...'
-        }
-        // Use resolveImagePath if it handles this better, but straightforward check is safer here to avoid scope issues if resolveImagePath is complex
-        // Actually, looking at line 1813, resolveImagePath is used. Let's use it if available, or fallback.
-        // But safer to just prepend / if needed, as standard in this app seems to be /uploads/...
-
-        document.getElementById('detail-author').innerHTML = `<img src="${avatarSrc}" alt="${authorName}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 8px; vertical-align: middle;"> <span style="vertical-align: middle;">${authorName}</span>`;
-    } else {
-        document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${authorName}`;
-    }
+    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${authorName}`;
     document.getElementById('detail-title').innerText = article.title;
 
     // Excerpt
