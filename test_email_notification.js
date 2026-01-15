@@ -121,8 +121,8 @@ async function testEmail() {
             attachments: [
                 {
                     filename: 'logo.png',
-                    path: 'uploads/logo.png', // Local path on server
-                    cid: 'unique-logo-id' // Same cid value as in the html img src
+                    path: require('path').join(__dirname, 'uploads', 'logo.png'),
+                    cid: 'unique-logo-id'
                 }
             ]
         });
