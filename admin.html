@@ -3750,6 +3750,17 @@
     </script>
     <script src="script_v105.js"></script>
     <script>
+        // Helper: Fetch with Auth Token
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('token');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            return fetch(url, { ...options, headers });
+        }
+
         // Load Email Logs
         async function loadEmailLogs() {
             const tbody = document.getElementById('email-logs-table-body');
