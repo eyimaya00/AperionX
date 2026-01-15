@@ -1126,25 +1126,47 @@ app.get('/api/articles/:key', async (req, res) => {
         if (/^\d+$/.test(key)) {
             sql += 'id = ?';
             params = [key];
-        } else {
-            sql += 'slug = ?';
-            params = [key];
         }
+        // Unsubscribe Endpoint (Public)
+        app.post('/api/public/unsubscribe', async (req, res) => {
+            const { email } = req.body;
+            if (!email) return res.status(400).json({ message: 'E-posta gerekli.' });
 
-        const [rows] = await pool.query(sql, params);
-        if (rows.length === 0) return res.status(404).json({ message: 'Makale bulunamadı' });
+            try {
+                const [result] = await pool.query('UPDATE users SET is_subscribed = 0 WHERE email = ?', [email]);
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ message: 'Bu e-posta kayıtlı değil.' });
+                }
+                res.json({ message: 'Abonelikten çıkıldı.' });
+            } catch (e) {
+                console.error(e);
+                res.status(500).json({ message: 'Sunucu hatası.' });
+            }
+        });
 
-        const article = rows[0];
+        // Helper Function: Send New Article Notification
+        async function sendNewArticleNotification(articleId) {
+            try {
+                // 1. Fetch Article Info
+                const [aRows] = await pool.query('SELECT title, slug, excerpt, image_url, author_id FROM articles WHERE id = ?', [articleId]);
+                if (aRows.length === 0) return;
+                const article = aRows[0];
 
-        // Fetch Author
-        try {
-            const [uRows] = await pool.query('SELECT fullname, avatar, username FROM users WHERE id = ?', [article.author_id]);
-            if (uRows.length > 0) {
-                article.author_name = uRows[0].fullname;
-                article.author_avatar = uRows[0].avatar;
-                article.author_username = uRows[0].username;
-            } else {
-                article.author_name = 'Yazar';
+                // 2. Fetch Author Info
+                const [uRows] = await pool.query('SELECT fullname, avatar FROM users WHERE id = ?', [article.author_id]);
+                const authorName = (uRows.length > 0) ? uRows[0].fullname : 'AperionX Yazarı';
+                const authorAvatar = (uRows.length > 0 && uRows[0].avatar) ? uRows[0].avatar : 'uploads/default-avatar.png';
+
+                // 3. Fetch SUBSCRIBED Users
+                const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND is_subscribed = 1");
+                if (users.length === 0) {
+                    console.log('[EMAIL-NOTIF] No subscribed users found.');
+                    return;
+                }
+
+                const recipientEmails = users.map(u => u.email);
+
+                // ... (rest of the email logic)
             }
         } catch (e) { article.author_name = 'Yazar'; }
 

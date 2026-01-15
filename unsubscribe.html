@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonelikten Ayrıl - AperionX</title>
+    <link rel="icon" type="image/x-icon" href="/uploads/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #64748b;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #dc2626;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success {
+            color: #10b981;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 style="color: #ef4444;">Abonelikten Ayrıl</h1>
+        <p>Yeni makale bildirimlerini almak istemiyorsanız e-posta adresinizi girerek çıkabilirsiniz.</p>
+
+        <input type="email" id="email" placeholder="E-posta adresiniz">
+        <button onclick="unsubscribe()">Abonelikten Çık</button>
+
+        <div id="msg" class="message"></div>
+        <a href="/" style="display:block; margin-top:20px; color:#64748b; text-decoration:none; font-size:0.9rem;">←
+            Anasayfaya Dön</a>
+    </div>
+
+    <script>
+        async function unsubscribe() {
+            const email = document.getElementById('email').value;
+            const btn = document.querySelector('button');
+            const msg = document.getElementById('msg');
+
+            if (!email) return;
+
+            btn.disabled = true;
+            btn.innerText = 'İşleniyor...';
+
+            try {
+                const res = await fetch('/api/public/unsubscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                msg.style.display = 'block';
+                if (res.ok) {
+                    msg.className = 'message success';
+                    msg.innerText = 'Başarıyla ayrıldınız. Sizi özleyeceğiz!';
+                    document.getElementById('email').value = '';
+                } else {
+                    msg.className = 'message error';
+                    msg.innerText = data.message || 'Bir hata oluştu.';
+                }
+            } catch (e) {
+                msg.className = 'message error';
+                msg.innerText = 'Sunucu hatası.';
+            }
+
+            btn.disabled = false;
+            btn.innerText = 'Abonelikten Çık';
+        }
+    </script>
+
+</body>
+
+</html>
