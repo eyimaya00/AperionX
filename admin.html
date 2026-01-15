@@ -797,6 +797,9 @@
             <a href="#" class="menu-item" onclick="showSection('categories', this); loadCategories();">
                 <i class="ph ph-bookmarks"></i> <span>Kategoriler</span>
             </a>
+            <a href="#" class="menu-item" onclick="showSection('email-logs-section', this); loadEmailLogs();">
+                <i class="ph ph-list-dashes"></i> <span>E-posta Logları</span>
+            </a>
             <a href="#" class="menu-item" onclick="showSection('menu-editor', this); loadMenuItems();">
                 <i class="ph ph-list"></i> <span>Menü Düzenle</span>
             </a>
@@ -3718,7 +3721,53 @@
         }
     </script>
     <script src="script_v105.js"></script>
+    <script>
+        // Load Email Logs
+        async function loadEmailLogs() {
+            const tbody = document.getElementById('email-logs-table-body');
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center;">Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetchWithAuth('/api/admin/email-logs');
+                if (!res.ok) throw new Error('Loglar yüklenemedi');
+
+                const logs = await res.json();
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:#64748b;">Henüz kayıt bulunmuyor.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(log => {
+                    const statusColor = log.status === 'sent' ? '#10b981' : '#ef4444';
+                    const statusText = log.status === 'sent' ? 'Gönderildi' : 'Başarısız';
+                    const date = new Date(log.sent_at).toLocaleString('tr-TR');
+
+                    return `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px; color: #64748b;">#${log.id}</td>
+                        <td style="padding: 12px; font-weight: 500;">${log.article_title || '-'}</td>
+                        <td style="padding: 12px;">${log.subject}</td>
+                        <td style="padding: 12px;">${log.recipient_count}</td>
+                        <td style="padding: 12px;">
+                            <span style="background:${statusColor}20; color:${statusColor}; padding: 4px 10px; border-radius: 50px; font-size: 12px; font-weight: bold;">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; color: #ef4444; font-size: 13px;">${log.error_message || '-'}</td>
+                        <td style="padding: 12px; color: #64748b; font-size: 13px;">${date}</td>
+                    </tr>
+                `;
+                }).join('');
+
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Veri yüklenirken hata oluştu.</td></tr>';
+            }
+        }
+
+        // Auto-load on section show if needed (handled by onclick)
+    </script>
 </body>
 
 </html>
-```
