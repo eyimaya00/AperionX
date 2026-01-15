@@ -1343,7 +1343,7 @@ async function sendNewArticleNotification(articleId) {
             [articleId, 'Notification Failed', 0, 'failed', e.message]);
     } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
 }
-        }
+
 
 // NEW: Public Author Profile Endpoint
 app.get('/api/public/author/:identifier', async (req, res) => {
