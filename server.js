@@ -3353,6 +3353,12 @@ app.get('/makale/:slug', async (req, res) => {
                     `<meta property="og:url" content="${siteUrl}/makale/${slug}">`
                 );
 
+                // FIXED: Canonical Tag
+                htmlData = htmlData.replace(
+                    /<link rel="canonical" href=".*?">/,
+                    `<link rel="canonical" href="${siteUrl}/makale/${slug}" />`
+                );
+
                 // Twitter Tags
                 htmlData = htmlData.replace(
                     /<meta property="twitter:title" content=".*?">/,
