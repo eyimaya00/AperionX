@@ -3294,9 +3294,101 @@ async function sendNewArticleNotification(articleId) {
 
 
 // GLOBAL 404 HANDLER (MUST BE LAST)
+// BUT FIRST: SEO Injection for Articles
+app.get('/makale/:slug', async (req, res) => {
+    const slug = req.params.slug;
+    const filePath = path.join(__dirname, 'index.html');
+
+    // 1. Read index.html
+    fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+        if (err) {
+            console.error('Error reading index.html', err);
+            return res.status(500).send('Server Error');
+        }
+
+        try {
+            // 2. Fetch Article Data
+            const [rows] = await pool.query('SELECT title, excerpt, image_url FROM articles WHERE slug = ?', [slug]);
+
+            if (rows.length > 0) {
+                const article = rows[0];
+                const siteUrl = 'https://aperionx.com';
+                const imageUrl = article.image_url ?
+                    (article.image_url.startsWith('http') ? article.image_url : `${siteUrl}/${article.image_url}`) :
+                    `${siteUrl}/uploads/logo.png`;
+
+                // 3. Inject SEO Tags
+                // Replace Title
+                htmlData = htmlData.replace(
+                    /<title>.*?<\/title>/,
+                    `<title>${article.title} - AperionX</title>`
+                );
+
+                // Replace Description (Meta & OG & Twitter)
+                const description = article.excerpt || 'AperionX ile Bilimin Sınırlarını Keşfedin.';
+                // Escape quotes to prevent breaking HTML
+                const safeDesc = description.replace(/"/g, '&quot;');
+
+                // Meta Description
+                htmlData = htmlData.replace(
+                    /<meta name="description" content=".*?">/,
+                    `<meta name="description" content="${safeDesc}">`
+                );
+
+                // OG Tags
+                htmlData = htmlData.replace(
+                    /<meta property="og:title" content=".*?">/,
+                    `<meta property="og:title" content="${article.title} - AperionX">`
+                );
+                htmlData = htmlData.replace(
+                    /<meta property="og:description" content=".*?">/,
+                    `<meta property="og:description" content="${safeDesc}">`
+                );
+                htmlData = htmlData.replace(
+                    /<meta property="og:image" content=".*?">/,
+                    `<meta property="og:image" content="${imageUrl}">`
+                );
+                htmlData = htmlData.replace(
+                    /<meta property="og:url" content=".*?">/,
+                    `<meta property="og:url" content="${siteUrl}/makale/${slug}">`
+                );
+
+                // Twitter Tags
+                htmlData = htmlData.replace(
+                    /<meta property="twitter:title" content=".*?">/,
+                    `<meta property="twitter:title" content="${article.title} - AperionX">`
+                );
+                htmlData = htmlData.replace(
+                    /<meta property="twitter:description" content=".*?">/,
+                    `<meta property="twitter:description" content="${safeDesc}">`
+                );
+                htmlData = htmlData.replace(
+                    /<meta property="twitter:image" content=".*?">/,
+                    `<meta property="twitter:image" content="${imageUrl}">`
+                );
+            }
+
+            // 4. Send Modified HTML
+            res.send(htmlData);
+
+        } catch (dbErr) {
+            console.error('SEO DB Error:', dbErr);
+            // Fallback to sending original HTML if DB fails
+            res.send(htmlData);
+        }
+    });
+});
+
 app.use((req, res) => {
-    console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ message: `Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
+    // Check if it looks like an API call first
+    if (req.originalUrl.startsWith('/api')) {
+        console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
+        return res.status(404).json({ message: `Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
+    }
+
+    // For SPA routes (frontend routing), serve index.html
+    // This allows React/Vue/Vanilla JS routers to handle the path
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start Server
