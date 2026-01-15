@@ -1020,32 +1020,25 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 15px;
-            /* EXTRA THICK for testing */
-            background: rgba(0, 255, 0, 0.5);
-            /* Green tint container helper */
+            height: 4px;
+            background: transparent;
             z-index: 2147483647;
+            /* Maximum Z-Index */
             pointer-events: none;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
 
         .progress-bar {
             height: 100%;
-            background: red !important;
-            /* DEBUG RED */
-            width: 50% !important;
-            /* DEBUG FIXED WIDTH */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
-        /* 
         [data-theme="dark"] .progress-bar {
             background: linear-gradient(90deg, #6366f1, #a855f7);
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
-        */
     </style>
 </head>
 
@@ -1070,19 +1063,30 @@
     <script>
         // Progress Bar Logic
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 AperionX Progress Bar Initialized'); // Debug Log
             const progressBar = document.getElementById('reading-progress');
 
-            window.addEventListener('scroll', () => {
-                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                const scrolled = (scrollTop / scrollHeight) * 100;
+            function updateProgress() {
+                if (!progressBar) return;
 
-                if (progressBar) {
-                    progressBar.style.width = scrolled + "%";
-                    // console.log('Scroll:', scrolled); // Optional: verbose logging
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const docHeight = document.documentElement.scrollHeight;
+                const winHeight = window.innerHeight;
+                const scrollHeight = docHeight - winHeight;
+
+                if (scrollHeight <= 0) {
+                    progressBar.style.width = '0%';
+                    return;
                 }
-            });
+
+                const scrolled = (scrollTop / scrollHeight) * 100;
+                progressBar.style.width = Math.min(100, Math.max(0, scrolled)) + "%";
+            }
+
+            // Update on Scroll, Resize, and Load
+            window.addEventListener('scroll', updateProgress, { passive: true });
+            window.addEventListener('resize', updateProgress);
+            // Initial check
+            updateProgress();
         });
     </script>
 
