@@ -1065,7 +1065,7 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 app.get('/api/articles', async (req, res) => {
     try {
         // 1. Fetch Articles
-        const [articles] = await pool.query("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published' ORDER BY created_at DESC");
 
         if (articles.length > 0) {
             // 2. Extract Author IDs
