@@ -1020,19 +1020,20 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            /* Slight background to verify position */
+            height: 10px;
+            /* Thicker for visibility */
+            background: red;
+            /* DEBUG: Force Red Background */
             z-index: 2147483647;
-            /* Maximum Z-Index */
             pointer-events: none;
-            /* Let clicks pass through */
         }
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #ef4444, #f59e0b);
-            width: 0%;
+            background: yellow;
+            /* DEBUG: Yellow Bar */
+            width: 50%;
+            /* DEBUG: Start at 50% */
             transition: width 0.1s ease-out;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
         }
