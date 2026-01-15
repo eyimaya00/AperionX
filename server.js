@@ -1051,7 +1051,7 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, u.fullname as author_name  
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             ORDER BY a.created_at DESC
@@ -1102,7 +1102,7 @@ app.get('/api/articles', async (req, res) => {
 app.get('/api/author/articles', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
