@@ -1063,12 +1063,18 @@
     <script>
         // Progress Bar Logic
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 AperionX Progress Bar Initialized'); // Debug Log
+            const progressBar = document.getElementById('reading-progress');
+
             window.addEventListener('scroll', () => {
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                 const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 const scrolled = (scrollTop / scrollHeight) * 100;
-                const progressBar = document.getElementById('reading-progress');
-                if (progressBar) progressBar.style.width = scrolled + "%";
+
+                if (progressBar) {
+                    progressBar.style.width = scrolled + "%";
+                    // console.log('Scroll:', scrolled); // Optional: verbose logging
+                }
             });
         });
     </script>
