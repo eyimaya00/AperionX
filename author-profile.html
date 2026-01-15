@@ -662,7 +662,7 @@
                     grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış makalesi yok.</div>';
                 } else {
                     grid.innerHTML = articles.map(art => `
-                        <a href="article-detail.html?slug=${art.slug || art.id}" class="author-article-card">
+                        <a href="/makale/${art.slug || art.id}" class="author-article-card">
                             <div class="card-image-wrapper">
                                 <img src="${art.image_url ? (art.image_url.startsWith('http') ? art.image_url : '/' + art.image_url) : 'uploads/default-hero.jpg'}" alt="${art.title}" class="card-image">
                                 <span class="card-category">${art.category}</span>
