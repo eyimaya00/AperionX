@@ -3790,7 +3790,7 @@
 
             } catch (error) {
                 console.error(error);
-                tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Veri yüklenirken hata oluştu.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Hata: ${error.message}</td></tr>`;
             }
         }
 
