@@ -117,7 +117,14 @@ async function testEmail() {
             from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
             to: TEST_EMAIL,
             subject: `✨ Yeni Makale: ${article.title}`,
-            html: htmlContent
+            html: htmlContent.replace(logoUrl, 'cid:unique-logo-id'), // Replace URL with CID in HTML
+            attachments: [
+                {
+                    filename: 'logo.png',
+                    path: 'uploads/logo.png', // Local path on server
+                    cid: 'unique-logo-id' // Same cid value as in the html img src
+                }
+            ]
         });
 
         console.log('✅ Email sent successfully!');
