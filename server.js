@@ -2999,6 +2999,20 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
+// GET Email Logs (Admin Only)
+app.get('/api/admin/email-logs', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT el.*, a.title as article_title 
+            FROM email_logs el 
+            LEFT JOIN articles a ON el.article_id = a.id 
+            ORDER BY el.sent_at DESC LIMIT 50
+        `);
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // SAVE Settings (Admin Only)
 // SAVE Settings (Admin Only) - ROBUST VERSION
 app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
@@ -3264,8 +3278,17 @@ async function sendNewArticleNotification(articleId) {
 
         console.log(`[EMAIL-NOTIF] Sent successfully. Message ID: ${info.messageId}`);
 
+        // Log to DB
+        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
+            [articleId, `✨ Yeni Makale: ${article.title}`, recipientEmails.length, 'sent']);
+
     } catch (e) {
         console.error('[EMAIL-NOTIF] Error:', e);
+        // Log Failure
+        try {
+            await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
+                [articleId, 'Notification Failed', 0, 'failed', e.message]);
+        } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
     }
 }
 
