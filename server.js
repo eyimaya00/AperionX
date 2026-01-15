@@ -1175,77 +1175,6 @@ app.post('/api/public/unsubscribe', async (req, res) => {
         res.status(500).json({ message: 'Sunucu hatası.' });
     }
 });
-            }
-        });
-
-// Helper Function: Send New Article Notification
-async function sendNewArticleNotification(articleId) {
-    try {
-        // 1. Fetch Article Info
-        const [aRows] = await pool.query('SELECT title, slug, excerpt, image_url, author_id FROM articles WHERE id = ?', [articleId]);
-        if (aRows.length === 0) return;
-        const article = aRows[0];
-
-        // 2. Fetch Author Info
-        const [uRows] = await pool.query('SELECT fullname, avatar FROM users WHERE id = ?', [article.author_id]);
-        const authorName = (uRows.length > 0) ? uRows[0].fullname : 'AperionX Yazarı';
-        const authorAvatar = (uRows.length > 0 && uRows[0].avatar) ? uRows[0].avatar : 'uploads/default-avatar.png';
-
-        // 3. Fetch SUBSCRIBED Users
-        const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND is_subscribed = 1");
-        if (users.length === 0) {
-            console.log('[EMAIL-NOTIF] No subscribed users found.');
-            return;
-        }
-    } else {
-        sql += 'slug = ?';
-        params = [key];
-    }
-
-    const [rows] = await pool.query(sql, params);
-
-    if (rows.length === 0) {
-        return res.status(404).json({ message: 'Article not found' });
-    }
-
-    const article = rows[0];
-
-    // Increment view count for published articles
-    if (article.status === 'published') {
-        await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [article.id]);
-    }
-
-    // Fetch author details
-    const [authorRows] = await pool.query('SELECT fullname, username, avatar_url FROM users WHERE id = ?', [article.author_id]);
-    if (authorRows.length > 0) {
-        article.author_name = authorRows[0].fullname;
-        article.author_username = authorRows[0].username;
-        article.author_avatar = authorRows[0].avatar_url;
-    } else { article.author_name = 'Yazar'; }
-
-    res.json(article);
-} catch (e) {
-    console.error('API Article Detail Error:', e);
-    res.status(500).send(e.toString());
-}
-    });
-
-// Unsubscribe Endpoint (Public)
-app.post('/api/public/unsubscribe', async (req, res) => {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'E-posta gerekli.' });
-
-    try {
-        const [result] = await pool.query('UPDATE users SET is_subscribed = 0 WHERE email = ?', [email]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Bu e-posta kayıtlı değil.' });
-        }
-        res.json({ message: 'Abonelikten çıkıldı.' });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ message: 'Sunucu hatası.' });
-    }
-});
 
 // Helper Function: Send New Article Notification
 async function sendNewArticleNotification(articleId) {
@@ -1308,42 +1237,47 @@ async function sendNewArticleNotification(articleId) {
         </div>
         `;
 
-        auth: {
-            user: process.env.SMTP_USER,
+        // 5. Send Email
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
-        }
-    });
-
-    const info = await transporter.sendMail({
-        from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
-        to: process.env.SMTP_USER,
-        bcc: recipientEmails,
-        subject: `✨ Yeni Makale: ${article.title}`,
-        html: htmlContent,
-        attachments: [
-            {
-                filename: 'logo.png',
-                path: logoPath,
-                cid: 'unique-logo-id'
             }
-        ]
-    });
+        });
 
-    console.log(`[EMAIL-NOTIF] Sent successfully. Message ID: ${info.messageId}`);
+        const info = await transporter.sendMail({
+            from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
+            to: process.env.SMTP_USER,
+            bcc: recipientEmails,
+            subject: `✨ Yeni Makale: ${article.title}`,
+            html: htmlContent,
+            attachments: [
+                {
+                    filename: 'logo.png',
+                    path: logoPath,
+                    cid: 'unique-logo-id'
+                }
+            ]
+        });
 
-    // Log to DB
-    await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
-        [articleId, `✨ Yeni Makale: ${article.title}`, recipientEmails.length, 'sent']);
+        console.log(`[EMAIL-NOTIF] Sent successfully. Message ID: ${info.messageId}`);
 
-} catch (e) {
-    console.error('[EMAIL-NOTIF] Error:', e);
-    // Log Failure
-    try {
-        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
-            [articleId, 'Notification Failed', 0, 'failed', e.message]);
-    } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
+        // Log to DB
+        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
+            [articleId, `✨ Yeni Makale: ${article.title}`, recipientEmails.length, 'sent']);
+
+    } catch (e) {
+        console.error('[EMAIL-NOTIF] Error:', e);
+        // Log Failure
+        try {
+            await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
+                [articleId, 'Notification Failed', 0, 'failed', e.message]);
+        } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
+    }
 }
-
 
 // NEW: Public Author Profile Endpoint
 app.get('/api/public/author/:identifier', async (req, res) => {
