@@ -928,6 +928,34 @@
             </div>
         </div>
 
+        <!-- EMAIL LOGS SECTION (Fixed Placement) -->
+        <section id="email-logs-section" class="section">
+            <div class="header-row">
+                <h1 class="page-title">E-posta Gönderim Geçmişi</h1>
+                <button class="btn btn-primary" onclick="loadEmailLogs()">
+                    <i class="ph ph-arrows-clockwise"></i> Yenile
+                </button>
+            </div>
+
+            <div class="card">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+                            <th style="padding: 12px; color: #64748b;">ID</th>
+                            <th style="padding: 12px; color: #64748b;">Makale</th>
+                            <th style="padding: 12px; color: #64748b;">Konu</th>
+                            <th style="padding: 12px; color: #64748b;">Alıcı</th>
+                            <th style="padding: 12px; color: #64748b;">Durum</th>
+                            <th style="padding: 12px; color: #64748b;">Hata</th>
+                            <th style="padding: 12px; color: #64748b;">Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody id="email-logs-table-body">
+                        <!-- Logs will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
 
         <!-- Maintenance Mode Section -->
