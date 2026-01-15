@@ -1209,7 +1209,7 @@ app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
     console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
