@@ -1057,37 +1057,38 @@
         </div>
     </div>
 
-                <script>
-        // Progress Bar Logic (Zombie-Proof & Safe)
+                    <script>
+        // Progress Bar Logic (Heartbeat & Self-Healing)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
             let articleElement = null;
             let ticking = false;
 
+            // Main Update Function
             function updateProgress() {
                 try {
                     if (!progressBar) return;
 
-                    // 1. Zombie Check: Is the cached element still in the DOM?
+                    // 1. Zombie Check
                     if (articleElement && !articleElement.isConnected) {
-                        articleElement = null; // It died, release it.
+                        articleElement = null; 
                     }
 
-                    // 2. Locate / Re-locate
+                    // 2. Locate
                     if (!articleElement) {
                         articleElement = document.querySelector('.unified-article-card');
                     }
                     
-                    // 3. Check Visibility / Existence
-                    if (!articleElement || articleElement.offsetParent === null) {
-                        return;
-                    }
+                    // 3. Visibility Check we can trust
+                    // If no element, we can't show progress.
+                    if (!articleElement) return;
 
+                    // 4. Metrics
                     const scrollTop = window.scrollY || document.documentElement.scrollTop;
                     const windowHeight = window.innerHeight;
                     const rect = articleElement.getBoundingClientRect();
                     
-                    // Use Top relative to viewport + scroll for absolute page position
+                    // Absolute Calcs
                     const elementTop = rect.top + scrollTop;
                     const elementHeight = articleElement.offsetHeight;
 
@@ -1096,22 +1097,23 @@
                     const startPoint = elementTop;
                     const endPoint = elementTop + elementHeight - windowHeight;
 
-                    // Calculation
+                    // 5. Calculate & Apply
                     let pct = 0;
                     if (endPoint > startPoint) {
                         pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                     }
                     
-                    pct = Math.max(0, Math.min(100, pct));
-                    progressBar.style.width = pct + "%";
+                    // Direct application (Unthrottled for smoothness)
+                    progressBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
 
                 } catch (e) {
-                    console.error(e);
+                    console.error("PB Error:", e);
                 } finally {
                     ticking = false;
                 }
             }
 
+            // Scroll Handler (RAF)
             function onScroll() {
                 if (!ticking) {
                     window.requestAnimationFrame(updateProgress);
@@ -1119,25 +1121,26 @@
                 }
             }
 
-            // Observer needs to be attached to BODY to catch if the wrapper itself is replaced
-            const observer = new MutationObserver(() => {
-                onScroll();
-            });
-            
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
+            // 1. Scroll Listener (Primary)
             window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', onScroll);
+
+            // 2. Debounced Observer (Secondary - for resizing content)
+            let observerTimer;
+            const observer = new MutationObserver(() => {
+                if (observerTimer) clearTimeout(observerTimer);
+                observerTimer = setTimeout(onScroll, 200); // Wait for layout to settle
+            });
+            // Watch body to catch all dynamic changes
+            observer.observe(document.body, { childList: true, subtree: true, attributes: false });
+
+            // 3. HEARTBEAT (The Failsafe)
+            // Even if everything else dies, this checks every 1 second
+            // preventing "permanent freeze"
+            setInterval(updateProgress, 1000);
             
-            // Initialization Check
-            const initLoop = setInterval(() => {
-                const el = document.querySelector('.unified-article-card');
-                if (el && el.offsetHeight > 0) {
-                    updateProgress();
-                }
-            }, 500);
-            
-            setTimeout(() => clearInterval(initLoop), 5000);
+            // Initial kick
+            updateProgress();
         });
     </script>
 
