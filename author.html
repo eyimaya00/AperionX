@@ -24,7 +24,7 @@
             alert("Bağlantı Hatası (Promise):\n" + event.reason);
         });
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Yazar Paneli - AperionX</title>
     <link rel="icon" type="image/png" href="/uploads/favicon.png" id="favicon">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -75,9 +75,7 @@
         }
 
         html {
-            height: 100%;
-            overflow-x: hidden;
-            /* Prevent horizontal scroll on root */
+            /* Default behavior */
         }
 
         body {
@@ -85,17 +83,8 @@
             margin: 0;
             font-family: 'Outfit', sans-serif;
             color: var(--text-main);
-            height: 100%;
-            /* Fill viewport */
-            width: 100%;
-            overflow-y: auto;
-            /* Body is the scroller */
-            -webkit-overflow-scrolling: touch;
-            /* Native feel */
-            overscroll-behavior-y: auto;
-            /* Allow PTR */
-            position: relative;
-            /* Ensure it is a positioning context */
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
         /* SIDEBAR GLASSMORPHISM DESIGN */
