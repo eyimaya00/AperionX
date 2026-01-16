@@ -1057,51 +1057,50 @@
         </div>
     </div>
 
-            <script>
-        // Progress Bar Logic (Stateless & Instant)
+    <script>
+        // Progress Bar Logic (Stateless & Visibility Final Fix)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
             let articleElement = null;
             let ticking = false;
 
             function updateProgress() {
-                // 1. Lazy Target
                 if (!progressBar) return;
-                if (!articleElement) articleElement = document.querySelector('.unified-article-card');
-                if (!articleElement) { ticking = false; return; }
 
-                // 2. Metrics (Current State)
+                // 1. Locate Article
+                if (!articleElement) articleElement = document.querySelector('.unified-article-card');
+
+                // 2. Check Visibility (Parent might be hidden)
+                if (!articleElement || articleElement.offsetParent === null) {
+                    // Element is hidden or not found
+                    ticking = false;
+                    return;
+                }
+
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
                 const windowHeight = window.innerHeight;
                 const rect = articleElement.getBoundingClientRect();
-                
-                // Absolute Position
+
                 const elementTop = rect.top + scrollTop;
                 const elementHeight = articleElement.offsetHeight;
 
-                // 3. Define Zone
-                // Start: Top of article hits top of viewport
+                // 3. Safety Check for 0 height
+                if (elementHeight === 0) { ticking = false; return; }
+
                 const startPoint = elementTop;
-                // End: Bottom of article hits bottom of viewport
                 const endPoint = elementTop + elementHeight - windowHeight;
 
-                // 4. Calculate %
                 let pct = 0;
-                // Prevent division by zero or negative range
                 if (endPoint > startPoint) {
-                    // Stateless calculation: (Current - Start) / (Total Range)
                     pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                 }
 
-                // 5. Clamp directly (0-100)
-                // This allows it to go back to 0 if we scroll up, or stick to 100 if we go past.
                 pct = Math.max(0, Math.min(100, pct));
-
                 progressBar.style.width = pct + "%";
+
                 ticking = false;
             }
 
-            // Scroll Handler (RAF)
             function onScroll() {
                 if (!ticking) {
                     window.requestAnimationFrame(updateProgress);
@@ -1109,18 +1108,31 @@
                 }
             }
 
-            // Observer
-            const observer = new MutationObserver(() => { onScroll(); });
-            const wrapper = document.getElementById('article-wrapper') || document.body;
-            observer.observe(wrapper, { childList: true, subtree: true, attributes: true });
+            // Robust Observer
+            const observer = new MutationObserver((mutations) => {
+                // Force update on any DOM change in the wrapper
+                onScroll();
+            });
 
-            // Listeners
+            // Watch the wrapper specifically for style/class changes (visibility)
+            const wrapper = document.getElementById('article-wrapper') || document.body;
+            observer.observe(wrapper, { attributes: true, childList: true, subtree: true });
+
             window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', onScroll);
-            
-            // Initial kicks
-            setTimeout(onScroll, 100);
-            setTimeout(onScroll, 500);
+
+            // Persistent Initializer: Check every 500ms until we find a valid height
+            const initLoop = setInterval(() => {
+                const el = document.querySelector('.unified-article-card');
+                if (el && el.offsetHeight > 0) {
+                    updateProgress();
+                    // Don't clear interval immediately, keep checking for a few seconds to ensure stability
+                    // clearInterval(initLoop); 
+                }
+            }, 500);
+
+            // Stop the intense poller after 10 seconds
+            setTimeout(() => clearInterval(initLoop), 10000);
         });
     </script>
 
