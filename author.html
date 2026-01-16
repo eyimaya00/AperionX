@@ -74,13 +74,28 @@
             border-color: #334155;
         }
 
+        html {
+            height: 100%;
+            overflow-x: hidden;
+            /* Prevent horizontal scroll on root */
+        }
+
         body {
             background-color: var(--admin-bg);
             margin: 0;
             font-family: 'Outfit', sans-serif;
             color: var(--text-main);
-            overflow-x: hidden;
-            min-height: 100vh;
+            height: 100%;
+            /* Fill viewport */
+            width: 100%;
+            overflow-y: auto;
+            /* Body is the scroller */
+            -webkit-overflow-scrolling: touch;
+            /* Native feel */
+            overscroll-behavior-y: auto;
+            /* Allow PTR */
+            position: relative;
+            /* Ensure it is a positioning context */
         }
 
         /* SIDEBAR GLASSMORPHISM DESIGN */
