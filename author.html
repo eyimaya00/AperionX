@@ -78,15 +78,12 @@
             background-color: var(--admin-bg);
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            display: flex;
+            /* display: flex; REMOVED to ensure standard document flow for scroll */
             color: var(--text-main);
             overflow-x: hidden;
-            overflow-y: auto;
-            /* Ensure vertical scrolling is explicit */
-            overscroll-behavior-y: auto;
-            /* Explicitly allow pull-to-refresh */
+            /* overflow-y: auto; REMOVED to let viewport handle scroll for PTR */
             min-height: 100vh;
-            /* Ensure body covers viewport */
+            overscroll-behavior-y: auto;
         }
 
         html {
