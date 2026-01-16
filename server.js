@@ -661,6 +661,30 @@ setTimeout(rotateShowcaseArticles, 5000);
 
 
 
+
+// === GET AUTHOR LIKES (New Feature) ===
+app.get('/api/author/likes', authenticateToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                u.fullname AS liker_name, 
+                u.avatar_url AS liker_avatar, 
+                a.title AS article_title, 
+                l.created_at
+            FROM likes l
+            JOIN articles a ON l.article_id = a.id
+            JOIN users u ON l.user_id = u.id
+            WHERE a.author_id = ?
+            ORDER BY l.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Likes Error:', e);
+        res.status(500).json({ message: 'Beğeni verileri alınamadı.' });
+    }
+});
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = 'uploads/';

@@ -1409,7 +1409,7 @@
             <div
                 style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 30px; margin-bottom: 40px;">
                 <!-- Total Likes Card -->
-                <div class="card" onclick="filterAnalytics('likes')"
+                <div class="card" onclick="showLikersModal()"
                     style="padding: 32px; display: flex; align-items: center; gap: 24px; cursor: pointer; transition: transform 0.2s; border-left: 6px solid #ef4444;"
                     onmouseover="this.style.transform='translateY(-5px)'"
                     onmouseout="this.style.transform='translateY(0)'">
@@ -1544,6 +1544,23 @@
     <button class="btn btn-secondary zen-exit-btn" onclick="toggleZenMode()" style="display: none;">
         <i class="ph ph-x"></i> Zen Modundan Çık
     </button>
+
+    <!-- LIKERS MODAL -->
+    <div class="modal-overlay" id="likers-modal">
+        <div class="modal-box" style="width: 500px; max-width: 90%; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 class="modal-title" style="margin: 0; font-size: 1.3rem;">Beğenenler</h3>
+                <button onclick="closeLikersModal()"
+                    style="background:none; border:none; cursor:pointer; font-size:1.5rem; color: #64748b; padding: 0;">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div id="likers-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                <!-- Content will be injected here -->
+                <div style="text-align: center; padding: 20px;">Yükleniyor...</div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_URL = '/api';
@@ -2386,6 +2403,54 @@
 
         function toggleZenMode() {
             document.body.classList.toggle('zen-mode');
+        }
+
+        // --- LIKERS MODAL LOGIC ---
+        function showLikersModal() {
+            document.getElementById('likers-modal').classList.add('show');
+            loadLikers();
+        }
+
+        function closeLikersModal() {
+            document.getElementById('likers-modal').classList.remove('show');
+        }
+
+        async function loadLikers() {
+            const container = document.getElementById('likers-list');
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;">Yükleniyor...</div>';
+
+            try {
+                const res = await fetch(`${API_URL}/author/likes`, { headers: { 'Authorization': 'Bearer ' + token } });
+                if (!res.ok) throw new Error('Veri alınamadı');
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;">Henüz beğeni yok.</div>';
+                    return;
+                }
+
+                let html = '';
+                data.forEach(like => {
+                    let avatar = like.liker_avatar || 'https://via.placeholder.com/40';
+                    if (!avatar.startsWith('http')) avatar = '/' + avatar; // Fix relative paths if needed
+
+                    const date = new Date(like.created_at).toLocaleDateString('tr-TR');
+                    html += `
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                            <img src="${avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #0f172a;">${escapeHtml(like.liker_name)}</div>
+                                <div style="font-size: 0.85rem; color: #64748b;">${escapeHtml(like.article_title)}</div>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #94a3b8;">${date}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Bir hata oluştu.</div>';
+            }
         }
 
         function showPreview() {
