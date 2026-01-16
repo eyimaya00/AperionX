@@ -81,6 +81,16 @@
             display: flex;
             color: var(--text-main);
             overflow-x: hidden;
+            overflow-y: auto;
+            /* Ensure vertical scrolling is explicit */
+            overscroll-behavior-y: auto;
+            /* Explicitly allow pull-to-refresh */
+            min-height: 100vh;
+            /* Ensure body covers viewport */
+        }
+
+        html {
+            overscroll-behavior-y: auto;
         }
 
         /* SIDEBAR GLASSMORPHISM DESIGN */
