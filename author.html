@@ -1123,7 +1123,7 @@
                 </div>
 
                 <!-- Total Likes -->
-                <div class="card" onclick="goToAnalytics()"
+                <div class="card" onclick="showLikers()"
                     style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #ef4444; cursor: pointer; transition: transform 0.2s;"
                     onmouseover="this.style.transform='translateY(-5px)'"
                     onmouseout="this.style.transform='translateY(0)'">
@@ -1438,7 +1438,7 @@
             <div
                 style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 30px; margin-bottom: 40px;">
                 <!-- Total Likes Card -->
-                <div class="card" onclick="filterAnalytics('likes')"
+                <div class="card" onclick="showLikers()"
                     style="padding: 32px; display: flex; align-items: center; gap: 24px; cursor: pointer; transition: transform 0.2s; border-left: 6px solid #ef4444;"
                     onmouseover="this.style.transform='translateY(-5px)'"
                     onmouseout="this.style.transform='translateY(0)'">
@@ -1553,6 +1553,34 @@
             <div class="modal-actions">
                 <button class="modal-btn modal-cancel" onclick="closeErrorModal()"
                     style="background: #ef4444; color: white;">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIKERS MODAL -->
+    <div class="modal-overlay" id="likers-modal">
+        <div class="modal-box"
+            style="width: 450px; max-width: 90%; text-align: left; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
+            <div
+                style="padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                <h3 class="modal-title" style="margin:0; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+                    <i class="ph-fill ph-heart" style="color:#ef4444;"></i> Beğenenler
+                </h3>
+                <button onclick="closeLikersModal()"
+                    style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:#64748b; padding:5px; border-radius:50%; display:flex;"
+                    onmouseover="this.style.backgroundColor='#f1f5f9'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div id="likers-list" style="overflow-y: auto; flex: 1; padding: 0;">
+                <!-- Populated by JS -->
+            </div>
+
+            <div style="padding: 15px 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; text-align: right;">
+                <button class="modal-btn modal-cancel" onclick="closeLikersModal()"
+                    style="width: auto; padding: 8px 24px;">Kapat</button>
             </div>
         </div>
     </div>
@@ -1682,6 +1710,65 @@
                 }
 
             } catch (e) { console.error('Analytics load error', e); }
+        }
+
+        // --- LIKER MODAL LOGIC ---
+        async function showLikers() {
+            const modal = document.getElementById('likers-modal');
+            const list = document.getElementById('likers-list');
+
+            // Allow opening even if on dashboard
+            if (modal) {
+                modal.classList.add('show');
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Yükleniyor...</div>';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/author/likes`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Veri alınamadı');
+
+                const data = await res.json();
+                list.innerHTML = '';
+
+                if (data.length === 0) {
+                    list.innerHTML = `
+                        <div style="text-align:center; padding:30px; color:#94a3b8; display:flex; flex-direction:column; align-items:center;">
+                            <i class="ph ph-heart-break" style="font-size:32px; margin-bottom:10px; opacity:0.5;"></i>
+                            <p>Henüz hiç beğeni yok.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.forEach(like => {
+                    // Default avatar if null/empty
+                    const avatar = like.liker_avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(like.liker_name) + '&background=random';
+                    const date = new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+                    const item = `
+                        <div style="display:flex; align-items:center; gap:15px; padding:15px; border-bottom:1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <img src="${avatar}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;">
+                            <div style="flex:1; text-align:left;">
+                                <h4 style="margin:0; font-size:0.95rem; color:#0f172a; font-weight:600;">${escapeHtml(like.liker_name)}</h4>
+                                <p style="margin:2px 0 0; font-size:0.8rem; color:#64748b;">${escapeHtml(like.article_title)}</p>
+                            </div>
+                            <span style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">${date}</span>
+                        </div>
+                    `;
+                    list.innerHTML += item;
+                });
+
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Bir hata oluştu.</div>';
+            }
+        }
+
+        function closeLikersModal() {
+            const modal = document.getElementById('likers-modal');
+            if (modal) modal.classList.remove('show');
         }
 
         function renderAnalyticsTable(articles) {
