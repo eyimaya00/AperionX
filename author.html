@@ -83,8 +83,8 @@
             margin: 0;
             font-family: 'Outfit', sans-serif;
             color: var(--text-main);
-            overflow-x: hidden;
             min-height: 100vh;
+            /* REMOVED overflow-x: hidden globally to fix mobile PTR */
         }
 
         /* SIDEBAR GLASSMORPHISM DESIGN */
@@ -525,6 +525,13 @@
 
         /* MOBILE RESPONSIVE & PREMIUM OVERRIDES */
         @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+                /* Only hide X on mobile if needed, but sometimes this breaks PTR */
+                overscroll-behavior-y: auto;
+                /* Force PTR capability */
+            }
+
             :root {
                 --sidebar-width: 0px;
             }
