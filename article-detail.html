@@ -1020,33 +1020,20 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
-            background: rgba(0, 0, 0, 0.1);
+            height: 3px;
+            /* Sleek & Thin */
+            background: transparent;
             z-index: 2147483647;
             pointer-events: none;
         }
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #ef4444, #f59e0b);
+            /* Theme Colors: Indigo to Purple */
+            background: linear-gradient(90deg, #6366f1, #a855f7);
             width: 0%;
-            transition: width 0.05s linear;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-
-        /* DEBUG OVERLAY - Force Visible */
-        #debug-overlay {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #0f0;
-            padding: 15px;
-            font-family: monospace;
-            font-size: 14px;
-            z-index: 2147483647;
-            border: 2px solid #0f0;
-            pointer-events: none;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
     </style>
 </head>
@@ -1070,58 +1057,59 @@
     </div>
 
     <script>
-        // Progress Bar Logic with Debugging
+        // Progress Bar Logic (Article Only)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
-            const debugOverlay = document.getElementById('debug-overlay');
 
             function updateProgress() {
-                // Try getting scroll from multiple sources
-                const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                // Target the Main Article Card
+                const articleElement = document.querySelector('.unified-article-card');
 
-                // Calculate height
-                const docHeight = Math.max(
-                    document.body.scrollHeight, document.documentElement.scrollHeight,
-                    document.body.offsetHeight, document.documentElement.offsetHeight,
-                    document.body.clientHeight, document.documentElement.clientHeight
-                );
+                if (!progressBar || !articleElement) return;
 
-                const winHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-                const scrollHeight = docHeight - winHeight;
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
 
-                // Calculate %
-                let pct = 0;
-                if (scrollHeight > 0) {
-                    pct = (scrollTop / scrollHeight) * 100;
+                // Calculate bounds
+                const rect = articleElement.getBoundingClientRect();
+                const elementOffsetTop = rect.top + scrollTop;
+                const elementHeight = articleElement.offsetHeight;
+
+                // Definition:
+                // 0% -> Top of viewport matches Top of Article (Beginning reading)
+                // 100% -> Bottom of viewport matches Bottom of Article (Finished reading)
+
+                const startPoint = elementOffsetTop;
+                // We want to finish when the bottom of the article is visible at the bottom of the screen.
+                // ScrollTop + WindowHeight = Bottom of Viewport
+                // We want Bottom of Viewport = ElementOffsetTop + ElementHeight
+                // So ScrollTop = ElementOffsetTop + ElementHeight - WindowHeight
+                const endPoint = elementOffsetTop + elementHeight - windowHeight;
+
+                if (endPoint <= startPoint) {
+                    progressBar.style.width = '100%';
+                    return;
                 }
-                pct = Math.min(100, Math.max(0, pct));
 
-                // Apply width
-                if (progressBar) progressBar.style.width = pct + "%";
-
-                // Update Overlay
-                if (debugOverlay) {
-                    debugOverlay.innerHTML = `
-                        SCROLL DEBUG <br>
-                        Top: ${Math.round(scrollTop)}px <br>
-                        Total H: ${docHeight}px <br>
-                        Win H: ${winHeight}px <br>
-                        Scrollable: ${scrollHeight}px <br>
-                        <strong>Value: ${pct.toFixed(1)}%</strong>
-                    `;
+                let progress = 0;
+                if (scrollTop < startPoint) {
+                    // Before article
+                    progress = 0;
+                } else if (scrollTop > endPoint) {
+                    // Past article
+                    progress = 100;
+                } else {
+                    // Inside article
+                    progress = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                 }
+
+                progressBar.style.width = Math.min(100, Math.max(0, progress)) + "%";
             }
 
-            // Listen to everything
             window.addEventListener('scroll', updateProgress, { passive: true });
             window.addEventListener('resize', updateProgress);
 
-            // Also listen to body scroll if relevant
-            document.body.addEventListener('scroll', updateProgress);
-
-            // Interval check just in case
-            setInterval(updateProgress, 500);
-
+            setTimeout(updateProgress, 500);
             updateProgress();
         });
     </script>
