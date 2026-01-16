@@ -280,6 +280,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const safeImg = (img || '').replace(/"/g, '&quot;');
                 const safeUrl = (url || '').replace(/"/g, '&quot;');
 
+                // Format Date for Schema
+                const isoDate = new Date(article.created_at).toISOString();
+
                 // REPLACEMENT LOGIC
                 let html = htmlData;
 
@@ -298,6 +301,11 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 replaceMeta('og:image', safeImg);
                 replaceMeta('og:url', safeUrl);
 
+                // Add Article Published Date Meta
+                if (!html.includes('article:published_time')) {
+                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
+                }
+
                 replaceMeta('twitter:title', safeTitle);
                 replaceMeta('twitter:description', safeSummary);
                 replaceMeta('twitter:image', safeImg);
@@ -307,7 +315,34 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 // Inject Preloaded Data Script
                 const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
-                html = html.replace('</head>', `${scriptTag}\n</head>`);
+
+                // === JSON-LD STRUCTURED DATA INJECTION ===
+                const schemaData = {
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "headline": safeTitle,
+                    "image": [safeImg],
+                    "datePublished": isoDate,
+                    "dateModified": isoDate,
+                    "author": {
+                        "@type": "Person",
+                        "name": authorName
+                    },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "AperionX",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/uploads/logo.png`
+                        }
+                    },
+                    "description": safeSummary
+                };
+
+                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+
+                // Insert both scripts
+                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n</head>`);
 
                 // SSR: Render Author Name & Avatar directly
                 // Pattern match existing placeholder: <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
@@ -333,6 +368,49 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
     } catch (e) {
         console.error('DB Error:', e);
         next();
+    }
+});
+
+// === SITEMAP ROUTE ===
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const [articles] = await pool.query("SELECT slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const origin = `${req.protocol}://${req.get('host')}`;
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        // Static Pages
+        const staticPages = ['', '/articles.html', '/about.html', '/author.html', '/index.html'];
+        staticPages.forEach(page => {
+            xml += `
+            <url>
+                <loc>${origin}${page}</loc>
+                <changefreq>daily</changefreq>
+                <priority>0.8</priority>
+            </url>`;
+        });
+
+        // Dynamic Articles
+        articles.forEach(article => {
+            const date = new Date(article.created_at).toISOString();
+            xml += `
+            <url>
+                <loc>${origin}/makale/${article.slug}</loc>
+                <lastmod>${date}</lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>1.0</priority>
+            </url>`;
+        });
+
+        xml += '</urlset>';
+
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+    } catch (e) {
+        console.error('Sitemap Error:', e);
+        fs.appendFileSync('sitemap_error.log', e.toString() + '\n');
+        res.status(500).send('Error generating sitemap');
     }
 });
 
@@ -3523,5 +3601,7 @@ app.use((req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log('SERVER RESTARTING WITH LATEST CODE...');
     console.log(`Server running on http://localhost:${PORT}`);
 });
