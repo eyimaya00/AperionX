@@ -78,16 +78,18 @@
             background-color: var(--admin-bg);
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            /* display: flex; REMOVED to ensure standard document flow for scroll */
             color: var(--text-main);
             overflow-x: hidden;
-            /* overflow-y: auto; REMOVED to let viewport handle scroll for PTR */
             min-height: 100vh;
             overscroll-behavior-y: auto;
         }
 
         html {
+            overflow-y: auto;
+            /* Force viewport scroll */
             overscroll-behavior-y: auto;
+            height: 100%;
+            /* Ensure html fills window */
         }
 
         /* SIDEBAR GLASSMORPHISM DESIGN */
