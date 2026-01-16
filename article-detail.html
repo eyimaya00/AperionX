@@ -1057,59 +1057,66 @@
     </div>
 
     <script>
-        // Progress Bar Logic (Article Only)
+        // Progress Bar Logic (Dynamic Content Aware)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
+            let articleElement = null;
 
             function updateProgress() {
-                // Target the Main Article Card
-                const articleElement = document.querySelector('.unified-article-card');
+                if (!progressBar) return;
 
-                if (!progressBar || !articleElement) return;
+                // Try to find the element if not already found
+                if (!articleElement) {
+                    articleElement = document.querySelector('.unified-article-card');
+                }
+
+                if (!articleElement) return;
 
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
                 const windowHeight = window.innerHeight;
 
-                // Calculate bounds
                 const rect = articleElement.getBoundingClientRect();
                 const elementOffsetTop = rect.top + scrollTop;
                 const elementHeight = articleElement.offsetHeight;
 
-                // Definition:
-                // 0% -> Top of viewport matches Top of Article (Beginning reading)
-                // 100% -> Bottom of viewport matches Bottom of Article (Finished reading)
+                // Stop if element has no meaningful height (not loaded)
+                if (elementHeight < 100) return;
 
                 const startPoint = elementOffsetTop;
-                // We want to finish when the bottom of the article is visible at the bottom of the screen.
-                // ScrollTop + WindowHeight = Bottom of Viewport
-                // We want Bottom of Viewport = ElementOffsetTop + ElementHeight
-                // So ScrollTop = ElementOffsetTop + ElementHeight - WindowHeight
-                const endPoint = elementOffsetTop + elementHeight - windowHeight;
-
-                if (endPoint <= startPoint) {
-                    progressBar.style.width = '100%';
-                    return;
-                }
+                const endPoint = Math.max(startPoint + 100, elementOffsetTop + elementHeight - windowHeight);
 
                 let progress = 0;
                 if (scrollTop < startPoint) {
-                    // Before article
                     progress = 0;
-                } else if (scrollTop > endPoint) {
-                    // Past article
+                } else if (scrollTop >= endPoint) {
                     progress = 100;
                 } else {
-                    // Inside article
                     progress = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                 }
 
                 progressBar.style.width = Math.min(100, Math.max(0, progress)) + "%";
             }
 
+            // OBSERVER: Watch for content changes
+            const observer = new MutationObserver(() => {
+                updateProgress();
+            });
+
+            // Start observing the main wrapper
+            const wrapper = document.getElementById('article-wrapper') || document.body;
+            observer.observe(wrapper, { childList: true, subtree: true, attributes: true });
+
             window.addEventListener('scroll', updateProgress, { passive: true });
             window.addEventListener('resize', updateProgress);
 
-            setTimeout(updateProgress, 500);
+            // Frequent checks for startup
+            let checkCount = 0;
+            const initInterval = setInterval(() => {
+                updateProgress();
+                checkCount++;
+                if (checkCount > 20) clearInterval(initInterval);
+            }, 200);
+
             updateProgress();
         });
     </script>
