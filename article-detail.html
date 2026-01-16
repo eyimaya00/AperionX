@@ -1057,47 +1057,51 @@
         </div>
     </div>
 
-        <script>
-        // Progress Bar Logic (Optimized & Themed)
+            <script>
+        // Progress Bar Logic (Safe Mode & No Deadlock)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
             let articleElement = null;
             let ticking = false;
 
             function updateProgress() {
-                if (!progressBar) return;
-                
-                // 1. Locate Article
-                if (!articleElement) articleElement = document.querySelector('.unified-article-card');
-                
-                // 2. Check Visibility
-                if (!articleElement || articleElement.offsetParent === null) {
+                // Wrap in try-finally to ENSURE ticking is reset no matter what
+                try {
+                    // 1. Locate Article
+                    if (!progressBar) return;
+                    if (!articleElement) articleElement = document.querySelector('.unified-article-card');
+                    
+                    // 2. Check Visibility / Existence
+                    if (!articleElement || articleElement.offsetParent === null) {
+                        return; // Finally block will reset ticking
+                    }
+
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    const rect = articleElement.getBoundingClientRect();
+                    
+                    const elementTop = rect.top + scrollTop;
+                    const elementHeight = articleElement.offsetHeight;
+
+                    // 3. Safety Check
+                    if (elementHeight === 0) return;
+
+                    const startPoint = elementTop;
+                    const endPoint = elementTop + elementHeight - windowHeight;
+
+                    let pct = 0;
+                    if (endPoint > startPoint) {
+                        pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
+                    }
+                    
+                    pct = Math.max(0, Math.min(100, pct));
+                    progressBar.style.width = pct + "%";
+                } catch (e) {
+                    console.error("Progress Bar Error:", e);
+                } finally {
+                    // CRITICAL: Always release the lock
                     ticking = false;
-                    return;
                 }
-
-                const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                const windowHeight = window.innerHeight;
-                const rect = articleElement.getBoundingClientRect();
-                
-                const elementTop = rect.top + scrollTop;
-                const elementHeight = articleElement.offsetHeight;
-
-                // 3. Safety Check
-                if (elementHeight === 0) { ticking = false; return; }
-
-                const startPoint = elementTop;
-                const endPoint = elementTop + elementHeight - windowHeight;
-
-                let pct = 0;
-                if (endPoint > startPoint) {
-                    pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
-                }
-                
-                pct = Math.max(0, Math.min(100, pct));
-                progressBar.style.width = pct + "%";
-                
-                ticking = false;
             }
 
             function onScroll() {
@@ -1107,11 +1111,10 @@
                 }
             }
 
-            // Debounce for Observer to prevent Freezing/Jank
-            let observerTimeout;
+            // Standard Observer (No Debounce needed with RAF)
+            // This ensures instant reaction to layout shifts
             const observer = new MutationObserver(() => {
-                if (observerTimeout) clearTimeout(observerTimeout);
-                observerTimeout = setTimeout(onScroll, 100); // Wait 100ms before updating on DOM change
+                onScroll();
             });
             
             const wrapper = document.getElementById('article-wrapper') || document.body;
@@ -1120,7 +1123,7 @@
             window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', onScroll);
             
-            // Initialization Check
+            // Initialization Check to wake it up if loaded late
             const initLoop = setInterval(() => {
                 const el = document.querySelector('.unified-article-card');
                 if (el && el.offsetHeight > 0) {
