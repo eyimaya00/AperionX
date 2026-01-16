@@ -1585,28 +1585,7 @@
 
         if (!token || !user) window.location.href = 'index.html';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSettings();
-            loadMyArticles();
-            loadDashboardStats(); // Load stats on init
-            loadAnalytics(); // Load analytics
-            if (user) updateSidebarProfile(user);
-            if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
-
-            // Real-time polling
-            setInterval(() => {
-                const dashboard = document.getElementById('dashboard');
-                const analytics = document.getElementById('analytics');
-
-                if (analytics && analytics.classList.contains('active')) {
-                    loadAnalytics(true); // silent refresh
-                }
-
-                if (dashboard && dashboard.classList.contains('active')) {
-                    loadDashboardStats(); // refresh dashboard stats
-                }
-            }, 3000);
-        });
+        // Initial Load moved to bottom
 
         // Navigation Helpers
         function goToMyArticles(filter) {
@@ -1782,20 +1761,7 @@
             }, 3000);
         }
 
-        async function loadDashboardStats() {
-            try {
-                const res = await fetch(`${API_URL}/author/stats`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('stat-published').textContent = data.published;
-                    document.getElementById('stat-views').textContent = data.views;
-                    if (document.getElementById('stat-likes')) document.getElementById('stat-likes').textContent = data.likes;
-                    if (document.getElementById('stat-comments')) document.getElementById('stat-comments').textContent = data.comments;
-                }
-            } catch (e) { console.error('Stats load error', e); }
-        }
+        // Duplicate loadDashboardStats removed
 
         function toggleTrashView() {
             isTrashView = !isTrashView;
@@ -2474,11 +2440,24 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
+            // loadMyArticles(); // Already called in initial tab logic or below? It's better to call it.
             loadMyArticles();
             loadCategories();
             loadNotifications();
+            loadDashboardStats();
+            loadAnalytics();
             renderDashboardChart();
-            setInterval(loadNotifications, 30000);
+
+            // Setup real-time polling
+            setInterval(() => {
+                loadNotifications();
+                const dashboard = document.getElementById('dashboard');
+                const analytics = document.getElementById('analytics');
+                if (analytics && analytics.classList.contains('active')) loadAnalytics(true);
+                if (dashboard && dashboard.classList.contains('active')) loadDashboardStats();
+            }, 5000); // 5s interval
+
+            // Load Theme
 
             // Load Theme
             if (localStorage.getItem('theme') === 'dark') {
