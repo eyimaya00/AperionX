@@ -2373,8 +2373,15 @@
 
         // --- LIKERS MODAL LOGIC ---
         function showLikersModal() {
-            document.getElementById('likers-modal').classList.add('show');
-            loadLikers();
+            console.log('Open Likers Modal Triggered');
+            const modal = document.getElementById('likers-modal');
+            if (modal) {
+                modal.classList.add('show');
+                loadLikers();
+            } else {
+                console.error('Likers Modal Element Not Found!');
+                alert('Hata: Modal bulunamadı.');
+            }
         }
 
         function closeLikersModal() {
@@ -2723,11 +2730,7 @@
                 });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNotifications();
-            renderDashboardChart();
-            setInterval(loadNotifications, 30000);
-        });
+        // Redundant listener removed
 
     </script>
 </body>

@@ -1960,3 +1960,175 @@ Maintenance Check Error: Error: Unknown column 'setting_value' in 'field list'
   sqlState: '42S22',
   sqlMessage: "Unknown column 'setting_key' in 'field list'"
 }
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+Maintenance Check Error: Error: Unknown column 'setting_value' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:92:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:58:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_value' in 'field list'"
+}
+NotFoundError: Not Found
+    at createHttpError (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:861:12)
+    at SendStream.error (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:168:31)
+    at SendStream.pipe (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:468:14)
+    at sendfile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:1014:8)
+    at ServerResponse.sendFile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:411:3)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:3623:9
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+Maintenance Check Error: Error: Unknown column 'setting_value' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:92:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:58:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_value' in 'field list'"
+}
+NotFoundError: Not Found
+    at createHttpError (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:861:12)
+    at SendStream.error (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:168:31)
+    at SendStream.pipe (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:468:14)
+    at sendfile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:1014:8)
+    at ServerResponse.sendFile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:411:3)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:3623:9
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+Maintenance Check Error: Error: Unknown column 'setting_value' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:92:35
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+    at next (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:291:5)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:58:5
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_value' in 'field list'"
+}
+NotFoundError: Not Found
+    at createHttpError (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:861:12)
+    at SendStream.error (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:168:31)
+    at SendStream.pipe (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\send\index.js:468:14)
+    at sendfile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:1014:8)
+    at ServerResponse.sendFile (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\express\lib\response.js:411:3)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:3623:9
+    at Layer.handleRequest (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:342:13)
+    at C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:297:9
+    at processParams (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\router\index.js:582:12)
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
+[SHOWCASE] Rotation Error: Error: Unknown column 'setting_key' in 'field list'
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:590:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sql: "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')",
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'setting_key' in 'field list'"
+}
