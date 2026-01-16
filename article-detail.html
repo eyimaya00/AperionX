@@ -1057,68 +1057,70 @@
         </div>
     </div>
 
-    <script>
-        // Progress Bar Logic (Dynamic Content Aware)
+        <script>
+        // Progress Bar Logic (Stateless & Instant)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
             let articleElement = null;
+            let ticking = false;
 
             function updateProgress() {
+                // 1. Lazy Target
                 if (!progressBar) return;
+                if (!articleElement) articleElement = document.querySelector('.unified-article-card');
+                if (!articleElement) { ticking = false; return; }
 
-                // Try to find the element if not already found
-                if (!articleElement) {
-                    articleElement = document.querySelector('.unified-article-card');
-                }
-
-                if (!articleElement) return;
-
+                // 2. Metrics (Current State)
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
                 const windowHeight = window.innerHeight;
-
                 const rect = articleElement.getBoundingClientRect();
-                const elementOffsetTop = rect.top + scrollTop;
+                
+                // Absolute Position
+                const elementTop = rect.top + scrollTop;
                 const elementHeight = articleElement.offsetHeight;
 
-                // Stop if element has no meaningful height (not loaded)
-                if (elementHeight < 100) return;
+                // 3. Define Zone
+                // Start: Top of article hits top of viewport
+                const startPoint = elementTop;
+                // End: Bottom of article hits bottom of viewport
+                const endPoint = elementTop + elementHeight - windowHeight;
 
-                const startPoint = elementOffsetTop;
-                const endPoint = Math.max(startPoint + 100, elementOffsetTop + elementHeight - windowHeight);
-
-                let progress = 0;
-                if (scrollTop < startPoint) {
-                    progress = 0;
-                } else if (scrollTop >= endPoint) {
-                    progress = 100;
-                } else {
-                    progress = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
+                // 4. Calculate %
+                let pct = 0;
+                // Prevent division by zero or negative range
+                if (endPoint > startPoint) {
+                    // Stateless calculation: (Current - Start) / (Total Range)
+                    pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                 }
 
-                progressBar.style.width = Math.min(100, Math.max(0, progress)) + "%";
+                // 5. Clamp directly (0-100)
+                // This allows it to go back to 0 if we scroll up, or stick to 100 if we go past.
+                pct = Math.max(0, Math.min(100, pct));
+
+                progressBar.style.width = pct + "%";
+                ticking = false;
             }
 
-            // OBSERVER: Watch for content changes
-            const observer = new MutationObserver(() => {
-                updateProgress();
-            });
+            // Scroll Handler (RAF)
+            function onScroll() {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateProgress);
+                    ticking = true;
+                }
+            }
 
-            // Start observing the main wrapper
+            // Observer
+            const observer = new MutationObserver(() => { onScroll(); });
             const wrapper = document.getElementById('article-wrapper') || document.body;
             observer.observe(wrapper, { childList: true, subtree: true, attributes: true });
 
-            window.addEventListener('scroll', updateProgress, { passive: true });
-            window.addEventListener('resize', updateProgress);
-
-            // Frequent checks for startup
-            let checkCount = 0;
-            const initInterval = setInterval(() => {
-                updateProgress();
-                checkCount++;
-                if (checkCount > 20) clearInterval(initInterval);
-            }, 200);
-
-            updateProgress();
+            // Listeners
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            
+            // Initial kicks
+            setTimeout(onScroll, 100);
+            setTimeout(onScroll, 500);
         });
     </script>
 
