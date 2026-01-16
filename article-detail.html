@@ -23,6 +23,7 @@
     <!-- Canonical -->
     <link rel="canonical" href="https://aperionx.com/" />
     <title>Makale Yükleniyor... - AperionX</title>
+    <link rel="icon" type="image/png" href="/uploads/favicon.png">
     <link rel="stylesheet" href="style.css?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
@@ -1027,7 +1028,7 @@
             pointer-events: none;
         }
 
-                .progress-bar {
+        .progress-bar {
             height: 100%;
             /* Theme Colors: Restored */
             background: linear-gradient(90deg, var(--primary-color), #a855f7);
@@ -1057,7 +1058,7 @@
         </div>
     </div>
 
-                    <script>
+    <script>
         // Progress Bar Logic (Heartbeat & Self-Healing)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
@@ -1071,14 +1072,14 @@
 
                     // 1. Zombie Check
                     if (articleElement && !articleElement.isConnected) {
-                        articleElement = null; 
+                        articleElement = null;
                     }
 
                     // 2. Locate
                     if (!articleElement) {
                         articleElement = document.querySelector('.unified-article-card');
                     }
-                    
+
                     // 3. Visibility Check we can trust
                     // If no element, we can't show progress.
                     if (!articleElement) return;
@@ -1087,7 +1088,7 @@
                     const scrollTop = window.scrollY || document.documentElement.scrollTop;
                     const windowHeight = window.innerHeight;
                     const rect = articleElement.getBoundingClientRect();
-                    
+
                     // Absolute Calcs
                     const elementTop = rect.top + scrollTop;
                     const elementHeight = articleElement.offsetHeight;
@@ -1102,7 +1103,7 @@
                     if (endPoint > startPoint) {
                         pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                     }
-                    
+
                     // Direct application (Unthrottled for smoothness)
                     progressBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
 
@@ -1138,7 +1139,7 @@
             // Even if everything else dies, this checks every 1 second
             // preventing "permanent freeze"
             setInterval(updateProgress, 1000);
-            
+
             // Initial kick
             updateProgress();
         });

@@ -479,7 +479,7 @@
                     }
 
                     // Favicon logic (Use specific favicon if exists, else use logo, else default)
-                    const faviconUrl = settings.site_favicon || settings.site_logo || 'uploads/favicon.ico';
+                    const faviconUrl = settings.site_favicon || settings.site_logo || '/uploads/favicon.png';
                     let link = document.querySelector("link[rel~='icon']");
                     if (!link) {
                         link = document.createElement('link');
