@@ -1027,13 +1027,13 @@
             pointer-events: none;
         }
 
-        .progress-bar {
+                .progress-bar {
             height: 100%;
-            /* Theme Colors: Use CSS Variables */
+            /* Theme Colors: Restored */
             background: linear-gradient(90deg, var(--primary-color), #a855f7);
             width: 0%;
-            /* Removed Transition for Instant Sync */
-            /* transition: width 0.1s linear; */
+            /* Optimized for performance */
+            will-change: width;
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
     </style>
@@ -1057,8 +1057,8 @@
         </div>
     </div>
 
-    <script>
-        // Progress Bar Logic (Stateless & Visibility Final Fix)
+        <script>
+        // Progress Bar Logic (Optimized & Themed)
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
             let articleElement = null;
@@ -1066,13 +1066,12 @@
 
             function updateProgress() {
                 if (!progressBar) return;
-
+                
                 // 1. Locate Article
                 if (!articleElement) articleElement = document.querySelector('.unified-article-card');
-
-                // 2. Check Visibility (Parent might be hidden)
+                
+                // 2. Check Visibility
                 if (!articleElement || articleElement.offsetParent === null) {
-                    // Element is hidden or not found
                     ticking = false;
                     return;
                 }
@@ -1080,11 +1079,11 @@
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
                 const windowHeight = window.innerHeight;
                 const rect = articleElement.getBoundingClientRect();
-
+                
                 const elementTop = rect.top + scrollTop;
                 const elementHeight = articleElement.offsetHeight;
 
-                // 3. Safety Check for 0 height
+                // 3. Safety Check
                 if (elementHeight === 0) { ticking = false; return; }
 
                 const startPoint = elementTop;
@@ -1094,10 +1093,10 @@
                 if (endPoint > startPoint) {
                     pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
                 }
-
+                
                 pct = Math.max(0, Math.min(100, pct));
                 progressBar.style.width = pct + "%";
-
+                
                 ticking = false;
             }
 
@@ -1108,31 +1107,28 @@
                 }
             }
 
-            // Robust Observer
-            const observer = new MutationObserver((mutations) => {
-                // Force update on any DOM change in the wrapper
-                onScroll();
+            // Debounce for Observer to prevent Freezing/Jank
+            let observerTimeout;
+            const observer = new MutationObserver(() => {
+                if (observerTimeout) clearTimeout(observerTimeout);
+                observerTimeout = setTimeout(onScroll, 100); // Wait 100ms before updating on DOM change
             });
-
-            // Watch the wrapper specifically for style/class changes (visibility)
+            
             const wrapper = document.getElementById('article-wrapper') || document.body;
             observer.observe(wrapper, { attributes: true, childList: true, subtree: true });
 
             window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', onScroll);
-
-            // Persistent Initializer: Check every 500ms until we find a valid height
+            
+            // Initialization Check
             const initLoop = setInterval(() => {
                 const el = document.querySelector('.unified-article-card');
                 if (el && el.offsetHeight > 0) {
                     updateProgress();
-                    // Don't clear interval immediately, keep checking for a few seconds to ensure stability
-                    // clearInterval(initLoop); 
                 }
             }, 500);
-
-            // Stop the intense poller after 10 seconds
-            setTimeout(() => clearInterval(initLoop), 10000);
+            
+            setTimeout(() => clearInterval(initLoop), 5000);
         });
     </script>
 
