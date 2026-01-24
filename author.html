@@ -2369,10 +2369,13 @@
 
         async function editArticle(id) {
             try {
-                const res = await fetch(`${API_URL}/author/articles`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const articles = await res.json();
-                const article = articles.find(a => a.id === id);
-                if (!article) return;
+                // FIXED: Fetch singular article to get full 'content' which might be missing in list view
+                const res = await fetch(`${API_URL}/articles/${id}?t=${Date.now()}`); // Public endpoint usually has full data
+                if (!res.ok) {
+                    showAuthorToast('Makale detayları alınamadı.', 'error');
+                    return;
+                }
+                const article = await res.json();
 
                 document.getElementById('title').value = article.title;
                 document.getElementById('tags').value = article.tags || '';
@@ -2389,7 +2392,10 @@
                     document.getElementById('image-references').value = '';
                 }
 
-                quill.root.innerHTML = article.content || '';
+                // Quill Content
+                if (quill && quill.root) {
+                    quill.root.innerHTML = article.content || '';
+                }
 
                 const categorySelect = document.getElementById('category');
                 const options = Array.from(categorySelect.options).map(o => o.value);
@@ -2404,8 +2410,17 @@
                 editingArticleId = id;
                 document.getElementById('form-title').innerText = 'Makale Düzenle: ' + article.title;
                 document.getElementById('reset-form-btn').style.display = 'inline-flex';
-                showSection('new-article', document.querySelectorAll('.menu-item')[0]);
-            } catch (e) { console.error(e); }
+
+                // Switch to editor section
+                showSection('new-article', document.querySelector('a[title="Yeni Yazı"]'));
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (e) {
+                console.error('Edit load error:', e);
+                showAuthorToast('Bir hata oluştu: ' + e.message, 'error');
+            }
         }
 
         function resetForm() {
