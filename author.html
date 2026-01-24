@@ -2075,10 +2075,34 @@
 
         function handleFileSelect(input, zoneId) {
             const zone = document.getElementById(zoneId);
-            const nameDisplay = zone.querySelector('p[id$="-name"]');
             if (input.files && input.files[0]) {
-                zone.classList.add('has-file');
-                nameDisplay.innerText = input.files[0].name;
+                const file = input.files[0];
+                // Check if it's an image
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        zone.innerHTML = `
+                            <img src="${e.target.result}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                            <p style="margin-top: 10px; font-weight: 600; color: #64748b;">${escapeHtml(file.name)} (Değiştirmek için tıklayın)</p>
+                        `;
+                        zone.classList.add('has-file');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // PDF or other file
+                    const nameDisplay = zone.querySelector('p[id$="-name"]');
+                    if (nameDisplay) {
+                        nameDisplay.innerText = file.name;
+                        zone.classList.add('has-file');
+                    } else {
+                        // Fallback if structure changed
+                        zone.innerHTML = `
+                            <i class="ph ph-file" style="font-size: 32px; color: var(--primary-accent); margin-bottom: 15px;"></i>
+                            <p style="margin: 0; font-weight: 600;">${escapeHtml(file.name)}</p>
+                         `;
+                        zone.classList.add('has-file');
+                    }
+                }
             }
         }
 
@@ -2397,6 +2421,20 @@
                     quill.root.innerHTML = article.content || '';
                 }
 
+                // Image Preview Logic
+                if (article.image_url) {
+                    const previewZone = document.getElementById('preview-zone');
+                    // Normalize path
+                    let imgUrl = article.image_url.replace(/\\/g, '/');
+                    if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) imgUrl = '/' + imgUrl;
+
+                    previewZone.innerHTML = `
+                         <img src="${imgUrl}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                         <p style="margin-top: 10px; font-weight: 600; color: #64748b;">Mevcut Görsel (Değiştirmek için tıklayın)</p>
+                     `;
+                    previewZone.classList.add('has-file');
+                }
+
                 const categorySelect = document.getElementById('category');
                 const options = Array.from(categorySelect.options).map(o => o.value);
                 if (options.includes(article.category)) {
@@ -2432,6 +2470,16 @@
             document.getElementById('form-title').innerText = 'İçerik Stüdyosu';
             document.getElementById('reset-form-btn').style.display = 'none';
             document.getElementById('custom-category-group').style.display = 'none';
+
+            // Reset Image Preview
+            const previewZone = document.getElementById('preview-zone');
+            previewZone.classList.remove('has-file');
+            previewZone.innerHTML = `
+                <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+            `;
         }
 
         function showAuthorToast(msg, type) {
