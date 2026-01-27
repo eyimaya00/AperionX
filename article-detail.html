@@ -686,6 +686,20 @@
                 font-size: 1.05rem;
                 /* Slightly smaller for mobile reading */
             }
+
+            /* FORCE AUTHOR VISIBILITY ON MOBILE */
+            #detail-author {
+                display: inline-flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                margin-top: 10px;
+                background: white !important;
+                border: 1px solid rgba(99, 102, 241, 0.3) !important;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+                z-index: 10;
+                width: auto;
+                justify-content: center;
+            }
         }
 
         .btn-show-more-comments {
