@@ -894,47 +894,9 @@ app.get('/robots.txt', (req, res) => {
     res.send(`User-agent: *\nAllow: /\nSitemap: https://${req.get('host')}/sitemap.xml`);
 });
 
-app.get('/sitemap.xml', async (req, res) => {
-    try {
-        const [articles] = await pool.query("SELECT id, slug, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
 
-        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+// [REMOVED DUPLICATE SITEMAP ROUTE] - Using improved version below
 
-        // Base Routes
-        const baseUrl = `https://${req.get('host')}`; // Ideally use env var for protocol
-        const routes = ['/', '/about.html', '/articles.html', '/author.html'];
-
-        routes.forEach(route => {
-            xml += `
-    <url>
-        <loc>${baseUrl}${route}</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-        });
-
-        // Article Routes
-        articles.forEach(article => {
-            const date = new Date(article.updated_at).toISOString();
-            xml += `
-    <url>
-        <loc>${baseUrl}/article-detail.html?id=${article.id}</loc> <!-- Or slug if implemented -->
-        <lastmod>${date}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>`;
-        });
-
-        xml += '</urlset>';
-        res.header('Content-Type', 'application/xml');
-        res.send(xml);
-
-    } catch (error) {
-        console.error('Sitemap Error:', error);
-        res.status(500).send('Sitemap generation error');
-    }
-});
 
 // === AUTH ROUTES ===
 
@@ -3142,12 +3104,19 @@ app.post('/api/admin/comments/:id/reject', authenticateToken, async (req, res) =
 // --- SEO: Sitemap.xml ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT id, slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        // Fetch updated_at for accurate SEO "lastmod"
+        const [articles] = await pool.query("SELECT id, slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
+        // NEW: Fetch Authors
+        const [authors] = await pool.query(`
+            SELECT DISTINCT u.username, u.created_at 
+            FROM users u 
+            JOIN articles a ON u.id = a.author_id 
+            WHERE a.status = 'published' AND u.username IS NOT NULL
+        `);
 
         // Use dynamic host but prefer https://www.aperionx.com if host header matches
         let baseUrl = `https://${req.get('host')}`;
-        // Force production URL if easy to guess, or keep dynamic for flexibility
         if (req.get('host').includes('aperionx.com')) {
             baseUrl = 'https://www.aperionx.com';
         }
@@ -3180,14 +3149,26 @@ app.get('/sitemap.xml', async (req, res) => {
     </url>`;
         });
 
+        // Authors
+        authors.forEach(auth => {
+            xml += `
+    <url>
+        <loc>${baseUrl}/author-profile.html?u=${encodeURIComponent(auth.username)}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+        });
+
         // Articles (Using Slugs)
         articles.forEach(art => {
-            const lastMod = new Date(art.created_at).toISOString();
+            // Prefer updated_at, fallback to created_at
+            const dateStr = art.updated_at || art.created_at;
+            const lastMod = new Date(dateStr).toISOString();
             xml += `
     <url>
         <loc>${baseUrl}/makale/${art.slug}</loc>
         <lastmod>${lastMod}</lastmod>
-        <changefreq>monthly</changefreq>
+        <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>`;
         });
