@@ -3039,7 +3039,7 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
         if (!content) return res.status(400).json({ error: 'Yorum boş olamaz' });
 
         // Default is_approved = 1 (Auto-approve)
-        const cleanContent = DOMPurify.sanitize(content);
+        const cleanContent = content; // DOMPurify.sanitize(content);
         await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
         res.json({ message: 'Yorum gönderildi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -3053,7 +3053,7 @@ app.put('/api/comments/:id', authenticateToken, async (req, res) => {
         const [rows] = await pool.query('SELECT * FROM comments WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
         if (!rows.length) return res.status(403).json({ error: 'Yetkisiz işlem' });
 
-        await pool.query('UPDATE comments SET content = ?, is_approved = 1 WHERE id = ?', [DOMPurify.sanitize(content), req.params.id]);
+        await pool.query('UPDATE comments SET content = ?, is_approved = 1 WHERE id = ?', [content, req.params.id]);
         res.json({ message: 'Yorum güncellendi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
