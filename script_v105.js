@@ -1834,14 +1834,15 @@ function renderArticleDetail(article) {
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
     const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
-    const profileKey = safeAuthorName;
 
-    if (profileKey && profileKey !== 'Gizli Yazar') {
-        const linkKey = profileKey.replace(/ /g, '-');
-        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${linkKey}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+    // Check for author_id. If missing, we can't link to profile safely with username if they don't have one.
+    if (article.author_id) {
+        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
     } else {
+        // Fallback for missing ID
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
     }
+
     document.getElementById('detail-title').innerText = article.title;
 
     // Excerpt
@@ -2240,7 +2241,10 @@ async function loadArticleSlider(currentId) {
                      <div class="content-bottom">
                         <a href="${art.slug ? '/makale/' + art.slug : '/article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
                         <div class="similar-card-meta">
-                            <span>${art.author_name || 'Admin'}</span>
+                            ${art.author_id
+                    ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
+                    : `<span>${art.author_name || 'Admin'}</span>`
+                }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
                             <span>${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>
                         </div>

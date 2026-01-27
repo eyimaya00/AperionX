@@ -2219,7 +2219,7 @@ app.get('/api/articles', async (req, res) => {
         const { category, search, page = 1, limit = 9 } = req.query;
         // Truncate excerpt to avoid huge packet sizes if it contains full content
         let query = `
-            SELECT a.id, a.slug, a.title, a.category, u.fullname as author_name, a.image_url, a.created_at, a.views, LEFT(a.excerpt, 300) as excerpt 
+            SELECT a.id, a.slug, a.title, a.category, u.fullname as author_name, a.author_id, a.image_url, a.created_at, a.views, LEFT(a.excerpt, 300) as excerpt 
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
             WHERE a.status = 'published'
