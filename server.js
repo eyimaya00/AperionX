@@ -139,6 +139,12 @@ app.get('/maintenance-access', async (req, res) => {
     }
 });
 
+// === ROOT REDIRECT ===
+// Redirect direct /index.html access to root
+app.get('/index.html', (req, res) => {
+    res.redirect(301, '/');
+});
+
 // === SEO & SLUG HELPERS ===
 // Serve index.html for /en root
 app.get(['/en', '/en/'], (req, res) => {

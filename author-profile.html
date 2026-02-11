@@ -367,7 +367,7 @@
     <!-- Header will be loaded by script.js -->
     <header class="header">
         <div class="container header-content">
-            <a href="index.html" class="logo">
+            <a href="/" class="logo">
                 <div class="logo-icon">
                     <i class="ph-fill ph-planet"></i>
                 </div>
@@ -465,7 +465,7 @@
             <div class="footer-col">
                 <h4 class="footer-heading">Hızlı Erişim</h4>
                 <ul class="footer-links">
-                    <li><a href="index.html">Ana Sayfa</a></li>
+                    <li><a href="/">Ana Sayfa</a></li>
                     <li><a href="articles.html">Makaleler</a></li>
                     <li><a href="about.html">Hakkımızda</a></li>
                 </ul>
@@ -618,7 +618,7 @@
             const username = params.get('u');
 
             if (!username) {
-                document.querySelector('main').innerHTML = '<div style="text-align:center; padding:100px;"><h2>Kullanıcı bulunamadı.</h2><a href="index.html" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Dön</a></div>';
+                document.querySelector('main').innerHTML = '<div style="text-align:center; padding:100px;"><h2>Kullanıcı bulunamadı.</h2><a href="/" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Dön</a></div>';
                 return;
             }
 
@@ -696,7 +696,7 @@
                             ${e.message}<br>
                             Aradığınız yazar kaldırılmış veya bağlantıda bir sorun oluşmuş olabilir.
                         </p>
-                        <a href="index.html" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem; border-radius: 50px;">
+                        <a href="/" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem; border-radius: 50px;">
                             <i class="ph-bold ph-house" style="margin-right: 8px;"></i> Ana Sayfaya Dön
                         </a>
                     </div>`;

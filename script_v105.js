@@ -793,12 +793,21 @@ async function loadMenus() {
 
         if (menus.length === 0) return; // Keep default if empty
 
+        // Standardize Home Link
+        menus.forEach(m => {
+            if (m.url === 'index.html' || m.label === 'Ana Sayfa') m.url = '/';
+        });
+
         const navMenu = document.querySelector('.nav-menu');
         const mobileMenu = document.querySelector('.mobile-menu');
 
         // Get current page filename
-        let currentPath = window.location.pathname.split('/').pop();
-        if (!currentPath || currentPath === '/') currentPath = 'index.html'; // Default for root
+        let currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath.endsWith('/index.html') || currentPath.endsWith('index.html')) {
+            currentPath = '/';
+        } else {
+            currentPath = currentPath.split('/').pop();
+        }
 
         // Clear existing (except auth buttons in mobile)
         if (navMenu) navMenu.innerHTML = '';
