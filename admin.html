@@ -812,6 +812,10 @@
             <a href="#" class="menu-item" onclick="showSection('email-management', this)">
                 <i class="ph ph-envelope"></i> <span>E-posta Yönetimi</span>
             </a>
+            <a href="#" class="menu-item"
+                onclick="showSection('newsletter-management', this); loadNewsletterManagement();">
+                <i class="ph ph-paper-plane-tilt"></i> <span>Bülten Gönderimi</span>
+            </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn">
@@ -924,6 +928,70 @@
                     <label for="smtp_secure" style="margin:0; cursor:pointer; font-weight:500;">Secure Bağlantı
                         (SSL)</label>
                     <small style="color:#64748b;">(Port 465 kullanıyorsanız işaretleyin)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW Newsletter Management Section -->
+        <div id="newsletter-management" class="section">
+            <div class="header-section">
+                <div>
+                    <h1 class="page-title">Bülten Gönderimi</h1>
+                    <p class="subtitle">Makalelerinizi seçip abonelerinize özel bülten olarak gönderin.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label style="font-weight:600; margin-bottom:10px; display:block;">📣 Gönderilecek Makale</label>
+                    <select id="newsletter-article-select" class="form-control" onchange="previewNewsletter()">
+                        <option value="">Makale Seçiniz...</option>
+                    </select>
+                    <small style="color:#64748b; display:block; margin-top:5px;">Sadece 'Yayında' (Published) olan
+                        makaleler listelenir.</small>
+                </div>
+
+                <div class="form-group" style="margin-top:20px;">
+                    <label style="font-weight:600; margin-bottom:10px; display:block;">👁️ Önizleme</label>
+                    <div id="newsletter-preview-container"
+                        style="border:1px solid #e2e8f0; border-radius:12px; padding:20px; background:#f8fafc; min-height:400px; display:flex; align-items:center; justify-content:center;">
+                        <span style="color:#94a3b8;">Makale seçildiğinde önizleme burada görünecek.</span>
+                    </div>
+                </div>
+
+                <div class="form-group"
+                    style="margin-top:30px; background:#f0f9ff; padding:20px; border-radius:12px; border:1px solid #bae6fd;">
+                    <label style="font-weight:600; margin-bottom:15px; display:block; color:#0369a1;">📤 Alıcı
+                        Seçimi</label>
+                    <div style="display:flex; gap:30px; flex-wrap:wrap;">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="recipient_target" value="test" checked
+                                onchange="toggleRecipientInput()">
+                            <span style="font-weight:500;">Sadece Bana Gönder (Test)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="recipient_target" value="all" onchange="toggleRecipientInput()">
+                            <span style="font-weight:500;">Tüm Aboneler</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="recipient_target" value="custom"
+                                onchange="toggleRecipientInput()">
+                            <span style="font-weight:500;">Özel Liste</span>
+                        </label>
+                    </div>
+
+                    <div id="custom-recipient-input" style="display:none; margin-top:15px;">
+                        <label style="font-weight:500; font-size:0.9rem;">E-posta Adresleri (Virgülle Ayırın)</label>
+                        <input type="text" id="custom-emails" class="form-control"
+                            placeholder="ornek@site.com, diger@site.com" style="margin-top:5px;">
+                    </div>
+                </div>
+
+                <div style="margin-top:30px; text-align:right;">
+                    <button onclick="sendNewsletterVerified()" class="btn btn-primary"
+                        style="padding:14px 30px; font-size:1.1rem;">
+                        <i class="ph-bold ph-paper-plane-right"></i> Gönderimi Başlat
+                    </button>
                 </div>
             </div>
         </div>
@@ -3759,6 +3827,120 @@
                 'Authorization': `Bearer ${token}`
             };
             return fetch(url, { ...options, headers });
+        }
+
+
+        /* === NEWSLETTER MANAGEMENT LOGIC === */
+        async function loadNewsletterManagement() {
+            const select = document.getElementById('newsletter-article-select');
+            select.innerHTML = '<option value="">Yükleniyor...</option>';
+
+            try {
+                // Determine API endpoint - reusing 'all-articles' logic but simpler fetch
+                const res = await fetch(`${API_URL}/admin/all-articles`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const articles = await res.json();
+
+                select.innerHTML = '<option value="">Makale Seçiniz...</option>';
+
+                const published = articles.filter(a => a.status === 'published');
+
+                if (published.length === 0) {
+                    select.innerHTML = '<option value="">Yayınlanmış makale yok</option>';
+                    return;
+                }
+
+                published.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.id;
+                    opt.innerText = `${a.title} (${new Date(a.created_at).toLocaleDateString('tr-TR')})`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error(e);
+                showToast('Makaleler yüklenemedi', 'error');
+            }
+        }
+
+        async function previewNewsletter() {
+            const articleId = document.getElementById('newsletter-article-select').value;
+            const container = document.getElementById('newsletter-preview-container');
+
+            if (!articleId) {
+                container.innerHTML = '<span style="color:#94a3b8;">Makale seçildiğinde önizleme burada görünecek.</span>';
+                return;
+            }
+
+            container.innerHTML = '<span style="color:#6366f1;">Önizleme yükleniyor...</span>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/newsletter/preview/${articleId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const html = await res.text();
+
+                if (res.ok) {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '600px';
+                    iframe.style.border = 'none';
+                    iframe.style.backgroundColor = 'white';
+                    container.innerHTML = '';
+                    container.appendChild(iframe);
+
+                    iframe.contentWindow.document.open();
+                    iframe.contentWindow.document.write(html);
+                    iframe.contentWindow.document.close();
+                } else {
+                    container.innerHTML = `<span style="color:red;">Hata: ${html}</span>`;
+                }
+            } catch (e) {
+                container.innerHTML = '<span style="color:red;">Önizleme hatası.</span>';
+            }
+        }
+
+        function toggleRecipientInput() {
+            const target = document.querySelector('input[name="recipient_target"]:checked').value;
+            const customDiv = document.getElementById('custom-recipient-input');
+            customDiv.style.display = target === 'custom' ? 'block' : 'none';
+        }
+
+        async function sendNewsletterVerified() {
+            const articleId = document.getElementById('newsletter-article-select').value;
+            if (!articleId) return showToast('Lütfen bir makale seçin.', 'warning');
+
+            const target = document.querySelector('input[name="recipient_target"]:checked').value;
+            let customEmails = [];
+
+            if (target === 'custom') {
+                const input = document.getElementById('custom-emails').value;
+                if (!input) return showToast('Lütfen e-posta adreslerini girin.', 'warning');
+                customEmails = input.split(',').map(e => e.trim()).filter(e => e);
+            }
+
+            if (!confirm('Bu bülteni seçilen alıcılara göndermek istediğinize emin misiniz?')) return;
+
+            showToast('Gönderiliyor...', 'info');
+
+            try {
+                const res = await fetch(`${API_URL}/admin/newsletter/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ articleId, target, customEmails })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.error || 'Hata oluştu', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Sunucu hatası', 'error');
+            }
         }
 
         // Load Email Logs

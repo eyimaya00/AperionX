@@ -3250,7 +3250,8 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
             await pool.query("UPDATE articles SET status = 'published', approved_by = ?, rejection_reason = NULL, updated_at = NOW() WHERE id = ?", [req.user.id, req.params.id]);
 
             // Trigger Email Notification (Background)
-            sendNewArticleNotification(req.params.id).catch(err => console.error('Notification Error:', err));
+            // AUTO-SEND DISABLED: Manual control enabled via Admin Panel
+            // sendNewArticleNotification(req.params.id).catch(err => console.error('Notification Error:', err));
 
         } else if (decision === 'reject') {
             await pool.query("UPDATE articles SET status = 'rejected', approved_by = ?, rejection_reason = ?, updated_at = NOW() WHERE id = ?", [req.user.id, rejection_reason, req.params.id]);
@@ -3272,47 +3273,71 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
 
 // Helper: Send New Article Notification to All Users
 // Helper: Send New Article Notification to All Users
-async function sendNewArticleNotification(articleId) {
+// === MANUAL NEWSLETTER SYSTEM ===
+
+// 1. Preview Newsletter
+app.get('/api/admin/newsletter/preview/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
     try {
-        console.log(`[EMAIL-NOTIF] Starting notification process for Article ID: ${articleId}`);
+        const html = await generateNewsletterHTML(req.params.id);
+        if (!html) return res.status(404).send('Makale bulunamadı');
+        res.send(html);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
 
-        // 1. Fetch Article Details with Author Name
-        const [rows] = await pool.query(`
-            SELECT a.*, u.fullname as author_name 
-            FROM articles a 
-            LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.id = ?
-        `, [articleId]);
+// 2. Send Newsletter
+app.post('/api/admin/newsletter/send', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    const { articleId, target, customEmails } = req.body; // target: 'all', 'test', 'custom'
 
-        if (rows.length === 0) {
-            console.error('[EMAIL-NOTIF] Article not found.');
-            return;
+    try {
+        let recipients = [];
+
+        if (target === 'test') {
+            recipients = [req.user.email];
+        } else if (target === 'custom') {
+            if (!Array.isArray(customEmails) || customEmails.length === 0) return res.status(400).json({ error: 'Alıcı listesi boş.' });
+            recipients = customEmails;
+        } else {
+            // All Subscribers
+            const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND email IS NOT NULL AND is_subscribed = 1");
+            recipients = users.map(u => u.email);
         }
 
-        const article = rows[0];
-        console.log(`[EMAIL-NOTIF] Sending for: ${article.title}`);
+        if (recipients.length === 0) return res.status(400).json({ error: 'Gönderilecek alıcı bulunamadı.' });
 
-        // 2. Fetch All Standard Users (role='user') AND Subscribed
-        const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND email IS NOT NULL AND is_subscribed = 1");
-        if (users.length === 0) {
-            console.log('[EMAIL-NOTIF] No subscribed users found to notify.');
-            return;
-        }
+        // Send logic
+        await sendNewsletterToRecipients(articleId, recipients);
+        res.json({ message: `${recipients.length} kişiye gönderim başlatıldı.` });
 
-        const recipientEmails = users.map(u => u.email);
-        console.log(`[EMAIL-NOTIF] Found ${recipientEmails.length} recipients.`);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
-        // 3. Prepare Email Content
-        const siteUrl = 'https://aperionx.com';
-        const articleLink = `${siteUrl}/makale/${article.slug}`;
-        const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
-        const logoPath = path.join(__dirname, 'uploads', 'logo.png');
+// Helper: Generate HTML
+async function generateNewsletterHTML(articleId) {
+    const [rows] = await pool.query(`
+        SELECT a.*, u.fullname as author_name
+        FROM articles a
+        LEFT JOIN users u ON a.author_id = u.id
+        WHERE a.id = ?
+    `, [articleId]);
 
-        const heroImage = article.image_url ?
-            (article.image_url.startsWith('http') ? article.image_url : `${siteUrl}/${article.image_url}`) :
-            `${siteUrl}/uploads/default-hero.jpg`;
+    if (rows.length === 0) return null;
+    const article = rows[0];
 
-        const htmlContent = `
+    const siteUrl = 'https://aperionx.com';
+    const articleLink = `${siteUrl}/makale/${article.slug}`;
+    const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
+    const heroImage = article.image_url ?
+        (article.image_url.startsWith('http') ? article.image_url : `${siteUrl}/${article.image_url}`) :
+        `${siteUrl}/uploads/default-hero.jpg`;
+
+    return `
         <!DOCTYPE html>
         <html>
         <head>
@@ -3345,13 +3370,13 @@ async function sendNewArticleNotification(articleId) {
                 <div class="content">
                     <span class="tag">YENİ MAKALE</span>
                     <h1 class="title">${article.title}</h1>
-                    
+
                     <div class="author">
                         <span>🖊️ Yazar: <span style="color: #0f172a;">${article.author_name || 'AperionX Yazarı'}</span></span>
                     </div>
 
                     <p class="excerpt">${article.excerpt || 'Bilim ve teknolojinin derinliklerine yolculuk...'}</p>
-                    
+
                     <div class="button-container">
                         <a href="${articleLink}" class="read-btn">Makaleyi Oku</a>
                     </div>
@@ -3363,24 +3388,39 @@ async function sendNewArticleNotification(articleId) {
             </div>
         </body>
         </html>
-        `;
+    `;
+}
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 587,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            },
-            tls: { rejectUnauthorized: false }
-        });
+// Helper: Send to Recipients
+async function sendNewsletterToRecipients(articleId, recipientEmails) {
+    if (recipientEmails.length === 0) return;
 
+    const htmlContent = await generateNewsletterHTML(articleId);
+    if (!htmlContent) return;
+
+    const logoPath = path.join(__dirname, 'uploads', 'logo.png');
+
+    // Fetch Article Title for Subject
+    const [rows] = await pool.query('SELECT title FROM articles WHERE id = ?', [articleId]);
+    const articleTitle = rows[0].title;
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        },
+        tls: { rejectUnauthorized: false }
+    });
+
+    try {
         const info = await transporter.sendMail({
             from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
-            to: process.env.SMTP_USER,
-            bcc: recipientEmails,
-            subject: `✨ Yeni Makale: ${article.title}`,
+            to: process.env.SMTP_USER, // Send to self
+            bcc: recipientEmails, // Everyone in BCC
+            subject: `✨ Yeni Makale: ${articleTitle}`,
             html: htmlContent,
             attachments: [
                 {
@@ -3391,19 +3431,15 @@ async function sendNewArticleNotification(articleId) {
             ]
         });
 
-        console.log(`[EMAIL-NOTIF] Sent successfully. Message ID: ${info.messageId}`);
+        console.log(`[EMAIL-MANUAL] Sent to ${recipientEmails.length} people. ID: ${info.messageId}`);
 
-        // Log to DB
         await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
-            [articleId, `✨ Yeni Makale: ${article.title}`, recipientEmails.length, 'sent']);
+            [articleId, `✨ Yeni Makale: ${articleTitle}`, recipientEmails.length, 'sent']);
 
     } catch (e) {
-        console.error('[EMAIL-NOTIF] Error:', e);
-        // Log Failure
-        try {
-            await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
-                [articleId, 'Notification Failed', 0, 'failed', e.message]);
-        } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
+        console.error('[EMAIL-MANUAL] Error:', e);
+        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
+            [articleId, 'Manual Send Failed', recipientEmails.length, 'failed', e.message]);
     }
 }
 
@@ -3537,7 +3573,7 @@ app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
 
     // Check and Send Latest Article Notification if missed
-    await checkAndSendLatestNotification();
+    // await checkAndSendLatestNotification(); // DISABLED FOR MANUAL CHECK
 });
 
 async function checkAndSendLatestNotification() {
