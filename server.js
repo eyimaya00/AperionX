@@ -1247,107 +1247,7 @@ app.post('/api/public/unsubscribe', async (req, res) => {
 });
 
 // Helper Function: Send New Article Notification
-async function sendNewArticleNotification(articleId) {
-    try {
-        // 1. Fetch Article Info
-        const [aRows] = await pool.query('SELECT title, slug, excerpt, image_url, author_id FROM articles WHERE id = ?', [articleId]);
-        if (aRows.length === 0) return;
-        const article = aRows[0];
-
-        // 2. Fetch Author Info
-        const [uRows] = await pool.query('SELECT fullname, avatar FROM users WHERE id = ?', [article.author_id]);
-        const authorName = (uRows.length > 0) ? uRows[0].fullname : 'AperionX Yazarı';
-        const authorAvatar = (uRows.length > 0 && uRows[0].avatar) ? uRows[0].avatar : 'uploads/default-avatar.png';
-
-        // 3. Fetch SUBSCRIBED Users
-        const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND is_subscribed = 1");
-        if (users.length === 0) {
-            console.log('[EMAIL-NOTIF] No subscribed users found.');
-            return;
-        }
-
-        const recipientEmails = users.map(u => u.email);
-
-        // 4. Construct Email (With Unsubscribe Link)
-        const siteUrl = 'https://aperionx.com';
-        const articleLink = `${siteUrl}/makale/${article.slug}`;
-        const logoPath = path.join(__dirname, 'uploads', 'logo.png');
-        const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
-
-        const htmlContent = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-            <!-- Header -->
-            <div style="background-color: #0f172a; padding: 20px; text-align: center;">
-                 <img src="cid:unique-logo-id" alt="AperionX" style="height: 40px;">
-            </div>
-
-            <!-- Hero Image -->
-             <div style="width: 100%; height: 250px; background-image: url('${article.image_url.startsWith('http') ? article.image_url : siteUrl + '/' + article.image_url}'); background-size: cover; background-position: center;"></div>
-
-            <!-- Content -->
-            <div style="padding: 30px;">
-                <div style="display: flex; align-items: center; margin-bottom: 20px;">
-                     <img src="${authorAvatar.startsWith('http') ? authorAvatar : siteUrl + '/' + authorAvatar}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover;">
-                     <span style="color: #64748b; font-weight: 500;">${authorName}</span>
-                </div>
-
-                <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px; line-height: 1.3;">${article.title}</h1>
-                <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">${article.excerpt || 'Yeni makalemizi okumak için aşağıdaki butona tıklayın.'}</p>
-
-                <a href="${articleLink}" style="display: block; background-color: #6366f1; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Makaleyi Oku</a>
-            </div>
-
-            <!-- Footer -->
-            <div style="background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0;">
-                <p>&copy; ${new Date().getFullYear()} AperionX. Tüm hakları saklıdır.</p>
-                <p>
-                    This e-mail is sent to you because you are subscribed to AperionX. If you no longer wish to receive these emails, you can <a href="${unsubscribeLink}" style="color: #6366f1; text-decoration: underline;">unsubscribe here</a>.
-                </p>
-            </div>
-        </div>
-        `;
-
-        // 5. Send Email
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
-        const info = await transporter.sendMail({
-            from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
-            to: process.env.SMTP_USER,
-            bcc: recipientEmails,
-            subject: `✨ Yeni Makale: ${article.title}`,
-            html: htmlContent,
-            attachments: [
-                {
-                    filename: 'logo.png',
-                    path: logoPath,
-                    cid: 'unique-logo-id'
-                }
-            ]
-        });
-
-        console.log(`[EMAIL-NOTIF] Sent successfully. Message ID: ${info.messageId}`);
-
-        // Log to DB
-        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
-            [articleId, `✨ Yeni Makale: ${article.title}`, recipientEmails.length, 'sent']);
-
-    } catch (e) {
-        console.error('[EMAIL-NOTIF] Error:', e);
-        // Log Failure
-        try {
-            await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
-                [articleId, 'Notification Failed', 0, 'failed', e.message]);
-        } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
-    }
-}
+// [Duplicate Function Removed]
 
 // NEW: Public Author Profile Endpoint
 app.get('/api/public/author/:identifier', async (req, res) => {
@@ -3371,6 +3271,7 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
 });
 
 // Helper: Send New Article Notification to All Users
+// Helper: Send New Article Notification to All Users
 async function sendNewArticleNotification(articleId) {
     try {
         console.log(`[EMAIL-NOTIF] Starting notification process for Article ID: ${articleId}`);
@@ -3391,10 +3292,10 @@ async function sendNewArticleNotification(articleId) {
         const article = rows[0];
         console.log(`[EMAIL-NOTIF] Sending for: ${article.title}`);
 
-        // 2. Fetch All Standard Users (role='user')
-        const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND email IS NOT NULL");
+        // 2. Fetch All Standard Users (role='user') AND Subscribed
+        const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND email IS NOT NULL AND is_subscribed = 1");
         if (users.length === 0) {
-            console.log('[EMAIL-NOTIF] No users found to notify.');
+            console.log('[EMAIL-NOTIF] No subscribed users found to notify.');
             return;
         }
 
@@ -3404,6 +3305,7 @@ async function sendNewArticleNotification(articleId) {
         // 3. Prepare Email Content
         const siteUrl = 'https://aperionx.com';
         const articleLink = `${siteUrl}/makale/${article.slug}`;
+        const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
         const logoPath = path.join(__dirname, 'uploads', 'logo.png');
 
         const heroImage = article.image_url ?
@@ -3456,7 +3358,7 @@ async function sendNewArticleNotification(articleId) {
                 </div>
                 <div class="footer">
                     <p>&copy; 2025 AperionX. Bilimin Sınırlarında.</p>
-                    <p>Bu bülten üyelerimize özel otomatik olarak gönderilmiştir.</p>
+                    <p>Bu bülten üyelerimize özel otomatik olarak gönderilmiştir. Almak istemiyorsanız <a href="${unsubscribeLink}">buradan ayrılabilirsiniz</a>.</p>
                 </div>
             </div>
         </body>
@@ -3504,6 +3406,23 @@ async function sendNewArticleNotification(articleId) {
         } catch (dbErr) { console.error('Failed to log email error to DB:', dbErr); }
     }
 }
+
+// Unsubscribe Endpoint
+app.post('/api/public/unsubscribe', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'E-posta gerekli.' });
+
+    try {
+        const [result] = await pool.query("UPDATE users SET is_subscribed = 0 WHERE email = ?", [email]);
+        if (result.affectedRows > 0) {
+            res.json({ message: 'Başarıyla ayrıldınız.' });
+        } else {
+            res.status(404).json({ message: 'E-posta bulunamadı veya zaten kayıtlı değil.' });
+        }
+    } catch (e) {
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
 
 
 // GLOBAL 404 HANDLER (MUST BE LAST)
@@ -3611,8 +3530,34 @@ app.use((req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+// Start Server
+app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     console.log('SERVER RESTARTING WITH LATEST CODE...');
     console.log(`Server running on http://localhost:${PORT}`);
+
+    // Check and Send Latest Article Notification if missed
+    await checkAndSendLatestNotification();
 });
+
+async function checkAndSendLatestNotification() {
+    try {
+        // 1. Get Latest Published Article
+        const [rows] = await pool.query("SELECT id, title FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 1");
+        if (rows.length === 0) return;
+
+        const article = rows[0];
+
+        // 2. Check if already sent
+        const [logs] = await pool.query("SELECT id FROM email_logs WHERE article_id = ? AND status = 'sent'", [article.id]);
+
+        if (logs.length === 0) {
+            console.log(`[STARTUP] Latest article "${article.title}" (ID: ${article.id}) notification not sent yet. Sending now...`);
+            await sendNewArticleNotification(article.id);
+        } else {
+            console.log(`[STARTUP] Notification for latest article "${article.title}" already sent.`);
+        }
+    } catch (e) {
+        console.error('[STARTUP] Failed to check for latest notifications:', e);
+    }
+}
