@@ -3392,6 +3392,7 @@ async function generateNewsletterHTML(articleId) {
 }
 
 // Helper: Send to Recipients
+// Helper: Send to Recipients (Individual Loop)
 async function sendNewsletterToRecipients(articleId, recipientEmails) {
     if (recipientEmails.length === 0) return;
 
@@ -3402,6 +3403,7 @@ async function sendNewsletterToRecipients(articleId, recipientEmails) {
 
     // Fetch Article Title for Subject
     const [rows] = await pool.query('SELECT title FROM articles WHERE id = ?', [articleId]);
+    if (rows.length === 0) return;
     const articleTitle = rows[0].title;
 
     const transporter = nodemailer.createTransport({
@@ -3415,31 +3417,41 @@ async function sendNewsletterToRecipients(articleId, recipientEmails) {
         tls: { rejectUnauthorized: false }
     });
 
+    console.log(`[NEWSLETTER] Starting batch send to ${recipientEmails.length} recipients...`);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // Send individually
+    for (const recipient of recipientEmails) {
+        try {
+            await transporter.sendMail({
+                from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
+                to: recipient,
+                // No BCC
+                subject: `✨ Yeni Makale: ${articleTitle}`,
+                html: htmlContent,
+                attachments: [{ filename: 'logo.png', path: logoPath, cid: 'unique-logo-id' }]
+            });
+            successCount++;
+            // Small delay to be polite to SMTP server
+            await new Promise(resolve => setTimeout(resolve, 250));
+        } catch (e) {
+            console.error(`[NEWSLETTER] Failed to send to ${recipient}: ${e.message}`);
+            failCount++;
+        }
+    }
+
+    console.log(`[NEWSLETTER] Batch finished. Success: ${successCount}, Fail: ${failCount}`);
+
+    // Log to DB
+    const status = failCount === 0 ? 'sent' : (successCount > 0 ? 'partial' : 'failed');
+
     try {
-        const info = await transporter.sendMail({
-            from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
-            to: process.env.SMTP_USER, // Send to self
-            bcc: recipientEmails, // Everyone in BCC
-            subject: `✨ Yeni Makale: ${articleTitle}`,
-            html: htmlContent,
-            attachments: [
-                {
-                    filename: 'logo.png',
-                    path: logoPath,
-                    cid: 'unique-logo-id'
-                }
-            ]
-        });
-
-        console.log(`[EMAIL-MANUAL] Sent to ${recipientEmails.length} people. ID: ${info.messageId}`);
-
         await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
-            [articleId, `✨ Yeni Makale: ${articleTitle}`, recipientEmails.length, 'sent']);
-
+            [articleId, `✨ Yeni Makale: ${articleTitle}`, successCount, status]);
     } catch (e) {
-        console.error('[EMAIL-MANUAL] Error:', e);
-        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status, error_message) VALUES (?, ?, ?, ?, ?)',
-            [articleId, 'Manual Send Failed', recipientEmails.length, 'failed', e.message]);
+        console.error('[NEWSLETTER] Error logging to DB:', e);
     }
 }
 
