@@ -3301,8 +3301,8 @@ app.post('/api/admin/newsletter/send', authenticateToken, async (req, res) => {
             if (!Array.isArray(customEmails) || customEmails.length === 0) return res.status(400).json({ error: 'Alıcı listesi boş.' });
             recipients = customEmails;
         } else {
-            // All Subscribers
-            const [users] = await pool.query("SELECT email FROM users WHERE role = 'user' AND email IS NOT NULL AND is_subscribed = 1");
+            // All Subscribers - Fix: Remove role restriction to include everyone subscribed
+            const [users] = await pool.query("SELECT email FROM users WHERE email IS NOT NULL AND is_subscribed = 1");
             recipients = users.map(u => u.email);
         }
 

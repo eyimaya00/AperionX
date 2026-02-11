@@ -3917,30 +3917,37 @@
                 customEmails = input.split(',').map(e => e.trim()).filter(e => e);
             }
 
-            if (!confirm('Bu bülteni seçilen alıcılara göndermek istediğinize emin misiniz?')) return;
+            // Replace native confirm with showConfirmModal
+            showConfirmModal('Bu bülteni seçilen alıcılara göndermek istediğinize emin misiniz?', async () => {
+                showToast('Gönderiliyor...', 'info');
+                closeConfirmModal(); // Close modal immediately
 
-            showToast('Gönderiliyor...', 'info');
+                try {
+                    const res = await fetch(`${API_URL}/admin/newsletter/send`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ articleId, target, customEmails })
+                    });
 
-            try {
-                const res = await fetch(`${API_URL}/admin/newsletter/send`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ articleId, target, customEmails })
-                });
-
-                const data = await res.json();
-                if (res.ok) {
-                    showToast(data.message, 'success');
-                } else {
-                    showToast(data.error || 'Hata oluştu', 'error');
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast(data.error || 'Hata oluştu', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showToast('Sunucu hatası', 'error');
                 }
-            } catch (e) {
-                console.error(e);
-                showToast('Sunucu hatası', 'error');
-            }
+            });
+
+            /* MOVED logic inside callback */
+
+
+            /* Logic moved inside modal callback */
         }
 
         // Load Email Logs
@@ -3988,7 +3995,57 @@
         }
 
         // Auto-load on section show if needed (handled by onclick)
+
+        /* === GENERIC CONFIRM MODAL LOGIC === */
+        let pendingConfirmAction = null;
+
+        function showConfirmModal(message, action) {
+            const modal = document.getElementById('confirmation-modal');
+            if (!modal) return console.error('Modal template not found');
+
+            document.getElementById('confirmation-modal-message').innerText = message;
+            modal.classList.add('show');
+            pendingConfirmAction = action;
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmation-modal');
+            if (modal) modal.classList.remove('show');
+            pendingConfirmAction = null;
+        }
+
+        function triggerConfirmAction() {
+            if (typeof pendingConfirmAction === 'function') {
+                pendingConfirmAction();
+            }
+            closeConfirmModal(); // Ensure close if action didn't
+        }
+
+        // Close on outside click
+        window.onclick = function (event) {
+            const modal = document.getElementById('confirmation-modal');
+            if (event.target == modal) {
+                closeConfirmModal();
+            }
+        }
     </script>
+    <!-- Generic Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon"
+                style="margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center;">
+                <i class="ph-bold ph-question" style="font-size:30px;"></i>
+            </div>
+            <h3 style="margin-bottom:10px; font-size:1.5rem; color:#1e293b;">Onay</h3>
+            <p id="confirmation-modal-message" style="color:#64748b; margin-bottom:30px; font-size:1.05rem;">İşlemi
+                onaylıyor musunuz?</p>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button onclick="closeConfirmModal()" class="btn"
+                    style="background:#f1f5f9; color:#64748b;">İptal</button>
+                <button onclick="triggerConfirmAction()" class="btn btn-primary">Onayla</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
