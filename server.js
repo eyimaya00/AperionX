@@ -219,7 +219,7 @@ async function getArticleAuthors(pool, articleId) {
             const [art] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [articleId]);
             if (art.length > 0 && art[0].author_id) {
                 const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [art[0].author_id]);
-                return u;
+                return u ? [u] : [];
             }
         }
         return rows;
