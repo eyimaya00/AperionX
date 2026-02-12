@@ -486,6 +486,22 @@ async function ensureSchema() {
             console.log('Migration Code: Users table updated with username column.');
         }
 
+        // --- NEW: Ensure article_authors table exists (Auto-Fix for Server) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS article_authors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                article_id INT NOT NULL,
+                user_id INT NOT NULL,
+                order_index INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_author (article_id, user_id),
+                FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log('Schema Check: article_authors table ensured.');
+        // ---------------------------------------------------------------------
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS likes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
