@@ -1,6 +1,13 @@
 ﻿// Base API URL
 var API_URL = '/api';
 
+// Inject author-chip hover CSS (can't do :hover with inline styles)
+(function () {
+    const style = document.createElement('style');
+    style.textContent = `.author-chip:hover { background: rgba(99,102,241,0.25) !important; color: #4f46e5 !important; border-color: rgba(99,102,241,0.5) !important; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(99,102,241,0.2); }`;
+    document.head.appendChild(style);
+})();
+
 // --- HELPER: Resolve Image Path ---
 function resolveImagePath(url) {
     if (!url) return null;
@@ -1422,9 +1429,8 @@ async function loadShowcase() {
                         <div class="card-meta-row">
                              <div class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">
                              ${(item.authors && item.authors.length > 0)
-                        ? `<span style="display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap;">
-                                    ${item.authors.map((a, idx) => `
-                                        ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                        ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    ${item.authors.map((a) => `
                                         <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
                                     `).join('')}
                                    </span>`
@@ -1653,9 +1659,8 @@ function renderArticlesGrid() {
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
             <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
                 ${(article.authors && article.authors.length > 0)
-                ? `<div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                        ${article.authors.map((a, idx) => `
-                            ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        ${article.authors.map((a) => `
                             <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join('')}
                        </div>`
@@ -1868,20 +1873,17 @@ function renderArticleDetail(article) {
     }
 
     if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
-        const authorsHtml = article.authors.map((a, index) => {
-            const separator = index > 0 ? '<span style="margin: 0 4px;">,</span>' : '';
-            return `${separator}<a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${escapeHtml(a.fullname)}</a>`;
+        const authorsHtml = article.authors.map((a) => {
+            const avatarSrc = a.avatar_url ? resolveImagePath(a.avatar_url) : '/uploads/default-avatar.png';
+            return `<a href="author-profile.html?u=${a.id}" class="author-chip" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border-radius: 20px; background: rgba(99,102,241,0.1); color: #6366f1; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border: 1px solid rgba(99,102,241,0.2);"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 2px solid rgba(99,102,241,0.3);">${escapeHtml(a.fullname)}</a>`;
         }).join('');
-        document.getElementById('detail-author').innerHTML = `<div style="display:inline-flex; align-items:center; flex-wrap:wrap;"><i class="ph ph-users" style="margin-right:6px;"></i> ${authorsHtml}</div>`;
+        document.getElementById('detail-author').innerHTML = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">${authorsHtml}</div>`;
     } else {
-        // Fallback for legacy single author
-        // Use SERVER_AUTHOR if available (though SERVER_AUTHORS is preferred now)
         const safeAuthorName = article.author_name || (window.SERVER_AUTHORS ? window.SERVER_AUTHORS[0]?.fullname : null) || 'AperionX Yazarı';
-
         if (article.author_id) {
-            document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+            document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" class="author-chip" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border-radius: 20px; background: rgba(99,102,241,0.1); color: #6366f1; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border: 1px solid rgba(99,102,241,0.2);"><i class="ph ph-user" style="font-size:1.1rem;"></i> ${safeAuthorName}</a>`;
         } else {
-            document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
+            document.getElementById('detail-author').innerHTML = `<span class="author-chip" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(99,102,241,0.1); color: #6366f1; font-weight: 500; font-size: 0.9rem;"><i class="ph ph-user"></i> ${safeAuthorName}</span>`;
         }
     }
 
