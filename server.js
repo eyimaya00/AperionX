@@ -219,7 +219,7 @@ async function getArticleAuthors(pool, articleId) {
             const [art] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [articleId]);
             if (art.length > 0 && art[0].author_id) {
                 const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [art[0].author_id]);
-                return u ? [u] : [];
+                return u;
             }
         }
         return rows;
@@ -1246,6 +1246,11 @@ app.get('/api/articles', async (req, res) => {
                     }
                 });
             }
+        }
+
+        // DEBUG: Log first article authors to check what is sent
+        if (articles.length > 0) {
+            console.log('[DEBUG API] /api/articles First Item Authors:', JSON.stringify(articles[0].authors));
         }
 
         res.json(articles);
