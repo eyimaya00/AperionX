@@ -1708,6 +1708,50 @@
             }
         }
 
+        async function editArticle(id) {
+            currentArticleId = id;
+            try {
+                // Fetch article details
+                // Use key lookup if possible or ID. The endpoint supports both but usually ID for editing.
+                const res = await fetch(`${API_URL}/articles/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Makale detayları alınamadı');
+                const article = await res.json();
+
+                // Populate Form
+                document.getElementById('edit-title').value = article.title;
+                document.getElementById('edit-category').value = article.category;
+                document.getElementById('edit-excerpt').value = article.excerpt;
+                document.getElementById('edit-tags').value = article.tags || '';
+                if (quillEdit) quillEdit.root.innerHTML = article.content;
+
+                // Handle Authors (Pre-selection)
+                // Reset all first
+                document.querySelectorAll('input[name="edit_article_authors"]').forEach(cb => cb.checked = false);
+
+                // Select based on data
+                if (article.authors && Array.isArray(article.authors)) {
+                    article.authors.forEach(a => {
+                        const cb = document.getElementById(`edit-auth-cb-${a.id}`);
+                        if (cb) cb.checked = true;
+                    });
+                } else if (article.author_id) {
+                    // Fallback
+                    const cb = document.getElementById(`edit-auth-cb-${article.author_id}`);
+                    if (cb) cb.checked = true;
+                }
+
+                document.getElementById('edit-modal').classList.add('show');
+            } catch (e) {
+                console.error(e);
+                showToast('Makale yüklenirken hata oluştu.', 'error');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('show');
+            currentArticleId = null;
+        }
+
         async function saveEditedArticle() {
             if (!currentArticleId) return;
 

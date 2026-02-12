@@ -1235,16 +1235,13 @@
                                 placeholder="Virgülle ayırın (örn: genetik, dna)">
                         </div>
 
+                        <!-- Author Selection Removed from Author Panel (Single Author only) -->
+                        <!-- 
                         <div class="form-group full-width">
                             <label>Yazarlar / Katkıda Bulunanlar</label>
-                            <div id="author-selection-container"
-                                style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
-                                <!-- Populated by JS -->
-                                <div style="color: #64748b; font-size: 0.9rem;">Yazarlar yükleniyor...</div>
-                            </div>
-                            <p style="margin: 5px 0 0; color: #64748b; font-size: 0.85rem;">Makalenize katkıda bulunan
-                                diğer yazarları seçebilirsiniz.</p>
-                        </div>
+                            <div id="author-selection-container">...</div>
+                        </div> 
+                        -->
 
                         <div class="form-group full-width">
                             <label>Kapak Görseli</label>
@@ -1630,6 +1627,7 @@
             loadMyArticles();
             loadDashboardStats(); // Load stats on init
             loadAnalytics(); // Load analytics
+            // loadAuthorsForSelection(); // DISABLED: Author Panel does not select authors.
             if (user) updateSidebarProfile(user);
             if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
 
@@ -2128,19 +2126,13 @@
                 const formData = new FormData();
                 formData.append('title', document.getElementById('title').value);
 
-                // Collect Authors
+                // Collect Authors - REMOVED for Author Panel (Single Author only)
+                // Backend defaults to req.user.id if author_ids is empty.
                 const selectedAuthors = [];
-                document.querySelectorAll('input[name="article_authors"]:checked').forEach(cb => {
-                    selectedAuthors.push(parseInt(cb.value));
-                });
-                // Ensure current user is included if list is empty? 
-                // Backend defaults to req.user.id if empty, but if we select others, we must ensure we are in it if we want to be.
-                // Let's rely on the checkboxes. The user MUST check themselves if they want to be shown.
-                // BUT, to prevent accidents, we will pre-select the current user on init.
+                // document.querySelectorAll('input[name="article_authors"]:checked').forEach... (Removed)
 
-                if (selectedAuthors.length > 0) {
-                    formData.append('author_ids', JSON.stringify(selectedAuthors));
-                }
+                // If we ever wanted to allow authors to select co-authors again, uncomment this block and re-add the UI.
+                // For now, we send nothing, so backend uses [req.user.id].
 
 
                 let category = document.getElementById('category').value;
@@ -2523,10 +2515,8 @@
                 <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
             `;
 
-            // Reset Authors (Select current user by default)
-            document.querySelectorAll('input[name="article_authors"]').forEach(cb => {
-                cb.checked = (user && parseInt(cb.value) === user.id);
-            });
+            // Reset Authors (Removed from Author Panel)
+            // document.querySelectorAll('input[name="article_authors"]').forEach...
         }
 
         function showAuthorToast(msg, type) {

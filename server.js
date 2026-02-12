@@ -1104,8 +1104,8 @@ app.post('/api/admin/users', authenticateToken, async (req, res) => {
 app.get('/api/users/list-authors', authenticateToken, async (req, res) => {
     try {
         // Return id, fullname, username for selection
-        // Optionally filter by role if needed, but for now we allow any user as co-author
-        const [users] = await pool.query('SELECT id, fullname, username, role FROM users ORDER BY fullname ASC');
+        // Filter by role: Author, Editor, Admin (exclude standard 'user')
+        const [users] = await pool.query("SELECT id, fullname, username, role FROM users WHERE role IN ('author', 'editor', 'admin') ORDER BY fullname ASC");
         res.json(users);
     } catch (e) {
         console.error('List Authors Error:', e);
