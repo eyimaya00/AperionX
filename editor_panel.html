@@ -991,267 +991,269 @@
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- STATS / ANALYSIS SECTION (Final) -->
-    <div id="section-stats-final" class="section">
-        <h1 class="page-title">Yazar İstatistikleri</h1>
+        <!-- STATS / ANALYSIS SECTION (Final) -->
+        <div id="section-stats-final" class="section">
+            <h1 class="page-title">Yazar İstatistikleri</h1>
 
-        <!-- Author Filter Bar -->
-        <div class="card" style="margin-bottom: 20px; padding: 15px; overflow-x: auto;">
-            <div id="stats-author-filters"
-                style="display: flex; gap: 10px; padding-bottom: 5px; flex-wrap: nowrap; min-width: max-content;">
-                <!-- JS populated -->
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="dashboard-stats">
-            <div class="stat-card" style="cursor: default;">
-                <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="ph-duotone ph-eye"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="stats-views">0</h3>
-                    <p>Toplam Okunma</p>
-                </div>
-            </div>
-            <div class="stat-card" style="cursor: default;">
-                <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i class="ph-duotone ph-heart"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="stats-likes">0</h3>
-                    <p>Toplam Beğeni</p>
-                </div>
-            </div>
-            <div class="stat-card" style="cursor: default;">
-                <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;"><i
-                        class="ph-duotone ph-chat-text"></i></div>
-                <div class="stat-info">
-                    <h3 id="stats-comments">0</h3>
-                    <p>Toplam Yorum</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Article List -->
-        <div class="card" style="margin-top: 20px;">
-            <h3 style="margin: 0 0 20px 0; font-size: 1.2rem;">Makale Listesi</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40%;">Başlık</th>
-                        <th style="width: 15%;">Yazar</th>
-                        <th style="width: 12%;">Kategori</th>
-                        <th style="width: 12%;">Tarih</th>
-                        <th style="width: 7%; text-align: center;">Okunma</th>
-                        <th style="width: 7%; text-align: center;">Beğeni</th>
-                        <th style="width: 7%; text-align: center;">Yorum</th>
-                    </tr>
-                </thead>
-                <tbody id="stats-article-list">
+            <!-- Author Filter Bar -->
+            <div class="card" style="margin-bottom: 20px; padding: 15px; overflow-x: auto;">
+                <div id="stats-author-filters"
+                    style="display: flex; gap: 10px; padding-bottom: 5px; flex-wrap: nowrap; min-width: max-content;">
                     <!-- JS populated -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- DASHBOARD (Article List) SECTION -->
-    <div id="dashboard" class="section">
-        <h1 class="page-title">Makale Yönetimi</h1>
-
-        <style>
-            .dashboard-stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 24px;
-                margin-bottom: 32px;
-                width: 100%;
-                /* Ensure grid takes full width */
-                box-sizing: border-box;
-            }
-
-            .stat-card {
-                background: white;
-                border: 1px solid #e2e8f0;
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                cursor: pointer;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .stat-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-                border-color: #cbd5e1;
-            }
-
-            .stat-card-content {
-                padding: 24px;
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                flex: 1;
-            }
-
-            .stat-icon-wrapper {
-                width: 64px;
-                height: 64px;
-                border-radius: 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 2rem;
-                transition: transform 0.3s ease;
-            }
-
-            .stat-card:hover .stat-icon-wrapper {
-                transform: scale(1.1) rotate(6deg);
-            }
-
-            .stat-details h3 {
-                font-size: 2rem;
-                font-weight: 800;
-                margin: 0;
-                line-height: 1.1;
-                color: #0f172a;
-            }
-
-            .stat-details p {
-                margin: 4px 0 0 0;
-                color: #64748b;
-                font-size: 0.95rem;
-                font-weight: 500;
-            }
-
-            .stat-card-footer {
-                padding: 14px 24px;
-                background: #f8fafc;
-                border-top: 1px solid #f1f5f9;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                font-size: 0.85rem;
-                font-weight: 600;
-                color: #64748b;
-                transition: color 0.2s, background 0.2s;
-            }
-
-            .stat-card:hover .stat-card-footer {
-                background: #f1f5f9;
-                color: #334155;
-            }
-
-            .stat-card-footer i {
-                transition: transform 0.2s;
-            }
-
-            .stat-card:hover .stat-card-footer i {
-                transform: translateX(4px);
-            }
-        </style>
-
-        <div class="dashboard-stats">
-            <!-- PENDING CARD -->
-            <div class="stat-card" onclick="filterArticles('pending')">
-                <div class="stat-card-content">
-                    <div class="stat-icon-wrapper"
-                        style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #f97316;">
-                        <i class="ph-duotone ph-clock-countdown"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3 id="count-pending-dash">0</h3>
-                        <p>Onay Bekleyen</p>
-                    </div>
-                </div>
-                <div class="stat-card-footer">
-                    <span>Makaleleri Görüntüle</span>
-                    <i class="ph-bold ph-arrow-right"></i>
                 </div>
             </div>
 
-            <!-- PUBLISHED CARD -->
-            <div class="stat-card" onclick="filterArticles('published')">
-                <div class="stat-card-content">
-                    <div class="stat-icon-wrapper"
-                        style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a;">
-                        <i class="ph-duotone ph-check-circle"></i>
+            <!-- Stats Cards -->
+            <div class="dashboard-stats">
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i
+                            class="ph-duotone ph-eye"></i>
                     </div>
-                    <div class="stat-details">
-                        <h3 id="count-published-dash">0</h3>
-                        <p>Yayında Olan</p>
+                    <div class="stat-info">
+                        <h3 id="stats-views">0</h3>
+                        <p>Toplam Okunma</p>
                     </div>
                 </div>
-                <div class="stat-card-footer">
-                    <span>Makaleleri Görüntüle</span>
-                    <i class="ph-bold ph-arrow-right"></i>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i
+                            class="ph-duotone ph-heart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="stats-likes">0</h3>
+                        <p>Toplam Beğeni</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;"><i
+                            class="ph-duotone ph-chat-text"></i></div>
+                    <div class="stat-info">
+                        <h3 id="stats-comments">0</h3>
+                        <p>Toplam Yorum</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- REJECTED CARD -->
-            <div class="stat-card" onclick="filterArticles('rejected')">
-                <div class="stat-card-content">
-                    <div class="stat-icon-wrapper"
-                        style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #ef4444;">
-                        <i class="ph-duotone ph-x-circle"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3 id="count-rejected-dash">0</h3>
-                        <p>Reddedilen</p>
-                    </div>
-                </div>
-                <div class="stat-card-footer">
-                    <span>Makaleleri Görüntüle</span>
-                    <i class="ph-bold ph-arrow-right"></i>
-                </div>
+            <!-- Article List -->
+            <div class="card" style="margin-top: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.2rem;">Makale Listesi</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Başlık</th>
+                            <th style="width: 15%;">Yazar</th>
+                            <th style="width: 12%;">Kategori</th>
+                            <th style="width: 12%;">Tarih</th>
+                            <th style="width: 7%; text-align: center;">Okunma</th>
+                            <th style="width: 7%; text-align: center;">Beğeni</th>
+                            <th style="width: 7%; text-align: center;">Yorum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-article-list">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="card"
-            style="min-height: 600px; display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap:wrap; gap:10px;">
-                <h2 style="font-size: 1.25rem; font-weight: 700; margin:0;">Makale Yönetimi</h2>
-                <div class="filter-bar">
-                    <button class="filter-btn active" onclick="filterArticles('all')" id="btn-all">Tümü</button>
-                    <button class="filter-btn" onclick="filterArticles('pending')" id="btn-pending">Onay
-                        Bekleyenler</button>
+        <!-- DASHBOARD (Article List) SECTION -->
+        <div id="dashboard" class="section">
+            <h1 class="page-title">Makale Yönetimi</h1>
+
+            <style>
+                .dashboard-stats {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 24px;
+                    margin-bottom: 32px;
+                    width: 100%;
+                    /* Ensure grid takes full width */
+                    box-sizing: border-box;
+                }
+
+                .stat-card {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .stat-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                    border-color: #cbd5e1;
+                }
+
+                .stat-card-content {
+                    padding: 24px;
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    flex: 1;
+                }
+
+                .stat-icon-wrapper {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    transition: transform 0.3s ease;
+                }
+
+                .stat-card:hover .stat-icon-wrapper {
+                    transform: scale(1.1) rotate(6deg);
+                }
+
+                .stat-details h3 {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    margin: 0;
+                    line-height: 1.1;
+                    color: #0f172a;
+                }
+
+                .stat-details p {
+                    margin: 4px 0 0 0;
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+
+                .stat-card-footer {
+                    padding: 14px 24px;
+                    background: #f8fafc;
+                    border-top: 1px solid #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    transition: color 0.2s, background 0.2s;
+                }
+
+                .stat-card:hover .stat-card-footer {
+                    background: #f1f5f9;
+                    color: #334155;
+                }
+
+                .stat-card-footer i {
+                    transition: transform 0.2s;
+                }
+
+                .stat-card:hover .stat-card-footer i {
+                    transform: translateX(4px);
+                }
+            </style>
+
+            <div class="dashboard-stats">
+                <!-- PENDING CARD -->
+                <div class="stat-card" onclick="filterArticles('pending')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper"
+                            style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #f97316;">
+                            <i class="ph-duotone ph-clock-countdown"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="count-pending-dash">0</h3>
+                            <p>Onay Bekleyen</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <span>Makaleleri Görüntüle</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- PUBLISHED CARD -->
+                <div class="stat-card" onclick="filterArticles('published')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper"
+                            style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a;">
+                            <i class="ph-duotone ph-check-circle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="count-published-dash">0</h3>
+                            <p>Yayında Olan</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <span>Makaleleri Görüntüle</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- REJECTED CARD -->
+                <div class="stat-card" onclick="filterArticles('rejected')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper"
+                            style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #ef4444;">
+                            <i class="ph-duotone ph-x-circle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="count-rejected-dash">0</h3>
+                            <p>Reddedilen</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <span>Makaleleri Görüntüle</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
                 </div>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Başlık</th>
-                        <th>Yazar</th>
-                        <th>Kategori</th>
-                        <th>Durum</th>
-                        <th>Tarih</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody id="unified-article-list">
-                    <!-- JS populated -->
-                </tbody>
-            </table>
+            <div class="card"
+                style="min-height: 600px; display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin:0;">Makale Yönetimi</h2>
+                    <div class="filter-bar">
+                        <button class="filter-btn active" onclick="filterArticles('all')" id="btn-all">Tümü</button>
+                        <button class="filter-btn" onclick="filterArticles('pending')" id="btn-pending">Onay
+                            Bekleyenler</button>
+                    </div>
+                </div>
 
-            <div style="margin-top: 20px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                <button onclick="filterArticles('trash')"
-                    style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:#94a3b8; display:inline-flex; align-items:center; gap:5px; transition:color 0.2s;"
-                    onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
-                    <i class="ph ph-trash"></i> Çöp Kutusunu Görüntüle (<span id="count-trash-btn">0</span>)
-                </button>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Yazar</th>
+                            <th>Kategori</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unified-article-list">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 20px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                    <button onclick="filterArticles('trash')"
+                        style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:#94a3b8; display:inline-flex; align-items:center; gap:5px; transition:color 0.2s;"
+                        onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                        <i class="ph ph-trash"></i> Çöp Kutusunu Görüntüle (<span id="count-trash-btn">0</span>)
+                    </button>
+                </div>
             </div>
+
+
+
+
+
+
+
         </div>
-
-
-
-
-
-
-
     </div>
 
     <!-- Review Modal -->
