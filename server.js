@@ -204,6 +204,31 @@ async function getUniqueSlug(pool, title, excludeId = null) {
     return slug;
 }
 
+async function getArticleAuthors(pool, articleId) {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title 
+            FROM article_authors aa
+            JOIN users u ON aa.user_id = u.id
+            WHERE aa.article_id = ?
+            ORDER BY aa.order_index ASC, aa.created_at ASC
+        `, [articleId]);
+
+        // Fallback: if no authors in join table, check articles.author_id
+        if (rows.length === 0) {
+            const [art] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [articleId]);
+            if (art.length > 0 && art[0].author_id) {
+                const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [art[0].author_id]);
+                return u;
+            }
+        }
+        return rows;
+    } catch (e) {
+        console.error('getArticleAuthors Error:', e);
+        return [];
+    }
+}
+
 // === DYNAMIC SEO ROUTES (SSR) ===
 
 // 1. Slug Route (Canonical)
@@ -258,15 +283,19 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 // Use String Replacement instead of JSDOM to avoid dependency issues on server
                 const origin = `${req.protocol}://${req.get('host')}`;
 
-                // Get Author Name & Avatar
-                let authorName = 'AperionX Yazarı';
-                let authorAvatar = null;
+                // Get Authors
+                let authorNames = [];
+                let authors = [];
                 try {
-                    const [uRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
-                    if (uRows.length > 0) {
-                        authorName = uRows[0].fullname;
+                    authors = await getArticleAuthors(pool, article.id);
+                    if (authors.length > 0) {
+                        authorNames = authors.map(a => a.fullname);
+                    } else {
+                        authorNames = ['AperionX Yazarı'];
                     }
-                } catch (e) { }
+                } catch (e) { authorNames = ['AperionX Yazarı']; }
+
+                const authorName = authorNames.join(', ');
 
                 // Prepare Content
                 const title = article.title;
@@ -320,7 +349,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
 
                 // Inject Preloaded Data Script
-                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHOR = "${authorName}";</script>`;
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHORS = ${JSON.stringify(authors)};</script>`;
 
                 // === JSON-LD STRUCTURED DATA INJECTION ===
                 const schemaData = {
@@ -353,7 +382,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 // SSR: Render Author Name & Avatar directly
                 // Pattern match existing placeholder: <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
 
-                let authorHtml = `<i class="ph ph-user"></i> ${authorName}`;
+                let authorHtml = authors.map(a => `<a href="/author.html?username=${a.username}" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
 
                 // Regex update: The HTML is <span id="detail-author">...</span> without class="meta-item"
                 // Using a more flexible regex to catch attributes in any order if they exist, but specifically id="detail-author"
@@ -1071,6 +1100,19 @@ app.post('/api/admin/users', authenticateToken, async (req, res) => {
     }
 });
 
+// New Endpoint for Multi-Author Selection
+app.get('/api/users/list-authors', authenticateToken, async (req, res) => {
+    try {
+        // Return id, fullname, username for selection
+        // Optionally filter by role if needed, but for now we allow any user as co-author
+        const [users] = await pool.query('SELECT id, fullname, username, role FROM users ORDER BY fullname ASC');
+        res.json(users);
+    } catch (e) {
+        console.error('List Authors Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
 app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
@@ -1138,32 +1180,61 @@ app.get('/api/articles', async (req, res) => {
         const [articles] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published' ORDER BY created_at DESC");
 
         if (articles.length > 0) {
-            // 2. Extract Author IDs
-            const authorIds = [...new Set(articles.map(a => a.author_id).filter(id => id))];
+            const articleIds = articles.map(a => a.id);
 
-            if (authorIds.length > 0) {
-                // 3. Fetch Author Names & Usernames
-                // Create placeholders (?,?,?)
-                const placeholders = authorIds.map(() => '?').join(',');
-                const [authors] = await pool.query(`SELECT id, fullname, username FROM users WHERE id IN (${placeholders})`, authorIds);
+            // 2. Fetch Authors for these articles
+            const [allAuthors] = await pool.query(`
+                SELECT aa.article_id, u.id, u.fullname, u.username 
+                FROM article_authors aa
+                JOIN users u ON aa.user_id = u.id
+                WHERE aa.article_id IN (?)
+                ORDER BY aa.order_index ASC
+             `, [articleIds]);
 
-                // 4. Map back to articles
-                const authorMap = {};
-                const userMap = {};
-                authors.forEach(u => {
-                    authorMap[u.id] = u.fullname;
-                    userMap[u.id] = u.username;
-                });
+            // 3. Map authors to articles
+            const authorMap = {};
+            allAuthors.forEach(row => {
+                if (!authorMap[row.article_id]) authorMap[row.article_id] = [];
+                authorMap[row.article_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+            });
 
+            // 4. Attach to articles
+            articles.forEach(a => {
+                a.authors = authorMap[a.id] || [];
+                if (a.authors.length > 0) {
+                    a.author_name = a.authors[0].fullname; // Primary author for legacy
+                    a.author_username = a.authors[0].username;
+                } else {
+                    // Fallback to legacy author_id if no entries in join table yet
+                    // (We could fetch legacy author names here if needed, but going forward all should be in join table)
+                    // For now, let's just leave it blank or fetch if strictly needed. 
+                    // actually, let's do a quick fallback lookup if we want to be safe, 
+                    // but simplest is to trust the join table OR the legacy ID.
+                    // Let's keep it simple: if join table empty, try to populate from legacy author_id if we really want,
+                    // but better to just migrate data. For new logic, we expect data in join table.
+                }
+            });
+
+            // Legacy fallback: If join table empty, we might want to fill from author_id.
+            // But let's assume valid data for now or simple "Yazar" fallback.
+            const legacyIds = articles.filter(a => a.authors.length === 0 && a.author_id).map(a => a.author_id);
+            if (legacyIds.length > 0) {
+                const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                const legacyMap = {};
+                legacyUsers.forEach(u => legacyMap[u.id] = u);
                 articles.forEach(a => {
-                    a.author_name = authorMap[a.author_id] || 'Yazar';
-                    a.author_username = userMap[a.author_id] || null;
+                    if (a.authors.length === 0 && a.author_id && legacyMap[a.author_id]) {
+                        const u = legacyMap[a.author_id];
+                        a.authors = [{ id: u.id, fullname: u.fullname, username: u.username }];
+                        a.author_name = u.fullname;
+                    }
                 });
             }
         }
 
         res.json(articles);
     } catch (e) {
+        console.error('API Articles Error:', e);
         res.status(500).send(e.toString());
     }
 });
@@ -1214,13 +1285,18 @@ app.get('/api/articles/:key', async (req, res) => {
             await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [article.id]);
         }
 
-        // Fetch author details
-        const [authorRows] = await pool.query('SELECT fullname, username, avatar_url FROM users WHERE id = ?', [article.author_id]);
-        if (authorRows.length > 0) {
-            article.author_name = authorRows[0].fullname;
-            article.author_username = authorRows[0].username;
-            article.author_avatar = authorRows[0].avatar_url;
-        } else { article.author_name = 'Yazar'; }
+        // Fetch authors
+        const authors = await getArticleAuthors(pool, article.id);
+        article.authors = authors;
+
+        // Backward compatibility
+        if (authors.length > 0) {
+            article.author_name = authors[0].fullname;
+            article.author_username = authors[0].username;
+            article.author_avatar = authors[0].avatar_url;
+        } else {
+            article.author_name = 'Yazar';
+        }
 
         res.json(article);
     } catch (e) {
@@ -1333,6 +1409,13 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
 
     const body = req.body || {};
     const { title, category, content, excerpt, status, tags, references_list } = body;
+    let author_ids = body.author_ids; // Expecting array or JSON string
+
+    if (typeof author_ids === 'string') {
+        try { author_ids = JSON.parse(author_ids); } catch (e) { }
+    }
+    if (!Array.isArray(author_ids)) author_ids = [req.user.id]; // Default to creator if empty
+
     console.log('Route: POST /api/articles', { title, status, statusType: typeof status, role: req.user.role });
 
     let image_url = null;
@@ -1360,10 +1443,18 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
         // Generate Slug
         const slug = await getUniqueSlug(pool, title);
 
-        await pool.query(
+        const [insertResult] = await pool.query(
             'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
         );
+
+        const newArticleId = insertResult.insertId;
+
+        // Insert Authors
+        if (author_ids && author_ids.length > 0) {
+            const authorValues = author_ids.map((uid, index) => [newArticleId, uid, index]);
+            await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
+        }
 
         console.log('Route: Article inserted successfully');
 
@@ -1417,6 +1508,11 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         finalStatus = 'pending';
     }
 
+    let author_ids = req.body.author_ids;
+    if (typeof author_ids === 'string') {
+        try { author_ids = JSON.parse(author_ids); } catch (e) { }
+    }
+
     let updates = [];
     let params = [];
 
@@ -1451,6 +1547,17 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (updates.length > 0) {
         params.push(articleId);
         await pool.query(`UPDATE articles SET ${updates.join(', ')} WHERE id = ?`, params);
+
+        // Update Authors if provided
+        if (author_ids && Array.isArray(author_ids)) {
+            // Delete existing
+            await pool.query('DELETE FROM article_authors WHERE article_id = ?', [articleId]);
+            // Insert new
+            if (author_ids.length > 0) {
+                const authorValues = author_ids.map((uid, index) => [articleId, uid, index]);
+                await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
+            }
+        }
 
         // Notification Logic
         if (finalStatus && req.user.role !== 'author') {
@@ -1567,24 +1674,7 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Restored to draft' });
 });
 
-// Create Article
-app.post('/api/articles', authenticateToken, upload.single('image'), async (req, res) => {
-    try {
-        const { title, content, category, tags, status } = req.body;
-        const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-        const author_id = req.user.id;
-        const slug = slugify(title, { lower: true, strict: true }) + '-' + Date.now();
-
-        await pool.query(
-            'INSERT INTO articles (author_id, title, content, image_url, category, tags, status, slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [author_id, title, content, image_url, category, tags, status || 'pending', slug]
-        );
-
-        res.status(201).json({ message: 'Article created successfully' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
+// [REMOVED DUPLICATE POST /api/articles ROUTE]
 
 // Update Article
 app.put('/api/articles/:id', authenticateToken, upload.single('image'), async (req, res) => {
@@ -3164,6 +3254,23 @@ app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
     }
 });
 
+
+// Helper: Get Article Authors
+async function getArticleAuthors(pool, articleId) {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title
+            FROM article_authors aa
+            JOIN users u ON aa.user_id = u.id
+            WHERE aa.article_id = ?
+            ORDER BY aa.order_index ASC
+        `, [articleId]);
+        return rows;
+    } catch (e) {
+        console.error('getArticleAuthors Error:', e);
+        return [];
+    }
+}
 
 // GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {

@@ -1420,7 +1420,17 @@ async function loadShowcase() {
                         <h3 class="card-title">${item.title}</h3>
                         <div class="card-meta-row">
                         <div class="card-meta-row">
-                             <a href="author-profile.html?u=${(item.author_name || '').replace(/ /g, '-')}" class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">${author}</a>
+                             <div class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">
+                             ${(item.authors && item.authors.length > 0)
+                        ? `<span style="display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                                    ${item.authors.map((a, idx) => `
+                                        ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                                        <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
+                                    `).join('')}
+                                   </span>`
+                        : `<a href="author-profile.html?u=${(item.author_name || '').replace(/ /g, '-')}" style="color:inherit; text-decoration:none;">${author}</a>`
+                    }
+                             </div>
                         </div>
                         </div>
                     </div>
@@ -1642,9 +1652,17 @@ function renderArticlesGrid() {
                 <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
             <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
-                <a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                    ${safeAuthor}
-                </a>
+                ${(article.authors && article.authors.length > 0)
+                ? `<div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                        ${article.authors.map((a, idx) => `
+                            ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                        `).join('')}
+                       </div>`
+                : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                        ${safeAuthor}
+                       </a>`
+            }
             </div>
                 </div>
 
@@ -1842,14 +1860,21 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
-
-    // Check for author_id. If missing, we can't link to profile safely with username if they don't have one.
-    if (article.author_id) {
-        document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+    // Multi-author Support
+    if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
+        const authorsHtml = article.authors.map((a, index) => {
+            const separator = index > 0 ? '<span style="margin: 0 4px;">,</span>' : '';
+            return `${separator}<a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${escapeHtml(a.fullname)}</a>`;
+        }).join('');
+        document.getElementById('detail-author').innerHTML = `<div style="display:inline-flex; align-items:center; flex-wrap:wrap;"><i class="ph ph-users" style="margin-right:6px;"></i> ${authorsHtml}</div>`;
     } else {
-        // Fallback for missing ID
-        document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
+        // Fallback for legacy single author
+        const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
+        if (article.author_id) {
+            document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+        } else {
+            document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${safeAuthorName}`;
+        }
     }
 
     document.getElementById('detail-title').innerText = article.title;
@@ -2250,9 +2275,16 @@ async function loadArticleSlider(currentId) {
                      <div class="content-bottom">
                         <a href="${art.slug ? '/makale/' + art.slug : '/article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
                         <div class="similar-card-meta">
-                            ${art.author_id
-                    ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
-                    : `<span>${art.author_name || 'Admin'}</span>`
+                            ${(art.authors && art.authors.length > 0)
+                    ? `<span style="display:inline-flex; gap:4px; flex-wrap:wrap;">
+                                    ${art.authors.map((a, idx) => `
+                                        ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                                        <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    `).join('')}
+                                   </span>`
+                    : (art.author_id
+                        ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
+                        : `<span>${art.author_name || 'Admin'}</span>`)
                 }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
                             <span>${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>

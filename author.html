@@ -1236,6 +1236,17 @@
                         </div>
 
                         <div class="form-group full-width">
+                            <label>Yazarlar / Katkıda Bulunanlar</label>
+                            <div id="author-selection-container"
+                                style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                                <!-- Populated by JS -->
+                                <div style="color: #64748b; font-size: 0.9rem;">Yazarlar yükleniyor...</div>
+                            </div>
+                            <p style="margin: 5px 0 0; color: #64748b; font-size: 0.85rem;">Makalenize katkıda bulunan
+                                diğer yazarları seçebilirsiniz.</p>
+                        </div>
+
+                        <div class="form-group full-width">
                             <label>Kapak Görseli</label>
                             <input type="file" id="imageInput" accept="image/*" style="display: none;"
                                 onchange="handleFileSelect(this, 'preview-zone')">
@@ -2117,6 +2128,21 @@
                 const formData = new FormData();
                 formData.append('title', document.getElementById('title').value);
 
+                // Collect Authors
+                const selectedAuthors = [];
+                document.querySelectorAll('input[name="article_authors"]:checked').forEach(cb => {
+                    selectedAuthors.push(parseInt(cb.value));
+                });
+                // Ensure current user is included if list is empty? 
+                // Backend defaults to req.user.id if empty, but if we select others, we must ensure we are in it if we want to be.
+                // Let's rely on the checkboxes. The user MUST check themselves if they want to be shown.
+                // BUT, to prevent accidents, we will pre-select the current user on init.
+
+                if (selectedAuthors.length > 0) {
+                    formData.append('author_ids', JSON.stringify(selectedAuthors));
+                }
+
+
                 let category = document.getElementById('category').value;
                 if (category === 'other') category = document.getElementById('custom-category').value;
                 formData.append('category', category);
@@ -2401,6 +2427,22 @@
                 }
                 const article = await res.json();
 
+                // Populate Authors
+                if (article.authors && Array.isArray(article.authors)) {
+                    const authorIds = article.authors.map(a => a.id);
+                    document.querySelectorAll('input[name="article_authors"]').forEach(cb => {
+                        cb.checked = authorIds.includes(parseInt(cb.value));
+                    });
+                } else {
+                    // Legacy: Check the main author (which is presumably the current user or the one in article.author_id)
+                    // If we are editing, we are likely the author.
+                    // Just reset to current user? No, better leave as is or basic check.
+                    if (user) {
+                        const myCb = document.querySelector(`input[name="article_authors"][value="${user.id}"]`);
+                        if (myCb) myCb.checked = true;
+                    }
+                }
+
                 document.getElementById('title').value = article.title;
                 document.getElementById('tags').value = article.tags || '';
                 document.getElementById('excerpt').value = article.excerpt || '';
@@ -2480,6 +2522,11 @@
                 <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
                 <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
             `;
+
+            // Reset Authors (Select current user by default)
+            document.querySelectorAll('input[name="article_authors"]').forEach(cb => {
+                cb.checked = (user && parseInt(cb.value) === user.id);
+            });
         }
 
         function showAuthorToast(msg, type) {
@@ -2519,6 +2566,39 @@
                 otherOpt.innerText = 'Diğer (Yeni Ekle)';
                 select.appendChild(otherOpt);
             } catch (e) { console.error('Error loading categories:', e); }
+        }
+
+        async function loadAuthorsForSelection() {
+            try {
+                const res = await fetch(`${API_URL}/users/list-authors`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const authors = await res.json();
+
+                const container = document.getElementById('author-selection-container');
+                container.innerHTML = '';
+
+                authors.forEach(a => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.gap = '8px';
+                    div.style.padding = '5px';
+                    div.style.background = 'white';
+                    div.style.borderRadius = '6px';
+                    div.style.border = '1px solid #e2e8f0';
+
+                    const isMe = user && user.id === a.id;
+
+                    div.innerHTML = `
+                        <input type="checkbox" name="article_authors" value="${a.id}" id="auth-cb-${a.id}" ${isMe ? 'checked' : ''} style="width: 16px; height: 16px; cursor: pointer;">
+                        <label for="auth-cb-${a.id}" style="margin:0; cursor:pointer; font-size:0.9rem; font-weight:500; color:#334155; display: flex; flex-direction: column; line-height: 1.2;">
+                            <span>${escapeHtml(a.fullname)}</span>
+                            ${a.username ? `<span style="font-size: 0.75rem; color: #94a3b8;">@${escapeHtml(a.username)}</span>` : ''}
+                        </label>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (e) { console.error('Error loading authors:', e); }
         }
 
         async function updateProfile(e) {
@@ -2631,7 +2711,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             loadMyArticles();
+            loadMyArticles();
             loadCategories();
+            loadAuthorsForSelection(); // Load authors
             loadNotifications();
             renderDashboardChart();
             setInterval(loadNotifications, 30000);

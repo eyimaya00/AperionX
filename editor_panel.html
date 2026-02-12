@@ -1326,22 +1326,30 @@
                         <textarea id="edit-excerpt" class="form-control" rows="3" required></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label>Etiketler</label>
-                        <input type="text" id="edit-tags" class="form-control">
-                    </div>
+                    <label>Etiketler</label>
+                    <input type="text" id="edit-tags" class="form-control">
+            </div>
 
-                    <div class="form-group">
-                        <label>İçerik</label>
-                        <div id="editor-container" style="height: 300px;"></div>
-                    </div>
-                </form>
+            <div class="form-group full-width">
+                <label>Yazarlar / Katkıda Bulunanlar</label>
+                <div id="edit-author-selection-container"
+                    style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                    <!-- Populated by JS -->
+                    <div style="color: #64748b; font-size: 0.9rem;">Yazarlar yükleniyor...</div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
-                <button class="btn btn-primary" onclick="saveEditedArticle()">Değişiklikleri Kaydet</button>
+
+            <div class="form-group">
+                <label>İçerik</label>
+                <div id="editor-container" style="height: 300px;"></div>
             </div>
+            </form>
         </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
+            <button class="btn btn-primary" onclick="saveEditedArticle()">Değişiklikleri Kaydet</button>
+        </div>
+    </div>
     </div>
 
 
@@ -1380,7 +1388,9 @@
             loadDashboardStats();
             loadAllArticles();
             loadProfile();
+            loadProfile();
             loadAnalysisAuthors(); // Init analysis module
+            loadAuthorsForEditorSelection(); // Load authors for edit modal
 
             // Initialize Quill for Edit Modal
             quillEdit = new Quill('#editor-container', {
@@ -1394,6 +1404,37 @@
                 }
             });
         });
+
+        async function loadAuthorsForEditorSelection() {
+            try {
+                const res = await fetch(`${API_URL}/users/list-authors`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const authors = await res.json();
+
+                const container = document.getElementById('edit-author-selection-container');
+                container.innerHTML = '';
+
+                authors.forEach(a => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.gap = '8px';
+                    div.style.padding = '5px';
+                    div.style.background = 'white';
+                    div.style.borderRadius = '6px';
+                    div.style.border = '1px solid #e2e8f0';
+
+                    div.innerHTML = `
+                        <input type="checkbox" name="edit_article_authors" value="${a.id}" id="edit-auth-cb-${a.id}" style="width: 16px; height: 16px; cursor: pointer;">
+                        <label for="edit-auth-cb-${a.id}" style="margin:0; cursor:pointer; font-size:0.9rem; font-weight:500; color:#334155; display: flex; flex-direction: column; line-height: 1.2;">
+                            <span>${escapeHtml(a.fullname)}</span>
+                            ${a.username ? `<span style="font-size: 0.75rem; color: #94a3b8;">@${escapeHtml(a.username)}</span>` : ''}
+                        </label>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (e) { console.error('Error loading authors for editor:', e); }
+        }
 
         // --- STATS / ANALYSIS MODULE ---
         async function loadAnalysisAuthors() {
@@ -1634,17 +1675,37 @@
         });
 
         async function editArticle(id) {
-            const article = allArticles.find(a => a.id === id);
-            if (!article) return;
+            // Fetch latest details to get authors
+            try {
+                const res = await fetch(`${API_URL}/articles/${id}?t=${Date.now()}`); // Public endpoint has authors
+                if (!res.ok) throw new Error('Makale alınamadı');
+                const article = await res.json();
 
-            currentArticleId = article.id;
-            document.getElementById('edit-title').value = article.title;
-            document.getElementById('edit-category').value = article.category; // Simple match, can be improved for custom
-            document.getElementById('edit-excerpt').value = article.excerpt;
-            document.getElementById('edit-tags').value = article.tags || '';
-            quillEdit.root.innerHTML = article.content;
+                currentArticleId = article.id;
+                document.getElementById('edit-title').value = article.title;
+                document.getElementById('edit-category').value = article.category;
+                document.getElementById('edit-excerpt').value = article.excerpt;
+                document.getElementById('edit-tags').value = article.tags || '';
+                quillEdit.root.innerHTML = article.content;
 
-            document.getElementById('edit-modal').classList.add('show');
+                // Populate Authors
+                if (article.authors && Array.isArray(article.authors)) {
+                    const authorIds = article.authors.map(a => a.id);
+                    document.querySelectorAll('input[name="edit_article_authors"]').forEach(cb => {
+                        cb.checked = authorIds.includes(parseInt(cb.value));
+                    });
+                } else {
+                    // Legacy fallback
+                    document.querySelectorAll('input[name="edit_article_authors"]').forEach(cb => {
+                        cb.checked = (parseInt(cb.value) === article.author_id);
+                    });
+                }
+
+                document.getElementById('edit-modal').classList.add('show');
+            } catch (e) {
+                console.error(e);
+                showToast('Makale detayları yüklenemedi.', 'error');
+            }
         }
 
         async function saveEditedArticle() {
@@ -1662,6 +1723,15 @@
             formData.append('excerpt', excerpt);
             formData.append('tags', tags);
             formData.append('content', content);
+
+            // Collect Authors
+            const selectedAuthors = [];
+            document.querySelectorAll('input[name="edit_article_authors"]:checked').forEach(cb => {
+                selectedAuthors.push(parseInt(cb.value));
+            });
+            if (selectedAuthors.length > 0) {
+                formData.append('author_ids', JSON.stringify(selectedAuthors));
+            }
 
             try {
                 const res = await fetch(`${API_URL}/articles/${currentArticleId}`, {
