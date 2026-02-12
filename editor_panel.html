@@ -870,6 +870,23 @@
             <!-- Text removed -->
         </a>
 
+        <!-- Sidebar Profile -->
+        <div class="sidebar-profile" id="editor-sidebar-profile"
+            style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="position: relative; display: inline-block;">
+                <img id="sidebar-avatar" src="https://via.placeholder.com/100" alt="Avatar"
+                    style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-accent);">
+                <div
+                    style="position: absolute; bottom: 3px; right: 3px; width: 14px; height: 14px; background: #10b981; border: 2px solid var(--sidebar-bg); border-radius: 50;">
+                </div>
+            </div>
+            <h3 id="sidebar-name"
+                style="margin: 10px 0 2px; color: white; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Editör</h3>
+            <span
+                style="display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: rgba(99,102,241,0.2); color: #818cf8; margin-top: 4px;">Editör</span>
+        </div>
+
         <div style="flex: 1; display: flex; flex-direction: column; margin-top: 10px;">
             <a href="javascript:void(0)" class="menu-item active" onclick="showSection('home', this)">
                 <i class="ph ph-house"></i> <span>Genel Bakış</span>
@@ -1316,30 +1333,31 @@
                         <textarea id="edit-excerpt" class="form-control" rows="3" required></textarea>
                     </div>
 
-                    <label>Etiketler</label>
-                    <input type="text" id="edit-tags" class="form-control">
-            </div>
+                    <div class="form-group">
+                        <label>Etiketler</label>
+                        <input type="text" id="edit-tags" class="form-control">
+                    </div>
 
-            <div class="form-group full-width">
-                <label>Yazarlar / Katkıda Bulunanlar</label>
-                <div id="edit-author-selection-container"
-                    style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
-                    <!-- Populated by JS -->
-                    <div style="color: #64748b; font-size: 0.9rem;">Yazarlar yükleniyor...</div>
-                </div>
-            </div>
+                    <div class="form-group">
+                        <label>Yazarlar / Katkıda Bulunanlar</label>
+                        <div id="edit-author-selection-container"
+                            style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; background: #f8fafc;">
+                            <!-- Populated by JS -->
+                            <div style="color: #64748b; font-size: 0.9rem;">Yazarlar yükleniyor...</div>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label>İçerik</label>
-                <div id="editor-container" style="height: 300px;"></div>
+                    <div class="form-group">
+                        <label>İçerik</label>
+                        <div id="editor-container" style="height: 300px;"></div>
+                    </div>
+                </form>
             </div>
-            </form>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveEditedArticle()">Değişiklikleri Kaydet</button>
+            </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
-            <button class="btn btn-primary" onclick="saveEditedArticle()">Değişiklikleri Kaydet</button>
-        </div>
-    </div>
     </div>
 
 
@@ -1643,6 +1661,21 @@
         function loadProfile() {
             document.getElementById('p-fullname').value = user.fullname;
             document.getElementById('p-email').value = user.email;
+
+            // Update sidebar profile
+            const sidebarName = document.getElementById('sidebar-name');
+            if (sidebarName) sidebarName.textContent = user.fullname || 'Editör';
+
+            const sidebarAvatar = document.getElementById('sidebar-avatar');
+            if (sidebarAvatar) {
+                if (user.avatar_url && user.avatar_url.trim() !== '') {
+                    sidebarAvatar.src = user.avatar_url;
+                } else {
+                    // Generate initials avatar
+                    const initials = (user.fullname || 'E').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+                    sidebarAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'Editor')}&background=6366f1&color=fff&size=100&bold=true`;
+                }
+            }
         }
 
         async function updateProfile(e) {
