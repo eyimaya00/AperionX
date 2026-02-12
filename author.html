@@ -1051,39 +1051,6 @@
     <main class="content" id="main-content">
         <!-- TOP BAR -->
         <div class="top-bar">
-            <!-- Dark Mode Toggle -->
-            <button class="icon-btn" onclick="toggleDarkMode()" title="Karanlık Mod">
-                <i class="ph ph-moon" id="theme-icon"></i>
-            </button>
-
-            <!-- Notification Bell -->
-            <div style="position: relative;">
-                <button class="icon-btn" onclick="toggleNotificationDropdown()" title="Bildirimler">
-                    <i class="ph ph-bell"></i>
-                    <div id="notif-badge"
-                        style="display:none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
-                        0</div>
-                </button>
-
-                <!-- DROPDOWN -->
-                <div id="notif-dropdown"
-                    style="display: none; position: absolute; top: 50px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0; animation: fadeIn 0.2s ease;">
-                    <div
-                        style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 600; color: #1e293b;">Bildirimler</span>
-                        <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;"
-                            onclick="loadNotifications()">Yenile</span>
-                    </div>
-                    <div id="notif-list" style="max-height: 350px; overflow-y: auto;">
-                        <div
-                            style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <span>Bildiriminiz yok.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         </div>
 
         <!-- DASHBOARD -->
