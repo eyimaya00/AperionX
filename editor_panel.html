@@ -832,6 +832,25 @@
                 padding: 15px;
             }
         }
+
+        /* Custom Scrollbar for Author List */
+        #author-list-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #author-list-grid::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        #author-list-grid::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        #author-list-grid::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 
@@ -1405,35 +1424,86 @@
             });
         });
 
+        let allAuthorsData = []; // Store for filtering
+
         async function loadAuthorsForEditorSelection() {
             try {
                 const res = await fetch(`${API_URL}/users/list-authors`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) return;
-                const authors = await res.json();
-
-                const container = document.getElementById('edit-author-selection-container');
-                container.innerHTML = '';
-
-                authors.forEach(a => {
-                    const div = document.createElement('div');
-                    div.style.display = 'flex';
-                    div.style.alignItems = 'center';
-                    div.style.gap = '8px';
-                    div.style.padding = '5px';
-                    div.style.background = 'white';
-                    div.style.borderRadius = '6px';
-                    div.style.border = '1px solid #e2e8f0';
-
-                    div.innerHTML = `
-                        <input type="checkbox" name="edit_article_authors" value="${a.id}" id="edit-auth-cb-${a.id}" style="width: 16px; height: 16px; cursor: pointer;">
-                        <label for="edit-auth-cb-${a.id}" style="margin:0; cursor:pointer; font-size:0.9rem; font-weight:500; color:#334155; display: flex; flex-direction: column; line-height: 1.2;">
-                            <span>${escapeHtml(a.fullname)}</span>
-                            ${a.username ? `<span style="font-size: 0.75rem; color: #94a3b8;">@${escapeHtml(a.username)}</span>` : ''}
-                        </label>
-                    `;
-                    container.appendChild(div);
-                });
+                allAuthorsData = await res.json();
+                renderAuthorSelectionList(allAuthorsData);
             } catch (e) { console.error('Error loading authors for editor:', e); }
+        }
+
+        function renderAuthorSelectionList(authors) {
+            const container = document.getElementById('edit-author-selection-container');
+            // Clear and Setup improved container
+            container.innerHTML = `
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="author-search-input" placeholder="Yazar ara..." 
+                        style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;"
+                        onkeyup="filterAuthorList(this.value)">
+                </div>
+                <div id="author-list-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; max-height: 250px; overflow-y: auto; padding: 2px;">
+                    <!-- Items -->
+                </div>
+             `;
+
+            const grid = document.getElementById('author-list-grid');
+
+            if (authors.length === 0) {
+                grid.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem; padding:10px;">Yazar bulunamadı.</div>';
+                return;
+            }
+
+            authors.forEach(a => {
+                const label = document.createElement('label');
+                label.className = 'author-select-card';
+                label.style.cssText = `
+                    display: flex; align-items: center; gap: 10px; padding: 10px; 
+                    border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; 
+                    background: white; transition: all 0.2s; position: relative;
+                `;
+                // Add hover effect via JS since inline
+                label.onmouseover = () => { if (!label.querySelector('input').checked) label.style.borderColor = '#cbd5e1'; };
+                label.onmouseout = () => { if (!label.querySelector('input').checked) label.style.borderColor = '#e2e8f0'; };
+
+                // Avatar logic
+                const avatarUrl = a.avatar_url && a.avatar_url.trim() !== '' ? a.avatar_url : null;
+                const avatarHtml = avatarUrl
+                    ? `<img src="${avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">`
+                    : `<div style="width: 32px; height: 32px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem;">${a.fullname.charAt(0).toUpperCase()}</div>`;
+
+                label.innerHTML = `
+                    <input type="checkbox" name="edit_article_authors" value="${a.id}" id="edit-auth-cb-${a.id}" 
+                        style="width: 16px; height: 16px; cursor: pointer; accent-color: #6366f1;"
+                        onchange="this.parentElement.style.borderColor = this.checked ? '#6366f1' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eef2ff' : 'white';">
+                    
+                    ${avatarHtml}
+                    
+                    <div style="display: flex; flex-direction: column; line-height: 1.2; overflow: hidden;">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(a.fullname)}</span>
+                        ${a.username ? `<span style="font-size: 0.75rem; color: #94a3b8;">@${escapeHtml(a.username)}</span>` : ''}
+                    </div>
+                `;
+                grid.appendChild(label);
+            });
+        }
+
+        function filterAuthorList(query) {
+            const lower = query.toLowerCase();
+            // Do NOT re-render, just toggle visibility to keep selection state
+            const grid = document.getElementById('author-list-grid');
+            const labels = grid.querySelectorAll('label');
+            labels.forEach(lbl => {
+                // Text content includes name and username
+                const text = lbl.innerText.toLowerCase();
+                if (text.includes(lower)) {
+                    lbl.style.display = 'flex';
+                } else {
+                    lbl.style.display = 'none';
+                }
+            });
         }
 
         // --- STATS / ANALYSIS MODULE ---
@@ -2369,6 +2439,8 @@
         // We can hook into showSection or just load it once if we want
         // Let's modify showSection to lazy load, OR just load on init.
         // loadAnalysisAuthors(); // Moved to init
+
+        loadAuthorsForEditorSelection();
 
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html'; }
     </script>
