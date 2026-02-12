@@ -1861,6 +1861,12 @@ function renderArticleDetail(article) {
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
     // Multi-author Support
+    // Multi-author Support
+    // MERGE: Ensure article.authors is populated from SSR global if missing
+    if ((!article.authors || article.authors.length === 0) && window.SERVER_AUTHORS) {
+        article.authors = window.SERVER_AUTHORS;
+    }
+
     if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
         const authorsHtml = article.authors.map((a, index) => {
             const separator = index > 0 ? '<span style="margin: 0 4px;">,</span>' : '';
@@ -1869,7 +1875,9 @@ function renderArticleDetail(article) {
         document.getElementById('detail-author').innerHTML = `<div style="display:inline-flex; align-items:center; flex-wrap:wrap;"><i class="ph ph-users" style="margin-right:6px;"></i> ${authorsHtml}</div>`;
     } else {
         // Fallback for legacy single author
-        const safeAuthorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
+        // Use SERVER_AUTHOR if available (though SERVER_AUTHORS is preferred now)
+        const safeAuthorName = article.author_name || (window.SERVER_AUTHORS ? window.SERVER_AUTHORS[0]?.fullname : null) || 'AperionX Yazarı';
+
         if (article.author_id) {
             document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
         } else {
