@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /editor.html
+Disallow: /author.html
+Disallow: /maintenance.html
+Disallow: /api/
 Sitemap: https://aperionx.com/sitemap.xml

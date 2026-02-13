@@ -341,6 +341,14 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                     html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
                 }
 
+                // Add Dynamic Keywords
+                const tags = article.tags || 'bilim, teknoloji, makale, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, makale">`);
+                if (!html.includes('<meta name="keywords"')) {
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, makale">\n</head>`);
+                }
+
+
                 replaceMeta('twitter:title', safeTitle);
                 replaceMeta('twitter:description', safeSummary);
                 replaceMeta('twitter:image', safeImg);
@@ -355,13 +363,18 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const schemaData = {
                     "@context": "https://schema.org",
                     "@type": "Article",
+                    "mainEntityOfPage": {
+                        "@type": "WebPage",
+                        "@id": safeUrl
+                    },
                     "headline": safeTitle,
                     "image": [safeImg],
                     "datePublished": isoDate,
-                    "dateModified": isoDate,
+                    "dateModified": isoDate, // Should ideally be updated_at if available
                     "author": {
                         "@type": "Person",
-                        "name": authorName
+                        "name": authorName,
+                        "url": authors.length > 0 ? `${origin}/author.html?username=${authors[0].username}` : `${origin}/author.html`
                     },
                     "publisher": {
                         "@type": "Organization",
@@ -374,10 +387,32 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                     "description": safeSummary
                 };
 
-                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+                const breadcrumbData = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Ana Sayfa",
+                        "item": "https://aperionx.com"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Makaleler",
+                        "item": "https://aperionx.com/articles.html"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": safeTitle,
+                        "item": safeUrl
+                    }]
+                };
 
-                // Insert both scripts
-                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n</head>`);
+                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+                const breadcrumbScript = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
+
+                // Insert all scripts
+                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
 
                 // SSR: Render Author Name & Avatar directly
                 // Pattern match existing placeholder: <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
