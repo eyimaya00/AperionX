@@ -251,23 +251,24 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
         // ============ VIEW COUNTING LOGIC ============
         const articleId = article.id;
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
         console.log(`[VIEW-COUNT] Article ${articleId} (${slug}) accessed from IP: ${ip}`);
 
         try {
+            // Only throttle same IP + same article within 2 hours
             const [viewCheck] = await pool.query(
                 `SELECT id FROM article_views 
-                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
+                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
                 [articleId, ip]
             );
 
             if (viewCheck.length === 0) {
-                console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} from IP ${ip}`);
+                console.log(`[VIEW-COUNT] ✅ New view for Article ${articleId} from IP ${ip}`);
                 await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
                 await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
             } else {
-                console.log(`[VIEW-DEBUG] View THROTTLED for Article ${articleId} from IP ${ip}`);
+                console.log(`[VIEW-COUNT] ⏳ Throttled for Article ${articleId} from IP ${ip} (already viewed in last 24h)`);
             }
         } catch (vcErr) {
             console.error('[VIEW-COUNT] Error:', vcErr.message);
@@ -1336,10 +1337,8 @@ app.get('/api/articles/:key', async (req, res) => {
 
         const article = rows[0];
 
-        // Increment view count for published articles
-        if (article.status === 'published') {
-            await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [article.id]);
-        }
+        // View counting is handled by the SSR /makale/:slug route only
+        // No view increment here to prevent double counting
 
         // Fetch authors
         const authors = await getArticleAuthors(pool, article.id);
@@ -2295,28 +2294,8 @@ app.get('/api/articles/:id', async (req, res) => {
             return res.status(404).json({ error: 'Makale bulunamadı veya yayında değil.' });
         }
 
-        // Get the article ID from the fetched row (for view counting)
-        const articleId = rows[0].id;
-
-        // Secure View Counting
-        // Use req.ip which is reliable with 'trust proxy' enabled
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-        // Check if this IP viewed this article in last 1 HOUR
-        const [viewCheck] = await pool.query(
-            `SELECT id FROM article_views 
-             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
-            [articleId, ip]
-        );
-
-        if (viewCheck.length === 0) {
-            console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} from IP ${ip}`);
-            // New view
-            await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
-            await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
-        } else {
-            console.log(`[VIEW-DEBUG] View TROTTLED for Article ${articleId} from IP ${ip} (Already viewed in last 10s)`);
-        }
+        // View counting is handled by the SSR /makale/:slug route only
+        // No view increment here to prevent double counting
 
         res.json(rows[0]);
     } catch (err) {
@@ -2851,26 +2830,9 @@ app.get('/makale/:slug', async (req, res) => {
         const articleId = article.id;
         console.log('[SLUG-ROUTE] Found article ID:', articleId, 'Title:', article.title);
 
-        // VIEW COUNTING LOGIC (Same as API endpoint)
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.log('[SLUG-ROUTE] IP detected:', ip);
-
-        const [viewCheck] = await pool.query(
-            `SELECT id FROM article_views 
-             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)`,
-            [articleId, ip]
-        );
-
-        console.log('[SLUG-ROUTE] View check returned', viewCheck.length, 'recent views from this IP');
-
-        if (viewCheck.length === 0) {
-            console.log(`[VIEW-DEBUG] Increasing view for Article ${articleId} (slug: ${slug}) from IP ${ip}`);
-            await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
-            await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
-            console.log('[SLUG-ROUTE] View count updated successfully');
-        } else {
-            console.log(`[VIEW-DEBUG] View THROTTLED for Article ${articleId} (slug: ${slug}) from IP ${ip} (Already viewed in last 10s)`);
-        }
+        // View counting is handled by the primary SSR /makale/:slug route at the top of the file
+        // No view increment here to prevent double counting
+        console.log('[SLUG-ROUTE] Skipping view count (handled by primary route)');
 
         // SEO Meta Tag Injection
         console.log('[SLUG-ROUTE] Injecting SEO meta tags...');
