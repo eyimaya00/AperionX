@@ -1621,8 +1621,10 @@
                 document.getElementById('main-content').classList.toggle('expanded');
             }
 
-            icon.className = (sidebar.classList.contains('collapsed') || !sidebar.classList.contains('active'))
-                ? 'ph ph-caret-right' : 'ph ph-caret-left';
+            // Verify if desktop or mobile to determine icon state
+            if (window.innerWidth > 768) {
+                icon.className = sidebar.classList.contains('collapsed') ? 'ph ph-caret-right' : 'ph ph-caret-left';
+            }
         }
 
         function showSection(id, el) {
