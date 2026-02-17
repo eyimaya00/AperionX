@@ -2192,7 +2192,13 @@
                 </div>
                 <div style="margin-top:20px;">
                     <strong>Kaynakça:</strong>
-                    <p style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:5px;">${article.references_list || 'Belirtilmemiş'}</p>
+                    <div style="background:#f1f5f9; padding:15px; border-radius:8px; margin-top:5px; font-size: 0.9rem;">
+                        ${article.references_list ?
+                    `<ol style="padding-left: 20px; margin: 0;">
+                                ${article.references_list.split('\n').filter(r => r.trim() !== '').map(r => `<li style="margin-bottom: 5px;">${r}</li>`).join('')}
+                            </ol>`
+                    : 'Belirtilmemiş'}
+                    </div>
                 </div>
                 ${article.pdf_url ? `<div style="margin-top:20px;"><a href="${article.pdf_url}" target="_blank" class="btn btn-secondary"><i class="ph ph-file-pdf"></i> PDF Dosyasını İndir</a></div>` : ''}
             `;
