@@ -1796,6 +1796,7 @@
                 document.getElementById('edit-category').value = article.category;
                 document.getElementById('edit-excerpt').value = article.excerpt;
                 document.getElementById('edit-tags').value = article.tags || '';
+                document.getElementById('references').value = article.references_list || '';
                 if (quillEdit) quillEdit.root.innerHTML = article.content;
 
                 // Handle Authors (Pre-selection)
@@ -1833,6 +1834,7 @@
             const category = document.getElementById('edit-category').value;
             const excerpt = document.getElementById('edit-excerpt').value;
             const tags = document.getElementById('edit-tags').value;
+            const references = document.getElementById('references').value;
             const content = quillEdit.root.innerHTML;
 
             const formData = new FormData();
@@ -1840,6 +1842,7 @@
             formData.append('category', category);
             formData.append('excerpt', excerpt);
             formData.append('tags', tags);
+            formData.append('references_list', references);
             formData.append('content', content);
 
             // Collect Authors
