@@ -694,6 +694,30 @@
         }
 
         /* ---- RESPONSIVE ---- */
+        @media(max-width:1024px) {
+            .controls-top {
+                top: 14px;
+                right: 16px;
+                transform: none;
+                flex-direction: row;
+            }
+
+            body.compare-mode .controls-top {
+                left: auto;
+                top: 14px;
+                right: 16px;
+                transform: none;
+            }
+
+            .info-panel {
+                top: 70px;
+            }
+
+            .legend-panel {
+                bottom: 150px;
+            }
+        }
+
         @media(max-width:768px) {
             #btnCompare {
                 display: none !important;
@@ -785,7 +809,8 @@
             }
 
             .controls-top {
-                top: 14px;
+                top: 70px;
+                flex-direction: column;
                 gap: 6px
             }
         }
@@ -845,7 +870,7 @@
     <div id="canvas-right"></div>
     <div class="compare-divider"></div>
 
-    <a class="site-logo" href="#">
+    <a class="site-logo" href="/index.html">
         <img src="Aperıonx.png" alt="AperionX">
     </a>
 
