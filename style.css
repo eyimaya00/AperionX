@@ -179,12 +179,9 @@ a {
 @media (min-width: 1200px) {
     .nav-menu {
         display: flex;
-        position: absolute;
-        /* Force True Center */
-        left: 50%;
-        transform: translateX(-50%);
+        flex: 1;
+        justify-content: center;
         margin: 0;
-        /* consistent centering */
         white-space: nowrap;
     }
 }
@@ -201,6 +198,17 @@ a {
     /* Transparent Background as requested */
     background: transparent;
     border: 1px solid transparent;
+}
+
+@media (min-width: 1200px) and (max-width: 1350px) {
+    .nav-menu {
+        gap: 6px;
+    }
+
+    .nav-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
 }
 
 [data-theme="dark"] .nav-link {
