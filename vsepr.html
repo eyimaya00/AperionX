@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSEPR Simülatörü | AperionX</title>
+    <meta name="description"
+        content="İnteraktif 3D VSEPR Molekül Geometrisi Simülatörü. Moleküler geometrileri keşfedin ve öğrenin.">
+    <meta property="og:title" content="VSEPR Simülatörü | AperionX">
+    <meta property="og:description"
+        content="İnteraktif 3D VSEPR Molekül Geometrisi Simülatörü. Moleküler geometrileri keşfedin ve öğrenin.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png?v=2">
+    <link rel="apple-touch-icon" href="favicon.png?v=2">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --bg: #f0f2f5;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --surface: rgba(255, 255, 255, 0.85);
+            --radius: 16px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.12);
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark {
+            --bg: #0f1117;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --surface: rgba(30, 32, 42, 0.85);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+            --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.4);
+            --primary-glow: rgba(99, 102, 241, 0.4);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1
+        }
+
+        canvas {
+            display: block
+        }
+
+        /* ---- BİLGİ PANELİ (sol üst) ---- */
+        .info-panel {
+            position: fixed;
+            top: 80px;
+            left: 36px;
+            z-index: 10;
+            max-width: 440px;
+            pointer-events: none
+        }
+
+        .info-title {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1.15;
+            letter-spacing: -.5px;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 12px rgba(99, 102, 241, .15);
+            transition: opacity .3s
+        }
+
+        .info-subtitle {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            letter-spacing: .5px
+        }
+
+        .info-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .info-detail-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px
+        }
+
+        .info-detail-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            min-width: 155px;
+            flex-shrink: 0
+        }
+
+        .info-detail-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text)
+        }
+
+        .info-detail-value.accent {
+            color: var(--primary);
+            font-weight: 700
+        }
+
+        .info-divider {
+            width: 48px;
+            height: 3px;
+            background: linear-gradient(90deg, var(-- primary), var(--primary-light));
+            border-radius: 2px;
+            margin: 6px 0 10px;
+            transition: opacity 0.3s;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .info-toggle-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all var(--transition);
+            pointer-events: none;
+            /* Let the header handle the click */
+        }
+
+        .info-toggle-btn:hover {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* ---- LEJANT (sol alt) ---- */
+        .legend-panel {
+            position: fixed;
+            bottom: 140px;
+            left: 36px;
+            z-index: 10;
+            display: flex;
+            gap: 18px;
+            pointer-events: none
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px
+        }
+
+        .legend-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, .06)
+        }
+
+        .legend-dot.center {
+            background: #4a4458
+        }
+
+        .legend-dot.bonded {
+            background: #cbd5e1
+        }
+
+        .legend-dot.lone {
+            background: var(--primary);
+            opacity: .55;
+            box-shadow: 0 0 6px var(--primary-glow)
+        }
+
+        .legend-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600
+        }
+
+        /* ---- ALT NAV (2 satır: VSEPR butonları + alt-menü) ---- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px 18px;
+            background: linear-gradient(180deg, transparent 0%, rgba(240, 242, 245, .8) 20%, rgba(240, 242, 245, .97) 100%);
+            pointer-events: none;
+            transition: background 0.4s ease
+        }
+
+        body.dark .bottom-nav {
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 17, 23, .8) 20%, rgba(15, 17, 23, .97) 100%)
+        }
+
+        body.dark .nav-btn {
+            border-color: rgba(255, 255, 255, .08)
+        }
+
+        body.dark .sub-btn {
+            background: rgba(30, 32, 42, .7);
+            border-color: rgba(255, 255, 255, .08)
+        }
+
+        body.dark .sub-btn:hover {
+            background: rgba(99, 102, 241, .12)
+        }
+
+        body.dark .ctrl-btn {
+            border-color: rgba(255, 255, 255, .08)
+        }
+
+        body.dark .angle-label {
+            background: rgba(30, 32, 42, .9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .3)
+        }
+
+        body.dark .legend-dot {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .08)
+        }
+
+        .nav-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 20px 4px 4px;
+            pointer-events: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .nav-row::-webkit-scrollbar {
+            display: none
+        }
+
+        .nav-btn {
+            flex-shrink: 0;
+            padding: 11px 18px;
+            border: 2px solid rgba(0, 0, 0, .06);
+            border-radius: 12px;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            letter-spacing: .3px;
+            box-shadow: var(--shadow)
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg)
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 6px 24px var(--primary-glow);
+            transform: translateY(-2px)
+        }
+
+        /* Alt-menü (örnek moleküller) */
+        .sub-nav {
+            display: flex;
+            gap: 6px;
+            padding: 6px 20px 2px 4px;
+            pointer-events: auto;
+            justify-content: flex-start;
+            min-height: 38px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            width: 100%;
+        }
+
+        .sub-nav::-webkit-scrollbar {
+            display: none
+        }
+
+        .sub-nav:empty {
+            display: none
+        }
+
+        .sub-btn {
+            flex-shrink: 0;
+            padding: 7px 14px;
+            border: 1.5px solid rgba(0, 0, 0, .06);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .7);
+            backdrop-filter: blur(8px);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap
+        }
+
+        .sub-btn:hover {
+            border-color: var(--primary-light);
+            color: var(--primary);
+            background: rgba(99, 102, 241, .06)
+        }
+
+        .sub-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 3px 12px var(--primary-glow)
+        }
+
+        /* ---- SAĞ FLOATING TOOLBAR ---- */
+        .controls-top {
+            position: fixed;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            padding: 8px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+            border: 1.5px solid rgba(0, 0, 0, .06)
+        }
+
+        body.dark .controls-top {
+            border-color: rgba(255, 255, 255, .08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .3)
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            color: var(--text-secondary)
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(99, 102, 241, .1);
+            transform: scale(1.08)
+        }
+
+        .ctrl-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 2px 10px var(--primary-glow)
+        }
+
+        .ctrl-btn .btn-tooltip {
+            position: absolute;
+            right: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--text);
+            color: var(--bg);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+            font-family: 'Inter', sans-serif
+        }
+
+        .ctrl-btn:hover .btn-tooltip {
+            opacity: 1
+        }
+
+        .ctrl-sep {
+            width: 24px;
+            height: 1px;
+            background: rgba(0, 0, 0, .08);
+            margin: 2px auto;
+            border: none
+        }
+
+        body.dark .ctrl-sep {
+            background: rgba(255, 255, 255, .1)
+        }
+
+        /* ---- CSS2D ETİKETLER ---- */
+        .atom-label {
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, .55);
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: .5px
+        }
+
+        .angle-label {
+            color: var(--primary-dark);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(255, 255, 255, .92);
+            padding: 3px 10px;
+            border-radius: 8px;
+            pointer-events: none;
+            user-select: none;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, .15);
+            white-space: nowrap;
+            border: 1.5px solid rgba(99, 102, 241, .2);
+            transition: opacity .3s
+        }
+
+        body.hide-angles .angle-label {
+            display: none !important
+        }
+
+        body.compare-mode .controls-top {
+            right: auto;
+            left: 50%;
+            top: 42%;
+            transform: translate(-50%, -50%)
+        }
+
+        /* ---- KARŞILAŞTIRMA MODU ---- */
+        #canvas-right {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 50%;
+            z-index: 1;
+            display: none
+        }
+
+        body.compare-mode #canvas-container {
+            width: 50%
+        }
+
+        body.compare-mode #canvas-right {
+            display: block
+        }
+
+        .compare-divider {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: var(--primary);
+            z-index: 12;
+            display: none;
+            opacity: .5
+        }
+
+        body.compare-mode .compare-divider {
+            display: block
+        }
+
+        .info-panel-right {
+            position: fixed;
+            top: 80px;
+            right: 36px;
+            z-index: 10;
+            max-width: 420px;
+            pointer-events: none;
+            display: none;
+            text-align: right
+        }
+
+        .info-panel-right .info-title,
+        .info-panel-right .info-subtitle,
+        .info-panel-right .info-detail-label,
+        .info-panel-right .info-detail-value {
+            text-align: right
+        }
+
+        .info-panel-right .info-detail-row {
+            justify-content: flex-end
+        }
+
+        .info-panel-right .info-divider {
+            margin-left: auto
+        }
+
+        body.compare-mode .info-panel-right {
+            display: block;
+            right: 36px;
+            top: 20px
+        }
+
+        /* Karşılaştırma modunda kompakt paneller */
+        body.compare-mode .info-panel {
+            top: 20px;
+            left: 20px;
+            max-width: 320px
+        }
+
+        body.compare-mode .info-panel .info-title,
+        body.compare-mode .info-panel-right .info-title {
+            font-size: 20px;
+            margin-bottom: 4px
+        }
+
+        body.compare-mode .info-panel .info-subtitle,
+        body.compare-mode .info-panel-right .info-subtitle {
+            font-size: 11px;
+            margin-bottom: 10px
+        }
+
+        body.compare-mode .info-panel .info-detail-label,
+        body.compare-mode .info-panel-right .info-detail-label {
+            font-size: 9px;
+            min-width: 85px
+        }
+
+        body.compare-mode .info-panel .info-detail-value,
+        body.compare-mode .info-panel-right .info-detail-value {
+            font-size: 12px
+        }
+
+        body.compare-mode .info-divider {
+            margin: 8px 0
+        }
+
+        body.compare-mode .info-details {
+            gap: 4px
+        }
+
+        body.compare-mode .info-panel-right {
+            max-width: 320px
+        }
+
+
+        body.compare-mode .legend-panel {
+            display: none
+        }
+
+        .side-selector {
+            display: none;
+            gap: 4px;
+            pointer-events: auto;
+            justify-content: center;
+            margin-bottom: 6px
+        }
+
+        body.compare-mode .side-selector {
+            display: flex
+        }
+
+        .side-tab {
+            padding: 6px 16px;
+            border: 2px solid rgba(0, 0, 0, .06);
+            border-radius: 10px;
+            background: var(--surface);
+            backdrop-filter: blur(8px);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition)
+        }
+
+        .side-tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 3px 12px var(--primary-glow)
+        }
+
+        body.dark .side-tab {
+            border-color: rgba(255, 255, 255, .08)
+        }
+
+        /* ---- SITE LOGO ---- */
+        .site-logo {
+            position: fixed;
+            top: 18px;
+            left: 24px;
+            z-index: 200;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 2px 16px rgba(99, 102, 241, 0.08);
+            transition: transform .3s, box-shadow .3s;
+            pointer-events: auto;
+            cursor: pointer
+        }
+
+        .site-logo:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15)
+        }
+
+        .site-logo img {
+            height: 38px;
+            width: auto;
+            display: block
+        }
+
+        body.dark .site-logo {
+            background: rgba(15, 17, 23, 0.75);
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 2px 16px rgba(99, 102, 241, 0.15)
+        }
+
+        body.dark .site-logo img {
+            filter: brightness(1.3)
+        }
+
+        body.compare-mode .site-logo {
+            left: 50%;
+            transform: translateX(-50%);
+            top: 24px;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media(max-width:768px) {
+            #btnCompare {
+                display: none !important;
+            }
+
+            .site-logo {
+                left: 50%;
+                transform: translateX(-50%);
+                top: 12px;
+                padding: 6px 12px;
+                border-radius: 10px;
+                z-index: 300;
+            }
+
+            .site-logo img {
+                height: 28px;
+            }
+
+            .info-panel {
+                top: 80px;
+                left: 16px;
+                max-width: calc(100vw - 32px);
+                z-index: 250;
+                background: rgba(15, 17, 23, 0.4);
+                backdrop-filter: blur(4px);
+                padding: 12px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all var(--transition);
+            }
+
+            .info-toggle-btn {
+                display: block;
+            }
+
+            .info-details {
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .info-panel.expanded .info-details {
+                max-height: 300px;
+                opacity: 1;
+                margin-top: 10px;
+            }
+
+            .info-panel.expanded .info-divider {
+                display: block;
+                opacity: 1;
+            }
+
+            .info-divider {
+                opacity: 0;
+                display: none;
+            }
+
+            .info-title {
+                font-size: 24px
+            }
+
+            .info-subtitle {
+                font-size: 12px
+            }
+
+            .info-detail-label {
+                font-size: 10px;
+                min-width: 110px
+            }
+
+            .info-detail-value {
+                font-size: 13px
+            }
+
+            .legend-panel {
+                bottom: 130px;
+                left: 16px;
+                gap: 12px
+            }
+
+            .bottom-nav {
+                padding: 0 8px 12px
+            }
+
+            .nav-btn {
+                padding: 9px 13px;
+                font-size: 12px
+            }
+
+            .controls-top {
+                top: 14px;
+                gap: 6px
+            }
+        }
+
+        @media(max-width:480px) {
+            .info-title {
+                font-size: 20px
+            }
+
+            .info-details {
+                gap: 4px
+            }
+
+            .info-detail-row {
+                flex-direction: column;
+                gap: 2px
+            }
+
+            .info-detail-label {
+                min-width: 0
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn .5s cubic-bezier(.16, 1, .3, 1) forwards;
+            opacity: 0
+        }
+
+        .d1 {
+            animation-delay: .05s
+        }
+
+        .d2 {
+            animation-delay: .1s
+        }
+
+        .d3 {
+            animation-delay: .15s
+        }
+    </style>
+</head>
+
+<body class="dark">
+    <div id="canvas-container"></div>
+    <div id="canvas-right"></div>
+    <div class="compare-divider"></div>
+
+    <a class="site-logo" href="#">
+        <img src="Aperıonx.png" alt="AperionX">
+    </a>
+
+    <!-- Bilgi Paneli -->
+    <div class="info-panel animate-in" id="mobileInfoPanel">
+        <div class="info-subtitle" id="infoNotation">AX4 — Tetrahedral</div>
+        <div class="info-header">
+            <h1 class="info-title" id="infoTitle">Düzgün Dörtyüzlü</h1>
+            <button class="info-toggle-btn" id="btnToggleInfo" aria-label="Bilgileri Göster">▼</button>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-details">
+            <div class="info-detail-row">
+                <span class="info-detail-label">Molekül Geometrisi</span>
+                <span class="info-detail-value" id="infoMolGeo">—</span>
+            </div>
+            <div class="info-detail-row">
+                <span class="info-detail-label">Elektron Geometrisi</span>
+                <span class="info-detail-value accent" id="infoElGeo">—</span>
+            </div>
+            <div class="info-detail-row">
+                <span class="info-detail-label">Bağ Açısı</span>
+                <span class="info-detail-value accent" id="infoAngle">—</span>
+            </div>
+            <div class="info-detail-row">
+                <span class="info-detail-label">Hibritleşme</span>
+                <span class="info-detail-value" id="infoHybrid">—</span>
+            </div>
+            <div class="info-detail-row">
+                <span class="info-detail-label">Örnek</span>
+                <span class="info-detail-value" id="infoExample">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sağ Bilgi Paneli (Karşılaştırma) -->
+    <div class="info-panel-right">
+        <div class="info-subtitle" id="infoNotationR">AX3 — Trigonal Planar</div>
+        <h1 class="info-title" id="infoTitleR">Düzlem Üçgen</h1>
+        <div class="info-divider"></div>
+        <div class="info-details">
+            <div class="info-detail-row"><span class="info-detail-label">Molekül Geometrisi</span><span
+                    class="info-detail-value" id="infoMolGeoR">—</span></div>
+            <div class="info-detail-row"><span class="info-detail-label">Elektron Geometrisi</span><span
+                    class="info-detail-value accent" id="infoElGeoR">—</span></div>
+            <div class="info-detail-row"><span class="info-detail-label">Bağ Açısı</span><span
+                    class="info-detail-value accent" id="infoAngleR">—</span></div>
+            <div class="info-detail-row"><span class="info-detail-label">Hibritleşme</span><span
+                    class="info-detail-value" id="infoHybridR">—</span></div>
+            <div class="info-detail-row"><span class="info-detail-label">Örnek</span><span class="info-detail-value"
+                    id="infoExampleR">—</span></div>
+        </div>
+    </div>
+
+    <!-- Lejant -->
+    <div class="legend-panel animate-in d2">
+        <div class="legend-item">
+            <div class="legend-dot center"></div><span class="legend-label">Merkez (A)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot bonded"></div><span class="legend-label">Bağlı (X)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot lone"></div><span class="legend-label">Elektron Çifti (E)</span>
+        </div>
+    </div>
+
+    <!-- Sağ Floating Toolbar -->
+    <div class="controls-top animate-in d1">
+        <button class="ctrl-btn" id="btnCompare">📊<span class="btn-tooltip">Karşılaştır</span></button>
+        <button class="ctrl-btn active" id="btnDarkMode">☀️<span class="btn-tooltip">Gündüz Modu</span></button>
+        <hr class="ctrl-sep">
+        <button class="ctrl-btn active" id="btnLonePairs">👁<span class="btn-tooltip">Elektron Çiftleri</span></button>
+        <button class="ctrl-btn active" id="btnAngles">📐<span class="btn-tooltip">Bağ Açıları</span></button>
+        <button class="ctrl-btn" id="btnShape">🔷<span class="btn-tooltip">Geometrik Şekil</span></button>
+        <button class="ctrl-btn" id="btnAutoRotate">🔄<span class="btn-tooltip">Oto-Döndür</span></button>
+    </div>
+
+    <!-- Alt Nav -->
+    <div class="bottom-nav animate-in d3">
+        <div class="side-selector" id="sideSelector">
+            <button class="side-tab active" id="tabLeft">◀ Sol Panel</button>
+            <button class="side-tab" id="tabRight">Sağ Panel ▶</button>
+        </div>
+        <div class="nav-row" id="navScroll"></div>
+        <div class="sub-nav" id="subNav"></div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+        import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
+
+        // ================================================================
+        //  SABİTLER & ATOM RENKLERİ (CPK)
+        // ================================================================
+        const BOND_LENGTH = 2.0;
+
+        const ATOM_COLORS = {
+            H: 0xffffff, C: 0x333333, N: 0x3050F8, O: 0xFF0D0D,
+            F: 0x90E050, S: 0xFFFF30, Cl: 0x1FF01F, Be: 0xC2FF00,
+            B: 0xFFB5B5, P: 0xFF8000, Br: 0xA62929, Xe: 0x429EB0,
+            I: 0x940094, Te: 0xD47A00, Pt: 0xD0D0E0
+        };
+
+        // ================================================================
+        //  MOLEKÜL VERİLERİ + GERÇEK MOLEKÜL ÖRNEKLERİ
+        // ================================================================
+        const moleculeData = {
+            "AX2": {
+                name: "Doğrusal", nameEn: "Linear", notation: "AX2",
+                moleculeGeometry: "Doğrusal (Linear)",
+                electronGeometry: "Doğrusal (Linear)",
+                bondAngle: "180°", hybridization: "sp",
+                example: "CO₂, BeCl₂",
+                bondedPositions: [[0, 0, 1], [0, 0, -1]], lonePairPositions: [],
+                realMolecules: {
+                    "CO₂": { center: { el: "C", color: ATOM_COLORS.C }, bonded: [{ el: "O", color: ATOM_COLORS.O }, { el: "O", color: ATOM_COLORS.O }] },
+                    "BeCl₂": { center: { el: "Be", color: ATOM_COLORS.Be }, bonded: [{ el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }] }
+                }
+            },
+            "AX3": {
+                name: "Düzlem Üçgen", nameEn: "Trigonal Planar", notation: "AX3",
+                moleculeGeometry: "Düzlem Üçgen (Trigonal Planar)",
+                electronGeometry: "Düzlem Üçgen (Trigonal Planar)",
+                bondAngle: "120°", hybridization: "sp²",
+                example: "BF₃, CO₃²⁻",
+                bondedPositions: [
+                    [0, 0, 1],
+                    [Math.sin(2 * Math.PI / 3), 0, Math.cos(2 * Math.PI / 3)],
+                    [Math.sin(4 * Math.PI / 3), 0, Math.cos(4 * Math.PI / 3)]
+                ], lonePairPositions: [],
+                realMolecules: {
+                    "BF₃": { center: { el: "B", color: ATOM_COLORS.B }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX2E": {
+                name: "Kırık Doğru", nameEn: "Bent", notation: "AX2E",
+                moleculeGeometry: "Kırık Doğru / Bükülmüş (Bent)",
+                electronGeometry: "Düzlem Üçgen (Trigonal Planar)",
+                bondAngle: "~117°", hybridization: "sp²",
+                example: "SO₂, O₃",
+                bondedPositions: [
+                    [Math.sin(2 * Math.PI / 3), 0, Math.cos(2 * Math.PI / 3)],
+                    [Math.sin(4 * Math.PI / 3), 0, Math.cos(4 * Math.PI / 3)]
+                ], lonePairPositions: [[0, 0, 1]],
+                realMolecules: {
+                    "SO₂": { center: { el: "S", color: ATOM_COLORS.S }, bonded: [{ el: "O", color: ATOM_COLORS.O }, { el: "O", color: ATOM_COLORS.O }] },
+                    "O₃": { center: { el: "O", color: ATOM_COLORS.O }, bonded: [{ el: "O", color: ATOM_COLORS.O }, { el: "O", color: ATOM_COLORS.O }] }
+                }
+            },
+            "AX4": {
+                name: "Düzgün Dörtyüzlü", nameEn: "Tetrahedral", notation: "AX4",
+                moleculeGeometry: "Düzgün Dörtyüzlü (Tetrahedral)",
+                electronGeometry: "Düzgün Dörtyüzlü (Tetrahedral)",
+                bondAngle: "109.5°", hybridization: "sp³",
+                example: "CH₄, NH₄⁺",
+                bondedPositions: (() => {
+                    const a = Math.acos(-1 / 3); return [
+                        [0, 1, 0],
+                        [Math.sin(a) * Math.sin(0), Math.cos(a), Math.sin(a) * Math.cos(0)],
+                        [Math.sin(a) * Math.sin(2 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(2 * Math.PI / 3)],
+                        [Math.sin(a) * Math.sin(4 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(4 * Math.PI / 3)]
+                    ];
+                })(), lonePairPositions: [],
+                realMolecules: {
+                    "CH₄": { center: { el: "C", color: ATOM_COLORS.C }, bonded: [{ el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }] },
+                    "NH₄⁺": { center: { el: "N", color: ATOM_COLORS.N }, bonded: [{ el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }] }
+                }
+            },
+            "AX3E": {
+                name: "Üçgen Piramit", nameEn: "Trigonal Pyramidal", notation: "AX3E",
+                moleculeGeometry: "Üçgen Piramit (Trigonal Pyramidal)",
+                electronGeometry: "Düzgün Dörtyüzlü (Tetrahedral)",
+                bondAngle: "~107°", hybridization: "sp³",
+                example: "NH₃, PCl₃",
+                bondedPositions: (() => {
+                    const a = Math.acos(-1 / 3); return [
+                        [Math.sin(a) * Math.sin(0), Math.cos(a), Math.sin(a) * Math.cos(0)],
+                        [Math.sin(a) * Math.sin(2 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(2 * Math.PI / 3)],
+                        [Math.sin(a) * Math.sin(4 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(4 * Math.PI / 3)]
+                    ];
+                })(), lonePairPositions: [[0, 1, 0]],
+                realMolecules: {
+                    "NH₃": { center: { el: "N", color: ATOM_COLORS.N }, bonded: [{ el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }] },
+                    "PCl₃": { center: { el: "P", color: ATOM_COLORS.P }, bonded: [{ el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }] }
+                }
+            },
+            "AX2E2": {
+                name: "Kırık Doğru", nameEn: "Bent (V-shape)", notation: "AX2E2",
+                moleculeGeometry: "Kırık Doğru / V-Şekli (Bent)",
+                electronGeometry: "Düzgün Dörtyüzlü (Tetrahedral)",
+                bondAngle: "~104.5°", hybridization: "sp³",
+                example: "H₂O, H₂S",
+                bondedPositions: (() => {
+                    const a = Math.acos(-1 / 3); return [
+                        [Math.sin(a) * Math.sin(2 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(2 * Math.PI / 3)],
+                        [Math.sin(a) * Math.sin(4 * Math.PI / 3), Math.cos(a), Math.sin(a) * Math.cos(4 * Math.PI / 3)]
+                    ];
+                })(),
+                lonePairPositions: (() => {
+                    const a = Math.acos(-1 / 3); return [
+                        [0, 1, 0],
+                        [Math.sin(a) * Math.sin(0), Math.cos(a), Math.sin(a) * Math.cos(0)]
+                    ];
+                })(),
+                realMolecules: {
+                    "H₂O": { center: { el: "O", color: ATOM_COLORS.O }, bonded: [{ el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }] },
+                    "H₂S": { center: { el: "S", color: ATOM_COLORS.S }, bonded: [{ el: "H", color: ATOM_COLORS.H }, { el: "H", color: ATOM_COLORS.H }] }
+                }
+            },
+            "AX5": {
+                name: "Üçgen Çift Piramit", nameEn: "Trigonal Bipyramidal", notation: "AX5",
+                moleculeGeometry: "Üçgen Çift Piramit (Trigonal Bipyramidal)",
+                electronGeometry: "Üçgen Çift Piramit (Trigonal Bipyramidal)",
+                bondAngle: "90° / 120°", hybridization: "sp³d",
+                example: "PCl₅, PF₅",
+                bondedPositions: [[0, 1, 0], [0, -1, 0], [1, 0, 0], [Math.cos(2 * Math.PI / 3), 0, Math.sin(2 * Math.PI / 3)], [Math.cos(4 * Math.PI / 3), 0, Math.sin(4 * Math.PI / 3)]],
+                lonePairPositions: [],
+                realMolecules: {
+                    "PCl₅": { center: { el: "P", color: ATOM_COLORS.P }, bonded: [{ el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }] },
+                    "PF₅": { center: { el: "P", color: ATOM_COLORS.P }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX4E": {
+                name: "Tahterevalli", nameEn: "Seesaw", notation: "AX4E",
+                moleculeGeometry: "Tahterevalli (Seesaw)",
+                electronGeometry: "Üçgen Çift Piramit (Trigonal Bipyramidal)",
+                bondAngle: "90° / 120°", hybridization: "sp³d",
+                example: "SF₄, TeCl₄",
+                bondedPositions: [[0, 1, 0], [0, -1, 0], [1, 0, 0], [Math.cos(4 * Math.PI / 3), 0, Math.sin(4 * Math.PI / 3)]],
+                lonePairPositions: [[Math.cos(2 * Math.PI / 3), 0, Math.sin(2 * Math.PI / 3)]],
+                realMolecules: {
+                    "SF₄": { center: { el: "S", color: ATOM_COLORS.S }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] },
+                    "TeCl₄": { center: { el: "Te", color: ATOM_COLORS.Te }, bonded: [{ el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }, { el: "Cl", color: ATOM_COLORS.Cl }] }
+                }
+            },
+            "AX3E2": {
+                name: "T-Şekli", nameEn: "T-shaped", notation: "AX3E2",
+                moleculeGeometry: "T-Şekli (T-shaped)",
+                electronGeometry: "Üçgen Çift Piramit (Trigonal Bipyramidal)",
+                bondAngle: "90°", hybridization: "sp³d",
+                example: "ClF₃, BrF₃",
+                bondedPositions: [[0, 1, 0], [0, -1, 0], [1, 0, 0]],
+                lonePairPositions: [[Math.cos(2 * Math.PI / 3), 0, Math.sin(2 * Math.PI / 3)], [Math.cos(4 * Math.PI / 3), 0, Math.sin(4 * Math.PI / 3)]],
+                realMolecules: {
+                    "ClF₃": { center: { el: "Cl", color: ATOM_COLORS.Cl }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] },
+                    "BrF₃": { center: { el: "Br", color: ATOM_COLORS.Br }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX2E3": {
+                name: "Doğrusal", nameEn: "Linear", notation: "AX2E3",
+                moleculeGeometry: "Doğrusal (Linear)",
+                electronGeometry: "Üçgen Çift Piramit (Trigonal Bipyramidal)",
+                bondAngle: "180°", hybridization: "sp³d",
+                example: "XeF₂, I₃⁻",
+                bondedPositions: [[0, 1, 0], [0, -1, 0]],
+                lonePairPositions: [[1, 0, 0], [Math.cos(2 * Math.PI / 3), 0, Math.sin(2 * Math.PI / 3)], [Math.cos(4 * Math.PI / 3), 0, Math.sin(4 * Math.PI / 3)]],
+                realMolecules: {
+                    "XeF₂": { center: { el: "Xe", color: ATOM_COLORS.Xe }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX6": {
+                name: "Düzgün Sekizyüzlü", nameEn: "Octahedral", notation: "AX6",
+                moleculeGeometry: "Düzgün Sekizyüzlü (Octahedral)",
+                electronGeometry: "Düzgün Sekizyüzlü (Octahedral)",
+                bondAngle: "90°", hybridization: "sp³d²",
+                example: "SF₆",
+                bondedPositions: [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]],
+                lonePairPositions: [],
+                realMolecules: {
+                    "SF₆": { center: { el: "S", color: ATOM_COLORS.S }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX5E": {
+                name: "Kare Piramit", nameEn: "Square Pyramidal", notation: "AX5E",
+                moleculeGeometry: "Kare Piramit (Square Pyramidal)",
+                electronGeometry: "Düzgün Sekizyüzlü (Octahedral)",
+                bondAngle: "90°", hybridization: "sp³d²",
+                example: "BrF₅, IF₅",
+                bondedPositions: [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -1]],
+                lonePairPositions: [[0, -1, 0]],
+                realMolecules: {
+                    "BrF₅": { center: { el: "Br", color: ATOM_COLORS.Br }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] },
+                    "IF₅": { center: { el: "I", color: ATOM_COLORS.I }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            },
+            "AX4E2": {
+                name: "Kare Düzlem", nameEn: "Square Planar", notation: "AX4E2",
+                moleculeGeometry: "Kare Düzlem (Square Planar)",
+                electronGeometry: "Düzgün Sekizyüzlü (Octahedral)",
+                bondAngle: "90°", hybridization: "sp³d²",
+                example: "XeF₄",
+                bondedPositions: [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]],
+                lonePairPositions: [[0, 1, 0], [0, -1, 0]],
+                realMolecules: {
+                    "XeF₄": { center: { el: "Xe", color: ATOM_COLORS.Xe }, bonded: [{ el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }, { el: "F", color: ATOM_COLORS.F }] }
+                }
+            }
+        };
+
+        const moleculeOrder = ['AX2', 'AX3', 'AX2E', 'AX4', 'AX3E', 'AX2E2', 'AX5', 'AX4E', 'AX3E2', 'AX2E3', 'AX6', 'AX5E', 'AX4E2'];
+
+        // ================================================================
+        //  THREE.JS KURULUMU
+        // ================================================================
+        // Sol sahne
+        let scene, camera, renderer, labelRenderer, controls;
+        let moleculeGroup = null, lonePairGroup = null;
+        let showLonePairs = true;
+        let currentType = 'AX4';
+        let currentRealMol = null;
+        let showShape = false;
+        let shapeGroup = null;
+        let angleGroup = null;
+
+        // Sağ sahne (karşılaştırma)
+        let sceneR, cameraR, rendererR, labelRendererR, controlsR;
+        let moleculeGroupR = null, lonePairGroupR = null;
+        let currentTypeR = 'AX3';
+        let currentRealMolR = null;
+        let isCompareMode = false;
+        let activeSide = 'left'; // 'left' veya 'right'
+        let gridHelperR = null;
+        let shapeGroupR = null;
+        let angleGroupR = null;
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f1117);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.5, 9);
+
+            // WebGL Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            container.appendChild(renderer.domElement);
+
+            // CSS2D Renderer (etiketler için)
+            labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0';
+            labelRenderer.domElement.style.left = '0';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            container.appendChild(labelRenderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.08;
+            controls.enablePan = false;
+            controls.minDistance = 3;
+            controls.maxDistance = 15;
+            controls.autoRotate = false;
+
+            setupLights(scene);
+            addSubtleGrid();
+            buildNavButtons();
+            buildMolecule(currentType, null);
+            updateInfo(currentType);
+            initRightScene();
+            animateCameraEntrance();
+
+            // Info Toggle Event Listener (Click anywhere on header)
+            const infoHeader = document.querySelector('.info-header');
+            if (infoHeader) {
+                infoHeader.addEventListener('click', function () {
+                    if (window.innerWidth <= 768) {
+                        const panel = document.getElementById('mobileInfoPanel');
+                        panel.classList.toggle('expanded');
+                        const btn = document.getElementById('btnToggleInfo');
+                        if (btn) btn.textContent = panel.classList.contains('expanded') ? '▲' : '▼';
+                    }
+                });
+            }
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        // ================================================================
+        //  SAĞ SAHNE (KARŞILAŞTIRMA)
+        // ================================================================
+        function initRightScene() {
+            const containerR = document.getElementById('canvas-right');
+            sceneR = new THREE.Scene();
+            sceneR.background = new THREE.Color(0x0f1117);
+
+            cameraR = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            cameraR.position.set(0, 1.5, 9);
+
+            rendererR = new THREE.WebGLRenderer({ antialias: true });
+            rendererR.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            rendererR.shadowMap.enabled = true;
+            rendererR.shadowMap.type = THREE.PCFSoftShadowMap;
+            rendererR.toneMapping = THREE.ACESFilmicToneMapping;
+            rendererR.toneMappingExposure = 1.2;
+            containerR.appendChild(rendererR.domElement);
+
+            labelRendererR = new CSS2DRenderer();
+            labelRendererR.domElement.style.position = 'absolute';
+            labelRendererR.domElement.style.top = '0';
+            labelRendererR.domElement.style.left = '0';
+            labelRendererR.domElement.style.pointerEvents = 'none';
+            containerR.appendChild(labelRendererR.domElement);
+
+            controlsR = new OrbitControls(cameraR, rendererR.domElement);
+            controlsR.enableDamping = true;
+            controlsR.dampingFactor = 0.08;
+            controlsR.enablePan = false;
+            controlsR.minDistance = 3;
+            controlsR.maxDistance = 15;
+            controlsR.autoRotate = false;
+
+            setupLights(sceneR);
+            gridHelperR = new THREE.GridHelper(20, 40, 0x1e2030, 0x181a24);
+            gridHelperR.position.y = -3.5;
+            gridHelperR.material.opacity = 0.5;
+            gridHelperR.material.transparent = true;
+            sceneR.add(gridHelperR);
+
+            buildMoleculeR(currentTypeR, null);
+            updateInfoR(currentTypeR);
+            updateRightSize();
+        }
+
+        function updateRightSize() {
+            const w = window.innerWidth / 2;
+            const h = window.innerHeight;
+            rendererR.setSize(w, h);
+            labelRendererR.setSize(w, h);
+            cameraR.aspect = w / h;
+            cameraR.updateProjectionMatrix();
+        }
+
+        // ================================================================
+        //  IŞIKLAR
+        // ================================================================
+        function setupLights(targetScene) {
+            targetScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const main = new THREE.DirectionalLight(0xffffff, 1.0);
+            main.position.set(5, 8, 5); main.castShadow = true; targetScene.add(main);
+            const fill = new THREE.DirectionalLight(0x818cf8, 0.3);
+            fill.position.set(-5, 2, -5); targetScene.add(fill);
+            const bottom = new THREE.DirectionalLight(0xffffff, 0.2);
+            bottom.position.set(0, -5, 0); targetScene.add(bottom);
+            targetScene.add(new THREE.HemisphereLight(0xe0e7ff, 0xf0f2f5, 0.4));
+        }
+
+        let gridHelper = null;
+        function addSubtleGrid() {
+            gridHelper = new THREE.GridHelper(20, 40, 0x1e2030, 0x181a24);
+            gridHelper.position.y = -3.5;
+            gridHelper.material.opacity = 0.5;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+        }
+
+        // ================================================================
+        //  NAVİGASYON (Ana butonlar + Alt menü)
+        // ================================================================
+        function buildNavButtons() {
+            const scrollEl = document.getElementById('navScroll');
+            moleculeOrder.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn' + (type === currentType ? ' active' : '');
+                btn.textContent = type;
+                btn.dataset.type = type;
+                btn.addEventListener('click', () => selectMolecule(type));
+                scrollEl.appendChild(btn);
+            });
+            buildSubNav(currentType);
+        }
+
+        function selectMolecule(type) {
+            if (isCompareMode && activeSide === 'right') {
+                currentTypeR = type;
+                currentRealMolR = null;
+                buildMoleculeR(type, null);
+                updateInfoR(type);
+            } else {
+                currentType = type;
+                currentRealMol = null;
+                buildMolecule(type, null);
+                updateInfo(type);
+                animateCameraFocus();
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+
+            buildSubNav(type);
+        }
+
+        function buildSubNav(type) {
+            const subEl = document.getElementById('subNav');
+            subEl.innerHTML = '';
+            const data = moleculeData[type];
+            if (!data || !data.realMolecules) return;
+
+            const isRight = isCompareMode && activeSide === 'right';
+
+            const genBtn = document.createElement('button');
+            genBtn.className = 'sub-btn active';
+            genBtn.textContent = type + ' (Genel)';
+            genBtn.addEventListener('click', () => {
+                if (isRight) { currentRealMolR = null; buildMoleculeR(type, null); updateInfoR(type); }
+                else { currentRealMol = null; buildMolecule(type, null); updateInfo(type); }
+                document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+                genBtn.classList.add('active');
+            });
+            subEl.appendChild(genBtn);
+
+            Object.keys(data.realMolecules).forEach(molName => {
+                const btn = document.createElement('button');
+                btn.className = 'sub-btn';
+                btn.textContent = molName;
+                btn.addEventListener('click', () => {
+                    if (isRight) { currentRealMolR = molName; buildMoleculeR(type, molName); updateInfoR(type); }
+                    else { currentRealMol = molName; buildMolecule(type, molName); updateInfo(type); }
+                    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+                subEl.appendChild(btn);
+            });
+        }
+
+        // ================================================================
+        //  CSS2D ETİKET OLUŞTURUCU
+        // ================================================================
+        function makeAtomLabel(text) {
+            const div = document.createElement('div');
+            div.className = 'atom-label';
+            div.textContent = text;
+            const obj = new CSS2DObject(div);
+            obj.layers.set(0);
+            return obj;
+        }
+
+        function makeAngleLabel(text, position) {
+            const div = document.createElement('div');
+            div.className = 'angle-label';
+            div.textContent = text;
+            const obj = new CSS2DObject(div);
+            obj.position.copy(position);
+            obj.layers.set(0);
+            return obj;
+        }
+
+        // ================================================================
+        //  MOLEKÜL OLUŞTURMA
+        // ================================================================
+        function buildMolecule(type, realMolName) {
+            // Temizle — CSS2D etiketlerinin DOM elementlerini de kaldır
+            if (moleculeGroup) {
+                scene.remove(moleculeGroup);
+                moleculeGroup.traverse(child => {
+                    if (child instanceof CSS2DObject) {
+                        if (child.element && child.element.parentNode) {
+                            child.element.parentNode.removeChild(child.element);
+                        }
+                    }
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                });
+            }
+
+            moleculeGroup = new THREE.Group();
+            lonePairGroup = new THREE.Group();
+            moleculeGroup.add(lonePairGroup);
+
+            const data = moleculeData[type];
+            if (!data) return;
+
+            const realMol = realMolName && data.realMolecules ? data.realMolecules[realMolName] : null;
+            const isReal = !!realMol;
+
+            // ---- Merkez Atom ----
+            const centerColor = isReal ? realMol.center.color : 0x4a4458;
+            const centerLabel = isReal ? realMol.center.el : 'A';
+
+            const centerMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.55, 64, 64),
+                new THREE.MeshStandardMaterial({ color: centerColor, metalness: 0.6, roughness: 0.25 })
+            );
+            centerMesh.castShadow = true;
+            moleculeGroup.add(centerMesh);
+
+            // Merkez etiket
+            const cLabel = makeAtomLabel(centerLabel);
+            cLabel.position.set(0, 0, 0);
+            centerMesh.add(cLabel);
+
+            // ---- Bağlı Atomlar ----
+            const bondedPositions3D = []; // açı etiketleri için
+            data.bondedPositions.forEach((pos, i) => {
+                const dir = new THREE.Vector3(...pos).normalize();
+                const atomPos = dir.clone().multiplyScalar(BOND_LENGTH);
+                bondedPositions3D.push(atomPos.clone());
+
+                const bColor = isReal ? realMol.bonded[i].color : 0xe2e8f0;
+                const bLabel = isReal ? realMol.bonded[i].el : 'X';
+
+                const atom = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.35, 48, 48),
+                    new THREE.MeshStandardMaterial({ color: bColor, metalness: 0.3, roughness: 0.4 })
+                );
+                atom.position.copy(atomPos);
+                atom.castShadow = true;
+                moleculeGroup.add(atom);
+
+                // Atom etiketi
+                const aLabel = makeAtomLabel(bLabel);
+                aLabel.position.set(0, 0, 0);
+                atom.add(aLabel);
+
+                createBond(new THREE.Vector3(0, 0, 0), atomPos, 0.08, 0xb0b8c8);
+            });
+
+            // ---- Bağ Açısı Etiketleri + Yayları ----
+            angleGroup = addAngleLabels(data, bondedPositions3D);
+            if (angleGroup) angleGroup.visible = showAngles;
+
+            // ---- Ortaklanmamış Elektron Çiftleri ----
+            data.lonePairPositions.forEach(pos => {
+                const dir = new THREE.Vector3(...pos).normalize();
+                const lpPos = dir.clone().multiplyScalar(BOND_LENGTH * 0.85);
+
+                const lpMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.38, 32, 32),
+                    new THREE.MeshStandardMaterial({
+                        color: 0x6366f1, transparent: true, opacity: 0.45,
+                        metalness: 0.15, roughness: 0.6, depthWrite: false,
+                        emissive: 0x6366f1, emissiveIntensity: 0.15
+                    })
+                );
+                lpMesh.position.copy(lpPos);
+                lpMesh.scale.set(0.85, 0.85, 1.4);
+                lpMesh.lookAt(dir.clone().multiplyScalar(10));
+                lonePairGroup.add(lpMesh);
+
+                const glowMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.52, 24, 24),
+                    new THREE.MeshBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.12, depthWrite: false })
+                );
+                glowMesh.position.copy(lpPos);
+                glowMesh.scale.set(0.9, 0.9, 1.5);
+                glowMesh.lookAt(dir.clone().multiplyScalar(10));
+                lonePairGroup.add(glowMesh);
+
+                createLonePairBond(new THREE.Vector3(0, 0, 0), lpPos, 0.05, 0x6366f1, 0.3);
+            });
+
+            lonePairGroup.visible = showLonePairs;
+
+            // ---- Geometrik Şekil ----
+            shapeGroup = buildGeometricShape(bondedPositions3D);
+            if (shapeGroup) { moleculeGroup.add(shapeGroup); shapeGroup.visible = showShape; }
+
+            scene.add(moleculeGroup);
+        }
+
+        // ================================================================
+        //  GEOMETRİK ŞEKİL OLUŞTURUCU
+        // ================================================================
+        function buildGeometricShape(positions) {
+            if (positions.length < 2) return null;
+
+            const pts = [];
+            // ConvexGeometry'nin (3D hacim oluşturucunun) düzlemsel veya doğrusal yapıları
+            // işlerken hata vermesini / görünmez olmasını engellemek için, merkezdeki tek
+            // nokta (0,0,0) yerine, gözle görülmeyecek kadar küçük bir 3 boyutlu şekil (tetrahedral) ekliyoruz.
+            pts.push(new THREE.Vector3(0.02, 0.02, 0.02));
+            pts.push(new THREE.Vector3(-0.02, -0.02, 0.02));
+            pts.push(new THREE.Vector3(0.02, -0.02, -0.02));
+            pts.push(new THREE.Vector3(-0.02, 0.02, -0.02));
+
+            pts.push(...positions.map(p => p.clone()));
+
+            try {
+                const convex = new ConvexGeometry(pts);
+
+                const group = new THREE.Group();
+
+                // Ghost fill — çok hafif dolgu
+                const fillMat = new THREE.MeshBasicMaterial({
+                    color: 0x6366f1,
+                    transparent: true,
+                    opacity: 0.08,
+                    depthWrite: false,
+                    side: THREE.DoubleSide
+                });
+                const fillMesh = new THREE.Mesh(convex, fillMat);
+                fillMesh.renderOrder = 999;
+                group.add(fillMesh);
+
+                // Kenar çizgileri
+                const edges = new THREE.EdgesGeometry(convex, 1);
+                const lineMat = new THREE.LineBasicMaterial({
+                    color: 0x6366f1,
+                    transparent: true,
+                    opacity: 0.7,
+                    linewidth: 1
+                });
+                const wireframe = new THREE.LineSegments(edges, lineMat);
+                wireframe.renderOrder = 1000;
+                group.add(wireframe);
+
+                return group;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ================================================================
+        //  BAĞ AÇISI ETİKETLERİ
+        // ================================================================
+        function addAngleLabels(data, positions, targetGroup) {
+            const parent = targetGroup || moleculeGroup;
+            if (positions.length < 2) return null;
+
+            const aGroup = new THREE.Group();
+            const placed = new Set();
+            const pairs = getAnglePairs(data, positions);
+            const ARC_RADIUS = BOND_LENGTH * 0.4;
+            const ARC_SEGMENTS = 40;
+
+            pairs.forEach(pair => {
+                const key = pair.label + '_' + pair.i + '_' + pair.j;
+                if (placed.has(key)) return;
+                placed.add(key);
+
+                const dirA = positions[pair.i].clone().normalize();
+                const dirB = positions[pair.j].clone().normalize();
+
+                const arcPoints = [];
+                for (let s = 0; s <= ARC_SEGMENTS; s++) {
+                    const t = s / ARC_SEGMENTS;
+                    const q = new THREE.Quaternion();
+                    const qA = new THREE.Quaternion();
+                    const qB = new THREE.Quaternion();
+                    qA.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirA);
+                    qB.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirB);
+                    q.slerpQuaternions(qA, qB, t);
+                    const pt = new THREE.Vector3(0, 0, 1).applyQuaternion(q).multiplyScalar(ARC_RADIUS);
+                    arcPoints.push(pt);
+                }
+
+                const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPoints);
+                const arcMat = new THREE.LineBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.6 });
+                aGroup.add(new THREE.Line(arcGeo, arcMat));
+
+                const midIdx = Math.floor(ARC_SEGMENTS / 2);
+                const labelPos = arcPoints[midIdx].clone();
+                labelPos.add(labelPos.clone().normalize().multiplyScalar(0.12));
+                aGroup.add(makeAngleLabel(pair.label, labelPos));
+            });
+
+            parent.add(aGroup);
+            return aGroup;
+        }
+
+        function getAnglePairs(data, positions) {
+            const results = [];
+            const angle = data.bondAngle;
+
+            if (positions.length === 2) {
+                results.push({ i: 0, j: 1, label: angle });
+            } else if (positions.length === 3 && !angle.includes('/')) {
+                // Sadece bir temsili çift göster (fazla kalabalık olmasın)
+                results.push({ i: 0, j: 1, label: angle });
+            } else if (positions.length >= 4 && angle.includes('/')) {
+                // İki farklı açı varsa (90° / 120° gibi) ilk iki farklı çifti göster
+                results.push({ i: 0, j: 2, label: '90°' });
+                if (positions.length >= 4) results.push({ i: 2, j: 3, label: '120°' });
+            } else if (positions.length >= 3) {
+                results.push({ i: 0, j: 1, label: angle });
+            }
+
+            return results;
+        }
+
+        // ================================================================
+        //  BOND / LP BOND HELPERS
+        // ================================================================
+        function createBond(start, end, radius, color, targetGroup) {
+            const grp = targetGroup || moleculeGroup;
+            const dir = new THREE.Vector3().subVectors(end, start);
+            const len = dir.length();
+            const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+            const cyl = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius, radius, len, 16, 1),
+                new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.5 })
+            );
+            cyl.position.copy(mid);
+            cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+            cyl.castShadow = true;
+            grp.add(cyl);
+        }
+
+        function createLonePairBond(start, end, radius, color, opacity, targetGroup) {
+            const grp = targetGroup || lonePairGroup;
+            const dir = new THREE.Vector3().subVectors(end, start);
+            const len = dir.length();
+            const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+            const cyl = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius, radius, len, 16, 1),
+                new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.5, transparent: true, opacity, depthWrite: false })
+            );
+            cyl.position.copy(mid);
+            cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+            grp.add(cyl);
+        }
+
+        // ================================================================
+        //  BİLGİ PANELİ GÜNCELLEME
+        // ================================================================
+        function updateInfo(type) {
+            const d = moleculeData[type]; if (!d) return;
+            const titleSuffix = currentRealMol ? ` (${currentRealMol})` : '';
+            document.getElementById('infoTitle').textContent = d.name + titleSuffix;
+            document.getElementById('infoNotation').textContent = d.notation + ' — ' + d.nameEn;
+            document.getElementById('infoMolGeo').textContent = d.moleculeGeometry;
+            document.getElementById('infoElGeo').textContent = d.electronGeometry;
+            document.getElementById('infoAngle').textContent = d.bondAngle;
+            document.getElementById('infoHybrid').textContent = d.hybridization;
+            document.getElementById('infoExample').textContent = d.example;
+        }
+
+        function updateInfoR(type) {
+            const d = moleculeData[type]; if (!d) return;
+            const titleSuffix = currentRealMolR ? ` (${currentRealMolR})` : '';
+            document.getElementById('infoTitleR').textContent = d.name + titleSuffix;
+            document.getElementById('infoNotationR').textContent = d.notation + ' — ' + d.nameEn;
+            document.getElementById('infoMolGeoR').textContent = d.moleculeGeometry;
+            document.getElementById('infoElGeoR').textContent = d.electronGeometry;
+            document.getElementById('infoAngleR').textContent = d.bondAngle;
+            document.getElementById('infoHybridR').textContent = d.hybridization;
+            document.getElementById('infoExampleR').textContent = d.example;
+        }
+
+        // ================================================================
+        //  SAĞ MOLEKÜL OLUŞTURMA
+        // ================================================================
+        function buildMoleculeR(type, realMolName) {
+            if (moleculeGroupR) {
+                sceneR.remove(moleculeGroupR);
+                moleculeGroupR.traverse(child => {
+                    if (child instanceof CSS2DObject && child.element && child.element.parentNode) {
+                        child.element.parentNode.removeChild(child.element);
+                    }
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                });
+            }
+
+            moleculeGroupR = new THREE.Group();
+            lonePairGroupR = new THREE.Group();
+            moleculeGroupR.add(lonePairGroupR);
+
+            const data = moleculeData[type]; if (!data) return;
+            const realMol = realMolName && data.realMolecules ? data.realMolecules[realMolName] : null;
+            const isReal = !!realMol;
+
+            const centerColor = isReal ? realMol.center.color : 0x4a4458;
+            const centerLabel = isReal ? realMol.center.el : 'A';
+            const centerMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.55, 64, 64),
+                new THREE.MeshStandardMaterial({ color: centerColor, metalness: 0.6, roughness: 0.25 })
+            );
+            centerMesh.castShadow = true;
+            moleculeGroupR.add(centerMesh);
+            const cLabel = makeAtomLabel(centerLabel); cLabel.position.set(0, 0, 0); centerMesh.add(cLabel);
+
+            const bondedPositions3D = [];
+            data.bondedPositions.forEach((pos, i) => {
+                const dir = new THREE.Vector3(...pos).normalize();
+                const atomPos = dir.clone().multiplyScalar(BOND_LENGTH);
+                bondedPositions3D.push(atomPos.clone());
+                const bColor = isReal ? realMol.bonded[i].color : 0xe2e8f0;
+                const bLabel = isReal ? realMol.bonded[i].el : 'X';
+                const atom = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.35, 48, 48),
+                    new THREE.MeshStandardMaterial({ color: bColor, metalness: 0.3, roughness: 0.4 })
+                );
+                atom.position.copy(atomPos); atom.castShadow = true;
+                moleculeGroupR.add(atom);
+                const aLabel = makeAtomLabel(bLabel); aLabel.position.set(0, 0, 0); atom.add(aLabel);
+                createBond(new THREE.Vector3(0, 0, 0), atomPos, 0.08, 0xb0b8c8, moleculeGroupR);
+            });
+
+            angleGroupR = addAngleLabels(data, bondedPositions3D, moleculeGroupR);
+            if (angleGroupR) angleGroupR.visible = showAngles;
+
+            data.lonePairPositions.forEach(pos => {
+                const dir = new THREE.Vector3(...pos).normalize();
+                const lpPos = dir.clone().multiplyScalar(BOND_LENGTH * 0.85);
+                const lpMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.38, 32, 32),
+                    new THREE.MeshStandardMaterial({ color: 0x6366f1, transparent: true, opacity: 0.45, metalness: 0.15, roughness: 0.6, depthWrite: false, emissive: 0x6366f1, emissiveIntensity: 0.15 })
+                );
+                lpMesh.position.copy(lpPos); lpMesh.scale.set(0.85, 0.85, 1.4); lpMesh.lookAt(dir.clone().multiplyScalar(10));
+                lonePairGroupR.add(lpMesh);
+                const glowMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.52, 24, 24),
+                    new THREE.MeshBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.12, depthWrite: false })
+                );
+                glowMesh.position.copy(lpPos); glowMesh.scale.set(0.9, 0.9, 1.5); glowMesh.lookAt(dir.clone().multiplyScalar(10));
+                lonePairGroupR.add(glowMesh);
+                createLonePairBond(new THREE.Vector3(0, 0, 0), lpPos, 0.05, 0x6366f1, 0.3, lonePairGroupR);
+            });
+
+            lonePairGroupR.visible = showLonePairs;
+
+            shapeGroupR = buildGeometricShape(bondedPositions3D);
+            if (shapeGroupR) { moleculeGroupR.add(shapeGroupR); shapeGroupR.visible = showShape; }
+
+            sceneR.add(moleculeGroupR);
+        }
+
+        // ================================================================
+        //  TOGGLE ELEKTRON ÇİFTLERİ
+        // ================================================================
+        document.getElementById('btnLonePairs').addEventListener('click', () => {
+            showLonePairs = !showLonePairs;
+            if (lonePairGroup) lonePairGroup.visible = showLonePairs;
+            if (lonePairGroupR) lonePairGroupR.visible = showLonePairs;
+            document.getElementById('btnLonePairs').classList.toggle('active', showLonePairs);
+        });
+
+        // ================================================================
+        //  GECE MODU (DARK MODE)
+        // ================================================================
+        let isDark = true;
+        function rebuildGrid(targetScene, oldGrid, isDk) {
+            if (oldGrid) { targetScene.remove(oldGrid); oldGrid.dispose(); }
+            const g = new THREE.GridHelper(20, 40, isDk ? 0x1e2030 : 0xe2e8f0, isDk ? 0x181a24 : 0xf1f5f9);
+            g.position.y = -3.5; g.material.opacity = isDk ? 0.5 : 0.35; g.material.transparent = true;
+            targetScene.add(g); return g;
+        }
+        document.getElementById('btnDarkMode').addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.classList.toggle('dark', isDark);
+            const btn = document.getElementById('btnDarkMode');
+            btn.classList.toggle('active', isDark);
+            btn.innerHTML = isDark ? '☀️<span class="btn-tooltip">Gündüz Modu</span>' : '🌙<span class="btn-tooltip">Gece Modu</span>';
+            const bgColor = isDark ? 0x0f1117 : 0xf0f2f5;
+            scene.background = new THREE.Color(bgColor);
+            gridHelper = rebuildGrid(scene, gridHelper, isDark);
+            if (sceneR) {
+                sceneR.background = new THREE.Color(bgColor);
+                gridHelperR = rebuildGrid(sceneR, gridHelperR, isDark);
+            }
+        });
+
+        // ================================================================
+        //  KARŞILAŞTIRMA MODU
+        // ================================================================
+        document.getElementById('btnCompare').addEventListener('click', () => {
+            isCompareMode = !isCompareMode;
+            document.body.classList.toggle('compare-mode', isCompareMode);
+            document.getElementById('btnCompare').classList.toggle('active', isCompareMode);
+            onWindowResize();
+            if (isCompareMode) {
+                activeSide = 'left';
+                updateSideTabs();
+                highlightNavForSide();
+                updateRightSize();
+            }
+        });
+
+        // ================================================================
+        //  BAĞ AÇILARI TOGGLE
+        // ================================================================
+        let showAngles = true;
+
+        function setAngleGroupVisible(grp, vis) {
+            if (!grp) return;
+            grp.visible = vis;
+            grp.traverse(child => {
+                if (child instanceof CSS2DObject && child.element) {
+                    child.element.style.display = vis ? '' : 'none';
+                }
+            });
+        }
+
+        document.getElementById('btnAngles').addEventListener('click', () => {
+            showAngles = !showAngles;
+            document.body.classList.toggle('hide-angles', !showAngles);
+            setAngleGroupVisible(angleGroup, showAngles);
+            setAngleGroupVisible(angleGroupR, showAngles);
+            document.getElementById('btnAngles').classList.toggle('active', showAngles);
+        });
+
+        // ================================================================
+        //  GEOMETRİK ŞEKİL TOGGLE
+        // ================================================================
+        document.getElementById('btnShape').addEventListener('click', () => {
+            showShape = !showShape;
+            if (shapeGroup) shapeGroup.visible = showShape;
+            if (shapeGroupR) shapeGroupR.visible = showShape;
+            document.getElementById('btnShape').classList.toggle('active', showShape);
+        });
+
+        // ================================================================
+        //  OTO-DÖNDÜR TOGGLE
+        // ================================================================
+        document.getElementById('btnAutoRotate').addEventListener('click', () => {
+            controls.autoRotate = !controls.autoRotate;
+            if (controlsR) controlsR.autoRotate = controls.autoRotate;
+            document.getElementById('btnAutoRotate').classList.toggle('active', controls.autoRotate);
+        });
+
+        // ================================================================
+        //  SOL / SAĞ PANEL SEÇİCİ
+        // ================================================================
+        document.getElementById('tabLeft').addEventListener('click', () => { activeSide = 'left'; updateSideTabs(); highlightNavForSide(); });
+        document.getElementById('tabRight').addEventListener('click', () => { activeSide = 'right'; updateSideTabs(); highlightNavForSide(); });
+
+        function updateSideTabs() {
+            document.getElementById('tabLeft').classList.toggle('active', activeSide === 'left');
+            document.getElementById('tabRight').classList.toggle('active', activeSide === 'right');
+        }
+
+        function highlightNavForSide() {
+            const activeType = activeSide === 'left' ? currentType : currentTypeR;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === activeType);
+            });
+            buildSubNav(activeType);
+        }
+
+        // ================================================================
+        //  KAMERA ANİMASYONLARI
+        // ================================================================
+        function animateCameraEntrance() {
+            camera.position.set(0, 5, 14);
+            const target = { x: 0, y: 1.5, z: 9 }, start = { x: 0, y: 5, z: 14 }, dur = 1400, t0 = performance.now();
+            function step(now) {
+                const p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+                camera.position.set(start.x + (target.x - start.x) * e, start.y + (target.y - start.y) * e, start.z + (target.z - start.z) * e);
+                controls.update();
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        function animateCameraFocus() {
+            const cur = camera.position.clone(), far = cur.clone().normalize().multiplyScalar(cur.length() + 0.4);
+            const dur = 350, t0 = performance.now();
+            function step(now) {
+                const p = Math.min((now - t0) / dur, 1);
+                const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+                camera.position.lerpVectors(p < 0.5 ? cur : far, p < 0.5 ? far : cur, p < 0.5 ? e : (e - 0.5) * 2);
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        // ================================================================
+        //  PENCERE & DÖNGÜ
+        // ================================================================
+        function onWindowResize() {
+            const w = isCompareMode ? window.innerWidth / 2 : window.innerWidth;
+            const h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            if (isCompareMode && rendererR) { updateRightSize(); }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+            if (isCompareMode && rendererR) {
+                controlsR.update();
+                rendererR.render(sceneR, cameraR);
+                labelRendererR.render(sceneR, cameraR);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
