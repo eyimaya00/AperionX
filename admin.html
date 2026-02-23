@@ -1898,9 +1898,12 @@
             <div class="card">
                 <div class="form-group">
                     <label>Yeni Menü Öğesi Ekle</label>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <input type="text" id="menuLabel" class="form-control" placeholder="Başlık (Örn: Hakkımızda)">
                         <input type="text" id="menuUrl" class="form-control" placeholder="URL (Örn: /about)">
+                        <select id="menuParent" class="form-control" style="max-width: 200px;">
+                            <option value="">(Üst Menü Yok)</option>
+                        </select>
                         <button onclick="addMenuItem()" class="btn btn-primary" style="white-space: nowrap;"><i
                                 class="ph ph-plus"></i> Ekle</button>
                     </div>
@@ -3292,50 +3295,135 @@
 
 
         // --- Menu Editor Logic ---
+        let currentMenuItems = [];
+
         async function loadMenuItems() {
-            const container = document.getElementById('menu-items-list');
             try {
                 const res = await fetch(`${API_URL}/menu`);
                 const items = await res.json();
+                currentMenuItems = items;
+
+                const container = document.getElementById('menu-items-list');
+                const parentSelect = document.getElementById('menuParent');
+
                 container.innerHTML = '';
+                // Sadece ana menüleri parent seçeneğine ekle
+                if (parentSelect) {
+                    parentSelect.innerHTML = '<option value="">(Üst Menü Yok)</option>';
+                    items.filter(i => !i.parent_id).forEach(item => {
+                        parentSelect.innerHTML += `<option value="${item.id}">${item.label}</option>`;
+                    });
+                }
+
                 if (items.length === 0) {
                     container.innerHTML = '<p style="text-align:center; color:#999;">Henüz menü öğesi eklenmemiş.</p>';
                     return;
                 }
 
+                // Group by parent_id
+                const menuTree = {};
                 items.forEach(item => {
-                    container.innerHTML += `
-                        <div class="draggable-item" data-id="${item.id}">
-                            <div>
-                                <strong>${item.label}</strong> <span style="color:#666; font-size:0.9em;">(${item.url})</span>
-                            </div>
-                            <div style="display:flex; gap:10px;">
-                                <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.9rem;"><i class="ph ph-trash"></i></button>
-                            </div>
-                        </div>
-                    `;
+                    const pid = item.parent_id || 0;
+                    if (!menuTree[pid]) menuTree[pid] = [];
+                    menuTree[pid].push(item);
                 });
-            } catch (e) { console.error(e); }
+
+                function renderMenuLevel(parentId, level = 0) {
+                    if (!menuTree[parentId]) return;
+                    menuTree[parentId].forEach((item, index) => {
+                        const isFirst = index === 0;
+                        const isLast = index === menuTree[parentId].length - 1;
+                        const indent = level * 30; // 30px indent per level
+
+                        container.innerHTML += `
+                            <div class="draggable-item" data-id="${item.id}" style="margin-left: ${indent}px; border-left: ${level > 0 ? '3px solid var(--primary-color)' : 'none'}; padding-left: ${level > 0 ? '10px' : '15px'}">
+                                <div>
+                                    <strong>${item.label}</strong> <span style="color:#666; font-size:0.9em;">(${item.url})</span>
+                                </div>
+                                <div style="display:flex; gap:5px;">
+                                    <button onclick="moveMenuItem(${item.id}, -1)" class="btn btn-sm" title="Yukarı Taşı" ${isFirst ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-up"></i></button>
+                                    <button onclick="moveMenuItem(${item.id}, 1)" class="btn btn-sm" title="Aşağı Taşı" ${isLast ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-down"></i></button>
+                                    <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger btn-sm" title="Sil" style="margin-left:5px;"><i class="ph-bold ph-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                        // Render children recursively
+                        renderMenuLevel(item.id, level + 1);
+                    });
+                }
+
+                renderMenuLevel(0);
+
+            } catch (e) { console.error('Menu load error:', e); }
         }
 
         async function addMenuItem() {
             const label = document.getElementById('menuLabel').value;
             const url = document.getElementById('menuUrl').value;
+            const parentSelect = document.getElementById('menuParent');
+            const parent_id = parentSelect ? parentSelect.value : '';
+
             if (!label || !url) return showToast('Lütfen başlık ve URL girin.', 'error');
 
             try {
+                const payload = { label, url };
+                if (parent_id) payload.parent_id = parseInt(parent_id);
+
                 const res = await fetch(`${API_URL}/menu`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ label, url })
+                    body: JSON.stringify(payload)
                 });
                 if (res.ok) {
                     document.getElementById('menuLabel').value = '';
                     document.getElementById('menuUrl').value = '';
+                    if (parentSelect) parentSelect.value = '';
                     loadMenuItems();
                     showToast('Menü öğesi eklendi', 'success');
                 } else showToast('Hata oluştu', 'error');
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error('Add menu error:', e); }
+        }
+
+        async function moveMenuItem(id, direction) {
+            // Find item
+            const item = currentMenuItems.find(i => i.id === id);
+            if (!item) return;
+
+            // Get siblings (same parent)
+            const parentId = item.parent_id || null;
+            const siblings = currentMenuItems.filter(i => (i.parent_id || null) === parentId).sort((a, b) => a.order_index - b.order_index);
+
+            const currentIndex = siblings.findIndex(i => i.id === id);
+            if (currentIndex === -1) return;
+
+            const targetIndex = currentIndex + direction;
+            if (targetIndex < 0 || targetIndex >= siblings.length) return; // Cannot move
+
+            // Swap order_index
+            const siblingToSwap = siblings[targetIndex];
+            const tempOrder = item.order_index;
+            item.order_index = siblingToSwap.order_index;
+            siblingToSwap.order_index = tempOrder;
+
+            // Prepare payload
+            const updates = [
+                { id: item.id, order_index: item.order_index, parent_id: item.parent_id },
+                { id: siblingToSwap.id, order_index: siblingToSwap.order_index, parent_id: siblingToSwap.parent_id }
+            ];
+
+            try {
+                const res = await fetch(`${API_URL}/menu/reorder`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ items: updates })
+                });
+
+                if (res.ok) {
+                    loadMenuItems();
+                } else {
+                    showToast('Sıralama güncellenemedi', 'error');
+                }
+            } catch (e) { console.error('Reorder error:', e); }
         }
 
         function deleteMenuItem(id) {

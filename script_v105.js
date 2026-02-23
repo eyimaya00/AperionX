@@ -828,40 +828,51 @@ async function loadMenus() {
             console.error('Failed to load categories for menu dropdown', e);
         }
 
+        // Build a tree of menus initially to share between desktop and mobile.
+        const menuTree = {};
+        const rootMenus = [];
+
+        menus.forEach(menu => {
+            if (menu.label === 'Hakkında' && menu.url !== 'about.html') menu.url = 'about.html'; // Override
+
+            const pid = menu.parent_id || null;
+            if (!pid) {
+                rootMenus.push(menu);
+            } else {
+                if (!menuTree[pid]) menuTree[pid] = [];
+                menuTree[pid].push(menu);
+            }
+        });
+
         // Rebuild Desktop
         if (navMenu) {
-
-
-            menus.forEach(menu => {
-                // Check if this is the "Categories" menu item
-                // matching by label roughly or url
+            rootMenus.forEach(menu => {
                 const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
+                const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
+                const needsDropdown = isCategoryMenu || hasChildren;
 
-                if (isCategoryMenu && categories.length > 0) {
+                if (needsDropdown) {
                     // Create Dropdown Structure
                     const dropdownContainer = document.createElement('div');
                     dropdownContainer.className = 'nav-item-dropdown';
 
                     const mainLink = document.createElement('a');
-                    if (menu.label === 'Hakkında') menu.url = 'about.html'; // Override for About page
-                    mainLink.href = menu.url; // Usually '#' or 'articles.html'
+                    mainLink.href = menu.url || '#';
                     mainLink.className = 'nav-link';
-                    mainLink.innerText = menu.label;
                     if (menu.url === currentPath) mainLink.classList.add('active');
-
-                    // Add Icon for visual cue
-                    mainLink.innerHTML += ' <i class="ph-bold ph-caret-down" style="font-size: 0.8em; margin-left: 4px; transition: transform 0.2s;"></i>';
+                    mainLink.innerHTML = `${menu.label} <i class="ph-bold ph-caret-down" style="font-size: 0.8em; margin-left: 4px; transition: transform 0.2s;"></i>`;
 
                     // TOGGLE LOGIC (Click instead of Hover)
                     mainLink.addEventListener('click', (e) => {
-                        e.preventDefault();
+                        // Only prevent default if it's purely a dropdown trigger (url is # or empty)
+                        if (!menu.url || menu.url === '#') {
+                            e.preventDefault();
+                        }
                         e.stopPropagation();
 
-                        // Close other dropdowns if any (future proofing)
                         document.querySelectorAll('.nav-item-dropdown.active').forEach(el => {
                             if (el !== dropdownContainer) el.classList.remove('active');
                         });
-
                         dropdownContainer.classList.toggle('active');
                     });
 
@@ -875,16 +886,27 @@ async function loadMenus() {
                     const dropdownContent = document.createElement('div');
                     dropdownContent.className = 'nav-dropdown-content';
 
-                    // "Tümü" (All) link removed as per user request
-                    // Categories only
+                    // Populate Dropdown
+                    if (isCategoryMenu && categories.length > 0) {
+                        categories.forEach(cat => {
+                            const catLink = document.createElement('a');
+                            catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                            catLink.className = 'dropdown-link';
+                            catLink.innerText = cat.name;
+                            dropdownContent.appendChild(catLink);
+                        });
+                    }
 
-                    categories.forEach(cat => {
-                        const catLink = document.createElement('a');
-                        catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                        catLink.className = 'dropdown-link';
-                        catLink.innerText = cat.name;
-                        dropdownContent.appendChild(catLink);
-                    });
+                    if (hasChildren) {
+                        menuTree[menu.id].forEach(child => {
+                            const childLink = document.createElement('a');
+                            childLink.href = child.url;
+                            if (child.label === 'Hakkında') childLink.href = 'about.html';
+                            childLink.className = 'dropdown-link';
+                            childLink.innerText = child.label;
+                            dropdownContent.appendChild(childLink);
+                        });
+                    }
 
                     dropdownContainer.appendChild(mainLink);
                     dropdownContainer.appendChild(dropdownContent);
@@ -892,12 +914,10 @@ async function loadMenus() {
                 } else {
                     // Standard Link
                     const a = document.createElement('a');
-                    if (menu.label === 'Hakkında') menu.url = 'about.html'; // Override for About page
                     a.href = menu.url;
                     a.className = 'nav-link';
                     a.innerText = menu.label;
 
-                    // Add active class if matches
                     if (menu.url === currentPath) {
                         a.classList.add('active');
                     }
@@ -954,10 +974,12 @@ async function loadMenus() {
                 linksContainer.innerHTML = ''; // safely clear only links
             }
 
-            menus.forEach(menu => {
+            rootMenus.forEach(menu => {
                 const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
+                const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
+                const needsDropdown = isCategoryMenu || hasChildren;
 
-                if (isCategoryMenu && categories.length > 0) {
+                if (needsDropdown) {
                     // Mobile Dropdown Accordion
                     const dropdownDiv = document.createElement('div');
                     dropdownDiv.className = 'mobile-nav-dropdown';
@@ -969,20 +991,34 @@ async function loadMenus() {
                     const content = document.createElement('div');
                     content.className = 'mobile-dropdown-content';
 
-                    // "Tümü" removed for mobile as well
+                    if (isCategoryMenu && categories.length > 0) {
+                        categories.forEach(cat => {
+                            const catLink = document.createElement('a');
+                            catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                            catLink.className = 'mobile-dropdown-link';
+                            catLink.innerText = cat.name;
+                            catLink.addEventListener('click', (e) => e.stopPropagation());
+                            content.appendChild(catLink);
+                        });
+                    }
 
-                    categories.forEach(cat => {
-                        const catLink = document.createElement('a');
-                        catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                        catLink.className = 'mobile-dropdown-link';
-                        catLink.innerText = cat.name;
-                        catLink.addEventListener('click', (e) => e.stopPropagation()); // Prevent closing
-                        content.appendChild(catLink);
-                    });
+                    if (hasChildren) {
+                        menuTree[menu.id].forEach(child => {
+                            const childLink = document.createElement('a');
+                            childLink.href = child.url;
+                            if (child.label === 'Hakkında') childLink.href = 'about.html';
+                            childLink.className = 'mobile-dropdown-link';
+                            childLink.innerText = child.label;
+                            childLink.addEventListener('click', (e) => e.stopPropagation());
+                            content.appendChild(childLink);
+                        });
+                    }
 
                     // Toggle Logic
                     header.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        // If it's a real link, and they click the text, let them go, otherwise expand/collapse on arrow
+                        // For simplicity, make header expand/collapse always, if they want link, it should not be root
                         content.classList.toggle('active');
                         // Rotate arrow
                         const icon = header.querySelector('i');

@@ -662,6 +662,19 @@ async function ensureSchema() {
                 }
             }
         }
+
+        // --- NEW: Ensure parent_id exists in menu_items ---
+        try {
+            await pool.query("SELECT parent_id FROM menu_items LIMIT 1");
+        } catch (e) {
+            if (e.code === 'ER_BAD_FIELD_ERROR') {
+                console.log('Migrating: Adding parent_id to menu_items...');
+                await pool.query("ALTER TABLE menu_items ADD COLUMN parent_id INT DEFAULT NULL");
+                await pool.query("ALTER TABLE menu_items ADD FOREIGN KEY (parent_id) REFERENCES menu_items(id) ON DELETE CASCADE");
+            }
+        }
+        // --------------------------------------------------
+
     } catch (e) {
         console.error('Auto-migration Error:', e);
     }
@@ -1040,18 +1053,18 @@ app.delete('/api/subscribers/:id', authenticateToken, async (req, res) => {
 // === MENU EDITOR ROUTES ===
 app.get('/api/menu', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM menu_items ORDER BY order_index ASC');
+        const [rows] = await pool.query('SELECT * FROM menu_items ORDER BY COALESCE(parent_id, 0) ASC, order_index ASC');
         res.json(rows);
     } catch (e) { res.status(500).send(e.toString()); }
 });
 
 app.post('/api/menu', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const { label, url } = req.body;
+    const { label, url, parent_id } = req.body;
     try {
-        const [max] = await pool.query('SELECT MAX(order_index) as maxOrder FROM menu_items');
+        const [max] = await pool.query('SELECT MAX(order_index) as maxOrder FROM menu_items WHERE COALESCE(parent_id, 0) = COALESCE(?, 0)', [parent_id || null]);
         const nextOrder = (max[0].maxOrder || 0) + 1;
-        await pool.query('INSERT INTO menu_items (label, url, order_index) VALUES (?, ?, ?)', [label, url, nextOrder]);
+        await pool.query('INSERT INTO menu_items (label, url, order_index, parent_id) VALUES (?, ?, ?, ?)', [label, url, nextOrder, parent_id || null]);
         res.status(201).json({ message: 'Menu item added' });
     } catch (e) {
         console.error('DEBUG: Menu Add Error:', e);
@@ -1074,7 +1087,7 @@ app.put('/api/menu/reorder', authenticateToken, async (req, res) => {
 
     try {
         for (const item of items) {
-            await pool.query('UPDATE menu_items SET order_index = ? WHERE id = ?', [item.order_index, item.id]);
+            await pool.query('UPDATE menu_items SET order_index = ?, parent_id = ? WHERE id = ?', [item.order_index, item.parent_id || null, item.id]);
         }
         res.json({ message: 'Reordered' });
     } catch (e) { res.status(500).send(e.toString()); }
