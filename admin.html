@@ -3333,17 +3333,20 @@
                     menuTree[parentId].forEach((item, index) => {
                         const isFirst = index === 0;
                         const isLast = index === menuTree[parentId].length - 1;
-                        const indent = level * 30; // 30px indent per level
+                        const indent = level * 40; // 40px indent per level
+                        const bgClass = level > 0 ? 'background: #f1f5f9; border-left: 4px solid var(--primary-accent);' : '';
+                        const prefix = level > 0 ? '<i class="ph-bold ph-arrow-elbow-down-right" style="margin-right:8px; color:#94a3b8;"></i>' : '';
 
                         container.innerHTML += `
-                            <div class="draggable-item" data-id="${item.id}" style="margin-left: ${indent}px; border-left: ${level > 0 ? '3px solid var(--primary-color)' : 'none'}; padding-left: ${level > 0 ? '10px' : '15px'}">
-                                <div>
-                                    <strong>${item.label}</strong> <span style="color:#666; font-size:0.9em;">(${item.url})</span>
+                            <div class="draggable-item" data-id="${item.id}" style="margin-left: ${indent}px; ${bgClass}">
+                                <div style="display:flex; align-items:center;">
+                                    ${prefix}
+                                    <strong>${item.label}</strong> <span style="color:#64748b; font-size:0.9em; margin-left: 5px;">(${item.url})</span>
                                 </div>
                                 <div style="display:flex; gap:5px;">
-                                    <button onclick="moveMenuItem(${item.id}, -1)" class="btn btn-sm" title="Yukarı Taşı" ${isFirst ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-up"></i></button>
-                                    <button onclick="moveMenuItem(${item.id}, 1)" class="btn btn-sm" title="Aşağı Taşı" ${isLast ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-down"></i></button>
-                                    <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger btn-sm" title="Sil" style="margin-left:5px;"><i class="ph-bold ph-trash"></i></button>
+                                    <button onclick="moveMenuItem(${item.id}, -1)" class="btn btn-sm" title="Yukarı Taşı" style="padding: 6px 10px;" ${isFirst ? 'disabled style="opacity:0.3; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-up"></i></button>
+                                    <button onclick="moveMenuItem(${item.id}, 1)" class="btn btn-sm" title="Aşağı Taşı" style="padding: 6px 10px;" ${isLast ? 'disabled style="opacity:0.3; pointer-events:none;"' : ''}><i class="ph-bold ph-arrow-down"></i></button>
+                                    <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger btn-sm" title="Sil" style="padding: 6px 10px; margin-left:5px;"><i class="ph-bold ph-trash"></i></button>
                                 </div>
                             </div>
                         `;
