@@ -2902,6 +2902,3 @@ function initLanguageSwitcher() {
     // Run periodically to handle dynamic content/late loads
     setInterval(enforceLanguageButtons, 1000);
 }
-
-// Initialize Mobile Menu
-setupMobileMenu();

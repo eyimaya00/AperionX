@@ -3920,7 +3920,7 @@ i[class*=" ph"] {
 }
 
 /* FORCE HIDE MOBILE MENU ON DESKTOP - FIX SPECIFICITY */
-@media (min-width: 769px) {
+@media (min-width: 1400px) {
 
     .mobile-menu,
     .mobile-menu.active {
