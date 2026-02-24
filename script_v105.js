@@ -2645,20 +2645,6 @@ function logout() {
     setTimeout(() => window.location.reload(), 1000);
 }
 
-// --- Mobile Menu ---
-function setupMobileMenu() {
-    const btn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('mobileMenu');
-    const closeBtn = document.getElementById('mobile-menu-close');
-
-    if (btn && menu) {
-        btn.onclick = () => menu.classList.add('active');
-    }
-    if (closeBtn && menu) {
-        closeBtn.onclick = () => menu.classList.remove('active');
-    }
-}
-
 // --- Active Nav Link ---
 function updateActiveNavLink() {
     const links = document.querySelectorAll('.nav-links a');
