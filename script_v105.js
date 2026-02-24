@@ -1081,47 +1081,53 @@ function closeModal(modalId) {
 // --- Mobile Menu Logic ---
 function setupMobileMenu() {
     const btn = document.getElementById('hamburgerBtn');
-    const nav = document.querySelector('.nav-menu');
-    const header = document.querySelector('.header');
+    const mobileMenu = document.getElementById('mobileMenu');
 
     // --- Mobile Menu Toggle Logic ---
-    if (btn && nav) {
-        btn.addEventListener('click', () => {
-            nav.classList.toggle('active');
+    if (btn && mobileMenu) {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // prevent document click immediately
+            mobileMenu.classList.toggle('active');
             btn.classList.toggle('active');
 
-            // Lock body
-            if (nav.classList.contains('active')) {
+            if (mobileMenu.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
+                btn.innerHTML = '<i class="ph ph-x"></i>';
             } else {
                 document.body.style.overflow = '';
+                btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
 
-        nav.querySelectorAll('a').forEach(link => {
+        mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                nav.classList.remove('active');
-                btn.classList.remove('active');
-                document.body.style.overflow = '';
+                // Only close if it's not a dropdown toggle
+                if (!link.classList.contains('mobile-dropdown-header')) {
+                    mobileMenu.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                    btn.innerHTML = '<i class="ph ph-list"></i>';
+                }
             });
         });
 
         document.addEventListener('click', (e) => {
-            if (!nav.contains(e.target) && !btn.contains(e.target) && nav.classList.contains('active')) {
-                nav.classList.remove('active');
+            if (!mobileMenu.contains(e.target) && !btn.contains(e.target) && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
+                btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
 
         // Handle Resize (Hide if desktop)
         window.addEventListener('resize', () => {
             if (window.innerWidth > 1400) {
-                // If the menu is active on desktop, close it and unlock scroll
-                if (nav.classList.contains('active')) {
-                    nav.classList.remove('active');
+                if (mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
                     btn.classList.remove('active');
                     document.body.style.overflow = '';
+                    btn.innerHTML = '<i class="ph ph-list"></i>';
                 }
             }
         });
@@ -1376,21 +1382,7 @@ function logout() {
 window.logout = logout;
 
 // --- Mobile Menu Toggle ---
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const mobileMenu = document.getElementById('mobileMenu');
-
-if (hamburgerBtn && mobileMenu) {
-    hamburgerBtn.addEventListener('click', () => {
-        const isActive = mobileMenu.classList.contains('active');
-        if (isActive) {
-            mobileMenu.classList.remove('active');
-            hamburgerBtn.innerHTML = '<i class="ph ph-list"></i>';
-        } else {
-            mobileMenu.classList.add('active');
-            hamburgerBtn.innerHTML = '<i class="ph ph-x"></i>';
-        }
-    });
-}
+// (Handled completely by setupMobileMenu now)
 
 // --- Showcase Loader ---
 async function loadShowcase() {
@@ -2925,3 +2917,5 @@ function initLanguageSwitcher() {
     setInterval(enforceLanguageButtons, 1000);
 }
 
+// Initialize Mobile Menu
+setupMobileMenu();
