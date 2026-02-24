@@ -28,6 +28,7 @@
         }
     }
     </script>
+    <link rel="stylesheet" href="style.css?v=148">
 
     <style>
         :root {
@@ -1972,6 +1973,237 @@
         }
 
         init();
+    </script>
+    <!-- ========================================== -->
+    <!--  AUTH MODALS & TRIAL OVERLAY BLOCKER       -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal', event)"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form id="vsepr-login-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal', event)"
+                        class="forgot-password-link">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal', event)">Üye Ol</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal', event)"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form id="vsepr-signup-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal', event)">Giriş
+                        Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal', event)"><i
+                    class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal', event)">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Blocker Overlay -->
+    <div id="trial-block-overlay">
+        <div class="trial-block-content">
+            <i class="ph ph-lock-key" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i>
+            <h2 style="font-size: 24px; margin-bottom: 10px; font-weight: 800;">Deneme Süresi Doldu</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
+                VSEPR Simülatörünü sınırsız kullanmaya devam etmek için lütfen giriş yapın veya ücretsiz kayıt olun.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="nav-btn active" style="padding: 12px 24px; font-size: 15px;"
+                    onclick="openModal('loginModal', event)">Giriş Yap</button>
+                <button class="nav-btn" style="padding: 12px 24px; font-size: 15px;"
+                    onclick="openModal('signupModal', event)">Kayıt Ol</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal & Sub-Menu Logic Functions
+        function openModal(modalId, e) {
+            if (e) e.preventDefault();
+            document.getElementById(modalId).classList.add('active');
+        }
+        function closeModal(modalId, e) {
+            if (e) e.preventDefault();
+            document.getElementById(modalId).classList.remove('active');
+        }
+        function switchModal(closeId, openId, e) {
+            if (e) e.preventDefault();
+            closeModal(closeId);
+            setTimeout(() => openModal(openId), 200);
+        }
+
+        // Close modal on click outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // 30 Second Trial Logic & Auth Handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const blockOverlay = document.getElementById('trial-block-overlay');
+            let trialTimer;
+
+            // Start Trial Timer if no token
+            if (!token) {
+                trialTimer = setTimeout(() => {
+                    if (blockOverlay) {
+                        blockOverlay.classList.add('active');
+                        document.querySelectorAll('.modal-overlay').forEach(m => m.style.zIndex = '10002');
+                    }
+                }, 30000); // 30 seconds
+            }
+
+            // Authentication Handlers for Login
+            const loginForm = document.getElementById('vsepr-login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    const btn = loginForm.querySelector('button[type="submit"]');
+
+                    btn.disabled = true;
+                    btn.innerHTML = 'Giriş Yapılıyor...';
+
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            if (trialTimer) clearTimeout(trialTimer);
+                            if (blockOverlay) blockOverlay.classList.remove('active');
+                            closeModal('loginModal');
+                        } else {
+                            alert(data.message || 'Giriş başarısız');
+                        }
+                    } catch (err) {
+                        alert('Sunucu hatası');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Giriş Yap';
+                    }
+                });
+            }
+
+            // Authentication Handlers for Signup
+            const signupForm = document.getElementById('vsepr-signup-form');
+            if (signupForm) {
+                signupForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const fullName = document.getElementById('signup-fullname').value;
+                    const username = document.getElementById('signup-username').value;
+                    const email = document.getElementById('signup-email').value;
+                    const password = document.getElementById('signup-password').value;
+                    const confirmPassword = document.getElementById('signup-confirm').value;
+
+                    if (password !== confirmPassword) return alert("Şifreler eşleşmiyor");
+
+                    const btn = signupForm.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = 'Kayıt Olunuyor...';
+
+                    try {
+                        const res = await fetch('/api/signup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ fullName, username, email, password })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            switchModal('signupModal', 'loginModal');
+                        } else {
+                            alert(data.message || 'Kayıt başarısız');
+                        }
+                    } catch (err) {
+                        alert('Sunucu hatası');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Üye Ol';
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
