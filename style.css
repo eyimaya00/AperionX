@@ -3713,7 +3713,7 @@ i[class*=" ph"] {
     padding-right: 20px !important;
     padding-bottom: 40px !important;
 
-    display: flex !important;
+    /* display: flex !important; REMOVED to allow default toggle logic */
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
