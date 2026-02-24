@@ -751,6 +751,115 @@ i[class*=" ph"] {
     max-width: 300px;
 }
 
+/* Mobile Links Container */
+.mobile-links-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Mobile Nav Dropdown (Accordion) */
+.mobile-nav-dropdown {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mobile-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.mobile-dropdown-header:hover {
+    background: var(--nav-hover-bg);
+    color: var(--primary-color);
+}
+
+.mobile-dropdown-header i {
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+    opacity: 0.6;
+}
+
+.mobile-dropdown-content {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 8px 12px;
+    animation: mobileDropSlide 0.25s ease;
+}
+
+.mobile-dropdown-content.active {
+    display: flex;
+}
+
+@keyframes mobileDropSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-dropdown-link {
+    display: block;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-color);
+    opacity: 0.85;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.mobile-dropdown-link:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* Mobile Menu Standard Links */
+.mobile-menu .nav-link,
+.mobile-link-item {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.mobile-menu .nav-link:hover,
+.mobile-link-item:hover {
+    background: var(--nav-hover-bg);
+    color: var(--primary-color);
+}
+
+.mobile-menu .nav-link.active,
+.mobile-link-item.active {
+    color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
 /* Modals */
 .modal-overlay {
     position: fixed;
