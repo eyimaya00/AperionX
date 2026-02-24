@@ -176,7 +176,7 @@ a {
     visibility: hidden;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
     .nav-menu {
         display: flex;
         flex: 1;
@@ -200,7 +200,7 @@ a {
     border: 1px solid transparent;
 }
 
-@media (min-width: 1200px) and (max-width: 1350px) {
+@media (min-width: 1400px) and (max-width: 1550px) {
     .nav-menu {
         gap: 6px;
     }
@@ -671,7 +671,7 @@ i[class*=" ph"] {
 /* Mobile Menu Btn */
 
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
     .mobile-menu-btn {
         display: none !important;
     }

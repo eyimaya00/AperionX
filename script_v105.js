@@ -1116,7 +1116,7 @@ function setupMobileMenu() {
 
         // Handle Resize (Hide if desktop)
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 1200) {
+            if (window.innerWidth > 1400) {
                 // If the menu is active on desktop, close it and unlock scroll
                 if (nav.classList.contains('active')) {
                     nav.classList.remove('active');
