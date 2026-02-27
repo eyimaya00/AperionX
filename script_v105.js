@@ -865,7 +865,7 @@ async function loadMenus() {
                     // TOGGLE LOGIC (Click instead of Hover)
                     mainLink.addEventListener('click', (e) => {
                         // Only prevent default if it's purely a dropdown trigger (url is # or empty)
-                        if (!menu.url || menu.url === '#') {
+                        if (!menu.url || menu.url === '#' || menu.label.toLowerCase() === 'makaleler') {
                             e.preventDefault();
                         }
                         e.stopPropagation();
@@ -887,14 +887,24 @@ async function loadMenus() {
                     dropdownContent.className = 'nav-dropdown-content';
 
                     // Populate Dropdown
-                    if (isCategoryMenu && categories.length > 0) {
-                        categories.forEach(cat => {
-                            const catLink = document.createElement('a');
-                            catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                            catLink.className = 'dropdown-link';
-                            catLink.innerText = cat.name;
-                            dropdownContent.appendChild(catLink);
-                        });
+                    if (isMakalelerMenu) {
+                        // Add link to all articles first
+                        const allLink = document.createElement('a');
+                        allLink.href = 'articles.html';
+                        allLink.className = 'dropdown-link';
+                        allLink.innerText = 'Tüm Makaleler';
+                        dropdownContent.appendChild(allLink);
+
+                        // Then add dynamic categories
+                        if (categories.length > 0) {
+                            categories.forEach(cat => {
+                                const catLink = document.createElement('a');
+                                catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                                catLink.className = 'dropdown-link';
+                                catLink.innerText = cat.name;
+                                dropdownContent.appendChild(catLink);
+                            });
+                        }
                     }
 
                     if (hasChildren) {
@@ -975,9 +985,9 @@ async function loadMenus() {
             }
 
             rootMenus.forEach(menu => {
-                const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
+                const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = isCategoryMenu || hasChildren;
+                const needsDropdown = isMakalelerMenu || hasChildren;
 
                 if (needsDropdown) {
                     // Mobile Dropdown Accordion
@@ -991,15 +1001,25 @@ async function loadMenus() {
                     const content = document.createElement('div');
                     content.className = 'mobile-dropdown-content';
 
-                    if (isCategoryMenu && categories.length > 0) {
-                        categories.forEach(cat => {
-                            const catLink = document.createElement('a');
-                            catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                            catLink.className = 'mobile-dropdown-link';
-                            catLink.innerText = cat.name;
-                            catLink.addEventListener('click', (e) => e.stopPropagation());
-                            content.appendChild(catLink);
-                        });
+                    if (isMakalelerMenu) {
+                        // All Articles Link
+                        const allLink = document.createElement('a');
+                        allLink.href = 'articles.html';
+                        allLink.className = 'mobile-dropdown-link';
+                        allLink.innerText = 'Tüm Makaleler';
+                        allLink.addEventListener('click', (e) => e.stopPropagation());
+                        content.appendChild(allLink);
+
+                        if (categories.length > 0) {
+                            categories.forEach(cat => {
+                                const catLink = document.createElement('a');
+                                catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                                catLink.className = 'mobile-dropdown-link';
+                                catLink.innerText = cat.name;
+                                catLink.addEventListener('click', (e) => e.stopPropagation());
+                                content.appendChild(catLink);
+                            });
+                        }
                     }
 
                     if (hasChildren) {

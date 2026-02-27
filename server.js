@@ -2351,7 +2351,7 @@ app.get('/editor', (req, res) => {
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/categories', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM categories ORDER BY name ASC');
+        const [rows] = await pool.query("SELECT DISTINCT category AS name FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != '' ORDER BY category ASC");
         res.json(rows);
     } catch (e) {
         res.status(500).json({ message: e.message });

@@ -64,8 +64,14 @@
 
             <nav class="nav-menu">
                 <a href="/" class="nav-link">Ana Sayfa</a>
-                <a href="/articles.html" class="nav-link active">Makaleler</a>
-                <a href="/articles.html" class="nav-link">Kategoriler</a>
+                <div class="nav-item dropdown">
+                    <a href="/articles.html" class="nav-link active dropdown-toggle" id="articlesDropdownToggle">
+                        Makaleler <i class="ph ph-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu" id="articles-dropdown-menu">
+                        <!-- Dynamically populated categories -->
+                    </div>
+                </div>
                 <a href="/hakkimizda" class="nav-link">Hakkında</a>
             </nav>
 
@@ -195,7 +201,6 @@
                 <ul class="footer-links">
                     <li><a href="/">Ana Sayfa</a></li>
                     <li><a href="/articles.html">Makaleler</a></li>
-                    <li><a href="/articles.html">Kategoriler</a></li>
                     <li><a href="/hakkimizda">Hakkımızda</a></li>
                 </ul>
             </div>
