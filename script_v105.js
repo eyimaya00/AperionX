@@ -847,9 +847,9 @@ async function loadMenus() {
         // Rebuild Desktop
         if (navMenu) {
             rootMenus.forEach(menu => {
-                const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
+                const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = isCategoryMenu || hasChildren;
+                const needsDropdown = isMakalelerMenu || hasChildren;
 
                 if (needsDropdown) {
                     // Create Dropdown Structure
