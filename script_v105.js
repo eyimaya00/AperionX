@@ -892,11 +892,23 @@ async function loadMenus() {
                         const allLink = document.createElement('a');
                         allLink.href = 'articles.html';
                         allLink.className = 'dropdown-link';
-                        allLink.innerText = 'Tüm Makaleler';
+                        allLink.innerText = 'Tümü';
+                        allLink.style.fontWeight = 'bold'; // Emphasize "Tümü"
                         dropdownContent.appendChild(allLink);
 
                         // Then add dynamic categories
                         if (categories.length > 0) {
+                            // Add a label/divider for custom categories
+                            const catLabel = document.createElement('div');
+                            catLabel.innerText = 'Kategoriler';
+                            catLabel.style.fontSize = '0.75rem';
+                            catLabel.style.textTransform = 'uppercase';
+                            catLabel.style.color = '#94a3b8';
+                            catLabel.style.padding = '8px 16px 4px 16px';
+                            catLabel.style.fontWeight = '700';
+                            catLabel.style.letterSpacing = '0.5px';
+                            dropdownContent.appendChild(catLabel);
+
                             categories.forEach(cat => {
                                 const catLink = document.createElement('a');
                                 catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
@@ -1006,11 +1018,23 @@ async function loadMenus() {
                         const allLink = document.createElement('a');
                         allLink.href = 'articles.html';
                         allLink.className = 'mobile-dropdown-link';
-                        allLink.innerText = 'Tüm Makaleler';
+                        allLink.innerText = 'Tümü';
+                        allLink.style.fontWeight = 'bold'; // Emphasize
                         allLink.addEventListener('click', (e) => e.stopPropagation());
                         content.appendChild(allLink);
 
                         if (categories.length > 0) {
+                            // Add a label/divider
+                            const catLabel = document.createElement('div');
+                            catLabel.innerText = 'Kategoriler';
+                            catLabel.style.fontSize = '0.75rem';
+                            catLabel.style.textTransform = 'uppercase';
+                            catLabel.style.color = '#94a3b8';
+                            catLabel.style.padding = '10px 24px 5px 24px';
+                            catLabel.style.fontWeight = '700';
+                            catLabel.style.letterSpacing = '0.5px';
+                            content.appendChild(catLabel);
+
                             categories.forEach(cat => {
                                 const catLink = document.createElement('a');
                                 catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
