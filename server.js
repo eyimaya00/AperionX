@@ -229,6 +229,54 @@ async function getArticleAuthors(pool, articleId) {
     }
 }
 
+// === EXPERIMENT HELPER FUNCTIONS ===
+async function getUniqueExperimentSlug(pool, title, excludeId = null) {
+    let slug = slugify(title);
+    let originalSlug = slug;
+    let counter = 1;
+    let exists = true;
+    while (exists) {
+        let query = "SELECT id FROM experiments WHERE slug = ?";
+        let params = [slug];
+        if (excludeId) {
+            query += " AND id != ?";
+            params.push(excludeId);
+        }
+        const [rows] = await pool.query(query, params);
+        if (rows.length === 0) {
+            exists = false;
+        } else {
+            slug = `${originalSlug}-${counter}`;
+            counter++;
+        }
+    }
+    return slug;
+}
+
+async function getExperimentAuthors(pool, experimentId) {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title 
+            FROM experiment_authors ea
+            JOIN users u ON ea.user_id = u.id
+            WHERE ea.experiment_id = ?
+            ORDER BY ea.order_index ASC, ea.created_at ASC
+        `, [experimentId]);
+
+        if (rows.length === 0) {
+            const [exp] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+            if (exp.length > 0 && exp[0].author_id) {
+                const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [exp[0].author_id]);
+                return u;
+            }
+        }
+        return rows;
+    } catch (e) {
+        console.error('getExperimentAuthors Error:', e);
+        return [];
+    }
+}
+
 // === DYNAMIC SEO ROUTES (SSR) ===
 
 // 1. Slug Route (Canonical)
@@ -446,13 +494,14 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const [articles] = await pool.query("SELECT slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' ORDER BY created_at DESC");
         const origin = `${req.protocol}://${req.get('host')}`;
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>';
         xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
         // Static Pages
-        const staticPages = ['', '/articles.html', '/about.html', '/author.html', '/index.html'];
+        const staticPages = ['', '/articles.html', '/experiments.html', '/about.html', '/author.html', '/index.html'];
         staticPages.forEach(page => {
             xml += `
             <url>
@@ -471,6 +520,18 @@ app.get('/sitemap.xml', async (req, res) => {
                 <lastmod>${date}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>1.0</priority>
+            </url>`;
+        });
+
+        // Dynamic Experiments
+        experiments.forEach(exp => {
+            const date = new Date(exp.created_at).toISOString();
+            xml += `
+            <url>
+                <loc>${origin}/deney/${exp.slug}</loc>
+                <lastmod>${date}</lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>0.9</priority>
             </url>`;
         });
 
@@ -618,7 +679,60 @@ async function ensureSchema() {
             )
         `);
 
-        console.log('Schema Check: Likes, Comments, Views, Settings, & Users ensured.');
+        // === EXPERIMENTS MODULE TABLES ===
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS experiments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                slug VARCHAR(255) UNIQUE,
+                excerpt TEXT,
+                objective TEXT,
+                materials TEXT,
+                procedure_steps LONGTEXT,
+                results LONGTEXT,
+                conclusion TEXT,
+                image_url VARCHAR(255),
+                youtube_url VARCHAR(500),
+                category VARCHAR(100),
+                safety_notes TEXT,
+                tags TEXT,
+                references_list TEXT,
+                pdf_url VARCHAR(255),
+                author_id INT,
+                status VARCHAR(50) DEFAULT 'pending',
+                rejection_reason TEXT,
+                approved_by INT,
+                views INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (author_id) REFERENCES users(id)
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS experiment_authors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                experiment_id INT NOT NULL,
+                user_id INT NOT NULL,
+                order_index INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_exp_author (experiment_id, user_id),
+                FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS experiment_views (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                experiment_id INT NOT NULL,
+                ip_address VARCHAR(45),
+                viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_experiment_views (experiment_id, ip_address, viewed_at)
+            )
+        `);
+        // === END EXPERIMENTS MODULE TABLES ===
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments & Users ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -3702,6 +3816,505 @@ app.get('/makale/:slug', async (req, res) => {
         }
     });
 });
+
+// =============================================
+// === EXPERIMENTS MODULE ===
+// =============================================
+
+// === EXPERIMENT SSR SEO ROUTE ===
+app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
+    const slug = req.params.slug;
+
+    if (slug === 'experiments.html' || slug === 'experiment-detail.html') {
+        return res.redirect(301, '/experiments.html');
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM experiments WHERE slug = ?', [slug]);
+        if (rows.length === 0) {
+            return res.status(404).send('Deney bulunamadı (404)');
+        }
+
+        const experiment = rows[0];
+
+        // View Counting
+        const experimentId = experiment.id;
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+        try {
+            const [viewCheck] = await pool.query(
+                `SELECT id FROM experiment_views 
+                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+                [experimentId, ip]
+            );
+
+            if (viewCheck.length === 0) {
+                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
+                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
+            }
+        } catch (vcErr) {
+            console.error('[EXP-VIEW-COUNT] Error:', vcErr.message);
+        }
+
+        // Read Template
+        const filePath = path.join(__dirname, 'experiment-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+
+                // Get Authors
+                let authorNames = [];
+                let authors = [];
+                try {
+                    authors = await getExperimentAuthors(pool, experiment.id);
+                    if (authors.length > 0) {
+                        authorNames = authors.map(a => a.fullname);
+                    } else {
+                        authorNames = ['AperionX Yazarı'];
+                    }
+                } catch (e) { authorNames = ['AperionX Yazarı']; }
+
+                const authorName = authorNames.join(', ');
+
+                const title = experiment.title;
+                const summary = experiment.excerpt || experiment.objective || experiment.title;
+                const img = experiment.image_url
+                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url}`)
+                    : `${origin}/uploads/logo.png`;
+
+                const isEnglish = req.path.startsWith('/en/');
+                const urlPrefix = isEnglish ? `${origin}/en` : origin;
+                const url = `${urlPrefix}/deney/${experiment.slug}`;
+
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const safeImg = (img || '').replace(/"/g, '&quot;');
+                const safeUrl = (url || '').replace(/"/g, '&quot;');
+                const isoDate = new Date(experiment.created_at).toISOString();
+
+                let html = htmlData;
+
+                // Title
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
+
+                // Meta Tags
+                const replaceMeta = (name, content) => {
+                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    html = html.replace(regex, `$1${content}$3`);
+                };
+
+                replaceMeta('description', safeSummary);
+                replaceMeta('og:title', safeTitle);
+                replaceMeta('og:description', safeSummary);
+                replaceMeta('og:image', safeImg);
+                replaceMeta('og:url', safeUrl);
+
+                if (!html.includes('article:published_time')) {
+                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
+                }
+
+                const tags = experiment.tags || 'bilim, deney, laboratuvar, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
+                if (!html.includes('<meta name="keywords"')) {
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
+                }
+
+                replaceMeta('twitter:title', safeTitle);
+                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:image', safeImg);
+
+                // Canonical
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+
+                // Preloaded Data
+                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
+
+                // JSON-LD: HowTo Schema
+                const schemaData = {
+                    "@context": "https://schema.org",
+                    "@type": "HowTo",
+                    "name": safeTitle,
+                    "description": safeSummary,
+                    "image": [safeImg],
+                    "datePublished": isoDate,
+                    "author": {
+                        "@type": "Person",
+                        "name": authorName,
+                        "url": authors.length > 0 ? `${origin}/author.html?username=${authors[0].username}` : `${origin}/author.html`
+                    },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "AperionX",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/uploads/logo.png`
+                        }
+                    }
+                };
+
+                // Add materials as tools
+                if (experiment.materials) {
+                    try {
+                        const mats = experiment.materials.split('\n').filter(m => m.trim());
+                        schemaData.tool = mats.map(m => ({ "@type": "HowToTool", "name": m.trim() }));
+                    } catch (e) { }
+                }
+
+                // Add procedure steps
+                if (experiment.procedure_steps) {
+                    try {
+                        const plainSteps = experiment.procedure_steps.replace(/<[^>]+>/g, '').split('\n').filter(s => s.trim());
+                        schemaData.step = plainSteps.map((s, i) => ({
+                            "@type": "HowToStep",
+                            "position": i + 1,
+                            "text": s.trim()
+                        }));
+                    } catch (e) { }
+                }
+
+                // Breadcrumb Schema
+                const breadcrumbData = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Ana Sayfa",
+                        "item": "https://aperionx.com"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Deneyler",
+                        "item": "https://aperionx.com/experiments.html"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": safeTitle,
+                        "item": safeUrl
+                    }]
+                };
+
+                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+                const breadcrumbScript = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
+
+                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
+
+                // SSR Author Rendering
+                let authorHtml = authors.map(a => `<a href="/author.html?username=${a.username}" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
+                html = html.replace(/<span\s+id="exp-detail-author">.*?<\/span>/s, `<span id="exp-detail-author">${authorHtml}</span>`);
+
+                res.send(html);
+
+            } catch (parseErr) {
+                console.error('Experiment SSR Parse Error:', parseErr);
+                res.status(500).send(parseErr.toString());
+            }
+        });
+
+    } catch (e) {
+        console.error('Experiment DB Error:', e);
+        next();
+    }
+});
+
+// Legacy Experiment URL Redirect
+app.get('/experiment-detail.html', async (req, res, next) => {
+    const experimentId = req.query.id;
+    if (!experimentId) return next();
+
+    try {
+        const [rows] = await pool.query('SELECT slug FROM experiments WHERE id = ?', [experimentId]);
+        if (rows.length > 0 && rows[0].slug) {
+            return res.redirect(301, `/deney/${rows[0].slug}`);
+        }
+        next();
+    } catch (e) { next(); }
+});
+
+// === EXPERIMENT API ENDPOINTS ===
+
+// Public: List published experiments
+app.get('/api/experiments', async (req, res) => {
+    try {
+        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, objective, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' ORDER BY created_at DESC");
+
+        if (experiments.length > 0) {
+            const expIds = experiments.map(e => e.id);
+
+            const [allAuthors] = await pool.query(`
+                SELECT ea.experiment_id, u.id, u.fullname, u.username 
+                FROM experiment_authors ea
+                JOIN users u ON ea.user_id = u.id
+                WHERE ea.experiment_id IN (?)
+                ORDER BY ea.order_index ASC
+            `, [expIds]);
+
+            const authorMap = {};
+            allAuthors.forEach(row => {
+                if (!authorMap[row.experiment_id]) authorMap[row.experiment_id] = [];
+                authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+            });
+
+            experiments.forEach(e => {
+                e.authors = authorMap[e.id] || [];
+                if (e.authors.length > 0) {
+                    e.author_name = e.authors[0].fullname;
+                    e.author_username = e.authors[0].username;
+                }
+            });
+
+            // Legacy fallback
+            const legacyIds = experiments.filter(e => e.authors.length === 0 && e.author_id).map(e => e.author_id);
+            if (legacyIds.length > 0) {
+                const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                const legacyMap = {};
+                legacyUsers.forEach(u => legacyMap[u.id] = u);
+                experiments.forEach(e => {
+                    if (e.authors.length === 0 && e.author_id && legacyMap[e.author_id]) {
+                        const u = legacyMap[e.author_id];
+                        e.authors = [{ id: u.id, fullname: u.fullname, username: u.username }];
+                        e.author_name = u.fullname;
+                    }
+                });
+            }
+        }
+
+        res.json(experiments);
+    } catch (e) {
+        console.error('API Experiments Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
+// Public: Experiment categories
+app.get('/api/experiments/categories', async (req, res) => {
+    try {
+        const [rows] = await pool.query("SELECT DISTINCT category FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != '' ORDER BY category ASC");
+        res.json(rows.map(r => r.category));
+    } catch (e) {
+        console.error('Experiment Categories Error:', e);
+        res.status(500).json({ message: 'Sunucu hatası' });
+    }
+});
+
+// Auth: My Experiments
+app.get('/api/experiments/my-experiments', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT id, title, slug, category, status, views, created_at, image_url, rejection_reason
+            FROM experiments 
+            WHERE author_id = ? 
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        console.error('My Experiments Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
+// Auth: Create Experiment
+app.post('/api/experiments', authenticateToken, upload.any(), async (req, res) => {
+    const body = req.body || {};
+    const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
+    let author_ids = body.author_ids;
+
+    if (typeof author_ids === 'string') {
+        try { author_ids = JSON.parse(author_ids); } catch (e) { }
+    }
+    if (!Array.isArray(author_ids)) author_ids = [req.user.id];
+
+    let image_url = null;
+    let pdf_url = null;
+
+    if (req.files) {
+        const imgFile = req.files.find(f => f.fieldname === 'image');
+        const pdfFile = req.files.find(f => f.fieldname === 'pdf');
+        if (imgFile) image_url = 'uploads/' + imgFile.filename;
+        if (pdfFile) pdf_url = 'uploads/' + pdfFile.filename;
+    }
+
+    let finalStatus = status;
+    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+        finalStatus = 'pending';
+    }
+
+    try {
+        const slug = await getUniqueExperimentSlug(pool, title);
+
+        const [insertResult] = await pool.query(
+            `INSERT INTO experiments (title, slug, category, objective, materials, procedure_steps, results, conclusion, excerpt, image_url, youtube_url, safety_notes, author_id, status, tags, references_list, pdf_url) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [title, slug, category, objective, materials, procedure_steps, results, conclusion, excerpt, image_url, youtube_url, safety_notes, req.user.id, finalStatus, tags, references_list, pdf_url]
+        );
+
+        const newExpId = insertResult.insertId;
+
+        if (author_ids && author_ids.length > 0) {
+            const authorValues = author_ids.map((uid, index) => [newExpId, uid, index]);
+            await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
+        }
+
+        // Notify editors if pending
+        if (finalStatus === 'pending') {
+            try {
+                const [authorUser] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const aName = authorUser[0]?.fullname || 'Bir Yazar';
+                const [destUsers] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+                const msg = `Yeni deney onayı bekliyor: ${title.substring(0, 30)}... - ${aName}`;
+                for (const u of destUsers) {
+                    if (u.id !== req.user.id) {
+                        await createNotification(u.id, msg, 'info');
+                    }
+                }
+            } catch (notifErr) { console.error('Exp Notif failed:', notifErr); }
+        }
+
+        res.status(201).json({ message: 'Experiment created', status: finalStatus });
+    } catch (e) {
+        console.error('Create Experiment Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
+// Auth: Update Experiment
+app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+    const expId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [expId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        const body = req.body || {};
+        const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
+
+        let image_url = body.existing_image || null;
+        let pdf_url = body.existing_pdf || null;
+
+        if (req.files) {
+            if (req.files.image && req.files.image[0]) image_url = 'uploads/' + req.files.image[0].filename;
+            if (req.files.pdf && req.files.pdf[0]) pdf_url = 'uploads/' + req.files.pdf[0].filename;
+        }
+
+        let finalStatus = status;
+        if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+            finalStatus = 'pending';
+        }
+
+        const slug = await getUniqueExperimentSlug(pool, title, expId);
+
+        await pool.query(
+            `UPDATE experiments SET title=?, slug=?, category=?, objective=?, materials=?, procedure_steps=?, results=?, conclusion=?, excerpt=?, image_url=?, youtube_url=?, safety_notes=?, status=?, tags=?, references_list=?, pdf_url=? WHERE id=?`,
+            [title, slug, category, objective, materials, procedure_steps, results, conclusion, excerpt, image_url, youtube_url, safety_notes, finalStatus, tags, references_list, pdf_url, expId]
+        );
+
+        // Update authors if provided
+        let author_ids = body.author_ids;
+        if (typeof author_ids === 'string') {
+            try { author_ids = JSON.parse(author_ids); } catch (e) { }
+        }
+        if (Array.isArray(author_ids)) {
+            await pool.query('DELETE FROM experiment_authors WHERE experiment_id = ?', [expId]);
+            if (author_ids.length > 0) {
+                const authorValues = author_ids.map((uid, index) => [expId, uid, index]);
+                await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
+            }
+        }
+
+        res.json({ message: 'Experiment updated', status: finalStatus });
+    } catch (e) {
+        console.error('Update Experiment Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Auth: Delete Experiment (Soft)
+app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [req.params.id]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        await pool.query("UPDATE experiments SET status = 'trash' WHERE id = ?", [req.params.id]);
+        res.json({ message: 'Experiment moved to trash' });
+    } catch (e) {
+        console.error('Delete Experiment Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Editor: Decide on Experiment (Approve/Reject)
+app.put('/api/editor/experiment-decide/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const expId = req.params.id;
+    const { decision, rejection_reason } = req.body;
+
+    try {
+        const [rows] = await pool.query('SELECT author_id, title FROM experiments WHERE id = ?', [expId]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Experiment not found' });
+
+        const authorId = rows[0].author_id;
+        const title = rows[0].title;
+
+        let status = '';
+        let msg = '';
+        let type = '';
+        let updateQuery = '';
+        let queryParams = [];
+
+        if (decision === 'approve') {
+            status = 'published';
+            msg = `Deneyiniz yayına alındı: ${title}`;
+            type = 'success';
+            updateQuery = "UPDATE experiments SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
+            queryParams = [req.user.id, expId];
+        } else if (decision === 'reject') {
+            status = 'rejected';
+            msg = `Deneyiniz reddedildi: ${title}. ${rejection_reason ? 'Sebep: ' + rejection_reason : ''}`;
+            type = 'error';
+            updateQuery = "UPDATE experiments SET status = 'rejected', rejection_reason = ? WHERE id = ?";
+            queryParams = [rejection_reason, expId];
+        } else {
+            return res.status(400).json({ message: 'Invalid decision' });
+        }
+
+        await pool.query(updateQuery, queryParams);
+
+        // Notify Author
+        await createNotification(authorId, msg, type);
+
+        res.json({ message: `Experiment ${status}` });
+
+    } catch (e) {
+        console.error('Experiment Decision Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Editor/Admin: List all experiments
+app.get('/api/editor/all-experiments', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    try {
+        const [rows] = await pool.query(`
+            SELECT e.*, u.fullname as author_name 
+            FROM experiments e 
+            LEFT JOIN users u ON e.author_id = u.id 
+            ORDER BY e.created_at DESC
+        `);
+        res.json(rows);
+    } catch (e) {
+        console.error('All Experiments Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// =============================================
+// === END EXPERIMENTS MODULE ===
+// =============================================
 
 app.use((req, res) => {
     // Check if it looks like an API call first

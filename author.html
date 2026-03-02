@@ -1039,6 +1039,18 @@
             <a href="#" class="menu-item" onclick="showSection('profile', this)" title="Profilim">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
+
+            <div style="height: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: 5px 15px;"></div>
+
+            <a href="#" class="menu-item"
+                onclick="showSection('new-experiment', this); resetExpForm(); if(window.innerWidth<=991) toggleSidebar();"
+                title="Yeni Deney">
+                <i class="ph ph-flask"></i> <span>Yeni Deney</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSection('my-experiments', this); loadMyExperiments();"
+                title="Deneylerim">
+                <i class="ph ph-test-tube"></i> <span>Deneylerim</span>
+            </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn" title="Çıkış Yap">
@@ -1544,6 +1556,196 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+
+        <!-- NEW EXPERIMENT FORM -->
+        <div id="new-experiment" class="section">
+            <div class="header-row"
+                style="border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
+                <div>
+                    <h1 class="page-title" id="exp-form-title">Deney Stüdyosu</h1>
+                    <p style="color: #64748b; margin: 8px 0 0 0; font-size: 1.1rem;">Bilimsel bir deney oluşturun.</p>
+                </div>
+                <button class="btn btn-secondary" id="reset-exp-form-btn" style="display: none;"
+                    onclick="resetExpForm()">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Yeni Deney
+                </button>
+            </div>
+
+            <form id="experimentForm">
+                <div class="card">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Deney Başlığı</label>
+                            <input type="text" id="exp-title" class="form-control"
+                                style="font-size: 1.2rem; font-weight: 600;" placeholder="Deney başlığını girin..."
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select id="exp-category" class="form-control">
+                                <option value="Biyoloji">Biyoloji</option>
+                                <option value="Fizik">Fizik</option>
+                                <option value="Kimya">Kimya</option>
+                                <option value="Astronomi">Astronomi</option>
+                                <option value="Sağlık">Sağlık</option>
+                                <option value="Teknoloji">Teknoloji</option>
+                                <option value="Çevre">Çevre</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Etiketler</label>
+                            <input type="text" id="exp-tags" class="form-control"
+                                placeholder="Virgülle ayırın (örn: deney, kimya)">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Kapak Görseli</label>
+                            <input type="file" id="exp-imageInput" accept="image/*" style="display: none;"
+                                onchange="handleFileSelect(this, 'exp-preview-zone')">
+                            <div class="upload-zone" id="exp-preview-zone"
+                                onclick="document.getElementById('exp-imageInput').click()">
+                                <i class="ph ph-image"
+                                    style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                                <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                                <p id="exp-file-name"
+                                    style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Kısa Özet</label>
+                            <textarea id="exp-excerpt" class="form-control" rows="2"
+                                placeholder="Deneyin kısa bir özeti..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-target" style="color: var(--primary-accent);"></i> Amaç</label>
+                            <textarea id="exp-objective" class="form-control" rows="3"
+                                placeholder="Bu deneyin amacı nedir?"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-package" style="color: #3b82f6;"></i> Malzemeler (her satıra bir
+                                malzeme)</label>
+                            <textarea id="exp-materials" class="form-control" rows="4"
+                                placeholder="Beher&#10;Bunsen Beki&#10;Turnusol Kağıdı"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-warning" style="color: #ef4444;"></i> Güvenlik Uyarıları</label>
+                            <textarea id="exp-safety" class="form-control" rows="2"
+                                placeholder="Eldiven ve gözlük takın..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-list-numbers" style="color: #10b981;"></i> Deney Adımları
+                                (Prosedür)</label>
+                            <div id="exp-editor"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-chart-bar" style="color: #f59e0b;"></i> Sonuçlar /
+                                Gözlemler</label>
+                            <div id="exp-results-editor"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-lightbulb" style="color: #8b5cf6;"></i> Çıkarım / Sonuç</label>
+                            <textarea id="exp-conclusion" class="form-control" rows="3"
+                                placeholder="Deney sonunda elde edilen çıkarım..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="ph-fill ph-youtube-logo" style="color: #ef4444;"></i> YouTube Video
+                                URL</label>
+                            <input type="text" id="exp-youtube" class="form-control"
+                                placeholder="https://youtube.com/watch?v=...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kaynakça (her satıra bir kaynak)</label>
+                            <textarea id="exp-references" class="form-control" rows="3"
+                                placeholder="Yazar, Kitap, Yıl..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label><i class="ph-fill ph-file-pdf" style="color: #ef4444;"></i> PDF Dosyası</label>
+                            <input type="file" id="exp-pdfInput" accept="application/pdf" style="display: none;"
+                                onchange="handleFileSelect(this, 'exp-pdf-zone')">
+                            <div class="upload-zone" id="exp-pdf-zone"
+                                onclick="document.getElementById('exp-pdfInput').click()" style="padding: 25px;">
+                                <i class="ph ph-file-pdf"
+                                    style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                                <p style="margin: 0; font-weight: 500;">PDF yüklemek için tıklayın</p>
+                                <p id="exp-pdf-name"
+                                    style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn btn-secondary" onclick="submitExperiment('draft')">Taslak
+                            Olarak Kaydet</button>
+                        <button type="button" class="btn btn-primary" onclick="submitExperiment('pending')"><i
+                                class="ph ph-flask"></i> Yayınla</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- MY EXPERIMENTS -->
+        <div id="my-experiments" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Deneylerim</h1>
+            </div>
+            <div id="exp-status-filters"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                <div class="card status-card" onclick="setExpFilter('all')"
+                    style="padding: 18px; border-left: 4px solid #6366f1; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        Tümü</h3>
+                    <p id="exp-count-all" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">
+                        -</p>
+                </div>
+                <div class="card status-card" onclick="setExpFilter('published')"
+                    style="padding: 18px; border-left: 4px solid #10b981; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        Yayınlanan</h3>
+                    <p id="exp-count-published"
+                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                </div>
+                <div class="card status-card" onclick="setExpFilter('pending')"
+                    style="padding: 18px; border-left: 4px solid #f59e0b; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        Bekleyen</h3>
+                    <p id="exp-count-pending"
+                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                </div>
+                <div class="card status-card" onclick="setExpFilter('rejected')"
+                    style="padding: 18px; border-left: 4px solid #ef4444; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        Reddedilen</h3>
+                    <p id="exp-count-rejected"
+                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                </div>
+            </div>
+            <div id="experiments-list"></div>
         </div>
 
     </main>
@@ -3021,6 +3223,206 @@
                 toastContainer.style.right = '20px';
             }
         });
+
+        // =============================================
+        // === EXPERIMENTS MODULE JS ===
+        // =============================================
+        let expQuillProcedure = null;
+        let expQuillResults = null;
+        let editingExpId = null;
+        let allMyExperiments = [];
+        let expFilterStatus = 'all';
+
+        function initExpQuill() {
+            if (!expQuillProcedure && document.getElementById('exp-editor')) {
+                expQuillProcedure = new Quill('#exp-editor', {
+                    theme: 'snow',
+                    placeholder: 'Deney adımlarını yazın...',
+                    modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                });
+            }
+            if (!expQuillResults && document.getElementById('exp-results-editor')) {
+                expQuillResults = new Quill('#exp-results-editor', {
+                    theme: 'snow',
+                    placeholder: 'Sonuçları ve gözlemleri yazın...',
+                    modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                });
+            }
+        }
+
+        // Override showSection to init Quill when experiment section is shown
+        const origShowSection = window.showSection;
+        window.showSection = function (id, el) {
+            origShowSection(id, el);
+            if (id === 'new-experiment') {
+                setTimeout(initExpQuill, 100);
+            }
+        };
+
+        function resetExpForm() {
+            editingExpId = null;
+            document.getElementById('exp-title').value = '';
+            document.getElementById('exp-category').value = 'Biyoloji';
+            document.getElementById('exp-tags').value = '';
+            document.getElementById('exp-excerpt').value = '';
+            document.getElementById('exp-objective').value = '';
+            document.getElementById('exp-materials').value = '';
+            document.getElementById('exp-safety').value = '';
+            document.getElementById('exp-conclusion').value = '';
+            document.getElementById('exp-youtube').value = '';
+            document.getElementById('exp-references').value = '';
+            if (expQuillProcedure) expQuillProcedure.root.innerHTML = '';
+            if (expQuillResults) expQuillResults.root.innerHTML = '';
+            document.getElementById('exp-file-name').textContent = '';
+            document.getElementById('exp-pdf-name').textContent = '';
+            document.getElementById('exp-form-title').textContent = 'Deney Stüdyosu';
+            document.getElementById('reset-exp-form-btn').style.display = 'none';
+        }
+
+        async function submitExperiment(status) {
+            const title = document.getElementById('exp-title').value.trim();
+            if (!title) { showToast('Başlık gerekli!', 'error'); return; }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', document.getElementById('exp-category').value);
+            formData.append('tags', document.getElementById('exp-tags').value);
+            formData.append('excerpt', document.getElementById('exp-excerpt').value);
+            formData.append('objective', document.getElementById('exp-objective').value);
+            formData.append('materials', document.getElementById('exp-materials').value);
+            formData.append('safety_notes', document.getElementById('exp-safety').value);
+            formData.append('procedure_steps', expQuillProcedure ? expQuillProcedure.root.innerHTML : '');
+            formData.append('results', expQuillResults ? expQuillResults.root.innerHTML : '');
+            formData.append('conclusion', document.getElementById('exp-conclusion').value);
+            formData.append('youtube_url', document.getElementById('exp-youtube').value);
+            formData.append('references_list', document.getElementById('exp-references').value);
+            formData.append('status', status);
+
+            const imgFile = document.getElementById('exp-imageInput').files[0];
+            const pdfFile = document.getElementById('exp-pdfInput').files[0];
+            if (imgFile) formData.append('image', imgFile);
+            if (pdfFile) formData.append('pdf', pdfFile);
+
+            const token = localStorage.getItem('token');
+            try {
+                const url = editingExpId ? `/api/experiments/${editingExpId}` : '/api/experiments';
+                const method = editingExpId ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(editingExpId ? 'Deney güncellendi!' : 'Deney oluşturuldu!', 'success');
+                    resetExpForm();
+                } else {
+                    showToast(data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) {
+                showToast('Sunucu hatası', 'error');
+            }
+        }
+
+        async function loadMyExperiments() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/experiments/my-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
+                allMyExperiments = await res.json();
+                updateExpCounts();
+                renderMyExperiments();
+            } catch (e) { console.error('Load experiments error:', e); }
+        }
+
+        function updateExpCounts() {
+            const all = allMyExperiments;
+            document.getElementById('exp-count-all').textContent = all.length;
+            document.getElementById('exp-count-published').textContent = all.filter(e => e.status === 'published').length;
+            document.getElementById('exp-count-pending').textContent = all.filter(e => e.status === 'pending').length;
+            document.getElementById('exp-count-rejected').textContent = all.filter(e => e.status === 'rejected').length;
+        }
+
+        function setExpFilter(status) {
+            expFilterStatus = status;
+            renderMyExperiments();
+        }
+
+        function renderMyExperiments() {
+            const container = document.getElementById('experiments-list');
+            let exps = allMyExperiments;
+            if (expFilterStatus !== 'all') {
+                exps = exps.filter(e => e.status === expFilterStatus);
+            }
+
+            if (exps.length === 0) {
+                container.innerHTML = '<div class="card" style="padding:30px; text-align:center; color:#64748b;"><i class="ph ph-flask" style="font-size:2rem; opacity:0.3;"></i><p>Henüz deney yok.</p></div>';
+                return;
+            }
+
+            const statusMap = { 'published': { label: 'Yayında', color: '#10b981' }, 'pending': { label: 'Beklemede', color: '#f59e0b' }, 'rejected': { label: 'Reddedildi', color: '#ef4444' }, 'draft': { label: 'Taslak', color: '#64748b' }, 'trash': { label: 'Çöp', color: '#94a3b8' } };
+
+            container.innerHTML = exps.map(exp => {
+                const s = statusMap[exp.status] || { label: exp.status, color: '#64748b' };
+                const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
+                return `
+                <div class="card" style="padding: 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 20px; transition: transform 0.2s;">
+                    ${exp.image_url ? `<img src="${exp.image_url}" style="width:80px; height:60px; object-fit:cover; border-radius:10px;" onerror="this.style.display='none'">` : ''}
+                    <div style="flex:1;">
+                        <h3 style="margin:0; font-size:1.1rem; font-weight:700;">${escapeHtml(exp.title)}</h3>
+                        <div style="display:flex; gap:15px; margin-top:6px; color:#64748b; font-size:0.85rem; flex-wrap:wrap;">
+                            <span>${exp.category || 'Genel'}</span>
+                            <span>${date}</span>
+                            <span><i class="ph ph-eye"></i> ${exp.views || 0}</span>
+                            <span style="color:${s.color}; font-weight:600;">${s.label}</span>
+                        </div>
+                        ${exp.rejection_reason ? `<p style="color:#ef4444; font-size:0.85rem; margin:5px 0 0;">Sebep: ${escapeHtml(exp.rejection_reason)}</p>` : ''}
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-secondary" style="padding:8px 14px; font-size:0.85rem;" onclick="editExperiment(${exp.id})"><i class="ph ph-pencil"></i></button>
+                        <button class="btn btn-danger-soft" style="padding:8px 14px; font-size:0.85rem;" onclick="deleteExperiment(${exp.id})"><i class="ph ph-trash"></i></button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function editExperiment(id) {
+            const token = localStorage.getItem('token');
+            const exp = allMyExperiments.find(e => e.id === id);
+            if (!exp) return;
+
+            editingExpId = id;
+            // Switch to form section
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            showSection('new-experiment', document.querySelector('[title="Yeni Deney"]'));
+            setTimeout(initExpQuill, 150);
+
+            setTimeout(() => {
+                document.getElementById('exp-title').value = exp.title || '';
+                document.getElementById('exp-category').value = exp.category || 'Biyoloji';
+                document.getElementById('exp-tags').value = exp.tags || '';
+                document.getElementById('exp-excerpt').value = exp.excerpt || '';
+                document.getElementById('exp-objective').value = exp.objective || '';
+                document.getElementById('exp-materials').value = exp.materials || '';
+                document.getElementById('exp-safety').value = exp.safety_notes || '';
+                document.getElementById('exp-conclusion').value = exp.conclusion || '';
+                document.getElementById('exp-youtube').value = exp.youtube_url || '';
+                document.getElementById('exp-references').value = exp.references_list || '';
+                if (expQuillProcedure) expQuillProcedure.root.innerHTML = exp.procedure_steps || '';
+                if (expQuillResults) expQuillResults.root.innerHTML = exp.results || '';
+                document.getElementById('exp-form-title').textContent = 'Deney Düzenle';
+                document.getElementById('reset-exp-form-btn').style.display = 'inline-flex';
+            }, 200);
+        }
+
+        async function deleteExperiment(id) {
+            if (!confirm('Bu deneyi silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/experiments/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+                showToast('Deney silindi', 'success');
+                loadMyExperiments();
+            } catch (e) { showToast('Silme hatası', 'error'); }
+        }
+
+        // =============================================
+        // === END EXPERIMENTS MODULE JS ===
+        // =============================================
 
     </script>
     <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>

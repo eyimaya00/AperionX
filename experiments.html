@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AperionX platformundaki tüm bilimsel deneyleri keşfedin. Biyoloji, fizik, kimya ve daha fazlası.">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/experiments.html">
+    <meta property="og:title" content="Deneyler - AperionX">
+    <meta property="og:description"
+        content="AperionX platformundaki tüm bilimsel deneyleri keşfedin. Biyoloji, fizik, kimya ve daha fazlası.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Deneyler - AperionX">
+    <meta name="twitter:description" content="AperionX platformundaki tüm bilimsel deneyleri keşfedin.">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://aperionx.com/experiments.html" />
+    <title>Deneyler - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=148">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <div class="loader-icon"><i class="ph-fill ph-planet"></i></div>
+                <img id="loader-logo-img" src="" alt="Site Logo" style="display: none; max-width: 150px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                <span class="logo-text">AperionX</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <div class="nav-item dropdown">
+                    <a href="/articles.html" class="nav-link dropdown-toggle" id="articlesDropdownToggle">
+                        Makaleler <i class="ph ph-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu" id="articles-dropdown-menu"></div>
+                </div>
+                <a href="/experiments.html" class="nav-link active">Deneyler</a>
+                <a href="tools.html" class="nav-link">Araçlar</a>
+                <a href="about.html" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara...">
+                    <button class="icon-btn search-btn"><i class="ph ph-magnifying-glass"></i></button>
+                </div>
+                <button class="icon-btn theme-toggle" id="themeToggle"><i class="ph ph-moon"></i></button>
+                <a href="#" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn"><i class="ph ph-list"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-slider articles-hero-section">
+        <div class="slider-container" id="slider-container"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="articles-page-title"><span style="color: #ffffff">Deney</span><span
+                    style="color: #6366f1">ler</span></h1>
+            <p class="articles-page-description" style="color: rgba(255, 255, 255, 0.9);">Bilimsel deneyleri keşfedin,
+                öğrenin ve uygulayın.</p>
+        </div>
+    </section>
+
+    <!-- Filter & Search Section -->
+    <div class="filter-section">
+        <div class="container">
+            <div class="filter-container">
+                <div class="category-scroll-wrapper">
+                    <button class="scroll-btn left" id="exp-cat-scroll-left"><i class="ph ph-caret-left"></i></button>
+                    <div class="category-filters" id="exp-category-filters">
+                        <button class="filter-chip active" onclick="filterExperiments('all', this)">Tümü</button>
+                    </div>
+                    <button class="scroll-btn right" id="exp-cat-scroll-right"><i
+                            class="ph ph-caret-right"></i></button>
+                </div>
+                <div class="article-search">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" placeholder="Deney ara..." id="exp-search-input"
+                        oninput="searchExperiments(this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Experiments Grid -->
+    <section class="articles-grid-section">
+        <div class="container">
+            <div class="articles-grid" id="experiments-grid">
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p style="margin-top: 10px;">Deneyler yükleniyor...</p>
+                </div>
+            </div>
+            <div class="pagination-container" id="exp-pagination-container" style="display:none;">
+                <button class="load-more-btn" onclick="loadMoreExperiments()">Daha Fazla Göster</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler
+                    ve keşifler.</p>
+                <div class="footer-socials">
+                    <a href="#" id="footer-twitter" target="_blank" class="social-link"><i
+                            class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="#" id="footer-instagram" target="_blank" class="social-link"><i
+                            class="ph-fill ph-instagram-logo"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="/">Ana Sayfa</a></li>
+                    <li><a href="/articles.html">Makaleler</a></li>
+                    <li><a href="/experiments.html">Deneyler</a></li>
+                    <li><a href="/hakkimizda">Hakkımızda</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" id="footer-email">info@aperionx.com</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Kullanım Şartları</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 <span id="footer-copyright-name">AperionX</span>. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <a href="#" onclick="switchModal('loginModal', 'forgotPasswordModal')"
+                        class="forgot-password-link">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script_v105.js?v=147"></script>
+    <script>
+        // === EXPERIMENTS PAGE LOGIC ===
+        let allExperiments = [];
+        let filteredExperiments = [];
+        let expPage = 0;
+        const expPerPage = 12;
+
+        // XSS Protection
+        function escapeHtmlExp(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        // Load experiments
+        async function loadExperimentsPage() {
+            try {
+                const res = await fetch('/api/experiments');
+                allExperiments = await res.json();
+                filteredExperiments = [...allExperiments];
+
+                // Load categories
+                loadExpCategories();
+
+                // Render
+                expPage = 0;
+                renderExperiments();
+            } catch (e) {
+                console.error('Failed to load experiments:', e);
+                document.getElementById('experiments-grid').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">Deneyler yüklenemedi.</div>';
+            }
+        }
+
+        async function loadExpCategories() {
+            try {
+                const res = await fetch('/api/experiments/categories');
+                const categories = await res.json();
+                const container = document.getElementById('exp-category-filters');
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-chip';
+                    btn.textContent = cat;
+                    btn.onclick = function () { filterExperiments(cat, this); };
+                    container.appendChild(btn);
+                });
+            } catch (e) { console.error('Category load error:', e); }
+        }
+
+        function filterExperiments(category, btn) {
+            // Update active chip
+            document.querySelectorAll('#exp-category-filters .filter-chip').forEach(c => c.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (category === 'all') {
+                filteredExperiments = [...allExperiments];
+            } else {
+                filteredExperiments = allExperiments.filter(e => e.category === category);
+            }
+            expPage = 0;
+            renderExperiments();
+        }
+
+        function searchExperiments(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                filteredExperiments = [...allExperiments];
+            } else {
+                filteredExperiments = allExperiments.filter(e =>
+                    (e.title && e.title.toLowerCase().includes(q)) ||
+                    (e.excerpt && e.excerpt.toLowerCase().includes(q)) ||
+                    (e.category && e.category.toLowerCase().includes(q)) ||
+                    (e.tags && e.tags.toLowerCase().includes(q))
+                );
+            }
+            expPage = 0;
+            renderExperiments();
+        }
+
+        function renderExperiments() {
+            const grid = document.getElementById('experiments-grid');
+            const start = 0;
+            const end = (expPage + 1) * expPerPage;
+            const visible = filteredExperiments.slice(start, end);
+
+            if (visible.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b;"><i class="ph ph-flask" style="font-size:3rem; opacity:0.3;"></i><p style="margin-top:10px;">Henüz deney bulunamadı.</p></div>';
+                document.getElementById('exp-pagination-container').style.display = 'none';
+                return;
+            }
+
+            grid.innerHTML = visible.map(exp => {
+                const safeTitle = escapeHtmlExp(exp.title);
+                const safeCategory = escapeHtmlExp(exp.category || 'Genel');
+                const safeExcerpt = escapeHtmlExp(exp.excerpt || exp.objective || '');
+                const authorName = exp.author_name ? escapeHtmlExp(exp.author_name) : 'AperionX';
+                const imgSrc = exp.image_url || 'uploads/logo.png';
+                const date = new Date(exp.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                const slug = exp.slug || exp.id;
+
+                return `
+                <a href="/deney/${slug}" class="article-card" style="text-decoration: none; color: inherit;">
+                    <div class="card-image-wrapper">
+                        <img src="${imgSrc}" alt="${safeTitle}" class="card-image" loading="lazy" onerror="this.src='uploads/logo.png'">
+                        <span class="card-category">${safeCategory}</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${safeTitle}</h3>
+                        <p class="card-excerpt">${safeExcerpt.substring(0, 120)}${safeExcerpt.length > 120 ? '...' : ''}</p>
+                        <div class="card-footer">
+                            <span class="card-author"><i class="ph ph-user"></i> ${authorName}</span>
+                            <span class="card-date"><i class="ph ph-calendar"></i> ${date}</span>
+                            <span class="card-views"><i class="ph ph-eye"></i> ${exp.views || 0}</span>
+                        </div>
+                    </div>
+                </a>`;
+            }).join('');
+
+            // Pagination
+            const paginationContainer = document.getElementById('exp-pagination-container');
+            if (end < filteredExperiments.length) {
+                paginationContainer.style.display = 'flex';
+            } else {
+                paginationContainer.style.display = 'none';
+            }
+        }
+
+        function loadMoreExperiments() {
+            expPage++;
+            renderExperiments();
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExperimentsPage();
+
+            // Category scroll buttons
+            const filterContainer = document.getElementById('exp-category-filters');
+            const scrollLeftBtn = document.getElementById('exp-cat-scroll-left');
+            const scrollRightBtn = document.getElementById('exp-cat-scroll-right');
+
+            if (filterContainer && scrollLeftBtn && scrollRightBtn) {
+                scrollLeftBtn.addEventListener('click', () => {
+                    filterContainer.scrollBy({ left: -200, behavior: 'smooth' });
+                });
+                scrollRightBtn.addEventListener('click', () => {
+                    filterContainer.scrollBy({ left: 200, behavior: 'smooth' });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

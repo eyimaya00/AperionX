@@ -906,6 +906,10 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this); loadProfile();">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item"
+                onclick="showSection('editor-experiments', this); loadEditorExperiments();">
+                <i class="ph ph-flask"></i> <span>Deneyler</span>
+            </a>
         </div>
 
         <button onclick="logout()" class="logout-btn"><i class="ph ph-sign-out"></i> <span>Güvenli Çıkış</span></button>
@@ -1271,6 +1275,35 @@
 
 
         </div>
+
+        <!-- EDITOR EXPERIMENTS SECTION -->
+        <div id="editor-experiments" class="section">
+            <h1 class="page-title">Deney Yönetimi</h1>
+            <div class="card" style="min-height: 400px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin:0;">Deneyler</h2>
+                    <div class="filter-bar">
+                        <button class="filter-btn active" onclick="filterEditorExps('all', this)">Tümü</button>
+                        <button class="filter-btn" onclick="filterEditorExps('pending', this)">Bekleyen</button>
+                        <button class="filter-btn" onclick="filterEditorExps('published', this)">Yayında</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Yazar</th>
+                            <th>Kategori</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="editor-exp-list"></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <!-- Review Modal -->
@@ -2454,6 +2487,88 @@
         // We can hook into showSection or just load it once if we want
         // Let's modify showSection to lazy load, OR just load on init.
         // loadAnalysisAuthors(); // Moved to init
+
+        // === EXPERIMENTS MODULE (EDITOR) ===
+        let editorAllExps = [];
+        let editorExpFilter = 'all';
+
+        async function loadEditorExperiments() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/editor/all-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
+                editorAllExps = await res.json();
+                renderEditorExps();
+            } catch (e) { console.error('Editor experiments error:', e); }
+        }
+
+        function filterEditorExps(status, btn) {
+            editorExpFilter = status;
+            document.querySelectorAll('#editor-experiments .filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderEditorExps();
+        }
+
+        function renderEditorExps() {
+            const tbody = document.getElementById('editor-exp-list');
+            let exps = editorAllExps;
+            if (editorExpFilter !== 'all') exps = exps.filter(e => e.status === editorExpFilter);
+
+            const statusColors = { published: '#10b981', pending: '#f59e0b', rejected: '#ef4444', draft: '#64748b', trash: '#94a3b8' };
+            const statusLabels = { published: 'Yayında', pending: 'Beklemede', rejected: 'Reddedildi', draft: 'Taslak', trash: 'Çöp' };
+
+            tbody.innerHTML = exps.map(exp => {
+                const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
+                const sc = statusColors[exp.status] || '#64748b';
+                const sl = statusLabels[exp.status] || exp.status;
+                let actions = '';
+                if (exp.status === 'pending') {
+                    actions = `<button onclick="approveExp(${exp.id})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:5px; font-size:0.85rem;"><i class="ph ph-check"></i> Onayla</button>
+                    <button onclick="rejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-x"></i> Reddet</button>`;
+                } else if (exp.status === 'published') {
+                    actions = `<a href="/deney/${exp.slug}" target="_blank" style="color:#6366f1; font-size:0.85rem;"><i class="ph ph-eye"></i> Görüntüle</a>`;
+                }
+                return `<tr>
+                    <td style="font-weight:600;">${escapeHtml(exp.title)}</td>
+                    <td>${escapeHtml(exp.author_name || 'Yazar')}</td>
+                    <td>${escapeHtml(exp.category || 'Genel')}</td>
+                    <td><span style="color:${sc}; font-weight:600;">${sl}</span></td>
+                    <td>${date}</td>
+                    <td>${actions}</td>
+                </tr>`;
+            }).join('');
+
+            if (exps.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Henüz deney yok.</td></tr>';
+            }
+        }
+
+        async function approveExp(id) {
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/editor/experiment-decide/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'approve' })
+                });
+                showToast('Deney onaylandı!', 'success');
+                loadEditorExperiments();
+            } catch (e) { showToast('Onay hatası', 'error'); }
+        }
+
+        async function rejectExp(id) {
+            const reason = prompt('Red sebebi (opsiyonel):');
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/editor/experiment-decide/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'reject', rejection_reason: reason || '' })
+                });
+                showToast('Deney reddedildi', 'info');
+                loadEditorExperiments();
+            } catch (e) { showToast('Red hatası', 'error'); }
+        }
+        // === END EXPERIMENTS MODULE (EDITOR) ===
 
         loadAuthorsForEditorSelection();
 

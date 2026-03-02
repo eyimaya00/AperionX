@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AperionX - Bilimsel Deneyler. Lisans düzeyinde bilimsel deneyler.">
+    <meta property="og:title" content="AperionX - Deney">
+    <meta property="og:description" content="Bilimsel deney detayları.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AperionX - Deney">
+    <meta name="twitter:description" content="Bilimsel deney detayları.">
+    <meta name="twitter:image" content="https://aperionx.com/uploads/logo.png">
+    <link rel="canonical" href="https://aperionx.com/" />
+    <title>Deney Yükleniyor... - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=148">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        /* Author Pills */
+        #exp-detail-author {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #exp-detail-author a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 50px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        #exp-detail-author a i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        #exp-detail-author a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.2);
+            background: white;
+            border-color: var(--primary-color);
+        }
+
+        [data-theme="dark"] #exp-detail-author a {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #e2e8f0;
+        }
+
+        /* Layout */
+        .experiment-detail-container {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        .header {
+            background-color: var(--card-bg) !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .experiment-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .experiment-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .experiment-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .experiment-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .detail-hero-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f8fafc;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+        }
+
+        /* Content Card */
+        .unified-experiment-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Structured Sections */
+        .exp-section {
+            margin-bottom: 35px;
+        }
+
+        .exp-section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .exp-section-title i {
+            font-size: 1.4rem;
+        }
+
+        .exp-section-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .exp-section-content p {
+            margin-bottom: 20px;
+        }
+
+        .exp-section-content img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: block;
+        }
+
+        /* Safety Box */
+        .safety-box {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 30px;
+        }
+
+        .safety-box .exp-section-title {
+            color: #dc2626;
+            border-bottom-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .safety-box .exp-section-content {
+            color: #991b1b;
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] .safety-box {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        [data-theme="dark"] .safety-box .exp-section-content {
+            color: #fca5a5;
+        }
+
+        /* Materials List */
+        .materials-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .materials-list li {
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .materials-list li::before {
+            content: '🧪';
+        }
+
+        /* YouTube Embed */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+        }
+
+        /* References */
+        .references-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .references-list {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 0;
+        }
+
+        .references-list li {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        [data-theme="dark"] .references-list li {
+            color: #94a3b8;
+        }
+
+        /* Share */
+        .share-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .share-btn-exp {
+            color: #64748b;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .share-btn-exp:hover {
+            transform: translateY(-2px);
+        }
+
+        .share-btn-exp.twitter:hover {
+            color: #1da1f2;
+        }
+
+        .share-btn-exp.whatsapp:hover {
+            color: #25d366;
+        }
+
+        .share-btn-exp.linkedin:hover {
+            color: #0077b5;
+        }
+
+        /* Back Button */
+        .btn-back-exp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back-exp:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .experiment-title {
+                font-size: 2rem;
+                line-height: 1.2;
+                text-align: left !important;
+            }
+
+            .detail-hero-image {
+                height: 250px;
+            }
+
+            .experiment-detail-container {
+                padding-top: 20px;
+                padding-bottom: 40px;
+                width: 100%;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            .unified-experiment-card {
+                padding: 10px 0px !important;
+                border: none;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            .materials-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <div class="loader-icon"><i class="ph-fill ph-planet"></i></div>
+                <img id="loader-logo-img" src="" alt="Site Logo" style="display: none; max-width: 150px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                <span class="logo-text">AperionX</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/articles.html" class="nav-link">Makaleler</a>
+                <a href="/experiments.html" class="nav-link active">Deneyler</a>
+                <a href="tools.html" class="nav-link">Araçlar</a>
+                <a href="about.html" class="nav-link">Hakkında</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn theme-toggle" id="themeToggle"><i class="ph ph-moon"></i></button>
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+                </div>
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn"><i class="ph ph-list"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="experiment-detail-container">
+        <div class="experiment-header">
+            <div class="experiment-meta">
+                <span class="experiment-badge" id="exp-detail-category"><i class="ph ph-flask"></i> Kategori</span>
+                <span><i class="ph ph-calendar"></i> <span id="exp-detail-date">Tarih</span></span>
+                <span><i class="ph ph-eye"></i> <span id="exp-detail-views">0</span> okunma</span>
+            </div>
+            <h1 class="experiment-title" id="exp-detail-title">Deney Yükleniyor...</h1>
+            <span id="exp-detail-author"><i class="ph ph-user"></i> Yazar</span>
+        </div>
+
+        <img id="exp-detail-image" class="detail-hero-image" src="" alt="" style="display:none;"
+            onerror="this.style.display='none'">
+
+        <div class="unified-experiment-card">
+            <!-- Objective -->
+            <div class="exp-section" id="section-objective" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-target"></i> Amaç</div>
+                <div class="exp-section-content" id="exp-objective"></div>
+            </div>
+
+            <!-- Safety Notes -->
+            <div class="safety-box" id="section-safety" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-warning"></i> Güvenlik Uyarıları</div>
+                <div class="exp-section-content" id="exp-safety"></div>
+            </div>
+
+            <!-- Materials -->
+            <div class="exp-section" id="section-materials" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-package"></i> Malzemeler</div>
+                <ul class="materials-list" id="exp-materials"></ul>
+            </div>
+
+            <!-- Procedure -->
+            <div class="exp-section" id="section-procedure" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-list-numbers"></i> Deney Adımları</div>
+                <div class="exp-section-content" id="exp-procedure"></div>
+            </div>
+
+            <!-- Results -->
+            <div class="exp-section" id="section-results" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-chart-bar"></i> Sonuçlar / Gözlemler</div>
+                <div class="exp-section-content" id="exp-results"></div>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="exp-section" id="section-conclusion" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-lightbulb"></i> Çıkarım</div>
+                <div class="exp-section-content" id="exp-conclusion"></div>
+            </div>
+
+            <!-- YouTube Video -->
+            <div class="exp-section" id="section-video" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-youtube-logo"></i> Video</div>
+                <div class="video-container" id="exp-video"></div>
+            </div>
+
+            <!-- References -->
+            <div class="references-section" id="section-references" style="display:none;">
+                <div class="exp-section-title"><i class="ph-fill ph-books"></i> Kaynakça</div>
+                <ol class="references-list" id="exp-references"></ol>
+            </div>
+
+            <!-- PDF Download -->
+            <div class="exp-section" id="section-pdf" style="display:none;">
+                <a href="#" id="exp-pdf-link" target="_blank" class="btn-back-exp"
+                    style="background: rgba(16,185,129,0.1); color: #059669; border-color: rgba(16,185,129,0.1);">
+                    <i class="ph-fill ph-file-pdf"></i> PDF İndir
+                </a>
+            </div>
+
+            <!-- Tags -->
+            <div id="exp-tags-container" class="tags-container" style="margin-top: 30px;"></div>
+
+            <!-- Share -->
+            <div class="share-row">
+                <span style="font-weight: 600; font-size: 0.9rem; color: #64748b;">Paylaş:</span>
+                <a class="share-btn-exp twitter" id="share-twitter" href="#" target="_blank"><i
+                        class="ph-fill ph-twitter-logo"></i></a>
+                <a class="share-btn-exp whatsapp" id="share-whatsapp" href="#" target="_blank"><i
+                        class="ph-fill ph-whatsapp-logo"></i></a>
+                <a class="share-btn-exp linkedin" id="share-linkedin" href="#" target="_blank"><i
+                        class="ph-fill ph-linkedin-logo"></i></a>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/experiments.html" class="btn-back-exp"><i class="ph ph-arrow-left"></i> Tüm Deneyler</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon"><i class="ph-fill ph-planet"></i></div>
+                    <span class="logo-text">AperionX</span>
+                </a>
+                <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler
+                    ve keşifler.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <ul class="footer-links">
+                    <li><a href="/">Ana Sayfa</a></li>
+                    <li><a href="/articles.html">Makaleler</a></li>
+                    <li><a href="/experiments.html">Deneyler</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 <span id="footer-copyright-name">AperionX</span>. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="text" id="login-email"
+                            placeholder="E-posta veya Kullanıcı Adı" required></div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="password" id="login-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;"><a href="#"
+                        onclick="switchModal('loginModal', 'forgotPasswordModal')" class="forgot-password-link">Şifremi
+                        Unuttum?</a></div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="#" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="text" id="signup-username" placeholder="Kullanıcı Adı"
+                            required></div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="email" id="signup-email" placeholder="E-posta Adresi"
+                            required></div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="password" id="signup-confirm" placeholder="Şifre Tekrar"
+                            required></div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="#" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>E-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper"><input type="email" id="forgot-email" placeholder="E-posta Adresi"
+                            required></div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="#" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script_v105.js?v=147"></script>
+    <script>
+        // XSS Protection
+        function escapeHtmlExp(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
+            return match ? match[1] : null;
+        }
+
+        function renderExperimentDetail() {
+            const exp = window.SERVER_EXPERIMENT;
+            if (!exp) {
+                document.querySelector('.experiment-title').textContent = 'Deney bulunamadı';
+                return;
+            }
+
+            // Title
+            document.getElementById('exp-detail-title').textContent = exp.title;
+            document.title = exp.title + ' - AperionX';
+
+            // Category
+            document.getElementById('exp-detail-category').innerHTML = `<i class="ph ph-flask"></i> ${escapeHtmlExp(exp.category || 'Genel')}`;
+
+            // Date
+            const date = new Date(exp.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('exp-detail-date').textContent = date;
+
+            // Views
+            document.getElementById('exp-detail-views').textContent = exp.views || 0;
+
+            // Image
+            if (exp.image_url) {
+                const img = document.getElementById('exp-detail-image');
+                img.src = exp.image_url;
+                img.alt = exp.title;
+                img.style.display = 'block';
+            }
+
+            // Authors (if not SSR'd)
+            const authors = window.SERVER_EXP_AUTHORS;
+            if (authors && authors.length > 0) {
+                const authorEl = document.getElementById('exp-detail-author');
+                authorEl.innerHTML = authors.map(a =>
+                    `<a href="/author.html?username=${a.username}" style="text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${escapeHtmlExp(a.fullname)}</a>`
+                ).join('');
+            }
+
+            // Objective
+            if (exp.objective) {
+                document.getElementById('section-objective').style.display = 'block';
+                document.getElementById('exp-objective').innerHTML = exp.objective;
+            }
+
+            // Safety
+            if (exp.safety_notes) {
+                document.getElementById('section-safety').style.display = 'block';
+                document.getElementById('exp-safety').innerHTML = exp.safety_notes;
+            }
+
+            // Materials
+            if (exp.materials) {
+                document.getElementById('section-materials').style.display = 'block';
+                const items = exp.materials.split('\n').filter(m => m.trim());
+                document.getElementById('exp-materials').innerHTML = items.map(m => `<li>${escapeHtmlExp(m.trim())}</li>`).join('');
+            }
+
+            // Procedure
+            if (exp.procedure_steps) {
+                document.getElementById('section-procedure').style.display = 'block';
+                document.getElementById('exp-procedure').innerHTML = exp.procedure_steps;
+            }
+
+            // Results
+            if (exp.results) {
+                document.getElementById('section-results').style.display = 'block';
+                document.getElementById('exp-results').innerHTML = exp.results;
+            }
+
+            // Conclusion
+            if (exp.conclusion) {
+                document.getElementById('section-conclusion').style.display = 'block';
+                document.getElementById('exp-conclusion').textContent = exp.conclusion;
+            }
+
+            // YouTube
+            const ytId = getYouTubeId(exp.youtube_url);
+            if (ytId) {
+                document.getElementById('section-video').style.display = 'block';
+                document.getElementById('exp-video').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe>`;
+            }
+
+            // References
+            if (exp.references_list) {
+                try {
+                    const refs = exp.references_list.split('\n').filter(r => r.trim());
+                    if (refs.length > 0) {
+                        document.getElementById('section-references').style.display = 'block';
+                        document.getElementById('exp-references').innerHTML = refs.map(r => `<li>${escapeHtmlExp(r.trim())}</li>`).join('');
+                    }
+                } catch (e) { }
+            }
+
+            // PDF
+            if (exp.pdf_url) {
+                document.getElementById('section-pdf').style.display = 'block';
+                document.getElementById('exp-pdf-link').href = '/' + exp.pdf_url;
+            }
+
+            // Tags
+            if (exp.tags) {
+                const tagsArr = exp.tags.split(',').map(t => t.trim()).filter(t => t);
+                if (tagsArr.length > 0) {
+                    document.getElementById('exp-tags-container').innerHTML = tagsArr.map(t =>
+                        `<span class="tag-pill" style="background:transparent; color:#64748b; padding:6px 14px; border-radius:50px; font-size:0.85rem; font-weight:500; border:1px solid #cbd5e1; display:inline-block;">${escapeHtmlExp(t)}</span>`
+                    ).join('');
+                }
+            }
+
+            // Share Buttons
+            const pageUrl = encodeURIComponent(window.location.href);
+            const pageTitle = encodeURIComponent(exp.title);
+            document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${pageUrl}&text=${pageTitle}`;
+            document.getElementById('share-whatsapp').href = `https://wa.me/?text=${pageTitle}%20${pageUrl}`;
+            document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.SERVER_EXPERIMENT) {
+                renderExperimentDetail();
+            } else {
+                document.querySelector('.experiment-title').textContent = 'Deney bulunamadı';
+            }
+        });
+    </script>
+</body>
+
+</html>

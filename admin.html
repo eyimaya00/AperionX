@@ -813,6 +813,9 @@
                 onclick="showSection('newsletter-management', this); loadNewsletterManagement();">
                 <i class="ph ph-paper-plane-tilt"></i> <span>Bülten Gönderimi</span>
             </a>
+            <a href="#" class="menu-item" onclick="showSection('admin-experiments', this); loadAdminExperiments();">
+                <i class="ph ph-flask"></i> <span>Deney Yönetimi</span>
+            </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn">
@@ -1983,6 +1986,49 @@
 
                     <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Kaydet</button>
                 </form>
+            </div>
+        </div>
+
+
+        <!-- ADMIN EXPERIMENTS SECTION -->
+        <div id="admin-experiments" class="section">
+            <h1 class="page-title">Deney Yönetimi</h1>
+            <p class="section-subtitle">Tüm deneyleri görüntüleyin, onaylayın veya reddedin.</p>
+            <div class="card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">Deneyler</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn"
+                            style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; font-size:0.85rem; background:#6366f1; color:white;"
+                            onclick="filterAdminExps('all', this)">Tümü</button>
+                        <button class="btn"
+                            style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; font-size:0.85rem;"
+                            onclick="filterAdminExps('pending', this)">Bekleyen</button>
+                        <button class="btn"
+                            style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; font-size:0.85rem;"
+                            onclick="filterAdminExps('published', this)">Yayında</button>
+                        <button class="btn"
+                            style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; font-size:0.85rem;"
+                            onclick="filterAdminExps('rejected', this)">Reddedilen</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+                                <th style="padding: 12px; color: #64748b;">Başlık</th>
+                                <th style="padding: 12px; color: #64748b;">Yazar</th>
+                                <th style="padding: 12px; color: #64748b;">Kategori</th>
+                                <th style="padding: 12px; color: #64748b;">Durum</th>
+                                <th style="padding: 12px; color: #64748b;">Görüntülenme</th>
+                                <th style="padding: 12px; color: #64748b;">Tarih</th>
+                                <th style="padding: 12px; color: #64748b;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-exp-list"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -4099,6 +4145,87 @@
                 closeConfirmModal();
             }
         }
+        // === ADMIN EXPERIMENTS MODULE ===
+        let adminAllExps = [];
+        let adminExpFilter = 'all';
+
+        async function loadAdminExperiments() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/editor/all-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
+                adminAllExps = await res.json();
+                renderAdminExps();
+            } catch (e) { console.error('Admin experiments error:', e); }
+        }
+
+        function filterAdminExps(status, btn) {
+            adminExpFilter = status;
+            document.querySelectorAll('#admin-experiments .btn').forEach(b => { b.style.background = 'white'; b.style.color = '#1e293b'; });
+            if (btn) { btn.style.background = '#6366f1'; btn.style.color = 'white'; }
+            renderAdminExps();
+        }
+
+        function renderAdminExps() {
+            const tbody = document.getElementById('admin-exp-list');
+            let exps = adminAllExps;
+            if (adminExpFilter !== 'all') exps = exps.filter(e => e.status === adminExpFilter);
+
+            const statusColors = { published: '#10b981', pending: '#f59e0b', rejected: '#ef4444', draft: '#64748b', trash: '#94a3b8' };
+            const statusLabels = { published: 'Yayında', pending: 'Beklemede', rejected: 'Reddedildi', draft: 'Taslak', trash: 'Çöp' };
+
+            tbody.innerHTML = exps.map(exp => {
+                const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
+                const sc = statusColors[exp.status] || '#64748b';
+                const sl = statusLabels[exp.status] || exp.status;
+                let actions = '';
+                if (exp.status === 'pending') {
+                    actions = `<button onclick="adminApproveExp(${exp.id})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:4px; font-size:0.8rem;"><i class="ph ph-check"></i></button>
+                    <button onclick="adminRejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;"><i class="ph ph-x"></i></button>`;
+                } else if (exp.status === 'published') {
+                    actions = `<a href="/deney/${exp.slug}" target="_blank" style="color:#6366f1; font-size:0.85rem;"><i class="ph ph-eye"></i></a>`;
+                }
+                return `<tr>
+                    <td style="padding:12px; font-weight:600;">${escapeHtml(exp.title)}</td>
+                    <td style="padding:12px;">${escapeHtml(exp.author_name || '-')}</td>
+                    <td style="padding:12px;">${escapeHtml(exp.category || 'Genel')}</td>
+                    <td style="padding:12px;"><span style="color:${sc}; font-weight:600; font-size:0.85rem;">${sl}</span></td>
+                    <td style="padding:12px; text-align:center;">${exp.views || 0}</td>
+                    <td style="padding:12px;">${date}</td>
+                    <td style="padding:12px;">${actions}</td>
+                </tr>`;
+            }).join('');
+
+            if (exps.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;"><i class="ph ph-flask" style="font-size:2rem; opacity:0.3;"></i><br>Henüz deney yok.</td></tr>';
+            }
+        }
+
+        async function adminApproveExp(id) {
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/editor/experiment-decide/${id}`, {
+                    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'approve' })
+                });
+                showToast('Deney onaylandı!', 'success');
+                loadAdminExperiments();
+            } catch (e) { showToast('Hata', 'error'); }
+        }
+
+        async function adminRejectExp(id) {
+            const reason = prompt('Red sebebi (opsiyonel):');
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/editor/experiment-decide/${id}`, {
+                    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'reject', rejection_reason: reason || '' })
+                });
+                showToast('Deney reddedildi', 'info');
+                loadAdminExperiments();
+            } catch (e) { showToast('Hata', 'error'); }
+        }
+        // === END ADMIN EXPERIMENTS MODULE ===
+
     </script>
     <!-- Generic Confirmation Modal -->
     <div id="confirmation-modal" class="modal-overlay">
