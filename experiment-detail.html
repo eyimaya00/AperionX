@@ -168,14 +168,7 @@
             color: #94a3b8;
         }
 
-        /* Layout */
-        .experiment-detail-container {
-            padding-top: 80px;
-            padding-bottom: 80px;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 90%;
-        }
+        /* Layout - reuse article-detail-container from style.css */
 
         .header {
             background-color: var(--card-bg) !important;
@@ -445,22 +438,8 @@
 
         /* Mobile */
         @media (max-width: 768px) {
-            .experiment-title {
-                font-size: 2rem;
-                line-height: 1.2;
-                text-align: left !important;
-            }
-
             .detail-hero-image {
                 height: 250px;
-            }
-
-            .experiment-detail-container {
-                padding-top: 20px;
-                padding-bottom: 40px;
-                width: 100%;
-                padding-left: 6px;
-                padding-right: 6px;
             }
 
             .unified-experiment-card {
@@ -514,99 +493,109 @@
     </header>
 
     <!-- Main Content -->
-    <main class="experiment-detail-container">
-        <div class="experiment-header">
-            <div class="experiment-meta">
-                <span class="experiment-badge" id="exp-detail-category"><i class="ph ph-flask"></i> Kategori</span>
-                <span><i class="ph ph-calendar"></i> <span id="exp-detail-date">Tarih</span></span>
+    <div class="container article-detail-container">
+        <main>
+            <!-- Hero Image -->
+            <img id="exp-detail-image" class="detail-hero-image" src="" alt="" style="display:none;"
+                onerror="this.style.display='none'">
+
+            <!-- Unified Card (same structure as article-detail) -->
+            <div class="unified-article-card">
+                <div class="article-header">
+                    <div class="article-meta">
+                        <span class="article-badge" id="exp-detail-category">Kategori</span>
+                        <span id="exp-detail-date-wrap"><i class="ph ph-calendar"></i> <span
+                                id="exp-detail-date">Tarih</span></span>
+                        <span id="exp-detail-author"><i class="ph ph-user"></i> Yazar</span>
+                    </div>
+                    <h1 class="article-title" id="exp-detail-title">Deney Yükleniyor...</h1>
+                </div>
+
+                <div class="unified-experiment-card">
+                    <!-- Objective -->
+                    <div class="exp-section" id="section-objective" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-target"></i> Amaç</div>
+                        <div class="exp-section-content" id="exp-objective"></div>
+                    </div>
+
+                    <!-- Safety Notes -->
+                    <div class="safety-box" id="section-safety" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-warning"></i> Güvenlik Uyarıları</div>
+                        <div class="exp-section-content" id="exp-safety"></div>
+                    </div>
+
+                    <!-- Materials -->
+                    <div class="exp-section" id="section-materials" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-package"></i> Malzemeler</div>
+                        <ul class="materials-list" id="exp-materials"></ul>
+                    </div>
+
+                    <!-- Procedure -->
+                    <div class="exp-section" id="section-procedure" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-list-numbers"></i> Deney Adımları</div>
+                        <div class="exp-section-content" id="exp-procedure"></div>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="exp-section" id="section-results" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-chart-bar"></i> Sonuçlar / Gözlemler</div>
+                        <div class="exp-section-content" id="exp-results"></div>
+                    </div>
+
+                    <!-- Conclusion -->
+                    <div class="exp-section" id="section-conclusion" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-lightbulb"></i> Çıkarım</div>
+                        <div class="exp-section-content" id="exp-conclusion"></div>
+                    </div>
+
+                    <!-- YouTube Video -->
+                    <div class="exp-section" id="section-video" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-youtube-logo"></i> Video</div>
+                        <div class="video-container" id="exp-video"></div>
+                    </div>
+
+                    <!-- References -->
+                    <div class="references-section" id="section-references" style="display:none;">
+                        <div class="exp-section-title"><i class="ph-fill ph-books"></i> Kaynakça</div>
+                        <ol class="references-list" id="exp-references"></ol>
+                    </div>
+
+                    <!-- PDF Download -->
+                    <div class="exp-section" id="section-pdf" style="display:none;">
+                        <a href="#" id="exp-pdf-link" target="_blank" class="btn-back-exp"
+                            style="background: rgba(16,185,129,0.1); color: #059669; border-color: rgba(16,185,129,0.1);">
+                            <i class="ph-fill ph-file-pdf"></i> PDF İndir
+                        </a>
+                    </div>
+
+                    <!-- Tags -->
+                    <div id="exp-tags-container" class="tags-container" style="margin-top: 30px;"></div>
+
+                    <!-- Share -->
+                    <div class="share-row">
+                        <span style="font-weight: 600; font-size: 0.9rem; color: #64748b;">Paylaş:</span>
+                        <a class="share-btn-exp twitter" id="share-twitter" href="#" target="_blank"><i
+                                class="ph-fill ph-twitter-logo"></i></a>
+                        <a class="share-btn-exp whatsapp" id="share-whatsapp" href="#" target="_blank"><i
+                                class="ph-fill ph-whatsapp-logo"></i></a>
+                        <a class="share-btn-exp linkedin" id="share-linkedin" href="#" target="_blank"><i
+                                class="ph-fill ph-linkedin-logo"></i></a>
+                    </div>
+
+                    <!-- Author Profile Card -->
+                    <div id="exp-author-profile-card" class="exp-author-profile" style="display:none;"></div>
+                </div> <!-- Close unified-experiment-card -->
+            </div> <!-- Close unified-article-card -->
+
+            <div class="article-footer-meta">
+                <div class="action-row">
+                    <a href="/experiments.html" class="btn-back-custom">
+                        <i class="ph-bold ph-arrow-left"></i> Diğer Deneylere Göz At
+                    </a>
+                </div>
             </div>
-            <h1 class="experiment-title" id="exp-detail-title">Deney Yükleniyor...</h1>
-            <span id="exp-detail-author"><i class="ph ph-user"></i> Yazar</span>
-        </div>
-
-        <img id="exp-detail-image" class="detail-hero-image" src="" alt="" style="display:none;"
-            onerror="this.style.display='none'">
-
-        <div class="unified-experiment-card">
-            <!-- Objective -->
-            <div class="exp-section" id="section-objective" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-target"></i> Amaç</div>
-                <div class="exp-section-content" id="exp-objective"></div>
-            </div>
-
-            <!-- Safety Notes -->
-            <div class="safety-box" id="section-safety" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-warning"></i> Güvenlik Uyarıları</div>
-                <div class="exp-section-content" id="exp-safety"></div>
-            </div>
-
-            <!-- Materials -->
-            <div class="exp-section" id="section-materials" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-package"></i> Malzemeler</div>
-                <ul class="materials-list" id="exp-materials"></ul>
-            </div>
-
-            <!-- Procedure -->
-            <div class="exp-section" id="section-procedure" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-list-numbers"></i> Deney Adımları</div>
-                <div class="exp-section-content" id="exp-procedure"></div>
-            </div>
-
-            <!-- Results -->
-            <div class="exp-section" id="section-results" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-chart-bar"></i> Sonuçlar / Gözlemler</div>
-                <div class="exp-section-content" id="exp-results"></div>
-            </div>
-
-            <!-- Conclusion -->
-            <div class="exp-section" id="section-conclusion" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-lightbulb"></i> Çıkarım</div>
-                <div class="exp-section-content" id="exp-conclusion"></div>
-            </div>
-
-            <!-- YouTube Video -->
-            <div class="exp-section" id="section-video" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-youtube-logo"></i> Video</div>
-                <div class="video-container" id="exp-video"></div>
-            </div>
-
-            <!-- References -->
-            <div class="references-section" id="section-references" style="display:none;">
-                <div class="exp-section-title"><i class="ph-fill ph-books"></i> Kaynakça</div>
-                <ol class="references-list" id="exp-references"></ol>
-            </div>
-
-            <!-- PDF Download -->
-            <div class="exp-section" id="section-pdf" style="display:none;">
-                <a href="#" id="exp-pdf-link" target="_blank" class="btn-back-exp"
-                    style="background: rgba(16,185,129,0.1); color: #059669; border-color: rgba(16,185,129,0.1);">
-                    <i class="ph-fill ph-file-pdf"></i> PDF İndir
-                </a>
-            </div>
-
-            <!-- Tags -->
-            <div id="exp-tags-container" class="tags-container" style="margin-top: 30px;"></div>
-
-            <!-- Share -->
-            <div class="share-row">
-                <span style="font-weight: 600; font-size: 0.9rem; color: #64748b;">Paylaş:</span>
-                <a class="share-btn-exp twitter" id="share-twitter" href="#" target="_blank"><i
-                        class="ph-fill ph-twitter-logo"></i></a>
-                <a class="share-btn-exp whatsapp" id="share-whatsapp" href="#" target="_blank"><i
-                        class="ph-fill ph-whatsapp-logo"></i></a>
-                <a class="share-btn-exp linkedin" id="share-linkedin" href="#" target="_blank"><i
-                        class="ph-fill ph-linkedin-logo"></i></a>
-            </div>
-
-            <!-- Author Profile Card -->
-            <div id="exp-author-profile-card" class="exp-author-profile" style="display:none;"></div>
-        </div>
-
-        <!-- Back Button -->
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="/experiments.html" class="btn-back-exp"><i class="ph ph-arrow-left"></i> Tüm Deneyler</a>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -755,10 +744,10 @@
             document.title = exp.title + ' - AperionX';
 
             // Category
-            document.getElementById('exp-detail-category').innerHTML = `<i class="ph ph-flask"></i> ${escapeHtmlExp(exp.category || 'Genel')}`;
+            document.getElementById('exp-detail-category').textContent = exp.category || 'Genel';
 
             // Date
-            const date = new Date(exp.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+            const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
             document.getElementById('exp-detail-date').textContent = date;
 
 
