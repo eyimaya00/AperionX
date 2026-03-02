@@ -138,11 +138,11 @@
     </section>
 
     <style>
-        /* === EXPERIMENT CARDS PREMIUM STYLES === */
+        /* === EXPERIMENT CARDS — OVERLAY STYLE (MATCHING ARTICLES) === */
         .experiments-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
+            gap: 24px;
         }
 
         @media (max-width: 1024px) {
@@ -160,166 +160,154 @@
         }
 
         .exp-card {
-            background: var(--card-bg, #ffffff);
-            border-radius: 20px;
+            position: relative;
+            border-radius: 24px;
             overflow: hidden;
-            border: 1px solid var(--border-color, #e2e8f0);
-            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            height: 380px;
             text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            color: white;
+            display: block;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .exp-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15), 0 12px 24px -8px rgba(0, 0, 0, 0.08);
-            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
         }
 
-        .exp-card-img-wrap {
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 16 / 10;
-        }
-
-        .exp-card-img-wrap img {
+        /* Background Image */
+        .exp-card-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        .exp-card:hover .exp-card-img-wrap img {
+        .exp-card:hover .exp-card-bg {
             transform: scale(1.08);
         }
 
-        .exp-card-img-wrap::after {
-            content: '';
+        /* Gradient Overlay */
+        .exp-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0.05) 30%,
+                    rgba(0, 0, 0, 0.4) 55%,
+                    rgba(0, 0, 0, 0.85) 100%);
+            transition: background 0.3s;
+            z-index: 1;
+        }
+
+        .exp-card:hover .exp-card-overlay {
+            background: linear-gradient(180deg,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0.1) 25%,
+                    rgba(0, 0, 0, 0.5) 50%,
+                    rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        /* Category Badge */
+        .exp-card-badge {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            background: rgba(99, 102, 241, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 50px;
+            z-index: 2;
+            letter-spacing: 0.3px;
+        }
+
+        /* Content at Bottom */
+        .exp-card-content {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.15), transparent);
-            pointer-events: none;
-        }
-
-        .exp-card-badge {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: #6366f1;
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 5px 12px;
-            border-radius: 50px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 24px;
             z-index: 2;
-            border: 1px solid rgba(99, 102, 241, 0.15);
-        }
-
-        [data-theme="dark"] .exp-card-badge {
-            background: rgba(30, 41, 59, 0.9);
-            color: #a5b4fc;
-            border-color: rgba(165, 180, 252, 0.2);
-        }
-
-        .exp-card-body {
-            padding: 20px 22px 22px;
             display: flex;
             flex-direction: column;
-            flex: 1;
+            gap: 10px;
         }
 
         .exp-card-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            color: var(--text-color, #1e293b);
-            line-height: 1.4;
-            margin: 0 0 8px;
+            line-height: 1.35;
+            color: white;
+            margin: 0;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            transition: color 0.2s;
         }
 
-        .exp-card:hover .exp-card-title {
-            color: #6366f1;
-        }
-
-        .exp-card-excerpt {
-            font-size: 0.9rem;
-            color: #64748b;
-            line-height: 1.6;
-            margin: 0 0 auto;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            padding-bottom: 16px;
-        }
-
-        [data-theme="dark"] .exp-card-excerpt {
-            color: #94a3b8;
-        }
-
-        .exp-card-footer {
+        .exp-card-bottom {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-top: 1px solid var(--border-color, #f1f5f9);
-            padding-top: 14px;
-            font-size: 0.82rem;
-            color: #94a3b8;
         }
 
         .exp-card-author {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #475569;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
-        [data-theme="dark"] .exp-card-author {
-            color: #cbd5e1;
-        }
-
-        .exp-card-author-avatar {
-            width: 28px;
-            height: 28px;
+        .exp-card-arrow {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             flex-shrink: 0;
         }
 
-        .exp-card-date {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .exp-card:hover .exp-card-arrow {
+            background: #6366f1;
+            border-color: #6366f1;
+            transform: translateX(3px);
         }
 
-        [data-theme="dark"] .exp-card {
-            background: var(--card-bg, #1e293b);
-            border-color: #334155;
-        }
+        @media (max-width: 640px) {
+            .exp-card {
+                height: 320px;
+            }
 
-        [data-theme="dark"] .exp-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.2), 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+            .exp-card-title {
+                font-size: 1.05rem;
+            }
+
+            .exp-card-content {
+                padding: 18px;
+            }
         }
     </style>
 
@@ -565,28 +553,20 @@
             grid.innerHTML = visible.map(exp => {
                 const safeTitle = escapeHtmlExp(exp.title);
                 const safeCategory = escapeHtmlExp(exp.category || 'Genel');
-                const safeExcerpt = escapeHtmlExp(exp.excerpt || exp.objective || '');
                 const authorName = exp.author_name ? escapeHtmlExp(exp.author_name) : 'AperionX';
-                const initials = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 const imgSrc = exp.image_url || 'uploads/logo.png';
-                const date = new Date(exp.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short', day: 'numeric' });
                 const slug = exp.slug || exp.id;
 
                 return `
                 <a href="/deney/${slug}" class="exp-card">
-                    <div class="exp-card-img-wrap">
-                        <img src="${imgSrc}" alt="${safeTitle}" loading="lazy" onerror="this.src='uploads/logo.png'">
-                        <span class="exp-card-badge"><i class="ph ph-flask" style="margin-right:3px;"></i> ${safeCategory}</span>
-                    </div>
-                    <div class="exp-card-body">
+                    <div class="exp-card-bg" style="background-image: url('${imgSrc}')"></div>
+                    <div class="exp-card-overlay"></div>
+                    <span class="exp-card-badge">${safeCategory}</span>
+                    <div class="exp-card-content">
                         <h3 class="exp-card-title">${safeTitle}</h3>
-                        <p class="exp-card-excerpt">${safeExcerpt.substring(0, 130)}${safeExcerpt.length > 130 ? '...' : ''}</p>
-                        <div class="exp-card-footer">
-                            <span class="exp-card-author">
-                                <span class="exp-card-author-avatar">${initials}</span>
-                                ${authorName}
-                            </span>
-                            <span class="exp-card-date"><i class="ph ph-calendar-blank"></i> ${date}</span>
+                        <div class="exp-card-bottom">
+                            <span class="exp-card-author">${authorName}</span>
+                            <span class="exp-card-arrow"><i class="ph-bold ph-arrow-right"></i></span>
                         </div>
                     </div>
                 </a>`;
