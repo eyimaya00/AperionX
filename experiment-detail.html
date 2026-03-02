@@ -81,93 +81,6 @@
             color: #a5b4fc;
         }
 
-        /* Author Profile Card */
-        .exp-author-profile {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 24px;
-            background: #f8fafc;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            margin-top: 30px;
-        }
-
-        .exp-author-profile .author-avatar {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #6366f1;
-            flex-shrink: 0;
-        }
-
-        .exp-author-profile .author-avatar-placeholder {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .exp-author-profile .author-info {
-            flex: 1;
-        }
-
-        .exp-author-profile .author-name {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
-        }
-
-        .exp-author-profile .author-name a {
-            text-decoration: none;
-            color: inherit;
-            transition: color 0.2s;
-        }
-
-        .exp-author-profile .author-name a:hover {
-            color: #6366f1;
-        }
-
-        .exp-author-profile .author-title {
-            font-size: 0.85rem;
-            color: #6366f1;
-            font-weight: 600;
-            margin: 2px 0 6px;
-        }
-
-        .exp-author-profile .author-bio {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin: 0;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        [data-theme="dark"] .exp-author-profile {
-            background: #1e293b;
-            border-color: #334155;
-        }
-
-        [data-theme="dark"] .exp-author-profile .author-name {
-            color: #f1f5f9;
-        }
-
-        [data-theme="dark"] .exp-author-profile .author-bio {
-            color: #94a3b8;
-        }
-
         /* Layout - same as article-detail */
         .article-detail-container {
             padding-top: 80px;
@@ -175,6 +88,51 @@
             max-width: 900px;
             margin: 0 auto;
             width: 90%;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .article-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .article-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .detail-hero-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 24px;
+            margin-bottom: 30px;
         }
 
         .header {
@@ -589,8 +547,7 @@
                                 class="ph-fill ph-linkedin-logo"></i></a>
                     </div>
 
-                    <!-- Author Profile Card -->
-                    <div id="exp-author-profile-card" class="exp-author-profile" style="display:none;"></div>
+                    <!-- Author Profile Card removed - author info in meta row -->
                 </div> <!-- Close unified-experiment-card -->
             </div> <!-- Close unified-article-card -->
 
@@ -776,27 +733,6 @@
                         : `<i class="ph ph-user"></i>`;
                     return `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;">${avatarHtml} ${escapeHtmlExp(a.fullname)}</a>`;
                 }).join('');
-
-                // Render Author Profile Card
-                const profileCard = document.getElementById('exp-author-profile-card');
-                if (profileCard) {
-                    const a = authors[0]; // Primary author
-                    const initials = a.fullname ? a.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'Y';
-                    const avatarHtml = a.avatar_url
-                        ? `<img src="/${a.avatar_url}" alt="${escapeHtmlExp(a.fullname)}" class="author-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                           <div class="author-avatar-placeholder" style="display:none;">${initials}</div>`
-                        : `<div class="author-avatar-placeholder">${initials}</div>`;
-
-                    profileCard.innerHTML = `
-                        ${avatarHtml}
-                        <div class="author-info">
-                            <p class="author-name"><a href="/author-profile.html?u=${a.username}">${escapeHtmlExp(a.fullname)}</a></p>
-                            ${a.job_title ? `<p class="author-title">${escapeHtmlExp(a.job_title)}</p>` : ''}
-                            ${a.bio ? `<p class="author-bio">${escapeHtmlExp(a.bio)}</p>` : ''}
-                        </div>
-                    `;
-                    profileCard.style.display = 'flex';
-                }
             }
 
             // Objective
