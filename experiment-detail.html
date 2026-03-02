@@ -775,7 +775,7 @@
             if (authors && authors.length > 0) {
                 const authorEl = document.getElementById('exp-detail-author');
                 authorEl.innerHTML = authors.map(a =>
-                    `<a href="/author-profile.html?username=${a.username}" style="text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${escapeHtmlExp(a.fullname)}</a>`
+                    `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${escapeHtmlExp(a.fullname)}</a>`
                 ).join('');
 
                 // Render Author Profile Card
@@ -791,7 +791,7 @@
                     profileCard.innerHTML = `
                         ${avatarHtml}
                         <div class="author-info">
-                            <p class="author-name"><a href="/author-profile.html?username=${a.username}">${escapeHtmlExp(a.fullname)}</a></p>
+                            <p class="author-name"><a href="/author-profile.html?u=${a.username}">${escapeHtmlExp(a.fullname)}</a></p>
                             ${a.job_title ? `<p class="author-title">${escapeHtmlExp(a.job_title)}</p>` : ''}
                             ${a.bio ? `<p class="author-bio">${escapeHtmlExp(a.bio)}</p>` : ''}
                         </div>
