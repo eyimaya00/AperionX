@@ -547,16 +547,7 @@
                     <!-- Tags -->
                     <div id="exp-tags-container" class="tags-container" style="margin-top: 30px;"></div>
 
-                    <!-- Share -->
-                    <div class="share-row">
-                        <span style="font-weight: 600; font-size: 0.9rem; color: #64748b;">Paylaş:</span>
-                        <a class="share-btn-exp twitter" id="share-twitter" href="#" target="_blank"><i
-                                class="ph-fill ph-twitter-logo"></i></a>
-                        <a class="share-btn-exp whatsapp" id="share-whatsapp" href="#" target="_blank"><i
-                                class="ph-fill ph-whatsapp-logo"></i></a>
-                        <a class="share-btn-exp linkedin" id="share-linkedin" href="#" target="_blank"><i
-                                class="ph-fill ph-linkedin-logo"></i></a>
-                    </div>
+
 
                     <!-- Author Profile Card removed - author info in meta row -->
                 </div> <!-- Close unified-experiment-card -->
@@ -567,6 +558,27 @@
                     <a href="/experiments.html" class="btn-back-custom">
                         <i class="ph-bold ph-arrow-left"></i> Diğer Deneylere Göz At
                     </a>
+
+                    <div class="right-actions">
+                        <button class="btn-like" id="exp-like-btn" onclick="toggleExpLike()">
+                            <i class="ph ph-heart"></i> Destek Ol
+                        </button>
+
+                        <div class="share-divider"></div>
+
+                        <div class="share-icons-row">
+                            <span class="share-label">Paylaş:</span>
+                            <a href="#" class="share-icon twitter" id="share-twitter"><i
+                                    class="ph-fill ph-twitter-logo"></i></a>
+                            <a href="#" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                            <a href="#" class="share-icon linkedin" id="share-linkedin"><i
+                                    class="ph-fill ph-linkedin-logo"></i></a>
+                            <a href="#" class="share-icon whatsapp" id="share-whatsapp"><i
+                                    class="ph-fill ph-whatsapp-logo"></i></a>
+                            <a href="javascript:void(0)" onclick="copyExpLink()" class="share-icon copy-link"
+                                title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -832,6 +844,48 @@
                 document.querySelector('.experiment-title').textContent = 'Deney bulunamadı';
             }
         });
+
+        // Like Button Toggle
+        function toggleExpLike() {
+            const btn = document.getElementById('exp-like-btn');
+            const expId = window.SERVER_EXPERIMENT?.id || 'unknown';
+            const key = `exp_liked_${expId}`;
+            const isLiked = localStorage.getItem(key);
+
+            if (isLiked) {
+                localStorage.removeItem(key);
+                btn.classList.remove('liked');
+                btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
+            } else {
+                localStorage.setItem(key, 'true');
+                btn.classList.add('liked');
+                btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+            }
+        }
+
+        // Restore like state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const expId = window.SERVER_EXPERIMENT?.id || 'unknown';
+            const key = `exp_liked_${expId}`;
+            if (localStorage.getItem(key)) {
+                const btn = document.getElementById('exp-like-btn');
+                if (btn) {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                }
+            }
+        });
+
+        // Copy Link
+        function copyExpLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const toast = document.createElement('div');
+                toast.textContent = 'Link kopyalandı!';
+                toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#6366f1;color:white;padding:10px 24px;border-radius:50px;font-weight:600;z-index:9999;animation:fadeIn 0.3s';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            });
+        }
     </script>
 </body>
 
