@@ -31,7 +31,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
     <style>
-        /* Author Pills */
+        /* Author Beautiful Button - same as article-detail */
         #exp-detail-author {
             display: inline-flex;
             flex-wrap: wrap;
@@ -39,21 +39,30 @@
             align-items: center;
         }
 
-        #exp-detail-author a {
+        #exp-detail-author a,
+        #exp-detail-author span.author-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(99, 102, 241, 0.08);
             border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 50px;
-            color: var(--text-color);
+            color: #6366f1;
             font-weight: 600;
             font-size: 0.9rem;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
             transition: all 0.3s ease;
             text-decoration: none;
+        }
+
+        #exp-detail-author a img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(99, 102, 241, 0.3);
         }
 
         #exp-detail-author a i {
@@ -67,18 +76,20 @@
         #exp-detail-author a:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(99, 102, 241, 0.2);
-            background: white;
+            background: rgba(99, 102, 241, 0.12);
             border-color: var(--primary-color);
         }
 
         [data-theme="dark"] #exp-detail-author a {
             background: rgba(30, 41, 59, 0.6);
             border-color: rgba(99, 102, 241, 0.3);
-            color: #e2e8f0;
+            color: #a5b4fc;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         [data-theme="dark"] #exp-detail-author a:hover {
-            color: #a5b4fc;
+            background: rgba(30, 41, 59, 1);
+            border-color: var(--primary-color);
         }
 
         /* Layout - same as article-detail */
