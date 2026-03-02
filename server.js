@@ -2595,6 +2595,47 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
     }
 });
 
+// === EXPERIMENT STATS ENDPOINT ===
+app.get('/api/experiment-stats', async (req, res) => {
+    try {
+        const authorId = req.query.author_id;
+        let whereClause = '';
+        let params = [];
+
+        if (authorId) {
+            whereClause = ' WHERE author_id = ?';
+            params = [authorId];
+        }
+
+        const [published] = await pool.query(
+            `SELECT COUNT(*) as count FROM experiments WHERE status = 'published'${authorId ? ' AND author_id = ?' : ''}`,
+            authorId ? [authorId] : []
+        );
+        const [totalViews] = await pool.query(
+            `SELECT COALESCE(SUM(views), 0) as total FROM experiments${whereClause}`,
+            params
+        );
+        const [pending] = await pool.query(
+            `SELECT COUNT(*) as count FROM experiments WHERE status = 'pending'${authorId ? ' AND author_id = ?' : ''}`,
+            authorId ? [authorId] : []
+        );
+        const [total] = await pool.query(
+            `SELECT COUNT(*) as count FROM experiments${whereClause}`,
+            params
+        );
+
+        res.json({
+            published_count: published[0].count,
+            total_views: totalViews[0].total,
+            pending_count: pending[0].count,
+            total_count: total[0].count
+        });
+    } catch (e) {
+        console.error('Experiment Stats Error:', e);
+        res.json({ published_count: 0, total_views: 0, pending_count: 0, total_count: 0 });
+    }
+});
+
 // Admin: Create User
 app.post('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);

@@ -955,6 +955,38 @@
                 </div>
             </div>
 
+            <!-- ROW 3: EXPERIMENTS -->
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 20px 0 15px 0;">Deney İstatistikleri</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
+                    <div class="stat-icon" style="background: #fdf4ff; color: #a855f7;"><i
+                            class="ph-duotone ph-flask"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-exp-published">0</h3>
+                        <p>Yayında Deney</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
+                    <div class="stat-icon" style="background: #ecfeff; color: #06b6d4;"><i
+                            class="ph-duotone ph-binoculars"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-exp-views">0</h3>
+                        <p>Deney Görüntülenme</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: pointer;"
+                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
+                    <div class="stat-icon" style="background: #fff7ed; color: #f97316;"><i
+                            class="ph-duotone ph-clock"></i></div>
+                    <div class="stat-info">
+                        <h3 id="count-exp-pending">0</h3>
+                        <p>Onay Bekleyen Deney</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- ROW 2: ENGAGEMENT -->
             <h2 style="font-size: 1.25rem; font-weight: 700; margin: 20px 0 15px 0;">Etkileşim İstatistikleri</h2>
             <div class="dashboard-stats">
@@ -1689,6 +1721,9 @@
             if (id === 'section-stats-final') {
                 loadAnalysisAuthors();
             }
+            if (id === 'editor-experiments') {
+                loadEditorExperiments();
+            }
         }
 
 
@@ -1783,39 +1818,6 @@
             closeConfirmModal();
         });
 
-        async function editArticle(id) {
-            // Fetch latest details to get authors
-            try {
-                const res = await fetch(`${API_URL}/articles/${id}?t=${Date.now()}`); // Public endpoint has authors
-                if (!res.ok) throw new Error('Makale alınamadı');
-                const article = await res.json();
-
-                currentArticleId = article.id;
-                document.getElementById('edit-title').value = article.title;
-                document.getElementById('edit-category').value = article.category;
-                document.getElementById('edit-excerpt').value = article.excerpt;
-                document.getElementById('edit-tags').value = article.tags || '';
-                quillEdit.root.innerHTML = article.content;
-
-                // Populate Authors
-                if (article.authors && Array.isArray(article.authors)) {
-                    const authorIds = article.authors.map(a => a.id);
-                    document.querySelectorAll('input[name="edit_article_authors"]').forEach(cb => {
-                        cb.checked = authorIds.includes(parseInt(cb.value));
-                    });
-                } else {
-                    // Legacy fallback
-                    document.querySelectorAll('input[name="edit_article_authors"]').forEach(cb => {
-                        cb.checked = (parseInt(cb.value) === article.author_id);
-                    });
-                }
-
-                document.getElementById('edit-modal').classList.add('show');
-            } catch (e) {
-                console.error(e);
-                showToast('Makale detayları yüklenemedi.', 'error');
-            }
-        }
 
         async function editArticle(id) {
             currentArticleId = id;
@@ -2570,6 +2572,21 @@
         }
         // === END EXPERIMENTS MODULE (EDITOR) ===
 
+        // === EXPERIMENT STATS LOADER ===
+        async function loadEditorExpStats() {
+            try {
+                const res = await fetch('/api/experiment-stats');
+                const data = await res.json();
+                const el1 = document.getElementById('count-exp-published');
+                const el2 = document.getElementById('count-exp-views');
+                const el3 = document.getElementById('count-exp-pending');
+                if (el1) el1.innerText = data.published_count || 0;
+                if (el2) el2.innerText = data.total_views || 0;
+                if (el3) el3.innerText = data.pending_count || 0;
+            } catch (e) { console.error('Editor exp stats error:', e); }
+        }
+        loadEditorExpStats();
+
         loadAuthorsForEditorSelection();
 
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html'; }
@@ -2579,4 +2596,3 @@
 </body>
 
 </html>
-```

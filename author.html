@@ -1183,6 +1183,44 @@
                     </div>
                 </div>
 
+                <!-- Experiments Published -->
+                <div class="card" onclick="showSection('my-experiments', document.querySelector('[title=\"
+                    Deneylerim\"]')); loadMyExperiments();"
+                    style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #a855f7; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-5px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <div
+                        style="background: #fdf4ff; color: #7c3aed; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                        <i class="ph-bold ph-flask"></i>
+                    </div>
+                    <div>
+                        <h3
+                            style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+                            Yayında Deney</h3>
+                        <p id="stat-exp-published"
+                            style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                    </div>
+                </div>
+
+                <!-- Experiment Views -->
+                <div class="card" onclick="showSection('my-experiments', document.querySelector('[title=\"
+                    Deneylerim\"]')); loadMyExperiments();"
+                    style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #06b6d4; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-5px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <div
+                        style="background: #ecfeff; color: #0891b2; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                        <i class="ph-bold ph-binoculars"></i>
+                    </div>
+                    <div>
+                        <h3
+                            style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+                            Deney Görüntülenme</h3>
+                        <p id="stat-exp-views"
+                            style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- ANALYTICS CHART (Full Width) -->
@@ -2905,11 +2943,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             loadMyArticles();
-            loadMyArticles();
             loadCategories();
             loadAuthorsForSelection(); // Load authors
             loadNotifications();
             renderDashboardChart();
+            loadMyExperiments();
             setInterval(loadNotifications, 30000);
 
             // Load Theme
@@ -3423,6 +3461,21 @@
         // =============================================
         // === END EXPERIMENTS MODULE JS ===
         // =============================================
+
+        // === EXPERIMENT STATS LOADER ===
+        async function loadAuthorExpStats() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const authorParam = user ? `?author_id=${user.id}` : '';
+                const res = await fetch(`/api/experiment-stats${authorParam}`);
+                const data = await res.json();
+                const el1 = document.getElementById('stat-exp-published');
+                const el2 = document.getElementById('stat-exp-views');
+                if (el1) el1.innerText = data.published_count || 0;
+                if (el2) el2.innerText = data.total_views || 0;
+            } catch (e) { console.error('Author exp stats error:', e); }
+        }
+        loadAuthorExpStats();
 
     </script>
     <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>

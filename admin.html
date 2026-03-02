@@ -1190,6 +1190,36 @@
                         <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Yorum</p>
                     </div>
                 </div>
+                <!-- Experiments Published -->
+                <div class="stat-card"
+                    onclick="showSection('admin-experiments', document.querySelector('a[onclick*=\'admin-experiments\']'))"
+                    style="cursor:pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fdf4ff; color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-flask"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;"
+                            id="stat-experiments">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Yayında Deney</p>
+                    </div>
+                </div>
+
+                <!-- Experiment Views -->
+                <div class="stat-card"
+                    onclick="showSection('admin-experiments', document.querySelector('a[onclick*=\'admin-experiments\']'))"
+                    style="cursor:pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #ecfeff; color: #06b6d4; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-binoculars"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-exp-views">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Deney Görüntülenme</p>
+                    </div>
+                </div>
             </div>
 
             <div style="margin-top: 40px;">
@@ -3502,13 +3532,14 @@
         }
 
         async function deleteComment(id) {
-            if (!confirm('Yorumu silmek istediğinize emin misiniz?')) return;
-            try {
-                // Reusing the reject endpoint which performs a DELETE
-                await fetch(`${API_URL}/admin/comments/${id}/reject`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-                showToast('Yorum silindi', 'success');
-                loadAllComments();
-            } catch (e) { console.error(e); }
+            showConfirmModal('Yorumu silmek istediğinize emin misiniz?', async () => {
+                try {
+                    // Reusing the reject endpoint which performs a DELETE
+                    await fetch(`${API_URL}/admin/comments/${id}/reject`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                    showToast('Yorum silindi', 'success');
+                    loadAllComments();
+                } catch (e) { console.error(e); }
+            });
         }
 
         loadAllComments();
@@ -3729,16 +3760,17 @@
         }
 
         function deleteSubscriber(id) {
-            if (!confirm('Bu aboneyi silmek istediğinize emin misiniz?')) return;
-            fetch(`${API_URL}/subscribers/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => {
-                if (res.ok) {
-                    showToast('Abone silindi', 'success');
-                    loadSubscribers();
-                } else showToast('Hata oluştu', 'error');
-            }).catch(e => showToast('Hata', 'error'));
+            showConfirmModal('Bu aboneyi silmek istediğinize emin misiniz?', async () => {
+                fetch(`${API_URL}/subscribers/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(res => {
+                    if (res.ok) {
+                        showToast('Abone silindi', 'success');
+                        loadSubscribers();
+                    } else showToast('Hata oluştu', 'error');
+                }).catch(e => showToast('Hata', 'error'));
+            });
         }
 
         // Hook automatic loading when section is shown
@@ -3813,12 +3845,10 @@
                 if (sectionId === 'likes-management') loadLikes();
                 if (sectionId === 'site-settings') loadSettings();
                 if (sectionId === 'charts-section') loadCharts();
-                if (sectionId === 'charts-section') loadCharts();
-                if (sectionId === 'email-settings') loadEmailSettings();
                 if (sectionId === 'email-settings') loadEmailSettings();
                 if (sectionId === 'maintenance-mode') loadMaintenanceSettings();
-                if (sectionId === 'email-management') loadSettings(); // Reuse generic settings loader for SMTP
-
+                if (sectionId === 'email-management') loadSettings();
+                if (sectionId === 'admin-experiments') loadAdminExperiments();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -4145,6 +4175,19 @@
                 closeConfirmModal();
             }
         }
+        // === EXPERIMENT STATS LOADER ===
+        async function loadExperimentStats() {
+            try {
+                const res = await fetch(`${API_URL}/experiment-stats`);
+                const data = await res.json();
+                const el1 = document.getElementById('stat-experiments');
+                const el2 = document.getElementById('stat-exp-views');
+                if (el1) el1.innerText = data.published_count || 0;
+                if (el2) el2.innerText = data.total_views || 0;
+            } catch (e) { console.error('Experiment stats error:', e); }
+        }
+        loadExperimentStats();
+
         // === ADMIN EXPERIMENTS MODULE ===
         let adminAllExps = [];
         let adminExpFilter = 'all';
