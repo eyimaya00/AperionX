@@ -146,6 +146,139 @@
             margin-bottom: 30px;
         }
 
+        /* Back Button */
+        .btn-back-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back-custom:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Footer Action Row */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+        }
+
+        [data-theme="dark"] .right-actions {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Like Button */
+        .btn-like {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-like:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-like.liked {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Share */
+        .share-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        .share-icons-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .share-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        [data-theme="dark"] .share-label {
+            color: #94a3b8;
+        }
+
+        .share-icon {
+            color: #64748b;
+            font-size: 1.3rem;
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="dark"] .share-icon {
+            color: #cbd5e1;
+        }
+
+        .share-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .share-icon.twitter:hover {
+            color: #1da1f2;
+        }
+
+        .share-icon.instagram:hover {
+            color: #e1306c;
+        }
+
+        .share-icon.linkedin:hover {
+            color: #0077b5;
+        }
+
+        .share-icon.whatsapp:hover {
+            color: #25d366;
+        }
+
         .header {
             background-color: var(--card-bg) !important;
             backdrop-filter: none !important;
@@ -414,6 +547,29 @@
 
         /* Mobile */
         @media (max-width: 768px) {
+            .action-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .right-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .article-title {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+
+            .article-detail-container {
+                padding-top: 20px;
+                padding-bottom: 40px;
+                width: 100%;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
             .detail-hero-image {
                 height: 250px;
             }
