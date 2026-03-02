@@ -168,7 +168,14 @@
             color: #94a3b8;
         }
 
-        /* Layout - reuse article-detail-container from style.css */
+        /* Layout - same as article-detail */
+        .article-detail-container {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+        }
 
         .header {
             background-color: var(--card-bg) !important;
@@ -763,9 +770,12 @@
             const authors = window.SERVER_EXP_AUTHORS;
             if (authors && authors.length > 0) {
                 const authorEl = document.getElementById('exp-detail-author');
-                authorEl.innerHTML = authors.map(a =>
-                    `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${escapeHtmlExp(a.fullname)}</a>`
-                ).join('');
+                authorEl.innerHTML = authors.map(a => {
+                    const avatarHtml = a.avatar_url
+                        ? `<img src="/${a.avatar_url}" alt="${escapeHtmlExp(a.fullname)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<i class=\'ph ph-user\'></i>'">`
+                        : `<i class="ph ph-user"></i>`;
+                    return `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;">${avatarHtml} ${escapeHtmlExp(a.fullname)}</a>`;
+                }).join('');
 
                 // Render Author Profile Card
                 const profileCard = document.getElementById('exp-author-profile-card');

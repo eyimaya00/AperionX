@@ -4042,8 +4042,13 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
 
                 html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
 
-                // SSR Author Rendering
-                let authorHtml = authors.map(a => `<a href="/author.html?username=${a.username}" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
+                // SSR Author Rendering with Avatar
+                let authorHtml = authors.map(a => {
+                    const avatarHtml = a.avatar_url
+                        ? `<img src="/${a.avatar_url}" alt="${a.fullname}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">`
+                        : `<i class="ph ph-user"></i>`;
+                    return `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;">${avatarHtml} ${a.fullname}</a>`;
+                }).join('');
                 html = html.replace(/<span\s+id="exp-detail-author">.*?<\/span>/s, `<span id="exp-detail-author">${authorHtml}</span>`);
 
                 res.send(html);
