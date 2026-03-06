@@ -146,21 +146,26 @@ export class DriveIntegrationService {
             const existing = this.db.prepare('SELECT id, status FROM drive_files WHERE file_id = ?').get(fileId) as any;
             const inVideosTable = VideoModel.findByFilename(filename);
 
-            if (existing && inVideosTable) {
-                if (existing.status === 'downloaded' || existing.status === 'downloading') {
-                    // Zaten inik/iniyor ve DB'de kayıtlı
-                    return false;
-                }
+            // DURUM 1: Tamamen başarıyla indirilmiş, AI yapılmış ve DB'de var. Atlaya biliriz.
+            if (existing && existing.status === 'downloaded' && inVideosTable) {
+                return false;
             }
 
-            if (!existing) {
+            // DURUM 2: Kayıt var ama eksik (failed kalmış, veya videos tablosuna girmemiş)
+            // Bu durumda status'u 'downloading' yapıp baştan başlayacağız.
+            if (existing) {
+                logger.info(`Drive dosyası yeniden deneniyor (eski durum: ${existing.status}): ${filename}`);
+                this.db.prepare(
+                    'UPDATE drive_files SET status = "downloading" WHERE file_id = ?'
+                ).run(fileId);
+            } else {
                 // Veritabanına yeni kayıt aç
                 this.db.prepare(
                     'INSERT INTO drive_files (file_id, filename, status) VALUES (?, ?, ?)'
                 ).run(fileId, filename, 'downloading');
             }
 
-            logger.info(`Drive'dan yeni dosya indiriliyor: ${filename} (${fileId})`);
+            logger.info(`Drive'dan dosya indiriliyor: ${filename} (${fileId})`);
 
             // Dosyayı indir
             const destPath = path.join(config.videosDir, filename);
