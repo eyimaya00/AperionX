@@ -165,23 +165,18 @@ export class VideoController {
             logger.info('Manuel Drive senkronizasyonu tetiklendi...');
             const driveService = new DriveIntegrationService();
 
-            // 1. Drive'dan yeni videoları indir ve AI analizi yap
+            // Drive'dan yeni videoları indir, AI analizi yap ve doğrudan DB'ye ekle.
+            // ÖNEMLİ: scanVideosDirectory() burada ÇAĞRILMAMALI.
+            // Çünkü scanner, videos/ klasöründeki TÜM .mp4 dosyalarını bulup DB'ye ekliyor.
+            // Bu da Drive'dan silinen ama diskten henüz silinmemiş eski dosyaların
+            // tekrar tekrar eklenmesine yol açıyordu.
+            // Drive sync zaten kendi içinde: indir → AI analiz → DB'ye ekle yapıyor.
             const syncResult = await driveService.syncVideos();
-
-            // 2. Ayrıca manual yüklemeler için klasörü tara
-            // scannerService burada sadece manual atılan (Drive'da kaydı olmayan) yeni dosyaları bulur.
-            const scanResult = scanVideosDirectory();
-
-            const totalAdded = syncResult.added + scanResult.added;
 
             res.json({
                 success: true,
-                message: `Drive senkronizasyonu tamamlandı. ${totalAdded} yeni video eklendi, ${syncResult.deleted} silinmiş dosya temizlendi.`,
-                data: {
-                    drive: syncResult,
-                    local: scanResult,
-                    totalAdded
-                },
+                message: `Drive senkronizasyonu tamamlandı. ${syncResult.added} yeni video eklendi, ${syncResult.deleted} eski dosya temizlendi.`,
+                data: syncResult,
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Drive senkronizasyon hatası:', error);

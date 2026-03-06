@@ -82,6 +82,21 @@ export class DriveIntegrationService {
                 logger.error('Drive reconciliation hatası:', reconError.message);
             }
 
+            // 3. DB Cleanup: Veritabanında kayıtlı ama dosyası disk'te olmayan videoları sil
+            try {
+                const allVideos = VideoModel.findAll({ limit: 9999 }).items;
+                for (const video of allVideos) {
+                    const videoPath = path.join(config.videosDir, video.filename);
+                    if (!fs.existsSync(videoPath)) {
+                        logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
+                        VideoModel.delete(video.id);
+                        stats.deleted++;
+                    }
+                }
+            } catch (dbCleanupError: any) {
+                logger.error('DB cleanup hatası:', dbCleanupError.message);
+            }
+
             if (files.length === 0) {
                 logger.debug('Drive klasöründe indirilecek yeni video yok.');
                 return stats;
