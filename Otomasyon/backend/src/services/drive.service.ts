@@ -118,15 +118,20 @@ export class DriveIntegrationService {
                 return stats;
             }
 
-            // 3. Dosyaları işle
+            // 4. Dosyaları işle
             for (const file of files) {
                 if (file.id && file.name) {
+                    logger.info(`Dosya işleniyor: ${file.name} (${file.id})`);
                     const isNew = await this.processDriveFile(file.id, file.name);
                     if (isNew) stats.added++;
+                } else {
+                    logger.warn(`Dosya atlandı: id=${file.id}, name=${file.name}`);
                 }
             }
         } catch (error: any) {
-            logger.error('Drive dosyaları listelenirken hata:', error.message);
+            const errMsg = error?.message || error?.code || String(error);
+            logger.error(`Drive dosyaları listelenirken hata: ${errMsg}`);
+            if (error?.stack) logger.error(`Stack: ${error.stack}`);
         }
 
         return stats;
@@ -163,7 +168,7 @@ export class DriveIntegrationService {
 
             // Başarılı ise durumu güncelle
             this.db.prepare(
-                'UPDATE drive_files SET status = ?, updated_at = datetime("now") WHERE file_id = ?'
+                'UPDATE drive_files SET status = ? WHERE file_id = ?'
             ).run('downloaded', fileId);
 
             logger.info(`✅ Drive dosyası başarıyla indirildi: ${filename}`);
@@ -219,9 +224,13 @@ export class DriveIntegrationService {
             if (error?.stack) logger.error(`Stack: ${error.stack}`);
 
             // Hata aldıysak durumu güncelle
-            this.db.prepare(
-                'UPDATE drive_files SET status = ?, updated_at = datetime("now") WHERE file_id = ?'
-            ).run('failed', fileId);
+            try {
+                this.db.prepare(
+                    'UPDATE drive_files SET status = ? WHERE file_id = ?'
+                ).run('failed', fileId);
+            } catch (updateError: any) {
+                logger.error(`Durum güncellenirken hata: ${updateError.message}`);
+            }
 
             return false;
         }
