@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { getDatabase } from '../database';
 import { VideoModel, LogModel } from '../models';
 import { analyzeVideoWithGemini } from './ai.service';
+import { getNextScheduleSlot } from '../utils/date-utils';
 
 /**
  * Google Drive Entegrasyon Servisi
@@ -186,9 +187,13 @@ export class DriveIntegrationService {
                 logger.info(`AI videoyu izliyor ve analiz ediyor (${filename})...`);
                 const aiMetadata = await analyzeVideoWithGemini(destPath);
 
+                const baseDescription = aiMetadata.description || '';
+                const socialText = '\n\nBizi sosyal medyadan takip etmeyi ve sitemizi ziyaret etmeyi unutmayın! 👇🔗 Website: www.aperionx.com📸 Instagram: @aperionx';
+                const finalDescription = baseDescription + socialText;
+
                 const txtContent = [
                     `title: ${aiMetadata.title || baseName}`,
-                    `description: ${aiMetadata.description}`,
+                    `description: ${finalDescription.replace(/\n/g, '\\n')}`,
                     `tags: ${aiMetadata.tags && aiMetadata.tags.length > 0 ? aiMetadata.tags.join(', ') : 'shorts, video, viral'}`,
                 ].join('\n');
 
@@ -198,8 +203,9 @@ export class DriveIntegrationService {
                 const videoData = {
                     filename,
                     title: aiMetadata.title || baseName,
-                    description: aiMetadata.description || '',
+                    description: finalDescription,
                     tags: aiMetadata.tags || [],
+                    scheduled_date: getNextScheduleSlot(),
                 };
 
                 // Eğer video zaten yoksa ekle, varsa güncelle
@@ -223,7 +229,7 @@ export class DriveIntegrationService {
                 try {
                     const existingVideo = VideoModel.findByFilename(filename);
                     if (!existingVideo) {
-                        const video = VideoModel.create({ filename, title: filename, tags: [] });
+                        const video = VideoModel.create({ filename, title: filename, tags: [], scheduled_date: getNextScheduleSlot() });
                         LogModel.create(video.id, `Drive'dan indirildi (Kayıt hatası atlandı: ${errMsg})`);
                     }
                 } catch (fallbackError: any) {
