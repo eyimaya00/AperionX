@@ -133,24 +133,28 @@ export async function analyzeVideoWithGemini(filePath: string): Promise<AIMetada
     }
 
     try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-            generationConfig: {
-                responseMimeType: "application/json",
-                // responseSchema defined in generateYouTubeMetadata can be reused or simplified
-                temperature: 0.7,
-            },
-        });
+        const modelsToTry = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
+        let lastError = null;
 
-        const videoBuffer = fs.readFileSync(filePath);
-        const videoData = {
-            inlineData: {
-                data: videoBuffer.toString('base64'),
-                mimeType: 'video/mp4',
-            },
-        };
+        for (const modelName of modelsToTry) {
+            try {
+                const model = genAI.getGenerativeModel({
+                    model: modelName,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        temperature: 0.7,
+                    },
+                });
 
-        const prompt = `
+                const videoBuffer = fs.readFileSync(filePath);
+                const videoData = {
+                    inlineData: {
+                        data: videoBuffer.toString('base64'),
+                        mimeType: 'video/mp4',
+                    },
+                };
+
+                const prompt = `
 Bu videoyu izle ve YouTube Shorts için en uygun, İZLENME VE ETKİLEŞİM ODAKLI (SEO Uyumlu) metadata bilgilerini (JSON formatında) üret. Sen profesyonel bir metin yazarı (copywriter) ve YouTube algoritma uzmanısın.
 Videonun içeriği nedir, ne anlatıyor, en dikkat çekici anları nelerdir analiz et.
         
@@ -170,15 +174,24 @@ KURALLAR:
 3. "tags": Videoyu en iyi yansıtan niş etiketler + "shorts, viral, trend" gibi geniş kitle etiketlerini harmanlayarak toplam 15 hashtag (# işareti olmadan dizi olarak).
 `;
 
-        logger.info(`AI videoyu izliyor ve analiz ediyor: ${path.basename(filePath)}...`);
+                logger.info(`AI videoyu izliyor ve analiz ediyor (${modelName}): ${path.basename(filePath)}...`);
 
-        const result = await model.generateContent([prompt, videoData]);
-        const responseText = result.response.text();
+                const result = await model.generateContent([prompt, videoData]);
+                const responseText = result.response.text();
 
-        const parsedResult = JSON.parse(responseText) as AIMetadataResult;
-        logger.info(`AI Video Analizi Başarılı: "${parsedResult.title}"`);
+                if (!responseText) throw new Error('Boş yanıt');
 
-        return parsedResult;
+                const parsedResult = JSON.parse(responseText) as AIMetadataResult;
+                logger.info(`AI Video Analizi Başarılı (${modelName}): "${parsedResult.title}"`);
+
+                return parsedResult;
+            } catch (err: any) {
+                lastError = err;
+                logger.warn(`AI Video Analiz (${modelName}) başarısız oldu: ${err.message}. Diğer model deneniyor...`);
+            }
+        }
+
+        throw lastError || new Error('Tüm modeller başarısız oldu.');
 
     } catch (error: any) {
         logger.error(`AI Video Analiz Hatası: ${error.message}`);
