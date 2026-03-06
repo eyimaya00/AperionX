@@ -214,14 +214,20 @@ export class DriveIntegrationService {
                     logger.info(`✅ Varolan videonun AI metadatası güncellendi: ${filename}`);
                 }
                 return true;
-            } catch (aiError: any) {
-                logger.error(`AI Video Analiz hatası: ${aiError.message}`);
+            } catch (dbOrAiError: any) {
+                const errMsg = dbOrAiError?.message || String(dbOrAiError);
+                logger.error(`AI Video Analiz veya DB Kayıt hatası: ${errMsg}`);
+                if (dbOrAiError?.stack) logger.error(`Stack: ${dbOrAiError.stack}`);
 
                 // Hata alsa bile videoyu veritabanına ekleyelim (en azından dosya adı ile)
-                const existingVideo = VideoModel.findByFilename(filename);
-                if (!existingVideo) {
-                    const video = VideoModel.create({ filename, title: filename });
-                    LogModel.create(video.id, `Drive'dan indirildi (AI analizi atlandı: ${aiError.message})`);
+                try {
+                    const existingVideo = VideoModel.findByFilename(filename);
+                    if (!existingVideo) {
+                        const video = VideoModel.create({ filename, title: filename, tags: [] });
+                        LogModel.create(video.id, `Drive'dan indirildi (Kayıt hatası atlandı: ${errMsg})`);
+                    }
+                } catch (fallbackError: any) {
+                    logger.error(`Fallback DB kayıt hatası: ${fallbackError.message}`);
                 }
                 return true;
             }
