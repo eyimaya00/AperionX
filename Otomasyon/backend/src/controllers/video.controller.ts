@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { VideoModel, LogModel } from '../models';
 import { ApiResponse, CreateVideoDTO, UpdateVideoDTO, PaginationQuery } from '../models/types';
 import { logger } from '../utils/logger';
+import { config } from '../config';
 import { scanVideosDirectory } from '../services/scanner.service';
 import { DriveIntegrationService } from '../services/drive.service';
 
@@ -141,27 +142,82 @@ export class VideoController {
 
     /**
      * POST /api/videos/scan — videos/ klasörünü tara
-     * Önce Drive cleanup yapılır (orphan dosyalar temizlenir),
-     * sonra kalan dosyalar taranır.
+     * 1. Drive'daki dosyaları listeler
+     * 2. videos/ klasöründeki Drive'da OLMAYAN dosyaları siler
+     * 3. DB'deki dosyası olmayan kayıtları siler
+     * 4. Drive'dan yeni dosyaları indirir ve AI ile analiz eder
      */
     static async scan(_req: Request, res: Response): Promise<void> {
         try {
-            // Önce Drive senkronizasyonu çalıştır (cleanup + yeni dosya indirme)
-            // Bu, videos/ klasöründeki sahipsiz eski dosyaları temizler
-            const driveService = new DriveIntegrationService();
-            const driveResult = await driveService.syncVideos();
+            logger.info('=== TARAMA BAŞLADI ===');
+            const fs = require('fs');
+            const path = require('path');
 
-            // Sonra kalan dosyaları tara (manuel yüklemeler için)
-            const result = scanVideosDirectory();
+            let deleted = 0;
+            let added = 0;
+
+            // ---- ADIM 1: Drive'daki dosya isimlerini al ----
+            const driveService = new DriveIntegrationService();
+            const driveFilenames = new Set<string>();
+
+            try {
+                // Drive sync yaparak hem dosya listesini al hem yeni dosyaları indir
+                const syncResult = await driveService.syncVideos();
+                added = syncResult.added;
+                deleted = syncResult.deleted;
+                logger.info(`Drive sync sonucu: ${added} eklendi, ${deleted} silindi`);
+            } catch (driveError: any) {
+                logger.error('Drive sync hatası (tarama devam edecek):', driveError.message);
+            }
+
+            // ---- ADIM 2: videos/ klasöründeki TÜM dosyaları kontrol et ----
+            // DB'de (videos tablosunda) OLMAYAN dosyaları sil
+            const videosDir = path.resolve(config.videosDir);
+            if (fs.existsSync(videosDir)) {
+                const allFiles = fs.readdirSync(videosDir) as string[];
+
+                for (const file of allFiles) {
+                    if (!file.toLowerCase().endsWith('.mp4')) continue;
+
+                    // Bu dosya DB'de var mı?
+                    const inDb = VideoModel.findByFilename(file);
+                    if (!inDb) {
+                        // DB'de yoksa diskten sil (orphaned dosya)
+                        const filePath = path.join(videosDir, file);
+                        const txtPath = path.join(videosDir, `${path.parse(file).name}.txt`);
+                        try {
+                            fs.unlinkSync(filePath);
+                            logger.info(`Orphan video silindi: ${file}`);
+                            if (fs.existsSync(txtPath)) fs.unlinkSync(txtPath);
+                            deleted++;
+                        } catch (e: any) {
+                            logger.error(`Dosya silinemedi: ${file} - ${e.message}`);
+                        }
+                    }
+                }
+            }
+
+            // ---- ADIM 3: DB'de kayıtlı ama diskten silinmiş videoları temizle ----
+            try {
+                const allVideos = VideoModel.findAll({ limit: 9999 }).items;
+                for (const video of allVideos) {
+                    const videoPath = path.join(videosDir, video.filename);
+                    if (!fs.existsSync(videoPath)) {
+                        logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
+                        VideoModel.delete(video.id);
+                        deleted++;
+                    }
+                }
+            } catch (dbError: any) {
+                logger.error('DB cleanup hatası:', dbError.message);
+            }
+
+            logger.info(`=== TARAMA TAMAMLANDI: ${added} eklendi, ${deleted} temizlendi ===`);
 
             res.json({
                 success: true,
-                message: `${driveResult.added + result.added} video eklendi, ${driveResult.deleted} eski dosya temizlendi, ${result.skipped} atlandı`,
-                data: {
-                    ...result,
-                    added: driveResult.added + result.added,
-                    deleted: driveResult.deleted,
-                },
+                message: `Tarama tamamlandı. ${added} yeni video eklendi, ${deleted} eski dosya temizlendi.`,
+                data: { added, deleted, scanned: 0, skipped: 0, errors: 0, details: [] },
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Tarama hatası:', error);
