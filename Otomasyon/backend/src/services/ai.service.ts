@@ -80,7 +80,7 @@ ${rawTags.join(', ')}
             required: ["title", "description", "tags"],
         };
 
-        const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest"];
+        const modelsToTry = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
         let lastError = null;
 
         for (const modelName of modelsToTry) {

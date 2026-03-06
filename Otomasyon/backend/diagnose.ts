@@ -22,9 +22,9 @@ async function diagnose() {
 
     // Bu liste en yaygın çalışan modellerdir
     const models = [
+        "gemini-flash-latest",
+        "gemini-2.5-flash",
         "gemini-1.5-flash",
-        "gemini-1.5-flash-latest",
-        "gemini-1.5-pro",
         "gemini-pro"
     ];
 
