@@ -198,7 +198,7 @@ export class DriveIntegrationService {
 
             return false;
         } catch (error: any) {
-            logger.error(`Drive dosyası indirme hatası (${filename}):`, error.message);
+            logger.error(`Drive dosyası indirme hatası (${filename}):`, error.message || error.code || JSON.stringify(error).substring(0, 500));
 
             // Hata aldıysak durumu güncelle
             this.db.prepare(
@@ -259,14 +259,28 @@ export class DriveIntegrationService {
      * Drive'dan stream ile dosya indirme yardımcı fonksiyonu
      */
     private async downloadFile(fileId: string, destPath: string): Promise<void> {
-        if (!this.driveClient) return;
+        if (!this.driveClient) throw new Error('Drive client yok');
 
-        const res = await this.driveClient.files.get(
-            { fileId: fileId, alt: 'media' },
-            { responseType: 'stream' }
-        );
+        logger.info(`Download başlıyor: fileId=${fileId}, dest=${destPath}`);
 
-        const dest = fs.createWriteStream(destPath);
-        await pipeline(res.data as any, dest);
+        try {
+            const res = await this.driveClient.files.get(
+                { fileId: fileId, alt: 'media' },
+                { responseType: 'stream' }
+            );
+
+            const dest = fs.createWriteStream(destPath);
+            await pipeline(res.data as any, dest);
+
+            // Dosya boyutunu kontrol et
+            const stats = fs.statSync(destPath);
+            logger.info(`Download tamamlandı: ${destPath} (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
+        } catch (downloadError: any) {
+            // İndirme hatası olursa yarım kalan dosyayı sil
+            if (fs.existsSync(destPath)) {
+                try { fs.unlinkSync(destPath); } catch (e) { }
+            }
+            throw new Error(`Download hatası: ${downloadError.message || downloadError.code || JSON.stringify(downloadError).substring(0, 300)}`);
+        }
     }
 }

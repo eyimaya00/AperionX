@@ -244,7 +244,13 @@ export class VideoController {
             res.json({
                 success: true,
                 message: `Drive senkronizasyonu tamamlandı. ${syncResult.added} yeni video eklendi, ${syncResult.deleted} eski dosya temizlendi.`,
-                data: syncResult,
+                data: {
+                    scanned: syncResult.added + syncResult.deleted,
+                    added: syncResult.added,
+                    skipped: 0,
+                    errors: 0,
+                    details: [],
+                },
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Drive senkronizasyon hatası:', error);
