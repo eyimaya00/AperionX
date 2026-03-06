@@ -18,9 +18,14 @@ function createApp(): express.Application {
     // ===== Güvenlik & Temel Middleware =====
     app.use(helmet());
     app.use(cors({
-        origin: config.env === 'production'
-            ? ['http://localhost:3000']
-            : '*',
+        origin: [
+            'http://localhost:3000',
+            'http://localhost:3002',
+            'https://shorts.aperionx.com',
+            'https://www.aperionx.com',
+            'https://aperionx.com',
+            'https://shorts-api.aperionx.com',
+        ],
         credentials: true,
     }));
     app.use(express.json({ limit: '10mb' }));
