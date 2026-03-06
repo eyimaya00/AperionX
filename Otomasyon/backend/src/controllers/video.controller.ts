@@ -165,16 +165,22 @@ export class VideoController {
             logger.info('Manuel Drive senkronizasyonu tetiklendi...');
             const driveService = new DriveIntegrationService();
 
-            // 1. Drive'dan yeni videoları indir
-            await driveService.syncVideos();
+            // 1. Drive'dan yeni videoları indir ve AI analizi yap
+            const syncResult = await driveService.syncVideos();
 
-            // 2. İndirilen videoları tara ve veritabanına ekle
-            const result = scanVideosDirectory();
+            // 2. Ayrıca manual yüklemeler için klasörü tara
+            const scanResult = scanVideosDirectory();
+
+            const totalAdded = syncResult.added + scanResult.added;
 
             res.json({
                 success: true,
-                message: `Drive senkronizasyonu tamamlandı. ${result.added} yeni video kuyruğa eklendi.`,
-                data: result,
+                message: `Drive senkronizasyonu tamamlandı. ${totalAdded} yeni video eklendi, ${syncResult.deleted} silinmiş dosya temizlendi.`,
+                data: {
+                    drive: syncResult,
+                    local: scanResult,
+                    totalAdded
+                },
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Drive senkronizasyon hatası:', error);

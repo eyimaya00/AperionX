@@ -5,6 +5,8 @@ import { pipeline } from 'stream/promises';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import { getDatabase } from '../database';
+import { VideoModel, LogModel } from '../models';
+import { analyzeVideoWithGemini } from './ai.service';
 
 /**
  * Google Drive Entegrasyon Servisi
@@ -37,12 +39,13 @@ export class DriveIntegrationService {
     /**
      * Drive klasörünü kontrol et ve yeni videoları indir
      */
-    async syncVideos(): Promise<void> {
+    async syncVideos(): Promise<{ added: number, deleted: number }> {
         if (!this.driveClient || !config.drive.folderId || !config.drive.enabled) {
-            return; // Devre dışıysa veya ayarlanmamışsa çık
+            return { added: 0, deleted: 0 };
         }
 
         logger.info(`Google Drive senaryosu başlıyor. Klasör ID: ${config.drive.folderId}`);
+        const stats = { added: 0, deleted: 0 };
 
         try {
             // Klasör içindeki .mp4 ve .mov dosyalarını listele
@@ -53,27 +56,57 @@ export class DriveIntegrationService {
             });
 
             const files = res.data.files;
-            if (!files || files.length === 0) {
+            if (!files) {
                 logger.debug('Drive klasöründe yeni video bulunamadı.');
-                return;
+                return stats;
             }
 
             logger.info(`Drive klasöründe ${files.length} adet video dosyası bulundu.`);
 
+            const driveFileIds = new Set(files.map(f => f.id).filter((id): id is string => !!id));
+
+            // Reconciliation: Drive'da olmayan yerel dosyaları temizle
+            try {
+                const localDriveFiles = this.db.prepare(
+                    'SELECT file_id, filename FROM drive_files WHERE status = ?'
+                ).all('downloaded') as { file_id: string, filename: string }[];
+
+                for (const local of localDriveFiles) {
+                    if (!driveFileIds.has(local.file_id)) {
+                        logger.info(`Drive'dan silinmiş dosya tespit edildi, yerelden de siliniyor: ${local.filename}`);
+
+                        // Veritabanından ve diskten sil (VideoModel.delete bunu hallediyor)
+                        const video = VideoModel.findByFilename(local.filename);
+                        if (video) {
+                            VideoModel.delete(video.id);
+                        }
+
+                        // Drive takip tablosundan sil
+                        this.db.prepare('DELETE FROM drive_files WHERE file_id = ?').run(local.file_id);
+                        stats.deleted++;
+                    }
+                }
+            } catch (reconError: any) {
+                logger.error('Drive reconciliation hatası:', reconError.message);
+            }
+
             for (const file of files) {
                 if (file.id && file.name) {
-                    await this.processDriveFile(file.id, file.name);
+                    const isNew = await this.processDriveFile(file.id, file.name);
+                    if (isNew) stats.added++;
                 }
             }
         } catch (error: any) {
             logger.error('Drive dosyaları listelenirken hata:', error.message);
         }
+
+        return stats;
     }
 
     /**
      * Tek bir dosyayı işle: DB'de var mı kontrol et, yoksa indir.
      */
-    private async processDriveFile(fileId: string, filename: string): Promise<void> {
+    private async processDriveFile(fileId: string, filename: string): Promise<boolean> {
         try {
             // Bu dosya daha önce işlenmiş mi?
             const existing = this.db.prepare('SELECT id, status FROM drive_files WHERE file_id = ?').get(fileId) as any;
@@ -81,7 +114,7 @@ export class DriveIntegrationService {
             if (existing) {
                 if (existing.status === 'downloaded' || existing.status === 'downloading') {
                     // Zaten inik veya iniyor
-                    return;
+                    return false;
                 }
             } else {
                 // Veritabanına yeni kayıt aç
@@ -109,7 +142,6 @@ export class DriveIntegrationService {
                 const txtPath = path.join(config.videosDir, `${baseName}.txt`);
 
                 logger.info(`AI videoyu izliyor ve analiz ediyor (${filename})...`);
-                const { analyzeVideoWithGemini } = require('./ai.service');
                 const aiMetadata = await analyzeVideoWithGemini(destPath);
 
                 const txtContent = [
@@ -120,13 +152,36 @@ export class DriveIntegrationService {
 
                 fs.writeFileSync(txtPath, txtContent, 'utf-8');
                 logger.info(`✅ AI Video Analizi Tamamlandı: ${txtPath}`);
+
+                // Veritabanına doğrudan ekle (ScannerService'i beklemeden)
+                const videoData = {
+                    filename,
+                    title: aiMetadata.title || baseName,
+                    description: aiMetadata.description || '',
+                    tags: aiMetadata.tags || [],
+                };
+
+                // Eğer video zaten yoksa ekle (Duplicate kontrol)
+                const existingVideo = VideoModel.findByFilename(filename);
+                if (!existingVideo) {
+                    const video = VideoModel.create(videoData);
+                    LogModel.create(video.id, `Drive'dan indirildi ve AI ile analiz edildi. (Metadata: ${txtPath})`);
+                    logger.info(`✅ Video veritabanına eklendi: ${filename}`);
+                    return true;
+                }
             } catch (aiError: any) {
                 logger.error(`AI Video Analiz hatası: ${aiError.message}`);
+
+                // Hata alsa bile videoyu veritabanına ekleyelim (en azından boş metadata ile)
+                const existingVideo = VideoModel.findByFilename(filename);
+                if (!existingVideo) {
+                    const video = VideoModel.create({ filename, title: filename });
+                    LogModel.create(video.id, `Drive'dan indirildi (AI hatası: ${aiError.message})`);
+                    return true;
+                }
             }
 
-            // Not: İndirilen dosya videosDir dizinine kondu. 
-            // ScannerService bir sonraki taramasında bu dosyayı görüp otomatik olarak kuyruğa ekleyecek.
-
+            return false;
         } catch (error: any) {
             logger.error(`Drive dosyası indirme hatası (${filename}):`, error.message);
 
@@ -134,6 +189,8 @@ export class DriveIntegrationService {
             this.db.prepare(
                 'UPDATE drive_files SET status = ?, updated_at = datetime("now") WHERE file_id = ?'
             ).run('failed', fileId);
+
+            return false;
         }
     }
 

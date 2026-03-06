@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { getDatabase } from '../database';
 import {
     Video,
@@ -7,6 +9,7 @@ import {
     PaginatedResult,
 } from './types';
 import { logger } from '../utils/logger';
+import { config } from '../config';
 
 /**
  * Video Model — Veritabanı işlemleri
@@ -145,9 +148,31 @@ export class VideoModel {
      */
     static delete(id: number): boolean {
         const db = getDatabase();
+        const video = this.findById(id);
+
+        if (!video) return false;
+
         const result = db.prepare('DELETE FROM videos WHERE id = ?').run(id);
         if (result.changes > 0) {
-            logger.info(`Video silindi: ID ${id}`);
+            logger.info(`Video veritabanından silindi: ID ${id}`);
+
+            // Dosyaları diskten sil
+            try {
+                const videoPath = path.join(config.videosDir, video.filename);
+                const txtPath = path.join(config.videosDir, `${path.parse(video.filename).name}.txt`);
+
+                if (fs.existsSync(videoPath)) {
+                    fs.unlinkSync(videoPath);
+                    logger.info(`Video dosyası diskten silindi: ${videoPath}`);
+                }
+                if (fs.existsSync(txtPath)) {
+                    fs.unlinkSync(txtPath);
+                    logger.info(`Metadata dosyası diskten silindi: ${txtPath}`);
+                }
+            } catch (err: any) {
+                logger.error(`Dosya silme hatası (ID: ${id}): ${err.message}`);
+            }
+
             return true;
         }
         return false;
