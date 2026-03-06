@@ -156,8 +156,8 @@ export class DriveIntegrationService {
             if (existing) {
                 logger.info(`Drive dosyası yeniden deneniyor (eski durum: ${existing.status}): ${filename}`);
                 this.db.prepare(
-                    'UPDATE drive_files SET status = "downloading" WHERE file_id = ?'
-                ).run(fileId);
+                    'UPDATE drive_files SET status = ? WHERE file_id = ?'
+                ).run('downloading', fileId);
             } else {
                 // Veritabanına yeni kayıt aç
                 this.db.prepare(
