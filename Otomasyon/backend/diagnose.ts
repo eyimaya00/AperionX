@@ -72,9 +72,9 @@ async function diagnose() {
         // SDK üzerinden model listesi çekmeyi deneyelim (SDK 0.24+ için)
         // Not: SDK sürümüne göre bu değişebilir, her zaman çalışmayabilir ama deneyelim.
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
-        console.log('   - Model Test Ediliyor (gemini-1.5-flash)...');
+        console.log('   - Model Test Ediliyor (gemini-1.5-flash-latest)...');
         const result = await model.generateContent('Test');
         console.log('   - ✅ AI Yanıtı:', result.response.text().trim());
     } catch (err: any) {
