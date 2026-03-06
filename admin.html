@@ -816,6 +816,9 @@
             <a href="#" class="menu-item" onclick="showSection('admin-experiments', this); loadAdminExperiments();">
                 <i class="ph ph-flask"></i> <span>Deney Yönetimi</span>
             </a>
+            <a href="#" class="menu-item" onclick="showSection('youtube-shorts-automation', this);">
+                <i class="ph ph-youtube-logo"></i> <span>Shorts Otomasyonu</span>
+            </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn">
@@ -830,6 +833,33 @@
             <button class="icon-btn mobile-menu-toggle" onclick="toggleSidebar()" title="Menü">
                 <i class="ph ph-list"></i>
             </button>
+        </div>
+
+        <!-- YouTube Shorts Automation Section -->
+        <div id="youtube-shorts-automation" class="section">
+            <div class="header-row">
+                <div>
+                    <h1 class="page-title">YouTube Shorts Otomasyonu</h1>
+                    <p class="section-subtitle">AperionX Shorts otomasyon projesi entegrasyon alanı.</p>
+                </div>
+            </div>
+
+            <div class="card" style="text-align: center; padding: 60px 20px;">
+                <i class="ph-duotone ph-youtube-logo" style="font-size: 64px; color: #ef4444; margin-bottom: 24px;"></i>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Otomasyon Paneli
+                    Entegrasyonu</h2>
+                <p style="color: #64748b; max-width: 600px; margin: 0 auto 30px auto; line-height: 1.6;">
+                    Bu alan, geliştirilmekte olan Next.js tabanlı YouTube Shorts otomasyon paneli veya klasörü için
+                    ayrılmıştır.
+                    Otomasyon klasörünü entegre ettikten sonra içerikler bu kısımda görüntülenebilir veya yeni sekmeye
+                    yönlendirilebilir.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <a href="http://localhost:3000" target="_blank" class="btn btn-primary" style="background:#ef4444;">
+                        <i class="ph ph-arrow-square-out"></i> Otomasyon Sunucusunu Aç
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Email Settings Section -->
