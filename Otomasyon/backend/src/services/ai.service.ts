@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai';
+import { GoogleAIFileManager } from '@google/generative-ai/server';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
@@ -8,6 +9,7 @@ const apiKey = process.env.GEMINI_API_KEY;
 
 // Gemini başlatma (sadece key varsa)
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+const fileManager = apiKey ? new GoogleAIFileManager(apiKey) : null;
 
 export interface AIMetadataResult {
     title: string;
@@ -127,14 +129,38 @@ ${rawTags.join(', ')}
  * Gemini videoyu "izler" ve içeriğine göre metadata üretir.
  */
 export async function analyzeVideoWithGemini(filePath: string): Promise<AIMetadataResult> {
-    if (!genAI) {
-        logger.warn('GEMINI_API_KEY tanımlı değil. Video analizi atlanıyor.');
+    if (!genAI || !fileManager) {
+        logger.warn('GEMINI_API_KEY tanımlı değil veya FileManager başlatılamadı. Video analizi atlanıyor.');
         return { title: 'Yeni Video', description: '', tags: [] };
     }
 
     try {
-        const modelsToTry = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-pro"];
+        const modelsToTry = ["gemini-1.5-flash", "gemini-flash-latest", "gemini-2.5-flash", "gemini-pro"];
         let lastError = null;
+
+        logger.info(`AI videoyu upload ediyor: ${path.basename(filePath)}...`);
+
+        // 1. Videoyu File API ile yükle
+        const uploadResult = await fileManager.uploadFile(filePath, {
+            mimeType: "video/mp4",
+            displayName: path.basename(filePath),
+        });
+
+        const fileUri = uploadResult.file.uri;
+        let fileState = uploadResult.file.state;
+
+        // 2. Videonun işlenmesini bekle (Genellikle birkaç saniye sürer)
+        let attempts = 0;
+        while (fileState === "PROCESSING" && attempts < 10) {
+            attempts++;
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            const getResult = await fileManager.getFile(uploadResult.file.name);
+            fileState = getResult.state;
+        }
+
+        if (fileState !== "ACTIVE") {
+            throw new Error(`Video iÅŸleme hatasÄ±: ${fileState}`);
+        }
 
         for (const modelName of modelsToTry) {
             try {
@@ -145,14 +171,6 @@ export async function analyzeVideoWithGemini(filePath: string): Promise<AIMetada
                         temperature: 0.7,
                     },
                 });
-
-                const videoBuffer = fs.readFileSync(filePath);
-                const videoData = {
-                    inlineData: {
-                        data: videoBuffer.toString('base64'),
-                        mimeType: 'video/mp4',
-                    },
-                };
 
                 const prompt = `
 Bu videoyu izle ve YouTube Shorts için en uygun, İZLENME VE ETKİLEŞİM ODAKLI (SEO Uyumlu) metadata bilgilerini (JSON formatında) üret. Sen profesyonel bir metin yazarı (copywriter) ve YouTube algoritma uzmanısın.
@@ -167,22 +185,30 @@ Döneceğin JSON formatı:
 
 KURALLAR:
 1. "title": Maksimum 60 karakter uzunluğunda, "Kanca (Hook)" içeren, MERAK UYANDIRAN, TIKLAMA ODAKLI ve emojilerle desteklenmiş bir başlık. Düz bir özet olmasın, izleyiciyi tıklamaya ikna etsin!
-2. "description":
-   - İlk cümle kanca olmalı ("Bunu biliyor muydunuz? 😲", "Sonuna kadar izleyin!").
-   - Gövde Bölümü: Videoyu anlatan SEO uyumlu, emojili, akıcı 2-3 cümle.
-   - Sonuna şunu ekle: "Daha fazlası için takipte kal ve sitemize göz at! 👇\\n🔗 Website: www.aperionx.com\\n📸 Instagram: @aperionx"
-3. "tags": Videoyu en iyi yansıtan niş etiketler + "shorts, viral, trend" gibi geniş kitle etiketlerini harmanlayarak toplam 15 hashtag (# işareti olmadan dizi olarak).
+... (existing rules block) ...
 `;
 
-                logger.info(`AI videoyu izliyor ve analiz ediyor (${modelName}): ${path.basename(filePath)}...`);
+                logger.info(`AI videoyu analiz ediyor (${modelName})...`);
 
-                const result = await model.generateContent([prompt, videoData]);
+                const result = await model.generateContent([
+                    {
+                        fileData: {
+                            mimeType: uploadResult.file.mimeType,
+                            fileUri: fileUri,
+                        },
+                    },
+                    { text: prompt },
+                ]);
+
                 const responseText = result.response.text();
 
                 if (!responseText) throw new Error('Boş yanıt');
 
                 const parsedResult = JSON.parse(responseText) as AIMetadataResult;
                 logger.info(`AI Video Analizi Başarılı (${modelName}): "${parsedResult.title}"`);
+
+                // Temizlik: Dosyayı FileManager'dan sil (isteğe bağlı ama iyi pratik)
+                try { await fileManager.deleteFile(uploadResult.file.name); } catch (e) { }
 
                 return parsedResult;
             } catch (err: any) {

@@ -90,6 +90,9 @@ export class DriveIntegrationService {
                 logger.error('Drive reconciliation hatası:', reconError.message);
             }
 
+            // Orphan cleanup: videos/ klasöründeki sahipsiz dosyaları sil
+            this.cleanupOrphanedLocalFiles(driveFileIds);
+
             for (const file of files) {
                 if (file.id && file.name) {
                     const isNew = await this.processDriveFile(file.id, file.name);
@@ -192,6 +195,52 @@ export class DriveIntegrationService {
 
             return false;
         }
+    }
+
+    /**
+     * videos/ klasöründe olup DB'de veya Drive'da izi olmayan dosyaları temizler.
+     */
+    private cleanupOrphanedLocalFiles(activeDriveFileIds: Set<string>): void {
+        try {
+            const files = fs.readdirSync(config.videosDir);
+            for (const file of files) {
+                if (!file.toLowerCase().endsWith('.mp4')) continue;
+
+                // 1. Bu dosya veritabanında (videos tablosu) var mı?
+                const inVideosTable = VideoModel.findByFilename(file);
+                if (inVideosTable) continue;
+
+                // 2. Bu dosya Drive takip tablosunda mı?
+                const inDriveTable = this.db.prepare('SELECT file_id FROM drive_files WHERE filename = ?').get(file) as { file_id: string } | undefined;
+
+                if (inDriveTable) {
+                    // Eğer takip tablosundaysa ama Drive'da artık yoksa (activeDriveFileIds'de yoksa) sil
+                    if (!activeDriveFileIds.has(inDriveTable.file_id)) {
+                        this.deleteLocalFile(file);
+                    }
+                } else {
+                    // Takip tablosunda bile yoksa doğrudan sil (orphaned)
+                    this.deleteLocalFile(file);
+                }
+            }
+        } catch (err: any) {
+            logger.error(`Orphan cleanup hatası: ${err.message}`);
+        }
+    }
+
+    private deleteLocalFile(filename: string): void {
+        try {
+            const videoPath = path.join(config.videosDir, filename);
+            const txtPath = path.join(config.videosDir, `${path.parse(filename).name}.txt`);
+
+            if (fs.existsSync(videoPath)) {
+                fs.unlinkSync(videoPath);
+                logger.info(`Orphaned video silindi: ${filename}`);
+            }
+            if (fs.existsSync(txtPath)) {
+                fs.unlinkSync(txtPath);
+            }
+        } catch (e) { }
     }
 
     /**
