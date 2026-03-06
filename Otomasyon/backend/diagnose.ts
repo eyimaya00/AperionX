@@ -72,11 +72,25 @@ async function diagnose() {
         // SDK üzerinden model listesi çekmeyi deneyelim (SDK 0.24+ için)
         // Not: SDK sürümüne göre bu değişebilir, her zaman çalışmayabilir ama deneyelim.
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
+        let success = false;
 
-        console.log('   - Model Test Ediliyor (gemini-1.5-flash-latest)...');
-        const result = await model.generateContent('Test');
-        console.log('   - ✅ AI Yanıtı:', result.response.text().trim());
+        for (const m of models) {
+            try {
+                process.stdout.write(`   - Model Deneniyor (${m})... `);
+                const model = genAI.getGenerativeModel({ model: m });
+                const result = await model.generateContent('Hi');
+                console.log(`✅ Başarılı! Yanıt: ${result.response.text().trim()}`);
+                success = true;
+                break;
+            } catch (e: any) {
+                console.log(`❌ Hata: ${e.message.split('\n')[0]}`);
+            }
+        }
+
+        if (!success) {
+            console.error('\n   - 🛑 Hiçbir model çalışmadı. Lütfen API anahtarınızı ve Google AI Studio projenizi kontrol edin.');
+        }
     } catch (err: any) {
         console.error(`   - ❌ AI Hatası: ${err.message}`);
         console.log('     Denenecek Alternatif Modeller: gemini-pro, gemini-1.5-flash-latest');

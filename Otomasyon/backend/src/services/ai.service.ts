@@ -80,33 +80,36 @@ ${rawTags.join(', ')}
             required: ["title", "description", "tags"],
         };
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest",
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: schema,
-                temperature: 0.7,
-            },
-        });
+        const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest"];
+        let lastError = null;
 
-        logger.info('Google Gemini ile metadata optimize ediliyor...');
+        for (const modelName of modelsToTry) {
+            try {
+                const model = genAI.getGenerativeModel({
+                    model: modelName,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: schema,
+                        temperature: 0.7,
+                    },
+                });
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+                logger.info(`Google Gemini (${modelName}) ile metadata optimize ediliyor...`);
+                const result = await model.generateContent(prompt);
+                const responseText = result.response.text();
 
-        if (!responseText) {
-            throw new Error('Gemini boş yanıt döndürdü.');
+                if (!responseText) throw new Error('Boş yanıt');
+
+                const parsedResult = JSON.parse(responseText) as AIMetadataResult;
+                logger.info(`AI Metadata başarıyla oluşturuldu (${modelName}): "${parsedResult.title}"`);
+                return parsedResult;
+            } catch (err: any) {
+                lastError = err;
+                logger.warn(`Gemini (${modelName}) başarısız oldu: ${err.message}. Diğer model deneniyor...`);
+            }
         }
 
-        const parsedResult = JSON.parse(responseText) as AIMetadataResult;
-
-        // Güvenlik kontrolleri
-        if (!parsedResult.title || !parsedResult.description || !Array.isArray(parsedResult.tags)) {
-            throw new Error('Gemini dönüş formatı hatalı.');
-        }
-
-        logger.info(`AI Metadata başarıyla oluşturuldu: "${parsedResult.title}"`);
-        return parsedResult;
+        throw lastError || new Error('Tüm modeller başarısız oldu.');
 
     } catch (error: any) {
         logger.error(`AI Metadata oluşturma hatası: ${error.message}`);
