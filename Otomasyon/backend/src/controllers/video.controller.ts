@@ -141,15 +141,27 @@ export class VideoController {
 
     /**
      * POST /api/videos/scan — videos/ klasörünü tara
+     * Önce Drive cleanup yapılır (orphan dosyalar temizlenir),
+     * sonra kalan dosyalar taranır.
      */
-    static scan(_req: Request, res: Response): void {
+    static async scan(_req: Request, res: Response): Promise<void> {
         try {
+            // Önce Drive senkronizasyonu çalıştır (cleanup + yeni dosya indirme)
+            // Bu, videos/ klasöründeki sahipsiz eski dosyaları temizler
+            const driveService = new DriveIntegrationService();
+            const driveResult = await driveService.syncVideos();
+
+            // Sonra kalan dosyaları tara (manuel yüklemeler için)
             const result = scanVideosDirectory();
 
             res.json({
                 success: true,
-                message: `${result.added} video eklendi, ${result.skipped} atlandı, ${result.errors} hata`,
-                data: result,
+                message: `${driveResult.added + result.added} video eklendi, ${driveResult.deleted} eski dosya temizlendi, ${result.skipped} atlandı`,
+                data: {
+                    ...result,
+                    added: driveResult.added + result.added,
+                    deleted: driveResult.deleted,
+                },
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Tarama hatası:', error);
