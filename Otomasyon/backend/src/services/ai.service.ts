@@ -38,12 +38,18 @@ export async function generateYouTubeMetadata(
     try {
         const prompt = `
 Aşağıda bir Instagram/TikTok videosuna ait orijinal açıklama ve etiketler bulunuyor.
-Lütfen bu bilgilerden yola çıkarak bir YouTube Shorts videosu için optimize edilmiş, dikkat çekici metadata oluştur.
+Lütfen bu bilgilerden yola çıkarak bir YouTube Shorts videosu için İZLENME VE ETKİLEŞİM ODAKLI (SEO Uyumlu) metadata oluştur. Sen profesyonel bir metin yazarı (copywriter) ve YouTube algoritma uzmanısın.
 
 KURALLAR:
-1. "title": Maksimum 60 karakter uzunluğunda, merak uyandıran, çarpıcı ve emojili kısa bir başlık.
-2. "description": Orijinal bağlamı detaylandırarak anlatan ve dikkat çekmek için bol emoji kullanan, yaklaşık 3-5 cümlelik akıcı, bilgilendirici, SEO dostu bir açıklama metni. **ÖNEMLİ:** Açıklamanın EN SONUNA izleyiciyi etkileşime davet edecek şekilde mutlaka şu metni tam olarak ekle: "Bizi sosyal medyadan takip etmeyi ve sitemizi ziyaret etmeyi unutmayın! 👇\n🔗 Website: www.aperionx.com\n📸 Instagram: @aperionx". Alt alta satırlarda olmalarına dikkat et.
-3. "tags": İlgili algoritmaları tetikleyecek, arama hacmi yüksek ve orijinal bağlamla uyumlu maksimum 15 adet anahtar kelime/hashtag (her biri kamerasız ve boşluksuz tek kelime olacak, '#' işareti OLMADAN, virgülle ayrılmış değil sade dizi formatında).
+1. "title": Maksimum 60 karakter uzunluğunda, "Kanca (Hook)" içeren, MERAK UYANDIRAN, TIKLAMA ODAKLI ve emojilerle desteklenmiş bir başlık ("Bunu Kimse Bilmiyor! 😱", "X Yapmayı Bırakın 🛑", "Hayatınızı Kurtaracak İpucu 🤯" tarzında). Sadece bilgi vermekten kaçın, duygulara hitap et.
+2. "description": 
+   - İlk cümle: İzleyiciyi videonun sonuna kadar tutacak güçlü bir kanca cümlesi ("Eğer X yapıyorsanız, bu videoyu sonuna kadar izleyin!").
+   - Gövde Bölümü: Orijinal bağlamı detaylandırarak anlatan ve dikkat çekmek için bol emoji kullanan, akıcı, bilgilendirici, SEO dostu, anahtar kelime zengini 2-3 cümlelik bir paragraf. Videonun ana sürprizini bozma.
+   - **ÖNEMLİ:** Açıklamanın EN SONUNA izleyiciyi etkileşime davet edecek şekilde mutlaka şu metni tam olarak ekle (alt alta satırlarda olmalarına dikkat et):
+"Daha fazlası için takipte kal ve sitemize göz at! 👇
+🔗 Website: www.aperionx.com
+📸 Instagram: @aperionx"
+3. "tags": İlgili algoritmaları tetikleyecek, arama hacmi en yüksek 15 adet anahtar kelime/hashtag. (Videoya özel niş etiketlerin yanı sıra kitleyi genişletecek "shorts, viral, trend, fyp" gibi geniş etiketleri karma olarak kullan. Her biri kamerasız ve boşluksuz tek kelime olacak, '#' işareti OLMADAN, virgülle ayrılmış değil sade dizi formatında).
 
 ORİJİNAL AÇIKLAMA:
 ${rawDescription}
@@ -142,7 +148,7 @@ export async function analyzeVideoWithGemini(filePath: string): Promise<AIMetada
         };
 
         const prompt = `
-Bu videoyu izle ve YouTube Shorts için en uygun metadata bilgilerini (JSON formatında) üret.
+Bu videoyu izle ve YouTube Shorts için en uygun, İZLENME VE ETKİLEŞİM ODAKLI (SEO Uyumlu) metadata bilgilerini (JSON formatında) üret. Sen profesyonel bir metin yazarı (copywriter) ve YouTube algoritma uzmanısın.
 Videonun içeriği nedir, ne anlatıyor, en dikkat çekici anları nelerdir analiz et.
         
 Döneceğin JSON formatı:
@@ -153,9 +159,12 @@ Döneceğin JSON formatı:
 }
 
 KURALLAR:
-1. Title: Merak uyandırıcı, emojili, max 60 karakter.
-2. Description: SEO uyumlu, emojili, akıcı. Sonuna şunu ekle: "Bizi takip etmeyi unutmayın! Website: www.aperionx.com".
-3. Tags: En uygun 15 hashtag (# işareti olmadan).
+1. "title": Maksimum 60 karakter uzunluğunda, "Kanca (Hook)" içeren, MERAK UYANDIRAN, TIKLAMA ODAKLI ve emojilerle desteklenmiş bir başlık. Düz bir özet olmasın, izleyiciyi tıklamaya ikna etsin!
+2. "description":
+   - İlk cümle kanca olmalı ("Bunu biliyor muydunuz? 😲", "Sonuna kadar izleyin!").
+   - Gövde Bölümü: Videoyu anlatan SEO uyumlu, emojili, akıcı 2-3 cümle.
+   - Sonuna şunu ekle: "Daha fazlası için takipte kal ve sitemize göz at! 👇\\n🔗 Website: www.aperionx.com\\n📸 Instagram: @aperionx"
+3. "tags": Videoyu en iyi yansıtan niş etiketler + "shorts, viral, trend" gibi geniş kitle etiketlerini harmanlayarak toplam 15 hashtag (# işareti olmadan dizi olarak).
 `;
 
         logger.info(`AI videoyu izliyor ve analiz ediyor: ${path.basename(filePath)}...`);

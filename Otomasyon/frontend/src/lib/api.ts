@@ -54,6 +54,9 @@ export const api = {
 
     getStats: () => request('/videos/stats'),
 
+    syncDrive: () =>
+        request('/videos/sync-drive', { method: 'POST' }),
+
     // Logs
     getLogs: (limit = 50) => request(`/logs?limit=${limit}`),
     getVideoLogs: (videoId: number) => request(`/logs/video/${videoId}`),

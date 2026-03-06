@@ -2,7 +2,7 @@ import { getDatabase } from '../database';
 
 /**
  * Bir sonraki müsait yayın slotunu (tarih/saat) hesaplar.
- * Kural: En son planlanmış videonun üzerine 2 gün ekle, saat 20:30 yap.
+ * Kural: En son planlanmış videonun üzerine 2 gün ekle, saat 20:15 yap.
  */
 export function getNextScheduleSlot(): string {
     const db = getDatabase();
@@ -26,8 +26,8 @@ export function getNextScheduleSlot(): string {
         nextDate.setDate(nextDate.getDate() + 1);
     }
 
-    // Saati 20:30'a Fixle (Yerel saat olarak ayarla)
-    nextDate.setHours(20, 30, 0, 0);
+    // Saati 20:15'e Fixle (Yerel saat olarak ayarla)
+    nextDate.setHours(20, 15, 0, 0);
 
     return nextDate.toISOString();
 }

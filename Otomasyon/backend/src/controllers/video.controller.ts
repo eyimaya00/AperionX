@@ -3,6 +3,7 @@ import { VideoModel, LogModel } from '../models';
 import { ApiResponse, CreateVideoDTO, UpdateVideoDTO, PaginationQuery } from '../models/types';
 import { logger } from '../utils/logger';
 import { scanVideosDirectory } from '../services/scanner.service';
+import { DriveIntegrationService } from '../services/drive.service';
 
 /**
  * Video Controller — REST API iş mantığı
@@ -152,6 +153,31 @@ export class VideoController {
             } as ApiResponse);
         } catch (error: any) {
             logger.error('Tarama hatası:', error);
+            res.status(500).json({ success: false, error: error.message } as ApiResponse);
+        }
+    }
+
+    /**
+     * POST /api/videos/sync-drive — Google Drive'dan videoları çek ve tara
+     */
+    static async syncDrive(_req: Request, res: Response): Promise<void> {
+        try {
+            logger.info('Manuel Drive senkronizasyonu tetiklendi...');
+            const driveService = new DriveIntegrationService();
+
+            // 1. Drive'dan yeni videoları indir
+            await driveService.syncVideos();
+
+            // 2. İndirilen videoları tara ve veritabanına ekle
+            const result = scanVideosDirectory();
+
+            res.json({
+                success: true,
+                message: `Drive senkronizasyonu tamamlandı. ${result.added} yeni video kuyruğa eklendi.`,
+                data: result,
+            } as ApiResponse);
+        } catch (error: any) {
+            logger.error('Drive senkronizasyon hatası:', error);
             res.status(500).json({ success: false, error: error.message } as ApiResponse);
         }
     }

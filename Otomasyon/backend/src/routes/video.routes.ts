@@ -6,6 +6,7 @@ const router = Router();
 // İstatistikler ve tarama (öne alınmalı, :id ile çakışmasın)
 router.get('/stats', VideoController.getStats);
 router.post('/scan', VideoController.scan);
+router.post('/sync-drive', VideoController.syncDrive);
 
 // CRUD
 router.get('/', VideoController.getAll);

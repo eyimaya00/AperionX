@@ -22,8 +22,8 @@ export function startScheduler() {
     const uploadService = new YouTubeUploadService(authService);
     const driveService = new DriveIntegrationService();
 
-    // Google Drive Sync Job - Her 4 saatte bir çalışır
-    cron.schedule('0 */4 * * *', async () => {
+    // Google Drive Sync Job - Her 1 saatte bir çalışır
+    cron.schedule('0 * * * *', async () => {
         if (!config.drive.enabled) return;
 
         if (isSyncingDrive) {

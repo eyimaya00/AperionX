@@ -36,6 +36,21 @@ export default function ScanPage() {
         }
     }
 
+    async function handleSyncDrive() {
+        setScanning(true);
+        setResult(null);
+        try {
+            const res = await api.syncDrive();
+            if (res.success) {
+                setResult(res.data);
+            }
+        } catch (err) {
+            console.error('Drive senkronizasyon hatası:', err);
+        } finally {
+            setScanning(false);
+        }
+    }
+
     const statusColors: Record<string, { bg: string; color: string; icon: string }> = {
         added: { bg: 'var(--success-soft)', color: 'var(--success)', icon: '✅' },
         skipped: { bg: 'var(--warning-soft)', color: 'var(--warning)', icon: '⏭️' },
@@ -75,7 +90,32 @@ export default function ScanPage() {
                             Taranıyor...
                         </>
                     ) : (
-                        '🔍 Taramayı Başlat'
+                        '🔍 Yerel Taramayı Başlat'
+                    )}
+                </button>
+            </div>
+
+            <div className="card" style={{ textAlign: 'center', marginBottom: '24px', border: '1px solid var(--primary-soft)' }}>
+                <div style={{ marginBottom: '16px' }}>
+                    <span style={{ fontSize: '3rem' }}>☁️</span>
+                </div>
+                <h3 style={{ marginBottom: '8px' }}>Google Drive Taraması</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '20px', maxWidth: '480px', margin: '0 auto 20px' }}>
+                    Google Drive klasörünüzü kontrol eder, yeni videoları indirir, <b>AI ile analiz eder</b> (başlık, açıklama üretir) ve kuyruğa ekler.
+                </p>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleSyncDrive}
+                    disabled={scanning}
+                    style={{ fontSize: '1rem', padding: '12px 32px', background: 'var(--primary)', borderColor: 'var(--primary)' }}
+                >
+                    {scanning ? (
+                        <>
+                            <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }} />
+                            Eşitleniyor...
+                        </>
+                    ) : (
+                        '🔄 Drive Taramasını Başlat'
                     )}
                 </button>
             </div>
