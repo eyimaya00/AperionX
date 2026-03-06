@@ -202,14 +202,18 @@ export class DriveIntegrationService {
                     tags: aiMetadata.tags || [],
                 };
 
-                // Eğer video zaten yoksa ekle (Duplicate kontrol)
+                // Eğer video zaten yoksa ekle, varsa güncelle
                 const existingVideo = VideoModel.findByFilename(filename);
                 if (!existingVideo) {
                     const video = VideoModel.create(videoData);
                     LogModel.create(video.id, `Drive'dan indirildi ve AI ile analiz edildi. (Metadata: ${txtPath})`);
                     logger.info(`✅ Video veritabanına eklendi: ${filename}`);
-                    return true;
+                } else {
+                    VideoModel.update(existingVideo.id, videoData);
+                    LogModel.create(existingVideo.id, `Drive'dan indirildi ve AI metadata güncellendi. (Metadata: ${txtPath})`);
+                    logger.info(`✅ Varolan videonun AI metadatası güncellendi: ${filename}`);
                 }
+                return true;
             } catch (aiError: any) {
                 logger.error(`AI Video Analiz hatası: ${aiError.message}`);
 
@@ -218,8 +222,8 @@ export class DriveIntegrationService {
                 if (!existingVideo) {
                     const video = VideoModel.create({ filename, title: filename });
                     LogModel.create(video.id, `Drive'dan indirildi (AI analizi atlandı: ${aiError.message})`);
-                    return true;
                 }
+                return true;
             }
 
             return false;
