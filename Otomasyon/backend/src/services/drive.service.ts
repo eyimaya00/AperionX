@@ -55,17 +55,15 @@ export class DriveIntegrationService {
                 spaces: 'drive',
             });
 
-            const files = res.data.files;
-            if (!files) {
-                logger.debug('Drive klasöründe yeni video bulunamadı.');
-                return stats;
-            }
-
-            logger.info(`Drive klasöründe ${files.length} adet video dosyası bulundu.`);
-
+            const files = res.data.files || [];
             const driveFileIds = new Set(files.map(f => f.id).filter((id): id is string => !!id));
 
-            // Reconciliation: Drive'da olmayan yerel dosyaları temizle
+            logger.info(`Drive klasöründe ${files.length} video dosyası tespit edildi. Temizlik ve senkronizasyon başlıyor...`);
+
+            // 1. Aggressive Cleanup: videos/ klasöründeki sahipsiz dosyaları sil
+            this.cleanupOrphanedLocalFiles(driveFileIds);
+
+            // 2. Reconciliation: Drive'dan kalkmış kayıtları yerelden temizle
             try {
                 const localDriveFiles = this.db.prepare(
                     'SELECT file_id, filename FROM drive_files WHERE status = ?'
@@ -73,15 +71,9 @@ export class DriveIntegrationService {
 
                 for (const local of localDriveFiles) {
                     if (!driveFileIds.has(local.file_id)) {
-                        logger.info(`Drive'dan silinmiş dosya tespit edildi, yerelden de siliniyor: ${local.filename}`);
-
-                        // Veritabanından ve diskten sil (VideoModel.delete bunu hallediyor)
+                        logger.info(`Drive'dan kalkmış dosya yerelden temizleniyor: ${local.filename}`);
                         const video = VideoModel.findByFilename(local.filename);
-                        if (video) {
-                            VideoModel.delete(video.id);
-                        }
-
-                        // Drive takip tablosundan sil
+                        if (video) VideoModel.delete(video.id);
                         this.db.prepare('DELETE FROM drive_files WHERE file_id = ?').run(local.file_id);
                         stats.deleted++;
                     }
@@ -90,9 +82,12 @@ export class DriveIntegrationService {
                 logger.error('Drive reconciliation hatası:', reconError.message);
             }
 
-            // Orphan cleanup: videos/ klasöründeki sahipsiz dosyaları sil
-            this.cleanupOrphanedLocalFiles(driveFileIds);
+            if (files.length === 0) {
+                logger.debug('Drive klasöründe indirilecek yeni video yok.');
+                return stats;
+            }
 
+            // 3. Dosyaları işle
             for (const file of files) {
                 if (file.id && file.name) {
                     const isNew = await this.processDriveFile(file.id, file.name);
@@ -113,13 +108,16 @@ export class DriveIntegrationService {
         try {
             // Bu dosya daha önce işlenmiş mi?
             const existing = this.db.prepare('SELECT id, status FROM drive_files WHERE file_id = ?').get(fileId) as any;
+            const inVideosTable = VideoModel.findByFilename(filename);
 
-            if (existing) {
+            if (existing && inVideosTable) {
                 if (existing.status === 'downloaded' || existing.status === 'downloading') {
-                    // Zaten inik veya iniyor
+                    // Zaten inik/iniyor ve DB'de kayıtlı
                     return false;
                 }
-            } else {
+            }
+
+            if (!existing) {
                 // Veritabanına yeni kayıt aç
                 this.db.prepare(
                     'INSERT INTO drive_files (file_id, filename, status) VALUES (?, ?, ?)'
@@ -156,7 +154,6 @@ export class DriveIntegrationService {
                 fs.writeFileSync(txtPath, txtContent, 'utf-8');
                 logger.info(`✅ AI Video Analizi Tamamlandı: ${txtPath}`);
 
-                // Veritabanına doğrudan ekle (ScannerService'i beklemeden)
                 const videoData = {
                     filename,
                     title: aiMetadata.title || baseName,
@@ -175,11 +172,11 @@ export class DriveIntegrationService {
             } catch (aiError: any) {
                 logger.error(`AI Video Analiz hatası: ${aiError.message}`);
 
-                // Hata alsa bile videoyu veritabanına ekleyelim (en azından boş metadata ile)
+                // Hata alsa bile videoyu veritabanına ekleyelim (en azından dosya adı ile)
                 const existingVideo = VideoModel.findByFilename(filename);
                 if (!existingVideo) {
                     const video = VideoModel.create({ filename, title: filename });
-                    LogModel.create(video.id, `Drive'dan indirildi (AI hatası: ${aiError.message})`);
+                    LogModel.create(video.id, `Drive'dan indirildi (AI analizi atlandı: ${aiError.message})`);
                     return true;
                 }
             }

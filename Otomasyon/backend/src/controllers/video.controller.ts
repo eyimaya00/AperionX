@@ -169,6 +169,7 @@ export class VideoController {
             const syncResult = await driveService.syncVideos();
 
             // 2. Ayrıca manual yüklemeler için klasörü tara
+            // scannerService burada sadece manual atılan (Drive'da kaydı olmayan) yeni dosyaları bulur.
             const scanResult = scanVideosDirectory();
 
             const totalAdded = syncResult.added + scanResult.added;
