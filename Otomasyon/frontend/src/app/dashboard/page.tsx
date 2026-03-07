@@ -54,7 +54,7 @@ export default function DashboardPage() {
     const statCards = [
         { label: 'Toplam Video', value: stats?.total || 0, icon: '🎬', color: 'var(--accent-secondary)', bg: 'var(--accent-secondary-soft)' },
         { label: 'Bekleyen', value: stats?.pending || 0, icon: '⏳', color: 'var(--warning)', bg: 'var(--warning-soft)' },
-        { label: 'Yüklendi', value: stats?.uploaded || 0, icon: '✅', color: 'var(--success)', bg: 'var(--success-soft)' },
+        { label: 'Yayınlandı', value: stats?.uploaded || 0, icon: '✅', color: 'var(--success)', bg: 'var(--success-soft)' },
         { label: 'Başarısız', value: stats?.failed || 0, icon: '❌', color: 'var(--error)', bg: 'var(--error-soft)' },
     ];
 

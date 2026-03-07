@@ -121,7 +121,7 @@ export default function VideosPage() {
         { value: '', label: 'Tümü' },
         { value: 'pending', label: 'Bekleyen' },
         { value: 'processing', label: 'İşleniyor' },
-        { value: 'uploaded', label: 'Yüklendi' },
+        { value: 'uploaded', label: 'Yayınlandı' }, // Changed to Yayınlandı
         { value: 'failed', label: 'Başarısız' },
     ];
 

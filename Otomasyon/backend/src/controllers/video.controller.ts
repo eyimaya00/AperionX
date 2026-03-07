@@ -171,7 +171,7 @@ export class VideoController {
             }
 
             // ---- ADIM 2: videos/ klasöründeki TÜM dosyaları kontrol et ----
-            // DB'de (videos tablosunda) OLMAYAN dosyaları sil
+            // DB'de (videos tablosunda) OLMAYAN veya 'uploaded' olan dosyaları sil
             const videosDir = path.resolve(config.videosDir);
             if (fs.existsSync(videosDir)) {
                 const allFiles = fs.readdirSync(videosDir) as string[];
@@ -181,13 +181,13 @@ export class VideoController {
 
                     // Bu dosya DB'de var mı?
                     const inDb = VideoModel.findByFilename(file);
-                    if (!inDb) {
-                        // DB'de yoksa diskten sil (orphaned dosya)
+                    if (!inDb || inDb.status === 'uploaded') {
+                        // DB'de yoksa veya yayınlandıysa diskten sil
                         const filePath = path.join(videosDir, file);
                         const txtPath = path.join(videosDir, `${path.parse(file).name}.txt`);
                         try {
                             fs.unlinkSync(filePath);
-                            logger.info(`Orphan video silindi: ${file}`);
+                            logger.info(`${!inDb ? 'Orphan' : 'Yayınlanmış'} video dosyası silindi: ${file}`);
                             if (fs.existsSync(txtPath)) fs.unlinkSync(txtPath);
                             deleted++;
                         } catch (e: any) {
@@ -203,9 +203,12 @@ export class VideoController {
                 for (const video of allVideos) {
                     const videoPath = path.join(videosDir, video.filename);
                     if (!fs.existsSync(videoPath)) {
-                        logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
-                        VideoModel.delete(video.id);
-                        deleted++;
+                        // Yayınlanmış olanları silme, kayıt olarak kalsın
+                        if (video.status !== 'uploaded') {
+                            logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
+                            VideoModel.delete(video.id);
+                            deleted++;
+                        }
                     }
                 }
             } catch (dbError: any) {
