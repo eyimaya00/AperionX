@@ -90,9 +90,17 @@ export class DriveIntegrationService {
                     if (!driveFileIds.has(local.file_id)) {
                         logger.info(`Drive'dan kalkmış dosya yerelden temizleniyor: ${local.filename}`);
                         const video = VideoModel.findByFilename(local.filename);
-                        if (video) VideoModel.delete(video.id);
+                        if (video) {
+                            if (video.status !== 'uploaded') {
+                                VideoModel.delete(video.id);
+                                stats.deleted++;
+                            } else {
+                                logger.info(`Video daha önce yüklendiği için DB kaydı korunuyor: ${local.filename}`);
+                            }
+                        } else {
+                            stats.deleted++; // DB'de yok ama drive_files'da varsa sayaç artsın
+                        }
                         this.db.prepare('DELETE FROM drive_files WHERE file_id = ?').run(local.file_id);
-                        stats.deleted++;
                     }
                 }
             } catch (reconError: any) {
@@ -105,9 +113,11 @@ export class DriveIntegrationService {
                 for (const video of allVideos) {
                     const videoPath = path.join(config.videosDir, video.filename);
                     if (!fs.existsSync(videoPath)) {
-                        logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
-                        VideoModel.delete(video.id);
-                        stats.deleted++;
+                        if (video.status !== 'uploaded') {
+                            logger.info(`DB Cleanup: Dosyası olmayan video siliniyor: ${video.filename}`);
+                            VideoModel.delete(video.id);
+                            stats.deleted++;
+                        }
                     }
                 }
             } catch (dbCleanupError: any) {
