@@ -490,6 +490,213 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
     }
 });
 
+// === EXPERIMENT SSR ROUTE ===
+app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
+    const slug = req.params.slug;
+
+    // Edge case: redirect incorrect links
+    if (slug === 'experiments.html' || slug === 'experiment-detail.html') {
+        return res.redirect(301, '/experiments.html');
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM experiments WHERE slug = ?', [slug]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Deney bulunamadı (404)');
+        }
+
+        const experiment = rows[0];
+
+        // ============ VIEW COUNTING LOGIC ============
+        const experimentId = experiment.id;
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+        try {
+            const [viewCheck] = await pool.query(
+                `SELECT id FROM experiment_views 
+                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+                [experimentId, ip]
+            );
+
+            if (viewCheck.length === 0) {
+                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
+                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
+            }
+        } catch (vcErr) {
+            console.error('[EXP-VIEW-COUNT] Error:', vcErr.message);
+        }
+        // ============ END VIEW COUNTING ============
+
+        // Read Template
+        const filePath = path.join(__dirname, 'experiment-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+
+                // Get Authors
+                let authorNames = [];
+                let authors = [];
+                try {
+                    authors = await getExperimentAuthors(pool, experiment.id);
+                    if (authors.length > 0) {
+                        authorNames = authors.map(a => a.fullname);
+                    } else {
+                        authorNames = ['AperionX Yazarı'];
+                    }
+                } catch (e) { authorNames = ['AperionX Yazarı']; }
+
+                const authorName = authorNames.join(', ');
+
+                // Prepare Content
+                const title = experiment.title;
+                const summary = experiment.excerpt || experiment.objective || experiment.title;
+                const img = experiment.image_url
+                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url}`)
+                    : `${origin}/uploads/logo.png`;
+
+                // Determine URL
+                const isEnglish = req.path.startsWith('/en/');
+                const urlPrefix = isEnglish ? `${origin}/en` : origin;
+                const url = `${urlPrefix}/deney/${experiment.slug}`;
+
+                // Sanitize
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const safeImg = (img || '').replace(/"/g, '&quot;');
+                const safeUrl = (url || '').replace(/"/g, '&quot;');
+
+                // Format Date
+                const isoDate = new Date(experiment.created_at).toISOString();
+
+                // REPLACEMENT LOGIC
+                let html = htmlData;
+
+                // Title
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
+
+                // Meta Tags
+                const replaceMeta = (name, content) => {
+                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    html = html.replace(regex, `$1${content}$3`);
+                };
+
+                replaceMeta('description', safeSummary);
+                replaceMeta('og:title', safeTitle);
+                replaceMeta('og:description', safeSummary);
+                replaceMeta('og:image', safeImg);
+                replaceMeta('og:url', safeUrl);
+                replaceMeta('twitter:title', safeTitle);
+                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:image', safeImg);
+
+                // Canonical
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+
+                // Keywords
+                const tags = experiment.tags || 'bilim, deney, laboratuvar, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
+                if (!html.includes('<meta name="keywords"')) {
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
+                }
+
+                // Article Published Date
+                if (!html.includes('article:published_time')) {
+                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
+                }
+
+                // Preloaded Data
+                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
+
+                // === JSON-LD STRUCTURED DATA ===
+                const schemaData = {
+                    "@context": "https://schema.org",
+                    "@type": "ScholarlyArticle",
+                    "mainEntityOfPage": {
+                        "@type": "WebPage",
+                        "@id": safeUrl
+                    },
+                    "headline": safeTitle,
+                    "image": [safeImg],
+                    "datePublished": isoDate,
+                    "dateModified": isoDate,
+                    "author": {
+                        "@type": "Person",
+                        "name": authorName,
+                        "url": authors.length > 0 ? `${origin}/author.html?username=${authors[0].username}` : `${origin}/author.html`
+                    },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "AperionX",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/uploads/logo.png`
+                        }
+                    },
+                    "description": safeSummary
+                };
+
+                const breadcrumbData = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Ana Sayfa",
+                        "item": "https://aperionx.com"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Deneyler",
+                        "item": "https://aperionx.com/experiments.html"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": safeTitle,
+                        "item": safeUrl
+                    }]
+                };
+
+                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+                const breadcrumbScript = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
+
+                // Insert all scripts before </head>
+                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
+
+                // SSR: Render Author in meta row
+                let authorHtml = authors.map(a => `<a href="/author.html?username=${a.username}" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
+                html = html.replace(/<span\s+id="exp-detail-author">.*?<\/span>/s, `<span id="exp-detail-author">${authorHtml}</span>`);
+
+                res.send(html);
+
+            } catch (parseErr) {
+                console.error('Experiment SSR Parse Error:', parseErr);
+                res.status(500).send(parseErr.toString());
+            }
+        });
+
+    } catch (e) {
+        console.error('Experiment DB Error:', e);
+        next();
+    }
+});
+
+// Redirect /experiment-detail.html?id=X to /deney/slug
+app.get('/experiment-detail.html', async (req, res, next) => {
+    const experimentId = req.query.id;
+    if (!experimentId) return next();
+
+    try {
+        const [rows] = await pool.query('SELECT slug FROM experiments WHERE id = ?', [experimentId]);
+        if (rows.length > 0 && rows[0].slug) {
+            return res.redirect(301, `/deney/${rows[0].slug}`);
+        }
+        next();
+    } catch (e) { next(); }
+});
+
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
