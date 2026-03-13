@@ -32,7 +32,11 @@ async function uploadLocalVideosToDrive() {
     }
 
     // Klasördeki .mp4 dosyalarını bul
-    const files = fs.readdirSync(videosDir).filter(f => f.toLowerCase().endsWith('.mp4'));
+    // DASH parçalarını (v.mp4) atla, sadece mux edilmiş veya normal mp4'leri al
+    const files = fs.readdirSync(videosDir).filter(f => {
+        const lower = f.toLowerCase();
+        return lower.endsWith('.mp4') && !lower.endsWith('v.mp4');
+    });
 
     if (files.length === 0) {
         console.log('Klasörde yüklenecek .mp4 dosyası bulunamadı.');

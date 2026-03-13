@@ -2184,10 +2184,10 @@
                     btn.innerHTML = 'Kayıt Olunuyor...';
 
                     try {
-                        const res = await fetch('/api/signup', {
+                        const res = await fetch('/api/register', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ fullName, username, email, password })
+                            body: JSON.stringify({ fullname: fullName, username, email, password, source: 'vsepr' })
                         });
                         const data = await res.json();
                         if (res.ok) {

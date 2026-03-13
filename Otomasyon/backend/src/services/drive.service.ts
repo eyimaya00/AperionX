@@ -8,6 +8,7 @@ import { getDatabase } from '../database';
 import { VideoModel, LogModel } from '../models';
 import { analyzeVideoWithGemini } from './ai.service';
 import { getNextScheduleSlot } from '../utils/date-utils';
+import { muxVideoAndAudio } from '../utils/video-utils';
 
 /**
  * Google Drive Entegrasyon Servisi
@@ -182,12 +183,87 @@ export class DriveIntegrationService {
             const destPath = path.join(config.videosDir, filename);
             await this.downloadFile(fileId, destPath);
 
+            // Muxing Kontrolü
+            let finalVideoPath = destPath;
+            let finalFilename = filename;
+
+            if (filename.toLowerCase().endsWith('v.mp4')) {
+                const baseName = filename.slice(0, -5); // .v.mp4 kısmını at
+                const audioFilename = `${baseName}a.m4a`;
+                const audioPath = path.join(config.videosDir, audioFilename);
+
+                // Eğer ses dosyası yerelde varsa mux yap
+                if (fs.existsSync(audioPath)) {
+                    finalFilename = `${baseName}.mp4`;
+                    finalVideoPath = path.join(config.videosDir, finalFilename);
+                    logger.info(`DASH parçaları tespit edildi, muxing başlatılıyor: ${filename} + ${audioFilename}`);
+                    
+                    try {
+                        await muxVideoAndAudio(destPath, audioPath, finalVideoPath);
+                        logger.info(`✅ Muxing başarılı: ${finalFilename}`);
+                        
+                        // Orijinal parçaları temizle
+                        try {
+                            fs.unlinkSync(destPath);
+                            fs.unlinkSync(audioPath);
+                        } catch (e) { }
+                    } catch (muxError: any) {
+                        logger.error(`❌ Muxing hatası: ${muxError.message}. Orijinal video ile devam ediliyor.`);
+                        finalVideoPath = destPath;
+                        finalFilename = filename;
+                    }
+                } else {
+                    logger.warn(`Ses dosyası henüz indirilmemiş: ${audioFilename}. Muxing atlanıyor, bir sonraki döngüde tamamlanabilir.`);
+                }
+            }
+
             // Başarılı ise durumu güncelle
             this.db.prepare(
                 'UPDATE drive_files SET status = ? WHERE file_id = ?'
             ).run('downloaded', fileId);
 
             logger.info(`✅ Drive dosyası başarıyla indirildi: ${filename}`);
+
+            // Eğer ses dosyasıysa, video parçası yerelde mi kontrol et ve muxing tetikle
+            if (filename.toLowerCase().endsWith('a.m4a')) {
+                const baseName = filename.slice(0, -5);
+                const videoFilename = `${baseName}v.mp4`;
+                const videoPath = path.join(config.videosDir, videoFilename);
+
+                if (fs.existsSync(videoPath)) {
+                    const finalMuxedFilename = `${baseName}.mp4`;
+                    const finalMuxedPath = path.join(config.videosDir, finalMuxedFilename);
+                    logger.info(`Ses dosyası indi, video parçası mevcut. Muxing başlatılıyor: ${videoFilename} + ${filename}`);
+                    
+                    try {
+                        await muxVideoAndAudio(videoPath, destPath, finalMuxedPath);
+                        logger.info(`✅ Muxing başarılı: ${finalMuxedFilename}`);
+
+                        // Parçaları sil
+                        try { fs.unlinkSync(videoPath); fs.unlinkSync(destPath); } catch (e) { }
+
+                        // AI Analizi ve DB Kaydı için sanki video yeni inmiş gibi devam et
+                        filename = finalMuxedFilename;
+                        destPath = finalMuxedPath;
+                    } catch (muxError: any) {
+                        logger.error(`❌ Muxing hatası: ${muxError.message}`);
+                        return false; 
+                    }
+                } else {
+                    logger.info(`Ses dosyası indi ama video parçası (${videoFilename}) henüz yok. Bekleniyor...`);
+                    return true; // Başarılı say ama AI yapma
+                }
+            } else if (filename.toLowerCase().endsWith('v.mp4')) {
+                // Eğer mux yapıldıysa filename ve destPath güncellendi
+                filename = finalFilename;
+                destPath = finalVideoPath;
+
+                // Eğer hala v.mp4 ise ve ses henüz inmemişse AI analizini ertele
+                if (filename.toLowerCase().endsWith('v.mp4')) {
+                    logger.info(`Video parçası indi ama ses henüz yok. AI analizi erteleniyor.`);
+                    return true;
+                }
+            }
 
             // AI Metadata Üretimi
             try {
