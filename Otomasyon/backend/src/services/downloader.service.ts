@@ -26,6 +26,11 @@ export interface DownloadResult {
     success: boolean;
     filename?: string;
     metadata?: VideoMetadataFromUrl;
+    aiMetadata?: {
+        title: string;
+        description: string;
+        tags: string[];
+    };
     scanResult?: ScanResult;
     error?: string;
 }
@@ -219,6 +224,7 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
             success: true,
             filename,
             metadata,
+            aiMetadata,
             scanResult,
         };
     } catch (error: any) {

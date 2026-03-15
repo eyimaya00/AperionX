@@ -41,15 +41,19 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
                     // İndirme bitti, statüyü pending (bekliyor) yap
                     VideoModel.update(video.id, { 
                         status: 'pending', 
-                        title: result.metadata?.title || video.title,
-                        description: video.description || result.metadata?.description || '',
+                        title: result.aiMetadata?.title || result.metadata?.title || video.title,
+                        description: result.aiMetadata?.description || video.description || result.metadata?.description || '',
                     });
                     
                     // Tagleri guncelle (AI veya URL'den gelmis olabilir)
-                    if (result.metadata?.tags && result.metadata.tags.length > 0) {
-                        VideoModel.update(video.id, { tags: result.metadata.tags });
+                    const tagsToSave = (result.aiMetadata?.tags && result.aiMetadata.tags.length > 0) 
+                                        ? result.aiMetadata.tags 
+                                        : result.metadata?.tags;
+
+                    if (tagsToSave && tagsToSave.length > 0) {
+                        VideoModel.update(video.id, { tags: tagsToSave });
                     }
-                    LogModel.create(video.id, '✅ İndirme tamamlandı.');
+                    LogModel.create(video.id, '✅ İndirme tamamlandı ve AI verisi uygulandı.');
                 } else {
                     VideoModel.update(video.id, { status: 'failed' });
                     LogModel.create(video.id, `❌ İndirme hatası: ${result.error}`);
