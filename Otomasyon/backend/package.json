@@ -17,6 +17,7 @@
     "express": "^4.21.0",
     "googleapis": "^171.4.0",
     "helmet": "^7.1.0",
+    "instagram-url-direct": "^2.0.7",
     "morgan": "^1.10.0",
     "node-cron": "^4.2.1",
     "uuid": "^10.0.0",

@@ -11,6 +11,7 @@ export interface DownloadRequest {
     title?: string;
     description?: string;
     tags?: string;
+    targetFilename?: string;
 }
 
 export interface VideoMetadataFromUrl {
@@ -34,10 +35,15 @@ export interface DownloadResult {
  */
 export function extractMetadata(url: string): Promise<VideoMetadataFromUrl> {
     return new Promise((resolve, reject) => {
+        const isInstagram = url.includes('instagram.com');
+        const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const cookiesArg = fs.existsSync(cookiesPath) && isInstagram ? ['--cookies', cookiesPath] : [];
+
         const args = [
             '--dump-json',
             '--no-download',
             '--no-warnings',
+            ...cookiesArg,
             url,
         ];
 
@@ -121,12 +127,22 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
         // 3. Videoyu indir
         logger.info(`Video indiriliyor: ${req.url}`);
 
-        const outputTemplate = path.join(videosDir, '%(id)s.%(ext)s');
+        const isInstagram = req.url.includes('instagram.com');
+        const formatArg = isInstagram 
+            ? ['-f', 'b'] 
+            : ['-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best', '--merge-output-format', 'mp4'];
+            
+        const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const cookiesArg = fs.existsSync(cookiesPath) && isInstagram ? ['--cookies', cookiesPath] : [];
+
+        const filenameToUse = req.targetFilename || '%(id)s.%(ext)s';
+        const outputTemplate = path.join(videosDir, filenameToUse);
 
         await new Promise<void>((resolve, reject) => {
             const args = [
-                '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                '--merge-output-format', 'mp4',
+                ...formatArg,
+                ...cookiesArg,
+                '--remux-video', 'mp4',
                 '-o', outputTemplate,
                 '--no-playlist',
                 '--no-warnings',
@@ -148,22 +164,24 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
 
         // 4. Yeni eklenen mp4 dosyasını bul
         const afterFiles = getExistingMp4Files(videosDir);
-        let filename = '';
-        for (const f of afterFiles) {
-            if (!beforeFiles.has(f)) {
-                filename = f;
-                break;
-            }
-        }
-
+        let filename = req.targetFilename || '';
         if (!filename) {
-            // Belki zaten vardı — en son değiştirilen mp4'ü al
-            const mp4Files = Array.from(afterFiles);
-            if (mp4Files.length > 0) {
-                const sorted = mp4Files
-                    .map(f => ({ name: f, mtime: fs.statSync(path.join(videosDir, f)).mtimeMs }))
-                    .sort((a, b) => b.mtime - a.mtime);
-                filename = sorted[0].name;
+            for (const f of afterFiles) {
+                if (!beforeFiles.has(f)) {
+                    filename = f;
+                    break;
+                }
+            }
+
+            if (!filename) {
+                // Belki zaten vardı — en son değiştirilen mp4'ü al
+                const mp4Files = Array.from(afterFiles);
+                if (mp4Files.length > 0) {
+                    const sorted = mp4Files
+                        .map(f => ({ name: f, mtime: fs.statSync(path.join(videosDir, f)).mtimeMs }))
+                        .sort((a, b) => b.mtime - a.mtime);
+                    filename = sorted[0].name;
+                }
             }
         }
 

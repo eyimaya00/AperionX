@@ -180,7 +180,7 @@ export class DriveIntegrationService {
             logger.info(`Drive'dan dosya indiriliyor: ${filename} (${fileId})`);
 
             // Dosyayı indir
-            const destPath = path.join(config.videosDir, filename);
+            let destPath = path.join(config.videosDir, filename);
             await this.downloadFile(fileId, destPath);
 
             // Muxing Kontrolü

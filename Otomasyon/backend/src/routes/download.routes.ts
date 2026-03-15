@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { downloadVideo, extractMetadata, DownloadRequest } from '../services/downloader.service';
 import { logger } from '../utils/logger';
 import { ApiResponse } from '../models/types';
+import { VideoModel, LogModel } from '../models';
 
 const router = Router();
 
@@ -18,21 +19,54 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        logger.info(`Video indirme isteği: ${url}`);
-        const result = await downloadVideo({ url, title, description, tags });
+        logger.info(`Video indirme isteği (Sıraya Alınıyor): ${url}`);
 
-        if (result.success) {
-            res.json({
-                success: true,
-                message: 'Video başarıyla indirildi',
-                data: result,
-            } as ApiResponse);
-        } else {
-            res.status(500).json({
-                success: false,
-                error: result.error || 'İndirme başarısız',
-            } as ApiResponse);
-        }
+        const timestamp = Date.now();
+        const filename = `dl_${timestamp}.mp4`;
+
+        // DB'ye hemen ekle (indiriliyor statusuyle eşanlamlı 'processing')
+        const video = VideoModel.create({
+            filename: filename,
+            title: title || 'İndiriliyor...',
+            description: description || '',
+            tags: tags ? tags.split(',').map(t => t.trim()) : [],
+        });
+        VideoModel.update(video.id, { status: 'processing' });
+        LogModel.create(video.id, 'Video indirme sırasına alındı.');
+
+        // İndirmeyi arka planda başlat
+        downloadVideo({ url, title, description, tags, targetFilename: filename })
+            .then(result => {
+                if (result.success) {
+                    // İndirme bitti, statüyü pending (bekliyor) yap
+                    VideoModel.update(video.id, { 
+                        status: 'pending', 
+                        title: result.metadata?.title || video.title,
+                        description: video.description || result.metadata?.description || '',
+                    });
+                    
+                    // Tagleri guncelle (AI veya URL'den gelmis olabilir)
+                    if (result.metadata?.tags && result.metadata.tags.length > 0) {
+                        VideoModel.update(video.id, { tags: result.metadata.tags });
+                    }
+                    LogModel.create(video.id, '✅ İndirme tamamlandı.');
+                } else {
+                    VideoModel.update(video.id, { status: 'failed' });
+                    LogModel.create(video.id, `❌ İndirme hatası: ${result.error}`);
+                }
+            })
+            .catch(err => {
+                VideoModel.update(video.id, { status: 'failed' });
+                LogModel.create(video.id, `❌ Kritik indirme hatası: ${err.message}`);
+                logger.error(`Kritik İndirme Hatası [ID: ${video.id}]:`, err);
+            });
+
+        // Kullanıcıya hemen cevap dön
+        res.json({
+            success: true,
+            message: 'Video başarıyla sıraya alındı, arka planda indiriliyor.',
+            data: { id: video.id, filename },
+        } as ApiResponse);
     } catch (error: any) {
         logger.error('Download endpoint hatası:', error);
         res.status(500).json({ success: false, error: error.message } as ApiResponse);
