@@ -1985,7 +1985,7 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
             status = 'published';
             msg = `Makaleniz yayına alındı: ${title}`;
             type = 'success';
-            updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL WHERE id = ?";
+            updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, created_at = NOW() WHERE id = ?";
             queryParams = [articleId];
         } else if (decision === 'reject') {
             status = 'rejected';
