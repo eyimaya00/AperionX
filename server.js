@@ -697,6 +697,63 @@ app.get('/experiment-detail.html', async (req, res, next) => {
     } catch (e) { next(); }
 });
 
+// === RSS FEED ===
+app.get('/feed.xml', async (req, res) => {
+    try {
+        const [articles] = await pool.query(
+            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, author_id FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 30"
+        );
+        const origin = `${req.protocol}://${req.get('host')}`;
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">';
+        xml += '<channel>';
+        xml += '<title>AperionX - Bilim ve Teknoloji</title>';
+        xml += `<link>${origin}</link>`;
+        xml += '<description>Bilimin sınırlarını keşfedin. Geleceği şekillendiren teknoloji analizleri ve derinlemesine makaleler.</description>';
+        xml += '<language>tr</language>';
+        xml += `<atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>`;
+        xml += `<lastBuildDate>${new Date().toUTCString()}</lastBuildDate>`;
+        xml += `<image><url>${origin}/uploads/logo.png</url><title>AperionX</title><link>${origin}</link></image>`;
+
+        for (const article of articles) {
+            let authorName = 'AperionX Yazarı';
+            try {
+                const [authorRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
+                if (authorRows.length > 0) authorName = authorRows[0].fullname;
+            } catch (e) { /* ignore */ }
+
+            const articleUrl = `${origin}/makale/${article.slug}`;
+            const pubDate = new Date(article.created_at).toUTCString();
+            const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeExcerpt = (article.excerpt || article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const imgUrl = article.image_url
+                ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
+                : `${origin}/uploads/logo.png`;
+
+            xml += '<item>';
+            xml += `<title>${safeTitle}</title>`;
+            xml += `<link>${articleUrl}</link>`;
+            xml += `<description>${safeExcerpt}</description>`;
+            xml += `<author>${authorName}</author>`;
+            xml += `<guid isPermaLink="true">${articleUrl}</guid>`;
+            xml += `<pubDate>${pubDate}</pubDate>`;
+            if (article.category) xml += `<category>${article.category}</category>`;
+            xml += `<media:content url="${imgUrl}" medium="image"/>`;
+            xml += `<enclosure url="${imgUrl}" type="image/jpeg"/>`;
+            xml += '</item>';
+        }
+
+        xml += '</channel></rss>';
+
+        res.header('Content-Type', 'application/rss+xml; charset=utf-8');
+        res.send(xml);
+    } catch (e) {
+        console.error('RSS Feed Error:', e);
+        res.status(500).send('Error generating RSS feed');
+    }
+});
+
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
@@ -750,64 +807,6 @@ app.get('/sitemap.xml', async (req, res) => {
         console.error('Sitemap Error:', e);
         fs.appendFileSync('sitemap_error.log', e.toString() + '\n');
         res.status(500).send('Error generating sitemap');
-    }
-});
-
-// === RSS FEED ===
-app.get('/feed.xml', async (req, res) => {
-    try {
-        const [articles] = await pool.query(
-            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, author_id FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 30"
-        );
-        const origin = `${req.protocol}://${req.get('host')}`;
-
-        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">';
-        xml += '<channel>';
-        xml += '<title>AperionX - Bilim ve Teknoloji</title>';
-        xml += `<link>${origin}</link>`;
-        xml += '<description>Bilimin sınırlarını keşfedin. Geleceği şekillendiren teknoloji analizleri ve derinlemesine makaleler.</description>';
-        xml += '<language>tr</language>';
-        xml += `<atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>`;
-        xml += `<lastBuildDate>${new Date().toUTCString()}</lastBuildDate>`;
-        xml += `<image><url>${origin}/uploads/logo.png</url><title>AperionX</title><link>${origin}</link></image>`;
-
-        for (const article of articles) {
-            // Get author name
-            let authorName = 'AperionX Yazarı';
-            try {
-                const [authorRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
-                if (authorRows.length > 0) authorName = authorRows[0].fullname;
-            } catch (e) { /* ignore */ }
-
-            const articleUrl = `${origin}/makale/${article.slug}`;
-            const pubDate = new Date(article.created_at).toUTCString();
-            const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const safeExcerpt = (article.excerpt || article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const imgUrl = article.image_url
-                ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
-                : `${origin}/uploads/logo.png`;
-
-            xml += '<item>';
-            xml += `<title>${safeTitle}</title>`;
-            xml += `<link>${articleUrl}</link>`;
-            xml += `<description>${safeExcerpt}</description>`;
-            xml += `<author>${authorName}</author>`;
-            xml += `<guid isPermaLink="true">${articleUrl}</guid>`;
-            xml += `<pubDate>${pubDate}</pubDate>`;
-            if (article.category) xml += `<category>${article.category}</category>`;
-            xml += `<media:content url="${imgUrl}" medium="image"/>`;
-            xml += `<enclosure url="${imgUrl}" type="image/jpeg"/>`;
-            xml += '</item>';
-        }
-
-        xml += '</channel></rss>';
-
-        res.header('Content-Type', 'application/rss+xml; charset=utf-8');
-        res.send(xml);
-    } catch (e) {
-        console.error('RSS Feed Error:', e);
-        res.status(500).send('Error generating RSS feed');
     }
 });
 
