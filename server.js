@@ -404,7 +404,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 replaceMeta('twitter:image', safeImg);
 
                 // Canonical Replacement
-                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/makale/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/makale/${slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/makale/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/makale/${slug}">`);
 
                 // Inject Preloaded Data Script
                 const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHORS = ${JSON.stringify(authors)};</script>`;
@@ -594,7 +594,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 replaceMeta('twitter:image', safeImg);
 
                 // Canonical
-                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${slug}">`);
 
                 // Keywords
                 const tags = experiment.tags || 'bilim, deney, laboratuvar, aperionx';
@@ -763,14 +763,19 @@ app.get('/sitemap.xml', async (req, res) => {
         const origin = `${req.protocol}://${req.get('host')}`;
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
         // Static Pages
         const staticPages = ['', '/articles.html', '/experiments.html', '/about.html', '/author.html', '/index.html'];
         staticPages.forEach(page => {
+            const pathUrl = page === '' ? '/' : page;
+            const enPath = page === '' ? '/en/' : '/en' + page;
             xml += `
             <url>
-                <loc>${origin}${page}</loc>
+                <loc>${origin}${pathUrl}</loc>
+                <xhtml:link rel="alternate" hreflang="tr" href="${origin}${pathUrl}"/>
+                <xhtml:link rel="alternate" hreflang="en" href="${origin}${enPath}"/>
+                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}${pathUrl}"/>
                 <changefreq>daily</changefreq>
                 <priority>0.8</priority>
             </url>`;
@@ -782,6 +787,9 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `
             <url>
                 <loc>${origin}/makale/${article.slug}</loc>
+                <xhtml:link rel="alternate" hreflang="tr" href="${origin}/makale/${article.slug}"/>
+                <xhtml:link rel="alternate" hreflang="en" href="${origin}/en/makale/${article.slug}"/>
+                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/makale/${article.slug}"/>
                 <lastmod>${date}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>1.0</priority>
@@ -794,6 +802,9 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `
             <url>
                 <loc>${origin}/deney/${exp.slug}</loc>
+                <xhtml:link rel="alternate" hreflang="tr" href="${origin}/deney/${exp.slug}"/>
+                <xhtml:link rel="alternate" hreflang="en" href="${origin}/en/deney/${exp.slug}"/>
+                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/deney/${exp.slug}"/>
                 <lastmod>${date}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>0.9</priority>
@@ -4172,7 +4183,7 @@ app.get('/makale/:slug', async (req, res) => {
                 // FIXED: Canonical Tag
                 htmlData = htmlData.replace(
                     /<link rel="canonical" href=".*?">/,
-                    `<link rel="canonical" href="${siteUrl}/makale/${slug}" />`
+                    `<link rel="canonical" href="${siteUrl}/makale/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${siteUrl}/makale/${slug}">\n    <link rel="alternate" hreflang="en" href="${siteUrl}/en/makale/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${siteUrl}/makale/${slug}">`
                 );
 
                 // Twitter Tags
@@ -4310,7 +4321,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 replaceMeta('twitter:image', safeImg);
 
                 // Canonical
-                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${safeUrl}" />`);
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${experiment.slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${experiment.slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${experiment.slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${experiment.slug}">`);
 
                 // Preloaded Data
                 const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
