@@ -753,6 +753,64 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
+// === RSS FEED ===
+app.get('/feed.xml', async (req, res) => {
+    try {
+        const [articles] = await pool.query(
+            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, author_id FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 30"
+        );
+        const origin = `${req.protocol}://${req.get('host')}`;
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">';
+        xml += '<channel>';
+        xml += '<title>AperionX - Bilim ve Teknoloji</title>';
+        xml += `<link>${origin}</link>`;
+        xml += '<description>Bilimin sınırlarını keşfedin. Geleceği şekillendiren teknoloji analizleri ve derinlemesine makaleler.</description>';
+        xml += '<language>tr</language>';
+        xml += `<atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>`;
+        xml += `<lastBuildDate>${new Date().toUTCString()}</lastBuildDate>`;
+        xml += `<image><url>${origin}/uploads/logo.png</url><title>AperionX</title><link>${origin}</link></image>`;
+
+        for (const article of articles) {
+            // Get author name
+            let authorName = 'AperionX Yazarı';
+            try {
+                const [authorRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [article.author_id]);
+                if (authorRows.length > 0) authorName = authorRows[0].fullname;
+            } catch (e) { /* ignore */ }
+
+            const articleUrl = `${origin}/makale/${article.slug}`;
+            const pubDate = new Date(article.created_at).toUTCString();
+            const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeExcerpt = (article.excerpt || article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const imgUrl = article.image_url
+                ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
+                : `${origin}/uploads/logo.png`;
+
+            xml += '<item>';
+            xml += `<title>${safeTitle}</title>`;
+            xml += `<link>${articleUrl}</link>`;
+            xml += `<description>${safeExcerpt}</description>`;
+            xml += `<author>${authorName}</author>`;
+            xml += `<guid isPermaLink="true">${articleUrl}</guid>`;
+            xml += `<pubDate>${pubDate}</pubDate>`;
+            if (article.category) xml += `<category>${article.category}</category>`;
+            xml += `<media:content url="${imgUrl}" medium="image"/>`;
+            xml += `<enclosure url="${imgUrl}" type="image/jpeg"/>`;
+            xml += '</item>';
+        }
+
+        xml += '</channel></rss>';
+
+        res.header('Content-Type', 'application/rss+xml; charset=utf-8');
+        res.send(xml);
+    } catch (e) {
+        console.error('RSS Feed Error:', e);
+        res.status(500).send('Error generating RSS feed');
+    }
+});
+
 app.get('/article-detail.html', async (req, res, next) => {
     const articleId = req.query.id;
     if (!articleId) return next();
@@ -1866,6 +1924,12 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
             } catch (notifErr) { console.error('Notif failed:', notifErr); }
         }
 
+        // SEO: If admin/editor published directly, ping search engines & send newsletter
+        if (finalStatus === 'published') {
+            pingSearchEngines(slug).catch(err => console.error('[SEO-PING] Error:', err));
+            autoSendNewsletter(newArticleId).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
+        }
+
         res.status(201).json({ message: 'Article created', status: finalStatus });
     } catch (e) {
         console.error('Route: DB Error:', e);
@@ -2001,6 +2065,15 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
 
         // Notify Author
         await createNotification(authorId, msg, type);
+
+        // SEO: Ping search engines & send newsletter on approve
+        if (decision === 'approve') {
+            const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [articleId]);
+            if (slugRow.length > 0) {
+                pingSearchEngines(slugRow[0].slug).catch(err => console.error('[SEO-PING] Error:', err));
+            }
+            autoSendNewsletter(articleId).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
+        }
 
         res.json({ message: `Article ${status}` });
 
@@ -2245,6 +2318,16 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
 
     try {
         await pool.query('UPDATE articles SET status = ?, rejection_reason = ?, approved_by = ? WHERE id = ?', [status, reasonValue, approvedBy, req.params.id]);
+
+        // SEO: Ping search engines & send newsletter on approve
+        if (decision === 'approve') {
+            const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [req.params.id]);
+            if (slugRow.length > 0) {
+                pingSearchEngines(slugRow[0].slug).catch(err => console.error('[SEO-PING] Error:', err));
+            }
+            autoSendNewsletter(req.params.id).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
+        }
+
         res.json({ message: `Article ${status}` });
     } catch (e) {
         res.status(500).send(e.toString());
@@ -3772,7 +3855,59 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Helper: Send New Article Notification to All Users
+// === SEO PING SYSTEM ===
+async function pingSearchEngines(articleSlug) {
+    const https = require('https');
+    const sitemapUrl = encodeURIComponent('https://aperionx.com/sitemap.xml');
+    const articleUrl = encodeURIComponent(`https://aperionx.com/makale/${articleSlug}`);
+
+    const targets = [
+        `https://www.google.com/ping?sitemap=${sitemapUrl}`,
+        `https://www.bing.com/ping?sitemap=${sitemapUrl}`,
+    ];
+
+    for (const url of targets) {
+        try {
+            await new Promise((resolve, reject) => {
+                https.get(url, (resp) => {
+                    console.log(`[SEO-PING] ✅ Pinged: ${url.split('?')[0]} -> Status: ${resp.statusCode}`);
+                    resp.resume();
+                    resolve();
+                }).on('error', (err) => {
+                    console.error(`[SEO-PING] ❌ Failed: ${url.split('?')[0]} -> ${err.message}`);
+                    resolve(); // Don't block on ping failure
+                });
+            });
+        } catch (e) {
+            console.error(`[SEO-PING] Error pinging ${url}:`, e.message);
+        }
+    }
+
+    console.log(`[SEO-PING] Ping cycle completed for article: ${articleSlug}`);
+}
+
+// === AUTO NEWSLETTER ON APPROVE ===
+async function autoSendNewsletter(articleId) {
+    try {
+        console.log(`[AUTO-NEWSLETTER] Starting auto-send for Article ID: ${articleId}`);
+
+        // Get all subscribed users
+        const [users] = await pool.query("SELECT email FROM users WHERE email IS NOT NULL AND is_subscribed = 1");
+        if (users.length === 0) {
+            console.log('[AUTO-NEWSLETTER] No subscribed users found.');
+            return;
+        }
+
+        const recipients = users.map(u => u.email);
+        console.log(`[AUTO-NEWSLETTER] Sending to ${recipients.length} subscribers...`);
+
+        await sendNewsletterToRecipients(articleId, recipients);
+        console.log(`[AUTO-NEWSLETTER] ✅ Completed for Article ID: ${articleId}`);
+    } catch (e) {
+        console.error('[AUTO-NEWSLETTER] ❌ Error:', e.message);
+    }
+}
+
 // Helper: Send New Article Notification to All Users
 // === MANUAL NEWSLETTER SYSTEM ===
 

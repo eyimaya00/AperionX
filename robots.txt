@@ -13,3 +13,6 @@ Disallow: /profile.html
 
 # Sitemap
 Sitemap: https://aperionx.com/sitemap.xml
+
+# RSS Feed
+# https://aperionx.com/feed.xml
