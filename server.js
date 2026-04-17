@@ -73,6 +73,7 @@ app.use(async (req, res, next) => {
         '/uploads',
         '/robots.txt',   // SEO
         '/sitemap.xml',  // SEO
+        '/feed.xml',     // RSS Feed
         '/admin.html',   // Allow Admin access (still protected by login)
         '/editor.html',  // Allow Editor access
         '/author.html',  // Allow Author access
