@@ -741,7 +741,7 @@ app.get('/feed.xml', async (req, res) => {
             xml += `<pubDate>${pubDate}</pubDate>`;
             if (article.category) xml += `<category>${article.category}</category>`;
             xml += `<media:content url="${imgUrl}" medium="image"/>`;
-            xml += `<enclosure url="${imgUrl}" type="image/jpeg"/>`;
+            xml += `<enclosure url="${imgUrl}" length="0" type="image/jpeg"/>`;
             xml += '</item>';
         }
 
