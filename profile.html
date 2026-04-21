@@ -443,13 +443,13 @@
             <div class="header-actions">
                 <!-- Search Container -->
                 <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Ara...">
-                    <button class="icon-btn search-btn">
+                    <input type="text" class="search-input" placeholder="Ara..." aria-label="Arama">
+                    <button class="icon-btn search-btn" aria-label="Ara">
                         <i class="ph ph-magnifying-glass"></i>
                     </button>
                 </div>
 
-                <button class="icon-btn theme-toggle" id="themeToggle">
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema Değiştir">
                     <i class="ph ph-moon"></i>
                 </button>
 
@@ -459,7 +459,7 @@
                     <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
                 </div>
 
-                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menü">
                     <i class="ph ph-list"></i>
                 </button>
             </div>
@@ -519,11 +519,11 @@
                 <div class="modal-header">
                     <h3>Yorumu Düzenle</h3>
                     <button onclick="closeModal('editCommentModal')"
-                        style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+                        style="background:none; border:none; font-size:1.5rem; cursor:pointer;" aria-label="Kapat">&times;</button>
                 </div>
                 <div style="padding: 20px;">
                     <textarea id="edit-comment-text" class="form-control" rows="5"
-                        style="width:100%; margin-bottom:15px;"></textarea>
+                        style="width:100%; margin-bottom:15px;" aria-label="Yorumu Düzenle"></textarea>
                     <button onclick="saveCommentEdit()" class="btn btn-primary" style="width:100%;">Kaydet ve Onaya
                         Gönder</button>
                 </div>

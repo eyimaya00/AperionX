@@ -110,13 +110,13 @@
             <div class="header-actions">
                 <!-- Search Container (Added) -->
                 <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Ara...">
-                    <button class="icon-btn search-btn">
+                    <input type="text" class="search-input" placeholder="Ara..." aria-label="Arama">
+                    <button class="icon-btn search-btn" aria-label="Ara">
                         <i class="ph ph-magnifying-glass"></i>
                     </button>
                 </div>
 
-                <button class="icon-btn theme-toggle" id="themeToggle">
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
                     <i class="ph ph-moon"></i>
                 </button>
 
@@ -132,7 +132,7 @@
                     <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
                 </div>
 
-                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn">
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
                     <i class="ph ph-list"></i>
                 </button>
             </div>
@@ -171,19 +171,19 @@
             <div class="filter-container">
                 <!-- Categories with Scroll -->
                 <div class="category-scroll-wrapper">
-                    <button class="scroll-btn left" id="cat-scroll-left"><i class="ph ph-caret-left"></i></button>
+                    <button class="scroll-btn left" id="cat-scroll-left" aria-label="Kategorileri sola kaydır"><i class="ph ph-caret-left"></i></button>
                     <div class="category-filters" id="category-filters">
                         <button class="filter-chip active" onclick="filterPageArticles('all', this)">Tümü</button>
                         <!-- Dynamic Categories will be injected here -->
                     </div>
-                    <button class="scroll-btn right" id="cat-scroll-right"><i class="ph ph-caret-right"></i></button>
+                    <button class="scroll-btn right" id="cat-scroll-right" aria-label="Kategorileri sağa kaydır"><i class="ph ph-caret-right"></i></button>
                 </div>
 
                 <!-- Search -->
                 <div class="article-search">
                     <i class="ph ph-magnifying-glass"></i>
                     <input type="text" placeholder="Makale ara..." id="article-search-input"
-                        oninput="searchPageArticles(this.value)">
+                        oninput="searchPageArticles(this.value)" aria-label="Makale ara">
                 </div>
             </div>
         </div>
@@ -221,17 +221,17 @@
                     makaleler
                     ve keşifler.</p>
                 <div class="footer-socials">
-                    <a href="https://twitter.com/aperionx" id="footer-twitter" target="_blank" rel="noopener" class="social-link"><i
+                    <a href="https://twitter.com/aperionx" id="footer-twitter" target="_blank" rel="noopener" class="social-link" aria-label="Twitter"><i
                             class="ph-fill ph-twitter-logo"></i></a>
-                    <a href="https://www.instagram.com/aperionx0" id="footer-instagram" target="_blank" rel="noopener" class="social-link"><i
+                    <a href="https://www.instagram.com/aperionx0" id="footer-instagram" target="_blank" rel="noopener" class="social-link" aria-label="Instagram"><i
                             class="ph-fill ph-instagram-logo"></i></a>
-                    <a href="https://www.linkedin.com/company/aperionx" id="footer-linkedin" target="_blank" rel="noopener" class="social-link"><i
+                    <a href="https://www.linkedin.com/company/aperionx" id="footer-linkedin" target="_blank" rel="noopener" class="social-link" aria-label="LinkedIn"><i
                             class="ph-fill ph-linkedin-logo"></i></a>
                 </div>
             </div>
 
             <div class="footer-col">
-                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <h3 class="footer-heading">Hızlı Erişim</h3>
                 <ul class="footer-links">
                     <li><a href="/">Ana Sayfa</a></li>
                     <li><a href="/articles.html">Makaleler</a></li>
@@ -240,7 +240,7 @@
             </div>
 
             <div class="footer-col">
-                <h4 class="footer-heading">İletişim & Kurumsal</h4>
+                <h3 class="footer-heading">İletişim & Kurumsal</h3>
                 <ul class="footer-links">
                     <li><a href="mailto:info@aperionx.com" id="footer-email">info@aperionx.com</a></li>
                     <li><a href="/about.html">Gizlilik Politikası</a></li>
@@ -267,7 +267,7 @@
     <!-- Modals (Copied for consistency) -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
-            <button class="modal-close" onclick="closeModal('loginModal')"><i class="ph ph-x"></i></button>
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
             <div class="modal-header">
                 <h2>Giriş Yap</h2>
                 <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
@@ -276,13 +276,13 @@
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-envelope-simple"></i> -->
-                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-lock-key"></i> -->
-                        <input type="password" id="login-password" placeholder="Şifre" required>
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
                     </div>
                 </div>
                 <div style="text-align: right; margin-bottom: 10px;">
@@ -299,7 +299,7 @@
 
     <div class="modal-overlay" id="signupModal">
         <div class="modal">
-            <button class="modal-close" onclick="closeModal('signupModal')"><i class="ph ph-x"></i></button>
+            <button class="modal-close" onclick="closeModal('signupModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
             <div class="modal-header">
                 <h2>Üye Ol</h2>
                 <p>Aramıza katılmak için formu doldurun.</p>
@@ -308,30 +308,30 @@
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-user"></i> -->
-                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required aria-label="Ad Soyad">
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required aria-label="Kullanıcı Adı">
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-envelope-simple"></i> -->
-                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-lock-key"></i> -->
-                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                        <input type="password" id="signup-password" placeholder="Şifre" required aria-label="Şifre">
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
                         <!-- <i class="ph ph-lock-key"></i> -->
-                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required aria-label="Şifre Tekrar">
                     </div>
                 </div>
                 <button type="submit" class="btn-primary">Üye Ol</button>
@@ -345,7 +345,7 @@
     <!-- Forgot Password Modal -->
     <div class="modal-overlay" id="forgotPasswordModal">
         <div class="modal">
-            <button class="modal-close" onclick="closeModal('forgotPasswordModal')"><i class="ph ph-x"></i></button>
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
             <div class="modal-header">
                 <h2>Şifremi Unuttum</h2>
                 <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
@@ -353,7 +353,7 @@
             <form id="forgot-password-form">
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
                     </div>
                 </div>
                 <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>

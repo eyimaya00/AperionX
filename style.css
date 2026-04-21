@@ -384,12 +384,10 @@ a {
 
 /* Icon Buttons */
 .icon-btn {
-    width: 36px;
-    /* Reduced from 40px */
-    /* Precise Width */
-    height: 36px;
-    /* Reduced from 40px */
-    /* Precise Height */
+    width: 44px;
+    /* WCAG minimum touch target */
+    height: 44px;
+    /* WCAG minimum touch target */
     display: flex;
     align-items: center;
     justify-content: center;

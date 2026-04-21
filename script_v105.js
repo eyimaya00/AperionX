@@ -1,4 +1,4 @@
-﻿// Base API URL
+// Base API URL
 var API_URL = '/api';
 
 // Inject author-chip hover CSS (can't do :hover with inline styles)
@@ -1513,8 +1513,8 @@ async function loadShowcase() {
                         </div>
                     </div>
                     
-                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
-                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="read-btn-circle" aria-label="Makaleyi oku: ${escapeHtml(item.title)}"><i class="ph-bold ph-arrow-right"></i></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;" aria-label="${escapeHtml(item.title)}"></a>
                 `;
             }
         });
@@ -1743,8 +1743,8 @@ function renderArticlesGrid() {
             </div>
                 </div>
 
-                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;"><i class="ph-bold ph-arrow-right"></i></a>
-                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;"></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Makaleyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
             </article>
         `;
         grid.innerHTML += html;
