@@ -50,7 +50,7 @@ const limiter = rateLimit({
     max: 5000,
     message: 'Too many requests from this IP, please try again later.'
 });
-
+app.disable('x-powered-by');
 app.use(cors());
 app.use(compression());
 app.use(bodyParser.json({ limit: '100mb' }));
@@ -4725,9 +4725,8 @@ app.use((req, res) => {
         return res.status(404).json({ message: `Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
     }
 
-    // For SPA routes (frontend routing), serve index.html
-    // This allows React/Vue/Vanilla JS routers to handle the path
-    res.sendFile(path.join(__dirname, 'index.html'));
+    // Serve HTML 404 page for front-end routes and unknown paths
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 // Start Server
