@@ -382,13 +382,7 @@ a {
     position: static !important;
 }
 
-/* Icon Buttons */
-.icon-btn {
-    width: 44px;
-    /* WCAG minimum touch target */
-    height: 44px;
-    /* WCAG minimum touch target */
-    display: flex;
+/* Icon Buttons */\n.icon-btn {\n    width: 36px;\n    height: 36px;\n    display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1rem;
@@ -5558,4 +5552,5 @@ body {
 .modal-overlay {
     z-index: 10001; /* By default, but js raises to 10002 when active */
 }
+
 

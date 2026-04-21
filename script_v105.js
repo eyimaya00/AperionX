@@ -1488,7 +1488,7 @@ async function loadShowcase() {
                 console.log(`[DEBUG] Rendering Card ${index + 1}:`, { title: item.title, author, bgImage });
 
                 card.innerHTML = `
-                    <div class="card-bg" style="background-image: url('${bgImage}'); background-color: #1e293b;"></div>
+                    <img src="${bgImage}" class="card-bg" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; background-color: #1e293b;" alt="">
                     <div class="card-overlay"></div>
                     
                     <div class="card-top-content">
@@ -1720,7 +1720,7 @@ function renderArticlesGrid() {
 
         const html = `
             <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
-                <div class="card-bg" style="background-image: url('${bgMeasure}')"></div>
+                <img src="${bgMeasure}" class="card-bg" loading="lazy" style="object-fit: cover; width: 100%; height: 100%;" alt="">
                 <div class="card-overlay" style="pointer-events: none;"></div>
                 
                 <div class="card-top-content" style="pointer-events: none;">
@@ -2946,3 +2946,4 @@ function initLanguageSwitcher() {
     // Run periodically to handle dynamic content/late loads
     setInterval(enforceLanguageButtons, 1000);
 }
+

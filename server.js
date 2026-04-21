@@ -19,6 +19,7 @@ const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const compression = require('compression');
 const multer = require('multer');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
@@ -51,6 +52,7 @@ const limiter = rateLimit({
 });
 
 app.use(cors());
+app.use(compression());
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(cookieParser());
 app.use((req, res, next) => {
@@ -835,8 +837,8 @@ app.get('/article-detail.html', async (req, res, next) => {
         next();
     } catch (e) { next(); }
 });
-app.use(express.static(__dirname));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(__dirname, { maxAge: '7d' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
 
 
