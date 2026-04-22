@@ -5642,3 +5642,13 @@ body {
 }
 
 
+
+/* Author Chip Styles */
+.author-chips-wrapper { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.author-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border-radius: 20px; background: rgba(99,102,241,0.1); color: var(--primary-color, #6366f1); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border: 1px solid rgba(99,102,241,0.2); }
+.author-chip:not(:has(.author-chip-avatar)) { padding: 4px 12px; }
+.author-chip i { font-size: 1.1rem; }
+.author-chip-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(99,102,241,0.3); }
+/* Dark Mode Support for Author Chip */
+body.dark-mode .author-chip { background: rgba(165, 180, 252, 0.1); color: #a5b4fc; border-color: rgba(165, 180, 252, 0.2); }
+body.dark-mode .author-chip-avatar { border-color: rgba(165, 180, 252, 0.3); }
