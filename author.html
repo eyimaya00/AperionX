@@ -1847,7 +1847,11 @@
 
         console.log('Author Scripts Starting...');
         const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+        let user = null;
+        try {
+            const userStr = localStorage.getItem('user');
+            if (userStr) user = JSON.parse(userStr);
+        } catch(e) { console.warn('User session parse error ignored.'); }
 
         function escapeHtml(text) {
             if (!text) return '';
@@ -3471,7 +3475,11 @@
         // === EXPERIMENT STATS LOADER ===
         async function loadAuthorExpStats() {
             try {
-                const user = JSON.parse(localStorage.getItem('user'));
+                let user = null;
+                try {
+                    const userStr = localStorage.getItem('user');
+                    if (userStr) user = JSON.parse(userStr);
+                } catch(e) {}
                 const authorParam = user ? `?author_id=${user.id}` : '';
                 const res = await fetch(`/api/experiment-stats${authorParam}`);
                 const data = await res.json();
