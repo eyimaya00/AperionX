@@ -2469,7 +2469,7 @@ async function loadComments(id) {
                 </div>
             `;
         } else {
-            formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal('loginModal')">giriş yapmalısınız</a>.</p>`;
+            formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal'); return false;">giriş yapmalısınız</a>.</p>`;
         }
     }
 
