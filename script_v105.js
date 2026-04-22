@@ -2455,8 +2455,27 @@ async function loadComments(id) {
     const list = document.getElementById('comments-list');
     if (!list) return;
 
+    // Render Comment Form based on auth status
+    const token = localStorage.getItem('token');
+    const formContainer = document.getElementById('comment-form-container');
+    if (formContainer) {
+        if (token) {
+            formContainer.innerHTML = `
+                <div class="comment-form">
+                    <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                    <div class="form-actions">
+                        <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
+        }
+    }
+
     try {
-        const res = await fetch(`${API_URL}/articles/${id}/comments`);
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_URL}/articles/${id}/comments`, { headers });
         const comments = await res.json();
 
         const countEl = document.getElementById('comment-count');
