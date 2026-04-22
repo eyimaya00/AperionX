@@ -2469,7 +2469,7 @@ async function loadComments(id) {
                 </div>
             `;
         } else {
-            formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
+            formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="#" onclick="openModal('loginModal')">giriş yapmalısınız</a>.</p>`;
         }
     }
 
@@ -2479,7 +2479,7 @@ async function loadComments(id) {
         const comments = await res.json();
 
         const countEl = document.getElementById('comment-count');
-        if (countEl) countEl.innerText = `(${comments.length})`;
+        if (countEl) countEl.innerText = comments.length;
 
         list.innerHTML = '';
         if (comments.length === 0) {
