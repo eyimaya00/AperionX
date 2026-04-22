@@ -560,7 +560,7 @@ i[class*=" ph"] {
 /* ── Mobile Padding adjustment ── */
 @media (max-width: 900px) {
     .header {
-        padding: 0 12px;
+        padding: 0 8px; /* Reduced from 12px to pull logo left */
         height: 64px;
     }
 
@@ -578,14 +578,15 @@ i[class*=" ph"] {
     }
 
     .logo {
-        font-size: 1.2rem !important;
+        font-size: 1.15rem !important; /* Slightly smaller text */
+        gap: 6px; /* Closer icon and text */
     }
 
     .logo-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 1.1rem !important;
-        border-radius: 9px;
+        width: 30px; /* Slightly smaller icon */
+        height: 30px;
+        font-size: 1.05rem !important;
+        border-radius: 8px;
     }
 }
 
