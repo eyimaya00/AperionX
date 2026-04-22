@@ -13,15 +13,13 @@
     </script>
     <meta charset="UTF-8">
     <script>
-        // DEBUG: Capture and alert global errors
+        // DEBUG: Capture and log global errors silently
         window.onerror = function (msg, url, line, col, error) {
-            console.error("Global Error:", msg, "Line:", line); // Enhanced logging
-            // Avoid alerting for known safe handled errors if possible, or keep alert but precise
-            alert("Sistem Hatası (v3.0 - Fix Applied):\n" + msg + "\nSatır: " + line);
+            console.error("Global Error:", msg, "Line:", line);
             return false;
         };
         window.addEventListener('unhandledrejection', function (event) {
-            alert("Bağlantı Hatası (Promise):\n" + event.reason);
+            console.error("Bağlantı Hatası (Promise):", event.reason);
         });
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
