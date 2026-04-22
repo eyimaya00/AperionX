@@ -1331,7 +1331,16 @@ window.logout = function () {
 
 // Check Auth & Update UI
 function checkAuthStatus() {
-    const user = JSON.parse(localStorage.getItem('user'));
+    let user = null;
+    try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser && storedUser !== 'undefined') {
+            user = JSON.parse(storedUser);
+        }
+    } catch (e) {
+        console.error('checkAuthStatus: Failed to parse user from localStorage', e);
+        localStorage.removeItem('user');
+    }
     const token = localStorage.getItem('token');
     const authButtons = document.querySelectorAll('.auth-buttons, .mobile-auth');
 
@@ -1354,7 +1363,7 @@ function checkAuthStatus() {
             // SIMPLE, DIRECT ONCLICK - NO EVENT LISTENERS
             container.innerHTML = `
                 <button type="button" class="btn btn-login" onclick="window.navigateToDashboard();" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <span class="user-name">${escapeHtml(user.fullname)}</span>
+                    <span class="user-name">${escapeHtml(user.fullname || user.username || 'Üye')}</span>
                     <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
                 </button>
                 <button type="button" class="btn btn-login btn-sm" onclick="window.logout();">Çıkış</button>
@@ -2518,9 +2527,22 @@ async function postComment() {
             showToast('Yorum gönderildi!', 'success');
             loadComments(id);
         } else {
-            showToast('Yorum gönderilemedi.', 'error');
+            let errorMsg = 'Yorum gönderilemedi.';
+            try {
+                const data = await res.json();
+                if (data && data.error) errorMsg = data.error;
+                else if (data && data.message) errorMsg = data.message;
+            } catch (jsonErr) {
+                if (res.status === 401 || res.status === 403) {
+                    errorMsg = 'Oturum süreniz dolmuş veya yetkisiz işlem. Lütfen tekrar giriş yapın.';
+                }
+            }
+            showToast(errorMsg, 'error');
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error('postComment error:', e); 
+        showToast('Yorum gönderilirken bir hata oluştu.', 'error');
+    }
 }
 
 async function deleteComment(commentId) {
