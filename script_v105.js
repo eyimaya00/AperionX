@@ -1268,14 +1268,16 @@ if (loginForm) {
                 closeModal('loginModal');
                 checkAuthStatus(); // Update UI
 
-                if (data.redirectUrl) {
-                    setTimeout(() => window.location.href = data.redirectUrl, 1000);
-                } else if (data.user.role === 'admin') {
-                    setTimeout(() => window.location.href = 'admin.html', 1000); // Fallback
+                // Role-based redirect logic
+                if (data.user.role === 'admin') {
+                    setTimeout(() => window.location.href = 'admin.html', 1000);
                 } else if (data.user.role === 'editor') {
                     setTimeout(() => window.location.href = 'editor.html', 1000);
                 } else if (data.user.role === 'author') {
                     setTimeout(() => window.location.href = 'author.html', 1000);
+                } else {
+                    // Reader: Stay on current page, reload to refresh comment forms & UI
+                    setTimeout(() => window.location.reload(), 800);
                 }
             }
         } catch (error) {
