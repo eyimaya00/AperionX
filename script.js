@@ -1,4 +1,4 @@
-﻿// Base API URL
+// Base API URL
 const API_URL = '/api';
 
 // --- HELPER: Resolve Image Path ---
@@ -1175,13 +1175,13 @@ if (loginForm) {
                 checkAuthStatus(); // Update UI
 
                 if (data.redirectUrl) {
-                    setTimeout(() => window.location.href = data.redirectUrl, 1000);
+                    setTimeout(() => window.location.href = '/' + data.redirectUrl, 1000);
                 } else if (data.user.role === 'admin') {
-                    setTimeout(() => window.location.href = 'admin.html', 1000); // Fallback
+                    setTimeout(() => window.location.href = '/admin', 1000);
                 } else if (data.user.role === 'editor') {
-                    setTimeout(() => window.location.href = 'editor.html', 1000);
+                    setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
-                    setTimeout(() => window.location.href = 'author.html', 1000);
+                    setTimeout(() => window.location.href = '/author', 1000);
                 }
             }
         } catch (error) {
@@ -1216,13 +1216,13 @@ function checkAuthStatus() {
             let roleBadge = '';
 
             if (user.role === 'admin') {
-                dashboardAction = "window.location.href='admin.html'";
+                dashboardAction = "window.location.href='/admin'";
                 roleBadge = '<span class="role-badge admin">Admin</span>';
             } else if (user.role === 'author') {
-                dashboardAction = "window.location.href='author.html'";
+                dashboardAction = "window.location.href='/author'";
                 roleBadge = '<span class="role-badge author">Yazar</span>';
             } else if (user.role === 'editor') {
-                dashboardAction = "window.location.href='editor.html'";
+                dashboardAction = "window.location.href='/editor'";
                 roleBadge = '<span class="role-badge editor">Editör</span>';
             }
 
@@ -1251,14 +1251,20 @@ function checkAuthStatus() {
                 // 2. Admin/Dashboard Link
                 if (user.role === 'admin') {
                     const adminLink = document.createElement('a');
-                    adminLink.href = 'admin.html';
+                    adminLink.href = '/admin';
                     adminLink.className = 'nav-link special-nav-link admin-link';
                     adminLink.innerHTML = '<i class="ph-fill ph-gear"></i> Admin';
                     adminLink.style.color = 'var(--primary-color)';
                     navMenu.appendChild(adminLink);
+                } else if (user.role === 'editor') {
+                    const editorLink = document.createElement('a');
+                    editorLink.href = '/editor';
+                    editorLink.className = 'nav-link special-nav-link';
+                    editorLink.innerText = 'Editör Paneli';
+                    navMenu.appendChild(editorLink);
                 } else if (user.role === 'author') {
                     const authorLink = document.createElement('a');
-                    authorLink.href = 'author.html';
+                    authorLink.href = '/author';
                     authorLink.className = 'nav-link special-nav-link';
                     authorLink.innerText = 'Yazar Paneli';
                     navMenu.appendChild(authorLink);

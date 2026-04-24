@@ -77,8 +77,11 @@ app.use(async (req, res, next) => {
         '/sitemap.xml',  // SEO
         '/feed.xml',     // RSS Feed
         '/admin.html',   // Allow Admin access (still protected by login)
+        '/admin',        // Allow Admin clean URL
         '/editor.html',  // Allow Editor access
+        '/editor',       // Allow Editor clean URL
         '/author.html',  // Allow Author access
+        '/author',       // Allow Author clean URL
         '/author_v2',    // Allow Debug Author access
         '/index.html',   // Allow Login on index
         '/api/login',    // Allow login API
@@ -3199,10 +3202,8 @@ app.get('/author', (req, res) => {
     res.sendFile(path.join(__dirname, 'author.html'));
 });
 
-// Serve Editor Panel
-app.get('/editor', (req, res) => {
-    res.sendFile(path.join(__dirname, 'editor.html'));
-});
+// Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
+// app.get('/editor', ...) -> already defined above serving editor_panel.html
 
 // === PUBLIC AUTHOR PROFILE (Username or ID) ===
 app.get('/api/public/author/:identifier', async (req, res) => {
@@ -3386,10 +3387,8 @@ app.get('/author', (req, res) => {
     res.sendFile(path.join(__dirname, 'author.html'));
 });
 
-// Serve Editor Panel
-app.get('/editor', (req, res) => {
-    res.sendFile(path.join(__dirname, 'editor.html'));
-});
+// Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
+// app.get('/editor', ...) -> already defined above serving editor_panel.html
 
 // === LIKES & COMMENTS ===
 
