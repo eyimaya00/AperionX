@@ -33,6 +33,11 @@ body { background: #f1f5f9; }
     background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
     border-right: 1px solid rgba(99,102,241,0.15) !important;
     box-shadow: 4px 0 30px rgba(0,0,0,0.3) !important;
+    overflow: visible !important;
+}
+
+.sidebar > *:not(.sidebar-toggle) {
+    /* Let inner content scroll but not clip toggle */
 }
 
 .sidebar::before {
@@ -192,7 +197,13 @@ body { background: #f1f5f9; }
     border: 1px solid rgba(0,0,0,0.04) !important;
     box-shadow: var(--shadow-soft) !important;
     position: relative;
-    overflow-x: auto;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+/* Table wrapper - ensure horizontal scroll */
+.card .data-table {
+    min-width: 700px;
 }
 
 /* === DATA TABLES === */
