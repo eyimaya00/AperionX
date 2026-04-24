@@ -1270,11 +1270,11 @@ if (loginForm) {
 
                 // Role-based redirect logic
                 if (data.user.role === 'admin') {
-                    setTimeout(() => window.location.href = 'admin.html', 1000);
+                    setTimeout(() => window.location.href = '/admin', 1000);
                 } else if (data.user.role === 'editor') {
-                    setTimeout(() => window.location.href = 'editor.html', 1000);
+                    setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
-                    setTimeout(() => window.location.href = 'author.html', 1000);
+                    setTimeout(() => window.location.href = '/author', 1000);
                 } else {
                     // Reader: Stay on current page, reload to refresh comment forms & UI
                     setTimeout(() => window.location.reload(), 800);
@@ -1313,9 +1313,9 @@ window.navigateToDashboard = function () {
         const u = JSON.parse(userStr);
         console.log('Navigating dashboard for role:', u.role);
 
-        if (u.role === 'admin') window.location.href = 'admin.html';
-        else if (u.role === 'author') window.location.href = 'author.html';
-        else if (u.role === 'editor') window.location.href = 'editor.html';
+        if (u.role === 'admin') window.location.href = '/admin';
+        else if (u.role === 'author') window.location.href = '/author';
+        else if (u.role === 'editor') window.location.href = '/editor';
         else window.location.href = 'profile.html';
     } catch (err) {
         console.error("Navigation Error:", err);
@@ -1388,21 +1388,21 @@ function checkAuthStatus() {
                 // 2. Admin/Dashboard Link
                 if (user.role === 'admin') {
                     const adminLink = document.createElement('a');
-                    adminLink.href = 'admin.html';
+                    adminLink.href = '/admin';
                     adminLink.className = 'nav-link special-nav-link admin-link';
                     adminLink.innerHTML = '<i class="ph-fill ph-gear"></i> Admin';
                     adminLink.style.color = 'var(--primary-color)';
                     navMenu.appendChild(adminLink);
                 } else if (user.role === 'author') {
                     const authorLink = document.createElement('a');
-                    authorLink.href = 'author.html';
+                    authorLink.href = '/author';
                     authorLink.className = 'nav-link special-nav-link author-link';
                     authorLink.innerHTML = '<i class="ph-fill ph-pencil-simple"></i> Yazar Paneli';
                     authorLink.style.color = '#10b981'; // Emerald Green distinction
                     navMenu.appendChild(authorLink);
                 } else if (user.role === 'editor') {
                     const editorLink = document.createElement('a');
-                    editorLink.href = 'editor.html';
+                    editorLink.href = '/editor';
                     editorLink.className = 'nav-link special-nav-link editor-link';
                     editorLink.innerText = 'Editör Paneli';
                     navMenu.appendChild(editorLink);
