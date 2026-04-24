@@ -295,20 +295,15 @@
             margin-left: var(--sidebar-width);
             padding: 40px;
             flex: 1;
-            width: 100%;
-            /* Force full width availability */
-            /* min-width: 0; REMOVED to prevent shrinking too small */
-            flex-shrink: 0;
-            /* Prevent shrinking */
-            /* Enable flex item shrinking if needed but prevents overflow issues */
-            max-width: 100%;
-            /* Prevent overflow */
+            width: calc(100% - var(--sidebar-width));
+            min-width: 0;
             box-sizing: border-box;
             transition: margin-left var(--transition-speed);
         }
 
         .content.expanded {
             margin-left: var(--sidebar-width-collapsed);
+            width: calc(100% - var(--sidebar-width-collapsed));
         }
 
         /* DASHBOARD GRID */
