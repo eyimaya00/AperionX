@@ -1844,28 +1844,89 @@
             window.location.href = 'index.html?openLogin=true';
         }
 
+        // =============================================
+        // === UNIFIED INIT — Single DOMContentLoaded ===
+        // =============================================
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Core Data Loading ---
             loadSettings();
             loadMyArticles();
-            loadDashboardStats(); // Load stats on init
-            loadAnalytics(); // Load analytics
-            // loadAuthorsForSelection(); // DISABLED: Author Panel does not select authors.
-            if (user) updateSidebarProfile(user);
-            if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
+            loadDashboardStats();
+            loadAnalytics();
+            loadCategories();
+            loadNotifications();
+            renderDashboardChart();
+            loadMyExperiments();
+            loadAuthorExpStats();
 
-            // Real-time polling
+            // --- User Profile ---
+            if (user) {
+                updateSidebarProfile(user);
+                if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
+
+                // Profile form fields
+                const profileName = document.getElementById('profile-name');
+                const profileEmail = document.getElementById('profile-email');
+                const profileJob = document.getElementById('profile-job');
+                const profileBio = document.getElementById('profile-bio');
+                if (profileName) profileName.value = user.fullname || '';
+                if (profileEmail) profileEmail.value = user.email || '';
+                if (profileJob) profileJob.value = user.job_title || '';
+                if (profileBio) profileBio.value = user.bio || '';
+
+                // Public profile link
+                const profileBtn = document.getElementById('view-public-profile-btn');
+                if (profileBtn && user.username) {
+                    profileBtn.href = `author-profile.html?u=${user.username}`;
+                } else if (profileBtn) {
+                    profileBtn.style.display = 'none';
+                }
+
+                // Avatar preview
+                if (user.avatar_url) {
+                    const avatarPreview = document.getElementById('profile-avatar-preview');
+                    if (avatarPreview) avatarPreview.src = user.avatar_url;
+                }
+            }
+
+            // --- Dark Mode Restore ---
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const icon = document.getElementById('theme-icon');
+                if (icon) icon.className = 'ph-fill ph-sun';
+            }
+
+            // --- Logout Button ---
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+
+            // --- Toast Container Position ---
+            const toastContainer = document.getElementById('toast-container');
+            if (toastContainer) {
+                toastContainer.style.top = 'auto';
+                toastContainer.style.bottom = '20px';
+                toastContainer.style.right = '20px';
+            }
+
+            // --- Polling Intervals ---
             setInterval(() => {
                 const dashboard = document.getElementById('dashboard');
                 const analytics = document.getElementById('analytics');
-
                 if (analytics && analytics.classList.contains('active')) {
-                    loadAnalytics(true); // silent refresh
+                    loadAnalytics(true);
                 }
-
                 if (dashboard && dashboard.classList.contains('active')) {
-                    loadDashboardStats(); // refresh dashboard stats
+                    loadDashboardStats();
                 }
             }, 3000);
+
+            // Notification polling (every 30s)
+            setInterval(loadNotifications, 30000);
         });
 
         // Navigation Helpers
@@ -2015,7 +2076,7 @@
                 const date = new Date(art.created_at).toLocaleDateString('tr-TR');
                 const row = `
                     <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding: 20px 30px; font-weight: 500; color: #0f172a;">${art.title}</td>
+                        <td style="padding: 20px 30px; font-weight: 500; color: #0f172a;">${escapeHtml(art.title)}</td>
                         <td style="padding: 20px 30px; color: #64748b;">${date}</td>
                         <td style="padding: 20px 30px; text-align: center;">
                             <span style="background: #eff6ff; color: #1e40af; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">${art.views}</span>
@@ -2055,9 +2116,9 @@
                 const date = new Date(c.created_at).toLocaleDateString('tr-TR');
                 const row = `
                     <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding: 20px 30px; font-weight: 600; color: #0f172a;">${c.user_name}</td>
-                        <td style="padding: 20px 30px; color: #475569; max-width: 300px;">${c.content}</td>
-                        <td style="padding: 20px 30px; color: #3b82f6;">${c.article_title}</td>
+                        <td style="padding: 20px 30px; font-weight: 600; color: #0f172a;">${escapeHtml(c.user_name)}</td>
+                        <td style="padding: 20px 30px; color: #475569; max-width: 300px;">${escapeHtml(c.content)}</td>
+                        <td style="padding: 20px 30px; color: #3b82f6;">${escapeHtml(c.article_title)}</td>
                         <td style="padding: 20px 30px; color: #94a3b8; font-size: 0.9rem;">${date}</td>
                     </tr>
                  `;
@@ -2078,11 +2139,7 @@
                 return;
             }
 
-            if (type === 'likers_list') {
-                loadLikersForTable();
-                showAuthorToast('Beğeniler listeleniyor.');
-                return;
-            }
+            // [CLEANED] Duplicate likers_list case removed
 
             // Sort based on type
             let sorted = [...analyticsData];
@@ -2096,41 +2153,9 @@
             renderAnalyticsTable(sorted);
         }
 
-        function showAuthorToast(message) {
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.cssText = `
-                 position: fixed;
-                 bottom: 20px;
-                 right: 20px;
-                 background: #0f172a;
-                 color: white;
-                 padding: 12px 24px;
-                 border-radius: 8px;
-                 z-index: 10000;
-                 animation: fadeIn 0.3s ease;
-             `;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+        // [CLEANED] First showAuthorToast (no type param) removed — using version at line ~2743 with type support
 
-        async function loadDashboardStats() {
-            try {
-                const res = await fetch(`${API_URL}/author/stats`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('stat-published').textContent = data.published;
-                    document.getElementById('stat-views').textContent = data.views;
-                    if (document.getElementById('stat-likes')) document.getElementById('stat-likes').textContent = data.likes;
-                    if (document.getElementById('stat-comments')) document.getElementById('stat-comments').textContent = data.comments;
-                }
-            } catch (e) { console.error('Stats load error', e); }
-        }
+        // [CLEANED] Duplicate loadDashboardStats removed — using version at line ~1883 with null safety
 
         function toggleTrashView() {
             isTrashView = !isTrashView;
@@ -2138,51 +2163,9 @@
             loadMyArticles();
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('main-content');
-            const icon = document.getElementById('toggle-icon');
+        // [CLEANED] Simple toggleSidebar removed — using advanced version at line ~2961 with try/catch + mobile support
 
-            sidebar.classList.toggle('collapsed');
-            content.classList.toggle('expanded');
-
-            if (sidebar.classList.contains('collapsed')) {
-                icon.className = 'ph ph-caret-right';
-            } else {
-                icon.className = 'ph ph-caret-left';
-            }
-        }
-
-        async function loadSettings() {
-            try {
-                const res = await fetch(`${API_URL}/settings`);
-                const settings = await res.json();
-
-                const brandText = document.getElementById('brand-text');
-                const brandLogoContainer = document.getElementById('logo-img-container');
-                const defaultIcon = document.getElementById('default-logo-icon');
-
-                if (settings.site_logo && settings.site_logo.trim() !== "") {
-                    if (defaultIcon) defaultIcon.style.display = 'none';
-                    brandLogoContainer.innerHTML = `<img src="${settings.site_logo}" alt="Logo" style="height: 36px; border-radius: 4px;">`;
-                }
-
-                // Dynamic Favicon Update
-                if (settings.site_favicon && settings.site_favicon.trim() !== "") {
-                    const fav = document.getElementById('favicon');
-                    if (fav) fav.href = settings.site_favicon;
-                }
-
-                if (settings.site_title) {
-                    const title = settings.site_title;
-                    if (title.endsWith('X')) {
-                        brandText.innerHTML = `${title.slice(0, -1)}<span style="color: var(--primary-accent)">X</span>`;
-                    } else {
-                        brandText.innerHTML = title;
-                    }
-                }
-            } catch (e) { }
-        }
+        // [CLEANED] First loadSettings removed — using version at line ~2999 with null safety checks
 
         // Register the image resize module
         /* global ImageResize */
@@ -2213,11 +2196,8 @@
                 toolbar: {
                     container: [
                         [{ 'header': [1, 2, 3, false] }],
-                        [{ 'header': [1, 2, 3, false] }],
                         ['bold', 'italic', 'underline', 'strike'],
                         [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'align': [] }],
-                        ['blockquote', 'code-block'],
                         [{ 'align': [] }],
                         ['blockquote', 'code-block'],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -2743,11 +2723,19 @@
 
         function showAuthorToast(msg, type) {
             const div = document.createElement('div');
-            div.style.background = type === 'success' ? '#10b981' : '#ef4444';
-            div.style.color = 'white';
-            div.style.padding = '12px 24px';
-            div.style.borderRadius = '8px';
-            div.style.marginTop = '10px';
+            // Neutral dark for info, green for success, red for error
+            const bgColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#0f172a');
+            div.style.cssText = `
+                background: ${bgColor};
+                color: white;
+                padding: 12px 24px;
+                border-radius: 10px;
+                margin-top: 10px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transition: opacity 0.3s ease;
+            `;
             div.innerText = msg;
             document.getElementById('toast-container').appendChild(div);
             setTimeout(() => div.remove(), 3000);
@@ -2878,12 +2866,7 @@
             if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
         }
 
-        // Init Dark Mode
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            const icon = document.getElementById('theme-icon');
-            if (icon) icon.className = 'ph ph-sun';
-        }
+        // [CLEANED] Standalone dark mode init removed — handled in unified DOMContentLoaded init
 
         function toggleZenMode() {
             document.body.classList.toggle('zen-mode');
@@ -2920,43 +2903,7 @@
             document.getElementById('preview-modal').style.display = 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSettings();
-            loadMyArticles();
-            loadCategories();
-            loadAuthorsForSelection(); // Load authors
-            loadNotifications();
-            renderDashboardChart();
-            loadMyExperiments();
-            setInterval(loadNotifications, 30000);
-
-            // Load Theme
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-                const icon = document.getElementById('theme-icon');
-                if (icon) icon.className = 'ph-fill ph-sun';
-            }
-
-            // Load Profile Info
-            if (user) {
-                document.getElementById('profile-name').value = user.fullname;
-                document.getElementById('profile-email').value = user.email; // Read-only usually
-                document.getElementById('profile-job').value = user.job_title || '';
-                document.getElementById('profile-bio').value = user.bio || '';
-
-                // Update "View Profile" Button Link
-                const profileBtn = document.getElementById('view-public-profile-btn');
-                if (profileBtn && user.username) {
-                    profileBtn.href = `author-profile.html?u=${user.username}`;
-                } else if (profileBtn) {
-                    profileBtn.style.display = 'none'; // Hide if no username (shouldn't happen)
-                }
-
-                if (user.avatar_url) document.getElementById('profile-avatar-preview').src = user.avatar_url;
-
-                updateSidebarProfile(user);
-            }
-        });
+        // [CLEANED] Second DOMContentLoaded removed — merged into unified init at top
 
         function toggleSidebar() {
             try {
@@ -3037,16 +2984,7 @@
             window.location.href = 'index.html';
         }
 
-        // Ensure button works
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    logout();
-                });
-            }
-        });
+        // [CLEANED] Third DOMContentLoaded (logout) removed — merged into unified init
 
         // Notifications Logic
         let isNotifOpen = false;
@@ -3228,19 +3166,7 @@
                 });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNotifications();
-            renderDashboardChart();
-            setInterval(loadNotifications, 30000);
-
-            // Move toast container if it was auto-generated elsewhere
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
-                toastContainer.style.top = 'auto';
-                toastContainer.style.bottom = '20px';
-                toastContainer.style.right = '20px';
-            }
-        });
+        // [CLEANED] Fourth DOMContentLoaded removed — merged into unified init
 
         // =============================================
         // === EXPERIMENTS MODULE JS ===
@@ -3459,10 +3385,10 @@
                 if (el2) el2.innerText = data.total_views || 0;
             } catch (e) { console.error('Author exp stats error:', e); }
         }
-        loadAuthorExpStats();
+        // [CLEANED] Standalone loadAuthorExpStats() call removed — handled in unified DOMContentLoaded init
 
     </script>
-    <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+    <!-- [CLEANED] Duplicate toast-container removed — using one at line 1799 -->
     <script defer src="script_v105.js?v=201"></script>
 </body>
 
