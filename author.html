@@ -105,11 +105,18 @@
             /* Subtle border */
             box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
             /* Deep shadow */
+            overflow: visible;
+            /* FIXED: was overflow-y:auto which clipped the toggle button */
+        }
+
+        /* Move scroll to nav inside sidebar */
+        .sidebar nav {
             overflow-y: auto;
+            flex: 1;
             scrollbar-width: none;
         }
 
-        .sidebar::-webkit-scrollbar {
+        .sidebar nav::-webkit-scrollbar {
             display: none;
         }
 
