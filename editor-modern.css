@@ -167,6 +167,15 @@ body { background: #f1f5f9; }
     height: 52px !important;
     font-size: 1.5rem !important;
     transition: transform 0.3s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.stat-icon i {
+    display: inline-block !important;
+    visibility: visible !important;
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
 }
 .stat-card:hover .stat-icon { transform: scale(1.1) rotate(6deg); }
 
@@ -183,7 +192,7 @@ body { background: #f1f5f9; }
     border: 1px solid rgba(0,0,0,0.04) !important;
     box-shadow: var(--shadow-soft) !important;
     position: relative;
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 /* === DATA TABLES === */
@@ -396,6 +405,17 @@ body { background: #f1f5f9; }
     border: 3px solid #f1f5f9 !important;
     box-shadow: 0 4px 12px rgba(99,102,241,0.3) !important;
     transition: all 0.25s ease !important;
+    z-index: 200 !important;
+    position: absolute !important;
+    top: 28px !important;
+    right: -16px !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    border-radius: 50% !important;
 }
 .sidebar-toggle:hover {
     transform: scale(1.1);
