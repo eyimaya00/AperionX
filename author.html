@@ -33,6 +33,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
     <link href="quill-overrides.css" rel="stylesheet">
+    <link href="author-modern.css" rel="stylesheet">
     <style>
         :root {
             --admin-bg: #f8fafc;
@@ -1103,111 +1104,89 @@
 
         <!-- DASHBOARD -->
         <div id="dashboard" class="section active">
-            <div style="margin-bottom: 30px;">
-                <h1 class="page-title" style="margin-bottom: 5px;">Ana Sayfa</h1>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.1rem; color: #64748b;">Tekrar hoş geldin,</span>
-                    <span id="welcome-name"
-                        style="font-size: 1.2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-accent), #818cf8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Yazar</span>
+            <div class="welcome-banner">
+                <h1 class="page-title welcome-title">Ana Sayfa</h1>
+                <div class="welcome-subtitle">
+                    <span class="welcome-text">Tekrar hoş geldin,</span>
+                    <span id="welcome-name" class="welcome-name">Yazar</span>
                     <span style="font-size: 1.2rem;">👋</span>
                 </div>
             </div>
 
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 30px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 24px;">
                 <!-- Published Count -->
-                <div class="card" onclick="goToMyArticles('published')" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #10b981; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="background: #dcfce7; color: #166534; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern green" onclick="goToMyArticles('published')">
+                    <div class="stat-icon-wrap">
                         <i class="ph-bold ph-check-circle"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Yayınlanan</h3>
-                        <p id="stat-published" style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Yayınlanan</h3>
+                        <p id="stat-published" class="stat-value">-</p>
                     </div>
                 </div>
 
                 <!-- Total Views -->
-                <div class="card" onclick="goToAnalytics()" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #3b82f6; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="background: #dbeafe; color: #1e40af; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern blue" onclick="goToAnalytics()">
+                    <div class="stat-icon-wrap">
                         <i class="ph-bold ph-eye"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Toplam Okunma</h3>
-                        <p id="stat-views" style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Toplam Okunma</h3>
+                        <p id="stat-views" class="stat-value">-</p>
                     </div>
                 </div>
 
                 <!-- Total Likes -->
-                <div class="card" onclick="goToLikers()" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #ef4444; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="background: #fee2e2; color: #b91c1c; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern red" onclick="goToLikers()">
+                    <div class="stat-icon-wrap">
                         <i class="ph-bold ph-heart"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Toplam Beğeni</h3>
-                        <p id="stat-likes" style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Toplam Beğeni</h3>
+                        <p id="stat-likes" class="stat-value">-</p>
                     </div>
                 </div>
 
                 <!-- Total Comments -->
-                <div class="card" onclick="goToAnalytics()" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #8b5cf6; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="background: #ddd6fe; color: #5b21b6; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern purple" onclick="goToAnalytics()">
+                    <div class="stat-icon-wrap">
                         <i class="ph-fill ph-chat-circle-text"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Yorum Sayısı</h3>
-                        <p id="stat-comments" style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Yorum Sayısı</h3>
+                        <p id="stat-comments" class="stat-value">-</p>
                     </div>
                 </div>
 
                 <!-- Experiments Published -->
-                <div class="card" onclick="showSection('my-experiments', document.querySelector('[title=\"
-                    Deneylerim\"]')); loadMyExperiments();"
-                    style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #a855f7; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-5px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <div
-                        style="background: #fdf4ff; color: #7c3aed; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern violet" onclick="showSection('my-experiments', document.querySelector('[title=&quot;Deneylerim&quot;]')); loadMyExperiments();">
+                    <div class="stat-icon-wrap">
                         <i class="ph-bold ph-flask"></i>
                     </div>
                     <div>
-                        <h3
-                            style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
-                            Yayında Deney</h3>
-                        <p id="stat-exp-published"
-                            style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Yayında Deney</h3>
+                        <p id="stat-exp-published" class="stat-value">-</p>
                     </div>
                 </div>
 
                 <!-- Experiment Views -->
-                <div class="card" onclick="showSection('my-experiments', document.querySelector('[title=\"
-                    Deneylerim\"]')); loadMyExperiments();"
-                    style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 5px solid #06b6d4; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-5px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <div
-                        style="background: #ecfeff; color: #0891b2; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div class="stat-card-modern cyan" onclick="showSection('my-experiments', document.querySelector('[title=&quot;Deneylerim&quot;]')); loadMyExperiments();">
+                    <div class="stat-icon-wrap">
                         <i class="ph-bold ph-binoculars"></i>
                     </div>
                     <div>
-                        <h3
-                            style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
-                            Deney Görüntülenme</h3>
-                        <p id="stat-exp-views"
-                            style="margin: 5px 0 0; font-size: 2rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="stat-label">Deney Görüntülenme</h3>
+                        <p id="stat-exp-views" class="stat-value">-</p>
                     </div>
                 </div>
-
             </div>
 
-            <!-- ANALYTICS CHART (Full Width) -->
-            <div class="card"
-                style="margin-top: 30px; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <!-- ANALYTICS CHART -->
+            <div class="chart-card-modern">
+                <div class="chart-header">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #1e293b;">Makale Performans
-                            Grafiği</h3>
-                        <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Görüntülenme, Beğeni ve Yorum
-                            İstatistikleri</p>
+                        <h3 class="chart-title">Makale Performans Grafiği</h3>
+                        <p class="chart-subtitle">Görüntülenme, Beğeni ve Yorum İstatistikleri</p>
                     </div>
                 </div>
                 <div style="height: 450px; position: relative; width: 100%;">
@@ -3142,19 +3121,27 @@
                                     position: 'top',
                                     labels: {
                                         usePointStyle: true,
-                                        boxWidth: 8
+                                        boxWidth: 8,
+                                        color: document.body.classList.contains('dark-mode') ? '#94a3b8' : '#64748b'
                                     }
                                 },
                                 tooltip: {
                                     mode: 'index',
-                                    intersect: false
+                                    intersect: false,
+                                    backgroundColor: document.body.classList.contains('dark-mode') ? '#1e293b' : '#fff',
+                                    titleColor: document.body.classList.contains('dark-mode') ? '#f1f5f9' : '#0f172a',
+                                    bodyColor: document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569',
+                                    borderColor: document.body.classList.contains('dark-mode') ? '#334155' : '#e2e8f0',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    cornerRadius: 10
                                 }
                             },
                             scales: {
                                 y: {
                                     beginAtZero: true,
-                                    grid: { color: '#f1f5f9', borderDash: [5, 5] },
-                                    ticks: { color: '#64748b' }
+                                    grid: { color: document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.06)' : '#f1f5f9', borderDash: [5, 5] },
+                                    ticks: { color: document.body.classList.contains('dark-mode') ? '#94a3b8' : '#64748b' }
                                 },
                                 x: {
                                     grid: { display: false },
