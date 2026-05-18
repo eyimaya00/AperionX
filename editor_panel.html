@@ -2528,7 +2528,8 @@
                 let actions = '';
                 if (exp.status === 'pending') {
                     actions = `<button onclick="approveExp(${exp.id})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:5px; font-size:0.85rem;"><i class="ph ph-check"></i> Onayla</button>
-                    <button onclick="rejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-x"></i> Reddet</button>`;
+                    <button onclick="rejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-x"></i> Reddet</button>
+                    <a href="/deney/${exp.slug}" target="_blank" style="background:#6366f1; color:white; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-block; font-size:0.85rem; margin-left:5px;"><i class="ph ph-eye"></i> İncele</a>`;
                 } else if (exp.status === 'published') {
                     actions = `<a href="/deney/${exp.slug}" target="_blank" style="color:#6366f1; font-size:0.85rem;"><i class="ph ph-eye"></i> Görüntüle</a>`;
                 }

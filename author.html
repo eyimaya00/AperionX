@@ -3252,23 +3252,76 @@
         let allMyExperiments = [];
         let expFilterStatus = 'all';
 
-        function initExpQuill() {
+                function initExpQuill() {
             if (!expQuillProcedure && document.getElementById('exp-editor')) {
                 expQuillProcedure = new Quill('#exp-editor', {
                     theme: 'snow',
                     placeholder: 'Deney adımlarını yazın...',
-                    modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                    modules: { 
+                        toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']],
+                        imageResize: {}
+                    }
+                });
+                expQuillProcedure.getModule('toolbar').addHandler('image', function() {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.click();
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        if (file) {
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            const q = this.quill || expQuillProcedure;
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                                if (!res.ok) throw new Error('Yükleme başarısız');
+                                const data = await res.json();
+                                let range = q.getSelection();
+                                if (!range) range = { index: q.getLength() - 1, length: 0 };
+                                q.insertEmbed(range.index, 'image', data.url);
+                                q.setSelection(range.index + 1);
+                            } catch (e) { console.error(e); }
+                        }
+                    };
                 });
             }
             if (!expQuillResults && document.getElementById('exp-results-editor')) {
                 expQuillResults = new Quill('#exp-results-editor', {
                     theme: 'snow',
                     placeholder: 'Sonuçları ve gözlemleri yazın...',
-                    modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                    modules: { 
+                        toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']],
+                        imageResize: {}
+                    }
+                });
+                expQuillResults.getModule('toolbar').addHandler('image', function() {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.click();
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        if (file) {
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            const q = this.quill || expQuillResults;
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                                if (!res.ok) throw new Error('Yükleme başarısız');
+                                const data = await res.json();
+                                let range = q.getSelection();
+                                if (!range) range = { index: q.getLength() - 1, length: 0 };
+                                q.insertEmbed(range.index, 'image', data.url);
+                                q.setSelection(range.index + 1);
+                            } catch (e) { console.error(e); }
+                        }
+                    };
                 });
             }
         }
-
         // Override showSection to init Quill when experiment section is shown
         const origShowSection = window.showSection;
         window.showSection = function (id, el) {

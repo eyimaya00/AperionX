@@ -4508,8 +4508,9 @@
                 const sl = statusLabels[exp.status] || exp.status;
                 let actions = '';
                 if (exp.status === 'pending') {
-                    actions = `<button onclick="adminApproveExp(${exp.id})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:4px; font-size:0.8rem;"><i class="ph ph-check"></i></button>
-                    <button onclick="adminRejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;"><i class="ph ph-x"></i></button>`;
+                    actions = `<button onclick="adminApproveExp(\${exp.id})"  style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:4px; font-size:0.8rem;"><i class="ph ph-check"></i></button>
+                    <button onclick="adminRejectExp(\${exp.id})"  style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;"><i class="ph ph-x"></i></button>
+                    <a href="/deney/\${exp.slug}" target="_blank" style="background:#6366f1; color:white; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-block; font-size:0.8rem;" title="İncele"><i class="ph ph-eye"></i></a>`;
                 } else if (exp.status === 'published') {
                     actions = `<a href="/deney/${exp.slug}" target="_blank" style="color:#6366f1; font-size:0.85rem;"><i class="ph ph-eye"></i></a>`;
                 }
