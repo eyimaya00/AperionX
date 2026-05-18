@@ -1565,7 +1565,7 @@
                 </button>
             </div>
 
-            <form id="experimentForm">
+            <form id="experimentForm" onsubmit="event.preventDefault();">
                 <div class="card">
                     <div class="form-grid">
                         <div class="form-group full-width">
@@ -1680,10 +1680,10 @@
                     </div>
 
                     <div class="action-bar">
-                        <button type="button" class="btn btn-secondary" onclick="submitExperiment('draft')">Taslak
+                        <button type="button" class="btn btn-secondary" onclick="event.preventDefault(); submitExperiment('draft')">Taslak
                             Olarak Kaydet</button>
-                        <button type="button" class="btn btn-primary" onclick="submitExperiment('pending')"><i
-                                class="ph ph-flask"></i> Yayınla</button>
+                        <button type="button" class="btn btn-primary" onclick="event.preventDefault(); submitExperiment('pending')"><i
+                                class="ph ph-flask"></i> Onaya Gönder</button>
                     </div>
                 </div>
             </form>
