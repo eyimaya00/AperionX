@@ -6,11 +6,8 @@ Disallow: /editor.html
 Disallow: /editor_panel.html
 Disallow: /author.html
 Disallow: /maintenance.html
-Disallow: /api/
 Disallow: /node_modules/
-Disallow: /*.js$
 Disallow: /profile.html
-
 # AI Bot Restrictions
 User-agent: GPTBot
 Disallow: /
