@@ -840,7 +840,7 @@ app.get('/article-detail.html', async (req, res, next) => {
         next();
     } catch (e) { next(); }
 });
-app.use(express.static(__dirname, { maxAge: '7d' }));
+app.use(express.static(__dirname, { setHeaders: (res, path) => { if (path.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } else { res.setHeader('Cache-Control', 'public, max-age=604800'); } } }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
 
