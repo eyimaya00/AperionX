@@ -1679,19 +1679,12 @@
                         </div>
                     </div>
 
-                    <!-- Co-Author Selection (Email Search) -->
+                    <!-- Co-Author Selection (Checkbox List) -->
                     <div class="form-grid" style="margin-top: 5px;">
                         <div class="form-group full-width">
                             <label><i class="ph-fill ph-users-three" style="color: #6366f1;"></i> Yazarlar / Katkıda Bulunanlar</label>
-                            <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 10px 0;">Sizin adınız otomatik eklenir. Eklemek istediğiniz yazarın e-posta adresini yazın.</p>
-                            <div id="exp-coauthor-pills" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="exp-coauthor-email" class="form-control" placeholder="yazar@mail.com" style="flex: 1;">
-                                <button type="button" class="btn btn-secondary" onclick="addExpCoAuthor()" style="white-space: nowrap; padding: 10px 20px;">
-                                    <i class="ph ph-plus"></i> Ekle
-                                </button>
-                            </div>
-                            <p id="exp-coauthor-status" style="font-size: 0.8rem; margin-top: 6px; display: none;"></p>
+                            <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 10px 0;">Sizin adınız otomatik seçilir. Katkıda bulunan diğer yazarları işaretleyin.</p>
+                            <div id="exp-author-selection-container" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; max-height: 220px; overflow-y: auto;"></div>
                         </div>
                     </div>
 
@@ -2884,95 +2877,53 @@
             } catch (e) { console.error('Error loading authors:', e); }
         }
 
-        // === EXPERIMENT CO-AUTHOR SYSTEM (Email-based) ===
-        let expCoAuthors = []; // Array of { id, fullname, email }
-
-        function initExpCoAuthors() {
-            expCoAuthors = [];
-            if (user) {
-                expCoAuthors.push({ id: user.id, fullname: user.fullname || user.username, email: user.email || '' });
-            }
-            renderExpCoAuthorPills();
-        }
-
-        function renderExpCoAuthorPills() {
-            const container = document.getElementById('exp-coauthor-pills');
-            if (!container) return;
-            container.innerHTML = expCoAuthors.map((a, idx) => {
-                const isMe = user && a.id === user.id;
-                return `<div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background: ${isMe ? 'rgba(99,102,241,0.1)' : '#f1f5f9'}; border:1px solid ${isMe ? 'rgba(99,102,241,0.2)' : '#e2e8f0'}; border-radius:50px; font-size:0.85rem; font-weight:500; color: ${isMe ? '#6366f1' : '#334155'};">
-                    <i class="ph ph-user" style="font-size:0.9rem;"></i>
-                    <span>${escapeHtml(a.fullname)}</span>
-                    ${isMe ? '<span style="font-size:0.7rem; color:#94a3b8;">(siz)</span>' : `<button type="button" onclick="removeExpCoAuthor(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1rem; line-height:1; padding:0 0 0 4px;" title="Kaldır">&times;</button>`}
-                </div>`;
-            }).join('');
-        }
-
-        function removeExpCoAuthor(idx) {
-            if (user && expCoAuthors[idx] && expCoAuthors[idx].id === user.id) return;
-            expCoAuthors.splice(idx, 1);
-            renderExpCoAuthorPills();
-        }
-
-        async function addExpCoAuthor() {
-            const emailInput = document.getElementById('exp-coauthor-email');
-            const statusEl = document.getElementById('exp-coauthor-status');
-            const email = emailInput.value.trim();
-
-            if (!email) {
-                statusEl.style.display = 'block';
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = 'Lütfen bir e-posta adresi girin.';
-                return;
-            }
-
-            if (expCoAuthors.find(a => a.email === email)) {
-                statusEl.style.display = 'block';
-                statusEl.style.color = '#f59e0b';
-                statusEl.textContent = 'Bu yazar zaten eklenmiş.';
-                return;
-            }
-
-            statusEl.style.display = 'block';
-            statusEl.style.color = '#64748b';
-            statusEl.textContent = 'Aranıyor...';
-
+        // === EXPERIMENT CO-AUTHOR SYSTEM (Checkbox-based, same as articles) ===
+        async function loadExpAuthorsForSelection() {
             try {
-                const res = await fetch(`/api/users/find-by-email?email=${encodeURIComponent(email)}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const foundUser = await res.json();
-                    expCoAuthors.push({ id: foundUser.id, fullname: foundUser.fullname, email: foundUser.email });
-                    renderExpCoAuthorPills();
-                    emailInput.value = '';
-                    statusEl.style.display = 'block';
-                    statusEl.style.color = '#10b981';
-                    statusEl.textContent = `✓ ${foundUser.fullname} eklendi!`;
-                    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-                } else {
-                    statusEl.style.display = 'block';
-                    statusEl.style.color = '#ef4444';
-                    statusEl.textContent = 'Bu e-posta adresine kayıtlı kullanıcı bulunamadı.';
+                const res = await fetch(`/api/users/list-authors`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const authors = await res.json();
+
+                const container = document.getElementById('exp-author-selection-container');
+                if (!container) return;
+                container.innerHTML = '';
+
+                if (authors.length === 0) {
+                    container.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem; margin:0;">Henüz kayıtlı yazar bulunmuyor.</p>';
+                    return;
                 }
-            } catch (e) {
-                statusEl.style.display = 'block';
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = 'Arama sırasında hata oluştu.';
-            }
+
+                authors.forEach(a => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'display:flex; align-items:center; gap:8px; padding:8px 14px; background:white; border-radius:10px; border:1px solid #e2e8f0; transition: all 0.2s ease; cursor:pointer;';
+                    div.onmouseover = () => { div.style.borderColor = '#6366f1'; div.style.background = 'rgba(99,102,241,0.04)'; };
+                    div.onmouseout = () => { const cb = div.querySelector('input'); if (!cb.checked) { div.style.borderColor = '#e2e8f0'; div.style.background = 'white'; } };
+
+                    const isMe = user && user.id === a.id;
+
+                    div.innerHTML = `
+                        <input type="checkbox" name="exp_authors" value="${a.id}" id="exp-auth-cb-${a.id}" ${isMe ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer; accent-color:#6366f1;">
+                        <label for="exp-auth-cb-${a.id}" style="margin:0; cursor:pointer; font-size:0.9rem; font-weight:500; color:#334155; display:flex; flex-direction:column; line-height:1.3;">
+                            <span>${escapeHtml(a.fullname || a.username)}</span>
+                            ${a.username ? `<span style="font-size:0.75rem; color:#94a3b8;">@${escapeHtml(a.username)}</span>` : ''}
+                        </label>
+                        ${isMe ? '<span style="font-size:0.65rem; color:#6366f1; background:rgba(99,102,241,0.1); padding:2px 8px; border-radius:50px; font-weight:600;">(siz)</span>' : ''}
+                    `;
+
+                    // Update style when checked/unchecked
+                    const cb = div.querySelector('input');
+                    cb.addEventListener('change', () => {
+                        if (cb.checked) { div.style.borderColor = '#6366f1'; div.style.background = 'rgba(99,102,241,0.04)'; }
+                        else { div.style.borderColor = '#e2e8f0'; div.style.background = 'white'; }
+                    });
+                    if (isMe) { div.style.borderColor = '#6366f1'; div.style.background = 'rgba(99,102,241,0.04)'; }
+
+                    container.appendChild(div);
+                });
+            } catch (e) { console.error('Error loading experiment authors:', e); }
         }
 
-        // Allow Enter key to add co-author
-        document.addEventListener('DOMContentLoaded', () => {
-            const emailInput = document.getElementById('exp-coauthor-email');
-            if (emailInput) {
-                emailInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') { e.preventDefault(); addExpCoAuthor(); }
-                });
-            }
-        });
-
-        initExpCoAuthors();
+        loadExpAuthorsForSelection();
 
 
         async function updateProfile(e) {
@@ -3456,7 +3407,7 @@
             document.getElementById('exp-pdf-name').textContent = '';
             document.getElementById('exp-form-title').textContent = 'Deney Stüdyosu';
             document.getElementById('reset-exp-form-btn').style.display = 'none';
-            initExpCoAuthors();
+            loadExpAuthorsForSelection();
         }
 
         async function submitExperiment(status) {
@@ -3478,10 +3429,13 @@
             formData.append('references_list', document.getElementById('exp-references').value);
             formData.append('status', status);
 
-            // Collect co-authors from email-based system
-            const authorIds = expCoAuthors.map(a => a.id);
-            if (authorIds.length > 0) {
-                formData.append('author_ids', JSON.stringify(authorIds));
+            // Collect co-authors from checkbox system
+            const selectedAuthors = [];
+            document.querySelectorAll('input[name="exp_authors"]:checked').forEach(cb => {
+                selectedAuthors.push(parseInt(cb.value));
+            });
+            if (selectedAuthors.length > 0) {
+                formData.append('author_ids', JSON.stringify(selectedAuthors));
             }
 
             const imgFile = document.getElementById('exp-imageInput').files[0];
