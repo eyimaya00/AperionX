@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -3509,7 +3509,7 @@
         async function loadMyExperiments() {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(/api/experiments/my-experiments?t=${Date.now()}, { headers: { 'Authorization': 'Bearer ' + token } });
+                const res = await fetch(`/api/experiments/my-experiments?t=${Date.now()}`, { headers: { 'Authorization': 'Bearer ' + token } });
                 allMyExperiments = await res.json();
                 updateExpCounts();
                 renderMyExperiments();
