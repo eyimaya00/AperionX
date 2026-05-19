@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
@@ -4654,7 +4654,7 @@ app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-        await pool.query("UPDATE experiments SET status = 'trash' WHERE id = ?", [req.params.id]);
+        await pool.query("DELETE FROM experiments WHERE id = ?", [req.params.id]);
         res.json({ message: 'Experiment moved to trash' });
     } catch (e) {
         console.error('Delete Experiment Error:', e);
