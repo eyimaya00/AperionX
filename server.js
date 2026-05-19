@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
@@ -1578,12 +1578,31 @@ app.get('/api/users/find-by-email', authenticateToken, async (req, res) => {
     try {
         const email = req.query.email;
         if (!email) return res.status(400).json({ message: 'Email veya kullanıcı adı gerekli' });
-        const [users] = await pool.query(
-            "SELECT id, fullname, email, username FROM users WHERE (email = ? OR username = ?) AND role IN ('author', 'editor', 'admin') LIMIT 1",
-            [email.trim(), email.trim()]
+        const trimmed = email.trim();
+        console.log('[FIND-BY-EMAIL] Searching for:', trimmed);
+
+        // 1. Try exact match first (email or username), any role
+        let [users] = await pool.query(
+            "SELECT id, fullname, email, username, role FROM users WHERE email = ? OR username = ? LIMIT 1",
+            [trimmed, trimmed]
         );
-        if (users.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
-        res.json(users[0]);
+        console.log('[FIND-BY-EMAIL] Exact match results:', users.length, users.length > 0 ? users[0] : 'none');
+
+        // 2. If no exact match, try partial LIKE match
+        if (users.length === 0) {
+            const searchPattern = '%' + trimmed + '%';
+            [users] = await pool.query(
+                "SELECT id, fullname, email, username, role FROM users WHERE email LIKE ? OR username LIKE ? LIMIT 1",
+                [searchPattern, searchPattern]
+            );
+            console.log('[FIND-BY-EMAIL] LIKE match results:', users.length, users.length > 0 ? users[0] : 'none');
+        }
+
+        if (users.length === 0) return res.status(404).json({ message: 'Bu e-posta veya kullanıcı adına kayıtlı kullanıcı bulunamadı.' });
+        
+        // Return found user (remove role from response)
+        const u = users[0];
+        res.json({ id: u.id, fullname: u.fullname, email: u.email, username: u.username });
     } catch (e) {
         console.error('Find by email error:', e);
         res.status(500).send(e.toString());
