@@ -3556,8 +3556,14 @@
             document.getElementById('exp-conclusion').value = exp.conclusion || '';
             document.getElementById('exp-youtube').value = exp.youtube_url || '';
             document.getElementById('exp-references').value = exp.references_list || '';
-            if (expQuillProcedure) expQuillProcedure.root.innerHTML = exp.procedure_steps || '';
-            if (expQuillResults) expQuillResults.root.innerHTML = exp.results || '';
+            if (expQuillProcedure) {
+                expQuillProcedure.root.innerHTML = ''; // clear first
+                expQuillProcedure.clipboard.dangerouslyPasteHTML(exp.procedure_steps || '');
+            }
+            if (expQuillResults) {
+                expQuillResults.root.innerHTML = '';
+                expQuillResults.clipboard.dangerouslyPasteHTML(exp.results || '');
+            }
             if (exp.image_url) {
                 var pz = document.getElementById('exp-preview-zone');
                 if (pz) pz.innerHTML = '<img src="/' + exp.image_url + '" style="max-height:180px;border-radius:10px;object-fit:contain;">';
