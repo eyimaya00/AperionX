@@ -1579,7 +1579,7 @@ app.get('/api/users/find-by-email', authenticateToken, async (req, res) => {
         const email = req.query.email;
         if (!email) return res.status(400).json({ message: 'Email veya kullanıcı adı gerekli' });
         const [users] = await pool.query(
-            "SELECT id, fullname, email, username FROM users WHERE email = ? OR username = ? LIMIT 1",
+            "SELECT id, fullname, email, username FROM users WHERE (email = ? OR username = ?) AND role IN ('author', 'editor', 'admin') LIMIT 1",
             [email.trim(), email.trim()]
         );
         if (users.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
