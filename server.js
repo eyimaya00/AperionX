@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
@@ -1577,12 +1577,12 @@ app.get('/api/users/list-authors', authenticateToken, async (req, res) => {
 app.get('/api/users/find-by-email', authenticateToken, async (req, res) => {
     try {
         const email = req.query.email;
-        if (!email) return res.status(400).json({ message: 'Email gerekli' });
+        if (!email) return res.status(400).json({ message: 'Email veya kullanıcı adı gerekli' });
         const [users] = await pool.query(
-            "SELECT id, fullname, email, username FROM users WHERE email = ? LIMIT 1",
-            [email.trim()]
+            "SELECT id, fullname, email, username FROM users WHERE email = ? OR username = ? LIMIT 1",
+            [email.trim(), email.trim()]
         );
-        if (users.length === 0) return res.status(404).json({ message: 'Kullanici bulunamadi' });
+        if (users.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
         res.json(users[0]);
     } catch (e) {
         console.error('Find by email error:', e);
@@ -4520,7 +4520,7 @@ app.get('/api/experiments/categories', async (req, res) => {
 app.get('/api/experiments/my-experiments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, title, slug, category, status, views, created_at, image_url, rejection_reason
+            SELECT *
             FROM experiments 
             WHERE author_id = ? 
             ORDER BY created_at DESC
