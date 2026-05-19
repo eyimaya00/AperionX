@@ -1689,8 +1689,7 @@
                     </div>
 
                     <div class="action-bar">
-                        <button type="button" class="btn btn-secondary" onclick="event.preventDefault(); submitExperiment('draft')">Taslak
-                            Olarak Kaydet</button>
+                        <button type="button" class="btn btn-secondary" onclick="event.preventDefault(); submitExperiment('draft')">Taslağa Kaydet (v2)</button>
                         <button type="button" class="btn btn-primary" onclick="event.preventDefault(); submitExperiment('pending')"><i
                                 class="ph ph-flask"></i> Onaya Gönder</button>
                     </div>
@@ -3556,13 +3555,17 @@
             document.getElementById('exp-conclusion').value = exp.conclusion || '';
             document.getElementById('exp-youtube').value = exp.youtube_url || '';
             document.getElementById('exp-references').value = exp.references_list || '';
-            if (expQuillProcedure) {
-                expQuillProcedure.root.innerHTML = ''; // clear first
-                expQuillProcedure.clipboard.dangerouslyPasteHTML(exp.procedure_steps || '');
-            }
-            if (expQuillResults) {
-                expQuillResults.root.innerHTML = '';
-                expQuillResults.clipboard.dangerouslyPasteHTML(exp.results || '');
+            try {
+                if (expQuillProcedure) {
+                    expQuillProcedure.root.innerHTML = ''; // clear first
+                    expQuillProcedure.clipboard.dangerouslyPasteHTML(exp.procedure_steps || '');
+                }
+                if (expQuillResults) {
+                    expQuillResults.root.innerHTML = '';
+                    expQuillResults.clipboard.dangerouslyPasteHTML(exp.results || '');
+                }
+            } catch (quillErr) {
+                console.error("Quill paste error:", quillErr);
             }
             if (exp.image_url) {
                 var pz = document.getElementById('exp-preview-zone');
