@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -45,14 +45,14 @@
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: rgba(15, 23, 42, 0.04);
-            border: 1px solid #e2e8f0;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 50px;
-            color: #334155;
+            color: #6366f1;
             font-weight: 600;
             font-size: 0.9rem;
             backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
             transition: all 0.3s ease;
             text-decoration: none;
         }
@@ -62,34 +62,34 @@
             height: 28px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #e2e8f0;
+            border: 2px solid rgba(99, 102, 241, 0.3);
         }
 
         #exp-detail-author a i {
-            color: #475569;
+            color: var(--primary-color);
             font-size: 1.1rem;
-            background: #f1f5f9;
+            background: rgba(99, 102, 241, 0.1);
             padding: 4px;
             border-radius: 50%;
         }
 
         #exp-detail-author a:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-            background: #f1f5f9;
-            border-color: #94a3b8;
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.2);
+            background: rgba(99, 102, 241, 0.12);
+            border-color: var(--primary-color);
         }
 
         [data-theme="dark"] #exp-detail-author a {
             background: rgba(30, 41, 59, 0.6);
-            border-color: #334155;
-            color: #cbd5e1;
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         [data-theme="dark"] #exp-detail-author a:hover {
             background: rgba(30, 41, 59, 1);
-            border-color: #475569;
+            border-color: var(--primary-color);
         }
 
         /* Layout - same as article-detail */
@@ -120,19 +120,13 @@
         }
 
         .article-badge {
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-            color: #059669;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
             padding: 6px 14px;
             border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 700;
-            border: 1px solid rgba(5, 150, 105, 0.15);
-        }
-
-        [data-theme="dark"] .article-badge {
-            background: rgba(5, 150, 105, 0.15);
-            color: #34d399;
-            border-color: rgba(52, 211, 153, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.1);
         }
 
         .article-title {
@@ -316,19 +310,13 @@
         }
 
         .experiment-badge {
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-            color: #059669;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
             padding: 6px 14px;
             border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 700;
-            border: 1px solid rgba(5, 150, 105, 0.15);
-        }
-
-        [data-theme="dark"] .experiment-badge {
-            background: rgba(5, 150, 105, 0.15);
-            color: #34d399;
-            border-color: rgba(52, 211, 153, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.1);
         }
 
         .experiment-title {
@@ -412,12 +400,7 @@
             margin-bottom: 20px;
         }
 
-        .exp-section-content img {
-            max-width: 100%;
-            border-radius: 12px;
-            margin: 15px 0;
-            display: block;
-        }
+        .exp-section-content img { max-width: 100%; border-radius: 12px; margin: 15px 0; height: auto; }
 
         /* Safety Box */
         .safety-box {

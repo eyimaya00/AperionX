@@ -2938,7 +2938,7 @@
             statusEl.textContent = 'Aranıyor...';
 
             try {
-                const res = await fetch(`${API_URL}/users/find-by-email?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`/api/users/find-by-email?email=${encodeURIComponent(email)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
