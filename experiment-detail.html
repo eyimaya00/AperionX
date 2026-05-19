@@ -359,19 +359,28 @@
         }
 
         .exp-section-title {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--text-color);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(99, 102, 241, 0.15);
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: -0.3px;
+        }
+
+        [data-theme="dark"] .exp-section-title {
+            border-bottom-color: #334155;
         }
 
         .exp-section-title i {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 6px;
+            border-radius: 8px;
         }
 
         .exp-section-content {
@@ -608,18 +617,35 @@
             </a>
             <nav class="nav-menu">
                 <a href="/" class="nav-link">Ana Sayfa</a>
-                <a href="/articles.html" class="nav-link">Makaleler</a>
+                <div class="nav-item dropdown">
+                    <a href="/articles.html" class="nav-link dropdown-toggle" id="articlesDropdownToggle">
+                        Makaleler <i class="ph ph-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu" id="articles-dropdown-menu">
+                        <!-- Dynamically populated categories -->
+                    </div>
+                </div>
                 <a href="/experiments.html" class="nav-link active">Deneyler</a>
                 <a href="tools.html" class="nav-link">Araçlar</a>
                 <a href="about.html" class="nav-link">Hakkında</a>
             </nav>
             <div class="header-actions">
-                <button class="icon-btn theme-toggle" id="themeToggle"><i class="ph ph-moon"></i></button>
-                <div class="auth-buttons">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Ara..." aria-label="Arama">
+                    <button class="icon-btn search-btn" aria-label="Ara">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir"><i class="ph ph-moon"></i></button>
+                <a href="#" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+                <div class="auth-buttons" id="user-menu-container">
                     <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
                 </div>
-                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn"><i class="ph ph-list"></i></button>
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç"><i class="ph ph-list"></i></button>
             </div>
         </div>
     </header>
@@ -750,13 +776,28 @@
                 </a>
                 <p class="footer-desc" id="footer-desc">Bilim ve teknolojinin sınırlarını zorlayan en güncel makaleler
                     ve keşifler.</p>
+                <div class="footer-socials">
+                    <a href="https://twitter.com/aperionx" class="social-link" id="footer-twitter" target="_blank" rel="noopener" aria-label="Twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                    <a href="https://www.instagram.com/aperionx0" class="social-link" id="footer-instagram" target="_blank" rel="noopener" aria-label="Instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="https://www.linkedin.com/company/aperionx" class="social-link" id="footer-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="ph-fill ph-linkedin-logo"></i></a>
+                    <a href="#" class="social-link" id="footer-youtube" target="_blank" rel="noopener" aria-label="YouTube"><i class="ph-fill ph-youtube-logo"></i></a>
+                </div>
             </div>
             <div class="footer-col">
-                <h4 class="footer-heading">Hızlı Erişim</h4>
+                <h3 class="footer-heading">Hızlı Erişim</h3>
                 <ul class="footer-links">
                     <li><a href="/">Ana Sayfa</a></li>
                     <li><a href="/articles.html">Makaleler</a></li>
                     <li><a href="/experiments.html">Deneyler</a></li>
+                    <li><a href="/about.html">Hakkımızda</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3 class="footer-heading">İletişim & Kurumsal</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:info@aperionx.com" id="footer-email">info@aperionx.com</a></li>
+                    <li><a href="/about.html">Gizlilik Politikası</a></li>
+                    <li><a href="/about.html">Kullanım Şartları</a></li>
                 </ul>
             </div>
         </div>
