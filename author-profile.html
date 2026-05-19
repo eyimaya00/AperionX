@@ -433,7 +433,7 @@
         </section>
 
         <div class="container-custom">
-            <h2 class="section-title">Yazarın Makaleleri</h2>
+            <h2 class="section-title">Yazarın İçerikleri</h2>
             <div class="articles-grid" id="articles-grid">
                 <!-- Articles will be injected here -->
             </div>
@@ -659,13 +659,16 @@
                 // 2. Fill Articles
                 const grid = document.getElementById('articles-grid');
                 if (articles.length === 0) {
-                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış makalesi yok.</div>';
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış bir içeriği yok.</div>';
                 } else {
-                    grid.innerHTML = articles.map(art => `
-                        <a href="/makale/${art.slug || art.id}" class="author-article-card">
+                    grid.innerHTML = articles.map(art => {
+                        const linkPath = art.type === 'experiment' ? `/deney/${art.slug || art.id}` : `/makale/${art.slug || art.id}`;
+                        const badgeLabel = art.type === 'experiment' ? 'DENEY' : art.category;
+                        return `
+                        <a href="${linkPath}" class="author-article-card">
                             <div class="card-image-wrapper">
                                 <img src="${art.image_url ? (art.image_url.startsWith('http') ? art.image_url : '/' + art.image_url) : 'uploads/default-hero.jpg'}" alt="${art.title}" class="card-image">
-                                <span class="card-category">${art.category}</span>
+                                <span class="card-category">${badgeLabel}</span>
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${art.title}</h3>
@@ -681,7 +684,7 @@
                                 </div>
                             </div>
                         </a>
-                    `).join('');
+                    `}).join('');
                 }
 
             } catch (e) {

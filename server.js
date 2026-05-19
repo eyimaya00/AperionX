@@ -3264,15 +3264,28 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             return res.status(404).json({ message: 'Author not found' });
         }
 
-        // 3. Fetch Articles
+        // 3. Fetch Articles (Main author or co-author)
         const [articles] = await pool.query(`
-            SELECT id, title, slug, image_url, excerpt, created_at, category, views 
-            FROM articles 
-            WHERE author_id = ? AND status = 'published' 
-            ORDER BY created_at DESC
-        `, [user.id]);
+            SELECT DISTINCT a.id, a.title, a.slug, a.image_url, a.excerpt, a.created_at, a.category, a.views, 'article' as type
+            FROM articles a
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
+            ORDER BY a.created_at DESC
+        `, [user.id, user.id]);
 
-        res.json({ profile: user, articles });
+        // 4. Fetch Experiments (Main author or co-author)
+        const [experiments] = await pool.query(`
+            SELECT DISTINCT e.id, e.title, e.slug, e.image_url, e.excerpt, e.created_at, e.category, e.views, 'experiment' as type
+            FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published'
+            ORDER BY e.created_at DESC
+        `, [user.id, user.id]);
+
+        // Combine and sort by date
+        const allContent = [...articles, ...experiments].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        res.json({ profile: user, articles: allContent });
 
     } catch (e) {
         console.error('[API] Public Author Error:', e);
@@ -4480,7 +4493,7 @@ app.get('/api/experiments', async (req, res) => {
             const expIds = experiments.map(e => e.id);
 
             const [allAuthors] = await pool.query(`
-                SELECT ea.experiment_id, u.id, u.fullname, u.username 
+                SELECT ea.experiment_id, u.id, u.fullname, u.username, u.avatar_url 
                 FROM experiment_authors ea
                 JOIN users u ON ea.user_id = u.id
                 WHERE ea.experiment_id IN (?)
@@ -4490,7 +4503,7 @@ app.get('/api/experiments', async (req, res) => {
             const authorMap = {};
             allAuthors.forEach(row => {
                 if (!authorMap[row.experiment_id]) authorMap[row.experiment_id] = [];
-                authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+                authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username, avatar_url: row.avatar_url });
             });
 
             experiments.forEach(e => {
@@ -4504,13 +4517,13 @@ app.get('/api/experiments', async (req, res) => {
             // Legacy fallback
             const legacyIds = experiments.filter(e => e.authors.length === 0 && e.author_id).map(e => e.author_id);
             if (legacyIds.length > 0) {
-                const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                const [legacyUsers] = await pool.query('SELECT id, fullname, username, avatar_url FROM users WHERE id IN (?)', [legacyIds]);
                 const legacyMap = {};
                 legacyUsers.forEach(u => legacyMap[u.id] = u);
                 experiments.forEach(e => {
                     if (e.authors.length === 0 && e.author_id && legacyMap[e.author_id]) {
                         const u = legacyMap[e.author_id];
-                        e.authors = [{ id: u.id, fullname: u.fullname, username: u.username }];
+                        e.authors = [{ id: u.id, fullname: u.fullname, username: u.username, avatar_url: u.avatar_url }];
                         e.author_name = u.fullname;
                     }
                 });

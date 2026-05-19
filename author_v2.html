@@ -1179,7 +1179,7 @@
                 </button>
             </div>
 
-            <form id="articleForm">
+            <form id="articleForm" onsubmit="event.preventDefault();">
                 <div class="card">
                     <div class="form-grid">
                         <div class="form-group full-width">
@@ -1278,10 +1278,10 @@
                         <button type="button" class="btn btn-secondary" onclick="showPreview()">
                             <i class="ph ph-eye"></i> Önizleme
                         </button>
-                        <button type="button" class="btn btn-secondary" onclick="submitArticle('draft')">Taslak Olarak
+                        <button type="button" class="btn btn-secondary" onclick="event.preventDefault(); submitArticle('draft')">Taslak Olarak
                             Kaydet</button>
                         <button type="button" class="btn btn-primary"
-                            onclick="submitArticle('pending')">Yayınla</button>
+                            onclick="event.preventDefault(); submitArticle('pending')">Onaya Gönder</button>
                     </div>
                 </div>
             </form>
@@ -1395,7 +1395,7 @@
                         </div>
                     </div>
                     <div class="action-bar">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" onclick="submitArticle(editingArticleId ? 'pending' : 'draft')">
                             <i class="ph ph-floppy-disk"></i> Değişiklikleri Kaydet
                         </button>
                     </div>
