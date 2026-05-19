@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -1008,7 +1008,7 @@
             const ytId = getYouTubeId(exp.youtube_url);
             if (ytId) {
                 document.getElementById('section-video').style.display = 'block';
-                document.getElementById('exp-video').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe>`;
+                document.getElementById('exp-video').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy" style="width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; box-shadow: 0 10px 20px rgba(0,0,0,0.3);"></iframe>`;
             }
 
             // References
