@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
@@ -1573,6 +1573,22 @@ app.get('/api/users/list-authors', authenticateToken, async (req, res) => {
     }
 });
 
+// Find user by email (for co-author search)
+app.get('/api/users/find-by-email', authenticateToken, async (req, res) => {
+    try {
+        const email = req.query.email;
+        if (!email) return res.status(400).json({ message: 'Email gerekli' });
+        const [users] = await pool.query(
+            "SELECT id, fullname, email, username FROM users WHERE email = ? LIMIT 1",
+            [email.trim()]
+        );
+        if (users.length === 0) return res.status(404).json({ message: 'Kullanici bulunamadi' });
+        res.json(users[0]);
+    } catch (e) {
+        console.error('Find by email error:', e);
+        res.status(500).send(e.toString());
+    }
+});
 app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
