@@ -67,7 +67,7 @@ exports.getMyExperiments = async (req, res) => {
         const [rows] = await pool.query(`
             SELECT *
             FROM experiments 
-            WHERE author_id = ? 
+            WHERE author_id = ? AND status != 'trash'
             ORDER BY created_at DESC
         `, [req.user.id]);
         res.json(rows);
@@ -144,17 +144,19 @@ exports.createExperiment = async (req, res) => {
 exports.updateExperiment = async (req, res) => {
     const expId = req.params.id;
     try {
-        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [expId]);
+        const [check] = await pool.query('SELECT * FROM experiments WHERE id = ?', [expId]);
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         // The checkRole middleware handles general role verification, but ownership check is still needed for authors
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
+        const existing = check[0];
         const body = req.body || {};
         console.log("PUT /api/experiments/:id body:", body);
         const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
 
-        let image_url = body.existing_image || null;
-        let pdf_url = body.existing_pdf || null;
+        // Preserve existing image/pdf if no new file uploaded
+        let image_url = existing.image_url;
+        let pdf_url = existing.pdf_url;
 
         if (req.files) {
             if (req.files.image && req.files.image[0]) image_url = 'uploads/' + req.files.image[0].filename;
@@ -200,9 +202,9 @@ exports.deleteExperiment = async (req, res) => {
         // Ownership check
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-        await pool.query("DELETE FROM experiment_authors WHERE experiment_id = ?", [req.params.id]);
-        await pool.query("DELETE FROM experiments WHERE id = ?", [req.params.id]);
-        res.json({ message: 'Experiment moved to trash' }); // The route name is delete but it says moved to trash, keeping original msg
+        // Soft delete: move to trash instead of hard delete
+        await pool.query("UPDATE experiments SET status = 'trash' WHERE id = ?", [req.params.id]);
+        res.json({ message: 'Experiment moved to trash' });
     } catch (e) {
         console.error('Delete Experiment Error:', e);
         res.status(500).json({ error: e.message });

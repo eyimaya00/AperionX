@@ -2519,7 +2519,7 @@
         async function loadEditorExperiments() {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch('/api/editor/all-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
+                const res = await fetch('/api/experiments/editor/all-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
                 editorAllExps = await res.json();
                 renderEditorExps();
             } catch (e) { console.error('Editor experiments error:', e); }
@@ -2656,7 +2656,7 @@
                     return;
                 }
                 try {
-                    await fetch('/api/editor/experiment-decide/' + currentExpId, {
+                    await fetch('/api/experiments/editor/experiment-decide/' + currentExpId, {
                         method: 'PUT',
                         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ decision: 'reject', rejection_reason: reason })
@@ -2669,7 +2669,7 @@
                 showConfirm('Bu deneyi yayına almak istediğinize emin misiniz?', async () => {
                     closeConfirmModal();
                     try {
-                        await fetch('/api/editor/experiment-decide/' + currentExpId, {
+                        await fetch('/api/experiments/editor/experiment-decide/' + currentExpId, {
                             method: 'PUT',
                             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                             body: JSON.stringify({ decision: 'approve' })
@@ -2685,7 +2685,7 @@
         async function approveExp(id) {
             const token = localStorage.getItem('token');
             try {
-                await fetch(`/api/editor/experiment-decide/${id}`, {
+                await fetch(`/api/experiments/editor/experiment-decide/${id}`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ decision: 'approve' })
@@ -2699,7 +2699,7 @@
             const reason = prompt('Red sebebi (opsiyonel):');
             const token = localStorage.getItem('token');
             try {
-                await fetch(`/api/editor/experiment-decide/${id}`, {
+                await fetch(`/api/experiments/editor/experiment-decide/${id}`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ decision: 'reject', rejection_reason: reason || '' })

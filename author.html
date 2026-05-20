@@ -3418,7 +3418,9 @@
             formData.append('category', document.getElementById('exp-category').value);
             formData.append('tags', document.getElementById('exp-tags').value);
             formData.append('excerpt', document.getElementById('exp-excerpt').value);
-            formData.append('objective', document.getElementById('exp-objective').value);
+            const objVal = document.getElementById('exp-objective').value;
+            console.log("Submitting objective:", objVal);
+            formData.append('objective', objVal);
             formData.append('materials', document.getElementById('exp-materials').value);
             formData.append('safety_notes', document.getElementById('exp-safety').value);
             formData.append('procedure_steps', expQuillProcedure ? expQuillProcedure.root.innerHTML : '');
@@ -3584,10 +3586,18 @@
             if (!confirm('Bu deneyi silmek istediğinize emin misiniz?')) return;
             const token = localStorage.getItem('token');
             try {
-                await fetch(`/api/experiments/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-                showAuthorToast('Deney silindi', 'success');
-                loadMyExperiments();
-            } catch (e) { showAuthorToast('Silme hatası', 'error'); }
+                const res = await fetch(`/api/experiments/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+                if (res.ok) {
+                    // Instant UI update: remove from local array and re-render
+                    allMyExperiments = allMyExperiments.filter(e => e.id !== id);
+                    updateExpCounts();
+                    renderMyExperiments();
+                    showAuthorToast('Deney çöp kutusuna taşındı', 'success');
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showAuthorToast(data.message || data.error || 'Silme başarısız oldu', 'error');
+                }
+            } catch (e) { showAuthorToast('Sunucu bağlantı hatası', 'error'); }
         }
 
         // =============================================
