@@ -23,8 +23,7 @@ const compression = require('compression');
 const multer = require('multer');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-// // const { JSDOM } = require('jsdom'); // DISABLED to fix 502
-// // const DOMPurify = require('dompurify')(new JSDOM('').window); // DISABLED to fix 502
+const DOMPurify = require('isomorphic-dompurify');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -1246,8 +1245,22 @@ function authenticateToken(req, res, next) {
         }
         console.log('Middleware: Token valid for user:', user.email);
         req.user = user;
+        req.user.role = user.role || 'user'; // Ensure role is explicitly set
         next();
     });
+}
+
+function checkRole(allowedRoles) {
+    return (req, res, next) => {
+        if (!req.user || !req.user.role) {
+            return res.status(403).json({ error: 'Erişim reddedildi: Rol bilgisi bulunamadı.' });
+        }
+        if (allowedRoles.includes(req.user.role)) {
+            next();
+        } else {
+            return res.status(403).json({ error: 'Erişim reddedildi: Bu işlem için yetki yetersiz.' });
+        }
+    };
 }
 
 async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
@@ -1936,7 +1949,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
 
     try {
         // Sanitize Content
-        const cleanContent = content; // DOMPurify.sanitize(content);
+        const cleanContent = DOMPurify.sanitize(content);
 
         // Generate Slug
         const slug = await getUniqueSlug(pool, title);
@@ -4567,6 +4580,7 @@ app.get('/api/experiments/my-experiments', authenticateToken, async (req, res) =
 // Auth: Create Experiment
 app.post('/api/experiments', authenticateToken, upload.any(), async (req, res) => {
     const body = req.body || {};
+    console.log("POST /api/experiments body:", body);
     const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
     let author_ids = body.author_ids;
 
@@ -4637,6 +4651,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
         const body = req.body || {};
+        console.log("PUT /api/experiments/:id body:", body);
         const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
 
         let image_url = body.existing_image || null;
@@ -4686,6 +4701,7 @@ app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
+        await pool.query("DELETE FROM experiment_authors WHERE experiment_id = ?", [req.params.id]);
         await pool.query("DELETE FROM experiments WHERE id = ?", [req.params.id]);
         res.json({ message: 'Experiment moved to trash' });
     } catch (e) {
