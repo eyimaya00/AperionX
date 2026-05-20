@@ -15,8 +15,11 @@ module.exports = function(upload, authenticateToken, checkRole, createNotificati
     router.get('/', expController.getAllExperiments);
     router.get('/categories', expController.getCategories);
 
-    // ─── Auth Routes ───
-    router.get('/my-experiments', authenticateToken, expController.getMyExperiments);
+    // ─── Author Specific Routes ───
+    router.get('/my-experiments', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.getMyExperiments);
+    router.get('/my-trash', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.getMyTrashExperiments);
+    router.put('/restore/:id', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.restoreExperiment);
+    router.delete('/permanent/:id', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.permanentDeleteExperiment);
     router.post('/', authenticateToken, upload.any(), expController.createExperiment);
 
     // ─── Editor/Admin specific routes (MUST come BEFORE /:id to avoid parameter capture) ───
@@ -24,7 +27,7 @@ module.exports = function(upload, authenticateToken, checkRole, createNotificati
     router.get('/editor/all-experiments', authenticateToken, checkRole(['admin', 'editor']), expController.getAllExperimentsEditor);
 
     // ─── Protected Modification Routes (parameterized — MUST come AFTER literal routes) ───
-    router.put('/:id', authenticateToken, checkRole(['admin', 'editor', 'author']), upload.fields([{ name: 'image' }, { name: 'pdf' }]), expController.updateExperiment);
+    router.put('/:id', authenticateToken, checkRole(['admin', 'editor', 'author']), upload.any(), expController.updateExperiment);
     router.delete('/:id', authenticateToken, checkRole(['admin', 'editor', 'author']), expController.deleteExperiment);
 
     return router;

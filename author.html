@@ -1744,6 +1744,26 @@
                     <p id="exp-count-rejected"
                         style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
                 </div>
+                <div class="card status-card" onclick="setExpFilter('draft')"
+                    style="padding: 18px; border-left: 4px solid #94a3b8; cursor: pointer; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        Taslaklar</h3>
+                    <p id="exp-count-draft"
+                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                </div>
+                <div class="card status-card" onclick="loadTrashExperiments()"
+                    style="padding: 18px; border-left: 4px solid #334155; cursor: pointer; transition: transform 0.2s; background: #f8fafc;"
+                    onmouseover="this.style.transform='translateY(-3px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <h3
+                        style="margin: 0; color: #334155; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                        <i class="ph ph-trash"></i> Çöp Kutusu</h3>
+                    <p id="exp-count-trash"
+                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                </div>
             </div>
             <div id="experiments-list"></div>
         </div>
@@ -3477,11 +3497,26 @@
             document.getElementById('exp-count-published').textContent = all.filter(e => e.status === 'published').length;
             document.getElementById('exp-count-pending').textContent = all.filter(e => e.status === 'pending').length;
             document.getElementById('exp-count-rejected').textContent = all.filter(e => e.status === 'rejected').length;
+            document.getElementById('exp-count-draft').textContent = all.filter(e => e.status === 'draft').length;
+            // Trash count will be fetched or kept empty visually unless clicked
         }
 
         function setExpFilter(status) {
             expFilterStatus = status;
             renderMyExperiments();
+        }
+
+        async function loadTrashExperiments() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/experiments/my-trash?t=${Date.now()}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                const trashData = await res.json();
+                document.getElementById('exp-count-trash').textContent = trashData.length;
+                expFilterStatus = 'trash';
+                // Temporarily replace allMyExperiments for rendering, or render explicitly
+                allMyExperiments = trashData; 
+                renderMyExperiments();
+            } catch (e) { console.error('Trash load error:', e); }
         }
 
         function renderMyExperiments() {
@@ -3508,7 +3543,7 @@
                     ${exp.image_url ? `<div style="flex-shrink:0;"><img src="${exp.image_url}" style="width:120px; height:80px; object-fit:cover; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);" onerror="this.style.display='none'"></div>` : `<div style="flex-shrink:0; width:120px; height:80px; background:#f8fafc; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#cbd5e1;"><i class="ph-fill ph-image" style="font-size:2rem;"></i></div>`}
                     
                     <div style="flex:1;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 700; color: #1e293b;">${escapeHtml(exp.title)}</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 700; color: #1e293b;">${escapeHtml(exp.title || 'Başlıksız')}</h3>
                         <div style="display:flex; gap:12px; margin-top:8px; color:#64748b; font-size:0.9rem; align-items:center; flex-wrap:wrap;">
                             <span class="status-badge ${statusClass}" style="margin-right: 5px;">${statusLabel}</span>
                             <span style="display:flex; align-items:center; gap:4px; background:#f1f5f9; padding:4px 10px; border-radius:50px;"><i class="ph ph-tag"></i> ${exp.category || 'Genel'}</span>
@@ -3518,8 +3553,13 @@
                         ${exp.rejection_reason ? `<div style="margin-top:10px; padding:10px 14px; background:rgba(239,68,68,0.08); border-left:3px solid #ef4444; border-radius:0 8px 8px 0; color:#b91c1c; font-size:0.85rem;"><i class="ph-fill ph-warning-circle"></i> <b>Red Sebebi:</b> ${escapeHtml(exp.rejection_reason)}</div>` : ''}
                     </div>
                     <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
-                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="editExperiment(${exp.id})"><i class="ph ph-pencil-simple"></i> Düzenle</button>
-                        <button class="btn btn-danger-soft" style="width: 100%; justify-content: center;" onclick="deleteExperiment(${exp.id})"><i class="ph ph-trash"></i> Sil</button>
+                        ${exp.status === 'trash' ? `
+                            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="restoreExperiment(${exp.id})"><i class="ph ph-arrow-counter-clockwise"></i> Geri Yükle</button>
+                            <button class="btn btn-danger-soft" style="width: 100%; justify-content: center;" onclick="permanentDeleteExperiment(${exp.id})"><i class="ph ph-trash"></i> Kalıcı Sil</button>
+                        ` : `
+                            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="editExperiment(${exp.id})"><i class="ph ph-pencil-simple"></i> Düzenle</button>
+                            <button class="btn btn-danger-soft" style="width: 100%; justify-content: center;" onclick="deleteExperiment(${exp.id})"><i class="ph ph-trash"></i> Sil</button>
+                        `}
                     </div>
                 </div>`;
             }).join('');
@@ -3588,7 +3628,6 @@
             try {
                 const res = await fetch(`/api/experiments/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
                 if (res.ok) {
-                    // Instant UI update: remove from local array and re-render
                     allMyExperiments = allMyExperiments.filter(e => e.id !== id);
                     updateExpCounts();
                     renderMyExperiments();
@@ -3598,6 +3637,34 @@
                     showAuthorToast(data.message || data.error || 'Silme başarısız oldu', 'error');
                 }
             } catch (e) { showAuthorToast('Sunucu bağlantı hatası', 'error'); }
+        }
+
+        async function restoreExperiment(id) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/experiments/restore/${id}`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+                if (res.ok) {
+                    showAuthorToast('Deney taslak olarak geri yüklendi', 'success');
+                    loadTrashExperiments(); // Reload trash
+                } else {
+                    showAuthorToast('Geri yükleme başarısız', 'error');
+                }
+            } catch (e) { showAuthorToast('Bağlantı hatası', 'error'); }
+        }
+
+        async function permanentDeleteExperiment(id) {
+            if (!confirm('Bu deneyi KALICI olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/experiments/permanent/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+                if (res.ok) {
+                    allMyExperiments = allMyExperiments.filter(e => e.id !== id);
+                    renderMyExperiments();
+                    showAuthorToast('Deney kalıcı olarak silindi', 'success');
+                } else {
+                    showAuthorToast('Silme başarısız', 'error');
+                }
+            } catch (e) { showAuthorToast('Bağlantı hatası', 'error'); }
         }
 
         // =============================================

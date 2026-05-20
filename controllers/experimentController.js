@@ -71,10 +71,19 @@ exports.getMyExperiments = async (req, res) => {
             ORDER BY created_at DESC
         `, [req.user.id]);
         res.json(rows);
-    } catch (e) {
-        console.error('My Experiments Error:', e);
-        res.status(500).send(e.toString());
-    }
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+exports.getMyTrashExperiments = async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT *
+            FROM experiments 
+            WHERE author_id = ? AND status = 'trash'
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
 exports.createExperiment = async (req, res) => {
@@ -154,13 +163,14 @@ exports.updateExperiment = async (req, res) => {
         console.log("PUT /api/experiments/:id body:", body);
         const { title, category, objective, materials, procedure_steps, results, conclusion, excerpt, status, tags, references_list, youtube_url, safety_notes } = body;
 
-        // Preserve existing image/pdf if no new file uploaded
         let image_url = existing.image_url;
         let pdf_url = existing.pdf_url;
 
-        if (req.files) {
-            if (req.files.image && req.files.image[0]) image_url = 'uploads/' + req.files.image[0].filename;
-            if (req.files.pdf && req.files.pdf[0]) pdf_url = 'uploads/' + req.files.pdf[0].filename;
+        if (req.files && Array.isArray(req.files)) {
+            const imgFile = req.files.find(f => f.fieldname === 'image');
+            const pdfFile = req.files.find(f => f.fieldname === 'pdf');
+            if (imgFile) image_url = 'uploads/' + imgFile.filename;
+            if (pdfFile) pdf_url = 'uploads/' + pdfFile.filename;
         }
 
         let finalStatus = status;
@@ -196,17 +206,46 @@ exports.updateExperiment = async (req, res) => {
 };
 
 exports.deleteExperiment = async (req, res) => {
+    const expId = req.params.id;
     try {
-        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [req.params.id]);
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [expId]);
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         // Ownership check
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
         // Soft delete: move to trash instead of hard delete
-        await pool.query("UPDATE experiments SET status = 'trash' WHERE id = ?", [req.params.id]);
+        await pool.query("UPDATE experiments SET status = 'trash' WHERE id = ?", [expId]);
         res.json({ message: 'Experiment moved to trash' });
     } catch (e) {
-        console.error('Delete Experiment Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+exports.restoreExperiment = async (req, res) => {
+    const expId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [expId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        await pool.query("UPDATE experiments SET status = 'draft' WHERE id = ?", [expId]);
+        res.json({ message: 'Experiment restored to draft' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+exports.permanentDeleteExperiment = async (req, res) => {
+    const expId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [expId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        await pool.query('DELETE FROM experiment_authors WHERE experiment_id = ?', [expId]);
+        await pool.query('DELETE FROM experiments WHERE id = ?', [expId]);
+        res.json({ message: 'Experiment permanently deleted' });
+    } catch (e) {
         res.status(500).json({ error: e.message });
     }
 };
