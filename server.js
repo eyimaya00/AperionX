@@ -234,53 +234,7 @@ async function getArticleAuthors(pool, articleId) {
     }
 }
 
-// === EXPERIMENT HELPER FUNCTIONS ===
-async function getUniqueExperimentSlug(pool, title, excludeId = null) {
-    let slug = slugify(title);
-    let originalSlug = slug;
-    let counter = 1;
-    let exists = true;
-    while (exists) {
-        let query = "SELECT id FROM experiments WHERE slug = ?";
-        let params = [slug];
-        if (excludeId) {
-            query += " AND id != ?";
-            params.push(excludeId);
-        }
-        const [rows] = await pool.query(query, params);
-        if (rows.length === 0) {
-            exists = false;
-        } else {
-            slug = `${originalSlug}-${counter}`;
-            counter++;
-        }
-    }
-    return slug;
-}
-
-async function getExperimentAuthors(pool, experimentId) {
-    try {
-        const [rows] = await pool.query(`
-            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title 
-            FROM experiment_authors ea
-            JOIN users u ON ea.user_id = u.id
-            WHERE ea.experiment_id = ?
-            ORDER BY ea.order_index ASC, ea.created_at ASC
-        `, [experimentId]);
-
-        if (rows.length === 0) {
-            const [exp] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
-            if (exp.length > 0 && exp[0].author_id) {
-                const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [exp[0].author_id]);
-                return u;
-            }
-        }
-        return rows;
-    } catch (e) {
-        console.error('getExperimentAuthors Error:', e);
-        return [];
-    }
-}
+// (Experiment helper functions removed)
 
 // === DYNAMIC SEO ROUTES (SSR) ===
 
@@ -489,217 +443,24 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
             }
         });
 
+
     } catch (e) {
         console.error('DB Error:', e);
         next();
     }
 });
 
-// === EXPERIMENT SSR ROUTE ===
-app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
-    const slug = req.params.slug;
-
-    // Edge case: redirect incorrect links
-    if (slug === 'experiments.html' || slug === 'experiment-detail.html') {
-        return res.redirect(301, '/experiments.html');
-    }
-
-    try {
-        const [rows] = await pool.query('SELECT * FROM experiments WHERE slug = ?', [slug]);
-
-        if (rows.length === 0) {
-            return res.status(404).send('Deney bulunamadı (404)');
-        }
-
-        const experiment = rows[0];
-
-        // ============ VIEW COUNTING LOGIC ============
-        const experimentId = experiment.id;
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-
-        try {
-            const [viewCheck] = await pool.query(
-                `SELECT id FROM experiment_views 
-                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
-                [experimentId, ip]
-            );
-
-            if (viewCheck.length === 0) {
-                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
-                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
-            }
-        } catch (vcErr) {
-            console.error('[EXP-VIEW-COUNT] Error:', vcErr.message);
-        }
-        // ============ END VIEW COUNTING ============
-
-        // Read Template
-        const filePath = path.join(__dirname, 'experiment-detail.html');
-        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
-            if (err) return next(err);
-
-            try {
-                const origin = `${req.protocol}://${req.get('host')}`;
-
-                // Get Authors
-                let authorNames = [];
-                let authors = [];
-                try {
-                    authors = await getExperimentAuthors(pool, experiment.id);
-                    if (authors.length > 0) {
-                        authorNames = authors.map(a => a.fullname);
-                    } else {
-                        authorNames = ['AperionX Yazarı'];
-                    }
-                } catch (e) { authorNames = ['AperionX Yazarı']; }
-
-                const authorName = authorNames.join(', ');
-
-                // Prepare Content
-                const title = experiment.title;
-                const summary = experiment.excerpt || experiment.objective || experiment.title;
-                const img = experiment.image_url
-                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url}`)
-                    : `${origin}/uploads/logo.png`;
-
-                // Determine URL
-                const isEnglish = req.path.startsWith('/en/');
-                const urlPrefix = isEnglish ? `${origin}/en` : origin;
-                const url = `${urlPrefix}/deney/${experiment.slug}`;
-
-                // Sanitize
-                const safeTitle = (title || '').replace(/"/g, '&quot;');
-                const safeSummary = (summary || '').replace(/"/g, '&quot;');
-                const safeImg = (img || '').replace(/"/g, '&quot;');
-                const safeUrl = (url || '').replace(/"/g, '&quot;');
-
-                // Format Date
-                const isoDate = new Date(experiment.created_at).toISOString();
-
-                // REPLACEMENT LOGIC
-                let html = htmlData;
-
-                // Title
-                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
-
-                // Meta Tags
-                const replaceMeta = (name, content) => {
-                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
-                    html = html.replace(regex, `$1${content}$3`);
-                };
-
-                replaceMeta('description', safeSummary);
-                replaceMeta('og:title', safeTitle);
-                replaceMeta('og:description', safeSummary);
-                replaceMeta('og:image', safeImg);
-                replaceMeta('og:url', safeUrl);
-                replaceMeta('twitter:title', safeTitle);
-                replaceMeta('twitter:description', safeSummary);
-                replaceMeta('twitter:image', safeImg);
-
-                // Canonical
-                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${slug}">`);
-
-                // Keywords
-                const tags = experiment.tags || 'bilim, deney, laboratuvar, aperionx';
-                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
-                if (!html.includes('<meta name="keywords"')) {
-                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
-                }
-
-                // Article Published Date
-                if (!html.includes('article:published_time')) {
-                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
-                }
-
-                // Preloaded Data
-                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
-
-                // === JSON-LD STRUCTURED DATA ===
-                const schemaData = {
-                    "@context": "https://schema.org",
-                    "@type": "ScholarlyArticle",
-                    "mainEntityOfPage": {
-                        "@type": "WebPage",
-                        "@id": safeUrl
-                    },
-                    "headline": safeTitle,
-                    "image": [safeImg],
-                    "datePublished": isoDate,
-                    "dateModified": isoDate,
-                    "author": {
-                        "@type": "Person",
-                        "name": authorName,
-                        "url": authors.length > 0 ? `${origin}/author.html?username=${authors[0].username}` : `${origin}/author.html`
-                    },
-                    "publisher": {
-                        "@type": "Organization",
-                        "name": "AperionX",
-                        "logo": {
-                            "@type": "ImageObject",
-                            "url": `${origin}/uploads/logo.png`
-                        }
-                    },
-                    "description": safeSummary
-                };
-
-                const breadcrumbData = {
-                    "@context": "https://schema.org",
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [{
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "Ana Sayfa",
-                        "item": "https://aperionx.com"
-                    }, {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Deneyler",
-                        "item": "https://aperionx.com/experiments.html"
-                    }, {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": safeTitle,
-                        "item": safeUrl
-                    }]
-                };
-
-                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
-                const breadcrumbScript = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
-
-                // Insert all scripts before </head>
-                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
-
-                // SSR: Render Author in meta row
-                let authorHtml = authors.map(a => `<a href="/author.html?username=${a.username}" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
-                html = html.replace(/<span\s+id="exp-detail-author">.*?<\/span>/s, `<span id="exp-detail-author">${authorHtml}</span>`);
-
-                res.send(html);
-
-            } catch (parseErr) {
-                console.error('Experiment SSR Parse Error:', parseErr);
-                res.status(500).send(parseErr.toString());
-            }
-        });
-
-    } catch (e) {
-        console.error('Experiment DB Error:', e);
-        next();
-    }
+// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
+app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], (req, res) => {
+    res.redirect(301, '/articles.html');
 });
 
-// Redirect /experiment-detail.html?id=X to /deney/slug
-app.get('/experiment-detail.html', async (req, res, next) => {
-    const experimentId = req.query.id;
-    if (!experimentId) return next();
+app.get('/experiment-detail.html', (req, res) => {
+    res.redirect(301, '/articles.html');
+});
 
-    try {
-        const [rows] = await pool.query('SELECT slug FROM experiments WHERE id = ?', [experimentId]);
-        if (rows.length > 0 && rows[0].slug) {
-            return res.redirect(301, `/deney/${rows[0].slug}`);
-        }
-        next();
-    } catch (e) { next(); }
+app.get('/experiments.html', (req, res) => {
+    res.redirect(301, '/articles.html');
 });
 
 // === RSS FEED ===
@@ -763,14 +524,13 @@ app.get('/feed.xml', async (req, res) => {
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const [articles] = await pool.query("SELECT slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
-        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' ORDER BY created_at DESC");
         const origin = `${req.protocol}://${req.get('host')}`;
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>';
         xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
         // Static Pages
-        const staticPages = ['', '/articles.html', '/experiments.html', '/about.html', '/author.html', '/index.html'];
+        const staticPages = ['', '/articles.html', '/about.html', '/author.html', '/index.html'];
         staticPages.forEach(page => {
             const pathUrl = page === '' ? '/' : page;
             const enPath = page === '' ? '/en/' : '/en' + page;
@@ -797,21 +557,6 @@ app.get('/sitemap.xml', async (req, res) => {
                 <lastmod>${date}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>1.0</priority>
-            </url>`;
-        });
-
-        // Dynamic Experiments
-        experiments.forEach(exp => {
-            const date = new Date(exp.created_at).toISOString();
-            xml += `
-            <url>
-                <loc>${origin}/deney/${exp.slug}</loc>
-                <xhtml:link rel="alternate" hreflang="tr" href="${origin}/deney/${exp.slug}"/>
-                <xhtml:link rel="alternate" hreflang="en" href="${origin}/en/deney/${exp.slug}"/>
-                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/deney/${exp.slug}"/>
-                <lastmod>${date}</lastmod>
-                <changefreq>weekly</changefreq>
-                <priority>0.9</priority>
             </url>`;
         });
 
@@ -2950,45 +2695,9 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 });
 
 
-// === EXPERIMENT STATS ENDPOINT ===
-app.get('/api/experiment-stats', async (req, res) => {
-    try {
-        const authorId = req.query.author_id;
-        let whereClause = '';
-        let params = [];
-
-        if (authorId) {
-            whereClause = ' WHERE author_id = ?';
-            params = [authorId];
-        }
-
-        const [published] = await pool.query(
-            `SELECT COUNT(*) as count FROM experiments WHERE status = 'published'${authorId ? ' AND author_id = ?' : ''}`,
-            authorId ? [authorId] : []
-        );
-        const [totalViews] = await pool.query(
-            `SELECT COALESCE(SUM(views), 0) as total FROM experiments${whereClause}`,
-            params
-        );
-        const [pending] = await pool.query(
-            `SELECT COUNT(*) as count FROM experiments WHERE status = 'pending'${authorId ? ' AND author_id = ?' : ''}`,
-            authorId ? [authorId] : []
-        );
-        const [total] = await pool.query(
-            `SELECT COUNT(*) as count FROM experiments${whereClause}`,
-            params
-        );
-
-        res.json({
-            published_count: published[0].count,
-            total_views: totalViews[0].total,
-            pending_count: pending[0].count,
-            total_count: total[0].count
-        });
-    } catch (e) {
-        console.error('Experiment Stats Error:', e);
-        res.json({ published_count: 0, total_views: 0, pending_count: 0, total_count: 0 });
-    }
+// === EXPERIMENT STATS ENDPOINT (DISABLED - returns zeroes) ===
+app.get('/api/experiment-stats', (req, res) => {
+    res.json({ published_count: 0, total_views: 0, pending_count: 0, total_count: 0 });
 });
 
 // Admin: Create User
@@ -3286,19 +2995,8 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             ORDER BY a.created_at DESC
         `, [user.id, user.id]);
 
-        // 4. Fetch Experiments (Main author or co-author)
-        const [experiments] = await pool.query(`
-            SELECT DISTINCT e.id, e.title, e.slug, e.image_url, e.excerpt, e.created_at, e.category, e.views, 'experiment' as type
-            FROM experiments e
-            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published'
-            ORDER BY e.created_at DESC
-        `, [user.id, user.id]);
-
-        // Combine and sort by date
-        const allContent = [...articles, ...experiments].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        res.json({ profile: user, articles: allContent });
+        // Experiments removed - only return articles
+        res.json({ profile: user, articles: articles });
 
     } catch (e) {
         console.error('[API] Public Author Error:', e);
@@ -4259,246 +3957,9 @@ app.get('/makale/:slug', async (req, res) => {
                 );
                 htmlData = htmlData.replace(
                     /<meta property="twitter:image" content=".*?">/,
-                    `<meta property="twitter:image" content="${imageUrl}">`
-                );
-            }
-
-            // 4. Send Modified HTML
-            res.send(htmlData);
-
-        } catch (dbErr) {
-            console.error('SEO DB Error:', dbErr);
-            // Fallback to sending original HTML if DB fails
-            res.send(htmlData);
-        }
-    });
-});
-
-// =============================================
-// === EXPERIMENTS MODULE ===
-// =============================================
-
-// === EXPERIMENT SSR SEO ROUTE ===
-app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
-    const slug = req.params.slug;
-
-    if (slug === 'experiments.html' || slug === 'experiment-detail.html') {
-        return res.redirect(301, '/experiments.html');
-    }
-
-    try {
-        const [rows] = await pool.query('SELECT * FROM experiments WHERE slug = ?', [slug]);
-        if (rows.length === 0) {
-            return res.status(404).send('Deney bulunamadı (404)');
-        }
-
-        const experiment = rows[0];
-
-        // View Counting
-        const experimentId = experiment.id;
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-
-        try {
-            const [viewCheck] = await pool.query(
-                `SELECT id FROM experiment_views 
-                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
-                [experimentId, ip]
-            );
-
-            if (viewCheck.length === 0) {
-                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
-                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
-            }
-        } catch (vcErr) {
-            console.error('[EXP-VIEW-COUNT] Error:', vcErr.message);
-        }
-
-        // Read Template
-        const filePath = path.join(__dirname, 'experiment-detail.html');
-        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
-            if (err) return next(err);
-
-            try {
-                const origin = `${req.protocol}://${req.get('host')}`;
-
-                // Get Authors
-                let authorNames = [];
-                let authors = [];
-                try {
-                    authors = await getExperimentAuthors(pool, experiment.id);
-                    if (authors.length > 0) {
-                        authorNames = authors.map(a => a.fullname);
-                    } else {
-                        authorNames = ['AperionX Yazarı'];
-                    }
-                } catch (e) { authorNames = ['AperionX Yazarı']; }
-
-                const authorName = authorNames.join(', ');
-
-                const title = experiment.title;
-                const summary = experiment.excerpt || experiment.objective || experiment.title;
-                const img = experiment.image_url
-                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url}`)
-                    : `${origin}/uploads/logo.png`;
-
-                const isEnglish = req.path.startsWith('/en/');
-                const urlPrefix = isEnglish ? `${origin}/en` : origin;
-                const url = `${urlPrefix}/deney/${experiment.slug}`;
-
-                const safeTitle = (title || '').replace(/"/g, '&quot;');
-                const safeSummary = (summary || '').replace(/"/g, '&quot;');
-                const safeImg = (img || '').replace(/"/g, '&quot;');
-                const safeUrl = (url || '').replace(/"/g, '&quot;');
-                const isoDate = new Date(experiment.created_at).toISOString();
-
-                let html = htmlData;
-
-                // Title
-                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
-
-                // Meta Tags
-                const replaceMeta = (name, content) => {
-                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
-                    html = html.replace(regex, `$1${content}$3`);
-                };
-
-                replaceMeta('description', safeSummary);
-                replaceMeta('og:title', safeTitle);
-                replaceMeta('og:description', safeSummary);
-                replaceMeta('og:image', safeImg);
-                replaceMeta('og:url', safeUrl);
-
-                if (!html.includes('article:published_time')) {
-                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
-                }
-
-                const tags = experiment.tags || 'bilim, deney, laboratuvar, aperionx';
-                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
-                if (!html.includes('<meta name="keywords"')) {
-                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
-                }
-
-                replaceMeta('twitter:title', safeTitle);
-                replaceMeta('twitter:description', safeSummary);
-                replaceMeta('twitter:image', safeImg);
-
-                // Canonical
-                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${experiment.slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${experiment.slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${experiment.slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${experiment.slug}">`);
-
-                // Preloaded Data
-                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
-
-                // JSON-LD: HowTo Schema
-                const schemaData = {
-                    "@context": "https://schema.org",
-                    "@type": "HowTo",
-                    "name": safeTitle,
-                    "description": safeSummary,
-                    "image": [safeImg],
-                    "datePublished": isoDate,
-                    "author": {
-                        "@type": "Person",
-                        "name": authorName,
-                        "url": authors.length > 0 ? `${origin}/author.html?username=${authors[0].username}` : `${origin}/author.html`
-                    },
-                    "publisher": {
-                        "@type": "Organization",
-                        "name": "AperionX",
-                        "logo": {
-                            "@type": "ImageObject",
-                            "url": `${origin}/uploads/logo.png`
-                        }
-                    }
-                };
-
-                // Add materials as tools
-                if (experiment.materials) {
-                    try {
-                        const mats = experiment.materials.split('\n').filter(m => m.trim());
-                        schemaData.tool = mats.map(m => ({ "@type": "HowToTool", "name": m.trim() }));
-                    } catch (e) { }
-                }
-
-                // Add procedure steps
-                if (experiment.procedure_steps) {
-                    try {
-                        const plainSteps = experiment.procedure_steps.replace(/<[^>]+>/g, '').split('\n').filter(s => s.trim());
-                        schemaData.step = plainSteps.map((s, i) => ({
-                            "@type": "HowToStep",
-                            "position": i + 1,
-                            "text": s.trim()
-                        }));
-                    } catch (e) { }
-                }
-
-                // Breadcrumb Schema
-                const breadcrumbData = {
-                    "@context": "https://schema.org",
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [{
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "Ana Sayfa",
-                        "item": "https://aperionx.com"
-                    }, {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": "Deneyler",
-                        "item": "https://aperionx.com/experiments.html"
-                    }, {
-                        "@type": "ListItem",
-                        "position": 3,
-                        "name": safeTitle,
-                        "item": safeUrl
-                    }]
-                };
-
-                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
-                const breadcrumbScript = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
-
-                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${breadcrumbScript}\n</head>`);
-
-                // SSR Author Rendering with Avatar
-                let authorHtml = authors.map(a => {
-                    const avatarHtml = a.avatar_url
-                        ? `<img src="/${a.avatar_url}" alt="${a.fullname}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">`
-                        : `<i class="ph ph-user"></i>`;
-                    return `<a href="/author-profile.html?u=${a.username}" style="text-decoration: none; color: inherit;">${avatarHtml} ${a.fullname}</a>`;
-                }).join('');
-                html = html.replace(/<span\s+id="exp-detail-author">.*?<\/span>/s, `<span id="exp-detail-author">${authorHtml}</span>`);
-
-                res.send(html);
-
-            } catch (parseErr) {
-                console.error('Experiment SSR Parse Error:', parseErr);
-                res.status(500).send(parseErr.toString());
-            }
-        });
-
-    } catch (e) {
-        console.error('Experiment DB Error:', e);
-        next();
-    }
-});
-
-// Legacy Experiment URL Redirect
-app.get('/experiment-detail.html', async (req, res, next) => {
-    const experimentId = req.query.id;
-    if (!experimentId) return next();
-
-    try {
-        const [rows] = await pool.query('SELECT slug FROM experiments WHERE id = ?', [experimentId]);
-        if (rows.length > 0 && rows[0].slug) {
-            return res.redirect(301, `/deney/${rows[0].slug}`);
-        }
-        next();
-    } catch (e) { next(); }
-});
-
-// === EXPERIMENT API ENDPOINTS ===
-
-// =============================================
-// === EXPERIMENTS MODULE (REFACTORED) ===
+                    `<meta property="twitte// =============================================
+// === EXPERIMENTS MODULE REMOVED ===
+// =============================================REFACTORED) ===
 // =============================================
 app.use('/api/experiments', require('./routes/experiments')(upload, authenticateToken, checkRole, createNotification, getUniqueExperimentSlug));
 

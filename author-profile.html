@@ -662,8 +662,8 @@
                     grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış bir içeriği yok.</div>';
                 } else {
                     grid.innerHTML = articles.map(art => {
-                        const linkPath = art.type === 'experiment' ? `/deney/${art.slug || art.id}` : `/makale/${art.slug || art.id}`;
-                        const badgeLabel = art.type === 'experiment' ? 'DENEY' : art.category;
+                        const linkPath = `/makale/${art.slug || art.id}`;
+                        const badgeLabel = art.category;
                         return `
                         <a href="${linkPath}" class="author-article-card">
                             <div class="card-image-wrapper">

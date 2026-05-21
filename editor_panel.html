@@ -909,10 +909,6 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this); loadProfile();">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item"
-                onclick="showSection('editor-experiments', this); loadEditorExperiments();">
-                <i class="ph ph-flask"></i> <span>Deneyler</span>
-            </a>
         </div>
 
         <button onclick="logout()" class="logout-btn"><i class="ph ph-sign-out"></i> <span>Güvenli Çıkış</span></button>
@@ -954,38 +950,6 @@
                     <div class="stat-info">
                         <h3 id="count-rejected">0</h3>
                         <p>Reddedilen</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ROW 3: EXPERIMENTS -->
-            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 20px 0 15px 0;">Deney İstatistikleri</h2>
-            <div class="dashboard-stats">
-                <div class="stat-card" style="cursor: pointer;"
-                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
-                    <div class="stat-icon" style="background: #fdf4ff; color: #a855f7;"><i
-                            class="ph-duotone ph-flask"></i></div>
-                    <div class="stat-info">
-                        <h3 id="count-exp-published">0</h3>
-                        <p>Yayında Deney</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="cursor: pointer;"
-                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
-                    <div class="stat-icon" style="background: #ecfeff; color: #06b6d4;"><i
-                            class="ph-duotone ph-binoculars"></i></div>
-                    <div class="stat-info">
-                        <h3 id="count-exp-views">0</h3>
-                        <p>Deney Görüntülenme</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="cursor: pointer;"
-                    onclick="showSection('editor-experiments', document.querySelector('a[onclick*=\'editor-experiments\']'))">
-                    <div class="stat-icon" style="background: #fff7ed; color: #f97316;"><i
-                            class="ph-duotone ph-clock"></i></div>
-                    <div class="stat-info">
-                        <h3 id="count-exp-pending">0</h3>
-                        <p>Onay Bekleyen Deney</p>
                     </div>
                 </div>
             </div>
@@ -1311,33 +1275,6 @@
 
         </div>
 
-        <!-- EDITOR EXPERIMENTS SECTION -->
-        <div id="editor-experiments" class="section">
-            <h1 class="page-title">Deney Yönetimi</h1>
-            <div class="card" style="min-height: 400px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="font-size: 1.25rem; font-weight: 700; margin:0;">Deneyler</h2>
-                    <div class="filter-bar">
-                        <button class="filter-btn active" onclick="filterEditorExps('all', this)">Tümü</button>
-                        <button class="filter-btn" onclick="filterEditorExps('pending', this)">Bekleyen</button>
-                        <button class="filter-btn" onclick="filterEditorExps('published', this)">Yayında</button>
-                    </div>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Başlık</th>
-                            <th>Yazar</th>
-                            <th>Kategori</th>
-                            <th>Durum</th>
-                            <th>Tarih</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody id="editor-exp-list"></tbody>
-                </table>
-            </div>
-        </div>
 
     </div>
 
@@ -1723,9 +1660,6 @@
             // Auto-load data for stats section
             if (id === 'section-stats-final') {
                 loadAnalysisAuthors();
-            }
-            if (id === 'editor-experiments') {
-                loadEditorExperiments();
             }
         }
 
@@ -2512,218 +2446,6 @@
         // Let's modify showSection to lazy load, OR just load on init.
         // loadAnalysisAuthors(); // Moved to init
 
-        // === EXPERIMENTS MODULE (EDITOR) ===
-        let editorAllExps = [];
-        let editorExpFilter = 'all';
-
-        async function loadEditorExperiments() {
-            const token = localStorage.getItem('token');
-            try {
-                const res = await fetch('/api/experiments/editor/all-experiments', { headers: { 'Authorization': 'Bearer ' + token } });
-                editorAllExps = await res.json();
-                renderEditorExps();
-            } catch (e) { console.error('Editor experiments error:', e); }
-        }
-
-        function filterEditorExps(status, btn) {
-            editorExpFilter = status;
-            document.querySelectorAll('#editor-experiments .filter-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            renderEditorExps();
-        }
-
-        function renderEditorExps() {
-            const tbody = document.getElementById('editor-exp-list');
-            let exps = editorAllExps;
-            if (editorExpFilter !== 'all') exps = exps.filter(e => e.status === editorExpFilter);
-
-            const statusColors = { published: '#10b981', pending: '#f59e0b', rejected: '#ef4444', draft: '#64748b', trash: '#94a3b8' };
-            const statusLabels = { published: 'Yayında', pending: 'Beklemede', rejected: 'Reddedildi', draft: 'Taslak', trash: 'Çöp' };
-
-            tbody.innerHTML = exps.map(exp => {
-                const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
-                const sc = statusColors[exp.status] || '#64748b';
-                const sl = statusLabels[exp.status] || exp.status;
-                let actions = '';
-                if (exp.status === 'pending') {
-                    actions = `<button onclick="approveExp(${exp.id})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; margin-right:5px; font-size:0.85rem;"><i class="ph ph-check"></i> Onayla</button>
-                    <button onclick="rejectExp(${exp.id})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-x"></i> Reddet</button>
-                    <button onclick="openReviewExp(${exp.id})" style="background:#6366f1; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem; margin-left:5px;"><i class="ph ph-eye"></i> İncele</button>`;
-                } else if (exp.status === 'published') {
-                    actions = `<a href="/deney/${exp.slug}" target="_blank" style="color:#6366f1; font-size:0.85rem;"><i class="ph ph-eye"></i> Görüntüle</a>`;
-                }
-                return `<tr>
-                    <td style="font-weight:600;">${escapeHtml(exp.title)}</td>
-                    <td>${escapeHtml(exp.author_name || 'Yazar')}</td>
-                    <td>${escapeHtml(exp.category || 'Genel')}</td>
-                    <td><span style="color:${sc}; font-weight:600;">${sl}</span></td>
-                    <td>${date}</td>
-                    <td>${actions}</td>
-                </tr>`;
-            }).join('');
-
-            if (exps.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Henüz deney yok.</td></tr>';
-            }
-        }
-
-        let currentExpId = null;
-
-        function openReviewExp(id) {
-            try {
-                const exp = editorAllExps.find(e => e.id == id);
-                if (!exp) {
-                    showToast('Deney verisi bulunamadı!', 'error');
-                    return;
-                }
-
-                currentExpId = exp.id;
-                document.getElementById('modal-title').innerText = exp.title;
-                const isPending = exp.status === 'pending';
-
-                let rejectionHtml = '';
-                if (exp.status === 'rejected' && exp.rejection_reason) {
-                    rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
-                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
-                        ${exp.rejection_reason}
-                    </div>`;
-                }
-
-                let html = `
-                    ${rejectionHtml}
-                    <div style="margin-bottom: 20px; text-align:center; background:#f1f5f9; border-radius:12px; overflow:hidden;">
-                        <img src="${exp.image_url ? '/' + exp.image_url : 'https://via.placeholder.com/800x400'}" style="width: 100%; max-width: 800px; height: auto; max-height: 500px; object-fit: contain; border-radius: 12px;">
-                    </div>
-                    <div style="font-size: 1.1rem; line-height: 1.8; color:#334155;">
-                        <h3 style="margin-top:0;">Özet</h3>
-                        <p>${exp.excerpt || '-'}</p>
-                        <h3>Amaç</h3>
-                        <p>${exp.objective || '-'}</p>
-                        <h3>Malzemeler</h3>
-                        <pre style="background:#f8fafc; padding:15px; border-radius:8px; white-space: pre-wrap; font-family: inherit;">${exp.materials || '-'}</pre>
-                        <h3>Güvenlik Uyarıları</h3>
-                        <p>${exp.safety_notes || '-'}</p>
-                        <h3>Adımlar</h3>
-                        <div>${exp.procedure_steps || '-'}</div>
-                        <h3>Sonuçlar</h3>
-                        <div>${exp.results || '-'}</div>
-                        <h3>Çıkarım</h3>
-                        <p>${exp.conclusion || '-'}</p>
-                    </div>
-                    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; font-size:0.95rem; color:#475569;">
-                        <div><strong>Kategori:</strong> ${exp.category || '-'}</div>
-                        <div><strong>Etiketler:</strong> ${exp.tags || '-'}</div>
-                    </div>
-                    ${exp.pdf_url ? `<div style="margin-top:20px;"><a href="/${exp.pdf_url}" target="_blank" class="btn btn-secondary"><i class="ph ph-file-pdf"></i> PDF Dosyasını İndir</a></div>` : ''}
-                `;
-
-                document.getElementById('modal-body').innerHTML = html;
-
-                const footer = document.querySelector('#review-modal .modal-footer');
-                if (isPending) {
-                    footer.innerHTML = `
-                        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
-                            <textarea id="reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
-                            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                                <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
-                                <button class="btn btn-danger" onclick="toggleRejectInput()">Reddet...</button>
-                                <button class="btn btn-primary" onclick="submitExpDecision('approve')">Yayına Al</button>
-                            </div>
-                            <div id="confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
-                                <button class="btn btn-danger" onclick="submitExpDecision('reject')">Reddet ve Bitir</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Kapat</button>`;
-                }
-
-                document.getElementById('review-modal').classList.add('show');
-            } catch (error) {
-                console.error("openReviewExp error:", error);
-                showToast("Deney önizlemesi yüklenirken bir hata oluştu.", "error");
-            }
-        }
-        
-        async function submitExpDecision(decision) {
-            if (!currentExpId) return;
-            const token = localStorage.getItem('token');
-            if (decision === 'reject') {
-                const reason = document.getElementById('reject-reason').value;
-                if (!reason || !reason.trim()) {
-                    showToast('Lütfen red sebebi yazın!', 'error');
-                    return;
-                }
-                try {
-                    await fetch('/api/experiments/editor/experiment-decide/' + currentExpId, {
-                        method: 'PUT',
-                        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ decision: 'reject', rejection_reason: reason })
-                    });
-                    closeModal();
-                    showToast('Deney reddedildi', 'info');
-                    loadEditorExperiments();
-                } catch (e) { showToast('Hata oluştu', 'error'); }
-            } else {
-                showConfirm('Bu deneyi yayına almak istediğinize emin misiniz?', async () => {
-                    closeConfirmModal();
-                    try {
-                        await fetch('/api/experiments/editor/experiment-decide/' + currentExpId, {
-                            method: 'PUT',
-                            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ decision: 'approve' })
-                        });
-                        closeModal();
-                        showToast('Deney yayına alındı', 'success');
-                        loadEditorExperiments();
-                    } catch (e) { showToast('Hata oluştu', 'error'); }
-                });
-            }
-        }
-
-        async function approveExp(id) {
-            const token = localStorage.getItem('token');
-            try {
-                await fetch(`/api/experiments/editor/experiment-decide/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decision: 'approve' })
-                });
-                showToast('Deney onaylandı!', 'success');
-                loadEditorExperiments();
-            } catch (e) { showToast('Onay hatası', 'error'); }
-        }
-
-        async function rejectExp(id) {
-            const reason = prompt('Red sebebi (opsiyonel):');
-            const token = localStorage.getItem('token');
-            try {
-                await fetch(`/api/experiments/editor/experiment-decide/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decision: 'reject', rejection_reason: reason || '' })
-                });
-                showToast('Deney reddedildi', 'info');
-                loadEditorExperiments();
-            } catch (e) { showToast('Red hatası', 'error'); }
-        }
-        // === END EXPERIMENTS MODULE (EDITOR) ===
-
-        // === EXPERIMENT STATS LOADER ===
-        async function loadEditorExpStats() {
-            try {
-                const res = await fetch('/api/experiment-stats');
-                const data = await res.json();
-                const el1 = document.getElementById('count-exp-published');
-                const el2 = document.getElementById('count-exp-views');
-                const el3 = document.getElementById('count-exp-pending');
-                if (el1) el1.innerText = data.published_count || 0;
-                if (el2) el2.innerText = data.total_views || 0;
-                if (el3) el3.innerText = data.pending_count || 0;
-            } catch (e) { console.error('Editor exp stats error:', e); }
-        }
-        loadEditorExpStats();
 
         loadAuthorsForEditorSelection();
 
