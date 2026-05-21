@@ -598,6 +598,31 @@ const dbConfig = {
 
 const pool = require('./config/db');
 
+// --- Simple API Cache ---
+const apiCache = {};
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCachedData(key) {
+    const cached = apiCache[key];
+    if (cached && (Date.now() - cached.timestamp < CACHE_DURATION_MS)) {
+        return cached.data;
+    }
+    return null;
+}
+
+function setCachedData(key, data) {
+    apiCache[key] = {
+        timestamp: Date.now(),
+        data: data
+    };
+}
+function clearCache(keyPrefix) {
+    Object.keys(apiCache).forEach(k => {
+        if (k.startsWith(keyPrefix)) delete apiCache[k];
+    });
+}
+// ------------------------
+
 async function ensureSchema() {
     try {
 
@@ -1248,7 +1273,12 @@ app.put('/api/menu/reorder', authenticateToken, async (req, res) => {
 
 app.get('/api/hero-slides', async (req, res) => {
     try {
+        const cacheKey = 'hero_slides';
+        const cached = getCachedData(cacheKey);
+        if (cached) return res.json(cached);
+
         const [rows] = await pool.query('SELECT * FROM hero_slides ORDER BY order_index ASC');
+        setCachedData(cacheKey, rows);
         res.json(rows);
     } catch (e) { res.status(500).send(e); }
 });
@@ -1429,6 +1459,10 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // 3. Articles (GET Public, POST Author)
 app.get('/api/articles', async (req, res) => {
     try {
+        const cacheKey = 'articles';
+        const cached = getCachedData(cacheKey);
+        if (cached) return res.json(cached);
+
         // 1. Fetch Articles
         const [articles] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published' ORDER BY created_at DESC");
 
@@ -1490,6 +1524,7 @@ app.get('/api/articles', async (req, res) => {
             console.log('[DEBUG API] /api/articles First Item Authors:', JSON.stringify(articles[0].authors));
         }
 
+        setCachedData(cacheKey, articles);
         res.json(articles);
     } catch (e) {
         console.error('API Articles Error:', e);
@@ -3438,11 +3473,17 @@ app.get('/sitemap.xml', async (req, res) => {
 // GET Settings
 app.get('/api/settings', async (req, res) => {
     try {
+        const cacheKey = 'settings';
+        const cached = getCachedData(cacheKey);
+        if (cached) return res.json(cached);
+
         const [rows] = await pool.query('SELECT * FROM settings');
         const settings = {};
         rows.forEach(row => {
             settings[row.setting_key] = row.setting_value;
         });
+
+        setCachedData(cacheKey, settings);
         res.json(settings);
     } catch (e) {
         console.error('Settings Fetch Error:', e);
@@ -3494,6 +3535,7 @@ app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
             }
         }
 
+        clearCache('settings');
         res.json({ message: 'Ayarlar başarıyla kaydedildi' });
 
     } catch (e) {
