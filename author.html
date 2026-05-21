@@ -1702,67 +1702,22 @@
             <div class="header-row">
                 <h1 class="page-title">Deneylerim</h1>
             </div>
-            <div id="exp-status-filters"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                <div class="card status-card" onclick="setExpFilter('all')"
-                    style="padding: 18px; border-left: 4px solid #6366f1; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        Tümü</h3>
-                    <p id="exp-count-all" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">
-                        -</p>
+            <div id="exp-status-filters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                <div class="card status-card" onclick="setExpFilter('all')" style="padding: 18px; border-left: 4px solid #6366f1; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Tümü</h3>
+                    <p id="exp-count-all" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
                 </div>
-                <div class="card status-card" onclick="setExpFilter('published')"
-                    style="padding: 18px; border-left: 4px solid #10b981; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        Yayınlanan</h3>
-                    <p id="exp-count-published"
-                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                <div class="card status-card" onclick="setExpFilter('published')" style="padding: 18px; border-left: 4px solid #10b981; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Yayınlananlar</h3>
+                    <p id="exp-count-published" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
                 </div>
-                <div class="card status-card" onclick="setExpFilter('pending')"
-                    style="padding: 18px; border-left: 4px solid #f59e0b; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        Bekleyen</h3>
-                    <p id="exp-count-pending"
-                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                <div class="card status-card" onclick="setExpFilter('draft')" style="padding: 18px; border-left: 4px solid #94a3b8; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Taslaklar</h3>
+                    <p id="exp-count-draft" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
                 </div>
-                <div class="card status-card" onclick="setExpFilter('rejected')"
-                    style="padding: 18px; border-left: 4px solid #ef4444; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        Reddedilen</h3>
-                    <p id="exp-count-rejected"
-                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
-                </div>
-                <div class="card status-card" onclick="setExpFilter('draft')"
-                    style="padding: 18px; border-left: 4px solid #94a3b8; cursor: pointer; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        Taslaklar</h3>
-                    <p id="exp-count-draft"
-                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
-                </div>
-                <div class="card status-card" onclick="loadTrashExperiments()"
-                    style="padding: 18px; border-left: 4px solid #334155; cursor: pointer; transition: transform 0.2s; background: #f8fafc;"
-                    onmouseover="this.style.transform='translateY(-3px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <h3
-                        style="margin: 0; color: #334155; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        <i class="ph ph-trash"></i> Çöp Kutusu</h3>
-                    <p id="exp-count-trash"
-                        style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
+                <div class="card status-card" onclick="setExpFilter('trash')" style="padding: 18px; border-left: 4px solid #334155; cursor: pointer; transition: transform 0.2s; background: #f8fafc;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="margin: 0; color: #334155; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;"><i class="ph ph-trash"></i> Çöp Kutusu</h3>
+                    <p id="exp-count-trash" style="margin: 3px 0 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">-</p>
                 </div>
             </div>
             <div id="experiments-list"></div>
@@ -3466,15 +3421,16 @@
 
             const token = localStorage.getItem('token');
             try {
-                const url = editingExpId ? `/api/experiments/${editingExpId}` : '/api/experiments';
+                const url = editingExpId ? `/api/experiments/update/${editingExpId}` : '/api/experiments/add';
                 const method = editingExpId ? 'PUT' : 'POST';
                 const res = await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + token }, body: formData });
                 const data = await res.json();
                 if (res.ok) {
                     showAuthorToast(editingExpId ? 'Deney güncellendi!' : 'Deney oluşturuldu!', 'success');
                     resetExpForm();
+                    loadMyExperiments(); // refresh list
                 } else {
-                    showAuthorToast(data.message || 'Hata oluştu', 'error');
+                    showAuthorToast(data.message || data.error || 'Hata oluştu', 'error');
                 }
             } catch (e) {
                 showAuthorToast('Sunucu hatası', 'error');
@@ -3484,63 +3440,50 @@
         async function loadMyExperiments() {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`/api/experiments/my-experiments?t=${Date.now()}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                const res = await fetch(`/api/experiments/my-experiments?status=${expFilterStatus}&t=${Date.now()}`, { headers: { 'Authorization': 'Bearer ' + token } });
                 allMyExperiments = await res.json();
-                updateExpCounts();
                 renderMyExperiments();
+                
+                // Background fetch for counts
+                fetch(`/api/experiments/my-experiments?status=all`, { headers: { 'Authorization': 'Bearer ' + token } })
+                  .then(r => r.json())
+                  .then(all => {
+                      document.getElementById('exp-count-all').textContent = all.length;
+                      document.getElementById('exp-count-published').textContent = all.filter(e => e.status === 'published').length;
+                      document.getElementById('exp-count-draft').textContent = all.filter(e => e.status === 'draft').length;
+                  });
+                fetch(`/api/experiments/my-experiments?status=trash`, { headers: { 'Authorization': 'Bearer ' + token } })
+                  .then(r => r.json())
+                  .then(trash => {
+                      document.getElementById('exp-count-trash').textContent = trash.length;
+                  });
             } catch (e) { console.error('Load experiments error:', e); }
-        }
-
-        function updateExpCounts() {
-            const all = allMyExperiments;
-            document.getElementById('exp-count-all').textContent = all.length;
-            document.getElementById('exp-count-published').textContent = all.filter(e => e.status === 'published').length;
-            document.getElementById('exp-count-pending').textContent = all.filter(e => e.status === 'pending').length;
-            document.getElementById('exp-count-rejected').textContent = all.filter(e => e.status === 'rejected').length;
-            document.getElementById('exp-count-draft').textContent = all.filter(e => e.status === 'draft').length;
-            // Trash count will be fetched or kept empty visually unless clicked
         }
 
         function setExpFilter(status) {
             expFilterStatus = status;
-            renderMyExperiments();
-        }
-
-        async function loadTrashExperiments() {
-            const token = localStorage.getItem('token');
-            try {
-                const res = await fetch(`/api/experiments/my-trash?t=${Date.now()}`, { headers: { 'Authorization': 'Bearer ' + token } });
-                const trashData = await res.json();
-                document.getElementById('exp-count-trash').textContent = trashData.length;
-                expFilterStatus = 'trash';
-                // Temporarily replace allMyExperiments for rendering, or render explicitly
-                allMyExperiments = trashData; 
-                renderMyExperiments();
-            } catch (e) { console.error('Trash load error:', e); }
+            loadMyExperiments();
         }
 
         function renderMyExperiments() {
             const container = document.getElementById('experiments-list');
             let exps = allMyExperiments;
-            if (expFilterStatus !== 'all') {
-                exps = exps.filter(e => e.status === expFilterStatus);
-            }
 
             if (exps.length === 0) {
-                container.innerHTML = '<div class="card" style="padding:40px; text-align:center; color:#64748b; font-size:1.1rem;"><i class="ph-fill ph-flask" style="font-size:3rem; color:#e2e8f0; display:block; margin-bottom:15px;"></i>Henüz bu kategoride deneyiniz yok.</div>';
+                container.innerHTML = '<div class="card" style="padding:40px; text-align:center; color:#64748b; font-size:1.1rem;"><i class="ph-fill ph-flask" style="font-size:3rem; color:#e2e8f0; display:block; margin-bottom:15px;"></i>Bu kategoride deney bulunmuyor.</div>';
                 return;
             }
 
             container.innerHTML = exps.map(exp => {
-                let statusClass = exp.status === 'published' ? 'status-published' : (exp.status === 'pending' ? 'status-pending' : (exp.status === 'rejected' ? 'status-trash' : 'status-draft'));
-                let statusLabel = exp.status === 'published' ? 'Yayında' : (exp.status === 'pending' ? 'Onay Bekliyor' : (exp.status === 'rejected' ? 'Reddedildi' : 'Taslak'));
+                let statusClass = exp.status === 'published' ? 'status-published' : (exp.status === 'pending' ? 'status-pending' : (exp.status === 'trash' ? 'status-trash' : 'status-draft'));
+                let statusLabel = exp.status === 'published' ? 'Yayında' : (exp.status === 'pending' ? 'Onay Bekliyor' : (exp.status === 'trash' ? 'Çöp' : 'Taslak'));
                 const date = new Date(exp.created_at).toLocaleDateString('tr-TR');
 
                 return `
                 <div class="card" style="padding: 24px; margin-bottom: 20px; display: flex; flex-direction: row; gap: 24px; align-items: center; transition: all 0.3s ease; border: 1px solid #f1f5f9; position: relative; overflow: hidden;">
-                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: ${exp.status === 'published' ? '#10b981' : (exp.status === 'pending' ? '#f59e0b' : (exp.status === 'rejected' ? '#ef4444' : '#64748b'))};"></div>
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: ${exp.status === 'published' ? '#10b981' : (exp.status === 'pending' ? '#f59e0b' : (exp.status === 'trash' ? '#ef4444' : '#64748b'))};"></div>
                     
-                    ${exp.image_url ? `<div style="flex-shrink:0;"><img src="${exp.image_url}" style="width:120px; height:80px; object-fit:cover; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);" onerror="this.style.display='none'"></div>` : `<div style="flex-shrink:0; width:120px; height:80px; background:#f8fafc; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#cbd5e1;"><i class="ph-fill ph-image" style="font-size:2rem;"></i></div>`}
+                    ${exp.image_url ? `<div style="flex-shrink:0;"><img src="/${exp.image_url}" style="width:120px; height:80px; object-fit:cover; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);" onerror="this.style.display='none'"></div>` : `<div style="flex-shrink:0; width:120px; height:80px; background:#f8fafc; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#cbd5e1;"><i class="ph-fill ph-image" style="font-size:2rem;"></i></div>`}
                     
                     <div style="flex:1;">
                         <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 700; color: #1e293b;">${escapeHtml(exp.title || 'Başlıksız')}</h3>
@@ -3573,7 +3516,6 @@
             document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
             showSection('new-experiment', document.querySelector('[title="Yeni Deney"]'));
 
-            // Poll until Quill editors are ready before filling form
             function waitForQuillAndFill(attempt) {
                 if (attempt > 30) { fillExpForm(exp); return; }
                 initExpQuill();
@@ -3599,7 +3541,7 @@
             document.getElementById('exp-references').value = exp.references_list || '';
             try {
                 if (expQuillProcedure) {
-                    expQuillProcedure.root.innerHTML = ''; // clear first
+                    expQuillProcedure.root.innerHTML = '';
                     expQuillProcedure.clipboard.dangerouslyPasteHTML(exp.procedure_steps || '');
                 }
                 if (expQuillResults) {
@@ -3626,12 +3568,10 @@
             if (!confirm('Bu deneyi silmek istediğinize emin misiniz?')) return;
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`/api/experiments/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+                const res = await fetch(`/api/experiments/trash/${id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
                 if (res.ok) {
-                    allMyExperiments = allMyExperiments.filter(e => e.id !== id);
-                    updateExpCounts();
-                    renderMyExperiments();
                     showAuthorToast('Deney çöp kutusuna taşındı', 'success');
+                    loadMyExperiments();
                 } else {
                     const data = await res.json().catch(() => ({}));
                     showAuthorToast(data.message || data.error || 'Silme başarısız oldu', 'error');
@@ -3642,10 +3582,10 @@
         async function restoreExperiment(id) {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`/api/experiments/restore/${id}`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+                const res = await fetch(`/api/experiments/restore/${id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token } });
                 if (res.ok) {
                     showAuthorToast('Deney taslak olarak geri yüklendi', 'success');
-                    loadTrashExperiments(); // Reload trash
+                    loadMyExperiments();
                 } else {
                     showAuthorToast('Geri yükleme başarısız', 'error');
                 }
@@ -3658,9 +3598,8 @@
             try {
                 const res = await fetch(`/api/experiments/permanent/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
                 if (res.ok) {
-                    allMyExperiments = allMyExperiments.filter(e => e.id !== id);
-                    renderMyExperiments();
                     showAuthorToast('Deney kalıcı olarak silindi', 'success');
+                    loadMyExperiments();
                 } else {
                     showAuthorToast('Silme başarısız', 'error');
                 }

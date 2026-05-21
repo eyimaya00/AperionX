@@ -11,24 +11,30 @@ module.exports = function(upload, authenticateToken, checkRole, createNotificati
         next();
     });
 
-    // ─── Public Routes ───
+    // ==========================================
+    // PUBLIC ROUTES (PRESERVED)
+    // ==========================================
     router.get('/', expController.getAllExperiments);
     router.get('/categories', expController.getCategories);
 
-    // ─── Author Specific Routes ───
-    router.get('/my-experiments', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.getMyExperiments);
-    router.get('/my-trash', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.getMyTrashExperiments);
-    router.put('/restore/:id', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.restoreExperiment);
-    router.delete('/permanent/:id', authenticateToken, checkRole(['author', 'editor', 'admin']), expController.permanentDeleteExperiment);
-    router.post('/', authenticateToken, upload.any(), expController.createExperiment);
+    // ==========================================
+    // AUTHOR PANEL ROUTES (REWRITTEN AS REQUESTED)
+    // ==========================================
+    const authorRoles = ['author', 'editor', 'admin'];
+    const uploadMiddleware = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]);
 
-    // ─── Editor/Admin specific routes (MUST come BEFORE /:id to avoid parameter capture) ───
+    router.get('/my-experiments', authenticateToken, checkRole(authorRoles), expController.getExperiments);
+    router.post('/add', authenticateToken, checkRole(authorRoles), uploadMiddleware, expController.createExperiment);
+    router.put('/update/:id', authenticateToken, checkRole(authorRoles), uploadMiddleware, expController.updateExperiment);
+    router.patch('/trash/:id', authenticateToken, checkRole(authorRoles), expController.softDeleteExperiment);
+    router.patch('/restore/:id', authenticateToken, checkRole(authorRoles), expController.restoreExperiment);
+    router.delete('/permanent/:id', authenticateToken, checkRole(authorRoles), expController.permanentDeleteExperiment);
+
+    // ==========================================
+    // EDITOR/ADMIN ROUTES (PRESERVED)
+    // ==========================================
     router.put('/editor/experiment-decide/:id', authenticateToken, checkRole(['admin', 'editor']), expController.decideExperiment);
     router.get('/editor/all-experiments', authenticateToken, checkRole(['admin', 'editor']), expController.getAllExperimentsEditor);
-
-    // ─── Protected Modification Routes (parameterized — MUST come AFTER literal routes) ───
-    router.put('/:id', authenticateToken, checkRole(['admin', 'editor', 'author']), upload.any(), expController.updateExperiment);
-    router.delete('/:id', authenticateToken, checkRole(['admin', 'editor', 'author']), expController.deleteExperiment);
 
     return router;
 };
