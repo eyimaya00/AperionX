@@ -1649,11 +1649,17 @@
                 }
             }
 
-            // --- Dark Mode Restore ---
-            if (localStorage.getItem('darkMode') === 'true') {
+            // --- Dark Mode Restore (Default to Dark) ---
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'false') {
+                document.body.classList.remove('dark-mode');
+                const icon = document.getElementById('theme-icon');
+                if (icon) icon.className = 'ph-fill ph-moon';
+            } else {
                 document.body.classList.add('dark-mode');
                 const icon = document.getElementById('theme-icon');
                 if (icon) icon.className = 'ph-fill ph-sun';
+                if (savedDarkMode === null) localStorage.setItem('darkMode', 'true');
             }
 
             // --- Logout Button ---

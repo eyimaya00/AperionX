@@ -420,14 +420,15 @@ function initTheme() {
     const themeBtn = document.getElementById('themeToggle');
     if (!themeBtn) return;
 
-    // Check saved theme
+    // Check saved theme (default to dark)
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
-    } else {
+    if (savedTheme === 'light') {
         document.documentElement.removeAttribute('data-theme');
         themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
+        if (!savedTheme) localStorage.setItem('theme', 'dark');
     }
 
     themeBtn.addEventListener('click', () => {

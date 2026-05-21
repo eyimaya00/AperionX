@@ -4166,11 +4166,17 @@
             if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
         }
 
-        // Init Dark Mode
-        if (localStorage.getItem('darkMode') === 'true') {
+        // Init Dark Mode (Default to Dark)
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'false') {
+            document.body.classList.remove('dark-mode');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = 'ph ph-moon';
+        } else {
             document.body.classList.add('dark-mode');
             const icon = document.getElementById('theme-icon');
             if (icon) icon.className = 'ph ph-sun';
+            if (savedDarkMode === null) localStorage.setItem('darkMode', 'true');
         }
     </script>
     <script defer src="script_v105.js?v=201"></script>

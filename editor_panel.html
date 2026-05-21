@@ -2277,12 +2277,13 @@
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             const icon = document.getElementById('theme-icon');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-                if (icon) icon.className = 'ph ph-sun';
-            } else {
+            if (savedTheme === 'light') {
                 document.body.classList.remove('dark-mode');
                 if (icon) icon.className = 'ph ph-moon';
+            } else {
+                document.body.classList.add('dark-mode');
+                if (icon) icon.className = 'ph ph-sun';
+                if (!savedTheme) localStorage.setItem('theme', 'dark');
             }
 
             const toggleBtn = document.getElementById('themeToggle');
