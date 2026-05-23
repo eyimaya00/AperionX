@@ -4197,7 +4197,7 @@ app.use((req, res) => {
     // Check if it looks like an API call first
     if (req.originalUrl.startsWith('/api')) {
         console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
-        return res.status(404).json({ message: `Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
+        return res.status(404).json({ message: `AperionX Process - Endpoint bulunamadı: ${req.method} ${req.originalUrl}` });
     }
 
     // Serve HTML 404 page for front-end routes and unknown paths
