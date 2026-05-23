@@ -2602,7 +2602,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         if (rows.length === 0) {
             const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
             const randomPassword = require('crypto').randomBytes(16).toString('hex');
-            const bcrypt = require('bcrypt');
+            // using global bcryptjs
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
             const [result] = await pool.query(
