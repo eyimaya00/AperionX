@@ -790,49 +790,35 @@ async function loadSettings() {
         if (settings.GOOGLE_CLIENT_ID) {
             window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
             
-            let googleLoadAttempts = 0;
-            window.renderGoogleButtons = function() {
-                console.log("[Google Auth] renderGoogleButtons called, attempt:", googleLoadAttempts);
-                
+            window.triggerGoogleSignIn = function() {
                 if (typeof google === 'undefined' || !google.accounts) {
-                    googleLoadAttempts++;
-                    if (googleLoadAttempts > 50) {
-                        console.error("[Google Auth] Google SDK failed to load after 50 attempts.");
-                        document.querySelectorAll('.google-login-btn, #google-login-btn').forEach(btn => {
-                            btn.innerHTML = '<div style="color: #ef4444; font-size: 0.85rem; text-align: center; border: 1px dashed #ef4444; padding: 8px; border-radius: 8px;">Google girişi yüklenemedi. Reklam engelleyicinizi kontrol edin.</div>';
-                        });
-                        return;
-                    }
-                    setTimeout(window.renderGoogleButtons, 200);
+                    alert('Google giriş servisi yüklenemedi. Lütfen sayfayı yenileyin veya reklam engelleyicinizi kontrol edin.');
                     return;
                 }
                 
-                try {
-                    if (!window.GOOGLE_INITIALIZED) {
-                        google.accounts.id.initialize({
-                            client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
-                            callback: handleGoogleCredentialResponse
-                        });
-                        window.GOOGLE_INITIALIZED = true;
-                        console.log("[Google Auth] Initialized with client ID");
-                    }
-                    
-                    document.querySelectorAll('.google-login-btn, #google-login-btn').forEach(btn => {
-                        btn.innerHTML = '';
-                        google.accounts.id.renderButton(btn, {
-                            theme: "outline",
-                            size: "large",
-                            type: "standard",
-                            width: 320
-                        });
-                        console.log("[Google Auth] Button rendered into:", btn.id || btn.className);
+                if (!window.GOOGLE_INITIALIZED) {
+                    google.accounts.id.initialize({
+                        client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
+                        callback: handleGoogleCredentialResponse
                     });
-                } catch (err) {
-                    console.error("[Google Auth] Render error:", err);
+                    window.GOOGLE_INITIALIZED = true;
                 }
+                
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        // One Tap couldn't display, fall back to redirect
+                        const redirectUri = window.location.origin + '/api/auth/google/callback';
+                        const scope = 'openid email profile';
+                        const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+                            'client_id=' + encodeURIComponent(window.GOOGLE_CLIENT_ID_GLOBAL) +
+                            '&redirect_uri=' + encodeURIComponent(redirectUri) +
+                            '&response_type=code' +
+                            '&scope=' + encodeURIComponent(scope) +
+                            '&prompt=select_account';
+                        window.location.href = authUrl;
+                    }
+                });
             };
-            // Don't call at page load - only call when modal opens
-            // window.renderGoogleButtons();
         }
 
     } catch (error) {

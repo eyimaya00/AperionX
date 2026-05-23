@@ -1027,6 +1027,42 @@ i[class*=" ph"] {
     align-items: center;
 }
 
+/* Custom Google Sign-In Button */
+.custom-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.custom-google-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.custom-google-btn:active {
+    transform: translateY(0);
+}
+
+.custom-google-btn svg {
+    flex-shrink: 0;
+}
+
 /* --- Modern Toast Notifications --- */
 .toast-container {
     position: fixed;
