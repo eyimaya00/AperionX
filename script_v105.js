@@ -796,6 +796,10 @@ async function loadSettings() {
                     googleLoadAttempts++;
                     if (googleLoadAttempts > 50) {
                         console.error("[Google Auth] Google script failed to load. Check adblockers or network.");
+                        const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
+                        googleBtns.forEach(btn => {
+                            btn.innerHTML = '<div style="color: #ef4444; font-size: 0.8rem; text-align: center; border: 1px dashed #ef4444; padding: 5px; border-radius: 5px;">Reklam engelleyiciniz Google girişini engelliyor olabilir. Lütfen kapatıp sayfayı yenileyin.</div>';
+                        });
                         return;
                     }
                     setTimeout(window.renderGoogleButtons, 100);
