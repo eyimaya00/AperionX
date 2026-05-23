@@ -2567,6 +2567,96 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
+// GET endpoint for Google OAuth Redirect (Full Page Flow)
+app.get('/api/auth/google/callback', async (req, res) => {
+    const code = req.query.code;
+    if (!code) {
+        return res.status(400).json({ message: 'Yetkilendirme kodu eksik.' });
+    }
+    
+    try {
+        const axios = require('axios');
+        const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+            client_id: process.env.GOOGLE_CLIENT_ID,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+            code: code,
+            grant_type: 'authorization_code',
+            redirect_uri: 'https://www.aperionx.com/api/auth/google/callback'
+        });
+        
+        const { id_token } = tokenResponse.data;
+        
+        const ticket = await googleClient.verifyIdToken({
+            idToken: id_token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+        
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        let user;
+        
+        if (rows.length === 0) {
+            const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+            const randomPassword = require('crypto').randomBytes(16).toString('hex');
+            const bcrypt = require('bcrypt');
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            
+            const [result] = await pool.query(
+                'INSERT INTO users (fullname, email, username, password, role, avatar_url) VALUES (?, ?, ?, ?, ?, ?)', 
+                [name, email, username, hashedPassword, 'reader', picture]
+            );
+            
+            user = { id: result.insertId, fullname: name, email, username, role: 'reader', avatar_url: picture, bio: null, job_title: null };
+        } else {
+            user = rows[0];
+            if (!user.avatar_url || user.avatar_url === '') {
+                await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [picture, user.id]);
+                user.avatar_url = picture;
+            }
+        }
+        
+        const jwt = require('jsonwebtoken');
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+        
+        // Return HTML that saves token to localStorage and redirects
+        const html = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Giriş Yapılıyor...</title>
+                <style>
+                    body { background: #1a1b26; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+                </style>
+            </head>
+            <body>
+                <h2>Başarıyla Giriş Yapıldı, Yönlendiriliyorsunuz...</h2>
+                <script>
+                    localStorage.setItem('token', '${token}');
+                    localStorage.setItem('user', JSON.stringify(${JSON.stringify({ 
+                        id: user.id, 
+                        fullname: user.fullname, 
+                        email: user.email, 
+                        username: user.username, 
+                        role: user.role, 
+                        avatar_url: user.avatar_url,
+                        bio: user.bio,
+                        job_title: user.job_title
+                    })}));
+                    window.location.href = '/';
+                </script>
+            </body>
+        </html>
+        `;
+        res.send(html);
+        
+    } catch (error) {
+        console.error('Google callback error:', error);
+        res.status(500).json({ message: 'Google doğrulama hatası', error: error.message });
+    }
+});
+
 // NEW: Validate Token / Get Current User
 app.get('/api/me', authenticateToken, (req, res) => {
     // If authenticateToken passes, req.user is set
