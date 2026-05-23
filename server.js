@@ -2568,7 +2568,9 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 // GET endpoint for Google OAuth Redirect (Full Page Flow)
+console.log('[ROUTE REGISTER] /api/auth/google/callback GET route is being registered NOW');
 app.get('/api/auth/google/callback', async (req, res) => {
+    console.log('[GOOGLE CALLBACK] Route HIT! code=' + (req.query.code ? 'present' : 'missing'));
     const code = req.query.code;
     if (!code) {
         return res.status(400).json({ message: 'Yetkilendirme kodu eksik.' });
@@ -4208,6 +4210,22 @@ app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     console.log('SERVER RESTARTING WITH LATEST CODE...');
     console.log(`Server running on http://localhost:${PORT}`);
+
+    // Debug: list all registered routes to verify google callback exists
+    console.log('=== REGISTERED ROUTES DEBUG ===');
+    const routes = [];
+    app._router.stack.forEach((middleware) => {
+        if (middleware.route) {
+            const methods = Object.keys(middleware.route.methods).join(',').toUpperCase();
+            routes.push(`${methods} ${middleware.route.path}`);
+            if (middleware.route.path.includes('google')) {
+                console.log(`[FOUND GOOGLE ROUTE] ${methods} ${middleware.route.path}`);
+            }
+        }
+    });
+    console.log(`Total routes registered: ${routes.length}`);
+    console.log('Google-related routes:', routes.filter(r => r.includes('google')));
+    console.log('=== END ROUTES DEBUG ===');
 
     // Check and Send Latest Article Notification if missed
     // await checkAndSendLatestNotification(); // DISABLED FOR MANUAL CHECK
