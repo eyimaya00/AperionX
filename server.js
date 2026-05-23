@@ -1,6 +1,8 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 
 
@@ -21,7 +23,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const compression = require('compression');
 const multer = require('multer');
-const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const DOMPurify = require('isomorphic-dompurify');
 const crypto = require('crypto');
@@ -31,7 +32,6 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Nginx/CloudPanel)
