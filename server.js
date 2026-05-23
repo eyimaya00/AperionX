@@ -43,7 +43,8 @@ const cookieParser = require('cookie-parser'); // Import cookie-parser
 app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false
 }));
 
 const limiter = rateLimit({

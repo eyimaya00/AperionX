@@ -790,34 +790,46 @@ async function loadSettings() {
         if (settings.GOOGLE_CLIENT_ID) {
             window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
             
+            let googleLoadAttempts = 0;
             window.renderGoogleButtons = function() {
                 if (typeof google === 'undefined' || !google.accounts) {
+                    googleLoadAttempts++;
+                    if (googleLoadAttempts > 50) {
+                        console.error("[Google Auth] Google script failed to load. Check adblockers or network.");
+                        return;
+                    }
                     setTimeout(window.renderGoogleButtons, 100);
                     return;
                 }
-                if (!window.GOOGLE_INITIALIZED) {
-                    google.accounts.id.initialize({
-                        client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
-                        callback: handleGoogleCredentialResponse
-                    });
-                    window.GOOGLE_INITIALIZED = true;
-                }
                 
-                const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
-                googleBtns.forEach(btn => {
-                    const modal = btn.closest('.modal-overlay');
-                    // Ensure the modal is active (visible) before rendering to prevent Google SDK 0-width bug
-                    if (!modal || modal.classList.contains('active')) {
-                        if (!btn.hasAttribute('data-google-rendered')) {
-                            btn.setAttribute('data-google-rendered', 'true');
-                            btn.innerHTML = ''; // Clear to prevent duplicate/broken iframes
-                            google.accounts.id.renderButton(
-                                btn,
-                                { theme: "outline", size: "large", type: "standard", width: 320 }
-                            );
-                        }
+                try {
+                    if (!window.GOOGLE_INITIALIZED) {
+                        google.accounts.id.initialize({
+                            client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
+                            callback: handleGoogleCredentialResponse
+                        });
+                        window.GOOGLE_INITIALIZED = true;
+                        console.log("[Google Auth] Initialized successfully with client ID:", window.GOOGLE_CLIENT_ID_GLOBAL);
                     }
-                });
+                    
+                    const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
+                    googleBtns.forEach(btn => {
+                        const modal = btn.closest('.modal-overlay');
+                        if (!modal || modal.classList.contains('active')) {
+                            if (!btn.hasAttribute('data-google-rendered')) {
+                                btn.setAttribute('data-google-rendered', 'true');
+                                btn.innerHTML = ''; // Clear to prevent duplicate/broken iframes
+                                google.accounts.id.renderButton(
+                                    btn,
+                                    { theme: "outline", size: "large", type: "standard", width: 320 }
+                                );
+                                console.log("[Google Auth] Rendered button into:", btn);
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error("[Google Auth] Error rendering button:", err);
+                }
             };
             window.renderGoogleButtons();
         }

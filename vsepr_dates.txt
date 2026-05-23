@@ -1,0 +1,15 @@
+﻿b8fc46c | 2026-03-02 23:38 | fix: Deney kartlarini makale kartlariyla esitle, goruntulenme kaldirdi, yazar profil karti eklendi
+de68723 | 2026-03-02 23:18 | feat: Deney istatistik kartlari tum panellere eklendi + 8 hata duzeltildi
+fa343cd | 2026-03-02 18:31 | feat: Deneyler (Experiments) modulu eklendi - DB, API, SEO, frontend, panel entegrasyonlari
+006d873 | 2026-02-27 19:23 | Fix: isMakalelerMenu undefined bug causing Araclar and Hakkinda to disappear, add Araclar to all HTML pages
+5b4839b | 2026-02-27 19:10 | Fix menu labels: Added T├╝m├╝ and Kategoriler titles to Makaleler dropdown, restored Ara├ğlar
+cd95086 | 2026-02-27 18:29 | Refactor menu: Remove Kategoriler page, make Makaleler a dynamic category dropdown
+8d3eaf1 | 2026-02-24 23:07 | feat: add 30-second trial restriction and auth modals to VSEPR simulator for non-logged-in users
+86b3490 | 2026-02-24 22:45 | fix: remove rogue display flex rule blocking menu close at 1300px, bump cache to v147
+879f22c | 2026-02-24 22:22 | fix: resolve duplicate js events and css display none for tablet hamburger menu
+0442bbf | 2026-02-24 22:05 | chore: bump asset version to v=145 to break browser cache and force mobile menu fixes to load
+1a06dba | 2026-02-24 22:03 | Revert "fix: add missing #mobileMenu HTML container so hamburger menu can render"
+f654961 | 2026-02-24 22:02 | fix: add missing #mobileMenu HTML container so hamburger menu can render
+0048d5a | 2026-02-24 18:58 | fix: remove duplicate setupMobileMenu that broke hamburger completely
+31b3ed5 | 2026-02-24 18:09 | fix: resolve conflicting hamburger menu click handlers
+9448336 | 2026-02-24 12:44 | fix: add missing mobile dropdown CSS for tablet/mobile hamburger menu

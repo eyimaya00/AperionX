@@ -1,0 +1,11 @@
+﻿ M Otomasyon/backend/src/services/drive.service.ts
+ M Otomasyon/backend/upload_to_drive.ts
+ M about.html
+ M admin.html
+ M article-detail.html
+ M articles.html
+ M author.html
+ M experiments.html
+ M index.html
+ M server.js
+ M vsepr.html

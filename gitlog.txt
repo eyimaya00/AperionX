@@ -1,0 +1,50 @@
+﻿ef37e12 SEO: SiteNavigationElement, meta tags, experiment SSR, CollectionPage schemas
+470b08f fix(backend): prevent deletion of uploaded video records
+1926c9c Force add middleware.ts
+0a841e3 Add Basic Auth, update video status text, and retain published videos in DB
+b9bd132 FEAT: Append social media text to AI descriptions and auto-schedule Drive uploads with 2-day interval at 20:15
+7520eee FIX: Wrap VideoModel.create in try/catch to log the exact DB error during Drive sync and fix fallback tags
+afbf66d FIX: Update existing video records with AI metadata instead of skipping them
+bf69161 FIX: Use query parameters instead of SQLite double quotes for string literals to fix syntax error
+b01f432 FIX: Rewrite processDriveFile skip logic to correctly retry failed or incomplete downloads instead of skipping them
+d7eacf3 FIX: Remove updated_at from drive_files UPDATE queries to prevent silent crashes in catch block
+36ae70a FIX: Add inline drive_files table creation, fix empty error messages with String(error)+stack
+8e411d7 FIX: Better error logging for Drive download, fix frontend crash from response format mismatch
+cbe8743 NUCLEAR FIX: Completely rewrite scan endpoint - delete orphans directly, remove scanVideosDirectory
+147e7af FIX: Make /scan endpoint also run Drive cleanup first - user was clicking Yerel Tarama not Drive Tarama
+fbdff8e FIX: Remove scanVideosDirectory from syncDrive - this was re-adding all orphaned mp4 files
+ea37bee Aggressive cleanup for Drive sync and robust AI metadata logic
+31df27f Switch to Gemini File API for video analysis and implement orphan local file cleanup in Drive sync
+e1468cb Implement Drive reconciliation, disk cleanup on delete, and AI metadata race condition fix
+6a00918 Fix AI video analysis model fallback and potential race condition
+c560e8d Final AI model names and diagnostic tool fix
+45e5a50 Improve AI diagnosis tool
+6531e53 Fix lint error and clean up AI service
+ad5e74d Try gemini-1.5-flash-latest and update diagnosis
+7d8bfb0 Update diagnosis tool with key normalization
+8018a0e Add diagnosis tool forcefully
+69acffd Fix Gemini model name and add diagnosis tool
+0eefe50 Add Drive Scan feature and AI analysis integration
+960ec99 fix: allow iframe embedding and expand CORS for VPS deployment
+6e5ef62 feat(admin): redesign shorts automation section with premium dashboard UI
+b53298b fix(admin): update shorts automation iframe URL to secure subdomain https://shorts.aperionx.com
+9dfd1bd fix(admin): update shorts automation iframe URL from localhost to server IP
+dc8d629 feat: add Next.js YouTube Shorts automation project
+65169e7 feat(admin): embed shorts automation dashboard via iframe
+f14ada3 feat(admin): add YouTube Shorts automation integration section
+2e7d94f Bump cache-busting versions to v200
+3ede421 Add database backup script
+dd69a0a fix: Yazar ve editor panel sidebar scroll eklendi (overflow-y auto)
+515c6db fix: Deney detay footer CSS eklendi - action-row, btn-like, share-icon, mobil uyum
+66f5264 feat: Deney detay altbilgisi makaleyle ayni - begeni butonu, paylasim ikonlari, link kopyala
+b6f4896 fix: Yazar butonu indigo temali pill stili - makaleyle ayni, avatar border eklendi
+cdbb956 fix: Meta ve baslik deney karti icine tasinidi, deney adimlari ustunde
+f83177a fix: Alt yazar karti kaldirildi, baslik/meta/badge ortalandi - makaleyle ayni
+07e1ccd fix: Deney detay sayfa kenarlari duzeltildi, yazar avatari eklendi
+e648692 feat: Deney detay sayfasi makale detay sayfasiyla ayni yapida - image, meta, title, content
+7bb2d1a fix: Deney kartlari artik makale kartlariyla ayni CSS siniflarini kullaniyor (featured-card, card-bg, card-overlay, read-btn-circle)
+dc71a93 feat: Deney kartlari overlay tasarima gecti - makale kartlariyla ayni
+baeac0d feat: Deney kartlari premium tasarim + mobil uyumlu + yazar profil linki duzeltildi
+b8fc46c fix: Deney kartlarini makale kartlariyla esitle, goruntulenme kaldirdi, yazar profil karti eklendi
+de68723 feat: Deney istatistik kartlari tum panellere eklendi + 8 hata duzeltildi
+fa343cd feat: Deneyler (Experiments) modulu eklendi - DB, API, SEO, frontend, panel entegrasyonlari

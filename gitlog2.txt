@@ -1,0 +1,50 @@
+﻿006d873 Fix: isMakalelerMenu undefined bug causing Araclar and Hakkinda to disappear, add Araclar to all HTML pages
+5b4839b Fix menu labels: Added T├╝m├╝ and Kategoriler titles to Makaleler dropdown, restored Ara├ğlar
+cd95086 Refactor menu: Remove Kategoriler page, make Makaleler a dynamic category dropdown
+8d3eaf1 feat: add 30-second trial restriction and auth modals to VSEPR simulator for non-logged-in users
+86b3490 fix: remove rogue display flex rule blocking menu close at 1300px, bump cache to v147
+879f22c fix: resolve duplicate js events and css display none for tablet hamburger menu
+0442bbf chore: bump asset version to v=145 to break browser cache and force mobile menu fixes to load
+1a06dba Revert "fix: add missing #mobileMenu HTML container so hamburger menu can render"
+f654961 fix: add missing #mobileMenu HTML container so hamburger menu can render
+0048d5a fix: remove duplicate setupMobileMenu that broke hamburger completely
+31b3ed5 fix: resolve conflicting hamburger menu click handlers
+9448336 fix: add missing mobile dropdown CSS for tablet/mobile hamburger menu
+77c9d19 fix: tablet menu breakpoint 1200px to 1400px
+36fabc6 Tablet (iPad Pro yatay) ana men├╝ ├ğak─▒┼şma sorunu ├ğ├Âz├╝ld├╝
+299c4a8 VSEPR Sim├╝lat├Âr├╝ navigasyon ve mobil UI d├╝zeltmeleri
+70a56bc VSEPR Simulat├Âr├╝ eklendi
+19580a8 Admin paneli alt men├╝ g├Âr├╝n├╝m├╝ iyile┼ştirildi
+aece853 Admin paneline a├ğ─▒l─▒r alt men├╝ ├Âzellikleri eklendi
+63ae06e Rollback: revert all recent changes requested by user
+9ade4e1 fix: SEO improvements - favicons, meta tags, dead links, viewport, copyright
+917935e feat: add view count sync script (fix_view_counts.js)
+220c9e7 fix: view count system - single counting point with 2h throttle
+dd8924f Edit├Âr paneli sol men├╝ a├ğma kapama sorunu d├╝zeltildi
+e8ec844 Edit├Âr inceleme modundaki kaynak├ğa format─▒ d├╝zeltildi
+e5a42d4 Edit├Âr panelindeki kaynak├ğa sorunu d├╝zeltildi
+63c38c1 feat(seo): enhance meta tags, schema markup, and robots.txt for better visibility
+98fe425 Add profile to editor sidebar and fix article edit modal layout
+40ea82f Fix editor panel layout: move stats and dashboard sections inside main-content wrapper
+623b30a Add horizontal scroll to author filter bar in editor panel
+7df8629 Remove buttons from editor panel, restore in author panel
+738b1f5 Remove dark mode and notification buttons from editor panel
+7c21596 Fix logo clipping in author panel sidebar
+b772f6d Restore author panel buttons, admin panel already clean
+b78f2b1 UI: Remove dark mode and notification buttons from editor panel
+ccd19dc UI: Author chip design with avatar + hover effect, remove commas between authors (v=143)
+209ddd4 Fix: Add cache-busting v=142 to all script tags + fix Sentetik Embriyolar author migration
+0b5b9b8 Fix: Revert getArticleAuthors to return correct array (fixes missing author names)
+0cb046b Fix: Ensure getArticleAuthors returns array for legacy fallback
+e3184b5 Fix: Author display on detail page (Gizli Yazar)
+493bb25 Auto-fix: Create article_authors table on server start
+02a712d Fix: Create article_authors table in aperionxdb; Design: Improve Editor Author Selection UI
+88e923a Restrict author selection: Only editors can select multiple authors; Filter author list by role
+b5a89d5 Implement multi-author support: update backend API, frontend selection UI, and display logic
+85aa90f Add migration script for missing email_logs table
+2e9756f Optimize email delivery: Switch to individual sending loop to avoid spam filters
+5c38141 Fix newsletter recipient query and add custom modal
+d461b7f Update server logs
+ea213b7 Implement manual newsletter system with preview and recipient selection
+7c5dc8e Add subscription column, unsubscribe endpoint, and startup email check
+c8cdc19 Normalize home page links to root path

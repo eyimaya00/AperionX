@@ -1,0 +1,504 @@
+[TAILING] Tailing last 500 lines for [shorts-backend] process (change the value with --lines option)
+/root/.pm2/logs/shorts-backend-error.log last 500 lines:
+/root/.pm2/logs/shorts-backend-out.log last 500 lines:
+3|shorts-b | 20:30:00 [32minfo[39m Video güncellendi: ID 9
+3|shorts-b | 20:30:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.333 ms
+3|shorts-b | 20:30:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.307 ms
+3|shorts-b | 20:31:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:31:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:31:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.367 ms
+3|shorts-b | 20:31:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.364 ms
+3|shorts-b | 20:32:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:32:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:32:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.363 ms
+3|shorts-b | 20:32:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.396 ms
+3|shorts-b | 20:33:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:33:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:33:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.335 ms
+3|shorts-b | 20:33:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.414 ms
+3|shorts-b | 20:33:18 [32minfo[39m 127.0.0.1 - GET / HTTP/1.1 200 78 - 0.471 ms
+3|shorts-b | 20:34:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:34:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:34:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.421 ms
+3|shorts-b | 20:34:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.391 ms
+3|shorts-b | 20:35:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:35:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:35:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.508 ms
+3|shorts-b | 20:35:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.310 ms
+3|shorts-b | 20:36:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:36:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:36:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.302 ms
+3|shorts-b | 20:36:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.305 ms
+3|shorts-b | 20:37:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:37:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:37:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.297 ms
+3|shorts-b | 20:37:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 100 - 0.335 ms
+3|shorts-b | 20:37:23 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 200 1717 - 0.677 ms
+3|shorts-b | 20:37:23 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.180 ms
+3|shorts-b | 20:37:23 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 200 2525 - 0.436 ms
+3|shorts-b | 20:37:35 [32minfo[39m OAuth2 auth URL oluşturuldu
+3|shorts-b | 20:37:35 [32minfo[39m 127.0.0.1 - GET /api/youtube/auth-url HTTP/1.1 200 486 - 1.058 ms
+3|shorts-b | 20:37:35 [32minfo[39m 127.0.0.1 - GET /api/youtube/channels HTTP/1.1 200 191 - 0.794 ms
+3|shorts-b | 20:37:45 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 200 2525 - 0.776 ms
+3|shorts-b | 20:37:45 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.249 ms
+3|shorts-b | 20:37:45 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 200 1717 - 0.858 ms
+3|shorts-b | 20:37:47 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 7339 - 0.841 ms
+3|shorts-b | 20:37:51 [32minfo[39m 127.0.0.1 - GET /api/youtube/channels HTTP/1.1 200 191 - 0.508 ms
+3|shorts-b | 20:37:51 [32minfo[39m OAuth2 auth URL oluşturuldu
+3|shorts-b | 20:37:51 [32minfo[39m 127.0.0.1 - GET /api/youtube/auth-url HTTP/1.1 304 - - 0.381 ms
+3|shorts-b | 20:37:55 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.307 ms
+3|shorts-b | 20:37:55 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.518 ms
+3|shorts-b | 20:37:55 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.301 ms
+3|shorts-b | 20:37:57 [32minfo[39m 127.0.0.1 - GET /api/youtube/channels HTTP/1.1 304 - - 0.532 ms
+3|shorts-b | 20:37:57 [32minfo[39m OAuth2 auth URL oluşturuldu
+3|shorts-b | 20:37:57 [32minfo[39m 127.0.0.1 - GET /api/youtube/auth-url HTTP/1.1 304 - - 0.531 ms
+3|shorts-b | 20:38:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:38:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:38:11 [32minfo[39m OAuth2 token exchange başarılı
+3|shorts-b | 20:38:11 [32minfo[39m Kanal token güncellendi: Aperionx (UCnc-ORyye541qq9aFKTUN1g)
+3|shorts-b | 20:38:11 [32minfo[39m 127.0.0.1 - GET /api/youtube/callback?iss=https://accounts.google.com&code=4/0AfrIepBYd4OZBQ1TMOCCfGT5t48FIGlvkXO5OX9ZF7jeXf5ALEk0yAkLN2GNbihF21SMYg&scope=https://www.googleapis.com/auth/youtube.force-ssl%20https://www.googleapis.com/auth/youtube.upload%20https://www.googleapis.com/auth/youtube.readonly HTTP/1.1 200 143 - 407.875 ms
+3|shorts-b | 20:38:12 [32minfo[39m 127.0.0.1 - GET /favicon.ico HTTP/1.1 404 66 - 0.585 ms
+3|shorts-b | 20:38:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.305 ms
+3|shorts-b | 20:38:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.383 ms
+3|shorts-b | 20:38:17 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.535 ms
+3|shorts-b | 20:38:17 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.508 ms
+3|shorts-b | 20:38:21 [32minfo[39m 127.0.0.1 - GET /api/youtube/channels HTTP/1.1 200 191 - 0.624 ms
+3|shorts-b | 20:38:21 [32minfo[39m OAuth2 auth URL oluşturuldu
+3|shorts-b | 20:38:21 [32minfo[39m 127.0.0.1 - GET /api/youtube/auth-url HTTP/1.1 304 - - 0.481 ms
+3|shorts-b | 20:38:24 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.862 ms
+3|shorts-b | 20:38:24 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.446 ms
+3|shorts-b | 20:38:26 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 1.017 ms
+3|shorts-b | 20:38:32 [32minfo[39m Video güncellendi: ID 9
+3|shorts-b | 20:38:32 [32minfo[39m 127.0.0.1 - PUT /api/videos/9 HTTP/1.1 200 1324 - 1.466 ms
+3|shorts-b | 20:38:32 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 7339 - 1.061 ms
+3|shorts-b | 20:38:38 [32minfo[39m Video güncellendi: ID 9
+3|shorts-b | 20:38:38 [32minfo[39m 127.0.0.1 - PUT /api/videos/9 HTTP/1.1 200 1324 - 1.282 ms
+3|shorts-b | 20:38:39 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 7339 - 0.784 ms
+3|shorts-b | 20:38:47 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.359 ms
+3|shorts-b | 20:39:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:39:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:39:01 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.349 ms
+3|shorts-b | 20:39:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.396 ms
+3|shorts-b | 20:39:47 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.306 ms
+3|shorts-b | 20:40:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:40:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:40:17 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 200 2476 - 0.609 ms
+3|shorts-b | 20:40:17 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 200 1720 - 0.428 ms
+3|shorts-b | 20:40:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.175 ms
+3|shorts-b | 20:40:47 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.350 ms
+3|shorts-b | 20:40:53 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.381 ms
+3|shorts-b | 20:40:53 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.670 ms
+3|shorts-b | 20:40:53 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.397 ms
+3|shorts-b | 20:40:57 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 1.019 ms
+3|shorts-b | 20:41:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:41:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:41:07 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20&status=pending HTTP/1.1 200 3724 - 0.751 ms
+3|shorts-b | 20:41:08 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20&status=processing HTTP/1.1 200 81 - 0.713 ms
+3|shorts-b | 20:41:10 [32minfo[39m OAuth2 auth URL oluşturuldu
+3|shorts-b | 20:41:10 [32minfo[39m 127.0.0.1 - GET /api/youtube/auth-url HTTP/1.1 304 - - 0.622 ms
+3|shorts-b | 20:41:10 [32minfo[39m 127.0.0.1 - GET /api/youtube/channels HTTP/1.1 304 - - 0.380 ms
+3|shorts-b | 20:41:12 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 0.926 ms
+3|shorts-b | 20:41:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.309 ms
+3|shorts-b | 20:41:23 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.322 ms
+3|shorts-b | 20:41:26 [32minfo[39m 127.0.0.1 - GET /api/videos/9 HTTP/1.1 200 2509 - 1.092 ms
+3|shorts-b | 20:41:31 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 0.789 ms
+3|shorts-b | 20:41:32 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.867 ms
+3|shorts-b | 20:41:32 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.365 ms
+3|shorts-b | 20:41:34 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 0.792 ms
+3|shorts-b | 20:41:45 [32minfo[39m Video güncellendi: ID 12
+3|shorts-b | 20:41:45 [32minfo[39m 127.0.0.1 - PUT /api/videos/12 HTTP/1.1 200 1233 - 1.131 ms
+3|shorts-b | 20:41:45 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 7339 - 1.364 ms
+3|shorts-b | 20:41:47 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.367 ms
+3|shorts-b | 20:41:53 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.379 ms
+3|shorts-b | 20:42:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:42:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:42:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.292 ms
+3|shorts-b | 20:42:23 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.305 ms
+3|shorts-b | 20:42:44 [32minfo[39m Video veritabanından silindi: ID 9
+3|shorts-b | 20:42:44 [32minfo[39m Video dosyası diskten silindi: videos/DUEAN0tiFJI.mp4
+3|shorts-b | 20:42:44 [32minfo[39m Metadata dosyası diskten silindi: videos/DUEAN0tiFJI.txt
+3|shorts-b | 20:42:44 [32minfo[39m 127.0.0.1 - DELETE /api/videos/9 HTTP/1.1 200 42 - 3.082 ms
+3|shorts-b | 20:42:44 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 6038 - 0.897 ms
+3|shorts-b | 20:42:47 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.267 ms
+3|shorts-b | 20:42:53 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.294 ms
+3|shorts-b | 20:43:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:43:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:43:17 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.318 ms
+3|shorts-b | 20:43:23 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.291 ms
+3|shorts-b | 20:43:53 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.441 ms
+3|shorts-b | 20:44:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:44:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:44:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.318 ms
+3|shorts-b | 20:44:23 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.338 ms
+3|shorts-b | 20:45:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:45:00 [32minfo[39m [Scheduler] 1 adet zamanı gelmiş video bulundu! İlk video yükleniyor...
+3|shorts-b | 20:45:00 [32minfo[39m Video güncellendi: ID 12
+3|shorts-b | 20:45:00 [32minfo[39m [Scheduler] Otomatik Yükleme Başlıyor -> [ID:12] Tavus Kuşu Örümcekleri Dansı: Evrimin Şaheseri! 🕺🕷️🌈
+3|shorts-b | 20:45:00 [32minfo[39m [Video #12] Upload başlıyor: DUJMSizCFWK.mp4 (5.0 MB)
+3|shorts-b | 20:45:01 [32minfo[39m [Video #12] ✅ Upload başarılı: https://youtube.com/shorts/tQuW7E1hBj8
+3|shorts-b | 20:45:01 [32minfo[39m [Scheduler] Otomatik Yükleme Tamamlandı -> [ID:12]
+3|shorts-b | 20:45:01 [32minfo[39m Video güncellendi: ID 12
+3|shorts-b | 20:45:01 [32minfo[39m [Scheduler] Video dosyası diskten silindi -> videos/DUJMSizCFWK.mp4
+3|shorts-b | 20:45:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.372 ms
+3|shorts-b | 20:45:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.350 ms
+3|shorts-b | 20:46:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:46:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:46:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.304 ms
+3|shorts-b | 20:46:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.301 ms
+3|shorts-b | 20:46:22 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.419 ms
+3|shorts-b | 20:46:22 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 6048 - 1.316 ms
+3|shorts-b | 20:46:52 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.374 ms
+3|shorts-b | 20:47:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:47:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:47:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.421 ms
+3|shorts-b | 20:47:22 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.356 ms
+3|shorts-b | 20:47:52 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.258 ms
+3|shorts-b | 20:48:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:48:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:48:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.379 ms
+3|shorts-b | 20:48:22 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.335 ms
+3|shorts-b | 20:48:52 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.303 ms
+3|shorts-b | 20:49:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:49:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:49:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.290 ms
+3|shorts-b | 20:49:22 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.504 ms
+3|shorts-b | 20:49:52 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.411 ms
+3|shorts-b | 20:50:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:50:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:50:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.440 ms
+3|shorts-b | 20:50:37 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.420 ms
+3|shorts-b | 20:50:42 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.278 ms
+3|shorts-b | 20:50:42 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 200 1722 - 0.727 ms
+3|shorts-b | 20:50:42 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 200 2557 - 0.375 ms
+3|shorts-b | 20:50:53 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.298 ms
+3|shorts-b | 20:51:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:51:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:51:12 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.398 ms
+3|shorts-b | 20:51:37 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.320 ms
+3|shorts-b | 20:51:38 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.345 ms
+3|shorts-b | 20:51:38 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 0.859 ms
+3|shorts-b | 20:51:42 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.341 ms
+3|shorts-b | 20:52:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:52:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:52:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.352 ms
+3|shorts-b | 20:52:12 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.337 ms
+3|shorts-b | 20:52:28 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 304 - - 0.735 ms
+3|shorts-b | 20:52:28 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 304 - - 0.508 ms
+3|shorts-b | 20:52:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.409 ms
+3|shorts-b | 20:52:42 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.367 ms
+3|shorts-b | 20:53:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:53:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:53:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.366 ms
+3|shorts-b | 20:53:12 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.371 ms
+3|shorts-b | 20:53:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.288 ms
+3|shorts-b | 20:53:42 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.286 ms
+3|shorts-b | 20:54:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:54:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:54:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.301 ms
+3|shorts-b | 20:54:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.297 ms
+3|shorts-b | 20:54:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.448 ms
+3|shorts-b | 20:55:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:55:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:55:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.322 ms
+3|shorts-b | 20:55:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.403 ms
+3|shorts-b | 20:55:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.361 ms
+3|shorts-b | 20:56:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:56:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:56:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.455 ms
+3|shorts-b | 20:56:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.383 ms
+3|shorts-b | 20:56:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.309 ms
+3|shorts-b | 20:57:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:57:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:57:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.327 ms
+3|shorts-b | 20:57:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.316 ms
+3|shorts-b | 20:58:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:58:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:58:10 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.258 ms
+3|shorts-b | 20:58:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.282 ms
+3|shorts-b | 20:59:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 20:59:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 20:59:11 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.400 ms
+3|shorts-b | 20:59:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.292 ms
+3|shorts-b | 21:00:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:00:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:00:00 [32minfo[39m Google Drive senaryosu başlıyor. Klasör ID: 1TvPIhqsCVffkUoB9P1ZHVIIb9mU1F86R
+3|shorts-b | 21:00:00 [32minfo[39m Drive klasöründe 0 video dosyası tespit edildi. Temizlik ve senkronizasyon başlıyor...
+3|shorts-b | 21:00:00 [34mdebug[39m Drive klasöründe indirilecek yeni video yok.
+3|shorts-b | 21:00:12 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.289 ms
+3|shorts-b | 21:00:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.322 ms
+3|shorts-b | 21:01:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:01:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:01:13 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 1.101 ms
+3|shorts-b | 21:01:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.455 ms
+3|shorts-b | 21:02:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:02:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:02:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.310 ms
+3|shorts-b | 21:02:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.442 ms
+3|shorts-b | 21:03:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:03:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:03:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.326 ms
+3|shorts-b | 21:03:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.318 ms
+3|shorts-b | 21:04:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:04:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:04:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.368 ms
+3|shorts-b | 21:04:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.331 ms
+3|shorts-b | 21:05:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:05:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:05:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.476 ms
+3|shorts-b | 21:05:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.361 ms
+3|shorts-b | 21:06:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:06:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:06:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.541 ms
+3|shorts-b | 21:06:16 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.439 ms
+3|shorts-b | 21:07:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:07:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:07:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.554 ms
+3|shorts-b | 21:07:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.248 ms
+3|shorts-b | 21:08:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:08:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:08:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.394 ms
+3|shorts-b | 21:08:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.268 ms
+3|shorts-b | 21:09:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:09:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:09:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.591 ms
+3|shorts-b | 21:09:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.314 ms
+3|shorts-b | 21:10:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:10:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:10:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.591 ms
+3|shorts-b | 21:10:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.428 ms
+3|shorts-b | 21:11:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:11:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:11:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.442 ms
+3|shorts-b | 21:11:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.397 ms
+3|shorts-b | 21:12:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:12:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:12:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.395 ms
+3|shorts-b | 21:12:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.354 ms
+3|shorts-b | 21:13:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:13:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:13:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.338 ms
+3|shorts-b | 21:13:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.308 ms
+3|shorts-b | 21:14:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:14:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:14:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.392 ms
+3|shorts-b | 21:14:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.346 ms
+3|shorts-b | 21:15:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:15:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:15:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.308 ms
+3|shorts-b | 21:15:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.298 ms
+3|shorts-b | 21:16:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:16:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:16:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.313 ms
+3|shorts-b | 21:16:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.284 ms
+3|shorts-b | 21:17:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:17:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:17:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.287 ms
+3|shorts-b | 21:17:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.433 ms
+3|shorts-b | 21:18:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:18:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:18:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.453 ms
+3|shorts-b | 21:18:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.347 ms
+3|shorts-b | 21:19:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:19:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:19:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.538 ms
+3|shorts-b | 21:19:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.367 ms
+3|shorts-b | 21:20:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:20:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:20:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.437 ms
+3|shorts-b | 21:20:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.294 ms
+3|shorts-b | 21:21:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:21:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:21:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.568 ms
+3|shorts-b | 21:21:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.222 ms
+3|shorts-b | 21:22:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:22:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:22:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.319 ms
+3|shorts-b | 21:22:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.337 ms
+3|shorts-b | 21:23:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:23:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:23:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 100 - 0.623 ms
+3|shorts-b | 21:23:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.371 ms
+3|shorts-b | 21:24:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:24:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:24:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.435 ms
+3|shorts-b | 21:24:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.453 ms
+3|shorts-b | 21:25:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:25:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:25:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.359 ms
+3|shorts-b | 21:25:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.421 ms
+3|shorts-b | 21:26:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:26:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:26:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.391 ms
+3|shorts-b | 21:26:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.274 ms
+3|shorts-b | 21:27:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:27:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:27:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.339 ms
+3|shorts-b | 21:27:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.368 ms
+3|shorts-b | 21:28:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:28:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:28:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.415 ms
+3|shorts-b | 21:28:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.381 ms
+3|shorts-b | 21:29:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:29:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:29:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.408 ms
+3|shorts-b | 21:29:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 101 - 0.375 ms
+3|shorts-b | 21:30:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:30:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:30:14 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.351 ms
+3|shorts-b | 21:30:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.323 ms
+3|shorts-b | 21:31:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:31:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:31:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.309 ms
+3|shorts-b | 21:31:15 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.317 ms
+3|shorts-b | 21:31:38 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.256 ms
+3|shorts-b | 21:31:39 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 304 - - 1.227 ms
+3|shorts-b | 21:31:53 [32minfo[39m Video güncellendi: ID 51
+3|shorts-b | 21:31:53 [32minfo[39m 127.0.0.1 - PUT /api/videos/51 HTTP/1.1 200 1028 - 1.752 ms
+3|shorts-b | 21:31:53 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 6048 - 0.741 ms
+3|shorts-b | 21:32:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:32:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:32:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.376 ms
+3|shorts-b | 21:32:38 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.309 ms
+3|shorts-b | 21:32:41 [32minfo[39m Video güncellendi: ID 6
+3|shorts-b | 21:32:41 [32minfo[39m 127.0.0.1 - PUT /api/videos/6 HTTP/1.1 200 1452 - 2.407 ms
+3|shorts-b | 21:32:41 [32minfo[39m 127.0.0.1 - GET /api/videos?page=1&limit=20 HTTP/1.1 200 6048 - 0.979 ms
+3|shorts-b | 21:33:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:33:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:33:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.314 ms
+3|shorts-b | 21:33:39 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.282 ms
+3|shorts-b | 21:34:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:34:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:34:09 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 102 - 0.317 ms
+3|shorts-b | 21:35:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:35:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:36:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:36:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:37:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:37:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:38:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:38:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:39:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:39:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:40:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:40:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:41:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:41:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:42:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:42:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:43:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:43:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:44:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:44:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:45:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:45:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:46:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:46:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:47:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:47:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:48:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:48:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:49:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:49:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:50:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:50:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:51:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:51:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:51:36 [32minfo[39m 127.0.0.1 - GET / HTTP/1.1 200 78 - 0.416 ms
+3|shorts-b | 21:51:43 [32minfo[39m 127.0.0.1 - GET /favicon.ico HTTP/1.1 404 66 - 0.256 ms
+3|shorts-b | 21:52:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:52:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:53:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:53:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:54:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:54:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:55:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:55:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:56:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:56:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:57:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:57:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:58:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:58:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 21:59:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 21:59:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:00:00 [32minfo[39m Google Drive senaryosu başlıyor. Klasör ID: 1TvPIhqsCVffkUoB9P1ZHVIIb9mU1F86R
+3|shorts-b | 22:00:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:00:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:00:00 [32minfo[39m Drive klasöründe 0 video dosyası tespit edildi. Temizlik ve senkronizasyon başlıyor...
+3|shorts-b | 22:00:00 [34mdebug[39m Drive klasöründe indirilecek yeni video yok.
+3|shorts-b | 22:01:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:01:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:02:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:02:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:03:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:03:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:04:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:04:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:05:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:05:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:06:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:06:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:07:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:07:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:08:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:08:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:09:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:09:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:10:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:10:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:11:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:11:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:12:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:12:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:13:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:13:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:14:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:14:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:15:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:15:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:16:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:16:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:17:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:17:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:18:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:18:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:19:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:19:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:20:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:20:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:21:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:21:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:22:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:22:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:23:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:23:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:24:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:24:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:25:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:25:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:26:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:26:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:27:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:27:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:28:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:28:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:29:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:29:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:30:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:30:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:31:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:31:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:32:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:32:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:33:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:33:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:34:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:34:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:35:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:35:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+3|shorts-b | 22:35:12 [32minfo[39m 127.0.0.1 - GET /api/health HTTP/1.1 200 103 - 0.855 ms
+3|shorts-b | 22:35:12 [32minfo[39m 127.0.0.1 - GET /api/videos/stats HTTP/1.1 200 1707 - 0.811 ms
+3|shorts-b | 22:35:12 [32minfo[39m 127.0.0.1 - GET /api/logs?limit=15 HTTP/1.1 200 2512 - 0.361 ms
+3|shorts-b | 22:36:00 [32minfo[39m [Scheduler] Zamanlanmış videolar kontrol ediliyor...
+3|shorts-b | 22:36:00 [32minfo[39m [Scheduler] Yüklenecek zamanı gelmiş video bulunamadı.
+

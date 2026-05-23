@@ -1,0 +1,56 @@
+﻿diff --git a/server.js b/server.js
+index 434a20b..228b146 100644
+--- a/server.js
++++ b/server.js
+@@ -2467,7 +2467,7 @@ app.get('/api/user/comments', authenticateToken, async (req, res) => {
+ 
+ // User Auth Routes
+ app.post('/api/register', async (req, res) => {
+-    const { fullname, email, username, password } = req.body;
++    const { fullname, email, username, password, source } = req.body;
+     try {
+         // Validate Username uniqueness if provided
+ 
+@@ -2477,7 +2477,7 @@ app.post('/api/register', async (req, res) => {
+         }
+ 
+         const hashedPassword = await bcrypt.hash(password, 10);
+-        await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader']);
++        await pool.query('INSERT INTO users (fullname, email, username, password, role, source) VALUES (?, ?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader', source || null]);
+ 
+         // Send Welcome Email
+         try {
+@@ -2802,6 +2802,17 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
+     }
+ });
+ 
++// Admin: Get VSEPR Users
++app.get('/api/admin/vsepr-users', authenticateToken, async (req, res) => {
++    if (req.user.role !== 'admin') return res.sendStatus(403);
++    try {
++        const [rows] = await pool.query("SELECT id, fullname, email, created_at FROM users WHERE source = 'vsepr' ORDER BY created_at DESC");
++        res.json(rows);
++    } catch (e) {
++        res.status(500).json({ error: e.message });
++    }
++});
++
+ // === EXPERIMENT STATS ENDPOINT ===
+ app.get('/api/experiment-stats', async (req, res) => {
+     try {
+@@ -2881,6 +2892,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+     console.log('[DEBUG] /api/admin/stats CALLED');
+     try {
+         const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
++        const [vseprUsers] = await pool.query("SELECT COUNT(*) as count FROM users WHERE source = 'vsepr'");
+         const [articles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'"); // Published articles only
+ 
+         // Views: Only from published articles
+@@ -2891,6 +2903,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+ 
+         res.json({
+             users: users[0].count,
++            vsepr_users: vseprUsers[0].count,
+             articles: articles[0].count,
+             views: views[0].count || 0,
+             likes: likes[0].count,
