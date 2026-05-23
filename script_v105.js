@@ -790,44 +790,65 @@ async function loadSettings() {
         if (settings.GOOGLE_CLIENT_ID) {
             window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
             
-            window.renderGoogleButtons = function() {
-                if (typeof google === 'undefined' || !google.accounts) {
-                    setTimeout(window.renderGoogleButtons, 200);
+            window.triggerGoogleSignIn = function() {
+                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                    alert('Google giriş servisi yüklenemedi. Lütfen sayfayı yenileyin veya reklam engelleyicinizi kontrol edin.');
                     return;
                 }
                 
-                try {
-                    if (!window.GOOGLE_INITIALIZED) {
-                        google.accounts.id.initialize({
-                            client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
-                            callback: handleGoogleCredentialResponse
-                        });
-                        window.GOOGLE_INITIALIZED = true;
-                    }
-                    
-                    document.querySelectorAll('.google-login-btn, #google-login-btn').forEach(btn => {
-                        if (!btn.hasAttribute('data-google-rendered')) {
-                            btn.setAttribute('data-google-rendered', 'true');
-                            btn.innerHTML = '';
-                            btn.style.minWidth = '320px';
-                            btn.style.minHeight = '40px';
-                            btn.style.display = 'flex';
-                            btn.style.justifyContent = 'center';
-                            
-                            google.accounts.id.renderButton(btn, {
-                                theme: "outline",
-                                size: "large",
-                                type: "standard",
-                                width: 320
-                            });
+                const client = google.accounts.oauth2.initCodeClient({
+                    client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
+                    scope: 'email profile openid',
+                    ux_mode: 'popup',
+                    callback: (response) => {
+                        if (response.error) {
+                            console.error('[Google Auth] Popup error:', response.error);
+                            return;
                         }
-                    });
-                } catch (err) {
-                    console.error("[Google Auth] Error:", err);
-                }
+                        
+                        // Send code to backend
+                        fetch(`${API_URL}/auth/google/code`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code: response.code })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.token) {
+                                showToast(data.message || 'Google ile giriş başarısız.', 'error');
+                                return;
+                            }
+                            
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            
+                            showToast('Google ile giriş başarılı!', 'success');
+                            closeModal('loginModal');
+                            const signupModal = document.getElementById('signupModal');
+                            if (signupModal && signupModal.classList.contains('active')) {
+                                closeModal('signupModal');
+                            }
+                            checkAuthStatus();
+                            
+                            if (data.user.role === 'admin') {
+                                setTimeout(() => window.location.href = '/admin', 1000);
+                            } else if (data.user.role === 'editor') {
+                                setTimeout(() => window.location.href = '/editor', 1000);
+                            } else if (data.user.role === 'author') {
+                                setTimeout(() => window.location.href = '/author', 1000);
+                            } else {
+                                setTimeout(() => window.location.reload(), 800);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('[Google Auth] Code exchange error:', err);
+                            showToast('Giriş yapılırken bir hata oluştu.', 'error');
+                        });
+                    }
+                });
+                
+                client.requestCode();
             };
-            // Do NOT call immediately! Wait for openModal to call it so the modal is fully visible (opacity: 1)
-            // If rendered while hidden, Google SDK disables the iframe click events to prevent clickjacking.
         }
 
     } catch (error) {
@@ -1155,16 +1176,6 @@ function openModal(modalId) {
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
-        if (modalId === 'loginModal' || modalId === 'signupModal') {
-            if (typeof window.renderGoogleButtons === 'function') {
-                // Wait for CSS transition (0.3s) to finish completely before rendering.
-                // If rendered while opacity is < 1, Google SDK disables the button to prevent clickjacking!
-                setTimeout(() => {
-                    window.renderGoogleButtons();
-                }, 350);
-            }
-        }
     }
 }
 
