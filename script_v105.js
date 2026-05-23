@@ -795,10 +795,13 @@ async function loadSettings() {
                     setTimeout(window.renderGoogleButtons, 100);
                     return;
                 }
-                google.accounts.id.initialize({
-                    client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
-                    callback: handleGoogleCredentialResponse
-                });
+                if (!window.GOOGLE_INITIALIZED) {
+                    google.accounts.id.initialize({
+                        client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
+                        callback: handleGoogleCredentialResponse
+                    });
+                    window.GOOGLE_INITIALIZED = true;
+                }
                 
                 const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
                 googleBtns.forEach(btn => {

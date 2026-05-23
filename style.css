@@ -983,6 +983,41 @@ i[class*=" ph"] {
     text-decoration: underline;
 }
 
+/* Remember Me Checkbox */
+.remember-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--header-border);
+    border-radius: 4px;
+    background-color: var(--nav-hover-bg);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+.remember-checkbox:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.remember-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.remember-checkbox:hover {
+    border-color: var(--primary-hover);
+}
+
 /* --- Modern Toast Notifications --- */
 .toast-container {
     position: fixed;
