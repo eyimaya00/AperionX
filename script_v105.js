@@ -786,6 +786,22 @@ async function loadSettings() {
             if (el) el.innerText = settings.newsletter_desc;
         }
 
+        // Initialize Google Sign-In if client ID is present
+        if (settings.GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.initialize({
+                client_id: settings.GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredentialResponse
+            });
+            // Render the button in all modals where the container exists
+            const googleBtns = document.querySelectorAll('#google-login-btn');
+            googleBtns.forEach(btn => {
+                google.accounts.id.renderButton(
+                    btn,
+                    { theme: "outline", size: "large", width: '100%' }
+                );
+            });
+        }
+
     } catch (error) {
         console.error('Settings load error:', error);
     }
@@ -1238,12 +1254,13 @@ if (loginForm) {
         e.preventDefault();
         const identifier = document.getElementById('login-email').value; // Email or Username
         const password = document.getElementById('login-password').value;
+        const rememberMe = document.getElementById('login-remember') ? document.getElementById('login-remember').checked : false;
 
         try {
             const res = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier, password })
+                body: JSON.stringify({ identifier, password, rememberMe })
             });
 
             const data = await res.json();
@@ -1285,6 +1302,47 @@ if (loginForm) {
             console.error(error);
             showToast('Bir hata oluştu.', 'error');
         }
+    });
+}
+
+// Google Identity Services callback
+function handleGoogleCredentialResponse(response) {
+    fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.token) {
+            showToast(data.message || 'Google ile giriş başarısız.', 'error');
+            return;
+        }
+        
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        showToast('Google ile giriş başarılı!', 'success');
+        closeModal('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        if (signupModal && signupModal.classList.contains('active')) {
+            closeModal('signupModal');
+        }
+        checkAuthStatus();
+        
+        if (data.user.role === 'admin') {
+            setTimeout(() => window.location.href = '/admin', 1000);
+        } else if (data.user.role === 'editor') {
+            setTimeout(() => window.location.href = '/editor', 1000);
+        } else if (data.user.role === 'author') {
+            setTimeout(() => window.location.href = '/author', 1000);
+        } else {
+            setTimeout(() => window.location.reload(), 800);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('Google ile giriş sırasında hata oluştu.', 'error');
     });
 }
 

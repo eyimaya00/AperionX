@@ -26,7 +26,8 @@ const jwt = require('jsonwebtoken');
 const DOMPurify = require('isomorphic-dompurify');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
@@ -2440,7 +2441,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-    const { identifier, password } = req.body; // 'identifier' is email OR username
+    const { identifier, password, rememberMe } = req.body; // 'identifier' is email OR username
     // Backward compatibility: if 'email' is sent instead of 'identifier'
     const loginInput = identifier || req.body.email;
 
@@ -2452,7 +2453,8 @@ app.post('/api/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
-        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        const tokenExpiry = rememberMe ? '30d' : '24h';
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: tokenExpiry });
 
         let redirectUrl = 'index.html';
         if (user.role === 'admin') redirectUrl = 'admin';
@@ -2478,6 +2480,88 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Sunucu hatası oluştu.' });
+    }
+});
+
+// Google OAuth Login
+app.post('/api/auth/google', async (req, res) => {
+    const { credential } = req.body;
+    
+    if (!credential) {
+        return res.status(400).json({ message: 'Google token gerekli.' });
+    }
+
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+        
+        // Kullanıcı var mı kontrol et
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        let user;
+        
+        if (rows.length === 0) {
+            // Kullanıcı yoksa oluştur
+            const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+            // Rastgele güvenli bir şifre ata (Google ile girdiği için şifre bilmesine gerek yok ama db kısıtlaması için lazım)
+            const randomPassword = require('crypto').randomBytes(16).toString('hex');
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            
+            const [result] = await pool.query(
+                'INSERT INTO users (fullname, email, username, password, role, avatar_url) VALUES (?, ?, ?, ?, ?, ?)', 
+                [name, email, username, hashedPassword, 'reader', picture]
+            );
+            
+            user = {
+                id: result.insertId,
+                fullname: name,
+                email: email,
+                username: username,
+                role: 'reader',
+                avatar_url: picture,
+                bio: null,
+                job_title: null
+            };
+        } else {
+            user = rows[0];
+            // Eğer profil resmi yoksa Google'dan alalım
+            if (!user.avatar_url || user.avatar_url === '') {
+                await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [picture, user.id]);
+                user.avatar_url = picture;
+            }
+        }
+        
+        // Token oluştur (Google girişleri için varsayılan 30 gün verebiliriz veya standart 24h)
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+        
+        let redirectUrl = 'index.html';
+        if (user.role === 'admin') redirectUrl = 'admin';
+        else if (user.role === 'author') redirectUrl = 'author';
+        else if (user.role === 'editor') redirectUrl = 'editor';
+        else if (user.role === 'reader') redirectUrl = 'index.html';
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                fullname: user.fullname,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                avatar_url: user.avatar_url,
+                bio: user.bio,
+                job_title: user.job_title
+            },
+            redirectUrl
+        });
+
+    } catch (error) {
+        console.error('Google Auth Error:', error);
+        res.status(500).json({ message: 'Google doğrulama hatası.' });
     }
 });
 
@@ -3483,6 +3567,9 @@ app.get('/api/settings', async (req, res) => {
             settings[row.setting_key] = row.setting_value;
         });
 
+        // Add Google Client ID from environment
+        settings.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
         setCachedData(cacheKey, settings);
         res.json(settings);
     } catch (e) {
@@ -3999,15 +4086,18 @@ app.get('/makale/:slug', async (req, res) => {
                 );
                 htmlData = htmlData.replace(
                     /<meta property="twitter:image" content=".*?">/,
-                    `<meta property="twitte// =============================================
-// === EXPERIMENTS MODULE REMOVED ===
-// =============================================REFACTORED) ===
-// =============================================
-app.use('/api/experiments', require('./routes/experiments')(upload, authenticateToken, checkRole, createNotification, getUniqueExperimentSlug));
-
-// =============================================
-// === END EXPERIMENTS MODULE ===
-// =============================================
+                    `<meta property="twitter:image" content="${article.image_url}">`
+                );
+                
+                // Add more replacements if needed...
+            }
+            res.send(htmlData);
+        } catch (dbErr) {
+            console.error('Database error in /makale/:slug', dbErr);
+            res.send(htmlData); // Fallback to unmodified HTML
+        }
+    });
+});
 
 app.use((req, res) => {
     // Check if it looks like an API call first
