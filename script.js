@@ -745,22 +745,35 @@ async function loadSettings() {
         // Ensure Social Container exists for LinkedIn/YouTube
         const socialContainer = document.querySelector('.footer-socials');
         if (socialContainer) {
-            // LinkedIn
+            // LinkedIn (Hardcoded)
             let lnk = document.getElementById('footer-linkedin');
-            if (settings.social_linkedin) {
-                if (!lnk) {
-                    lnk = document.createElement('a');
-                    lnk.id = 'footer-linkedin';
-                    lnk.className = 'social-link';
-                    lnk.target = '_blank';
-                    lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
-                    socialContainer.appendChild(lnk);
-                }
-                lnk.href = settings.social_linkedin;
-                lnk.style.display = 'flex';
-            } else if (lnk) { lnk.style.display = 'none'; }
+            if (!lnk) {
+                lnk = document.createElement('a');
+                lnk.id = 'footer-linkedin';
+                lnk.className = 'social-link';
+                lnk.target = '_blank';
+                lnk.setAttribute('aria-label', 'LinkedIn');
+                lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
+                socialContainer.appendChild(lnk);
+            }
+            lnk.href = settings.social_linkedin || 'https://www.linkedin.com/company/aperionx';
+            lnk.style.display = 'flex';
 
-            // YouTube
+            // TikTok (Hardcoded)
+            let tk = document.getElementById('footer-tiktok');
+            if (!tk) {
+                tk = document.createElement('a');
+                tk.id = 'footer-tiktok';
+                tk.className = 'social-link';
+                tk.target = '_blank';
+                tk.setAttribute('aria-label', 'TikTok');
+                tk.innerHTML = '<i class="ph-fill ph-tiktok-logo"></i>';
+                socialContainer.appendChild(tk);
+            }
+            tk.href = settings.social_tiktok || 'https://www.tiktok.com/@aperionx';
+            tk.style.display = 'flex';
+
+            // YouTube (Dynamic fallback)
             let yt = document.getElementById('footer-youtube');
             if (settings.social_youtube) {
                 if (!yt) {
@@ -768,6 +781,7 @@ async function loadSettings() {
                     yt.id = 'footer-youtube';
                     yt.className = 'social-link';
                     yt.target = '_blank';
+                    yt.setAttribute('aria-label', 'YouTube');
                     yt.innerHTML = '<i class="ph-fill ph-youtube-logo"></i>';
                     socialContainer.appendChild(yt);
                 }
