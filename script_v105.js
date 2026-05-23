@@ -787,19 +787,28 @@ async function loadSettings() {
         }
 
         // Initialize Google Sign-In if client ID is present
-        if (settings.GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.initialize({
-                client_id: settings.GOOGLE_CLIENT_ID,
-                callback: handleGoogleCredentialResponse
-            });
-            // Render the button in all modals where the container exists
-            const googleBtns = document.querySelectorAll('#google-login-btn');
-            googleBtns.forEach(btn => {
-                google.accounts.id.renderButton(
-                    btn,
-                    { theme: "outline", size: "large", width: '100%' }
-                );
-            });
+        if (settings.GOOGLE_CLIENT_ID) {
+            window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
+            
+            function renderGoogleButton() {
+                if (typeof google === 'undefined' || !google.accounts) {
+                    setTimeout(renderGoogleButton, 100);
+                    return;
+                }
+                google.accounts.id.initialize({
+                    client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
+                    callback: handleGoogleCredentialResponse
+                });
+                
+                const googleBtns = document.querySelectorAll('#google-login-btn');
+                googleBtns.forEach(btn => {
+                    google.accounts.id.renderButton(
+                        btn,
+                        { theme: "outline", size: "large", type: "standard" } // Removed invalid width: '100%'
+                    );
+                });
+            }
+            renderGoogleButton();
         }
 
     } catch (error) {
