@@ -826,8 +826,8 @@ async function loadSettings() {
                     console.error("[Google Auth] Error:", err);
                 }
             };
-            // Call immediately when settings load (even if modal is hidden, because we set explicit minWidth)
-            window.renderGoogleButtons();
+            // Do NOT call immediately! Wait for openModal to call it so the modal is fully visible (opacity: 1)
+            // If rendered while hidden, Google SDK disables the iframe click events to prevent clickjacking.
         }
 
     } catch (error) {
@@ -1158,9 +1158,11 @@ function openModal(modalId) {
         
         if (modalId === 'loginModal' || modalId === 'signupModal') {
             if (typeof window.renderGoogleButtons === 'function') {
+                // Wait for CSS transition (0.3s) to finish completely before rendering.
+                // If rendered while opacity is < 1, Google SDK disables the button to prevent clickjacking!
                 setTimeout(() => {
                     window.renderGoogleButtons();
-                }, 150);
+                }, 350);
             }
         }
     }
