@@ -792,17 +792,18 @@ async function loadSettings() {
             
             let googleLoadAttempts = 0;
             window.renderGoogleButtons = function() {
+                console.log("[Google Auth] renderGoogleButtons called, attempt:", googleLoadAttempts);
+                
                 if (typeof google === 'undefined' || !google.accounts) {
                     googleLoadAttempts++;
                     if (googleLoadAttempts > 50) {
-                        console.error("[Google Auth] Google script failed to load. Check adblockers or network.");
-                        const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
-                        googleBtns.forEach(btn => {
-                            btn.innerHTML = '<div style="color: #ef4444; font-size: 0.8rem; text-align: center; border: 1px dashed #ef4444; padding: 5px; border-radius: 5px;">Reklam engelleyiciniz Google girişini engelliyor olabilir. Lütfen kapatıp sayfayı yenileyin.</div>';
+                        console.error("[Google Auth] Google SDK failed to load after 50 attempts.");
+                        document.querySelectorAll('.google-login-btn, #google-login-btn').forEach(btn => {
+                            btn.innerHTML = '<div style="color: #ef4444; font-size: 0.85rem; text-align: center; border: 1px dashed #ef4444; padding: 8px; border-radius: 8px;">Google girişi yüklenemedi. Reklam engelleyicinizi kontrol edin.</div>';
                         });
                         return;
                     }
-                    setTimeout(window.renderGoogleButtons, 100);
+                    setTimeout(window.renderGoogleButtons, 200);
                     return;
                 }
                 
@@ -813,29 +814,25 @@ async function loadSettings() {
                             callback: handleGoogleCredentialResponse
                         });
                         window.GOOGLE_INITIALIZED = true;
-                        console.log("[Google Auth] Initialized successfully with client ID:", window.GOOGLE_CLIENT_ID_GLOBAL);
+                        console.log("[Google Auth] Initialized with client ID");
                     }
                     
-                    const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
-                    googleBtns.forEach(btn => {
-                        const modal = btn.closest('.modal-overlay');
-                        if (!modal || modal.classList.contains('active')) {
-                            if (!btn.hasAttribute('data-google-rendered')) {
-                                btn.setAttribute('data-google-rendered', 'true');
-                                btn.innerHTML = ''; // Clear to prevent duplicate/broken iframes
-                                google.accounts.id.renderButton(
-                                    btn,
-                                    { theme: "outline", size: "large", type: "standard", width: 320 }
-                                );
-                                console.log("[Google Auth] Rendered button into:", btn);
-                            }
-                        }
+                    document.querySelectorAll('.google-login-btn, #google-login-btn').forEach(btn => {
+                        btn.innerHTML = '';
+                        google.accounts.id.renderButton(btn, {
+                            theme: "outline",
+                            size: "large",
+                            type: "standard",
+                            width: 320
+                        });
+                        console.log("[Google Auth] Button rendered into:", btn.id || btn.className);
                     });
                 } catch (err) {
-                    console.error("[Google Auth] Error rendering button:", err);
+                    console.error("[Google Auth] Render error:", err);
                 }
             };
-            window.renderGoogleButtons();
+            // Don't call at page load - only call when modal opens
+            // window.renderGoogleButtons();
         }
 
     } catch (error) {
