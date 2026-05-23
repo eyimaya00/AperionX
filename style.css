@@ -1018,6 +1018,15 @@ i[class*=" ph"] {
     border-color: var(--primary-hover);
 }
 
+/* Ensure Google Button container has dimensions before iframe loads */
+.google-login-btn {
+    min-width: 320px;
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* --- Modern Toast Notifications --- */
 .toast-container {
     position: fixed;
