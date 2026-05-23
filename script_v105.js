@@ -786,19 +786,17 @@ async function loadSettings() {
             if (el) el.innerText = settings.newsletter_desc;
         }
 
-        // Initialize Google Sign-In if client ID is present
-        if (settings.GOOGLE_CLIENT_ID) {
-            window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
+        // Hardcode Client ID since it's a public key, avoids API caching/env issues
+        window.GOOGLE_CLIENT_ID_GLOBAL = "181445432661-0i7m20n5leci7raa45o249a86tnb53cn.apps.googleusercontent.com";
+        
+        window.triggerGoogleSignIn = function() {
+            const clientId = window.GOOGLE_CLIENT_ID_GLOBAL;
+            const redirectUri = 'https://www.aperionx.com/api/auth/google/callback';
+            const scope = 'email profile openid';
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
             
-            window.triggerGoogleSignIn = function() {
-                const clientId = window.GOOGLE_CLIENT_ID_GLOBAL;
-                const redirectUri = 'https://www.aperionx.com/api/auth/google/callback';
-                const scope = 'email profile openid';
-                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
-                
-                window.location.href = authUrl;
-            };
-        }
+            window.location.href = authUrl;
+        };
 
     } catch (error) {
         console.error('Settings load error:', error);
