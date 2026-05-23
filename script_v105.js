@@ -791,63 +791,12 @@ async function loadSettings() {
             window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
             
             window.triggerGoogleSignIn = function() {
-                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-                    alert('Google giriş servisi yüklenemedi. Lütfen sayfayı yenileyin veya reklam engelleyicinizi kontrol edin.');
-                    return;
-                }
+                const clientId = window.GOOGLE_CLIENT_ID_GLOBAL;
+                const redirectUri = 'https://www.aperionx.com/api/auth/google/callback';
+                const scope = 'email profile openid';
+                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
                 
-                const client = google.accounts.oauth2.initCodeClient({
-                    client_id: window.GOOGLE_CLIENT_ID_GLOBAL,
-                    scope: 'email profile openid',
-                    ux_mode: 'popup',
-                    callback: (response) => {
-                        if (response.error) {
-                            console.error('[Google Auth] Popup error:', response.error);
-                            return;
-                        }
-                        
-                        // Send code to backend
-                        fetch(`${API_URL}/auth/google/code`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ code: response.code })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (!data.token) {
-                                showToast(data.message || 'Google ile giriş başarısız.', 'error');
-                                return;
-                            }
-                            
-                            localStorage.setItem('token', data.token);
-                            localStorage.setItem('user', JSON.stringify(data.user));
-                            
-                            showToast('Google ile giriş başarılı!', 'success');
-                            closeModal('loginModal');
-                            const signupModal = document.getElementById('signupModal');
-                            if (signupModal && signupModal.classList.contains('active')) {
-                                closeModal('signupModal');
-                            }
-                            checkAuthStatus();
-                            
-                            if (data.user.role === 'admin') {
-                                setTimeout(() => window.location.href = '/admin', 1000);
-                            } else if (data.user.role === 'editor') {
-                                setTimeout(() => window.location.href = '/editor', 1000);
-                            } else if (data.user.role === 'author') {
-                                setTimeout(() => window.location.href = '/author', 1000);
-                            } else {
-                                setTimeout(() => window.location.reload(), 800);
-                            }
-                        })
-                        .catch(err => {
-                            console.error('[Google Auth] Code exchange error:', err);
-                            showToast('Giriş yapılırken bir hata oluştu.', 'error');
-                        });
-                    }
-                });
-                
-                client.requestCode();
+                window.location.href = authUrl;
             };
         }
 
