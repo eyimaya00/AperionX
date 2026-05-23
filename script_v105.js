@@ -805,15 +805,17 @@ async function loadSettings() {
                 
                 const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
                 googleBtns.forEach(btn => {
-                    // Google SDK creates a 0-width iframe if the container is hidden.
-                    // To fix this, only render when the modal is active (offsetWidth > 0)
-                    // and clear the previous iframe before re-rendering.
-                    if (btn.offsetWidth > 0) {
-                        btn.innerHTML = ''; // Clear to prevent duplicate/broken iframes
-                        google.accounts.id.renderButton(
-                            btn,
-                            { theme: "outline", size: "large", type: "standard", width: 320 }
-                        );
+                    const modal = btn.closest('.modal-overlay');
+                    // Ensure the modal is active (visible) before rendering to prevent Google SDK 0-width bug
+                    if (!modal || modal.classList.contains('active')) {
+                        if (!btn.hasAttribute('data-google-rendered')) {
+                            btn.setAttribute('data-google-rendered', 'true');
+                            btn.innerHTML = ''; // Clear to prevent duplicate/broken iframes
+                            google.accounts.id.renderButton(
+                                btn,
+                                { theme: "outline", size: "large", type: "standard", width: 320 }
+                            );
+                        }
                     }
                 });
             };
