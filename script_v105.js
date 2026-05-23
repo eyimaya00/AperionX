@@ -790,9 +790,9 @@ async function loadSettings() {
         if (settings.GOOGLE_CLIENT_ID) {
             window.GOOGLE_CLIENT_ID_GLOBAL = settings.GOOGLE_CLIENT_ID;
             
-            function renderGoogleButton() {
+            window.renderGoogleButtons = function() {
                 if (typeof google === 'undefined' || !google.accounts) {
-                    setTimeout(renderGoogleButton, 100);
+                    setTimeout(window.renderGoogleButtons, 100);
                     return;
                 }
                 google.accounts.id.initialize({
@@ -800,15 +800,15 @@ async function loadSettings() {
                     callback: handleGoogleCredentialResponse
                 });
                 
-                const googleBtns = document.querySelectorAll('#google-login-btn');
+                const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
                 googleBtns.forEach(btn => {
                     google.accounts.id.renderButton(
                         btn,
-                        { theme: "outline", size: "large", type: "standard" } // Removed invalid width: '100%'
+                        { theme: "outline", size: "large", type: "standard", width: 320 }
                     );
                 });
-            }
-            renderGoogleButton();
+            };
+            window.renderGoogleButtons();
         }
 
     } catch (error) {
@@ -1136,6 +1136,14 @@ function openModal(modalId) {
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        
+        if (modalId === 'loginModal' || modalId === 'signupModal') {
+            if (typeof window.renderGoogleButtons === 'function') {
+                setTimeout(() => {
+                    window.renderGoogleButtons();
+                }, 150);
+            }
+        }
     }
 }
 
