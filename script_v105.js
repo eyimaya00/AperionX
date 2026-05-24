@@ -2665,7 +2665,7 @@ function hideLoader() {
         // Remove from DOM after transition
         setTimeout(() => {
             loader.style.display = 'none';
-        }, 500);
+        }, 200);
     }
 }
 

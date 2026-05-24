@@ -9,8 +9,8 @@ async function run() {
             password: process.env.DB_PASSWORD || '',
             database: process.env.DB_NAME || 'aperionx_db'
         });
-        const [cols] = await pool.query('SHOW COLUMNS FROM users');
-        console.log(cols.map(c => c.Field));
+        const [articles] = await pool.query('SELECT id, title, author_id, status FROM articles LIMIT 10');
+        console.table(articles);
     } finally { if(pool) await pool.end(); }
 }
 run();
