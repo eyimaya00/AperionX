@@ -5732,3 +5732,94 @@ body {
 /* Dark Mode Support for Author Chip */
 body.dark-mode .author-chip { background: rgba(165, 180, 252, 0.1); color: #a5b4fc; border-color: rgba(165, 180, 252, 0.2); }
 body.dark-mode .author-chip-avatar { border-color: rgba(165, 180, 252, 0.3); }
+
+/* User Profile Dropdown Styles */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.user-btn:hover {
+    background: var(--nav-hover-bg);
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 180px;
+    z-index: 1000;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+body.dark-mode .dropdown-menu {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.dropdown-menu.active {
+    display: flex;
+    animation: fadeInDown 0.2s ease forwards;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.dropdown-menu a:hover {
+    background: var(--nav-hover-bg);
+    color: var(--primary-color);
+}
+
+.dropdown-menu a i {
+    font-size: 1.1em;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.dropdown-menu a:hover i {
+    color: var(--primary-color);
+}
