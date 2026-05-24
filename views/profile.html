@@ -14,7 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profilim - AperionX</title>
-    <link rel="stylesheet" href="style.css?v=212">
+    <link rel="stylesheet" href="/style.css?v=212">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=212" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=212"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=212" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=212"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=212" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=212"></noscript>
     <style>
@@ -437,7 +437,7 @@
 
             <nav class="nav-menu">
                 <a href="/" class="nav-link">Ana Sayfa</a>
-                <a href="articles.html" class="nav-link">Makaleler</a>
+                <a href="/articles" class="nav-link">Makaleler</a>
                 <a href="javascript:void(0)" class="nav-link active">Profilim</a>
             </nav>
 
@@ -552,7 +552,7 @@
 
         <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
 
-        <script defer src="script_v105.js?v=214"></script>
+        <script defer src="/script_v105.js?v=214"></script>
         <script>
             const API_BASE = '/api';
             let currentEditCommentId = null;
@@ -613,7 +613,7 @@
                     </div>`;
                     } else {
                         grid.innerHTML = articles.map(article => `
-                        <a href="article-detail.html?id=${article.id}" class="article-card-modern">
+                        <a href="/article-detail?id=${article.id}" class="article-card-modern">
                             <div class="modern-card-bg" style="background-image: url('${article.image_url || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000'}')"></div>
                             <div class="modern-card-overlay"></div>
                             <div class="modern-card-content">
@@ -669,7 +669,7 @@
                         list.innerHTML = comments.map(c => `
                         <div class="my-comment-card" id="comment-card-${c.id}">
                             <div class="comment-meta">
-                                <span>Makale: <a href="article-detail.html?id=${c.article_id}" class="article-link">${c.article_title}</a></span>
+                                <span>Makale: <a href="/article-detail?id=${c.article_id}" class="article-link">${c.article_title}</a></span>
                                 <span>${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
                             </div>
                             <div class="comment-text" id="comment-text-${c.id}">${c.content}</div>

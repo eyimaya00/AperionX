@@ -156,14 +156,14 @@ app.get('/index.html', (req, res) => {
 // === SEO & SLUG HELPERS ===
 // Serve index.html for /en root
 app.get(['/en', '/en/'], (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 // Serve static HTML pages on /en path
 app.get('/en/:page', (req, res, next) => {
     const page = req.params.page;
     if (page.endsWith('.html')) {
-        const filePath = path.join(__dirname, page);
+        const filePath = path.join(__dirname, 'views', page);
         if (fs.existsSync(filePath)) {
             return res.sendFile(filePath);
         }
@@ -286,7 +286,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
         // ============ END VIEW COUNTING ============
 
         // Read Template
-        const filePath = path.join(__dirname, 'article-detail.html');
+        const filePath = path.join(__dirname, 'views', 'article-detail.html');
         fs.readFile(filePath, 'utf8', async (err, htmlData) => {
             if (err) return next(err);
 
@@ -587,7 +587,8 @@ app.get('/article-detail.html', async (req, res, next) => {
         next();
     } catch (e) { next(); }
 });
-app.use(express.static(__dirname, { setHeaders: (res, path) => { if (path.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } else { res.setHeader('Cache-Control', 'public, max-age=604800'); } } }));
+app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { res.setHeader('Cache-Control', 'public, max-age=604800'); } }));
+app.use(express.static(path.join(__dirname, 'views', 'views'), { extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
 
@@ -2772,21 +2773,21 @@ app.get('/api/debug-ip', (req, res) => {
 
 // Clean URLs
 app.get('/admin', (req, res) => {
-    res.sendFile('admin.html', { root: __dirname });
+    res.sendFile('admin.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/author', (req, res) => {
-    res.sendFile('author.html', { root: __dirname });
+    res.sendFile('author.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/author_v2', (req, res) => {
-    res.sendFile('author_v2.html', { root: __dirname });
+    res.sendFile('author_v2.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/editor', (req, res) => {
     console.log('Serving editor_panel.html');
     res.set('Cache-Control', 'no-store');
-    res.sendFile('editor_panel.html', { root: __dirname });
+    res.sendFile('editor_panel.html', { root: path.join(__dirname, 'views') });
 });
 
 // === CATEGORIES MANAGEMENT ===
@@ -3179,12 +3180,12 @@ app.post('/api/settings_v2', authenticateToken, (req, res, next) => {
 
 // Serve Admin Panel
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    res.sendFile(path.join(__dirname, 'views', 'admin.html'));
 });
 
 // Serve Author Panel
 app.get('/author', (req, res) => {
-    res.sendFile(path.join(__dirname, 'author.html'));
+    res.sendFile(path.join(__dirname, 'views', 'author.html'));
 });
 
 // Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
@@ -3265,7 +3266,7 @@ setTimeout(ensureUsernameMigration, 5000); // Delay slightly to ensure DB connec
 // SEO-Friendly Article URLs with View Counting
 app.get('/makale/:slug', async (req, res) => {
     console.log('[SLUG-ROUTE] Called with slug:', req.params.slug);
-    const filePath = path.join(__dirname, 'article-detail.html');
+    const filePath = path.join(__dirname, 'views', 'article-detail.html');
     const slug = req.params.slug;
 
     try {
@@ -3327,7 +3328,7 @@ app.get('/makale/:slug', async (req, res) => {
 
 // Dynamic SEO for Article Detail
 app.get('/article-detail.html', async (req, res) => {
-    const filePath = path.join(__dirname, 'article-detail.html');
+    const filePath = path.join(__dirname, 'views', 'article-detail.html');
     const id = req.query.id;
 
     if (!id) {
@@ -3371,7 +3372,7 @@ app.get('/article-detail.html', async (req, res) => {
 
 // Serve Author Panel
 app.get('/author', (req, res) => {
-    res.sendFile(path.join(__dirname, 'author.html'));
+    res.sendFile(path.join(__dirname, 'views', 'author.html'));
 });
 
 // Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
@@ -4122,7 +4123,7 @@ app.post('/api/public/unsubscribe', async (req, res) => {
 // BUT FIRST: SEO Injection for Articles
 app.get('/makale/:slug', async (req, res) => {
     const slug = req.params.slug;
-    const filePath = path.join(__dirname, 'index.html');
+    const filePath = path.join(__dirname, 'views', 'index.html');
 
     // 1. Read index.html
     fs.readFile(filePath, 'utf8', async (err, htmlData) => {
@@ -4216,7 +4217,7 @@ app.use((req, res) => {
     }
 
     // Serve HTML 404 page for front-end routes and unknown paths
-    res.status(404).sendFile(path.join(__dirname, '404.html'));
+    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
 });
 
 // Start Server

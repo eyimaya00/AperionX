@@ -3316,7 +3316,7 @@
                                 <span style="font-size:0.9rem; color:#666;">Yazar: ${art.author_name} - ${new Date(art.created_at).toLocaleDateString()}</span>
                             </div>
                             <div>
-                                <a href="editor.html" class="btn btn-primary" style="text-decoration:none; font-size:0.9rem;">İncele</a>
+                                <a href="/editor" class="btn btn-primary" style="text-decoration:none; font-size:0.9rem;">İncele</a>
                             </div>
                         </li>
                     `;
@@ -3490,7 +3490,7 @@
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding:12px;">#${art.id}</td>
                         <td style="padding:12px; font-weight:500;">
-                            <a href="article-detail.html?id=${art.id}" target="_blank" style="text-decoration:none; color:inherit;">${escapeHtml(art.title)}</a>
+                            <a href="/article-detail?id=${art.id}" target="_blank" style="text-decoration:none; color:inherit;">${escapeHtml(art.title)}</a>
                         </td>
                         <td style="padding:12px;">${escapeHtml(art.author_name)}</td>
                         <td style="padding:12px;">
@@ -3500,7 +3500,7 @@
                         <td style="padding:12px; color:#6b7280; font-size:0.9rem;">${new Date(art.created_at).toLocaleDateString('tr-TR')}</td>
                         <td style="padding:12px;">
                             <div style="display:flex; gap:6px;">
-                                <a href="editor.html?edit=${art.id}" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca;"><i class="ph-bold ph-pencil-simple"></i></a>
+                                <a href="/editor?edit=${art.id}" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca;"><i class="ph-bold ph-pencil-simple"></i></a>
                                 <button onclick="deleteArticle(${art.id})" class="btn" style="padding:6px 10px; font-size:0.8rem; background:#fee2e2; color:#ef4444;"><i class="ph-bold ph-trash"></i></button>
                             </div>
                         </td>
@@ -4179,7 +4179,7 @@
             if (savedDarkMode === null) localStorage.setItem('darkMode', 'true');
         }
     </script>
-    <script defer src="script_v105.js?v=214"></script>
+    <script defer src="/script_v105.js?v=214"></script>
     <script>
         // Helper: Fetch with Auth Token
         async function fetchWithAuth(url, options = {}) {

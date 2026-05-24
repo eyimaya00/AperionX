@@ -1225,7 +1225,7 @@ function checkAuthStatus() {
 
     if (user) {
         authButtons.forEach(container => {
-            let dashboardAction = "window.location.href='profile.html'";
+            let dashboardAction = "window.location.href = "/profile"";
             let cursorStyle = 'pointer';
             let titleAttr = 'Profilime Git';
             let roleBadge = '';
@@ -1308,7 +1308,7 @@ function checkAuthStatus() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.href = "/index";
 }
 
 // --- Mobile Menu Toggle ---
@@ -1693,7 +1693,7 @@ async function loadArticleDetail() {
         const pathParts = window.location.pathname.split('/');
         const possibleSlug = pathParts[pathParts.length - 1]; // naive check
         if (!possibleSlug || possibleSlug === 'article-detail.html') {
-            window.location.href = '/articles.html';
+            window.location.href = "//articles";
             return;
         }
         // Fetch by slug if logic allows
@@ -1708,7 +1708,7 @@ async function loadArticleDetail() {
         } catch (e) {
             console.error('Slug fetch failed:', e);
             document.body.innerHTML = '<h1 style="color:red; padding:50px;">HATA: Makale Yüklenemedi</h1><p style="padding:0 50px;">' + e.toString() + '</p>';
-            // window.location.href = '/articles.html'; // DISABLE REDIRECT FOR DEBUGGING
+            // window.location.href = "//articles"; // DISABLE REDIRECT FOR DEBUGGING
             return;
         }
     }
@@ -2405,7 +2405,7 @@ function initHeroScroll() {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
                 // Fallback for different pages (go to articles)
-                window.location.href = 'articles.html';
+                window.location.href = "/articles";
             }
         });
     }

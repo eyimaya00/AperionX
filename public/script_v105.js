@@ -1361,7 +1361,7 @@ window.navigateToDashboard = function () {
         const userStr = localStorage.getItem('user');
         if (!userStr) {
             console.warn("No user found in localStorage, redirecting to home.");
-            window.location.href = 'index.html';
+            window.location.href = "/index";
             return;
         }
 
@@ -1371,10 +1371,10 @@ window.navigateToDashboard = function () {
         if (u.role === 'admin') window.location.href = '/admin';
         else if (u.role === 'author') window.location.href = '/author';
         else if (u.role === 'editor') window.location.href = '/editor';
-        else window.location.href = 'profile.html';
+        else window.location.href = "/profile";
     } catch (err) {
         console.error("Navigation Error:", err);
-        window.location.href = 'index.html';
+        window.location.href = "/index";
     }
 };
 
@@ -1383,7 +1383,7 @@ window.logout = function () {
     console.log('Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.href = "/index";
 };
 
 // Check Auth & Update UI
@@ -1486,7 +1486,7 @@ function checkAuthStatus() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.href = "/index";
 }
 // Expose globally for onclick handlers
 window.logout = logout;
@@ -1879,7 +1879,7 @@ async function loadArticleDetail() {
         const pathParts = window.location.pathname.split('/');
         const possibleSlug = pathParts[pathParts.length - 1]; // naive check
         if (!possibleSlug || possibleSlug === 'article-detail.html') {
-            window.location.href = '/articles.html';
+            window.location.href = "//articles";
             return;
         }
         // Fetch by slug if logic allows
@@ -1894,7 +1894,7 @@ async function loadArticleDetail() {
         } catch (e) {
             console.error('Slug fetch failed:', e);
             document.body.innerHTML = '<h1 style="color:red; padding:50px;">HATA: Makale Yüklenemedi</h1><p style="padding:0 50px;">' + e.toString() + '</p>';
-            // window.location.href = '/articles.html'; // DISABLE REDIRECT FOR DEBUGGING
+            // window.location.href = "//articles"; // DISABLE REDIRECT FOR DEBUGGING
             return;
         }
     }
@@ -2652,7 +2652,7 @@ function initHeroScroll() {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
                 // Fallback for different pages (go to articles)
-                window.location.href = 'articles.html';
+                window.location.href = "/articles";
             }
         });
     }
