@@ -588,7 +588,7 @@ app.get('/article-detail.html', async (req, res, next) => {
     } catch (e) { next(); }
 });
 app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { res.setHeader('Cache-Control', 'public, max-age=604800'); } }));
-app.use(express.static(path.join(__dirname, 'views', 'views'), { extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
+app.use(express.static(path.join(__dirname, 'views'), { extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
 
