@@ -1552,6 +1552,28 @@ app.get('/api/author/articles', authenticateToken, async (req, res) => {
     }
 });
 
+// GET// My Articles Endpoint
+app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
+    console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
+            (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+            (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a 
+            WHERE author_id = ? 
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        console.error('CRITICAL ERROR in /api/articles/my-articles:', e);
+        const fs = require('fs');
+        const logMsg = `[${new Date().toISOString()}] ERROR /api/articles/my-articles: ${e.stack || e}\n`;
+        try { fs.appendFileSync('server_error.log', logMsg); } catch (err) { console.error(err); }
+        res.status(500).send('DB_ERR: ' + e.toString());
+    }
+});
+
 // GET Single Article by ID or Slug for Frontend API
 app.get('/api/articles/:key', async (req, res) => {
     const key = req.params.key;
@@ -1669,26 +1691,7 @@ app.get('/api/public/author/:identifier', async (req, res) => {
 });
 
 
-app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
-    console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
-    try {
-        const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
-            (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
-            (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
-            FROM articles a 
-            WHERE author_id = ? 
-            ORDER BY created_at DESC
-        `, [req.user.id]);
-        res.json(rows);
-    } catch (e) {
-        console.error('CRITICAL ERROR in /api/articles/my-articles:', e);
-        const fs = require('fs');
-        const logMsg = `[${new Date().toISOString()}] ERROR /api/articles/my-articles: ${e.stack || e}\n`;
-        try { fs.appendFileSync('server_error.log', logMsg); } catch (err) { console.error(err); }
-        res.status(500).send('DB_ERR: ' + e.toString());
-    }
-});
+// Moved to top to avoid collision with :key
 
 app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
     // Both Author and Admin can post.
