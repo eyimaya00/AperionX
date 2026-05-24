@@ -1622,7 +1622,7 @@
 
         if (!token || !user) {
             console.error('Auth Check Failed:', { token, user });
-            window.location.href = 'index.html?openLogin=true';
+            window.location.href = "/index?openLogin=true';
         }
 
         // =============================================
@@ -1684,7 +1684,7 @@
                 // Public profile link
                 const profileBtn = document.getElementById('view-public-profile-btn');
                 if (profileBtn && user.username) {
-                    profileBtn.href = `author-profile.html?u=${user.username}`;
+                    profileBtn.href = `/author-profile?u=${user.username}`;
                 } else if (profileBtn) {
                     profileBtn.style.display = 'none';
                 }
@@ -2896,7 +2896,7 @@
             localStorage.removeItem('user_role'); // Just in case
 
             // Redirect to index
-            window.location.href = 'index.html';
+            window.location.href = "/index';
         }
 
         // [CLEANED] Third DOMContentLoaded (logout) removed — merged into unified init
