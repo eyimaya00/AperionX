@@ -5097,11 +5097,13 @@ i[class*=" ph"] {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background-color: var(--bg-color);
+    background-color: rgba(15, 23, 42, 0.85); /* Semi-transparent modern dark */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 #global-loader.hidden {
@@ -5114,29 +5116,81 @@ i[class*=" ph"] {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 24px;
+    position: relative;
 }
 
 .loader-logo-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 15px;
-    animation: pulse-logo 1.5s infinite ease-in-out;
+    position: relative;
 }
 
+/* Beautiful Sci-Fi Glassmorphic Planet Animation */
 .loader-icon {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-icon i {
     font-size: 3.5rem;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+    background: linear-gradient(135deg, #a5b4fc, #6366f1, #8b5cf6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: spin-icon 2s linear infinite;
-    filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.4));
+    animation: float-icon 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+    z-index: 2;
 }
 
-@keyframes spin-icon {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.loader-icon::before,
+.loader-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.loader-icon::before {
+    border-top-color: rgba(99, 102, 241, 0.9);
+    border-right-color: rgba(139, 92, 246, 0.9);
+    animation: spin-ring 1.5s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+}
+
+.loader-icon::after {
+    border-bottom-color: rgba(168, 85, 247, 0.9);
+    border-left-color: rgba(99, 102, 241, 0.9);
+    animation: spin-ring 2s linear infinite reverse;
+    inset: 8px;
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+}
+
+#loader-logo-img {
+    animation: pulse-glow 2.5s infinite ease-in-out;
+    filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.3));
+}
+
+@keyframes spin-ring {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes float-icon {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-8px) scale(1.05); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.2)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.6)); }
 }
 
 .loader-text {
