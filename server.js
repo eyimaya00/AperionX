@@ -122,6 +122,17 @@ app.use(async (req, res, next) => {
     next();
 });
 
+
+// 301 Redirect for .html extensions
+app.use((req, res, next) => {
+    if (req.path.endsWith('.html')) {
+        const newPath = req.path.slice(0, -5);
+        const query = req.url.slice(req.path.length);
+        return res.redirect(301, newPath + query);
+    }
+    next();
+});
+
 // === MAGIC LINK ROUTE ===
 app.get('/maintenance-access', async (req, res) => {
     const { key } = req.query;
