@@ -2749,11 +2749,15 @@
 
         function updateSidebarProfile(u) {
             if (!u) return;
-            document.getElementById('sidebar-name').innerText = u.fullname || 'Yazar';
+            const displayName = u.fullname || u.username || 'Yazar';
+            document.getElementById('sidebar-name').innerText = displayName;
             document.getElementById('sidebar-title').innerText = u.job_title || 'Ünvan Yok';
+            
+            const welcomeEl = document.getElementById('welcome-name');
+            if (welcomeEl) welcomeEl.innerText = displayName;
+
             if (u.avatar_url) {
                 document.getElementById('sidebar-avatar').src = u.avatar_url;
-                document.getElementById('welcome-name').innerText = u.fullname;
             }
         }
 

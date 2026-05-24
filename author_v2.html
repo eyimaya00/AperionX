@@ -1597,10 +1597,7 @@
                 // Keep global variable in sync
                 Object.assign(user, freshUser);
                 localStorage.setItem('user', JSON.stringify(user));
-                // Assuming author_v2 doesn't have updateSidebarProfile, or we need to check if it does.
-                // Wait, it might have it or just needs to be refreshed.
-                // It does not have an explicit `updateSidebarProfile` function in my grep. 
-                // But it might have elements to update.
+                updateSidebarProfile(user);
             }
         }).catch(err => {
             console.error('Failed to refresh user profile:', err);
@@ -2359,11 +2356,15 @@
 
         function updateSidebarProfile(u) {
             if (!u) return;
-            document.getElementById('sidebar-name').innerText = u.fullname || 'Yazar';
+            const displayName = u.fullname || u.username || 'Yazar';
+            document.getElementById('sidebar-name').innerText = displayName;
             document.getElementById('sidebar-title').innerText = u.job_title || 'Ünvan Yok';
+            
+            const welcomeEl = document.getElementById('welcome-name');
+            if (welcomeEl) welcomeEl.innerText = displayName;
+
             if (u.avatar_url) {
                 document.getElementById('sidebar-avatar').src = u.avatar_url;
-                document.getElementById('welcome-name').innerText = u.fullname;
             }
         }
 
