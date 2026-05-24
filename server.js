@@ -2660,9 +2660,21 @@ app.get('/api/auth/google/callback', async (req, res) => {
 });
 
 // NEW: Validate Token / Get Current User
-app.get('/api/me', authenticateToken, (req, res) => {
-    // If authenticateToken passes, req.user is set
-    res.json({ user: req.user });
+app.get('/api/me', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title FROM users WHERE id = ?', [req.user.id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        // script_v105.js expects the response to be the user object directly: `const user = await res.json();`
+        // We will return the user object directly, but also include `{ user: ... }` wrapper just in case other scripts expect it.
+        // Wait, script_v105.js does `const user = await res.json(); user.fullname...`. It expects the user object at the root.
+        res.json({
+            ...rows[0],
+            user: rows[0] // Backward compatibility for scripts expecting data.user
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 // Public: Get all published articles with filters

@@ -1591,6 +1591,10 @@
     </button>
 
     <script>
+        // Ensure API_URL is defined even if script_v105.js hasn't executed yet
+        if (typeof window.API_URL === 'undefined') {
+            window.API_URL = '/api';
+        }
 
         console.log('Author Scripts Starting...');
         const token = localStorage.getItem('token');
@@ -1625,6 +1629,33 @@
         // === UNIFIED INIT — Single DOMContentLoaded ===
         // =============================================
         document.addEventListener('DOMContentLoaded', () => {
+            if (!token || !user || user.role !== 'author') {
+                window.location.href = '/?login=true';
+                return;
+            }
+
+            // Fetch fresh user data from server on load
+            fetch(`${window.API_URL || '/api'}/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => {
+                if (res.ok) return res.json();
+                throw new Error('Invalid token');
+            }).then(freshData => {
+                const freshUser = freshData.user || freshData;
+                if (freshUser) {
+                    user = freshUser;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    updateSidebarProfile(user);
+                    if (user.fullname) {
+                        const welcomeEl = document.getElementById('welcome-name');
+                        if (welcomeEl) welcomeEl.textContent = user.fullname;
+                    }
+                }
+            }).catch(err => {
+                console.error('Failed to refresh user profile:', err);
+                // If token is invalid, redirect will happen in other fetch calls or here
+            });
+            
             // --- Core Data Loading ---
             loadSettings();
             loadMyArticles();
@@ -1735,6 +1766,9 @@
                     // Handle potential undefined from older server instance
                     if (document.getElementById('stat-likes')) document.getElementById('stat-likes').textContent = (data.likes !== undefined) ? data.likes : '-';
                     if (document.getElementById('stat-comments')) document.getElementById('stat-comments').textContent = (data.comments !== undefined) ? data.comments : '-';
+                } else if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/?login=true';
                 }
             } catch (e) { console.error('Stats load error', e); }
         }
@@ -1758,6 +1792,9 @@
                     if (commentsEl) commentsEl.textContent = data.totalComments;
 
                     if (!silent) renderAnalyticsTable(analyticsData);
+                } else if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/?login=true';
                 }
 
                 // Fetch recent comments

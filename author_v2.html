@@ -1585,6 +1585,27 @@
 
         if (!token || !user) window.location.href = 'index.html';
 
+        // Fetch fresh user data from server on load
+        fetch(`${window.API_URL || '/api'}/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).then(res => {
+            if (res.ok) return res.json();
+            throw new Error('Invalid token');
+        }).then(freshData => {
+            const freshUser = freshData.user || freshData;
+            if (freshUser) {
+                // Keep global variable in sync
+                Object.assign(user, freshUser);
+                localStorage.setItem('user', JSON.stringify(user));
+                // Assuming author_v2 doesn't have updateSidebarProfile, or we need to check if it does.
+                // Wait, it might have it or just needs to be refreshed.
+                // It does not have an explicit `updateSidebarProfile` function in my grep. 
+                // But it might have elements to update.
+            }
+        }).catch(err => {
+            console.error('Failed to refresh user profile:', err);
+        });
+
         // Initial Load moved to bottom
 
         // Navigation Helpers
@@ -1611,6 +1632,9 @@
                     // Handle potential undefined from older server instance
                     if (document.getElementById('stat-likes')) document.getElementById('stat-likes').textContent = (data.likes !== undefined) ? data.likes : '-';
                     if (document.getElementById('stat-comments')) document.getElementById('stat-comments').textContent = (data.comments !== undefined) ? data.comments : '-';
+                } else if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/?login=true';
                 }
             } catch (e) { console.error('Stats load error', e); }
         }
@@ -1634,6 +1658,9 @@
                     if (commentsEl) commentsEl.textContent = data.totalComments;
 
                     if (!silent) renderAnalyticsTable(analyticsData);
+                } else if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/?login=true';
                 }
 
                 // Fetch recent comments
