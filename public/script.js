@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initCategoryScroll(); // Initialize Category Scroll Logic
     initHeroScroll(); // Force Scroll Logic
 
-    if (window.location.pathname.includes('articles.html')) {
+    if (window.location.pathname.includes('/articles')) {
         loadArticlesPage();
     }
 
-    if (window.location.pathname.includes('article-detail.html') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/')) {
+    if (window.location.pathname.includes('/article-detail') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/')) {
         loadArticleDetail();
     }
 
@@ -169,10 +169,10 @@ async function loadHero() {
         let titleToUse = null;
         let descToUse = null;
 
-        if (window.location.pathname.includes('articles.html')) {
+        if (window.location.pathname.includes('/articles')) {
             if (settings.articles_hero_title) titleToUse = settings.articles_hero_title;
             if (settings.articles_hero_desc) descToUse = settings.articles_hero_desc;
-        } else if (window.location.pathname.includes('about.html')) {
+        } else if (window.location.pathname.includes('/about')) {
             if (settings.about_hero_title) titleToUse = settings.about_hero_title;
             if (settings.about_hero_desc) descToUse = settings.about_hero_desc;
         } else {
@@ -620,7 +620,7 @@ async function loadSettings() {
         // --- GLOBAL SEO / SOCIAL SHARE UPDATE ---
         // If we are NOT on an article detail page (which handles its own tags),
         // set the default site image/logo for social sharing.
-        if (!window.location.pathname.includes('article-detail.html')) {
+        if (!window.location.pathname.includes('/article-detail')) {
             const logoUrl = settings.site_logo
                 ? (settings.site_logo.startsWith('http') ? settings.site_logo : window.location.origin + '/' + settings.site_logo.replace(/^\//, ''))
                 : window.location.origin + '/uploads/logo.png';
@@ -1692,7 +1692,7 @@ async function loadArticleDetail() {
         // e.g. /makale/slug-name
         const pathParts = window.location.pathname.split('/');
         const possibleSlug = pathParts[pathParts.length - 1]; // naive check
-        if (!possibleSlug || possibleSlug === 'article-detail.html') {
+        if (!possibleSlug || possibleSlug === 'article-detail') {
             window.location.href = "//articles";
             return;
         }
