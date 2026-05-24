@@ -1583,7 +1583,7 @@
         // Trash State
         let isTrashView = false;
 
-        if (!token || !user) window.location.href = "/index';
+        if (!token || !user) window.location.href = '/index';
 
         // Fetch fresh user data from server on load
         fetch(`${window.API_URL || '/api'}/me`, {
@@ -2595,7 +2595,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = "/index';
+            localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/index';
         }
 
         // Notifications Logic

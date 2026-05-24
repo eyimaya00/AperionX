@@ -1622,7 +1622,7 @@
 
         if (!token || !user) {
             console.error('Auth Check Failed:', { token, user });
-            window.location.href = "/index?openLogin=true';
+            window.location.href = '/index?openLogin=true';
         }
 
         // =============================================
@@ -2896,7 +2896,7 @@
             localStorage.removeItem('user_role'); // Just in case
 
             // Redirect to index
-            window.location.href = "/index';
+            window.location.href = '/index';
         }
 
         // [CLEANED] Third DOMContentLoaded (logout) removed — merged into unified init

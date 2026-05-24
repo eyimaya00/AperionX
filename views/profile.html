@@ -561,7 +561,7 @@
             async function initProfile() {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    window.location.href = "/index';
+                    window.location.href = '/index';
                     return;
                 }
 
@@ -598,7 +598,7 @@
                         showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'error');
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
-                        setTimeout(() => window.location.href = "/index', 2000);
+                        setTimeout(() => window.location.href = '/index', 2000);
                         return;
                     }
 
@@ -652,7 +652,7 @@
                         showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'error');
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
-                        setTimeout(() => window.location.href = "/index', 2000);
+                        setTimeout(() => window.location.href = '/index', 2000);
                         return;
                     }
 
