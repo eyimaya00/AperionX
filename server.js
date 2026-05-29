@@ -3591,13 +3591,6 @@ app.get('/sitemap.xml', async (req, res) => {
         // Fetch updated_at for accurate SEO "lastmod"
         const [articles] = await pool.query("SELECT id, slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
-        // NEW: Fetch Authors
-        const [authors] = await pool.query(`
-            SELECT DISTINCT u.username, u.created_at 
-            FROM users u 
-            JOIN articles a ON u.id = a.author_id 
-            WHERE a.status = 'published' AND u.username IS NOT NULL
-        `);
 
         // Use dynamic host but prefer https://www.aperionx.com if host header matches
         let baseUrl = `https://${req.get('host')}`;
@@ -3628,16 +3621,6 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `
     <url>
         <loc>${baseUrl}/articles.html?category=${encodeURIComponent(cat.name)}</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-        });
-
-        // Authors
-        authors.forEach(auth => {
-            xml += `
-    <url>
-        <loc>${baseUrl}/author-profile.html?u=${encodeURIComponent(auth.username)}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>`;
