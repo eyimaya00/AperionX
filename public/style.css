@@ -5096,7 +5096,7 @@ i[class*=" ph"] {
 #global-loader {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 999999 !important;
     background-color: rgba(15, 23, 42, 0.85); /* Semi-transparent modern dark */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
