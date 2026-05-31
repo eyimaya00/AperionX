@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initSearch(); // Initialize Search
     initLanguageSwitcher(); // Add Language Support
-    loadUserInfo();
+    
     setupMobileMenu();
     updateActiveNavLink();
 
@@ -1412,19 +1412,41 @@ function checkAuthStatus() {
 
     if (user && token) {
         authButtons.forEach(container => {
-            let titleAttr = 'Profilime Git';
-            if (user.role === 'admin') titleAttr = 'Admin Paneli';
-            else if (user.role === 'author') titleAttr = 'Yazar Paneli';
-            else if (user.role === 'editor') titleAttr = 'Editör Paneli';
-
-            // SIMPLE, DIRECT ONCLICK - NO EVENT LISTENERS
-            container.innerHTML = `
-                <button type="button" class="btn btn-login" onclick="window.navigateToDashboard();" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <span class="user-name">${escapeHtml(user.fullname || user.username || 'Üye')}</span>
-                    <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
-                </button>
-                <button type="button" class="btn btn-login btn-sm" onclick="window.logout();">Çıkış</button>
-            `;
+            if (container.classList.contains('mobile-auth')) {
+                container.innerHTML = `
+                    <div class="mobile-user-profile">
+                        <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User">
+                        <div class="mobile-user-info">
+                            <span class="name">${escapeHtml(user.fullname || user.username)}</span>
+                            <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-user-links">
+                        ${user.role === 'admin' ? '<a href="/admin" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                        ${user.role === 'author' || user.role === 'admin' ? '<a href="/author" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                        ${user.role === 'editor' ? '<a href="/editor" class="btn btn-outline"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
+                        <a href="/profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
+                        <button onclick="window.logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="user-dropdown" style="position:relative;">
+                        <button class="user-btn" onclick="toggleUserDropdown(event)">
+                            <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" class="user-avatar-small">
+                            <span>${escapeHtml((user.fullname || user.username || '').split(' ')[0] || 'Üye')}</span>
+                            <i class="ph-bold ph-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="user-dropdown-menu">
+                            ${user.role === 'admin' ? '<a href="/admin"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                            ${(user.role === 'author' || user.role === 'admin') ? '<a href="/author"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                            ${user.role === 'editor' ? '<a href="/editor"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
+                            <a href="/profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
+                            <a href="#" onclick="window.logout(); return false;"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
+                        </div>
+                    </div>
+                `;
+            }
 
             // Add Profile/Dashboard Link to Nav if not present
             const navMenu = document.querySelector('.nav-menu');
@@ -2714,68 +2736,6 @@ function initLanguageSwitcher_OLD() {
 
 
 // --- Restore: Load User Info ---
-async function loadUserInfo() {
-    const token = localStorage.getItem('token');
-    const userMenuContainer = document.getElementById('user-menu-container');
-    const mobileAuth = document.querySelector('.mobile-auth');
-
-    if (token) {
-        try {
-            const res = await fetch(`${API_URL}/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                const user = await res.json();
-
-                // Desktop Header
-                if (userMenuContainer) {
-                    userMenuContainer.innerHTML = `
-                        <div class="user-dropdown">
-                            <button class="user-btn" onclick="toggleUserDropdown()">
-                                <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User" class="user-avatar-small">
-                                <span>${user.fullname.split(' ')[0]}</span>
-                                <i class="ph-bold ph-caret-down"></i>
-                            </button>
-                            <div class="dropdown-menu" id="user-dropdown-menu">
-                                ${user.role === 'admin' ? '<a href="admin.html"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
-                                ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
-                                <a href="profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
-                                <a href="#" onclick="logout()"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Mobile Menu
-                if (mobileAuth) {
-                    mobileAuth.innerHTML = `
-                        <div class="mobile-user-profile">
-                            <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User">
-                            <div class="mobile-user-info">
-                                <span class="name">${user.fullname}</span>
-                                <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'author' ? 'Yazar' : 'Üye')}</span>
-                            </div>
-                        </div>
-                        <div class="mobile-user-links">
-                            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
-                            ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
-                            <a href="profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
-                            <button onclick="logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
-                        </div>
-                    `;
-                }
-            } else {
-                localStorage.removeItem('token'); // Invalid token
-            }
-        } catch (e) {
-            console.error('User info load error:', e);
-        }
-    } else {
-        // Not logged in (Default state is already static HTML, but ensure correctness)
-    }
-}
-
 function toggleUserDropdown() {
     const menu = document.getElementById('user-dropdown-menu');
     if (menu) menu.classList.toggle('active');
