@@ -473,9 +473,7 @@ app.get('/experiment-detail.html', (req, res) => {
     res.redirect(301, '/articles.html');
 });
 
-app.get('/experiments.html', (req, res) => {
-    res.redirect(301, '/articles.html');
-});
+// Redirect removed so views/experiments.html can be served
 
 // === RSS FEED ===
 app.get('/feed.xml', async (req, res) => {
