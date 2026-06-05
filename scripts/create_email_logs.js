@@ -19,7 +19,7 @@ async function createEmailLogsTable() {
                 article_id INT,
                 subject VARCHAR(255) NOT NULL,
                 recipient_count INT DEFAULT 0,
-                status ENUM('sent', 'failed') DEFAULT 'sent',
+                status ENUM('sent', 'failed', 'partial') DEFAULT 'sent',
                 sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 error_message TEXT
             )

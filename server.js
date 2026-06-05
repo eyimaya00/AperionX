@@ -4029,8 +4029,7 @@ async function generateNewsletterHTML(articleId) {
     `;
 }
 
-// Helper: Send to Recipients
-// Helper: Send to Recipients (Individual Loop)
+// Helper: Send to Recipients (Individual Loop with Rate-Limiting & Backoff)
 async function sendNewsletterToRecipients(articleId, recipientEmails) {
     if (recipientEmails.length === 0) return;
 
@@ -4052,37 +4051,59 @@ async function sendNewsletterToRecipients(articleId, recipientEmails) {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
         },
-        tls: { rejectUnauthorized: false }
+        tls: { rejectUnauthorized: false },
+        pool: true,           // Use connection pooling
+        maxConnections: 1,    // Only 1 connection at a time
+        maxMessages: 10,      // Max 10 messages per connection
+        rateDelta: 2000,      // Min 2 seconds between messages
+        rateLimit: 1           // Max 1 message per rateDelta
     });
 
     console.log(`[NEWSLETTER] Starting batch send to ${recipientEmails.length} recipients...`);
 
     let successCount = 0;
     let failCount = 0;
+    let consecutiveFailures = 0;
+    const MAX_CONSECUTIVE_FAILURES = 5; // Circuit breaker: stop after 5 failures in a row
 
-    // Send individually
+    // Send individually with rate limiting
     for (const recipient of recipientEmails) {
+        // Circuit breaker: if too many consecutive failures, abort
+        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+            console.error(`[NEWSLETTER] ⛔ Circuit breaker triggered after ${MAX_CONSECUTIVE_FAILURES} consecutive failures. Aborting batch.`);
+            break;
+        }
+
         try {
             await transporter.sendMail({
                 from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
                 to: recipient,
-                // No BCC
                 subject: `✨ Yeni Makale: ${articleTitle}`,
                 html: htmlContent,
                 attachments: [{ filename: 'logo.png', path: logoPath, cid: 'unique-logo-id' }]
             });
             successCount++;
-            // Small delay to be polite to SMTP server
-            await new Promise(resolve => setTimeout(resolve, 250));
+            consecutiveFailures = 0; // Reset on success
+            // Polite delay between sends (1.5 seconds)
+            await new Promise(resolve => setTimeout(resolve, 1500));
         } catch (e) {
             console.error(`[NEWSLETTER] Failed to send to ${recipient}: ${e.message}`);
             failCount++;
+            consecutiveFailures++;
+
+            // Exponential backoff on failure (wait longer after each consecutive failure)
+            const backoffMs = Math.min(consecutiveFailures * 3000, 30000); // 3s, 6s, 9s... max 30s
+            console.log(`[NEWSLETTER] Backing off for ${backoffMs / 1000}s after failure...`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
         }
     }
 
     console.log(`[NEWSLETTER] Batch finished. Success: ${successCount}, Fail: ${failCount}`);
 
-    // Log to DB
+    // Close the transporter pool
+    transporter.close();
+
+    // Log to DB - use VARCHAR-safe status values
     const status = failCount === 0 ? 'sent' : (successCount > 0 ? 'partial' : 'failed');
 
     try {
