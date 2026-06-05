@@ -1,109 +1,54 @@
-/**
- * AperionX Veritabanı Yedekleme Scripti
- * Kullanım: node backup_db.js
- * Çıktı: backup_TARIH.sql dosyası oluşturur
- */
-const mysql = require('mysql2/promise');
-const fs = require('fs');
+const { exec } = require('child_process');
 const path = require('path');
-require('dotenv').config();
+const fs = require('fs');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-(async () => {
-    const dbName = process.env.DB_NAME || 'aperionx';
-    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const outputFile = path.join(__dirname, `backup_${timestamp}.sql`);
+const backupDir = path.join(__dirname, '..', 'backups');
 
-    console.log('=== AperionX Veritabanı Yedekleme ===');
-    console.log(`Veritabanı: ${dbName}`);
-    console.log(`Çıktı dosyası: ${outputFile}`);
-    console.log('');
+// Yedekleme klasörünü oluştur
+if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir);
+}
 
-    const pool = mysql.createPool({
-        host: process.env.DB_HOST || '127.0.0.1',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASS || '',
-        database: dbName
-    });
+// Dosya adını tarih ve saat ile oluştur (Örn: yedek_2026-06-05_14-30.sql)
+const date = new Date();
+const timestamp = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}`;
+const fileName = `yedek_${timestamp}.sql`;
+const filePath = path.join(backupDir, fileName);
 
-    let sql = '';
+const dbUser = process.env.DB_USER;
+const dbPass = process.env.DB_PASS || process.env.DB_PASSWORD;
+const dbName = process.env.DB_NAME;
 
-    try {
-        // Header
-        sql += `-- AperionX Veritabanı Yedeği\n`;
-        sql += `-- Tarih: ${new Date().toISOString()}\n`;
-        sql += `-- Veritabanı: ${dbName}\n\n`;
-        sql += `SET FOREIGN_KEY_CHECKS=0;\n`;
-        sql += `SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";\n\n`;
+// mysqldump komutu (şifreyi komut satırından geçirir)
+const dumpCommand = `mysqldump -u ${dbUser} -p"${dbPass}" ${dbName} > ${filePath}`;
 
-        // Tabloları al
-        const [tables] = await pool.query('SHOW TABLES');
-        const tableKey = `Tables_in_${dbName}`;
+console.log(`[YEDEKLEME BAŞLADI] ${fileName} oluşturuluyor...`);
 
-        console.log(`${tables.length} tablo bulundu.\n`);
-
-        for (const tableRow of tables) {
-            const tableName = tableRow[tableKey];
-            console.log(`Yedekleniyor: ${tableName}...`);
-
-            // CREATE TABLE ifadesi
-            const [createResult] = await pool.query(`SHOW CREATE TABLE \`${tableName}\``);
-            const createSQL = createResult[0]['Create Table'];
-            sql += `-- ----------------------------\n`;
-            sql += `-- Tablo: ${tableName}\n`;
-            sql += `-- ----------------------------\n`;
-            sql += `DROP TABLE IF EXISTS \`${tableName}\`;\n`;
-            sql += `${createSQL};\n\n`;
-
-            // Verileri al
-            const [rows] = await pool.query(`SELECT * FROM \`${tableName}\``);
-
-            if (rows.length > 0) {
-                const columns = Object.keys(rows[0]);
-                const colList = columns.map(c => `\`${c}\``).join(', ');
-
-                // Her 100 satırda bir INSERT yaz (performans için)
-                for (let i = 0; i < rows.length; i += 100) {
-                    const batch = rows.slice(i, i + 100);
-                    const values = batch.map(row => {
-                        const vals = columns.map(col => {
-                            const val = row[col];
-                            if (val === null) return 'NULL';
-                            if (val instanceof Date) return `'${val.toISOString().slice(0, 19).replace('T', ' ')}'`;
-                            if (typeof val === 'number') return val;
-                            // Escape string
-                            const escaped = String(val)
-                                .replace(/\\/g, '\\\\')
-                                .replace(/'/g, "\\'")
-                                .replace(/\n/g, '\\n')
-                                .replace(/\r/g, '\\r')
-                                .replace(/\t/g, '\\t');
-                            return `'${escaped}'`;
-                        });
-                        return `(${vals.join(', ')})`;
-                    }).join(',\n');
-
-                    sql += `INSERT INTO \`${tableName}\` (${colList}) VALUES\n${values};\n\n`;
-                }
-
-                console.log(`  ✅ ${rows.length} satır yedeklendi`);
-            } else {
-                console.log(`  ⚪ Boş tablo`);
-            }
-        }
-
-        sql += `SET FOREIGN_KEY_CHECKS=1;\n`;
-
-        // Dosyaya yaz
-        fs.writeFileSync(outputFile, sql, 'utf8');
-
-        const sizeKB = (fs.statSync(outputFile).size / 1024).toFixed(1);
-        console.log(`\n=== YEDEKLEME TAMAMLANDI ===`);
-        console.log(`Dosya: ${outputFile}`);
-        console.log(`Boyut: ${sizeKB} KB`);
-
-    } catch (e) {
-        console.error('HATA:', e.message);
-    } finally {
-        await pool.end();
+exec(dumpCommand, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`[HATA] Yedekleme başarısız: ${error.message}`);
+        return;
     }
-})();
+    console.log(`[BAŞARILI] Veritabanı yedeği alındı: ${filePath}`);
+
+    // İsteğe bağlı: Eski yedekleri silme (Sadece son 7 yedeği tutar)
+    cleanOldBackups();
+});
+
+function cleanOldBackups() {
+    fs.readdir(backupDir, (err, files) => {
+        if (err) return;
+        const sqlFiles = files.filter(f => f.endsWith('.sql')).sort().reverse();
+        
+        // 7'den fazla yedek varsa eskileri sil
+        if (sqlFiles.length > 7) {
+            const filesToDelete = sqlFiles.slice(7);
+            filesToDelete.forEach(file => {
+                fs.unlink(path.join(backupDir, file), err => {
+                    if (!err) console.log(`[TEMİZLİK] Eski yedek silindi: ${file}`);
+                });
+            });
+        }
+    });
+}
