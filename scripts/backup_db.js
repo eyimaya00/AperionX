@@ -16,12 +16,13 @@ const timestamp = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
 const fileName = `yedek_${timestamp}.sql`;
 const filePath = path.join(backupDir, fileName);
 
+const dbHost = process.env.DB_HOST || '127.0.0.1';
 const dbUser = process.env.DB_USER;
 const dbPass = process.env.DB_PASS || process.env.DB_PASSWORD;
 const dbName = process.env.DB_NAME;
 
-// mysqldump komutu (şifreyi komut satırından geçirir)
-const dumpCommand = `mysqldump -u ${dbUser} -p"${dbPass}" ${dbName} > ${filePath}`;
+// mysqldump komutu (-h ile TCP üzerinden bağlanmaya zorlar, socket hatasını aşar)
+const dumpCommand = `mysqldump -h ${dbHost} -u ${dbUser} -p"${dbPass}" ${dbName} > ${filePath}`;
 
 console.log(`[YEDEKLEME BAŞLADI] ${fileName} oluşturuluyor...`);
 
