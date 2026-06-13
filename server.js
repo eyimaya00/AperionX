@@ -2480,36 +2480,40 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // Get all articles with their view counts, like counts AND COMMENT counts
-        const [articles] = await pool.query(`
+        // Get all articles and experiments with their view counts, like counts AND COMMENT counts
+        const [items] = await pool.query(`
             SELECT 
-                a.id, 
-                a.title, 
-                a.created_at, 
-                a.views, 
+                a.id, a.title, a.created_at, a.views, 'article' as type,
                 (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as likes,
                 (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comments
             FROM articles a
             WHERE a.author_id = ? AND a.status = 'published'
-            ORDER BY a.created_at DESC
-        `, [userId]);
+            UNION ALL
+            SELECT 
+                e.id, e.title, e.created_at, e.views, 'experiment' as type,
+                0 as likes,
+                0 as comments
+            FROM experiments e
+            WHERE e.author_id = ? AND e.status = 'published' AND e.deleted_at IS NULL
+            ORDER BY created_at DESC
+        `, [userId, userId]);
 
         // Calculate totals
         let totalViews = 0;
         let totalLikes = 0;
         let totalComments = 0;
 
-        articles.forEach(art => {
-            totalViews += art.views;
-            totalLikes += art.likes;
-            totalComments += art.comments;
+        items.forEach(item => {
+            totalViews += item.views;
+            totalLikes += item.likes;
+            totalComments += item.comments;
         });
 
         res.json({
             totalViews,
             totalLikes,
             totalComments,
-            articles
+            articles: items
         });
     } catch (e) {
         res.status(500).send(e.toString());
