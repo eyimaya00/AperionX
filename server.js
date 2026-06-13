@@ -793,9 +793,14 @@ async function ensureSchema() {
                 approved_by INT,
                 views INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
                 FOREIGN KEY (author_id) REFERENCES users(id)
             )
         `);
+
+        // Add deleted_at to existing tables if missing (Soft Delete support)
+        try { await pool.query('ALTER TABLE experiments ADD COLUMN deleted_at TIMESTAMP NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN deleted_at TIMESTAMP NULL'); } catch(e) {}
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS experiment_authors (
@@ -1936,15 +1941,13 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     res.json({ message: 'Updated' });
 });
 
-// === EXPERIMENT AUTHOR API'S ===
-
-// 1. Get My Experiments
+// === EXPERIMENTS AUTHOR API'S ===
+// 1. Get Author's Experiments
 app.get('/api/author/experiments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, title, slug, category, status, views, created_at, image_url, rejection_reason
-            FROM experiments
-            WHERE author_id = ?
+            SELECT * FROM experiments 
+            WHERE author_id = ? AND deleted_at IS NULL 
             ORDER BY created_at DESC
         `, [req.user.id]);
         res.json(rows);
@@ -2125,7 +2128,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     res.json({ message: 'Updated' });
 });
 
-// 4. Delete Experiment (DELETE)
+// 4. Delete Experiment (Soft Delete)
 app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
     const experimentId = req.params.id;
     try {
@@ -2133,8 +2136,52 @@ app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
+        await pool.query('UPDATE experiments SET deleted_at = NOW() WHERE id = ?', [experimentId]);
+        res.json({ message: 'Moved to trash' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 4.1. Get Trash Experiments
+app.get('/api/author/trash', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT * FROM experiments 
+            WHERE author_id = ? AND deleted_at IS NOT NULL 
+            ORDER BY deleted_at DESC
+        `, [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 4.2 Restore from Trash
+app.put('/api/experiments/:id/restore', authenticateToken, async (req, res) => {
+    const experimentId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin') return res.sendStatus(403);
+
+        await pool.query('UPDATE experiments SET deleted_at = NULL WHERE id = ?', [experimentId]);
+        res.json({ message: 'Restored from trash' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 4.3 Force Delete (Permanent)
+app.delete('/api/experiments/:id/force', authenticateToken, async (req, res) => {
+    const experimentId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin') return res.sendStatus(403);
+
         await pool.query('DELETE FROM experiments WHERE id = ?', [experimentId]);
-        res.json({ message: 'Deleted' });
+        res.json({ message: 'Permanently deleted' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -2410,10 +2457,17 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             WHERE a.author_id = ?
         `, [userId]);
 
+        // Experiment stats
+        const [expPublishedRes] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE author_id = ? AND status = 'published' AND deleted_at IS NULL", [userId]);
+        const [expPendingRes] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE author_id = ? AND status = 'pending' AND deleted_at IS NULL", [userId]);
+        const [expViewsRes] = await pool.query("SELECT SUM(views) as count FROM experiments WHERE author_id = ? AND status = 'published' AND deleted_at IS NULL", [userId]);
+
         res.json({
             published: published[0].count,
             pending: pending[0].count,
-            views: views[0].count || 0,
+            expPublished: expPublishedRes[0].count,
+            expPending: expPendingRes[0].count,
+            views: (views[0].count || 0) + (expViewsRes[0].count || 0), // Combined views
             likes: likes[0].count || 0,
             comments: comments[0].count || 0
         });
