@@ -2460,7 +2460,7 @@ async function loadFrontendCategories() {
         // Fetch Settings & Categories in parallel or sequence
         // Optimized: parallel
         const [catRes, setRes] = await Promise.all([
-            fetch(`${API_URL}/categories`),
+            fetch(window.location.pathname.includes("/experiments") ? `${API_URL}/experiments/categories` : `${API_URL}/categories`),
             fetch(`${API_URL}/settings`)
         ]);
 
@@ -2488,7 +2488,7 @@ async function loadFrontendCategories() {
                 btn.className = 'filter-chip';
                 btn.innerText = cat.name;
                 btn.onclick = function () {
-                    filterPageArticles(cat.name, this);
+                    if (window.location.pathname.includes('/experiments')) { filterPageExperiments(cat.name, this); } else { filterPageArticles(cat.name, this); }
                 };
                 list.appendChild(btn);
             });
