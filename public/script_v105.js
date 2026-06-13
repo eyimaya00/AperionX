@@ -1692,6 +1692,8 @@ if (newsletterForm) {
 
 let pageArticles = [];
 let filteredArticles = [];
+let pageExperiments = [];
+let filteredExperiments = [];
 let currentPage = 1;
 const itemsPerPage = 6;
 
@@ -1868,6 +1870,191 @@ function renderPaginationControls() {
             renderArticlesGrid();
             // Scroll to top of grid
             const grid = document.getElementById('articles-grid');
+            if (grid) {
+                const headerOffset = 150;
+                const elementPosition = grid.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
+        };
+        pagination.appendChild(btn);
+    }
+}
+
+
+
+// --- EXPERIMENTS LISTING --- 
+async function loadExperimentsPage() {
+    console.log('Loading Articles Page...');
+    const grid = document.getElementById('experiments-grid');
+    if (!grid) return; // Not on articles page
+
+    try {
+        // Fetch all published articles
+        const res = await fetch(`${API_URL}/experiments`);
+        if (!res.ok) throw new Error('API Error');
+        pageExperiments = await res.json();
+
+        // Initial Sort (Newest first)
+        pageExperiments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        filteredExperiments = [...pageExperiments];
+
+        // Check URL Params for Category
+        const urlParams = new URLSearchParams(window.location.search);
+        const catParam = urlParams.get('category');
+        if (catParam) {
+            // Activate chip
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(c => {
+                if (c.innerText === catParam) {
+                    c.click(); // Trigger click logic
+                }
+            });
+            // If manual filter needed:
+            filterpageExperiments(catParam, null);
+        } else {
+            // Check URL Params for Search
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                // Pre-fill input if exists
+                const searchInput = document.getElementById('experiment-search-input');
+                if (searchInput) {
+                    searchInput.value = searchParam;
+                }
+                searchpageExperiments(searchParam);
+            } else {
+                renderExperimentsGrid();
+            }
+        }
+
+    } catch (e) {
+        console.error('Experiments Page Error:', e);
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">Hata oluştu: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function filterpageExperiments(category, btnElement) {
+    // UI Update
+    if (btnElement) {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+
+    if (category === 'all') {
+        filteredExperiments = [...pageExperiments];
+    } else {
+        filteredExperiments = pageExperiments.filter(a => a.category === category);
+    }
+
+    currentPage = 1;
+    renderExperimentsGrid();
+}
+
+function searchpageExperiments(query) {
+    const term = query.toLowerCase();
+
+    filteredExperiments = pageExperiments.filter(a =>
+        (a.title && a.title.toLowerCase().includes(term)) ||
+        (a.excerpt && a.excerpt.toLowerCase().includes(term)) ||
+        (a.tags && a.tags.toLowerCase().includes(term))
+    );
+
+    currentPage = 1;
+    renderExperimentsGrid();
+}
+
+function renderExperimentsGrid() {
+    const grid = document.getElementById('experiments-grid');
+    const pagination = document.getElementById('pagination-container');
+
+    if (!grid) return;
+
+    // Filter Logic
+    // If we are just rendering page, we rely on filteredExperiments state
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const toRender = filteredExperiments.slice(start, end);
+
+    // Scroll to top of grid smoothly if it's a page change (optional, but nice)
+    // if (currentPage > 1) { ... }
+
+    grid.innerHTML = ''; // Always clear for page replacement
+
+    if (filteredExperiments.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:60px; color:#64748b; font-size:1.1rem;">Aradığınız kriterlere uygun makale bulunamadı.</div>`;
+        if (pagination) pagination.style.display = 'none';
+        return;
+    }
+
+    toRender.forEach(article => {
+        const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
+        const safeTitle = escapeHtml(article.title);
+        const safecategory = escapeHtml(article.category || 'Genel');
+        const safeAuthor = escapeHtml(article.author_name || 'Yazar');
+
+        const html = `
+            <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
+                <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
+                <div class="card-overlay" style="pointer-events: none;"></div>
+                
+                <div class="card-top-content" style="pointer-events: none;">
+                     <span class="category-badge-glass">${safecategory}</span>
+                </div>
+                
+                <div class="card-bottom-content" style="pointer-events: none;">
+                    <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
+            <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                ${(article.authors && article.authors.length > 0)
+                ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        ${article.authors.map((a) => `
+                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                        `).join('')}
+                       </div>`
+                : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                        ${safeAuthor}
+                       </a>`
+            }
+            </div>
+                </div>
+
+                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Deneyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
+            </article>
+        `;
+        grid.innerHTML += html;
+    });
+
+    // Numeric Pagination Logic
+    renderPaginationControls();
+}
+
+function renderPaginationControls() {
+    const pagination = document.getElementById('pagination-container');
+    if (!pagination) return;
+
+    const totalPages = Math.ceil(filteredExperiments.length / itemsPerPage);
+
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    pagination.style.display = 'flex';
+    pagination.innerHTML = '';
+
+    // Previous
+    // const prevBtn = document.createElement('button'); ... (Optional)
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.onclick = () => {
+            currentPage = i;
+            renderExperimentsGrid();
+            // Scroll to top of grid
+            const grid = document.getElementById('experiments-grid');
             if (grid) {
                 const headerOffset = 150;
                 const elementPosition = grid.getBoundingClientRect().top;

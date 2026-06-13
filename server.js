@@ -1601,6 +1601,67 @@ app.get('/api/articles', async (req, res) => {
     }
 });
 
+// Public Experiments Endpoint
+app.get('/api/experiments', async (req, res) => {
+    try {
+        const cacheKey = 'experiments';
+        const cached = getCachedData(cacheKey);
+        if (cached) return res.json(cached);
+
+        // 1. Fetch Experiments
+        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
+
+        if (experiments.length > 0) {
+            const expIds = experiments.map(e => e.id);
+
+            // 2. Fetch Authors for these experiments
+            const [allAuthors] = await pool.query(`
+                SELECT ea.experiment_id, u.id, u.fullname, u.username 
+                FROM experiment_authors ea
+                JOIN users u ON ea.user_id = u.id
+                WHERE ea.experiment_id IN (?)
+                ORDER BY ea.order_index ASC
+             `, [expIds]);
+
+            // 3. Map authors to experiments
+            const authorMap = {};
+            allAuthors.forEach(row => {
+                if (!authorMap[row.experiment_id]) authorMap[row.experiment_id] = [];
+                authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+            });
+
+            // 4. Attach to experiments
+            experiments.forEach(e => {
+                e.authors = authorMap[e.id] || [];
+                if (e.authors.length > 0) {
+                    e.author_name = e.authors[0].fullname; 
+                    e.author_username = e.authors[0].username;
+                }
+            });
+
+            // Legacy fallback
+            const legacyIds = experiments.filter(e => e.authors.length === 0 && e.author_id).map(e => e.author_id);
+            if (legacyIds.length > 0) {
+                const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                const legacyMap = {};
+                legacyUsers.forEach(u => legacyMap[u.id] = u);
+                experiments.forEach(e => {
+                    if (e.authors.length === 0 && e.author_id && legacyMap[e.author_id]) {
+                        e.author_name = legacyMap[e.author_id].fullname;
+                        e.author_username = legacyMap[e.author_id].username;
+                    }
+                });
+            }
+        }
+
+        setCachedData(cacheKey, experiments);
+        res.json(experiments);
+    } catch (e) {
+        console.error('API Experiments Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
 // Get My Articles (Moved to /api/author namespace to avoid collision)
 app.get('/api/author/articles', authenticateToken, async (req, res) => {
     try {
