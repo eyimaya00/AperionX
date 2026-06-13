@@ -1841,7 +1841,7 @@ function renderArticlesGrid() {
     });
 
     // Numeric Pagination Logic
-    renderPaginationControls();
+    renderExperimentPaginationControls();
 }
 
 function renderPaginationControls() {
@@ -1911,7 +1911,7 @@ async function loadExperimentsPage() {
                 }
             });
             // If manual filter needed:
-            filterpageExperiments(catParam, null);
+            filterPageExperiments(catParam, null);
         } else {
             // Check URL Params for Search
             const searchParam = urlParams.get('search');
@@ -1921,7 +1921,7 @@ async function loadExperimentsPage() {
                 if (searchInput) {
                     searchInput.value = searchParam;
                 }
-                searchpageExperiments(searchParam);
+                searchPageExperiments(searchParam);
             } else {
                 renderExperimentsGrid();
             }
@@ -1933,7 +1933,7 @@ async function loadExperimentsPage() {
     }
 }
 
-function filterpageExperiments(category, btnElement) {
+function filterPageExperiments(category, btnElement) {
     // UI Update
     if (btnElement) {
         document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
@@ -1950,7 +1950,7 @@ function filterpageExperiments(category, btnElement) {
     renderExperimentsGrid();
 }
 
-function searchpageExperiments(query) {
+function searchPageExperiments(query) {
     const term = query.toLowerCase();
 
     filteredExperiments = pageExperiments.filter(a =>
@@ -2026,10 +2026,10 @@ function renderExperimentsGrid() {
     });
 
     // Numeric Pagination Logic
-    renderPaginationControls();
+    renderExperimentPaginationControls();
 }
 
-function renderPaginationControls() {
+function renderExperimentPaginationControls() {
     const pagination = document.getElementById('pagination-container');
     if (!pagination) return;
 
