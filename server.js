@@ -248,6 +248,32 @@ async function getArticleAuthors(pool, articleId) {
     }
 }
 
+async function getExperimentAuthors(pool, experimentId) {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title 
+            FROM experiment_authors ea
+            JOIN users u ON ea.user_id = u.id
+            WHERE ea.experiment_id = ?
+            ORDER BY ea.order_index ASC, ea.created_at ASC
+        `, [experimentId]);
+
+        // Fallback: if no authors in join table, check experiments.author_id
+        if (rows.length === 0) {
+            const [exp] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+            if (exp.length > 0 && exp[0].author_id) {
+                const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [exp[0].author_id]);
+                return u;
+            }
+        }
+        return rows;
+    } catch (e) {
+        console.error('getExperimentAuthors Error:', e);
+        return [];
+    }
+}
+
+
 // (Experiment helper functions removed)
 
 // === DYNAMIC SEO ROUTES (SSR) ===
@@ -1905,7 +1931,7 @@ app.get('/api/author/experiments', authenticateToken, async (req, res) => {
 // 2. Create Experiment (POST)
 app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
     const body = req.body || {};
-    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url } = body;
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, coAuthors } = body;
     let author_id = req.user.id;
 
     let image_url = null;
@@ -1930,22 +1956,40 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const cleanResults = results ? DOMPurify.sanitize(results) : null;
         const cleanConclusion = conclusion ? DOMPurify.sanitize(conclusion) : null;
         const cleanSafety = safety_notes ? DOMPurify.sanitize(safety_notes) : null;
+        const cleanReferences = references_list ? DOMPurify.sanitize(references_list) : null;
 
         const [insertResult] = await pool.query(
             `INSERT INTO experiments (
                 title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
-                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
-                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences
             ]
         );
 
         const newExperimentId = insertResult.insertId;
 
-        // Add to experiment_authors
-        await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES (?, ?, ?)', [newExperimentId, author_id, 0]);
+        // Add to experiment_authors (owner + co-authors)
+        let authorIdsToInsert = [author_id];
+        if (coAuthors) {
+            try {
+                const parsedCoAuthors = JSON.parse(coAuthors);
+                if (Array.isArray(parsedCoAuthors)) {
+                    parsedCoAuthors.forEach(id => {
+                        if (id && !authorIdsToInsert.includes(parseInt(id))) {
+                            authorIdsToInsert.push(parseInt(id));
+                        }
+                    });
+                }
+            } catch (e) { console.error('Error parsing coAuthors:', e); }
+        }
+
+        const authorValues = authorIdsToInsert.map((uid, index) => [newExperimentId, uid, index]);
+        if (authorValues.length > 0) {
+            await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
+        }
 
         // Send notifications if pending
         if (finalStatus === 'pending') {
@@ -1976,7 +2020,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url } = req.body;
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, coAuthors } = req.body;
 
     let finalStatus = status;
     if (status === 'published' && req.user.role === 'author') {
@@ -1996,15 +2040,16 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (category) { updates.push('category = ?'); params.push(category); }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
     if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
-    if (tags) { updates.push('tags = ?'); params.push(tags); }
+    if (tags !== undefined) { updates.push('tags = ?'); params.push(tags); }
     if (youtube_url !== undefined) { updates.push('youtube_url = ?'); params.push(youtube_url); }
+    if (references_list !== undefined) { updates.push('references_list = ?'); params.push(DOMPurify.sanitize(references_list)); }
 
-    if (objective) { updates.push('objective = ?'); params.push(DOMPurify.sanitize(objective)); }
-    if (materials) { updates.push('materials = ?'); params.push(DOMPurify.sanitize(materials)); }
-    if (procedure_steps) { updates.push('procedure_steps = ?'); params.push(DOMPurify.sanitize(procedure_steps)); }
-    if (results) { updates.push('results = ?'); params.push(DOMPurify.sanitize(results)); }
-    if (conclusion) { updates.push('conclusion = ?'); params.push(DOMPurify.sanitize(conclusion)); }
-    if (safety_notes) { updates.push('safety_notes = ?'); params.push(DOMPurify.sanitize(safety_notes)); }
+    if (objective !== undefined) { updates.push('objective = ?'); params.push(DOMPurify.sanitize(objective)); }
+    if (materials !== undefined) { updates.push('materials = ?'); params.push(DOMPurify.sanitize(materials)); }
+    if (procedure_steps !== undefined) { updates.push('procedure_steps = ?'); params.push(DOMPurify.sanitize(procedure_steps)); }
+    if (results !== undefined) { updates.push('results = ?'); params.push(DOMPurify.sanitize(results)); }
+    if (conclusion !== undefined) { updates.push('conclusion = ?'); params.push(DOMPurify.sanitize(conclusion)); }
+    if (safety_notes !== undefined) { updates.push('safety_notes = ?'); params.push(DOMPurify.sanitize(safety_notes)); }
 
     if (req.files && req.files['image']) {
         updates.push('image_url = ?');
@@ -2028,6 +2073,30 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
             }
         }
     }
+
+    // Update Co-Authors
+    if (coAuthors !== undefined) {
+        try {
+            const parsedCoAuthors = JSON.parse(coAuthors);
+            let authorIdsToInsert = [check[0].author_id]; // Owner always included
+            if (Array.isArray(parsedCoAuthors)) {
+                parsedCoAuthors.forEach(id => {
+                    if (id && !authorIdsToInsert.includes(parseInt(id))) {
+                        authorIdsToInsert.push(parseInt(id));
+                    }
+                });
+            }
+            
+            await pool.query('DELETE FROM experiment_authors WHERE experiment_id = ?', [experimentId]);
+            const authorValues = authorIdsToInsert.map((uid, index) => [experimentId, uid, index]);
+            if (authorValues.length > 0) {
+                await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
+            }
+        } catch (e) {
+            console.error('Error updating coAuthors:', e);
+        }
+    }
+
     res.json({ message: 'Updated' });
 });
 
@@ -2051,10 +2120,18 @@ app.get('/api/experiments/by-id/:id', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM experiments WHERE id = ?', [req.params.id]);
         if (rows.length === 0) return res.status(404).json({ message: 'Experiment not found' });
-        if (rows[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') {
+        
+        // Let co-authors view and edit
+        const [coAuthorsList] = await pool.query('SELECT user_id FROM experiment_authors WHERE experiment_id = ?', [req.params.id]);
+        const isCoAuthor = coAuthorsList.some(a => a.user_id === req.user.id);
+
+        if (rows[0].author_id !== req.user.id && !isCoAuthor && req.user.role !== 'admin' && req.user.role !== 'editor') {
             return res.sendStatus(403);
         }
-        res.json(rows[0]);
+
+        const exp = rows[0];
+        exp.co_authors = await getExperimentAuthors(pool, req.params.id);
+        res.json(exp);
     } catch (e) {
         res.status(500).send(e.toString());
     }
