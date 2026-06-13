@@ -3249,7 +3249,7 @@
                 return;
             }
 
-            let html = \`
+            let html = `
                 <div class="card" style="padding:0; overflow-x:auto; border-radius:16px;">
                     <table style="width:100%; border-collapse:collapse; text-align:left;">
                         <thead>
@@ -3260,27 +3260,27 @@
                             </tr>
                         </thead>
                         <tbody>
-            \`;
+            `;
 
             myTrash.forEach(exp => {
                 const deletedDate = exp.deleted_at ? new Date(exp.deleted_at).toLocaleString('tr-TR') : '-';
-                html += \`
+                html += `
                     <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding:15px 30px; font-weight:600; color:#0f172a;">\${escapeHtml(exp.title)}</td>
-                        <td style="padding:15px 30px; color:#475569;">\${deletedDate}</td>
+                        <td style="padding:15px 30px; font-weight:600; color:#0f172a;">${escapeHtml(exp.title)}</td>
+                        <td style="padding:15px 30px; color:#475569;">${deletedDate}</td>
                         <td style="padding:15px 30px; display:flex; gap:10px; align-items:center;">
-                            <button class="btn btn-secondary-soft" onclick="restoreExperiment(\${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-arrow-counter-clockwise"></i> Geri Al</button>
-                            <button class="btn btn-danger-soft" onclick="forceDeleteExperiment(\${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-trash"></i> Kalıcı Sil</button>
+                            <button class="btn btn-secondary-soft" onclick="restoreExperiment(${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-arrow-counter-clockwise"></i> Geri Al</button>
+                            <button class="btn btn-danger-soft" onclick="forceDeleteExperiment(${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-trash"></i> Kalıcı Sil</button>
                         </td>
                     </tr>
-                \`;
+                `;
             });
 
-            html += \`
+            html += `
                         </tbody>
                     </table>
                 </div>
-            \`;
+            `;
             list.innerHTML = html;
         }
 
