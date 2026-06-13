@@ -1074,9 +1074,6 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('analytics', this)" title="İçerik Detayı">
                 <i class="ph ph-chart-line-up"></i> <span>İçerik Detayı</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-trash', this); loadMyTrash();" title="Çöp Kutusu">
-                <i class="ph ph-trash"></i> <span>Çöp Kutusu</span>
-            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this)" title="Profilim">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
@@ -1150,7 +1147,7 @@
                 </div>
 
                 <!-- Published Experiments -->
-                <div class="stat-card-modern green" onclick="showSection('my-experiments', this)">
+                <div class="stat-card-modern green" onclick="showSection('my-experiments', document.querySelector('a[title=\"Deneylerim\"]'))">
                     <div class="stat-icon-wrap" style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #15803d;">
                         <i class="ph-bold ph-flask"></i>
                     </div>
@@ -1160,39 +1157,38 @@
                     </div>
                 </div>
 
-                <!-- Total Views -->
+                <!-- Okunma -->
                 <div class="stat-card-modern blue" onclick="goToAnalytics()">
                     <div class="stat-icon-wrap">
                         <i class="ph-bold ph-eye"></i>
                     </div>
                     <div>
-                        <h3 class="stat-label">Toplam Okunma</h3>
+                        <h3 class="stat-label">Okunma</h3>
                         <p id="stat-views" class="stat-value">-</p>
                     </div>
                 </div>
 
-                <!-- Total Likes -->
+                <!-- Beğeni -->
                 <div class="stat-card-modern red" onclick="goToLikers()">
                     <div class="stat-icon-wrap">
                         <i class="ph-bold ph-heart"></i>
                     </div>
                     <div>
-                        <h3 class="stat-label">Toplam Beğeni</h3>
+                        <h3 class="stat-label">Beğeni</h3>
                         <p id="stat-likes" class="stat-value">-</p>
                     </div>
                 </div>
 
-                <!-- Total Comments -->
+                <!-- Yorum Sayısı -->
                 <div class="stat-card-modern purple" onclick="goToAnalytics()">
                     <div class="stat-icon-wrap">
                         <i class="ph-fill ph-chat-circle-text"></i>
                     </div>
                     <div>
-                        <h3 class="stat-label">Yorum Sayısı</h3>
+                        <h3 class="stat-label">Yorum</h3>
                         <p id="stat-comments" class="stat-value">-</p>
                     </div>
                 </div>
-
 
             </div>
 
@@ -1564,40 +1560,58 @@
                 <h1 class="page-title">Deneylerim</h1>
             </div>
 
-            <!-- STATUS FILTER CARDS FOR EXPERIMENTS -->
-            <div id="exp-status-filters"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
-                <div class="stat-card-modern green" onclick="setExperimentFilter('published')" style="padding: 20px; cursor: pointer;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-check-circle"></i></div>
-                    <div>
-                        <h3 class="stat-label">Yayınlanan</h3>
-                        <p id="exp-count-published-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
-                    </div>
-                </div>
-                <div class="stat-card-modern" onclick="setExperimentFilter('pending')" style="padding: 20px; cursor: pointer;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309;"><i class="ph-bold ph-clock"></i></div>
-                    <div>
-                        <h3 class="stat-label">Onay Bekleyen</h3>
-                        <p id="exp-count-pending-filter" class="stat-value" style="font-size: 1.6rem; color: #b45309;">-</p>
-                    </div>
-                </div>
-                <div class="stat-card-modern red" onclick="setExperimentFilter('rejected')" style="padding: 20px; cursor: pointer;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-x-circle"></i></div>
-                    <div>
-                        <h3 class="stat-label">Red Alanlar</h3>
-                        <p id="exp-count-rejected-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
-                    </div>
-                </div>
-                <div class="stat-card-modern" onclick="setExperimentFilter('draft')" style="padding: 20px; cursor: pointer;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569;"><i class="ph-bold ph-file-dashed"></i></div>
-                    <div>
-                        <h3 class="stat-label">Taslaklar</h3>
-                        <p id="exp-count-draft-filter" class="stat-value" style="font-size: 1.6rem; color: #475569;">-</p>
-                    </div>
-                </div>
+            <!-- TAB NAVIGATION -->
+            <div id="exp-tab-nav" style="display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0;">
+                <button class="exp-tab-btn active" onclick="switchExpTab('list', this)" style="padding: 12px 24px; border: none; background: none; font-size: 0.95rem; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;">
+                    <i class="ph ph-list-numbers"></i> Deneyler
+                </button>
+                <button class="exp-tab-btn" onclick="switchExpTab('trash', this)" style="padding: 12px 24px; border: none; background: none; font-size: 0.95rem; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;">
+                    <i class="ph ph-trash"></i> Çöp Kutusu
+                </button>
             </div>
 
-            <div id="experiments-list"></div>
+            <!-- EXPERIMENTS LIST TAB -->
+            <div id="exp-tab-list">
+                <!-- STATUS FILTER CARDS FOR EXPERIMENTS -->
+                <div id="exp-status-filters"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
+                    <div class="stat-card-modern green" onclick="setExperimentFilter('published')" style="padding: 20px; cursor: pointer;">
+                        <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-check-circle"></i></div>
+                        <div>
+                            <h3 class="stat-label">Yayınlanan</h3>
+                            <p id="exp-count-published-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-modern" onclick="setExperimentFilter('pending')" style="padding: 20px; cursor: pointer;">
+                        <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309;"><i class="ph-bold ph-clock"></i></div>
+                        <div>
+                            <h3 class="stat-label">Onay Bekleyen</h3>
+                            <p id="exp-count-pending-filter" class="stat-value" style="font-size: 1.6rem; color: #b45309;">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-modern red" onclick="setExperimentFilter('rejected')" style="padding: 20px; cursor: pointer;">
+                        <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-x-circle"></i></div>
+                        <div>
+                            <h3 class="stat-label">Red Alanlar</h3>
+                            <p id="exp-count-rejected-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-modern" onclick="setExperimentFilter('draft')" style="padding: 20px; cursor: pointer;">
+                        <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569;"><i class="ph-bold ph-file-dashed"></i></div>
+                        <div>
+                            <h3 class="stat-label">Taslaklar</h3>
+                            <p id="exp-count-draft-filter" class="stat-value" style="font-size: 1.6rem; color: #475569;">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="experiments-list"></div>
+            </div>
+
+            <!-- TRASH TAB -->
+            <div id="exp-tab-trash" style="display: none;">
+                <p style="color:#64748b; margin-bottom: 20px;">Sildiğiniz deneyler burada toplanır. Geri alabilir veya kalıcı olarak silebilirsiniz.</p>
+                <div id="trash-list"></div>
+            </div>
         </div>
 
         <div id="profile" class="section">
@@ -1660,11 +1674,7 @@
             </div>
         </div>
 
-        <div id="my-trash" class="section">
-            <h1 class="page-title">Çöp Kutusu</h1>
-            <p style="color:#64748b; margin-bottom: 20px;">Sildiğiniz deneyler burada toplanır. Dilerseniz geri alabilir veya kalıcı olarak silebilirsiniz.</p>
-            <div id="trash-list"></div>
-        </div>
+
 
         <div id="analytics" class="section">
             <h1 class="page-title">İçerik Detayı</h1>
@@ -3320,6 +3330,42 @@
                 showAuthorToast('Silme esnasında hata oluştu.', 'error');
             }
         }
+
+        function switchExpTab(tab, btnEl) {
+            const listTab = document.getElementById('exp-tab-list');
+            const trashTab = document.getElementById('exp-tab-trash');
+            
+            // Toggle tabs
+            if (tab === 'trash') {
+                if (listTab) listTab.style.display = 'none';
+                if (trashTab) trashTab.style.display = 'block';
+                loadMyTrash();
+            } else {
+                if (listTab) listTab.style.display = 'block';
+                if (trashTab) trashTab.style.display = 'none';
+            }
+            
+            // Update active button styles
+            document.querySelectorAll('.exp-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = '#64748b';
+                btn.style.borderBottomColor = 'transparent';
+            });
+            if (btnEl) {
+                btnEl.classList.add('active');
+                btnEl.style.color = '#6366f1';
+                btnEl.style.borderBottomColor = '#6366f1';
+            }
+        }
+
+        // Initialize active tab style on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeTabBtn = document.querySelector('.exp-tab-btn.active');
+            if (activeTabBtn) {
+                activeTabBtn.style.color = '#6366f1';
+                activeTabBtn.style.borderBottomColor = '#6366f1';
+            }
+        });
 
         function resetExperimentForm() {
             editingExperimentId = null;
