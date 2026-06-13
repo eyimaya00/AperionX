@@ -2639,6 +2639,15 @@
                         </div>
                     </div>
 
+                    <!-- Excerpt -->
+                    ${exp.excerpt ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-text-align-left" style="color:#64748b;"></i> Kısa Özet</h3>
+                        <div style="background:#f8fafc; padding:16px; border-radius:10px; border-left:4px solid #94a3b8; color:#334155; line-height:1.6;">
+                            ${escapeHtml(exp.excerpt)}
+                        </div>
+                    </div>` : ''}
+
                     <!-- Objective -->
                     ${exp.objective ? `
                     <div style="margin-bottom:20px;">
@@ -2715,6 +2724,12 @@
                     ${exp.pdf_url ? `
                     <div style="margin-top:20px;">
                         <a href="${exp.pdf_url}" target="_blank" class="btn btn-secondary"><i class="ph ph-file-pdf"></i> PDF Dosyasını İndir</a>
+                    </div>` : ''}
+
+                    <!-- YouTube -->
+                    ${exp.youtube_url ? `
+                    <div style="margin-top:20px;">
+                        <a href="${exp.youtube_url}" target="_blank" class="btn btn-secondary" style="background:#fee2e2; color:#ef4444; border-color:#fca5a5;"><i class="ph ph-youtube-logo"></i> YouTube Videosunu İzle</a>
                     </div>` : ''}
                 `;
 
