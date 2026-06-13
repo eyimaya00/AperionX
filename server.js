@@ -1435,6 +1435,31 @@ app.get('/api/users/find-by-email', authenticateToken, async (req, res) => {
         res.status(500).send(e.toString());
     }
 });
+
+// Search authors/editors for co-author selection
+app.get('/api/users/search-authors', authenticateToken, async (req, res) => {
+    try {
+        const term = req.query.q;
+        if (!term || term.length < 2) return res.json([]);
+        
+        const searchPattern = '%' + term.trim() + '%';
+        
+        // Find users who are authors, editors, or admins
+        const [users] = await pool.query(
+            `SELECT id, fullname, username, avatar_url 
+             FROM users 
+             WHERE (fullname LIKE ? OR username LIKE ? OR email LIKE ?) 
+             AND role IN ('author', 'editor', 'admin') 
+             LIMIT 10`,
+            [searchPattern, searchPattern, searchPattern]
+        );
+        
+        res.json(users);
+    } catch (e) {
+        console.error('Search authors error:', e);
+        res.status(500).send(e.toString());
+    }
+});
 app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
