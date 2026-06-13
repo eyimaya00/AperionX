@@ -2346,6 +2346,7 @@ app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res
             return res.status(400).json({ error: 'Invalid decision' });
         }
 
+        clearCache('experiments');
         res.json({ message: 'Success' });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -2666,6 +2667,7 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
             autoSendNewsletter(req.params.id).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
         }
 
+        clearCache('articles');
         res.json({ message: `Article ${status}` });
     } catch (e) {
         res.status(500).send(e.toString());
