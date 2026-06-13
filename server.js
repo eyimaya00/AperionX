@@ -2467,9 +2467,9 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             pending: pending[0].count,
             expPublished: expPublishedRes[0].count,
             expPending: expPendingRes[0].count,
-            views: (views[0].count || 0) + (expViewsRes[0].count || 0), // Combined views
-            likes: likes[0].count || 0,
-            comments: comments[0].count || 0
+            views: Number(views[0].count || 0) + Number(expViewsRes[0].count || 0), // Combined views
+            likes: Number(likes[0].count || 0),
+            comments: Number(comments[0].count || 0)
         });
     } catch (e) {
         res.status(500).send(e.toString());
