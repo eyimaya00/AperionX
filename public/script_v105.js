@@ -1592,7 +1592,7 @@ async function loadShowcase() {
                         ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     ${item.authors.map((a) => `
                                         <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
-                                    `).join('')}
+                                    `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
                         : `<a href="author-profile.html?u=${(item.author_name || '').replace(/ /g, '-')}" style="color:inherit; text-decoration:none;">${author}</a>`
                     }
@@ -1824,7 +1824,7 @@ function renderArticlesGrid() {
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
                             <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
-                        `).join('')}
+                        `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
                 : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
@@ -2009,7 +2009,7 @@ function renderExperimentsGrid() {
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
                             <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
-                        `).join('')}
+                        `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
                 : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
@@ -2637,7 +2637,7 @@ async function loadArticleSlider(currentId) {
                                     ${art.authors.map((a, idx) => `
                                         ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
                                         <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
-                                    `).join('')}
+                                    `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
                     : (art.author_id
                         ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`

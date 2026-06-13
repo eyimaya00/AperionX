@@ -63,7 +63,7 @@
         "@type": "BreadcrumbList",
         "itemListElement": [
           {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://aperionx.com/"},
-          {"@type": "ListItem", "position": 2, "name": "Deneyler", "item": "https://aperionx.com/experiments"}
+          {"@type": "ListItem", "position": 2, "name": "Makaleler", "item": "https://aperionx.com/experiments"}
         ]
       }
     }
@@ -91,9 +91,10 @@
             </a>
 
             <nav class="nav-menu">
-                <a href="/" class="nav-link">Ana Sayfa</a>`n                <a href="/experiments" class="nav-link active">Deneyler</a>
+                <a href="/" class="nav-link">Ana Sayfa</a>
                 <div class="nav-item dropdown">
-                    <a href="/articles" class="nav-link dropdown-toggle" id="articlesDropdownToggle">Makaleler <i class="ph ph-caret-down"></i>
+                    <a href="/articles" class="nav-link active dropdown-toggle" id="articlesDropdownToggle">
+                        Makaleler <i class="ph ph-caret-down"></i>
                     </a>
                     <div class="dropdown-menu" id="articles-dropdown-menu">
                         <!-- Dynamically populated categories -->
@@ -143,9 +144,9 @@
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <h1 class="articles-page-title" id="experiments-hero-title"><span style="color: #ffffff">Den</span><span
-                    style="color: #6366f1">eyler</span></h1>
-            <p class="articles-page-description" id="experiments-hero-description"
+            <h1 class="articles-page-title" id="experiments-hero-title"><span style="color: #ffffff">Maka</span><span
+                    style="color: #6366f1">leler</span></h1>
+            <p class="articles-page-description" id="articles-hero-description"
                 style="color: rgba(255, 255, 255, 0.9);">Bilimsel Deneyleri Keþfedin.
             </p>
         </div>
@@ -179,7 +180,7 @@
                 <div class="article-search">
                     <i class="ph ph-magnifying-glass"></i>
                     <input type="text" placeholder="Deney ara..." id="experiment-search-input"
-                        oninput="searchPageExperiments(this.value)" aria-label="Deney ara">
+                        oninput="searchPageExperiments(this.value)" aria-label="Makale ara">
                 </div>
             </div>
         </div>
@@ -229,7 +230,7 @@
                 <h3 class="footer-heading">Hýzlý Eriþim</h3>
                 <ul class="footer-links">
                     <li><a href="/">Ana Sayfa</a></li>
-                    <li><a href="/experiments">Deneyler</a></li>
+                    <li><a href="/articles">Makaleler</a></li>
                     <li><a href="/about">Hakkýmýzda</a></li>
                 </ul>
             </div>
@@ -386,7 +387,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script defer src="/script_v105.js?v=221"></script>
+    <script defer src="/script_v105.js?v=222"></script>
     <script>
         // Inline logic to trigger load on this page
         document.addEventListener('DOMContentLoaded', () => {
