@@ -2175,6 +2175,9 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
             WHERE e.status = 'pending' 
             ORDER BY e.created_at ASC
         `);
+        for (let row of rows) {
+            row.co_authors = await getExperimentAuthors(pool, row.id);
+        }
         res.json(rows);
     } catch (e) {
         res.status(500).json({ error: e.message });

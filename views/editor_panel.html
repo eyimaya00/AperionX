@@ -2623,8 +2623,11 @@
                     <!-- Meta Info -->
                     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:24px;">
                         <div style="background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
-                            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Yazar</div>
-                            <div style="font-weight:600; color:#1e293b;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</div>
+                            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Yazar & Hazırlayanlar</div>
+                            <div style="font-weight:600; color:#1e293b;">
+                                ${escapeHtml(exp.author_name || 'Bilinmiyor')}
+                                ${exp.co_authors && exp.co_authors.length > 0 ? `<div style="font-size:0.8rem; font-weight:400; color:#64748b; margin-top:4px;">+ ${exp.co_authors.filter(a => a.fullname !== exp.author_name).map(a => escapeHtml(a.fullname)).join(', ')}</div>` : ''}
+                            </div>
                         </div>
                         <div style="background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
                             <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Kategori</div>
@@ -2664,20 +2667,38 @@
                     </div>` : ''}
 
                     <!-- Procedure -->
-                    ${exp.procedure ? `
+                    ${exp.procedure_steps ? `
                     <div style="margin-bottom:20px;">
                         <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-list-numbers" style="color:#10b981;"></i> Deney Prosedürü</h3>
                         <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
-                            ${exp.procedure}
+                            ${exp.procedure_steps}
                         </div>
                     </div>` : ''}
 
-                    <!-- Expected Results -->
-                    ${exp.expected_results ? `
+                    <!-- Results -->
+                    ${exp.results ? `
                     <div style="margin-bottom:20px;">
-                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-chart-line-up" style="color:#8b5cf6;"></i> Beklenen Sonuçlar</h3>
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-chart-line-up" style="color:#8b5cf6;"></i> Elde Edilen Bulgular</h3>
                         <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
-                            ${exp.expected_results}
+                            ${exp.results}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Conclusion -->
+                    ${exp.conclusion ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-flag-checkered" style="color:#f43f5e;"></i> Sonuç</h3>
+                        <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
+                            ${escapeHtml(exp.conclusion)}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- References -->
+                    ${exp.references_list ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-books" style="color:#0ea5e9;"></i> Kaynaklar</h3>
+                        <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
+                            ${escapeHtml(exp.references_list)}
                         </div>
                     </div>` : ''}
 
