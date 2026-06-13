@@ -898,7 +898,10 @@
                 onclick="showSection('dashboard', this); setTimeout(() => filterArticles('all'), 50);">
                 <i class="ph ph-kanban"></i> <span>Makale Yönetimi</span>
             </a>
-
+            <a href="javascript:void(0)" class="menu-item"
+                onclick="showSection('experiments-dashboard', this); setTimeout(() => loadExperimentsDashboard(), 50);">
+                <i class="ph ph-flask"></i> <span>Deney Onayları</span>
+            </a>
 
             <!-- STATS MENU -->
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('section-stats-final', this)">
@@ -1275,6 +1278,76 @@
 
         </div>
 
+        <!-- DENEY YÖNETİMİ / ONAYLARI -->
+        <div id="experiments-dashboard" class="section">
+            <h1 class="page-title">Deney Onayları</h1>
+
+            <!-- DENEY STATS -->
+            <div class="dashboard-stats" style="margin-bottom: 32px;">
+                <div class="stat-card" onclick="filterExperiments('pending')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="ph ph-hourglass-high"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="exp-count-pending">0</h3>
+                            <p>Onay Bekleyen Deneyler</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" onclick="filterExperiments('published')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="ph ph-check-square"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="exp-count-published">0</h3>
+                            <p>Yayınlanan Deneyler</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" onclick="filterExperiments('rejected')">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            <i class="ph ph-x-square"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="exp-count-rejected">0</h3>
+                            <p>Reddedilen Deneyler</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DENEY LİSTESİ TABLOSU -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b;" id="exp-table-title">Onay Bekleyen Deneyler</h3>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="filterExperiments('pending')" style="padding: 8px 16px; font-size: 0.85rem;">Bekleyenler</button>
+                        <button class="btn btn-secondary" onclick="filterExperiments('history')" style="padding: 8px 16px; font-size: 0.85rem;">Geçmiş</button>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Görsel</th>
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Başlık</th>
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Yazar</th>
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Kategori</th>
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="experiments-table-body">
+                        <!-- JS ile dolacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
     </div>
 
@@ -1391,6 +1464,8 @@
         const user = JSON.parse(localStorage.getItem('user'));
         let currentArticleId = null;
         let allArticles = [];
+        let currentExperimentId = null;
+        let allExperiments = [];
 
         if (!token || !user || (user.role !== 'editor' && user.role !== 'admin')) {
             window.location.href = '/index';
@@ -1660,6 +1735,9 @@
             // Auto-load data for stats section
             if (id === 'section-stats-final') {
                 loadAnalysisAuthors();
+            }
+            if (id === 'experiments-dashboard') {
+                loadExperimentsDashboard();
             }
         }
 
@@ -2389,6 +2467,314 @@
         function closeModal() {
             document.getElementById('review-modal').classList.remove('show');
             currentArticleId = null;
+            currentExperimentId = null;
+        }
+
+        // =============================================
+        // === EXPERIMENT MANAGEMENT FUNCTIONS ===
+        // =============================================
+
+        let currentExpFilter = 'pending';
+
+        async function loadExperimentsDashboard() {
+            try {
+                const [resPending, resHistory] = await Promise.all([
+                    fetch(`${API_URL}/editor/pending-experiments`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/editor/experiments/history`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                const safeJson = async (r) => r.ok ? await r.json() : [];
+
+                const pending = await safeJson(resPending);
+                const history = await safeJson(resHistory);
+
+                allExperiments = [...(pending || []), ...(history || [])];
+
+                // Update stat cards
+                const pendingCount = (pending || []).length;
+                const publishedCount = (history || []).filter(e => e.status === 'published').length;
+                const rejectedCount = (history || []).filter(e => e.status === 'rejected').length;
+
+                document.getElementById('exp-count-pending').innerText = pendingCount;
+                document.getElementById('exp-count-published').innerText = publishedCount;
+                document.getElementById('exp-count-rejected').innerText = rejectedCount;
+
+                filterExperiments(currentExpFilter);
+            } catch (e) {
+                console.error('Deney yükleme hatası:', e);
+                const tbody = document.getElementById('experiments-table-body');
+                if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center; padding:40px;">Yükleme hatası: ${e.message}</td></tr>`;
+            }
+        }
+
+        function filterExperiments(status) {
+            currentExpFilter = status;
+            const titleEl = document.getElementById('exp-table-title');
+
+            let filtered = [];
+            if (status === 'pending') {
+                filtered = allExperiments.filter(e => e.status === 'pending');
+                if (titleEl) titleEl.innerText = 'Onay Bekleyen Deneyler';
+            } else if (status === 'published') {
+                filtered = allExperiments.filter(e => e.status === 'published');
+                if (titleEl) titleEl.innerText = 'Yayınlanan Deneyler';
+            } else if (status === 'rejected') {
+                filtered = allExperiments.filter(e => e.status === 'rejected');
+                if (titleEl) titleEl.innerText = 'Reddedilen Deneyler';
+            } else {
+                // 'history' = published + rejected
+                filtered = allExperiments.filter(e => e.status !== 'pending');
+                if (titleEl) titleEl.innerText = 'Deney Geçmişi';
+            }
+
+            renderExperimentsTable(filtered);
+        }
+
+        function renderExperimentsTable(experiments) {
+            const tbody = document.getElementById('experiments-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (experiments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; height:250px; vertical-align:middle; color:#94a3b8;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                        <i class="ph-duotone ph-flask" style="font-size:3rem; opacity:0.5;"></i>
+                        <span>Deney bulunamadı.</span>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            experiments.forEach(exp => {
+                const date = new Date(exp.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                let statusBadge = '';
+                if (exp.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
+                else if (exp.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                else if (exp.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
+
+                const isPending = exp.status === 'pending';
+                const actions = isPending
+                    ? `<button class="btn btn-primary" style="padding:6px 14px; font-size:0.85rem;" onclick="openExperimentReview(${exp.id})"><i class="ph-bold ph-eye"></i> İncele</button>`
+                    : `<button class="btn btn-secondary" style="padding:6px 14px; font-size:0.85rem;" onclick="openExperimentReview(${exp.id})"><i class="ph-bold ph-eye"></i> Görüntüle</button>`;
+
+                const imgSrc = exp.image_url || 'https://via.placeholder.com/60x40?text=Deney';
+
+                const row = `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        <td style="padding: 14px 24px;">
+                            <img src="${imgSrc}" alt="" style="width:60px; height:40px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;">
+                        </td>
+                        <td style="padding: 14px 24px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 4px; height: 36px; background: ${exp.status === 'published' ? '#10b981' : (exp.status === 'rejected' ? '#ef4444' : '#f59e0b')}; border-radius: 4px;"></div>
+                                <div>
+                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">${escapeHtml(exp.title)}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">${date} · ${statusBadge}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 24px; font-weight: 500; color: #475569;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</td>
+                        <td style="padding: 14px 24px;">
+                            <span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; padding:4px 10px; border-radius:6px; font-size:0.8rem;">${escapeHtml(exp.category || 'Genel')}</span>
+                        </td>
+                        <td style="padding: 14px 24px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${actions}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function openExperimentReview(id) {
+            try {
+                const exp = allExperiments.find(e => e.id == id);
+                if (!exp) {
+                    showToast('Deney verisi bulunamadı!', 'error');
+                    return;
+                }
+
+                currentExperimentId = exp.id;
+                document.getElementById('modal-title').innerText = exp.title;
+                const isPending = exp.status === 'pending';
+
+                let rejectionHtml = '';
+                if (exp.status === 'rejected' && exp.rejection_reason) {
+                    rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
+                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
+                        ${escapeHtml(exp.rejection_reason)}
+                    </div>`;
+                }
+
+                // Build experiment detail sections
+                let html = `
+                    ${rejectionHtml}
+
+                    <!-- Experiment Image -->
+                    <div style="margin-bottom: 24px; text-align:center; background:#f1f5f9; border-radius:12px; overflow:hidden;">
+                        <img src="${exp.image_url || 'https://via.placeholder.com/800x400?text=Deney+Görseli'}" 
+                             style="width: 100%; max-width: 800px; height: auto; max-height: 400px; object-fit: contain; border-radius: 12px;">
+                    </div>
+
+                    <!-- Meta Info -->
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:24px;">
+                        <div style="background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
+                            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Yazar</div>
+                            <div style="font-weight:600; color:#1e293b;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</div>
+                        </div>
+                        <div style="background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
+                            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Kategori</div>
+                            <div style="font-weight:600; color:#1e293b;">${escapeHtml(exp.category || 'Genel')}</div>
+                        </div>
+                        <div style="background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
+                            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Zorluk Seviyesi</div>
+                            <div style="font-weight:600; color:#1e293b;">${escapeHtml(exp.difficulty_level || 'Belirtilmedi')}</div>
+                        </div>
+                    </div>
+
+                    <!-- Objective -->
+                    ${exp.objective ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-target" style="color:#6366f1;"></i> Amaç</h3>
+                        <div style="background:#f0f9ff; padding:16px; border-radius:10px; border-left:4px solid #3b82f6; color:#334155; line-height:1.6;">
+                            ${escapeHtml(exp.objective)}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Materials -->
+                    ${exp.materials ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-package" style="color:#f59e0b;"></i> Malzemeler</h3>
+                        <div style="background:#fffbeb; padding:16px; border-radius:10px; border-left:4px solid #f59e0b; color:#334155; line-height:1.6;">
+                            ${escapeHtml(exp.materials)}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Safety Notes -->
+                    ${exp.safety_notes ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-shield-warning" style="color:#ef4444;"></i> Güvenlik Notları</h3>
+                        <div style="background:#fef2f2; padding:16px; border-radius:10px; border-left:4px solid #ef4444; color:#334155; line-height:1.6;">
+                            ${escapeHtml(exp.safety_notes)}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Procedure -->
+                    ${exp.procedure ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-list-numbers" style="color:#10b981;"></i> Deney Prosedürü</h3>
+                        <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
+                            ${exp.procedure}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Expected Results -->
+                    ${exp.expected_results ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-chart-line-up" style="color:#8b5cf6;"></i> Beklenen Sonuçlar</h3>
+                        <div style="background:white; padding:16px; border-radius:10px; border:1px solid #e2e8f0; color:#334155; line-height:1.8; font-size:1.05rem;">
+                            ${exp.expected_results}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Tags -->
+                    ${exp.tags ? `
+                    <div style="margin-bottom:20px;">
+                        <h3 style="margin:0 0 8px 0; color:#1e293b; font-size:1.1rem;"><i class="ph ph-tag" style="color:#64748b;"></i> Etiketler</h3>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            ${exp.tags.split(',').map(t => `<span style="background:#f1f5f9; color:#475569; padding:4px 12px; border-radius:20px; font-size:0.85rem; border:1px solid #e2e8f0;">${escapeHtml(t.trim())}</span>`).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- PDF -->
+                    ${exp.pdf_url ? `
+                    <div style="margin-top:20px;">
+                        <a href="${exp.pdf_url}" target="_blank" class="btn btn-secondary"><i class="ph ph-file-pdf"></i> PDF Dosyasını İndir</a>
+                    </div>` : ''}
+                `;
+
+                document.getElementById('modal-body').innerHTML = html;
+
+                // Footer buttons
+                const footer = document.querySelector('#review-modal .modal-footer');
+                if (isPending) {
+                    footer.innerHTML = `
+                        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                            <textarea id="exp-reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." 
+                                style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit; box-sizing:border-box;"></textarea>
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                                <button class="btn btn-danger" onclick="toggleExpRejectInput()">Reddet...</button>
+                                <button class="btn btn-primary" onclick="submitExperimentDecision('approve')">Yayına Al</button>
+                            </div>
+                            <div id="exp-confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-danger" onclick="submitExperimentDecision('reject')">Reddet ve Bitir</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Kapat</button>`;
+                }
+
+                document.getElementById('review-modal').classList.add('show');
+            } catch (error) {
+                console.error("openExperimentReview error:", error);
+                showToast("Deney önizlemesi yüklenirken bir hata oluştu.", "error");
+            }
+        }
+
+        function toggleExpRejectInput() {
+            const area = document.getElementById('exp-reject-reason');
+            const confirmArea = document.getElementById('exp-confirm-reject-area');
+            if (area.style.display === 'none') {
+                area.style.display = 'block';
+                confirmArea.style.display = 'flex';
+                area.focus();
+            } else {
+                area.style.display = 'none';
+                confirmArea.style.display = 'none';
+            }
+        }
+
+        async function submitExperimentDecision(decision) {
+            if (!currentExperimentId) return;
+
+            let body = { decision };
+
+            if (decision === 'reject') {
+                const reason = document.getElementById('exp-reject-reason').value;
+                if (!reason || !reason.trim()) {
+                    showToast('Lütfen red sebebini yazınız.', 'error');
+                    return;
+                }
+                body.rejection_reason = reason;
+                performExpSubmit();
+            } else {
+                showConfirm('Bu deneyi yayına almak istediğinize emin misiniz?', performExpSubmit);
+            }
+
+            async function performExpSubmit() {
+                try {
+                    const res = await fetch(`${API_URL}/editor/experiments/decide/${currentExperimentId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (res.ok) {
+                        showToast(decision === 'approve' ? 'Deney başarıyla yayınlandı!' : 'Deney reddedildi.', 'success');
+                        closeModal();
+                        loadExperimentsDashboard();
+                    } else {
+                        const txt = await res.text();
+                        showToast('Hata: ' + txt, 'error');
+                    }
+                } catch (e) { showToast('Sunucu hatası', 'error'); }
+            }
         }
 
         async function loadSettings() {

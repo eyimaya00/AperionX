@@ -200,13 +200,13 @@ function slugify(text) {
         .replace(/-+$/, '');      // Trim - from end
 }
 
-async function getUniqueSlug(pool, title, excludeId = null) {
+async function getUniqueSlug(pool, title, excludeId = null, table = 'articles') {
     let slug = slugify(title);
     let originalSlug = slug;
     let counter = 1;
     let exists = true;
     while (exists) {
-        let query = "SELECT id FROM articles WHERE slug = ?";
+        let query = `SELECT id FROM ${table} WHERE slug = ?`;
         let params = [slug];
         if (excludeId) {
             query += " AND id != ?";
@@ -1883,6 +1883,260 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         }
     }
     res.json({ message: 'Updated' });
+});
+
+// === EXPERIMENT AUTHOR API'S ===
+
+// 1. Get My Experiments
+app.get('/api/author/experiments', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT id, title, slug, category, status, views, created_at, image_url, rejection_reason
+            FROM experiments
+            WHERE author_id = ?
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
+// 2. Create Experiment (POST)
+app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+    const body = req.body || {};
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url } = body;
+    let author_id = req.user.id;
+
+    let image_url = null;
+    let pdf_url = null;
+
+    if (req.files) {
+        if (req.files['image']) image_url = 'uploads/' + req.files['image'][0].filename;
+        if (req.files['pdf']) pdf_url = 'uploads/' + req.files['pdf'][0].filename;
+    }
+
+    let finalStatus = status;
+    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+        finalStatus = 'pending';
+    }
+
+    try {
+        const slug = await getUniqueSlug(pool, title, null, 'experiments');
+
+        const cleanObjective = objective ? DOMPurify.sanitize(objective) : null;
+        const cleanMaterials = materials ? DOMPurify.sanitize(materials) : null;
+        const cleanProcedure = procedure_steps ? DOMPurify.sanitize(procedure_steps) : null;
+        const cleanResults = results ? DOMPurify.sanitize(results) : null;
+        const cleanConclusion = conclusion ? DOMPurify.sanitize(conclusion) : null;
+        const cleanSafety = safety_notes ? DOMPurify.sanitize(safety_notes) : null;
+
+        const [insertResult] = await pool.query(
+            `INSERT INTO experiments (
+                title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus
+            ]
+        );
+
+        const newExperimentId = insertResult.insertId;
+
+        // Add to experiment_authors
+        await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES (?, ?, ?)', [newExperimentId, author_id, 0]);
+
+        // Send notifications if pending
+        if (finalStatus === 'pending') {
+            try {
+                const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const authorName = authors[0]?.fullname || 'Bir Yazar';
+                const [destUsers] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+                const msg = `Yeni deney onayı bekliyor: ${title.substring(0, 30)}... - ${authorName}`;
+                for (const u of destUsers) {
+                    if (u.id !== req.user.id) {
+                        await createNotification(u.id, msg, 'info');
+                    }
+                }
+            } catch (notifErr) { console.error('Notif failed:', notifErr); }
+        }
+
+        res.status(201).json({ message: 'Experiment created', status: finalStatus });
+    } catch (e) {
+        console.error('Create Experiment DB Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
+// 3. Update Experiment (PUT)
+app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+    const experimentId = req.params.id;
+    const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+    if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+    if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url } = req.body;
+
+    let finalStatus = status;
+    if (status === 'published' && req.user.role === 'author') {
+        finalStatus = 'pending';
+    }
+
+    let updates = [];
+    let params = [];
+
+    if (title) {
+        updates.push('title = ?');
+        params.push(title);
+        const newSlug = await getUniqueSlug(pool, title, experimentId, 'experiments');
+        updates.push('slug = ?');
+        params.push(newSlug);
+    }
+    if (category) { updates.push('category = ?'); params.push(category); }
+    if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
+    if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
+    if (tags) { updates.push('tags = ?'); params.push(tags); }
+    if (youtube_url !== undefined) { updates.push('youtube_url = ?'); params.push(youtube_url); }
+
+    if (objective) { updates.push('objective = ?'); params.push(DOMPurify.sanitize(objective)); }
+    if (materials) { updates.push('materials = ?'); params.push(DOMPurify.sanitize(materials)); }
+    if (procedure_steps) { updates.push('procedure_steps = ?'); params.push(DOMPurify.sanitize(procedure_steps)); }
+    if (results) { updates.push('results = ?'); params.push(DOMPurify.sanitize(results)); }
+    if (conclusion) { updates.push('conclusion = ?'); params.push(DOMPurify.sanitize(conclusion)); }
+    if (safety_notes) { updates.push('safety_notes = ?'); params.push(DOMPurify.sanitize(safety_notes)); }
+
+    if (req.files && req.files['image']) {
+        updates.push('image_url = ?');
+        params.push('uploads/' + req.files['image'][0].filename);
+    }
+    if (req.files && req.files['pdf']) {
+        updates.push('pdf_url = ?');
+        params.push('uploads/' + req.files['pdf'][0].filename);
+    }
+
+    if (updates.length > 0) {
+        params.push(experimentId);
+        await pool.query(`UPDATE experiments SET ${updates.join(', ')} WHERE id = ?`, params);
+
+        if (finalStatus && req.user.role !== 'author') {
+            const authorId = check[0].author_id;
+            if (req.user.id !== authorId) {
+                let msg = `Deneyinizin durumu güncellendi: ${finalStatus === 'published' ? 'Yayınlandı' : (finalStatus === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor')}`;
+                let type = finalStatus === 'published' ? 'success' : (finalStatus === 'rejected' ? 'error' : 'info');
+                await createNotification(authorId, msg, type);
+            }
+        }
+    }
+    res.json({ message: 'Updated' });
+});
+
+// 4. Delete Experiment (DELETE)
+app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
+    const experimentId = req.params.id;
+    try {
+        const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        await pool.query('DELETE FROM experiments WHERE id = ?', [experimentId]);
+        res.json({ message: 'Deleted' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 5. Get Single Experiment by ID (For Edit Form)
+app.get('/api/experiments/by-id/:id', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM experiments WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Experiment not found' });
+        if (rows[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') {
+            return res.sendStatus(403);
+        }
+        res.json(rows[0]);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
+// === EXPERIMENT EDITOR API'S ===
+
+// 1. Pending Experiments
+app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT e.*, u.fullname as author_name 
+            FROM experiments e
+            LEFT JOIN users u ON e.author_id = u.id
+            WHERE e.status = 'pending' 
+            ORDER BY e.created_at ASC
+        `);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 2. History of Experiments (Published or Rejected)
+app.get('/api/editor/experiments/history', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT e.*, u.fullname as author_name 
+            FROM experiments e
+            LEFT JOIN users u ON e.author_id = u.id
+            WHERE e.status IN ('published', 'rejected') 
+            ORDER BY e.created_at DESC 
+            LIMIT 50
+        `);
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 3. Decide on Experiment (Approve/Reject)
+app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
+    const experimentId = req.params.id;
+
+    try {
+        const [check] = await pool.query('SELECT author_id, title FROM experiments WHERE id = ?', [experimentId]);
+        if (check.length === 0) return res.status(404).json({ message: 'Experiment not found' });
+
+        const authorId = check[0].author_id;
+        const title = check[0].title;
+
+        if (decision === 'approve') {
+            await pool.query(
+                "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL WHERE id = ?",
+                [req.user.id, experimentId]
+            );
+
+            // Notify author
+            let msg = `Tebrikler! Deneyiniz onaylandı ve yayınlandı: ${title}`;
+            await createNotification(authorId, msg, 'success');
+
+        } else if (decision === 'reject') {
+            await pool.query(
+                "UPDATE experiments SET status = 'rejected', approved_by = ?, rejection_reason = ? WHERE id = ?",
+                [req.user.id, rejection_reason, experimentId]
+            );
+
+            // Notify author
+            let msg = `Deneyiniz reddedildi: ${title}. Sebep: ${rejection_reason || 'Belirtilmedi'}`;
+            await createNotification(authorId, msg, 'error');
+        } else {
+            return res.status(400).json({ error: 'Invalid decision' });
+        }
+
+        res.json({ message: 'Success' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Editor Decision Endpoint (Approve/Reject)
