@@ -3287,9 +3287,9 @@
         async function restoreExperiment(id) {
             if (!confirm('Bu deneyi geri almak istediğinize emin misiniz?')) return;
             try {
-                const res = await fetch(\`\${API_URL}/experiments/\${id}/restore\`, {
+                const res = await fetch(`${API_URL}/experiments/${id}/restore`, {
                     method: 'PUT',
-                    headers: { 'Authorization': \`Bearer \${token}\` }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     showAuthorToast('Deney başarıyla geri alındı.', 'success');
@@ -3306,9 +3306,9 @@
         async function forceDeleteExperiment(id) {
             if (!confirm('DİKKAT! Bu deneyi kalıcı olarak silmek istediğinize emin misiniz? Bu işlem asla geri alınamaz!')) return;
             try {
-                const res = await fetch(\`\${API_URL}/experiments/\${id}/force\`, {
+                const res = await fetch(`${API_URL}/experiments/${id}/force`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': \`Bearer \${token}\` }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     showAuthorToast('Deney kalıcı olarak silindi.', 'success');
