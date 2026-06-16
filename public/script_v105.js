@@ -862,7 +862,7 @@ async function loadMenus() {
             rootMenus.forEach(menu => {
                 const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = isMakalelerMenu || hasChildren;
+                const needsDropdown = hasChildren;
 
                 if (needsDropdown) {
                     // Create Dropdown Structure
@@ -1012,7 +1012,7 @@ async function loadMenus() {
             rootMenus.forEach(menu => {
                 const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = isMakalelerMenu || hasChildren;
+                const needsDropdown = hasChildren;
 
                 if (needsDropdown) {
                     // Mobile Dropdown Accordion
