@@ -1841,7 +1841,7 @@ function renderArticlesGrid() {
     });
 
     // Numeric Pagination Logic
-    renderExperimentPaginationControls();
+    renderPaginationControls();
 }
 
 function renderPaginationControls() {
