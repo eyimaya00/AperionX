@@ -1414,8 +1414,8 @@ function checkAuthStatus() {
         authButtons.forEach(container => {
             if (container.classList.contains('mobile-auth')) {
                 container.innerHTML = `
-                    <div class="mobile-user-profile">
-                        <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User">
+                    <div class="mobile-user-profile" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #333;">
                         <div class="mobile-user-info">
                             <span class="name">${escapeHtml(user.fullname || user.username)}</span>
                             <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
