@@ -3898,7 +3898,7 @@ app.post('/api/articles/:id/like', authenticateToken, async (req, res) => {
             await pool.query('DELETE FROM likes WHERE article_id = ? AND user_id = ?', [articleId, userId]);
             res.json({ liked: false });
         } else {
-            await pool.query('INSERT INTO likes (article_id, user_id) VALUES (?, ?)', [articleId, userId]);
+            await pool.query('INSERT IGNORE INTO likes (article_id, user_id) VALUES (?, ?)', [articleId, userId]);
             res.json({ liked: true });
         }
     } catch (e) { res.status(500).json({ error: e.message }); }
