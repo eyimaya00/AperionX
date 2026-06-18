@@ -5883,3 +5883,37 @@ body.dark-mode .dropdown-menu {
 .dropdown-menu a:hover i {
     color: var(--primary-color);
 }
+
+/* Fix for mobile user profile image size */
+.mobile-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.mobile-user-profile img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color, #333);
+}
+
+.mobile-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-user-info .name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color, #fff);
+}
+
+.mobile-user-info .role {
+    font-size: 0.8rem;
+    color: var(--text-muted, #aaa);
+}
