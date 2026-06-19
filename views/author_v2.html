@@ -2016,11 +2016,16 @@
                 console.log('Response status:', res.status);
 
                 if (res.ok) {
+                    const data = await res.json();
+                    if (data.id && !editingArticleId) {
+                        editingArticleId = data.id;
+                    }
                     const isDraft = status === 'draft';
                     showToast(isDraft ? 'Taslak kaydedildi' : 'Makale onay için editöre gönderildi.', 'success');
                     if (!isDraft) {
                         showSection('my-articles', document.querySelectorAll('.menu-item')[1]); resetForm();
                     }
+                    return data.id || editingArticleId;
                 } else {
                     const contentType = res.headers.get("content-type");
                     if (contentType && contentType.includes("application/json")) {
@@ -2474,19 +2479,41 @@
             }
         }
 
-        function showPreview() {
-            const title = document.getElementById('title').value || 'Başlıksız Makale';
-            const content = quill.root.innerHTML;
-            const modal = document.getElementById('preview-modal');
-            const container = document.getElementById('preview-content');
+        async function showPreview() {
+            const btn = document.querySelector('button[onclick="showPreview()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-spinner ph-spin"></i> Hazırlanıyor...';
+            btn.disabled = true;
 
-            container.innerHTML = `
-                <h1 style="font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main);">${title}</h1>
-                <div class="article-body" style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main);">
-                    ${content}
-                </div>
-            `;
-            modal.style.display = 'block';
+            try {
+                // Öncelikle güncel halini taslak olarak kaydediyoruz
+                const id = await submitArticle('draft');
+                if (!id) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                const modal = document.getElementById('preview-modal');
+                const container = document.getElementById('preview-content');
+                
+                // Container genişliğini tam sayfa yapalım
+                container.style.maxWidth = '1200px';
+                container.style.width = '100%';
+                container.style.padding = '0';
+                container.style.margin = '0 auto';
+
+                container.innerHTML = `
+                    <iframe src="/preview-article/${id}?token=${token}" width="100%" height="800px" style="border: none; border-radius: 12px; background: #fff; width: 100%;"></iframe>
+                `;
+                modal.style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                showToast('Önizleme yüklenirken hata oluştu', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         function closePreview() {
