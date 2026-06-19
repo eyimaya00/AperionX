@@ -585,7 +585,7 @@ app.get('/preview-article/:id', async (req, res, next) => {
         res.status(500).send('Sunucu Hatası');
     }
 });
-\n// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
+// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
 app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], (req, res) => {
     res.redirect(301, '/articles.html');
 });
