@@ -952,6 +952,7 @@ async function ensureSchema() {
             { name: 'category', def: "VARCHAR(100) DEFAULT 'Genel'" },
             { name: 'tags', def: "TEXT" },
             { name: 'references_list', def: "TEXT" },
+            { name: 'visual_references_list', def: "TEXT" },
             { name: 'pdf_url', def: "VARCHAR(255)" }
         ];
 
