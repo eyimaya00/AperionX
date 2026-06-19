@@ -1904,8 +1904,17 @@
                 document.getElementById('edit-tags').value = article.tags || '';
                 document.getElementById('edit-imageInput').value = '';
                 document.getElementById('edit-pdfInput').value = '';
-                document.getElementById('references').value = article.references_list || '';
-                document.getElementById('visual_references').value = article.visual_references_list || '';
+                let allRefs = article.references_list || '';
+                let visRefs = article.visual_references_list || '';
+                
+                if (!visRefs && allRefs.includes('[IMAGES]')) {
+                    const parts = allRefs.split('[IMAGES]');
+                    allRefs = parts[0];
+                    visRefs = parts[1];
+                }
+                
+                document.getElementById('references').value = allRefs.trim();
+                document.getElementById('visual_references').value = visRefs.trim();
                 if (quillEdit) quillEdit.root.innerHTML = article.content;
 
                 // Handle Authors (Pre-selection)

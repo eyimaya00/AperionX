@@ -2834,15 +2834,17 @@
                 document.getElementById('excerpt').value = article.excerpt || '';
 
                 // Split references
-                const allRefs = article.references_list || '';
-                if (allRefs.includes('[IMAGES]')) {
+                let allRefs = article.references_list || '';
+                let visRefs = article.visual_references_list || '';
+                
+                if (!visRefs && allRefs.includes('[IMAGES]')) {
                     const parts = allRefs.split('[IMAGES]');
-                    document.getElementById('text-references').value = parts[0].trim();
-                    document.getElementById('image-references').value = parts[1].trim();
-                } else {
-                    document.getElementById('text-references').value = allRefs.trim();
-                    document.getElementById('image-references').value = '';
+                    allRefs = parts[0];
+                    visRefs = parts[1];
                 }
+                
+                document.getElementById('text-references').value = allRefs.trim();
+                document.getElementById('image-references').value = visRefs.trim();
 
                 // Quill Content
                 if (quill && quill.root) {
