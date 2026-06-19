@@ -2533,8 +2533,8 @@
                 // Combine references
                 const textRefs = document.getElementById('text-references').value;
                 const imgRefs = document.getElementById('image-references').value;
-                const combinedRefs = textRefs + '\n[IMAGES]\n' + imgRefs;
-                formData.append('references_list', combinedRefs);
+                formData.append('references_list', textRefs);
+                formData.append('visual_references_list', imgRefs);
 
                 if (quill && quill.root) {
                     formData.append('content', quill.root.innerHTML);
@@ -2560,11 +2560,16 @@
                 console.log('Response status:', res.status);
 
                 if (res.ok) {
+                    const data = await res.json();
+                    if (data.id && !editingArticleId) {
+                        editingArticleId = data.id;
+                    }
                     const isDraft = status === 'draft';
                     showAuthorToast(isDraft ? 'Taslak başarıyla kaydedildi!' : 'Makale onay için editöre gönderildi.', 'success');
                     if (!isDraft) {
                         showSection('my-articles', document.querySelectorAll('.menu-item')[1]); resetForm();
                     }
+                    return data.id || editingArticleId;
                 } else {
                     const contentType = res.headers.get("content-type");
                     if (contentType && contentType.includes("application/json")) {
@@ -3574,38 +3579,53 @@
             if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
         }
 
-        // [CLEANED] Standalone dark mode init removed — handled in unified DOMContentLoaded init
+        async function showPreview() {
+            const btn = document.querySelector('button[onclick="showPreview()"]');
+            const originalText = btn ? btn.innerHTML : 'Önizleme';
+            if (btn) {
+                btn.innerHTML = '<i class="ph-spinner ph-spin"></i> Hazırlanıyor...';
+                btn.disabled = true;
+            }
+
+            try {
+                // Öncelikle güncel halini taslak olarak kaydediyoruz
+                const id = await submitArticle('draft');
+                if (!id) {
+                    if (btn) {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                    return;
+                }
+
+                const modal = document.getElementById('preview-modal');
+                const container = document.getElementById('preview-content');
+                
+                // Container genişliğini tam sayfa yapalım
+                container.style.maxWidth = '1200px';
+                container.style.width = '100%';
+                container.style.padding = '0';
+                container.style.margin = '0 auto';
+
+                container.innerHTML = `
+                    <iframe src="/preview-article/${id}?token=${token}" width="100%" height="800px" style="border: none; border-radius: 12px; background: #fff; width: 100%;"></iframe>
+                `;
+                modal.style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                showAuthorToast('Önizleme yüklenirken hata oluştu', 'error');
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
 
         function toggleZenMode() {
             document.body.classList.toggle('zen-mode');
         }
 
-        function showPreview() {
-            const title = document.getElementById('title').value || 'Başlıksız Makale';
-            const content = quill.root.innerHTML;
-            const modal = document.getElementById('preview-modal');
-            const container = document.getElementById('preview-content');
-            const category = document.getElementById('category').value;
-            const authorName = user ? user.fullname : 'Yazar';
-
-            // Replicate structure of article-detail.html
-            container.innerHTML = `
-                <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px; background: var(--card-bg); border-radius: 20px;">
-                    <span class="category-chip" style="margin-bottom: 15px; display: inline-block;">${category === 'other' ? 'Genel' : category}</span>
-                    <h1 class="article-title">${title}</h1>
-                    
-                    <div class="article-meta" style="margin-bottom: 30px; display: flex; align-items: center; gap: 15px; color: var(--text-color); opacity: 0.8;">
-                        <span class="meta-item"><i class="ph ph-user"></i> ${authorName}</span>
-                        <span class="meta-item"><i class="ph ph-calendar"></i> ${new Date().toLocaleDateString('tr-TR')}</span>
-                    </div>
-
-                    <div class="article-content" style="color: var(--text-color);">
-                        ${content}
-                    </div>
-                </div>
-            `;
-            modal.style.display = 'block';
-        }
 
         function closePreview() {
             document.getElementById('preview-modal').style.display = 'none';
