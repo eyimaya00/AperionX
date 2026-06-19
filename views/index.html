@@ -187,11 +187,10 @@
             </nav>
 
             <div class="header-actions">
-                
-
-                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
-                    <i class="ph ph-moon"></i>
-                </button>
+                <!-- Auth Buttons will be injected here if not logged in -->
+                <div class="auth-buttons" id="user-menu-container">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
 
                 <!-- Language Switcher -->
                 <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
@@ -199,10 +198,9 @@
                     <i class="ph-bold ph-globe"></i> EN
                 </a>
 
-                <!-- Auth Buttons will be injected here if not logged in -->
-                <div class="auth-buttons" id="user-menu-container">
-                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
-                </div>
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
 
                 <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
                     <i class="ph ph-list"></i>
