@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArticlesPage();
     }
 
-    if (window.location.pathname.includes('/article-detail') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/')) {
+    if (window.location.pathname.includes('/article-detail') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/') || window.location.pathname.includes('/preview-article')) {
         loadArticleDetail();
     }
 
