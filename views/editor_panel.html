@@ -1385,7 +1385,7 @@
 
                     <div class="form-group">
                         <label>Kategori</label>
-                        <select id="edit-category" class="form-control">
+                        <select id="edit-category" class="form-control" onchange="toggleEditCustomCategory(this)">
                             <option value="Biyoloji">Biyoloji</option>
                             <option value="Fizik">Fizik</option>
                             <option value="Astronomi">Astronomi</option>
@@ -1394,6 +1394,10 @@
                             <option value="Sağlık">Sağlık</option>
                             <option value="other">Diğer</option>
                         </select>
+                    </div>
+                    <div class="form-group" id="edit-custom-category-group" style="display: none;">
+                        <label>Özel Kategori Adı</label>
+                        <input type="text" id="edit-custom-category" class="form-control" placeholder="Kategori adını yazın">
                     </div>
 
                     <div class="form-group full-width">
@@ -1414,6 +1418,18 @@
                     <div class="form-group">
                         <label>Etiketler</label>
                         <input type="text" id="edit-tags" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kapak Görselini Değiştir</label>
+                        <input type="file" id="edit-imageInput" accept="image/*" class="form-control" style="margin-top: 5px; padding: 10px;">
+                        <small style="color: #64748b; display: block; margin-top: 5px;">Mevcut görseli korumak için boş bırakın.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>PDF Dosyasını Değiştir</label>
+                        <input type="file" id="edit-pdfInput" accept=".pdf" class="form-control" style="margin-top: 5px; padding: 10px;">
+                        <small style="color: #64748b; display: block; margin-top: 5px;">Mevcut PDF'i korumak için boş bırakın.</small>
                     </div>
 
                     <div class="form-group">
@@ -1486,8 +1502,19 @@
                 modules: {
                     imageResize: {},
                     toolbar: [
-                        [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline'],
-                        ['blockquote', 'code-block'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        [{ 'font': [] }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'script': 'sub'}, { 'script': 'super' }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'direction': 'rtl' }],
+                        [{ 'align': [] }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image', 'video'],
+                        ['clean']
                     ]
                 }
             });
@@ -1813,6 +1840,16 @@
             }
         }
 
+        function toggleEditCustomCategory(select) {
+            const group = document.getElementById('edit-custom-category-group');
+            if (select.value === 'other') {
+                group.style.display = 'block';
+                document.getElementById('edit-custom-category').focus();
+            } else {
+                group.style.display = 'none';
+            }
+        }
+
         function closeEditModal() {
             document.getElementById('edit-modal').classList.remove('show');
         }
@@ -1845,9 +1882,20 @@
 
                 // Populate Form
                 document.getElementById('edit-title').value = article.title;
-                document.getElementById('edit-category').value = article.category;
+                const editCategorySelect = document.getElementById('edit-category');
+                const editOptions = Array.from(editCategorySelect.options).map(o => o.value);
+                if (editOptions.includes(article.category)) {
+                    editCategorySelect.value = article.category;
+                    document.getElementById('edit-custom-category-group').style.display = 'none';
+                } else {
+                    editCategorySelect.value = 'other';
+                    document.getElementById('edit-custom-category-group').style.display = 'block';
+                    document.getElementById('edit-custom-category').value = article.category;
+                }
                 document.getElementById('edit-excerpt').value = article.excerpt;
                 document.getElementById('edit-tags').value = article.tags || '';
+                document.getElementById('edit-imageInput').value = '';
+                document.getElementById('edit-pdfInput').value = '';
                 document.getElementById('references').value = article.references_list || '';
                 if (quillEdit) quillEdit.root.innerHTML = article.content;
 
@@ -1883,7 +1931,8 @@
             if (!currentArticleId) return;
 
             const title = document.getElementById('edit-title').value;
-            const category = document.getElementById('edit-category').value;
+            let category = document.getElementById('edit-category').value;
+            if (category === 'other') category = document.getElementById('edit-custom-category').value;
             const excerpt = document.getElementById('edit-excerpt').value;
             const tags = document.getElementById('edit-tags').value;
             const references = document.getElementById('references').value;
@@ -1896,6 +1945,12 @@
             formData.append('tags', tags);
             formData.append('references_list', references);
             formData.append('content', content);
+
+            const imageFile = document.getElementById('edit-imageInput').files[0];
+            if (imageFile) formData.append('image', imageFile);
+
+            const pdfFile = document.getElementById('edit-pdfInput').files[0];
+            if (pdfFile) formData.append('pdf', pdfFile);
 
             // Collect Authors
             const selectedAuthors = [];
