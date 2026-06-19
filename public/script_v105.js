@@ -984,7 +984,6 @@ async function loadMenus() {
                     // Default Content (Login/Signup) - will be updated by checkAuthStatus
                     mobileAuth.innerHTML = `
                         <button class="btn btn-login" onclick="openModal('loginModal')" style="width:100%;">Giriş Yap</button>
-                        <button class="btn btn-signup" onclick="openModal('signupModal')" style="width:100%;">Kayıt Ol</button>
                     `;
 
                     mobileMenu.appendChild(mobileAuth);
@@ -1491,7 +1490,6 @@ function checkAuthStatus() {
         authButtons.forEach(container => {
             container.innerHTML = `
                 <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
-                <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
             `;
         });
 
