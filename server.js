@@ -2003,7 +2003,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
             autoSendNewsletter(newArticleId).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
         }
 
-        res.status(201).json({ message: 'Article created', status: finalStatus });
+        res.status(201).json({ message: 'Article created', status: finalStatus, id: newArticleId });
     } catch (e) {
         console.error('Route: DB Error:', e);
         res.status(500).send(e.toString());
