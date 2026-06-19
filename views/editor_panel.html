@@ -1403,11 +1403,19 @@
                     <div class="form-group full-width">
                         <div class="section-header">
                             <i class="ph-fill ph-books section-icon"></i>
-                            <h3 class="section-label">Kaynakça</h3>
+                            <h3 class="section-label">Makale Kaynakçası</h3>
                         </div>
-                        <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.9rem;">Makalede
-                            kullandığınız kaynakları buraya ekleyin.</label>
+                        <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.9rem;">Makalede kullandığınız kaynakları buraya ekleyin.</label>
                         <textarea id="references" class="form-control" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="section-header">
+                            <i class="ph-fill ph-image section-icon"></i>
+                            <h3 class="section-label">Görsel Kaynakçası</h3>
+                        </div>
+                        <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.9rem;">Makalede kullandığınız görsellerin kaynaklarını buraya ekleyin.</label>
+                        <textarea id="visual_references" class="form-control" rows="4"></textarea>
                     </div>
 
                     <div class="form-group">
@@ -1897,6 +1905,7 @@
                 document.getElementById('edit-imageInput').value = '';
                 document.getElementById('edit-pdfInput').value = '';
                 document.getElementById('references').value = article.references_list || '';
+                document.getElementById('visual_references').value = article.visual_references_list || '';
                 if (quillEdit) quillEdit.root.innerHTML = article.content;
 
                 // Handle Authors (Pre-selection)
@@ -1944,6 +1953,7 @@
             formData.append('excerpt', excerpt);
             formData.append('tags', tags);
             formData.append('references_list', references);
+            formData.append('visual_references_list', document.getElementById('visual_references').value);
             formData.append('content', content);
 
             const imageFile = document.getElementById('edit-imageInput').files[0];
