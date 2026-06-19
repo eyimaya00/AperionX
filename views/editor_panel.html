@@ -1907,7 +1907,7 @@
                 let allRefs = article.references_list || '';
                 let visRefs = article.visual_references_list || '';
                 
-                if (!visRefs && allRefs.includes('[IMAGES]')) {
+                if (!visRefs.trim() && allRefs.includes('[IMAGES]')) {
                     const parts = allRefs.split('[IMAGES]');
                     allRefs = parts[0];
                     visRefs = parts[1];

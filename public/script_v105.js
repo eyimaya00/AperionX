@@ -2287,7 +2287,7 @@ function renderArticleDetail(article) {
         let rawRefs = article.references_list || '';
         let rawVisual = article.visual_references_list || '';
 
-        if (!rawVisual && rawRefs.includes('[IMAGES]')) {
+        if (!rawVisual.trim() && rawRefs.includes('[IMAGES]')) {
             const parts = rawRefs.split('[IMAGES]');
             rawRefs = parts[0];
             rawVisual = parts[1];
