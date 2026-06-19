@@ -657,12 +657,6 @@ i[class*=" ph"] {
     }
 }
 
-/* Hide theme toggle on small screens (moved to mobile menu) */
-@media (max-width: 1399px) {
-    #themeToggle {
-        display: none !important;
-    }
-}
 
 /* ── Mobile Menu Panel ── */
 .mobile-menu {
