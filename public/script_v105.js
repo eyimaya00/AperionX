@@ -417,31 +417,33 @@ function startHeroLoop(count) {
 
 // --- Theme Toggle ---
 function initTheme() {
-    const themeBtn = document.getElementById('themeToggle');
-    if (!themeBtn) return;
+    const themeBtns = document.querySelectorAll('.theme-toggle');
+    if (themeBtns.length === 0) return;
 
     // Check saved theme (default to dark)
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         document.documentElement.removeAttribute('data-theme');
-        themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
+        themeBtns.forEach(btn => btn.innerHTML = '<i class="ph ph-moon"></i>');
     } else {
         document.documentElement.setAttribute('data-theme', 'dark');
-        themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
+        themeBtns.forEach(btn => btn.innerHTML = '<i class="ph ph-sun"></i>');
         if (!savedTheme) localStorage.setItem('theme', 'dark');
     }
 
-    themeBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
-        }
+    themeBtns.forEach(themeBtn => {
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeBtns.forEach(btn => btn.innerHTML = '<i class="ph ph-moon"></i>');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeBtns.forEach(btn => btn.innerHTML = '<i class="ph ph-sun"></i>');
+            }
+        });
     });
 }
 
