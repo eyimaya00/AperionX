@@ -490,7 +490,102 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
     }
 });
 
-// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
+
+// === TRUE PREVIEW ROUTE FOR EDITORS ===
+app.get('/preview-article/:id', async (req, res, next) => {
+    // Authenticate via query param token for iframes
+    const token = req.query.token;
+    if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+    } catch (e) {
+        return res.status(403).send('Yetkisiz Erişim (Geçersiz Token)');
+    }
+
+    const id = req.params.id;
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM articles WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).send('Makale bulunamadı (404)');
+        
+        const article = rows[0];
+
+        // Verify authorization
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && article.author_id !== req.user.id) {
+            return res.status(403).send('Erişim Reddedildi');
+        }
+
+        // Read Template
+        const filePath = path.join(__dirname, 'views', 'article-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+
+                let authorNames = [];
+                let authors = [];
+                try {
+                    authors = await getArticleAuthors(pool, article.id);
+                    if (authors.length > 0) {
+                        authorNames = authors.map(a => a.fullname);
+                    } else {
+                        authorNames = ['AperionX Yazarı'];
+                    }
+                } catch (e) { authorNames = ['AperionX Yazarı']; }
+
+                const authorName = authorNames.join(', ');
+
+                const title = article.title;
+                const summary = article.excerpt || article.title;
+                const img = article.image_url
+                    ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
+                    : `${origin}/uploads/logo.png`;
+
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const safeImg = (img || '').replace(/"/g, '&quot;');
+                const safeUrl = `${origin}/makale/${article.slug}`;
+                const isoDate = new Date(article.created_at).toISOString();
+
+                let html = htmlData;
+
+                html = html.replace(/<title>.*?<\/title>/i, `<title>(ÖNİZLEME) ${safeTitle} - AperionX</title>`);
+
+                const replaceMeta = (name, content) => {
+                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    html = html.replace(regex, `$1${content}$3`);
+                };
+
+                replaceMeta('description', safeSummary);
+                replaceMeta('og:title', safeTitle);
+                replaceMeta('og:description', safeSummary);
+                replaceMeta('og:image', safeImg);
+
+                // Inject Preloaded Data Script WITH IS_PREVIEW FLAG
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHORS = ${JSON.stringify(authors)}; window.IS_PREVIEW = true;</script>`;
+
+                html = html.replace('</head>', `${scriptTag}\n</head>`);
+
+                let authorHtml = authors.map(a => `<a href="#" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
+                html = html.replace(/<span\s+id="detail-author">.*?<\/span>/s, `<span id="detail-author">${authorHtml}</span>`);
+
+                res.send(html);
+
+            } catch (parseErr) {
+                console.error('SSR Parse Error (Preview):', parseErr);
+                res.status(500).send(parseErr.toString());
+            }
+        });
+
+    } catch (e) {
+        console.error('DB Error (Preview):', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+\n// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
 app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], (req, res) => {
     res.redirect(301, '/articles.html');
 });
@@ -1832,7 +1927,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
     //    If role is 'admin' or 'editor' -> ALLOW 'published'.
 
     const body = req.body || {};
-    const { title, category, content, excerpt, status, tags, references_list } = body;
+    const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = body;
     let author_ids = body.author_ids; // Expecting array or JSON string
 
     if (typeof author_ids === 'string') {
@@ -1868,8 +1963,8 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
         const slug = await getUniqueSlug(pool, title);
 
         const [insertResult] = await pool.query(
-            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, pdf_url]
+            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url]
         );
 
         const newArticleId = insertResult.insertId;
@@ -1927,7 +2022,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-    const { title, category, content, excerpt, status, tags, references_list } = req.body;
+    const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
 
     // Determine status update logic
     // If editing a 'published' article, does it go back to pending? 
@@ -1963,7 +2058,8 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
     if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
     if (tags) { updates.push('tags = ?'); params.push(tags); }
-    if (references_list) { updates.push('references_list = ?'); params.push(references_list); }
+    if (references_list !== undefined) { updates.push('references_list = ?'); params.push(references_list); }
+    if (visual_references_list !== undefined) { updates.push('visual_references_list = ?'); params.push(visual_references_list); }
 
     if (req.files && req.files['image']) {
         updates.push('image_url = ?');

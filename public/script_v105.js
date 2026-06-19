@@ -2269,7 +2269,7 @@ function renderArticleDetail(article) {
     // References
     const refSection = document.getElementById('references-section');
 
-    if (article.references_list && refSection) {
+    if ((article.references_list || article.visual_references_list) && refSection) {
         // Clear and rebuild section content
         refSection.innerHTML = '';
 
@@ -2281,16 +2281,14 @@ function renderArticleDetail(article) {
         refSection.appendChild(mainTitle); 
         */
 
-        const allRefs = article.references_list;
         let textRefs = [];
         let imgRefs = [];
 
-        if (allRefs.includes('[IMAGES]')) {
-            const parts = allRefs.split('[IMAGES]');
-            textRefs = parts[0].trim().split('\n').filter(r => r.trim());
-            imgRefs = parts[1].trim().split('\n').filter(r => r.trim());
-        } else {
-            textRefs = allRefs.split('\n').filter(r => r.trim());
+        if (article.references_list) {
+            textRefs = article.references_list.split('\n').filter(r => r.trim());
+        }
+        if (article.visual_references_list) {
+            imgRefs = article.visual_references_list.split('\n').filter(r => r.trim());
         }
 
         // 1. Text References

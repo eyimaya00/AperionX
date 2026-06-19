@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS articles (
     category VARCHAR(100) DEFAULT 'Genel',
     tags TEXT,
     references_list TEXT,
+    visual_references_list TEXT,
     pdf_url VARCHAR(255),
     rejection_reason TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
