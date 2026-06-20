@@ -855,6 +855,20 @@
         }
 
         /* === YAZAR TAKİP CSS STYLES === */
+        .yazar-violation-badge {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         #yazar-takip {
             margin-top: 10px;
         }
@@ -2349,6 +2363,10 @@
                 <div class="yazar-form-group">
                     <label for="yazar-conversationDate">Konuşma Tarihi</label>
                     <input type="date" id="yazar-conversationDate" required>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-violations">İhlal Sayısı</label>
+                    <input type="number" id="yazar-violations" min="0" value="0">
                 </div>
                 <div class="yazar-form-group">
                     <label for="yazar-notes">Notlar (İsteğe bağlı)</label>
@@ -4169,6 +4187,11 @@
             let progressPercent = Math.min((daysPassed / deadlineDays) * 100, 100);
             if (status === 'red') progressPercent = 100;
 
+            let violationBadgeHTML = '';
+            if (author.violations > 0) {
+                violationBadgeHTML = `<span class="yazar-violation-badge" title="Toplam İhlal Sayısı">⚠️ ${author.violations} İhlal</span>`;
+            }
+
             const refDate = getYazarLastReferenceDate(author);
             const hasArticles = author.articles && author.articles.length > 0;
             const refLabel = hasArticles ? 'Son Makale Tarihi' : 'Konuşma Tarihi';
@@ -4224,7 +4247,7 @@
                         <div class="yazar-status-dot ${status}"></div>
                         <div class="yazar-author-avatar">${initials}</div>
                         <div class="yazar-author-summary">
-                            <div class="yazar-author-name">${escapeYazarHtml(fullName)}</div>
+                            <div class="yazar-author-name">${escapeYazarHtml(fullName)} ${violationBadgeHTML}</div>
                             <div class="yazar-author-quick-info">
                                 <span>📞 ${escapeYazarHtml(formatYazarPhone(author.phone))}</span>
                                 <span>📅 ${freqLabel}</span>
@@ -4250,6 +4273,12 @@
                             <div class="yazar-detail-item">
                                 <div class="yazar-detail-label">Son Teslim Tarihi</div>
                                 <div class="yazar-detail-value mono">${formatYazarDate(deadlineDate)}</div>
+                            </div>
+                            <div class="yazar-detail-item">
+                                <div class="yazar-detail-label">Toplam İhlal</div>
+                                <div class="yazar-detail-value" style="color: ${author.violations > 0 ? '#ef4444' : 'inherit'}; font-weight: ${author.violations > 0 ? '700' : 'normal'};">
+                                    ${author.violations} İhlal
+                                </div>
                             </div>
                             ${createdByHTML}
                         </div>
@@ -4322,6 +4351,7 @@
             document.getElementById('yazar-btnSubmitAuthor').textContent = 'Kaydet';
             document.getElementById('yazar-editAuthorId').value = '';
             document.getElementById('yazar-authorForm').reset();
+            document.getElementById('yazar-violations').value = '0';
             setYazarDefaultDate();
             openYazarModal('yazar-authorModal');
             setTimeout(() => {
@@ -4341,6 +4371,7 @@
             document.getElementById('yazar-lastName').value = author.last_name;
             document.getElementById('yazar-phone').value = author.phone || '';
             document.getElementById('yazar-frequency').value = author.frequency;
+            document.getElementById('yazar-violations').value = author.violations || 0;
             
             const convDate = new Date(author.conversation_date).toISOString().split('T')[0];
             document.getElementById('yazar-conversationDate').value = convDate;
@@ -4392,6 +4423,7 @@
             }
         }
 
+        // Search & Filter
         function handleYazarSearch() {
             renderYazarAuthorList();
         }
@@ -4420,6 +4452,7 @@
             const phone = document.getElementById('yazar-phone').value.trim();
             const frequency = document.getElementById('yazar-frequency').value;
             const conversation_date = document.getElementById('yazar-conversationDate').value;
+            const violations = parseInt(document.getElementById('yazar-violations').value) || 0;
             const notes = document.getElementById('yazar-notes').value.trim();
 
             if (!first_name || !last_name || !frequency || !conversation_date) {
@@ -4427,7 +4460,7 @@
                 return;
             }
 
-            const body = { first_name, last_name, phone, frequency, conversation_date, notes };
+            const body = { first_name, last_name, phone, frequency, conversation_date, notes, violations };
 
             try {
                 let res;
@@ -4487,13 +4520,17 @@
                     body: JSON.stringify({ title, article_date })
                 });
 
+                const data = await res.json();
                 if (!res.ok) {
-                    const data = await res.json();
                     throw new Error(data.error || 'Makale kaydedilemedi');
                 }
 
                 yazarExpandedCardId = authorId;
-                showToast(`"${title}" başarıyla kaydedildi.`, 'success');
+                if (data.violation) {
+                    showToast(`"${title}" kaydedildi. ⚠️ Gecikme nedeniyle 1 İhlal eklendi!`, 'error');
+                } else {
+                    showToast(`"${title}" başarıyla kaydedildi.`, 'success');
+                }
                 closeYazarModal('yazar-articleModal');
                 await loadYazarTakip();
             } catch (err) {

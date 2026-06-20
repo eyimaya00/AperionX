@@ -932,6 +932,7 @@ async function ensureSchema() {
                 conversation_date DATE NOT NULL,
                 notes TEXT,
                 created_by INT,
+                violations INT NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
@@ -949,7 +950,14 @@ async function ensureSchema() {
             )
         `);
 
-        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users & Yazar Takip ensured.');
+        // Migration: add violations column if it doesn't exist
+        try {
+            await pool.query('ALTER TABLE tracked_authors ADD COLUMN violations INT NOT NULL DEFAULT 0');
+        } catch (err) {
+            // Ignore if column already exists
+        }
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users & Yazar Takip (with Violations) ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -2900,16 +2908,16 @@ app.get('/api/tracked-authors', authenticateToken, async (req, res) => {
 app.post('/api/tracked-authors', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        const { first_name, last_name, phone, frequency, conversation_date, notes } = req.body;
+        const { first_name, last_name, phone, frequency, conversation_date, notes, violations } = req.body;
 
         if (!first_name || !last_name || !frequency || !conversation_date) {
             return res.status(400).json({ error: 'Zorunlu alanlar eksik: first_name, last_name, frequency, conversation_date' });
         }
 
         const [result] = await pool.query(
-            `INSERT INTO tracked_authors (first_name, last_name, phone, frequency, conversation_date, notes, created_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, req.user.id]
+            `INSERT INTO tracked_authors (first_name, last_name, phone, frequency, conversation_date, notes, created_by, violations)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, req.user.id, parseInt(violations) || 0]
         );
 
         res.status(201).json({ id: result.insertId, message: `${first_name} ${last_name} başarıyla eklendi.` });
@@ -2923,7 +2931,7 @@ app.post('/api/tracked-authors', authenticateToken, async (req, res) => {
 app.put('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        const { first_name, last_name, phone, frequency, conversation_date, notes } = req.body;
+        const { first_name, last_name, phone, frequency, conversation_date, notes, violations } = req.body;
         const authorId = req.params.id;
 
         if (!first_name || !last_name || !frequency || !conversation_date) {
@@ -2931,9 +2939,9 @@ app.put('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
         }
 
         const [result] = await pool.query(
-            `UPDATE tracked_authors SET first_name = ?, last_name = ?, phone = ?, frequency = ?, conversation_date = ?, notes = ?
+            `UPDATE tracked_authors SET first_name = ?, last_name = ?, phone = ?, frequency = ?, conversation_date = ?, notes = ?, violations = ?
              WHERE id = ?`,
-            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, authorId]
+            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, parseInt(violations) || 0, authorId]
         );
 
         if (result.affectedRows === 0) {
@@ -2975,18 +2983,57 @@ app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res
             return res.status(400).json({ error: 'Makale başlığı ve tarihi gerekli.' });
         }
 
-        // Verify author exists
-        const [author] = await pool.query('SELECT id, first_name, last_name FROM tracked_authors WHERE id = ?', [authorId]);
-        if (author.length === 0) {
+        // Verify author exists and fetch their details
+        const [authors] = await pool.query('SELECT * FROM tracked_authors WHERE id = ?', [authorId]);
+        if (authors.length === 0) {
             return res.status(404).json({ error: 'Yazar bulunamadı.' });
         }
+        const author = authors[0];
 
+        // Fetch their most recent article date before this new one
+        const [articles] = await pool.query(
+            'SELECT article_date FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC LIMIT 1',
+            [authorId]
+        );
+
+        // Determine reference date (MAX of conversation_date and last article date)
+        let referenceDate = new Date(author.conversation_date);
+        if (articles.length > 0) {
+            const lastArticleDate = new Date(articles[0].article_date);
+            if (lastArticleDate > referenceDate) {
+                referenceDate = lastArticleDate;
+            }
+        }
+        referenceDate.setHours(0, 0, 0, 0);
+
+        // Calculate deadline
+        const deadlineDays = parseInt(author.frequency);
+        const deadlineDate = new Date(referenceDate);
+        deadlineDate.setDate(deadlineDate.getDate() + deadlineDays);
+        deadlineDate.setHours(0, 0, 0, 0);
+
+        // Compare new article date with deadline
+        const newArticleDate = new Date(article_date);
+        newArticleDate.setHours(0, 0, 0, 0);
+
+        let violation = false;
+        if (newArticleDate > deadlineDate) {
+            violation = true;
+            // Increment violation count in database
+            await pool.query('UPDATE tracked_authors SET violations = violations + 1 WHERE id = ?', [authorId]);
+        }
+
+        // Insert new article
         const [result] = await pool.query(
             'INSERT INTO tracked_author_articles (author_id, title, article_date) VALUES (?, ?, ?)',
             [authorId, title, article_date]
         );
 
-        res.status(201).json({ id: result.insertId, message: `"${title}" kaydedildi.` });
+        res.status(201).json({
+            id: result.insertId,
+            message: `"${title}" kaydedildi.` + (violation ? ' ⚠️ Gecikme nedeniyle 1 ihlal eklendi!' : ''),
+            violation: violation
+        });
     } catch (e) {
         console.error('Tracked author article create error:', e);
         res.status(500).json({ error: e.toString() });
