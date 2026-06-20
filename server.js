@@ -921,7 +921,35 @@ async function ensureSchema() {
         `);
         // === END EXPERIMENTS MODULE TABLES ===
 
-        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments & Users ensured.');
+        // === YAZAR TAKİP MODULE TABLES ===
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS tracked_authors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                first_name VARCHAR(100) NOT NULL,
+                last_name VARCHAR(100) NOT NULL,
+                phone VARCHAR(20),
+                frequency INT NOT NULL DEFAULT 14,
+                conversation_date DATE NOT NULL,
+                notes TEXT,
+                created_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS tracked_author_articles (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                author_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                article_date DATE NOT NULL,
+                recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (author_id) REFERENCES tracked_authors(id) ON DELETE CASCADE
+            )
+        `);
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users & Yazar Takip ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -2838,6 +2866,132 @@ app.get('/api/editor/authors', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).send(e.toString()); }
 });
 
+
+// === YAZAR TAKİP (TRACKED AUTHORS) ROUTES ===
+
+// GET all tracked authors with their articles
+app.get('/api/tracked-authors', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [authors] = await pool.query(`
+            SELECT ta.*, u.fullname as created_by_name
+            FROM tracked_authors ta
+            LEFT JOIN users u ON ta.created_by = u.id
+            ORDER BY ta.created_at DESC
+        `);
+
+        // Fetch articles for each author
+        for (let author of authors) {
+            const [articles] = await pool.query(
+                'SELECT * FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC',
+                [author.id]
+            );
+            author.articles = articles;
+        }
+
+        res.json(authors);
+    } catch (e) {
+        console.error('Tracked authors fetch error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// POST create new tracked author
+app.post('/api/tracked-authors', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { first_name, last_name, phone, frequency, conversation_date, notes } = req.body;
+
+        if (!first_name || !last_name || !frequency || !conversation_date) {
+            return res.status(400).json({ error: 'Zorunlu alanlar eksik: first_name, last_name, frequency, conversation_date' });
+        }
+
+        const [result] = await pool.query(
+            `INSERT INTO tracked_authors (first_name, last_name, phone, frequency, conversation_date, notes, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, req.user.id]
+        );
+
+        res.status(201).json({ id: result.insertId, message: `${first_name} ${last_name} başarıyla eklendi.` });
+    } catch (e) {
+        console.error('Tracked author create error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// PUT update tracked author
+app.put('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { first_name, last_name, phone, frequency, conversation_date, notes } = req.body;
+        const authorId = req.params.id;
+
+        if (!first_name || !last_name || !frequency || !conversation_date) {
+            return res.status(400).json({ error: 'Zorunlu alanlar eksik.' });
+        }
+
+        const [result] = await pool.query(
+            `UPDATE tracked_authors SET first_name = ?, last_name = ?, phone = ?, frequency = ?, conversation_date = ?, notes = ?
+             WHERE id = ?`,
+            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, authorId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Yazar bulunamadı.' });
+        }
+
+        res.json({ message: `${first_name} ${last_name} güncellendi.` });
+    } catch (e) {
+        console.error('Tracked author update error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// DELETE tracked author
+app.delete('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [result] = await pool.query('DELETE FROM tracked_authors WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Yazar bulunamadı.' });
+        }
+
+        res.json({ message: 'Yazar silindi.' });
+    } catch (e) {
+        console.error('Tracked author delete error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// POST record article for tracked author
+app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { title, article_date } = req.body;
+        const authorId = req.params.id;
+
+        if (!title || !article_date) {
+            return res.status(400).json({ error: 'Makale başlığı ve tarihi gerekli.' });
+        }
+
+        // Verify author exists
+        const [author] = await pool.query('SELECT id, first_name, last_name FROM tracked_authors WHERE id = ?', [authorId]);
+        if (author.length === 0) {
+            return res.status(404).json({ error: 'Yazar bulunamadı.' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO tracked_author_articles (author_id, title, article_date) VALUES (?, ?, ?)',
+            [authorId, title, article_date]
+        );
+
+        res.status(201).json({ id: result.insertId, message: `"${title}" kaydedildi.` });
+    } catch (e) {
+        console.error('Tracked author article create error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
 
 
 // 2. Hero Slides

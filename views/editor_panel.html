@@ -853,6 +853,900 @@
         #author-list-grid::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* === YAZAR TAKİP CSS STYLES === */
+        #yazar-takip {
+            margin-top: 10px;
+        }
+
+        /* ── Dashboard Stats ── */
+        .yazar-dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .yazar-stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .yazar-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .yazar-stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .yazar-stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
+        .yazar-stat-card:hover::after {
+            opacity: 0.15;
+        }
+
+        .yazar-stat-card.total::before { background: linear-gradient(90deg, #6366f1, #818cf8); }
+        .yazar-stat-card.active::before { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+        .yazar-stat-card.warning::before { background: linear-gradient(90deg, #f59e0b, #fde68a); }
+        .yazar-stat-card.overdue::before { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+
+        .yazar-stat-card.total::after { background: #6366f1; }
+        .yazar-stat-card.active::after { background: #10b981; }
+        .yazar-stat-card.warning::after { background: #f59e0b; }
+        .yazar-stat-card.overdue::after { background: #ef4444; }
+
+        .yazar-stat-card .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .yazar-stat-card .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .yazar-stat-card.total .stat-icon { background: rgba(99, 102, 241, 0.08); }
+        .yazar-stat-card.active .stat-icon { background: rgba(16, 185, 129, 0.08); }
+        .yazar-stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.08); }
+        .yazar-stat-card.overdue .stat-icon { background: rgba(239, 68, 68, 0.08); }
+
+        .yazar-stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            font-feature-settings: 'tnum';
+        }
+
+        .yazar-stat-card .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 6px;
+            letter-spacing: 0.02em;
+        }
+
+        .yazar-stat-card.total .stat-value { color: #6366f1; }
+        .yazar-stat-card.active .stat-value { color: #10b981; }
+        .yazar-stat-card.warning .stat-value { color: #f59e0b; }
+        .yazar-stat-card.overdue .stat-value { color: #ef4444; }
+
+        /* ── Controls Bar ── */
+        .yazar-controls-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .yazar-search-wrapper {
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .yazar-search-wrapper .yazar-search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .yazar-search-input {
+            width: 100%;
+            padding: 11px 18px 11px 44px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+
+        .yazar-search-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .yazar-filter-group {
+            display: flex;
+            gap: 3px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            padding: 3px;
+        }
+
+        .yazar-filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 9999px;
+            background: transparent;
+            color: #64748b;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .yazar-filter-btn:hover {
+            color: var(--text-main);
+            background: #f1f5f9;
+        }
+
+        .yazar-filter-btn.active {
+            background: var(--primary-accent, #6366f1);
+            color: white;
+        }
+
+        .yazar-section-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        .yazar-author-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* ── Author Card ── */
+        .yazar-author-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .yazar-author-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .yazar-author-card.expanded {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.05);
+            background: #fcfdfe;
+        }
+
+        .yazar-author-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            user-select: none;
+        }
+
+        .yazar-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .yazar-status-dot::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .yazar-status-dot.green {
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+        .yazar-status-dot.green::before {
+            border: 1.5px solid #10b981;
+            animation: dotPulse 2.5s ease-in-out infinite;
+        }
+
+        .yazar-status-dot.yellow {
+            background: #f59e0b;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+        }
+        .yazar-status-dot.yellow::before {
+            border: 1.5px solid #f59e0b;
+            animation: dotPulse 1.8s ease-in-out infinite;
+        }
+
+        .yazar-status-dot.red {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+        .yazar-status-dot.red::before {
+            border: 1.5px solid #ef4444;
+            animation: dotPulseRed 1.2s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0; transform: scale(2.2); }
+        }
+        @keyframes dotPulseRed {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 0; transform: scale(2.5); }
+        }
+
+        .yazar-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-accent, #6366f1), #8b5cf6);
+        }
+
+        .yazar-author-card[data-status="green"] .yazar-author-avatar {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+        .yazar-author-card[data-status="yellow"] .yazar-author-avatar {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+        .yazar-author-card[data-status="red"] .yazar-author-avatar {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .yazar-author-summary {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .yazar-author-name {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .yazar-author-quick-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 2px;
+        }
+
+        .yazar-author-quick-info span {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .yazar-status-badge {
+            padding: 5px 14px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+        }
+
+        .yazar-status-badge.green {
+            background: rgba(16, 185, 129, 0.08);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+        .yazar-status-badge.yellow {
+            background: rgba(245, 158, 11, 0.08);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+        .yazar-status-badge.red {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .yazar-expand-arrow {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .yazar-author-card.expanded .yazar-expand-arrow {
+            transform: rotate(180deg);
+        }
+
+        .yazar-author-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0 20px;
+        }
+
+        .yazar-author-card.expanded .yazar-author-detail {
+            max-height: 1000px;
+            padding: 0 20px 20px;
+        }
+
+        .yazar-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+            margin-top: 10px;
+        }
+
+        .yazar-detail-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+
+        .yazar-detail-item .yazar-detail-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .yazar-detail-item .yazar-detail-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .yazar-detail-item .yazar-detail-value.mono {
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .yazar-progress-container {
+            margin-bottom: 16px;
+        }
+
+        .yazar-progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .yazar-progress-label span {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .yazar-progress-label .yazar-progress-days {
+            font-weight: 600;
+        }
+
+        .yazar-progress-bar {
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .yazar-progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .yazar-progress-fill.green { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+        .yazar-progress-fill.yellow { background: linear-gradient(90deg, #f59e0b, #fde68a); }
+        .yazar-progress-fill.red { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+
+        .yazar-detail-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .yazar-btn-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9999px;
+            background: white;
+            color: #475569;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .yazar-btn-detail:hover {
+            background: #f8fafc;
+            color: var(--text-main);
+            border-color: #94a3b8;
+        }
+
+        .yazar-btn-detail.yazar-btn-record-article {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .yazar-btn-detail.yazar-btn-record-article:hover {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .yazar-btn-detail.yazar-btn-edit {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.2);
+            color: var(--primary-accent, #6366f1);
+        }
+        .yazar-btn-detail.yazar-btn-edit:hover {
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .yazar-btn-detail.yazar-btn-danger {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .yazar-btn-detail.yazar-btn-danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .yazar-article-history {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+        }
+
+        .yazar-article-history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .yazar-article-history-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .yazar-article-count-badge {
+            font-size: 0.68rem;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--primary-accent, #6366f1);
+            font-weight: 600;
+        }
+
+        .yazar-article-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.15s;
+        }
+
+        .yazar-article-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .yazar-article-item .yazar-article-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            flex-shrink: 0;
+        }
+
+        .yazar-article-item .yazar-article-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .yazar-article-item .yazar-article-title-text {
+            font-size: 0.82rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .yazar-article-item .yazar-article-date {
+            font-size: 0.7rem;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        .yazar-notes-section {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-accent, #6366f1);
+        }
+
+        .yazar-notes-section .yazar-notes-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .yazar-notes-section .yazar-notes-text {
+            font-size: 0.82rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .yazar-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .yazar-empty-state .yazar-empty-visual {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 16px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .yazar-empty-state h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .yazar-empty-state p {
+            font-size: 0.85rem;
+            max-width: 350px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Modals */
+        .yazar-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s;
+            padding: 20px;
+        }
+
+        .yazar-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .yazar-modal {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(24px) scale(0.96);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .yazar-modal-overlay.active .yazar-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .yazar-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .yazar-modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #0f172a;
+        }
+
+        .yazar-modal-close {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: transparent;
+            color: #64748b;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .yazar-modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+        .yazar-form-group {
+            margin-bottom: 16px;
+        }
+
+        .yazar-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .yazar-form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .yazar-form-group input,
+        .yazar-form-group select,
+        .yazar-form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: white;
+            border: 1px solid #dcdfe4;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.88rem;
+            transition: all 0.15s;
+            outline: none;
+        }
+
+        .yazar-form-group input:focus,
+        .yazar-form-group select:focus,
+        .yazar-form-group textarea:focus {
+            border-color: var(--brand-primary, #6366f1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .yazar-form-group select {
+            cursor: pointer;
+        }
+
+        .yazar-form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .yazar-form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .yazar-btn-cancel {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            border-radius: 9999px;
+            color: #475569;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .yazar-btn-cancel:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .yazar-btn-submit {
+            padding: 10px 24px;
+            background: var(--primary-accent, #6366f1);
+            border: none;
+            border-radius: 9999px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .yazar-btn-submit:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .yazar-confirm-dialog {
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .yazar-confirm-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 16px;
+        }
+
+        .yazar-confirm-dialog p {
+            color: #475569;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .yazar-confirm-name {
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 24px;
+        }
+
+        .yazar-confirm-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .yazar-btn-delete-confirm {
+            padding: 10px 24px;
+            background: #ef4444;
+            border: none;
+            border-radius: 9999px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .yazar-btn-delete-confirm:hover {
+            background: #dc2626;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+
+        @media (max-width: 900px) {
+            .yazar-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .yazar-dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+            .yazar-controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .yazar-filter-group {
+                width: 100%;
+                justify-content: center;
+            }
+            .yazar-form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .yazar-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     <link rel="stylesheet" href="/editor-modern.css?v=1">
 </head>
@@ -905,12 +1799,17 @@
 
             <!-- STATS MENU -->
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('section-stats-final', this)">
-                <i class="ph ph-chart-bar"></i> <span>İstatistikler</span>
+                <i class="ph ph-caret-right" style="display:none;"></i> <i class="ph ph-chart-bar"></i> <span>İstatistikler</span>
+            </a>
+
+            <!-- YAZAR TAKİP MENU -->
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('yazar-takip', this);">
+                <i class="ph ph-caret-right" style="display:none;"></i> <i class="ph ph-users-three"></i> <span>Yazar Takip</span>
             </a>
 
             <!-- PROFILE MENU -->
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this); loadProfile();">
-                <i class="ph ph-user"></i> <span>Profilim</span>
+                <i class="ph ph-caret-right" style="display:none;"></i> <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
         </div>
 
@@ -1349,6 +2248,159 @@
             </div>
         </div>
 
+        <!-- YAZAR TAKİP SECTION -->
+        <div id="yazar-takip" class="section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;">
+                <h1 class="page-title" style="margin: 0;">Yazar Takip</h1>
+                <button class="btn btn-primary" id="yazar-btnAddAuthor" onclick="openYazarAddModal()" style="display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; padding: 10px 20px;">
+                    <i class="ph ph-plus" style="font-size: 1.1rem;"></i>
+                    Yeni Yazar Ekle
+                </button>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="yazar-dashboard">
+                <div class="yazar-stat-card total" onclick="setYazarFilter('all')">
+                    <div class="stat-header">
+                        <div class="stat-icon">👥</div>
+                    </div>
+                    <div class="stat-value" id="yazar-statTotal">0</div>
+                    <div class="stat-label">Toplam Yazar</div>
+                </div>
+                <div class="yazar-stat-card active" onclick="setYazarFilter('green')">
+                    <div class="stat-header">
+                        <div class="stat-icon">✅</div>
+                    </div>
+                    <div class="stat-value" id="yazar-statActive">0</div>
+                    <div class="stat-label">Zamanında</div>
+                </div>
+                <div class="yazar-stat-card warning" onclick="setYazarFilter('yellow')">
+                    <div class="stat-header">
+                        <div class="stat-icon">⏳</div>
+                    </div>
+                    <div class="stat-value" id="yazar-statWarning">0</div>
+                    <div class="stat-label">Süresi Yaklaşan</div>
+                </div>
+                <div class="yazar-stat-card overdue" onclick="setYazarFilter('red')">
+                    <div class="stat-header">
+                        <div class="stat-icon">🔴</div>
+                    </div>
+                    <div class="stat-value" id="yazar-statOverdue">0</div>
+                    <div class="stat-label">Geciken</div>
+                </div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="yazar-controls-bar">
+                <div class="yazar-search-wrapper">
+                    <span class="yazar-search-icon">🔍</span>
+                    <input type="text" class="yazar-search-input" id="yazar-searchInput" placeholder="Yazar ara..." oninput="handleYazarSearch()">
+                </div>
+                <div class="yazar-filter-group">
+                    <button class="yazar-filter-btn active" data-filter="all" onclick="setYazarFilter('all', this)">Tümü</button>
+                    <button class="yazar-filter-btn" data-filter="green" onclick="setYazarFilter('green', this)">Aktif</button>
+                    <button class="yazar-filter-btn" data-filter="yellow" onclick="setYazarFilter('yellow', this)">Yaklaşan</button>
+                    <button class="yazar-filter-btn" data-filter="red" onclick="setYazarFilter('red', this)">Geciken</button>
+                </div>
+            </div>
+
+            <!-- Author List -->
+            <div class="yazar-section-label" id="yazar-sectionLabel">YAZARLAR</div>
+            <div class="yazar-author-list" id="yazar-authorList">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Yazar Takip Add/Edit Author Modal ── -->
+    <div class="yazar-modal-overlay" id="yazar-authorModal">
+        <div class="yazar-modal">
+            <div class="yazar-modal-header">
+                <h2 id="yazar-modalTitle">Yeni Yazar Ekle</h2>
+                <button class="yazar-modal-close" onclick="closeYazarModal('yazar-authorModal')">✕</button>
+            </div>
+            <form id="yazar-authorForm" onsubmit="handleYazarAuthorSubmit(event)">
+                <input type="hidden" id="yazar-editAuthorId">
+                <div class="yazar-form-row">
+                    <div class="yazar-form-group">
+                        <label for="yazar-firstName">Ad</label>
+                        <input type="text" id="yazar-firstName" placeholder="Yazarın adı" required>
+                    </div>
+                    <div class="yazar-form-group">
+                        <label for="yazar-lastName">Soyad</label>
+                        <input type="text" id="yazar-lastName" placeholder="Yazarın soyadı" required>
+                    </div>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-phone">Telefon Numarası</label>
+                    <input type="tel" id="yazar-phone" placeholder="05XX XXX XX XX" required>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-frequency">Makale Yayınlama Sıklığı</label>
+                    <select id="yazar-frequency" required>
+                        <option value="" disabled selected>Sıklık seçin...</option>
+                        <option value="7">Haftada 1 makale (7 gün)</option>
+                        <option value="14">2 haftada 1 makale (14 gün)</option>
+                        <option value="21">3 haftada 1 makale (21 gün)</option>
+                        <option value="28">4 haftada 1 makale (28 gün)</option>
+                    </select>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-conversationDate">Konuşma Tarihi</label>
+                    <input type="date" id="yazar-conversationDate" required>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-notes">Notlar (İsteğe bağlı)</label>
+                    <textarea id="yazar-notes" placeholder="Yazarla ilgili ek notlar..."></textarea>
+                </div>
+                <div class="yazar-form-actions">
+                    <button type="button" class="yazar-btn-cancel" onclick="closeYazarModal('yazar-authorModal')">İptal</button>
+                    <button type="submit" class="yazar-btn-submit" id="yazar-btnSubmitAuthor">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Yazar Takip Record Article Modal ── -->
+    <div class="yazar-modal-overlay" id="yazar-articleModal">
+        <div class="yazar-modal">
+            <div class="yazar-modal-header">
+                <h2>Makale Kaydet</h2>
+                <button class="yazar-modal-close" onclick="closeYazarModal('yazar-articleModal')">✕</button>
+            </div>
+            <form id="yazar-articleForm" onsubmit="handleYazarArticleSubmit(event)">
+                <input type="hidden" id="yazar-articleAuthorId">
+                <p id="yazar-articleAuthorName" style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.88rem;"></p>
+                <div class="yazar-form-group">
+                    <label for="yazar-articleTitle">Makale Başlığı</label>
+                    <input type="text" id="yazar-articleTitle" placeholder="Makale başlığını girin..." required>
+                </div>
+                <div class="yazar-form-group">
+                    <label for="yazar-articleDate">Yayın Tarihi</label>
+                    <input type="date" id="yazar-articleDate" required>
+                </div>
+                <div class="yazar-form-actions">
+                    <button type="button" class="yazar-btn-cancel" onclick="closeYazarModal('yazar-articleModal')">İptal</button>
+                    <button type="submit" class="yazar-btn-submit">Makaleyi Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Yazar Takip Confirm Delete Modal ── -->
+    <div class="yazar-modal-overlay" id="yazar-confirmModal">
+        <div class="yazar-modal" style="max-width: 400px;">
+            <div class="yazar-confirm-dialog">
+                <div class="yazar-confirm-icon">⚠️</div>
+                <p>Bu yazarı silmek istediğinize emin misiniz?</p>
+                <div class="yazar-confirm-name" id="yazar-confirmAuthorName"></div>
+                <div class="yazar-confirm-actions">
+                    <button class="yazar-btn-cancel" onclick="closeYazarModal('yazar-confirmModal')">İptal</button>
+                    <button class="yazar-btn-delete-confirm" id="yazar-btnConfirmDelete" onclick="confirmYazarDelete()">Yazarı Sil</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Review Modal -->
@@ -1773,6 +2825,9 @@
             }
             if (id === 'experiments-dashboard') {
                 loadExperimentsDashboard();
+            }
+            if (id === 'yazar-takip') {
+                loadYazarTakip();
             }
         }
 
@@ -2890,7 +3945,7 @@
 
         function showToast(msg, type) {
             const div = document.createElement('div');
-            div.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            div.style.background = type === 'success' ? '#10b981' : (type === 'info' ? '#6366f1' : '#ef4444');
             div.style.color = 'white'; div.style.padding = '12px 24px'; div.style.borderRadius = '8px'; div.style.marginTop = '10px';
             div.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
             div.className = 'toast-msg';
@@ -2919,6 +3974,587 @@
         // Let's modify showSection to lazy load, OR just load on init.
         // loadAnalysisAuthors(); // Moved to init
 
+
+        loadAuthorsForEditorSelection();
+
+        // =============================================
+        // === YAZAR TAKİP SYSTEM FUNCTIONS ===
+        // =============================================
+        const YAZAR_FREQUENCY_LABELS = {
+            7:  'Haftada 1 makale (7 gün)',
+            14: '2 haftada 1 makale (14 gün)',
+            21: '3 haftada 1 makale (21 gün)',
+            28: '4 haftada 1 makale (28 gün)'
+        };
+
+        let yazarAuthors = [];
+        let yazarFilter = 'all';
+        let yazarDeleteTargetId = null;
+        let yazarExpandedCardId = null;
+
+        async function loadYazarTakip() {
+            try {
+                const res = await fetch(`${API_URL}/tracked-authors`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        showToast('Yazar Takip sayfasına erişim yetkiniz yok.', 'error');
+                        return;
+                    }
+                    throw new Error('Yazarlar yüklenirken bir hata oluştu');
+                }
+                yazarAuthors = await res.json();
+                renderYazarAll();
+                setYazarDefaultDate();
+            } catch (e) {
+                console.error(e);
+                showToast(e.message, 'error');
+            }
+        }
+
+        function getYazarLastReferenceDate(author) {
+            if (author.articles && author.articles.length > 0) {
+                const lastArticle = author.articles.reduce((latest, article) => {
+                    const d = new Date(article.article_date);
+                    return d > latest ? d : latest;
+                }, new Date(author.articles[0].article_date));
+                lastArticle.setHours(0, 0, 0, 0);
+                return lastArticle;
+            }
+
+            const convDate = new Date(author.conversation_date);
+            convDate.setHours(0, 0, 0, 0);
+            return convDate;
+        }
+
+        function calculateYazarStatus(author) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const deadlineDays = parseInt(author.frequency);
+            const referenceDate = getYazarLastReferenceDate(author);
+
+            const diffTime = today.getTime() - referenceDate.getTime();
+            const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const daysRemaining = deadlineDays - daysPassed;
+
+            let status;
+            if (daysPassed > deadlineDays) {
+                status = 'red';
+            } else if (daysPassed >= deadlineDays - 2) {
+                status = 'yellow';
+            } else {
+                status = 'green';
+            }
+
+            return { status, daysPassed, daysRemaining, deadlineDays, referenceDate };
+        }
+
+        function renderYazarAll() {
+            renderYazarAuthorList();
+            renderYazarDashboard();
+        }
+
+        function renderYazarDashboard() {
+            let total = yazarAuthors.length;
+            let active = 0, warning = 0, overdue = 0;
+
+            yazarAuthors.forEach(author => {
+                const { status } = calculateYazarStatus(author);
+                if (status === 'green') active++;
+                else if (status === 'yellow') warning++;
+                else if (status === 'red') overdue++;
+            });
+
+            animateYazarCounter('yazar-statTotal', total);
+            animateYazarCounter('yazar-statActive', active);
+            animateYazarCounter('yazar-statWarning', warning);
+            animateYazarCounter('yazar-statOverdue', overdue);
+        }
+
+        function animateYazarCounter(elementId, target) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const current = parseInt(el.textContent) || 0;
+            if (current === target) return;
+
+            const duration = 400;
+            const startTime = performance.now();
+
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(current + (target - current) * eased);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function renderYazarAuthorList() {
+            const container = document.getElementById('yazar-authorList');
+            if (!container) return;
+            const searchTerm = document.getElementById('yazar-searchInput').value.toLowerCase().trim();
+            const label = document.getElementById('yazar-sectionLabel');
+
+            let filtered = yazarAuthors.filter(author => {
+                const fullName = `${author.first_name} ${author.last_name}`.toLowerCase();
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || (author.phone && author.phone.includes(searchTerm));
+
+                if (!matchesSearch) return false;
+
+                if (yazarFilter === 'all') return true;
+                const { status } = calculateYazarStatus(author);
+                return status === yazarFilter;
+            });
+
+            const statusOrder = { red: 0, yellow: 1, green: 2 };
+            filtered.sort((a, b) => {
+                const sa = calculateYazarStatus(a).status;
+                const sb = calculateYazarStatus(b).status;
+                return statusOrder[sa] - statusOrder[sb];
+            });
+
+            const filterNames = { all: 'YAZARLAR', green: 'AKTİF YAZARLAR', yellow: 'SÜRESİ YAKLAŞAN YAZARLAR', red: 'GECİKEN YAZARLAR' };
+            if (label) {
+                label.textContent = `${filterNames[yazarFilter]} (${filtered.length})`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = renderYazarEmptyState(searchTerm || yazarFilter !== 'all');
+                return;
+            }
+
+            container.innerHTML = filtered.map(author => renderYazarAuthorCard(author)).join('');
+        }
+
+        function renderYazarEmptyState(isFiltered) {
+            if (isFiltered) {
+                return `
+                    <div class="yazar-empty-state">
+                        <div class="yazar-empty-visual">🔍</div>
+                        <h3>Sonuç bulunamadı</h3>
+                        <p>Arama kriterlerinize uygun yazar bulunamadı. Filtreleri değiştirmeyi deneyin.</p>
+                    </div>
+                `;
+            }
+            return `
+                <div class="yazar-empty-state">
+                    <div class="yazar-empty-visual">✍️</div>
+                    <h3>Henüz yazar eklenmedi</h3>
+                    <p>Üst kısımdaki "Yeni Yazar Ekle" butonuna tıklayarak ilk yazarınızı ekleyin ve takibi başlatın.</p>
+                </div>
+            `;
+        }
+
+        function renderYazarAuthorCard(author) {
+            const calc = calculateYazarStatus(author);
+            const { status, daysPassed, daysRemaining, deadlineDays } = calc;
+
+            const fullName = `${author.first_name} ${author.last_name}`;
+            const initials = `${author.first_name.charAt(0)}${author.last_name.charAt(0)}`.toUpperCase();
+            const freqLabel = YAZAR_FREQUENCY_LABELS[author.frequency] || `${author.frequency} gün`;
+            const isExpanded = yazarExpandedCardId == author.id;
+
+            let badgeText;
+            if (status === 'red') {
+                const overdueDays = Math.abs(daysRemaining);
+                badgeText = `${overdueDays} gün gecikmiş`;
+            } else {
+                badgeText = `${daysRemaining} gün kaldı`;
+            }
+
+            let progressPercent = Math.min((daysPassed / deadlineDays) * 100, 100);
+            if (status === 'red') progressPercent = 100;
+
+            const refDate = getYazarLastReferenceDate(author);
+            const hasArticles = author.articles && author.articles.length > 0;
+            const refLabel = hasArticles ? 'Son Makale Tarihi' : 'Konuşma Tarihi';
+
+            const deadlineDate = new Date(refDate);
+            deadlineDate.setDate(deadlineDate.getDate() + deadlineDays);
+
+            let articleHistoryHTML = '';
+            if (author.articles && author.articles.length > 0) {
+                const sortedArticles = [...author.articles].sort((a, b) => new Date(b.article_date) - new Date(a.article_date));
+                articleHistoryHTML = `
+                    <div class="yazar-article-history">
+                        <div class="yazar-article-history-header">
+                            <div class="yazar-article-history-title">Makale Geçmişi</div>
+                            <span class="yazar-article-count-badge">${author.articles.length} makale</span>
+                        </div>
+                        ${sortedArticles.map(a => `
+                            <div class="yazar-article-item">
+                                <div class="yazar-article-dot"></div>
+                                <div class="yazar-article-info">
+                                    <div class="yazar-article-title-text">${escapeYazarHtml(a.title)}</div>
+                                </div>
+                                <div class="yazar-article-date">${formatYazarDate(a.article_date)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            let notesHTML = '';
+            if (author.notes) {
+                notesHTML = `
+                    <div class="yazar-notes-section">
+                        <div class="yazar-notes-label">Notlar</div>
+                        <div class="yazar-notes-text">${escapeYazarHtml(author.notes)}</div>
+                    </div>
+                `;
+            }
+
+            let createdByHTML = '';
+            if (author.created_by_name) {
+                createdByHTML = `
+                    <div class="yazar-detail-item">
+                        <div class="yazar-detail-label">Ekleyen Editör</div>
+                        <div class="yazar-detail-value">${escapeYazarHtml(author.created_by_name)}</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="yazar-author-card ${isExpanded ? 'expanded' : ''}" data-id="${author.id}" data-status="${status}">
+                    <div class="yazar-author-card-header" onclick="toggleYazarCard('${author.id}')">
+                        <div class="yazar-status-dot ${status}"></div>
+                        <div class="yazar-author-avatar">${initials}</div>
+                        <div class="yazar-author-summary">
+                            <div class="yazar-author-name">${escapeYazarHtml(fullName)}</div>
+                            <div class="yazar-author-quick-info">
+                                <span>📞 ${escapeYazarHtml(formatYazarPhone(author.phone))}</span>
+                                <span>📅 ${freqLabel}</span>
+                            </div>
+                        </div>
+                        <div class="yazar-status-badge ${status}">${badgeText}</div>
+                        <div class="yazar-expand-arrow">▼</div>
+                    </div>
+                    <div class="yazar-author-detail">
+                        <div class="yazar-detail-grid">
+                            <div class="yazar-detail-item">
+                                <div class="yazar-detail-label">Telefon</div>
+                                <div class="yazar-detail-value mono">${escapeYazarHtml(formatYazarPhone(author.phone))}</div>
+                            </div>
+                            <div class="yazar-detail-item">
+                                <div class="yazar-detail-label">Yayın Sıklığı</div>
+                                <div class="yazar-detail-value">${freqLabel} (${deadlineDays} gün)</div>
+                            </div>
+                            <div class="yazar-detail-item">
+                                <div class="yazar-detail-label">${refLabel}</div>
+                                <div class="yazar-detail-value mono">${formatYazarDate(refDate)}</div>
+                            </div>
+                            <div class="yazar-detail-item">
+                                <div class="yazar-detail-label">Son Teslim Tarihi</div>
+                                <div class="yazar-detail-value mono">${formatYazarDate(deadlineDate)}</div>
+                            </div>
+                            ${createdByHTML}
+                        </div>
+
+                        <div class="yazar-progress-container">
+                            <div class="yazar-progress-label">
+                                <span>Süre İlerlemesi</span>
+                                <span class="yazar-progress-days">${daysPassed} / ${deadlineDays} gün</span>
+                            </div>
+                            <div class="yazar-progress-bar">
+                                <div class="yazar-progress-fill ${status}" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="yazar-detail-actions">
+                            <button class="yazar-btn-detail yazar-btn-record-article" onclick="event.stopPropagation(); openYazarArticleModal('${author.id}')">
+                                📄 Makale Kaydet
+                            </button>
+                            <button class="yazar-btn-detail yazar-btn-edit" onclick="event.stopPropagation(); openYazarEditModal('${author.id}')">
+                                ✏️ Düzenle
+                            </button>
+                            <button class="yazar-btn-detail yazar-btn-danger" onclick="event.stopPropagation(); openYazarDeleteConfirm('${author.id}')">
+                                🗑️ Sil
+                            </button>
+                        </div>
+
+                        ${articleHistoryHTML}
+                        ${notesHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openYazarModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeYazarModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on overlay click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('yazar-modal-overlay') && e.target.classList.contains('active')) {
+                e.target.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.yazar-modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+
+        function setYazarDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('yazar-conversationDate');
+            if (dateInput) dateInput.value = today;
+        }
+
+        function openYazarAddModal() {
+            document.getElementById('yazar-modalTitle').textContent = 'Yeni Yazar Ekle';
+            document.getElementById('yazar-btnSubmitAuthor').textContent = 'Kaydet';
+            document.getElementById('yazar-editAuthorId').value = '';
+            document.getElementById('yazar-authorForm').reset();
+            setYazarDefaultDate();
+            openYazarModal('yazar-authorModal');
+            setTimeout(() => {
+                const fnInput = document.getElementById('yazar-firstName');
+                if (fnInput) fnInput.focus();
+            }, 200);
+        }
+
+        function openYazarEditModal(id) {
+            const author = yazarAuthors.find(a => a.id == id);
+            if (!author) return;
+
+            document.getElementById('yazar-modalTitle').textContent = 'Yazar Düzenle';
+            document.getElementById('yazar-btnSubmitAuthor').textContent = 'Güncelle';
+            document.getElementById('yazar-editAuthorId').value = id;
+            document.getElementById('yazar-firstName').value = author.first_name;
+            document.getElementById('yazar-lastName').value = author.last_name;
+            document.getElementById('yazar-phone').value = author.phone || '';
+            document.getElementById('yazar-frequency').value = author.frequency;
+            
+            const convDate = new Date(author.conversation_date).toISOString().split('T')[0];
+            document.getElementById('yazar-conversationDate').value = convDate;
+            document.getElementById('yazar-notes').value = author.notes || '';
+
+            openYazarModal('yazar-authorModal');
+        }
+
+        function openYazarArticleModal(authorId) {
+            const author = yazarAuthors.find(a => a.id == authorId);
+            if (!author) return;
+
+            document.getElementById('yazar-articleAuthorId').value = authorId;
+            document.getElementById('yazar-articleAuthorName').innerHTML = `<strong>${author.first_name} ${author.last_name}</strong> için yeni makale kaydı`;
+            document.getElementById('yazar-articleTitle').value = '';
+            document.getElementById('yazar-articleDate').value = new Date().toISOString().split('T')[0];
+
+            openYazarModal('yazar-articleModal');
+            setTimeout(() => {
+                const titleInput = document.getElementById('yazar-articleTitle');
+                if (titleInput) titleInput.focus();
+            }, 200);
+        }
+
+        function openYazarDeleteConfirm(id) {
+            const author = yazarAuthors.find(a => a.id == id);
+            if (!author) return;
+
+            yazarDeleteTargetId = id;
+            document.getElementById('yazar-confirmAuthorName').textContent = `${author.first_name} ${author.last_name}`;
+            openYazarModal('yazar-confirmModal');
+        }
+
+        function toggleYazarCard(id) {
+            if (yazarExpandedCardId == id) {
+                yazarExpandedCardId = null;
+            } else {
+                yazarExpandedCardId = id;
+            }
+            renderYazarAuthorList();
+
+            if (yazarExpandedCardId) {
+                setTimeout(() => {
+                    const card = document.querySelector(`.yazar-author-card[data-id="${yazarExpandedCardId}"]`);
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 100);
+            }
+        }
+
+        function handleYazarSearch() {
+            renderYazarAuthorList();
+        }
+
+        function setYazarFilter(filter, btnEl) {
+            yazarFilter = filter;
+
+            document.querySelectorAll('.yazar-filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            if (!btnEl) {
+                document.querySelectorAll('.yazar-filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === filter) btn.classList.add('active');
+                });
+            }
+
+            renderYazarAuthorList();
+        }
+
+        async function handleYazarAuthorSubmit(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('yazar-editAuthorId').value;
+            const first_name = document.getElementById('yazar-firstName').value.trim();
+            const last_name = document.getElementById('yazar-lastName').value.trim();
+            const phone = document.getElementById('yazar-phone').value.trim();
+            const frequency = document.getElementById('yazar-frequency').value;
+            const conversation_date = document.getElementById('yazar-conversationDate').value;
+            const notes = document.getElementById('yazar-notes').value.trim();
+
+            if (!first_name || !last_name || !frequency || !conversation_date) {
+                showToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
+                return;
+            }
+
+            const body = { first_name, last_name, phone, frequency, conversation_date, notes };
+
+            try {
+                let res;
+                if (editId) {
+                    res = await fetch(`${API_URL}/tracked-authors/${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(body)
+                    });
+                } else {
+                    res = await fetch(`${API_URL}/tracked-authors`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(body)
+                    });
+                }
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'İşlem gerçekleştirilemedi');
+                }
+
+                showToast(editId ? 'Yazar başarıyla güncellendi.' : 'Yazar sisteme eklendi.', 'success');
+                closeYazarModal('yazar-authorModal');
+                await loadYazarTakip();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function handleYazarArticleSubmit(e) {
+            e.preventDefault();
+
+            const authorId = document.getElementById('yazar-articleAuthorId').value;
+            const title = document.getElementById('yazar-articleTitle').value.trim();
+            const article_date = document.getElementById('yazar-articleDate').value;
+
+            if (!title || !article_date) {
+                showToast('Lütfen makale başlığı ve tarih girin.', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/tracked-authors/${authorId}/articles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ title, article_date })
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Makale kaydedilemedi');
+                }
+
+                yazarExpandedCardId = authorId;
+                showToast(`"${title}" başarıyla kaydedildi.`, 'success');
+                closeYazarModal('yazar-articleModal');
+                await loadYazarTakip();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function confirmYazarDelete() {
+            if (!yazarDeleteTargetId) return;
+
+            try {
+                const res = await fetch(`${API_URL}/tracked-authors/${yazarDeleteTargetId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Yazar silinemedi');
+                }
+
+                if (yazarExpandedCardId === yazarDeleteTargetId) {
+                    yazarExpandedCardId = null;
+                }
+                yazarDeleteTargetId = null;
+
+                showToast('Yazar başarıyla silindi.', 'success');
+                closeYazarModal('yazar-confirmModal');
+                await loadYazarTakip();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
+        }
+
+        function formatYazarPhone(phone) {
+            if (!phone) return '—';
+            const cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 11) {
+                return `${cleaned.slice(0,4)} ${cleaned.slice(4,7)} ${cleaned.slice(7,9)} ${cleaned.slice(9,11)}`;
+            }
+            return phone;
+        }
+
+        function formatYazarDate(dateStr) {
+            if (!dateStr) return '—';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '—';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        function escapeYazarHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
         loadAuthorsForEditorSelection();
 
