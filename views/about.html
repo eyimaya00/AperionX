@@ -102,10 +102,11 @@
         }
 
         .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 32px;
-            justify-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .team-card {
@@ -216,22 +217,15 @@
 
         @media (max-width: 768px) {
             .team-grid {
-                grid-template-columns: 1fr;
                 gap: 24px;
             }
 
             .team-card {
-                max-width: 100%;
+                max-width: 340px;
             }
 
             #team-section-title {
                 font-size: 2rem !important;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .team-grid {
-                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
