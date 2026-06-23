@@ -957,7 +957,20 @@ async function ensureSchema() {
             // Ignore if column already exists
         }
 
-        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users & Yazar Takip (with Violations) ensured.');
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS team_members (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                fullname VARCHAR(255) NOT NULL,
+                role VARCHAR(255) NOT NULL,
+                image_url VARCHAR(255),
+                email VARCHAR(255),
+                linkedin_url VARCHAR(255),
+                order_index INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users, Team Members & Yazar Takip (with Violations) ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -4441,6 +4454,84 @@ app.get('/sitemap.xml', async (req, res) => {
 
 
 
+
+// === TEAM MEMBERS API ===
+
+// GET Team Members (Public)
+app.get('/api/team', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM team_members ORDER BY order_index ASC, id ASC');
+        res.json(rows);
+    } catch (e) {
+        console.error('Team Members Fetch Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ADD Team Member (Admin Only)
+app.post('/api/admin/team', authenticateToken, upload.single('image'), async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { fullname, role, email, linkedin_url, order_index } = req.body;
+        const image_url = req.file ? 'uploads/' + req.file.filename : null;
+        const [result] = await pool.query(
+            'INSERT INTO team_members (fullname, role, image_url, email, linkedin_url, order_index) VALUES (?, ?, ?, ?, ?, ?)',
+            [fullname, role, image_url, email || null, linkedin_url || null, parseInt(order_index) || 0]
+        );
+        clearCache('team_members');
+        res.json({ message: 'Ekip üyesi eklendi', id: result.insertId });
+    } catch (e) {
+        console.error('Team Member Add Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// UPDATE Team Member (Admin Only)
+app.put('/api/admin/team/:id', authenticateToken, upload.single('image'), async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { fullname, role, email, linkedin_url, order_index } = req.body;
+        const memberId = req.params.id;
+
+        let image_url = req.body.existing_image || null;
+        if (req.file) {
+            image_url = 'uploads/' + req.file.filename;
+            // Delete old image if exists
+            if (req.body.existing_image) {
+                const oldPath = path.join(__dirname, req.body.existing_image);
+                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            }
+        }
+
+        await pool.query(
+            'UPDATE team_members SET fullname = ?, role = ?, image_url = ?, email = ?, linkedin_url = ?, order_index = ? WHERE id = ?',
+            [fullname, role, image_url, email || null, linkedin_url || null, parseInt(order_index) || 0, memberId]
+        );
+        clearCache('team_members');
+        res.json({ message: 'Ekip üyesi güncellendi' });
+    } catch (e) {
+        console.error('Team Member Update Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// DELETE Team Member (Admin Only)
+app.delete('/api/admin/team/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query('SELECT image_url FROM team_members WHERE id = ?', [req.params.id]);
+        if (rows.length > 0 && rows[0].image_url) {
+            const imgPath = path.join(__dirname, rows[0].image_url);
+            if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+        }
+        await pool.query('DELETE FROM team_members WHERE id = ?', [req.params.id]);
+        clearCache('team_members');
+        res.json({ message: 'Ekip üyesi silindi' });
+    } catch (e) {
+        console.error('Team Member Delete Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
 // === SETTINGS API ===
 

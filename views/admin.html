@@ -800,6 +800,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('comments-moderation', this); loadAllComments();">
                 <i class="ph ph-chat-text"></i> <span>Yorumlar</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('team-management', this); loadTeamMembers();">
+                <i class="ph ph-users-four"></i> <span>Ekip Yönetimi</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('about-management', this); loadSettings();">
                 <i class="ph ph-info"></i> <span>Hakkında Yönetimi</span>
             </a>
@@ -2038,6 +2041,31 @@
                         <tr>
                             <td colspan="6" style="padding:20px; text-align:center;">Yükleniyor...</td>
                         </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Team Management -->
+        <div id="team-management" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Ekip Yönetimi</h1>
+                <button class="btn btn-primary" onclick="showTeamModal()"><i class="ph ph-user-plus"></i> Yeni Üye Ekle</button>
+            </div>
+            <div class="card">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 12px; color:#64748b; text-align: left;">Fotoğraf</th>
+                            <th style="padding: 12px; color:#64748b; text-align: left;">Ad Soyad</th>
+                            <th style="padding: 12px; color:#64748b; text-align: left;">Görev</th>
+                            <th style="padding: 12px; color:#64748b; text-align: left;">E-posta</th>
+                            <th style="padding: 12px; color:#64748b; text-align: left;">Sıra</th>
+                            <th style="padding: 12px; color:#64748b; text-align: center;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body">
+                        <tr><td colspan="6" style="padding: 20px; text-align: center;">Yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -4056,6 +4084,7 @@
                 if (sectionId === 'email-settings') loadEmailSettings();
                 if (sectionId === 'maintenance-mode') loadMaintenanceSettings();
                 if (sectionId === 'email-management') loadSettings();
+                if (sectionId === 'team-management') loadTeamMembers();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -4389,7 +4418,161 @@
             }
         }
 
+        // === TEAM MEMBERS MANAGEMENT ===
+        async function loadTeamMembers() {
+            const tbody = document.getElementById('team-table-body');
+            if (!tbody) return;
+            try {
+                const res = await fetch(`${API_URL}/team`);
+                const members = await res.json();
+                if (!members || members.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">Henüz ekip üyesi eklenmemiş.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = members.map(m => {
+                    const imgSrc = m.image_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.fullname) + '&background=6366f1&color=fff&size=80';
+                    return `<tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px;"><img src="${imgSrc}" alt="${m.fullname}" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border: 2px solid rgba(99,102,241,0.2);"></td>
+                        <td style="padding: 12px; font-weight: 600;">${m.fullname}</td>
+                        <td style="padding: 12px; color: #6366f1; font-weight: 500;">${m.role}</td>
+                        <td style="padding: 12px;">${m.email || '<span style="color:#94a3b8;">—</span>'}</td>
+                        <td style="padding: 12px; text-align: center;">${m.order_index}</td>
+                        <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                            <button onclick='editTeamMember(${JSON.stringify(m).replace(/'/g, "&#39;")})' class="btn" style="background:#eef2ff; color:#6366f1; padding:6px 12px; font-size:0.85rem; margin-right:4px;" title="Düzenle"><i class="ph ph-pencil-simple"></i></button>
+                            <button onclick="deleteTeamMember(${m.id})" class="btn" style="background:#fef2f2; color:#ef4444; padding:6px 12px; font-size:0.85rem;" title="Sil"><i class="ph ph-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                console.error('Load Team Error:', e);
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center; color:#ef4444;">Yüklenirken hata oluştu.</td></tr>';
+            }
+        }
+
+        function showTeamModal(editData) {
+            document.getElementById('teamModalTitle').textContent = editData ? 'Ekip Üyesini Düzenle' : 'Yeni Ekip Üyesi';
+            document.getElementById('team_edit_id').value = editData ? editData.id : '';
+            document.getElementById('team_fullname').value = editData ? editData.fullname : '';
+            document.getElementById('team_role').value = editData ? editData.role : '';
+            document.getElementById('team_email').value = editData ? (editData.email || '') : '';
+            document.getElementById('team_linkedin').value = editData ? (editData.linkedin_url || '') : '';
+            document.getElementById('team_order').value = editData ? editData.order_index : 0;
+            document.getElementById('team_existing_image').value = editData ? (editData.image_url || '') : '';
+            document.getElementById('team_image').value = '';
+            const preview = document.getElementById('team_image_preview');
+            if (editData && editData.image_url) {
+                preview.innerHTML = `<img src="${editData.image_url}" style="max-height: 80px; border-radius: 8px;">`;
+            } else {
+                preview.innerHTML = '';
+            }
+            document.getElementById('teamModal').classList.add('show');
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('show');
+            document.getElementById('teamMemberForm').reset();
+            document.getElementById('team_image_preview').innerHTML = '';
+        }
+
+        function editTeamMember(data) {
+            showTeamModal(data);
+        }
+
+        function deleteTeamMember(id) {
+            showConfirmModal('Bu ekip üyesini silmek istediğinize emin misiniz?', async () => {
+                try {
+                    const res = await fetch(`${API_URL}/admin/team/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        showToast('Ekip üyesi silindi', 'success');
+                        loadTeamMembers();
+                    } else {
+                        showToast('Silme işlemi başarısız', 'error');
+                    }
+                } catch (e) {
+                    showToast('Hata oluştu', 'error');
+                }
+            });
+        }
+
+        document.getElementById('teamMemberForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('team_edit_id').value;
+            const formData = new FormData();
+            formData.append('fullname', document.getElementById('team_fullname').value);
+            formData.append('role', document.getElementById('team_role').value);
+            formData.append('email', document.getElementById('team_email').value);
+            formData.append('linkedin_url', document.getElementById('team_linkedin').value);
+            formData.append('order_index', document.getElementById('team_order').value || '0');
+            formData.append('existing_image', document.getElementById('team_existing_image').value);
+
+            const imageFile = document.getElementById('team_image').files[0];
+            if (imageFile) formData.append('image', imageFile);
+
+            const url = editId ? `${API_URL}/admin/team/${editId}` : `${API_URL}/admin/team`;
+            const method = editId ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                if (res.ok) {
+                    showToast(editId ? 'Ekip üyesi güncellendi' : 'Ekip üyesi eklendi', 'success');
+                    closeTeamModal();
+                    loadTeamMembers();
+                } else {
+                    const d = await res.json();
+                    showToast(d.error || 'Hata oluştu', 'error');
+                }
+            } catch (e) {
+                showToast('Sunucu hatası', 'error');
+            }
+        });
+
     </script>
+    <!-- Team Member Modal -->
+    <div class="modal-overlay" id="teamModal">
+        <div class="modal-box" style="max-width: 520px; padding: 32px;">
+            <h3 id="teamModalTitle" style="margin-bottom: 24px; font-size: 1.4rem; color: #1e293b;">Yeni Ekip Üyesi</h3>
+            <form id="teamMemberForm" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="team_edit_id">
+                <input type="hidden" id="team_existing_image">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">Ad Soyad *</label>
+                    <input type="text" id="team_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">Görev / Pozisyon *</label>
+                    <input type="text" id="team_role" class="form-control" placeholder="Örn: Kurucu & CEO" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">E-posta Adresi</label>
+                    <input type="email" id="team_email" class="form-control" placeholder="ornek@aperionx.com">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">LinkedIn URL</label>
+                    <input type="url" id="team_linkedin" class="form-control" placeholder="https://linkedin.com/in/kullaniciadi">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">Sıra Numarası</label>
+                    <input type="number" id="team_order" class="form-control" placeholder="0" min="0">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="margin-bottom: 6px; display: block; font-weight: 600; color: #64748b;">Profil Fotoğrafı</label>
+                    <input type="file" id="team_image" class="form-control" accept="image/*">
+                    <div id="team_image_preview" style="margin-top: 10px;"></div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                    <button type="button" onclick="closeTeamModal()" class="btn" style="background: #f1f5f9; color: #64748b;">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Generic Confirmation Modal -->
     <div id="confirmation-modal" class="modal-overlay">
         <div class="modal-box">

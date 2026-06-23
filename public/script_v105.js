@@ -71,6 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArticleDetail();
     }
 
+    if (window.location.pathname.includes('/about')) {
+        loadTeam();
+    }
+
     // Header Scroll Effect
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.header');
@@ -399,6 +403,41 @@ async function loadHero() {
         } catch (e) {
             console.error('Hero Slides Load Error:', e);
         }
+    }
+}
+
+// === TEAM MEMBERS LOADER ===
+async function loadTeam() {
+    const teamGrid = document.getElementById('team-grid');
+    if (!teamGrid) return;
+
+    try {
+        const res = await fetch(`${API_URL}/team`);
+        if (!res.ok) throw new Error('Team fetch failed');
+        const members = await res.json();
+
+        if (!members || members.length === 0) {
+            teamGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary, #94a3b8); grid-column: 1 / -1;">Henüz ekip üyesi eklenmemiş.</p>';
+            return;
+        }
+
+        teamGrid.innerHTML = members.map(member => {
+            const avatarSrc = member.image_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.fullname) + '&background=6366f1&color=fff&size=220&bold=true';
+            const emailLink = member.email ? `<a href="mailto:${member.email}" title="E-posta" aria-label="E-posta gönder"><i class="ph-fill ph-envelope-simple"></i></a>` : '';
+            const linkedinLink = member.linkedin_url ? `<a href="${member.linkedin_url}" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn profili"><i class="ph-fill ph-linkedin-logo"></i></a>` : '';
+
+            return `
+                <div class="team-card">
+                    <img class="team-card-avatar" src="${avatarSrc}" alt="${member.fullname}" loading="lazy">
+                    <div class="team-card-name">${member.fullname}</div>
+                    <div class="team-card-role">${member.role}</div>
+                    ${(emailLink || linkedinLink) ? `<div class="team-card-socials">${emailLink}${linkedinLink}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error('Team Load Error:', e);
+        if (teamGrid) teamGrid.innerHTML = '';
     }
 }
 
