@@ -1223,6 +1223,8 @@ function checkRole(allowedRoles) {
 }
 
 async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
+    console.log(`[Email] Automatic email system is temporarily disabled. Skipping send to: ${to} (type: ${type})`);
+    return false;
     try {
         let subject = 'AperionX Bildirim';
         let body = '';
@@ -4910,6 +4912,8 @@ async function generateNewsletterHTML(articleId) {
 
 // Helper: Send to Recipients (Individual Loop with Rate-Limiting & Backoff)
 async function sendNewsletterToRecipients(articleId, recipientEmails) {
+    console.log(`[Email] Newsletter auto-send is temporarily disabled. Skipping batch send to ${recipientEmails.length} recipients.`);
+    return;
     if (recipientEmails.length === 0) return;
 
     const htmlContent = await generateNewsletterHTML(articleId);
