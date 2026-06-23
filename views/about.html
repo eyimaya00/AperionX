@@ -100,12 +100,13 @@
         }
 
         .team-card {
-            background: var(--card-bg);
+            background: #ffffff;
             border-radius: 20px;
             padding: 32px 24px;
             text-align: center;
-            border: 1px solid var(--border-color, rgba(255,255,255,0.06));
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+            border: 1px solid rgba(99, 102, 241, 0.08);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.05);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease, background-color 0.3s, border-color 0.3s;
             width: 100%;
             max-width: 320px;
             position: relative;
@@ -127,10 +128,23 @@
         .team-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.2);
         }
 
         .team-card:hover::before {
             opacity: 1;
+        }
+
+        /* Dark Mode support for team card */
+        [data-theme="dark"] .team-card {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .team-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
         }
 
         .team-card-avatar {
@@ -342,6 +356,47 @@
         </div>
     </section>
 
+    <!-- Team Section -->
+    <section class="team-section" id="team-section" style="padding: 0 0 80px 0; background: var(--bg-color);">
+        <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto;">
+            <!-- Section Header -->
+            <div style="text-align: center; margin-bottom: 60px;">
+                <div style="
+                    width: 64px; 
+                    height: 64px; 
+                    background: rgba(99, 102, 241, 0.1); 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    margin: 0 auto 24px auto;
+                ">
+                    <i class="ph ph-users-three" style="font-size: 32px; color: #6366f1;"></i>
+                </div>
+                <h2 id="team-section-title" style="
+                    font-size: 2.5rem; 
+                    font-weight: 700; 
+                    margin-bottom: 16px; 
+                    font-family: 'Inter', sans-serif;
+                    color: var(--text-color);
+                ">Yönetim Ekibimiz</h2>
+                <p id="team-section-desc" style="
+                    font-size: 1.1rem; 
+                    line-height: 1.6; 
+                    max-width: 600px; 
+                    margin: 0 auto;
+                    color: var(--text-secondary, #94a3b8);
+                ">Platformumuzu şekillendiren tutkulu ekibimizle tanışın.</p>
+            </div>
+
+            <!-- Team Grid -->
+            <div id="team-grid" class="team-grid">
+                <!-- Cards will be loaded dynamically by script_v105.js -->
+                <p style="text-align: center; color: var(--text-secondary, #94a3b8);">Yükleniyor...</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Vision Section -->
     <section class="vision-section" style="padding-bottom: 80px; background: var(--bg-color);">
         <div class="container" style="display: flex; justify-content: center; padding: 0 20px;">
@@ -378,47 +433,6 @@
                     Karmaşık bilimsel verileri sade, anlaşılır ve estetik bir dille sunarak, toplumda bilimsel
                     okuryazarlığı artırmak ve gelecek nesil araştırmacılara ilham kaynağı olmak.
                 </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Team Section -->
-    <section class="team-section" id="team-section" style="padding: 80px 0; background: var(--bg-color);">
-        <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto;">
-            <!-- Section Header -->
-            <div style="text-align: center; margin-bottom: 60px;">
-                <div style="
-                    width: 64px; 
-                    height: 64px; 
-                    background: rgba(99, 102, 241, 0.1); 
-                    border-radius: 50%; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    margin: 0 auto 24px auto;
-                ">
-                    <i class="ph ph-users-three" style="font-size: 32px; color: #6366f1;"></i>
-                </div>
-                <h2 id="team-section-title" style="
-                    font-size: 2.5rem; 
-                    font-weight: 700; 
-                    margin-bottom: 16px; 
-                    font-family: 'Inter', sans-serif;
-                    color: var(--text-color);
-                ">Yönetim Ekibimiz</h2>
-                <p id="team-section-desc" style="
-                    font-size: 1.1rem; 
-                    line-height: 1.6; 
-                    max-width: 600px; 
-                    margin: 0 auto;
-                    color: var(--text-secondary, #94a3b8);
-                ">Platformumuzu şekillendiren tutkulu ekibimizle tanışın.</p>
-            </div>
-
-            <!-- Team Grid -->
-            <div id="team-grid" class="team-grid">
-                <!-- Cards will be loaded dynamically by script_v105.js -->
-                <p style="text-align: center; color: var(--text-secondary, #94a3b8);">Yükleniyor...</p>
             </div>
         </div>
     </section>
