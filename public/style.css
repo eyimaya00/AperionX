@@ -1205,13 +1205,9 @@ i[class*=" ph"] {
 .hero-slider {
     position: relative;
     width: 100%;
-    /* Mobile-First Full Height - Increased Size */
-    height: 115vh !important;
-    min-height: 115vh !important;
-
-    /* Ensure dVH is used for mobile browsers if supported */
-    height: 115dvh !important;
-    min-height: 115dvh !important;
+    /* Desktop: exactly one viewport height */
+    height: 100vh;
+    min-height: 600px;
 
     overflow: hidden;
     margin: 0;
