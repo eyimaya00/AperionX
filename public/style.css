@@ -60,7 +60,7 @@ body {
     overflow-x: hidden;
     /* Allowed rubber banding / pull-to-refresh */
     overscroll-behavior-y: auto;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth; -- Removed to prevent scroll freeze/locking on Chrome/Safari */
     min-height: 100vh;
 }
 
