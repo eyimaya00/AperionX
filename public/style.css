@@ -96,25 +96,30 @@ a {
     border-bottom: 1px solid var(--header-border);
     z-index: 1000;
     transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    will-change: background-color, backdrop-filter, box-shadow;
+    transform: translateZ(0);
     padding: 0 20px;
-    /* Reduced from 40px to pull logo left */
-    /* Desktop Padding */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* Replaces center */
 }
 
 [data-theme="dark"] .header {
-    background: rgba(15, 23, 42, 0.75);
-    /* Dark mode 75% opacity */
+    background: rgba(15, 23, 42, 0.85);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header.scrolled {
     height: 70px;
-    background: rgba(255, 255, 255, 0.75);
-    /* Updated transparency */
-    backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
 }
 
 [data-theme="dark"] .header.scrolled {
@@ -6010,8 +6015,16 @@ body.dark-mode .dropdown-menu {
 
 /* Ensure mobile menu button is hidden on desktop (widths >= 1024px) */
 @media (min-width: 1024px) {
-    .header-actions .mobile-menu-btn {
+    .header-actions .mobile-menu-btn,
+    #hamburgerBtn {
         display: none !important;
+    }
+    
+    .header-actions .icon-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.9rem !important;
+        border-radius: 6px !important;
     }
 }
 
