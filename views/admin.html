@@ -1656,6 +1656,11 @@
                             <input type="text" id="social_youtube" class="form-control"
                                 placeholder="https://youtube.com/@channel">
                         </div>
+                        <div class="form-group">
+                            <label>TikTok</label>
+                            <input type="text" id="social_tiktok" class="form-control"
+                                placeholder="https://tiktok.com/@username">
+                        </div>
                     </div>
                 </div>
 
@@ -2568,6 +2573,7 @@
                 if (settings.social_instagram) document.getElementById('social_instagram').value = settings.social_instagram;
                 if (settings.social_linkedin) document.getElementById('social_linkedin').value = settings.social_linkedin;
                 if (settings.social_youtube) document.getElementById('social_youtube').value = settings.social_youtube;
+                if (settings.social_tiktok) document.getElementById('social_tiktok').value = settings.social_tiktok;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_copyright) document.getElementById('footer_copyright').value = settings.footer_copyright;
@@ -2794,6 +2800,7 @@
             formData.append('social_instagram', document.getElementById('social_instagram').value);
             formData.append('social_linkedin', document.getElementById('social_linkedin').value);
             formData.append('social_youtube', document.getElementById('social_youtube').value);
+            formData.append('social_tiktok', document.getElementById('social_tiktok').value);
             formData.append('footer_desc', document.getElementById('footer_desc').value);
             formData.append('footer_copyright', document.getElementById('footer_copyright').value);
 

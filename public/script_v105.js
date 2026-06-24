@@ -571,6 +571,20 @@ function showToast(message, type = 'info') {
 // --- Dynamic Settings ---
 async function loadSettings() {
     try {
+        // --- LOAD GLOBAL FOOTER ---
+        const footerPlaceholder = document.getElementById('global-footer');
+        if (footerPlaceholder) {
+            try {
+                const footerRes = await fetch('/footer');
+                if (footerRes.ok) {
+                    const footerHtml = await footerRes.text();
+                    footerPlaceholder.outerHTML = footerHtml;
+                }
+            } catch (footerErr) {
+                console.error('Failed to load global footer:', footerErr);
+            }
+        }
+
         const res = await fetch(`${API_URL}/settings`);
         const settings = res.ok ? await res.json() : {};
 
@@ -814,6 +828,21 @@ async function loadSettings() {
                 yt.href = settings.social_youtube;
                 yt.style.display = 'flex';
             } else if (yt) { yt.style.display = 'none'; }
+
+            // TikTok
+            let tt = document.getElementById('footer-tiktok');
+            if (settings.social_tiktok) {
+                if (!tt) {
+                    tt = document.createElement('a');
+                    tt.id = 'footer-tiktok';
+                    tt.className = 'social-link';
+                    tt.target = '_blank';
+                    tt.innerHTML = '<i class="ph-fill ph-tiktok-logo"></i>';
+                    socialContainer.appendChild(tt);
+                }
+                tt.href = settings.social_tiktok;
+                tt.style.display = 'flex';
+            } else if (tt) { tt.style.display = 'none'; }
         }
 
         if (settings.newsletter_title) {
@@ -1147,6 +1176,20 @@ async function loadMenus() {
                     }
                     linksContainer.appendChild(a);
                 }
+            });
+        }
+
+        // Rebuild Footer Links
+        const footerLinksContainer = document.getElementById('footer-links-container');
+        if (footerLinksContainer) {
+            footerLinksContainer.innerHTML = '';
+            rootMenus.forEach(menu => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = menu.url || '#';
+                a.innerText = menu.label;
+                li.appendChild(a);
+                footerLinksContainer.appendChild(li);
             });
         }
 
