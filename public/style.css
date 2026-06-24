@@ -4612,9 +4612,9 @@ i[class*=" ph"] {
 
 /* Articles Hero Updates */
 .articles-hero-section {
-    height: 55vh !important;
-    /* Updated to 55vh */
-    min-height: 350px !important;
+    height: calc(55vh + 80px) !important;
+    /* Updated to calc(55vh + 80px) to compensate for -80px header margin pull */
+    min-height: 430px !important;
     background-color: var(--bg-color) !important;
     position: relative;
     display: block !important;
@@ -4632,9 +4632,9 @@ i[class*=" ph"] {
 
 @media (max-width: 1024px) {
     .articles-hero-section {
-        height: 55vh !important;
+        height: calc(55vh + 80px) !important;
         /* Match desktop/mobile */
-        min-height: 350px !important;
+        min-height: 430px !important;
     }
 }
 
