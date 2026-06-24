@@ -6014,4 +6014,22 @@ body.dark-mode .dropdown-menu {
     }
 }
 
+/* Ensure language switcher button expands to show both flag and text */
+.header-actions .icon-btn.lang-btn {
+    width: auto !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+@media (max-width: 1024px) {
+    .header-actions .icon-btn.lang-btn {
+        height: 38px !important;
+        padding: 0 10px !important;
+    }
+}
+
+
 
