@@ -533,9 +533,9 @@ i[class*=" ph"] {
 
 /* ── Mobile Menu Button — Animated Hamburger ── */
 .mobile-menu-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 1.4rem;
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
     border-radius: 12px;
     position: relative;
     z-index: 1001;
@@ -3019,7 +3019,8 @@ i[class*=" ph"] {
             gap: 8px;
         }
 
-        .icon-btn {
+        .icon-btn,
+        .mobile-menu-btn {
             width: 36px;
             height: 36px;
         }
@@ -5917,4 +5918,17 @@ body.dark-mode .dropdown-menu {
 .mobile-user-info .role {
     font-size: 0.8rem;
     color: var(--text-muted, #aaa);
+}
+
+/* Header Logo Size Adjustments */
+.logo img {
+    height: 48px !important;
+    width: auto !important;
+    object-fit: contain !important;
+}
+
+@media (max-width: 1024px) {
+    .logo img {
+        height: 40px !important;
+    }
 }

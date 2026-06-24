@@ -625,8 +625,8 @@ async function loadSettings() {
                 img.alt = settings.site_title || 'Logo';
 
                 // Height Logic
-                const height = settings.logo_height ? `${settings.logo_height}px` : '36px';
-                img.style.height = height;
+                const height = settings.logo_height ? `${settings.logo_height}px` : (window.innerWidth <= 1024 ? '40px' : '48px');
+                img.style.setProperty('height', height, 'important');
                 img.style.width = 'auto';
                 img.style.borderRadius = '8px';
 
