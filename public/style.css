@@ -506,7 +506,7 @@ i[class*=" ph"] {
 
 /* ── Theme Toggle ── */
 .theme-toggle {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
 }
 
 .theme-toggle i {
@@ -3413,7 +3413,9 @@ i[class*=" ph"] {
 
     /* Dark mode support for forced buttons - Not needed as buttons are hidden */
     .mobile-menu-btn {
-        display: block;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         margin-left: 10px;
         position: relative;
         z-index: 1002;
