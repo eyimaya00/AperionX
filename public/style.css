@@ -5962,23 +5962,23 @@ body.dark-mode .dropdown-menu {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 10px !important;
+    gap: 8px !important;
 }
 
 .header-actions .icon-btn,
 .header-actions .mobile-menu-btn {
-    width: 38px !important;
-    height: 38px !important;
+    width: 34px !important;
+    height: 34px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     background: transparent !important;
     color: var(--text-color) !important;
-    font-size: 1.15rem !important;
+    font-size: 1.05rem !important;
     line-height: 1 !important;
     box-sizing: border-box !important;
     cursor: pointer !important;
@@ -5996,14 +5996,15 @@ body.dark-mode .dropdown-menu {
 /* Mobile responsive sizing for buttons */
 @media (max-width: 1024px) {
     .header-actions {
-        gap: 8px !important;
+        gap: 6px !important;
     }
     
     .header-actions .icon-btn,
     .header-actions .mobile-menu-btn {
-        width: 34px !important;
-        height: 34px !important;
-        font-size: 1.05rem !important;
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.95rem !important;
+        border-radius: 6px !important;
     }
 }
 
@@ -6017,19 +6018,20 @@ body.dark-mode .dropdown-menu {
 /* Ensure language switcher button expands to show both flag and text */
 .header-actions .icon-btn.lang-btn {
     width: auto !important;
-    padding: 0 10px !important;
+    padding: 0 8px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
 }
 
 @media (max-width: 1024px) {
     .header-actions .icon-btn.lang-btn {
-        height: 34px !important;
-        padding: 0 8px !important;
+        height: 30px !important;
+        padding: 0 6px !important;
     }
 }
+
 
 
 
