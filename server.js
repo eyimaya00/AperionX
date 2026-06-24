@@ -1700,12 +1700,30 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // 3. Articles (GET Public, POST Author)
 app.get('/api/articles', async (req, res) => {
     try {
-        const cacheKey = 'articles';
+        const limit = req.query.limit ? parseInt(req.query.limit) : null;
+        const idsParam = req.query.ids ? req.query.ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id)) : null;
+
+        const cacheKey = `articles_${limit || 'all'}_${req.query.ids || 'all'}`;
         const cached = getCachedData(cacheKey);
         if (cached) return res.json(cached);
 
         // 1. Fetch Articles
-        const [articles] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published'";
+        const params = [];
+
+        if (idsParam && idsParam.length > 0) {
+            query += " AND id IN (?)";
+            params.push(idsParam);
+        }
+
+        query += " ORDER BY created_at DESC";
+
+        if (limit && (!idsParam || idsParam.length === 0)) {
+            query += " LIMIT ?";
+            params.push(limit);
+        }
+
+        const [articles] = await pool.query(query, params);
 
         if (articles.length > 0) {
             const articleIds = articles.map(a => a.id);
