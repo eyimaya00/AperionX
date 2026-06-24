@@ -184,7 +184,7 @@ a {
     visibility: hidden;
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1024px) {
     .nav-menu {
         display: flex;
         flex: 1;
@@ -208,7 +208,7 @@ a {
     border: 1px solid transparent;
 }
 
-@media (min-width: 1400px) and (max-width: 1550px) {
+@media (min-width: 1024px) and (max-width: 1400px) {
     .nav-menu {
         gap: 6px;
     }
@@ -651,7 +651,7 @@ i[class*=" ph"] {
 }
 
 /* Hide hamburger on large screens */
-@media (min-width: 1400px) {
+@media (min-width: 1024px) {
     .mobile-menu-btn {
         display: none !important;
     }

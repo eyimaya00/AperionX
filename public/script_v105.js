@@ -1270,7 +1270,7 @@ function setupMobileMenu() {
 
         // Handle Resize (Hide if desktop)
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 1400) {
+            if (window.innerWidth > 1024) {
                 if (mobileMenu.classList.contains('active')) {
                     mobileMenu.classList.remove('active');
                     btn.classList.remove('active');
