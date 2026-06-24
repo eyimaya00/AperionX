@@ -5924,13 +5924,86 @@ body.dark-mode .dropdown-menu {
 
 /* Header Logo Size Adjustments */
 .logo img {
-    height: 48px !important;
+    height: 60px !important;
+    max-height: 60px !important;
     width: auto !important;
     object-fit: contain !important;
+    transition: height 0.3s ease !important;
+}
+
+.header.scrolled .logo img {
+    height: 52px !important;
+    max-height: 52px !important;
 }
 
 @media (max-width: 1024px) {
     .logo img {
-        height: 40px !important;
+        height: 48px !important;
+        max-height: 48px !important;
+    }
+    .header.scrolled .logo img {
+        height: 42px !important;
+        max-height: 42px !important;
     }
 }
+
+/* Mobile Header Height Adjustments to prevent overflow */
+@media (max-width: 900px) {
+    .header {
+        height: 72px !important;
+    }
+    .header.scrolled {
+        height: 62px !important;
+    }
+}
+
+/* --- UNIFIED BUTTONS SIZING & ALIGNMENT (Theme Toggle & Mobile Menu) --- */
+.header-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+}
+
+.header-actions .icon-btn,
+.header-actions .mobile-menu-btn {
+    width: 44px !important;
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-color) !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Ensure hover backgrounds are identical */
+.header-actions .icon-btn:hover,
+.header-actions .mobile-menu-btn:hover {
+    background: var(--nav-hover-bg) !important;
+    color: var(--primary-color) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Mobile responsive sizing for buttons */
+@media (max-width: 1024px) {
+    .header-actions {
+        gap: 8px !important;
+    }
+    
+    .header-actions .icon-btn,
+    .header-actions .mobile-menu-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.15rem !important;
+    }
+}
+

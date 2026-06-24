@@ -36,7 +36,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
-    <link rel="stylesheet" href="/style.css?v=235">
+    <link rel="stylesheet" href="/style.css?v=236">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
     <style>
@@ -1117,8 +1117,9 @@
                 if (observerTimer) clearTimeout(observerTimer);
                 observerTimer = setTimeout(onScroll, 200); // Wait for layout to settle
             });
-            // Watch body to catch all dynamic changes
-            observer.observe(document.body, { childList: true, subtree: true, attributes: false });
+            // Watch article card only to avoid infinite feedback loop when progress bar updates
+            const targetNode = document.querySelector('.unified-article-card') || document.body;
+            observer.observe(targetNode, { childList: true, subtree: true, attributes: false });
 
             // 3. HEARTBEAT (The Failsafe)
             // Even if everything else dies, this checks every 1 second
@@ -1415,7 +1416,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script defer src="/script_v105.js?v=235"></script>
+    <script defer src="/script_v105.js?v=236"></script>
     <script>
         // Use API_URL from script.js or default
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
@@ -1765,7 +1766,7 @@
     </script>
 
 
-    <!-- <script src="/script.js?v=226.0"></script> -->
+    <!-- <script src="/script.js?v=236.0"></script> -->
     <script src="/lightbox.js"></script>
 </body>
 

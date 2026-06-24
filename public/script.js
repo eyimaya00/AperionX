@@ -63,15 +63,26 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArticleDetail();
     }
 
-    // Header Scroll Effect
-    window.addEventListener('scroll', () => {
-        const header = document.querySelector('.header');
-        if (window.scrollY > 20) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-    });
+    // Header Scroll Effect (Performance Optimized via RAF & Passive Event)
+    const header = document.querySelector('.header');
+    if (header) {
+        let ticking = false;
+        const updateHeader = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
+        }, { passive: true });
+    }
 
     /* === PASSWORD RESET LOGIC === */
     const forgotForm = document.getElementById('forgot-password-form');
