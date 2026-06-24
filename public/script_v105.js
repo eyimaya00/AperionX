@@ -24,16 +24,6 @@ window.currentArticleId = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
 
-    // Connection Check
-    fetch(`${API_URL}/settings`)
-        .then(res => {
-            if (!res.ok) showToast('Sunucu bağlantı hatası (API)', 'error');
-        })
-        .catch(err => {
-            console.error('API Check Error:', err);
-            showToast('Sunucuya bağlanılamadı. Lütfen node server.js çalıştığından emin olun.', 'error');
-        });
-
     // --- Global Loader Logic ---
     Promise.all([
         loadSettings(),
@@ -176,8 +166,7 @@ async function loadHero() {
     // --- PART 1: TEXT & SETTINGS ---
     try {
         // Fetch Settings for Text
-        const settingsRes = await fetch(`${API_URL}/settings`);
-        const settings = await settingsRes.json();
+        const settings = await fetchSettingsCached();
 
         // Determine which title/desc to use based on page
         let titleToUse = null;
@@ -576,7 +565,25 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// --- Dynamic Settings ---
+// Settings Cache to optimize page load times
+let settingsCache = null;
+async function fetchSettingsCached() {
+    if (settingsCache) return settingsCache;
+    try {
+        const res = await fetch(`${API_URL}/settings`);
+        if (res.ok) {
+            settingsCache = await res.json();
+            return settingsCache;
+        } else {
+            showToast('Sunucu bağlantı hatası (API)', 'error');
+        }
+    } catch (e) {
+        console.error('Settings load error:', e);
+        showToast('Sunucuya bağlanılamadı. Lütfen node server.js çalıştığından emin olun.', 'error');
+    }
+    return {};
+}
+
 // --- Dynamic Settings ---
 async function loadSettings() {
     try {
@@ -586,16 +593,15 @@ async function loadSettings() {
             try {
                 const footerRes = await fetch('/footer');
                 if (footerRes.ok) {
-                    const footerHtml = await footerRes.text();
-                    footerPlaceholder.outerHTML = footerHtml;
+                     const footerHtml = await footerRes.text();
+                     footerPlaceholder.outerHTML = footerHtml;
                 }
             } catch (footerErr) {
                 console.error('Failed to load global footer:', footerErr);
             }
         }
 
-        const res = await fetch(`${API_URL}/settings`);
-        const settings = res.ok ? await res.json() : {};
+        const settings = await fetchSettingsCached();
 
         // Update Title - Safe Check
         const siteTitle = settings.site_title || '';
@@ -1609,30 +1615,42 @@ window.logout = logout;
 async function loadShowcase() {
     try {
         const sliderContainer = document.getElementById('showcase-grid');
-        console.log('DEBUG: loadShowcase started, container:', sliderContainer);
         if (!sliderContainer) return; // Only run if showcase exists
 
-        // 1. Fetch Settings & Articles in Parallel
-        const [settingsRes, articlesRes] = await Promise.all([
-            fetch(`${API_URL}/settings`),
-            fetch(`${API_URL}/articles`)
+        // 1. Fetch Settings (cached) & only top 3 articles in parallel
+        const [settings, articlesRes] = await Promise.all([
+            fetchSettingsCached(),
+            fetch(`${API_URL}/articles?limit=3`)
         ]);
 
-        console.log('DEBUG: Fetch results:', settingsRes.status, articlesRes.status);
+        if (!articlesRes.ok) return;
 
-        if (!settingsRes.ok || !articlesRes.ok) {
-            console.error('DEBUG: One of the fetches failed');
-            return;
+        const top3Articles = await articlesRes.json(); // Already sorted by date desc
+        let allArticles = [...top3Articles];
+
+        // Find missing IDs from settings
+        const requiredIds = [];
+        if (settings.homepage_article_1) requiredIds.push(parseInt(settings.homepage_article_1));
+        if (settings.homepage_article_2) requiredIds.push(parseInt(settings.homepage_article_2));
+        if (settings.homepage_article_3) requiredIds.push(parseInt(settings.homepage_article_3));
+
+        const missingIds = requiredIds.filter(id => !isNaN(id) && !allArticles.some(a => a.id == id));
+
+        if (missingIds.length > 0) {
+            try {
+                const missingRes = await fetch(`${API_URL}/articles?ids=${missingIds.join(',')}`);
+                if (missingRes.ok) {
+                    const missingArticles = await missingRes.json();
+                    allArticles = allArticles.concat(missingArticles);
+                }
+            } catch (err) {
+                console.error("Error fetching missing showcase articles:", err);
+            }
         }
-
-        console.log('DEBUG: Fetch OK');
-
-        const settings = await settingsRes.json();
-        const allArticles = await articlesRes.json(); // Already sorted by date desc
 
         // 2. Determine Slots
         // Default: Top 3
-        let slots = [allArticles[0], allArticles[1], allArticles[2]];
+        let slots = [top3Articles[0], top3Articles[1], top3Articles[2]];
 
         // Override with User Selections
         if (settings.homepage_article_1) {

@@ -1244,13 +1244,14 @@ i[class*=" ph"] {
     background-size: cover;
     background-position: center;
     opacity: 0;
-    transition: opacity 1.5s ease;
-    transform: scale(1.1);
+    transition: opacity 1.5s ease, transform 10s ease;
+    transform: scale(1.1) translate3d(0, 0, 0);
+    will-change: transform, opacity;
 }
 
 .hero-slide.active {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translate3d(0, 0, 0);
     transition: opacity 1.5s ease, transform 10s ease;
 }
 
@@ -1997,6 +1998,8 @@ i[class*=" ph"] {
     min-height: 600px;
     text-decoration: none;
     background: #000;
+    will-change: transform, box-shadow;
+    transform: translate3d(0, 0, 0);
 }
 
 .featured-card.small {
@@ -2019,6 +2022,7 @@ i[class*=" ph"] {
     background-position: center;
     transition: transform 0.5s ease;
     z-index: -2;
+    will-change: transform;
 }
 
 .article-card img {
@@ -6041,7 +6045,10 @@ body.dark-mode .dropdown-menu {
     }
 }
 
-
-
-
-
+/* --- Scroll Rendering Performance Optimizations --- */
+.showcase, 
+.newsletter-section, 
+.articles-grid-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+}
