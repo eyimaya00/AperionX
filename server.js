@@ -23,6 +23,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const compression = require('compression');
 const multer = require('multer');
+const sharp = require('sharp');
 const jwt = require('jsonwebtoken');
 const DOMPurify = require('isomorphic-dompurify');
 const crypto = require('crypto');
@@ -1182,7 +1183,33 @@ const articleStorage = multer.diskStorage({
 });
 const uploadArticleImage = multer({ storage: articleStorage });
 
-app.post('/api/upload', authenticateToken, uploadArticleImage.single('image'), (req, res) => {
+const optimizeImageMiddleware = async (req, res, next) => {
+    if (!req.file || req.file.mimetype === 'application/pdf') return next();
+    try {
+        const filePath = req.file.path;
+        const tempPath = filePath + '.tmp';
+        const metadata = await sharp(filePath).metadata();
+        let image = sharp(filePath);
+        if (metadata.width > 1600) image = image.resize({ width: 1600, withoutEnlargement: true });
+        
+        if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+            image = image.jpeg({ quality: 80 });
+        } else if (metadata.format === 'png') {
+            image = image.png({ quality: 80, compressionLevel: 8 });
+        } else if (metadata.format === 'webp') {
+            image = image.webp({ quality: 80 });
+        }
+        
+        await image.toFile(tempPath);
+        fs.renameSync(tempPath, filePath);
+        next();
+    } catch (err) {
+        console.error('Image optimization error:', err);
+        next();
+    }
+};
+
+app.post('/api/upload', authenticateToken, uploadArticleImage.single('image'), optimizeImageMiddleware, (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
 
     res.json({ url: `uploads/article_images/${req.file.filename}` });
@@ -1472,7 +1499,7 @@ app.get('/api/hero-slides', async (req, res) => {
     } catch (e) { res.status(500).send(e); }
 });
 
-app.post('/api/hero-slides', authenticateToken, upload.single('image'), async (req, res) => {
+app.post('/api/hero-slides', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const image_url = 'uploads/' + req.file.filename;
@@ -2060,7 +2087,7 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
 });
 
 // Upload Image Endpoint for Editor
-app.post('/api/upload-image', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/upload-image', authenticateToken, upload.single('image'), optimizeImageMiddleware, (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
     res.json({ url: 'uploads/' + req.file.filename });
 });
@@ -2613,7 +2640,7 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
 // [REMOVED DUPLICATE POST /api/articles ROUTE]
 
 // Update Article
-app.put('/api/articles/:id', authenticateToken, upload.single('image'), async (req, res) => {
+app.put('/api/articles/:id', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     try {
         const { title, content, category, tags, status } = req.body;
         const articleId = req.params.id;
@@ -3064,7 +3091,7 @@ app.get('/api/hero-slides', async (req, res) => {
     }
 });
 
-app.post('/api/hero-slides', authenticateToken, upload.single('image'), async (req, res) => {
+app.post('/api/hero-slides', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     if (!req.file) return res.status(400).json({ message: 'No image file' });
 
@@ -3656,7 +3683,7 @@ app.put('/api/categories/:id', authenticateToken, async (req, res) => {
 
 
 // === USER PROFILE UPDATE ===
-app.put('/api/profile', authenticateToken, upload.single('avatar'), async (req, res) => {
+app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImageMiddleware, async (req, res) => {
     const { fullname, email, password, bio, job_title } = req.body;
     const userId = req.user.id;
 
@@ -4469,7 +4496,7 @@ app.get('/api/team', async (req, res) => {
 });
 
 // ADD Team Member (Admin Only)
-app.post('/api/admin/team', authenticateToken, upload.single('image'), async (req, res) => {
+app.post('/api/admin/team', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const { fullname, role, email, linkedin_url, order_index } = req.body;
@@ -4487,7 +4514,7 @@ app.post('/api/admin/team', authenticateToken, upload.single('image'), async (re
 });
 
 // UPDATE Team Member (Admin Only)
-app.put('/api/admin/team/:id', authenticateToken, upload.single('image'), async (req, res) => {
+app.put('/api/admin/team/:id', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const { fullname, role, email, linkedin_url, order_index } = req.body;

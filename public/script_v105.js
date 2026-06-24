@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global Loader Logic ---
     Promise.all([
         loadSettings(),
-        loadHero()
+        loadHero(),
+        loadShowcase()
     ]).then(() => {
         hideLoader();
     }).catch(err => {
@@ -57,9 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMobileMenu();
     updateActiveNavLink();
 
-    loadShowcase();
     loadFrontendCategories(); // Dynamic Categories
-    initCategoryScroll(); // Initialize Category Scroll Logic
     initCategoryScroll(); // Initialize Category Scroll Logic
     initHeroScroll(); // Force Scroll Logic
 
@@ -1666,7 +1665,7 @@ async function loadShowcase() {
                 console.log(`[DEBUG] Rendering Card ${index + 1}:`, { title: item.title, author, bgImage });
 
                 card.innerHTML = `
-                    <img src="${bgImage}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%; background-color: #1e293b;" alt="Makale Kapak Resmi">
+                    <img src="${bgImage}" class="card-bg" loading="eager" fetchpriority="high" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%; background-color: #1e293b;" alt="Makale Kapak Resmi">
                     <div class="card-overlay"></div>
                     
                     <div class="card-top-content">
