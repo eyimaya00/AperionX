@@ -5967,18 +5967,18 @@ body.dark-mode .dropdown-menu {
 
 .header-actions .icon-btn,
 .header-actions .mobile-menu-btn {
-    width: 44px !important;
-    height: 44px !important;
+    width: 38px !important;
+    height: 38px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     background: transparent !important;
     color: var(--text-color) !important;
-    font-size: 1.25rem !important;
+    font-size: 1.15rem !important;
     line-height: 1 !important;
     box-sizing: border-box !important;
     cursor: pointer !important;
@@ -6001,9 +6001,9 @@ body.dark-mode .dropdown-menu {
     
     .header-actions .icon-btn,
     .header-actions .mobile-menu-btn {
-        width: 38px !important;
-        height: 38px !important;
-        font-size: 1.15rem !important;
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 1.05rem !important;
     }
 }
 
@@ -6017,7 +6017,7 @@ body.dark-mode .dropdown-menu {
 /* Ensure language switcher button expands to show both flag and text */
 .header-actions .icon-btn.lang-btn {
     width: auto !important;
-    padding: 0 12px !important;
+    padding: 0 10px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -6026,10 +6026,11 @@ body.dark-mode .dropdown-menu {
 
 @media (max-width: 1024px) {
     .header-actions .icon-btn.lang-btn {
-        height: 38px !important;
-        padding: 0 10px !important;
+        height: 34px !important;
+        padding: 0 8px !important;
     }
 }
+
 
 
 
