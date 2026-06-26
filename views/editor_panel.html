@@ -4340,6 +4340,13 @@
             } catch (err) { console.error(err); }
         }
 
+        function setYazarDefaultDate() {
+            const el = document.getElementById('yazar-conversationDate');
+            if (el && !el.value) {
+                el.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
         function openYazarAddModal() {
             document.getElementById('yazar-modalTitle').textContent = 'Yeni Yazar Ekle';
             document.getElementById('yazar-btnSubmitAuthor').textContent = 'Kaydet';
