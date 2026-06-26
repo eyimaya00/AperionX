@@ -2346,9 +2346,22 @@
                         <input type="text" id="yazar-lastName" placeholder="Yazarın soyadı" required>
                     </div>
                 </div>
+                <div class="yazar-form-row">
+                    <div class="yazar-form-group">
+                        <label for="yazar-phone">Telefon Numarası</label>
+                        <input type="tel" id="yazar-phone" placeholder="05XX XXX XX XX" required>
+                    </div>
+                    <div class="yazar-form-group">
+                        <label for="yazar-university">Üniversite</label>
+                        <input type="text" id="yazar-university" placeholder="Örn: İstanbul Üniversitesi">
+                    </div>
+                </div>
                 <div class="yazar-form-group">
-                    <label for="yazar-phone">Telefon Numarası</label>
-                    <input type="tel" id="yazar-phone" placeholder="05XX XXX XX XX" required>
+                    <label for="yazar-userId">Bağlı Yazar Hesabı</label>
+                    <select id="yazar-userId">
+                        <option value="">Sistemde hesabı yok (Sadece takip amaçlı)</option>
+                        <!-- Options will be populated by JS -->
+                    </select>
                 </div>
                 <div class="yazar-form-group">
                     <label for="yazar-frequency">Makale Yayınlama Sıklığı</label>
@@ -4012,6 +4025,7 @@
 
         async function loadYazarTakip() {
             try {
+                await loadAuthorsForDropdown();
                 const res = await fetch(`${API_URL}/tracked-authors`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -4119,7 +4133,7 @@
 
             let filtered = yazarAuthors.filter(author => {
                 const fullName = `${author.first_name} ${author.last_name}`.toLowerCase();
-                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || (author.phone && author.phone.includes(searchTerm));
+                const matchesSearch = !searchTerm || fullName.includes(searchTerm) || (author.phone && author.phone.includes(searchTerm)) || (author.university && author.university.toLowerCase().includes(searchTerm));
 
                 if (!matchesSearch) return false;
 
@@ -4231,16 +4245,6 @@
                 `;
             }
 
-            let createdByHTML = '';
-            if (author.created_by_name) {
-                createdByHTML = `
-                    <div class="yazar-detail-item">
-                        <div class="yazar-detail-label">Ekleyen Editör</div>
-                        <div class="yazar-detail-value">${escapeYazarHtml(author.created_by_name)}</div>
-                    </div>
-                `;
-            }
-
             return `
                 <div class="yazar-author-card ${isExpanded ? 'expanded' : ''}" data-id="${author.id}" data-status="${status}">
                     <div class="yazar-author-card-header" onclick="toggleYazarCard('${author.id}')">
@@ -4249,8 +4253,8 @@
                         <div class="yazar-author-summary">
                             <div class="yazar-author-name">${escapeYazarHtml(fullName)} ${violationBadgeHTML}</div>
                             <div class="yazar-author-quick-info">
+                                <span>🎓 ${escapeYazarHtml(author.university || 'Belirtilmedi')}</span>
                                 <span>📞 ${escapeYazarHtml(formatYazarPhone(author.phone))}</span>
-                                <span>📅 ${freqLabel}</span>
                             </div>
                         </div>
                         <div class="yazar-status-badge ${status}">${badgeText}</div>
@@ -4259,8 +4263,8 @@
                     <div class="yazar-author-detail">
                         <div class="yazar-detail-grid">
                             <div class="yazar-detail-item">
-                                <div class="yazar-detail-label">Telefon</div>
-                                <div class="yazar-detail-value mono">${escapeYazarHtml(formatYazarPhone(author.phone))}</div>
+                                <div class="yazar-detail-label">Üniversite</div>
+                                <div class="yazar-detail-value">${escapeYazarHtml(author.university || '-')}</div>
                             </div>
                             <div class="yazar-detail-item">
                                 <div class="yazar-detail-label">Yayın Sıklığı</div>
@@ -4271,16 +4275,11 @@
                                 <div class="yazar-detail-value mono">${formatYazarDate(refDate)}</div>
                             </div>
                             <div class="yazar-detail-item">
-                                <div class="yazar-detail-label">Son Teslim Tarihi</div>
-                                <div class="yazar-detail-value mono">${formatYazarDate(deadlineDate)}</div>
-                            </div>
-                            <div class="yazar-detail-item">
                                 <div class="yazar-detail-label">Toplam İhlal</div>
-                                <div class="yazar-detail-value" style="color: ${author.violations > 0 ? '#ef4444' : 'inherit'}; font-weight: ${author.violations > 0 ? '700' : 'normal'};">
+                                <div class="yazar-detail-value" style="color: ${author.violations > 0 ? '#ef4444' : 'inherit'};">
                                     ${author.violations} İhlal
                                 </div>
                             </div>
-                            ${createdByHTML}
                         </div>
 
                         <div class="yazar-progress-container">
@@ -4322,28 +4321,23 @@
             document.body.style.overflow = '';
         }
 
-        // Close modal on overlay click
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('yazar-modal-overlay') && e.target.classList.contains('active')) {
-                e.target.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.yazar-modal-overlay.active').forEach(modal => {
-                    modal.classList.remove('active');
+        async function loadAuthorsForDropdown() {
+            try {
+                const res = await fetch(`${API_URL}/users/authors`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                document.body.style.overflow = '';
-            }
-        });
-
-        function setYazarDefaultDate() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('yazar-conversationDate');
-            if (dateInput) dateInput.value = today;
+                if (res.ok) {
+                    const data = await res.json();
+                    const select = document.getElementById('yazar-userId');
+                    select.innerHTML = '<option value="">Sistemde hesabı yok (Sadece takip amaçlı)</option>';
+                    data.forEach(user => {
+                        const opt = document.createElement('option');
+                        opt.value = user.id;
+                        opt.textContent = `${user.fullname} (${user.email})`;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) { console.error(err); }
         }
 
         function openYazarAddModal() {
@@ -4354,10 +4348,6 @@
             document.getElementById('yazar-violations').value = '0';
             setYazarDefaultDate();
             openYazarModal('yazar-authorModal');
-            setTimeout(() => {
-                const fnInput = document.getElementById('yazar-firstName');
-                if (fnInput) fnInput.focus();
-            }, 200);
         }
 
         function openYazarEditModal(id) {
@@ -4370,11 +4360,11 @@
             document.getElementById('yazar-firstName').value = author.first_name;
             document.getElementById('yazar-lastName').value = author.last_name;
             document.getElementById('yazar-phone').value = author.phone || '';
+            document.getElementById('yazar-university').value = author.university || '';
+            document.getElementById('yazar-userId').value = author.user_id || '';
             document.getElementById('yazar-frequency').value = author.frequency;
+            document.getElementById('yazar-conversationDate').value = author.conversation_date.split('T')[0];
             document.getElementById('yazar-violations').value = author.violations || 0;
-            
-            const convDate = new Date(author.conversation_date).toISOString().split('T')[0];
-            document.getElementById('yazar-conversationDate').value = convDate;
             document.getElementById('yazar-notes').value = author.notes || '';
 
             openYazarModal('yazar-authorModal');
@@ -4390,173 +4380,88 @@
             document.getElementById('yazar-articleDate').value = new Date().toISOString().split('T')[0];
 
             openYazarModal('yazar-articleModal');
-            setTimeout(() => {
-                const titleInput = document.getElementById('yazar-articleTitle');
-                if (titleInput) titleInput.focus();
-            }, 200);
         }
 
         function openYazarDeleteConfirm(id) {
             const author = yazarAuthors.find(a => a.id == id);
             if (!author) return;
-
             yazarDeleteTargetId = id;
             document.getElementById('yazar-confirmAuthorName').textContent = `${author.first_name} ${author.last_name}`;
             openYazarModal('yazar-confirmModal');
         }
 
         function toggleYazarCard(id) {
-            if (yazarExpandedCardId == id) {
-                yazarExpandedCardId = null;
-            } else {
-                yazarExpandedCardId = id;
-            }
-            renderYazarAuthorList();
-
-            if (yazarExpandedCardId) {
-                setTimeout(() => {
-                    const card = document.querySelector(`.yazar-author-card[data-id="${yazarExpandedCardId}"]`);
-                    if (card) {
-                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                }, 100);
-            }
-        }
-
-        // Search & Filter
-        function handleYazarSearch() {
+            yazarExpandedCardId = (yazarExpandedCardId == id) ? null : id;
             renderYazarAuthorList();
         }
+
+        function handleYazarSearch() { renderYazarAuthorList(); }
 
         function setYazarFilter(filter, btnEl) {
             yazarFilter = filter;
-
             document.querySelectorAll('.yazar-filter-btn').forEach(btn => btn.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
-
-            if (!btnEl) {
-                document.querySelectorAll('.yazar-filter-btn').forEach(btn => {
-                    if (btn.dataset.filter === filter) btn.classList.add('active');
-                });
-            }
-
             renderYazarAuthorList();
         }
 
         async function handleYazarAuthorSubmit(e) {
             e.preventDefault();
-
             const editId = document.getElementById('yazar-editAuthorId').value;
-            const first_name = document.getElementById('yazar-firstName').value.trim();
-            const last_name = document.getElementById('yazar-lastName').value.trim();
-            const phone = document.getElementById('yazar-phone').value.trim();
-            const frequency = document.getElementById('yazar-frequency').value;
-            const conversation_date = document.getElementById('yazar-conversationDate').value;
-            const violations = parseInt(document.getElementById('yazar-violations').value) || 0;
-            const notes = document.getElementById('yazar-notes').value.trim();
-
-            if (!first_name || !last_name || !frequency || !conversation_date) {
-                showToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
-                return;
-            }
-
-            const body = { first_name, last_name, phone, frequency, conversation_date, notes, violations };
+            const body = {
+                first_name: document.getElementById('yazar-firstName').value,
+                last_name: document.getElementById('yazar-lastName').value,
+                phone: document.getElementById('yazar-phone').value,
+                university: document.getElementById('yazar-university').value,
+                user_id: document.getElementById('yazar-userId').value || null,
+                frequency: document.getElementById('yazar-frequency').value,
+                conversation_date: document.getElementById('yazar-conversationDate').value,
+                violations: parseInt(document.getElementById('yazar-violations').value) || 0,
+                notes: document.getElementById('yazar-notes').value
+            };
 
             try {
-                let res;
-                if (editId) {
-                    res = await fetch(`${API_URL}/tracked-authors/${editId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(body)
-                    });
-                } else {
-                    res = await fetch(`${API_URL}/tracked-authors`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(body)
-                    });
-                }
+                const res = await fetch(`${API_URL}/tracked-authors${editId ? '/' + editId : ''}`, {
+                    method: editId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                });
 
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.error || 'İşlem gerçekleştirilemedi');
-                }
-
-                showToast(editId ? 'Yazar başarıyla güncellendi.' : 'Yazar sisteme eklendi.', 'success');
+                if (!res.ok) throw new Error('İşlem başarısız');
+                showToast('Yazar kaydedildi', 'success');
                 closeYazarModal('yazar-authorModal');
-                await loadYazarTakip();
-            } catch (err) {
-                console.error(err);
-                showToast(err.message, 'error');
-            }
+                loadYazarTakip();
+            } catch (err) { showToast(err.message, 'error'); }
         }
 
         async function handleYazarArticleSubmit(e) {
             e.preventDefault();
-
             const authorId = document.getElementById('yazar-articleAuthorId').value;
-            const title = document.getElementById('yazar-articleTitle').value.trim();
-            const article_date = document.getElementById('yazar-articleDate').value;
-
-            if (!title || !article_date) {
-                showToast('Lütfen makale başlığı ve tarih girin.', 'error');
-                return;
-            }
+            const body = {
+                title: document.getElementById('yazar-articleTitle').value,
+                article_date: document.getElementById('yazar-articleDate').value
+            };
 
             try {
                 const res = await fetch(`${API_URL}/tracked-authors/${authorId}/articles`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ title, article_date })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
                 });
 
-                const data = await res.json();
-                if (!res.ok) {
-                    throw new Error(data.error || 'Makale kaydedilemedi');
-                }
-
-                yazarExpandedCardId = authorId;
-                if (data.violation) {
-                    showToast(`"${title}" kaydedildi. ⚠️ Gecikme nedeniyle 1 İhlal eklendi!`, 'error');
-                } else {
-                    showToast(`"${title}" başarıyla kaydedildi.`, 'success');
-                }
+                if (!res.ok) throw new Error('Hata oluştu');
+                showToast('Makale kaydedildi', 'success');
                 closeYazarModal('yazar-articleModal');
-                await loadYazarTakip();
-            } catch (err) {
-                console.error(err);
-                showToast(err.message, 'error');
-            }
+                loadYazarTakip();
+            } catch (err) { showToast(err.message, 'error'); }
         }
 
         async function confirmYazarDelete() {
             if (!yazarDeleteTargetId) return;
-
             try {
                 const res = await fetch(`${API_URL}/tracked-authors/${yazarDeleteTargetId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.error || 'Yazar silinemedi');
-                }
-
-                if (yazarExpandedCardId === yazarDeleteTargetId) {
-                    yazarExpandedCardId = null;
-                }
-                yazarDeleteTargetId = null;
 
                 showToast('Yazar başarıyla silindi.', 'success');
                 closeYazarModal('yazar-confirmModal');

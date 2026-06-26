@@ -1006,6 +1006,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('analytics', this)" title="İçerik Detayı">
                 <i class="ph ph-chart-line-up"></i> <span>İçerik Detayı</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('tracking', this)" title="Takip Durumu">
+                <i class="ph ph-calendar-check"></i> <span>Takip Durumu</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this)" title="Profilim">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
@@ -1355,6 +1358,15 @@
             </div>
 
             <div id="articles-list"></div>
+        </div>
+
+        <!-- TRACKING STATUS VIEW -->
+        <div id="tracking" class="section">
+            <h1 class="page-title">Takip Durumu</h1>
+            <div class="card" style="padding: 30px; text-align: center;" id="tracking-card">
+                <i class="ph ph-spinner-gap ph-spin" style="font-size: 32px; color: var(--primary-accent);"></i>
+                <p>Durumunuz yükleniyor...</p>
+            </div>
         </div>
 
         <div id="profile" class="section">

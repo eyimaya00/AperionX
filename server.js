@@ -929,14 +929,17 @@ async function ensureSchema() {
                 first_name VARCHAR(100) NOT NULL,
                 last_name VARCHAR(100) NOT NULL,
                 phone VARCHAR(20),
+                university VARCHAR(255),
                 frequency INT NOT NULL DEFAULT 14,
                 conversation_date DATE NOT NULL,
                 notes TEXT,
                 created_by INT,
+                user_id INT,
                 violations INT NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
             )
         `);
 
@@ -957,6 +960,15 @@ async function ensureSchema() {
         } catch (err) {
             // Ignore if column already exists
         }
+
+        // Migration: add university and user_id columns if they don't exist
+        try {
+            await pool.query('ALTER TABLE tracked_authors ADD COLUMN university VARCHAR(255)');
+        } catch (err) {}
+        try {
+            await pool.query('ALTER TABLE tracked_authors ADD COLUMN user_id INT NULL');
+            await pool.query('ALTER TABLE tracked_authors ADD CONSTRAINT fk_tracked_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL');
+        } catch (err) {}
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS team_members (
@@ -2966,16 +2978,16 @@ app.get('/api/tracked-authors', authenticateToken, async (req, res) => {
 app.post('/api/tracked-authors', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        const { first_name, last_name, phone, frequency, conversation_date, notes, violations } = req.body;
+        const { first_name, last_name, phone, university, frequency, conversation_date, notes, violations, user_id } = req.body;
 
         if (!first_name || !last_name || !frequency || !conversation_date) {
             return res.status(400).json({ error: 'Zorunlu alanlar eksik: first_name, last_name, frequency, conversation_date' });
         }
 
         const [result] = await pool.query(
-            `INSERT INTO tracked_authors (first_name, last_name, phone, frequency, conversation_date, notes, created_by, violations)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, req.user.id, parseInt(violations) || 0]
+            `INSERT INTO tracked_authors (first_name, last_name, phone, university, frequency, conversation_date, notes, created_by, violations, user_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [first_name, last_name, phone || null, university || null, parseInt(frequency), conversation_date, notes || null, req.user.id, parseInt(violations) || 0, user_id || null]
         );
 
         res.status(201).json({ id: result.insertId, message: `${first_name} ${last_name} başarıyla eklendi.` });
@@ -2989,7 +3001,7 @@ app.post('/api/tracked-authors', authenticateToken, async (req, res) => {
 app.put('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        const { first_name, last_name, phone, frequency, conversation_date, notes, violations } = req.body;
+        const { first_name, last_name, phone, university, frequency, conversation_date, notes, violations, user_id } = req.body;
         const authorId = req.params.id;
 
         if (!first_name || !last_name || !frequency || !conversation_date) {
@@ -2997,9 +3009,9 @@ app.put('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
         }
 
         const [result] = await pool.query(
-            `UPDATE tracked_authors SET first_name = ?, last_name = ?, phone = ?, frequency = ?, conversation_date = ?, notes = ?, violations = ?
+            `UPDATE tracked_authors SET first_name = ?, last_name = ?, phone = ?, university = ?, frequency = ?, conversation_date = ?, notes = ?, violations = ?, user_id = ?
              WHERE id = ?`,
-            [first_name, last_name, phone || null, parseInt(frequency), conversation_date, notes || null, parseInt(violations) || 0, authorId]
+            [first_name, last_name, phone || null, university || null, parseInt(frequency), conversation_date, notes || null, parseInt(violations) || 0, user_id || null, authorId]
         );
 
         if (result.affectedRows === 0) {
@@ -3026,6 +3038,50 @@ app.delete('/api/tracked-authors/:id', authenticateToken, async (req, res) => {
         res.json({ message: 'Yazar silindi.' });
     } catch (e) {
         console.error('Tracked author delete error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// GET authors list for dropdown (Editors only)
+app.get('/api/users/authors', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [authors] = await pool.query('SELECT id, fullname, email FROM users WHERE role = "author" ORDER BY fullname ASC');
+        res.json(authors);
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// GET author tracking status (for the logged in author)
+app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM tracked_authors WHERE user_id = ?', [req.user.id]);
+        if (rows.length === 0) {
+            return res.json({ tracked: false });
+        }
+        const tracking = rows[0];
+        
+        // Calculate days left
+        const lastDate = new Date(tracking.conversation_date);
+        const today = new Date();
+        const nextDate = new Date(lastDate);
+        nextDate.setDate(lastDate.getDate() + tracking.frequency);
+        
+        // Difference in ms, then convert to days
+        const diffMs = nextDate - today;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        
+        res.json({
+            tracked: true,
+            university: tracking.university,
+            frequency: tracking.frequency,
+            last_conversation: tracking.conversation_date,
+            next_deadline: nextDate.toISOString(),
+            days_left: diffDays,
+            violations: tracking.violations
+        });
+    } catch (e) {
         res.status(500).json({ error: e.toString() });
     }
 });

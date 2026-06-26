@@ -457,15 +457,21 @@ function initTheme() {
     const themeBtn = document.getElementById('themeToggle');
     if (!themeBtn) return;
 
-    // Check saved theme (default to dark)
-    const savedTheme = localStorage.getItem('theme');
+    // Check saved theme (default to dark, except author panel defaults to light)
+    let savedTheme = localStorage.getItem('theme');
+    const isAuthorPanel = window.location.pathname.includes('/author');
+
+    if (!savedTheme) {
+        savedTheme = isAuthorPanel ? 'light' : 'dark';
+        localStorage.setItem('theme', savedTheme);
+    }
+
     if (savedTheme === 'light') {
         document.documentElement.removeAttribute('data-theme');
         themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
     } else {
         document.documentElement.setAttribute('data-theme', 'dark');
         themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
-        if (!savedTheme) localStorage.setItem('theme', 'dark');
     }
 
     themeBtn.addEventListener('click', () => {

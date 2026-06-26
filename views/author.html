@@ -1074,6 +1074,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('analytics', this)" title="İçerik Detayı">
                 <i class="ph ph-chart-line-up"></i> <span>İçerik Detayı</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('tracking', this)" title="Takip Durumu">
+                <i class="ph ph-calendar-check"></i> <span>Takip Durumu</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this)" title="Profilim">
                 <i class="ph ph-user"></i> <span>Profilim</span>
             </a>
@@ -1611,6 +1614,15 @@
             <div id="exp-tab-trash" style="display: none;">
                 <p style="color:#64748b; margin-bottom: 20px;">Sildiğiniz deneyler burada toplanır. Geri alabilir veya kalıcı olarak silebilirsiniz.</p>
                 <div id="trash-list"></div>
+            </div>
+        </div>
+
+        <!-- TRACKING STATUS VIEW -->
+        <div id="tracking" class="section">
+            <h1 class="page-title">Takip Durumu</h1>
+            <div class="card" style="padding: 30px; text-align: center;" id="tracking-card">
+                <i class="ph ph-spinner-gap ph-spin" style="font-size: 32px; color: var(--primary-accent);"></i>
+                <p>Durumunuz yükleniyor...</p>
             </div>
         </div>
 
@@ -2194,8 +2206,6 @@
                 return;
             }
 
-            // [CLEANED] Duplicate likers_list case removed
-
             // Sort based on type
             let sorted = [...analyticsData];
             if (type === 'views') {
@@ -2208,19 +2218,11 @@
             renderAnalyticsTable(sorted);
         }
 
-        // [CLEANED] First showAuthorToast (no type param) removed — using version at line ~2743 with type support
-
-        // [CLEANED] Duplicate loadDashboardStats removed — using version at line ~1883 with null safety
-
         function toggleTrashView() {
             isTrashView = !isTrashView;
             updateTrashUI();
             loadMyArticles();
         }
-
-        // [CLEANED] Simple toggleSidebar removed — using advanced version at line ~2961 with try/catch + mobile support
-
-        // [CLEANED] First loadSettings removed — using version at line ~2999 with null safety checks
 
         // Register the image resize module
         /* global ImageResize */
@@ -2480,6 +2482,74 @@
             }
             if (id === 'my-experiments') {
                 loadMyExperiments();
+            }
+            if (id === 'dashboard') {
+                loadDashboardStats();
+                if (window.innerWidth > 991) {
+                    renderDashboardChart();
+                }
+            }
+            if (id === 'tracking') {
+                loadTrackingStatus();
+            }
+        }
+
+        async function loadTrackingStatus() {
+            const container = document.getElementById('tracking-card');
+            container.innerHTML = '<i class="ph ph-spinner-gap ph-spin" style="font-size: 32px; color: var(--primary-accent);"></i><p>Durumunuz yükleniyor...</p>';
+            try {
+                const res = await fetch(`${API_URL}/author/tracking-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!data.tracked) {
+                        container.innerHTML = `
+                            <div style="padding: 40px 20px;">
+                                <i class="ph-fill ph-check-circle" style="font-size: 48px; color: #10b981; margin-bottom: 15px;"></i>
+                                <h2 style="margin: 0; color: #1e293b;">Süreli Takipte Değilsiniz</h2>
+                                <p style="color: #64748b; margin-top: 10px;">Şu an için zorunlu bir makale teslim takviminiz bulunmuyor. İstediğiniz zaman makale gönderebilirsiniz.</p>
+                            </div>
+                        `;
+                    } else {
+                        let statusColor = '#10b981';
+                        let statusIcon = 'ph-check-circle';
+                        let statusMessage = `${data.days_left} gün kaldı`;
+                        
+                        if (data.days_left < 0) {
+                            statusColor = '#ef4444';
+                            statusIcon = 'ph-warning-circle';
+                            statusMessage = `${Math.abs(data.days_left)} gün geciktiniz!`;
+                        } else if (data.days_left <= 3) {
+                            statusColor = '#f59e0b';
+                            statusIcon = 'ph-clock';
+                        }
+                        
+                        const vhtml = data.violations > 0 ? `<div style="margin-top: 15px; display: inline-block; background: #fee2e2; color: #ef4444; padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">⚠️ ${data.violations} İhlaliniz Var</div>` : '';
+
+                        container.innerHTML = `
+                            <div style="padding: 20px; border: 2px solid ${statusColor}; border-radius: 16px; display: inline-block; text-align: center; max-width: 400px; width: 100%;">
+                                <i class="ph-fill ${statusIcon}" style="font-size: 56px; color: ${statusColor}; margin-bottom: 15px;"></i>
+                                <h2 style="margin: 0 0 5px 0; color: #1e293b; font-size: 1.5rem;">Sıradaki Makale Teslimi</h2>
+                                <p style="margin: 0; font-size: 2rem; font-weight: 800; color: ${statusColor};">${statusMessage}</p>
+                                <hr style="border: 0; height: 1px; background: #e2e8f0; margin: 20px 0;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #64748b; margin-bottom: 10px;">
+                                    <span>Teslim Sıklığı:</span>
+                                    <span style="font-weight: 600; color: #1e293b;">${data.frequency} Günde Bir</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #64748b;">
+                                    <span>Son Teslim Tarihi:</span>
+                                    <span style="font-weight: 600; color: #1e293b;">${new Date(data.next_deadline).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                                ${vhtml}
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = '<p style="color: #ef4444;">Durum yüklenirken bir hata oluştu.</p>';
+                }
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">Sunucuya bağlanılamadı.</p>';
             }
         }
 
