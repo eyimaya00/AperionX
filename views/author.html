@@ -2546,16 +2546,19 @@
                         if (progressVal < 0) progressVal = 0;
                         if (progressVal > 100) progressVal = 100;
                         
+                        let extraMessage = 'Bu süre içerisinde dilediğiniz an makale gönderebilirsiniz.';
                         if (data.days_left < 0) {
                             statusColor = '#ef4444';
                             statusGradient = 'rgba(239, 68, 68, 0.1)';
                             statusIcon = 'ph-warning-octagon';
                             statusMessage = `${Math.abs(data.days_left)} gün geciktiniz!`;
                             progressVal = 100;
+                            extraMessage = 'Lütfen en kısa sürede makale gönderiminizi tamamlayın.';
                         } else if (data.days_left <= 3) {
                             statusColor = '#f59e0b';
                             statusGradient = 'rgba(245, 158, 11, 0.1)';
                             statusIcon = 'ph-hourglass-high';
+                            extraMessage = 'Süreniz azalıyor, makalenizi yakında göndermeyi unutmayın.';
                         }
                         
                         const vhtml = data.violations > 0 ? `
@@ -2575,11 +2578,12 @@
                                             <i class="ph-fill ${statusIcon}" style="font-size: 34px; color: ${statusColor};"></i>
                                         </div>
                                     </div>
-                                    <h2 style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px;">Sıradaki Makale Teslimi</h2>
+                                    <h2 style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px;">Makale Teslimi İçin Kalan Süre</h2>
                                     
-                                    <div style="font-size: 2.8rem; font-weight: 900; color: ${statusColor}; letter-spacing: -1px; text-shadow: 0 4px 15px ${statusGradient}; margin-bottom: 30px;">
+                                    <div style="font-size: 2.8rem; font-weight: 900; color: ${statusColor}; letter-spacing: -1px; text-shadow: 0 4px 15px ${statusGradient}; margin-bottom: 10px;">
                                         ${statusMessage}
                                     </div>
+                                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0; margin-bottom: 30px; font-weight: 500;">${extraMessage}</p>
                                     
                                     <!-- Progress Bar -->
                                     <div style="width: 100%; height: 8px; background: rgba(100,100,100,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);">
