@@ -4026,7 +4026,6 @@
         async function loadYazarTakip() {
             try {
                 await loadAuthorsForDropdown();
-                await loadYazarUsers(); // Populates user_id dropdown
                 const res = await fetch(`${API_URL}/tracked-authors`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
