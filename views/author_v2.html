@@ -97,6 +97,19 @@
             padding: 32px 12px;
         }
 
+        /* Move scroll to nav inside sidebar */
+        .sidebar nav {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            scrollbar-width: none;
+            padding-bottom: 20px;
+        }
+
+        .sidebar nav::-webkit-scrollbar {
+            display: none;
+        }
+
         .sidebar.collapsed .logo span,
         .sidebar.collapsed .menu-item span,
         .sidebar.collapsed .logout-btn span,
@@ -128,9 +141,10 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             padding-left: 8px;
             position: relative;
+            flex-shrink: 0;
         }
 
         .logo img {
