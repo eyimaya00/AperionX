@@ -68,12 +68,12 @@
     box-shadow: 0 24px 48px -12px rgba(99, 102, 241, 0.3);
 }
 
-/* === ICON - Large circle with gradient === */
+/* === ICON - Large circle, dark slate bg === */
 .category-icon {
     width: 90px;
     height: 90px;
-    background: linear-gradient(145deg, #6366f1, #8b5cf6);
-    color: #ffffff;
+    background: #1e293b;
+    color: #e2e8f0;
     border-radius: 50%;
     display: flex;
     flex-shrink: 0;
@@ -84,15 +84,15 @@
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     z-index: 1;
-    box-shadow:
-        0 10px 30px -8px rgba(99, 102, 241, 0.45),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .category-icon {
-    box-shadow:
-        0 10px 30px -8px rgba(99, 102, 241, 0.55),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.15);
+    background: #334155;
+    color: #f1f5f9;
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Soft glow ring behind icon */
@@ -101,17 +101,18 @@
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    background: linear-gradient(145deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.1));
     z-index: -1;
     opacity: 0;
     transition: opacity 0.4s ease;
 }
 
 .category-card:hover .category-icon {
+    background: var(--primary-color);
+    color: #ffffff;
     transform: translateY(-6px) scale(1.08);
-    box-shadow:
-        0 16px 40px -8px rgba(99, 102, 241, 0.55),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 16px 40px -8px rgba(99, 102, 241, 0.4);
+    border-color: transparent;
 }
 
 .category-card:hover .category-icon::after {
