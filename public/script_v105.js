@@ -2985,16 +2985,10 @@ function initHeroScroll() {
             e.preventDefault();
             const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
-                // Manuel offsetli scroll
-                const headerOffset = 0;
-                const bodyRect = document.body.getBoundingClientRect().top;
-                const elementRect = target.getBoundingClientRect().top;
-                const elementPosition = elementRect - bodyRect;
-                const offsetPosition = elementPosition - headerOffset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
+                // ScrollIntoView ile en tepeye kusursuz hizalama
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             } else {
                 // Fallback for different pages (go to articles)
@@ -3318,6 +3312,200 @@ function initLanguageSwitcher() {
                 }
             }
 
+    // 4. Hide Gadget Icon
+    const icon = document.querySelector('.goog-te-gadget-icon');
+    if (icon) icon.style.display = 'none';
+
+    // 5. Hide Tooltip
+    const tooltip = document.querySelector('.goog-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+}
+// Run extremely aggressively at start, then periodically
+setInterval(hideGoogleBanner, 100);
+
+
+// --- Language Switcher (Robust / "Nuclear" Version) ---
+function initLanguageSwitcher() {
+    // 0. INJECT GOOGLE TRANSLATE SCRIPT IF MISSING
+    if (!document.getElementById('google-translate-script')) {
+        const script = document.createElement('script');
+        script.id = 'google-translate-script';
+        script.type = 'text/javascript';
+        script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        document.head.appendChild(script);
+
+        // Add hidden target element
+        if (!document.getElementById('google_translate_element')) {
+            const div = document.createElement('div');
+            div.id = 'google_translate_element';
+            div.style.display = 'none';
+            document.body.appendChild(div);
+        }
+
+        // Init Callback
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement({
+                pageLanguage: 'tr',
+                includedLanguages: 'en,tr',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        };
+    }
+
+    const enforceLanguageButtons = () => {
+        try {
+            // --- COOKIE HELPERS ---
+            function getCookie(name) {
+                const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                return v ? v[2] : null;
+            }
+            function setCookie(name, value) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=${value}; path=/`;
+                document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+                document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
+            }
+            function deleteCookie(name) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+            }
+
+            // --- STATE ---
+            const currentTrans = getCookie('googtrans');
+            const isEnglish = currentTrans === '/tr/en';
+
+            // --- SVG FLAGS ---
+            const trFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#e30a17"/><circle cx="13" cy="16" r="6" fill="#fff"/><circle cx="14.5" cy="16" r="5" fill="#e30a17"/><path d="M19 16 L20.5 14.5 L20.5 17.5 Z" fill="#fff" stroke="#fff" stroke-width="2"/></svg>`;
+            const enFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#00247d"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#fff" stroke-width="6"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#fff" stroke-width="10"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#cf142b" stroke-width="3"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#cf142b" stroke-width="6"/></svg>`;
+
+            const labelContent = isEnglish
+                ? `<div style="display:flex; align-items:center; gap:6px;">${trFlag} <span style="font-weight:700;">TR</span></div>`
+                : `<div style="display:flex; align-items:center; gap:6px;">${enFlag} <span style="font-weight:700;">EN</span></div>`;
+
+            // --- HANDLER --- 
+            const handleLangClick = (e, btnElement) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (btnElement) {
+                    btnElement.style.transform = 'scale(0.95)';
+                    setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
+                    btnElement.style.opacity = '0.7';
+                }
+
+                // NUCLEAR CLEAR
+                deleteCookie('googtrans');
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.aperionx.com";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=aperionx.com";
+
+                if (isEnglish) {
+                    // Switch to Turkish
+                    document.cookie = "googtrans=/tr/tr; path=/";
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=.aperionx.com";
+                } else {
+                    // Switch to English
+                    document.cookie = "googtrans=/tr/en; path=/";
+                    document.cookie = "googtrans=/tr/en; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/en; path=/; domain=.aperionx.com";
+                }
+
+                console.log("Language Switched. Reloading...");
+                setTimeout(() => window.location.reload(), 200);
+            };
+
+            // --- 1. MOBILE MENU BUTTON ---
+            const mobileMenu = document.querySelector('.mobile-menu');
+            if (mobileMenu) {
+                let mobileBtn = document.getElementById('nuclear-mobile-btn');
+                // Ensure it exists and is inside the menu
+                if (!mobileBtn || mobileBtn.parentNode !== mobileMenu) {
+                    if (mobileBtn) mobileBtn.remove();
+                    mobileBtn = document.createElement('a');
+                    mobileBtn.id = 'nuclear-mobile-btn';
+                    mobileBtn.href = "#";
+                    mobileBtn.setAttribute('role', 'button');
+                    // Static Styles
+                    mobileBtn.style.cssText = `
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 8px !important;
+                        padding: 12px 25px !important;
+                        border-radius: 50px !important;
+                        background-color: rgba(255,255,255,0.1) !important;
+                        border: 1px solid rgba(255,255,255,0.2) !important;
+                        color: var(--text-color, #fff) !important;
+                        font-family: sans-serif !important;
+                        font-weight: bold !important;
+                        font-size: 14px !important;
+                        margin-bottom: 15px !important;
+                        width: auto !important;
+                        max-width: 200px !important;
+                        cursor: pointer !important;
+                        transition: transform 0.1s !important;
+                    `;
+
+                    // --- POSITIONING FIX ---
+                    // Want it explicitly at the bottom, after auth buttons
+                    const authSection = mobileMenu.querySelector('.mobile-auth');
+
+                    if (authSection) {
+                        // Insert AFTER auth section
+                        if (mobileBtn.parentNode !== mobileMenu || mobileBtn.previousElementSibling !== authSection) {
+                            // Check if already after
+                            if (authSection.nextSibling !== mobileBtn) {
+                                authSection.parentNode.insertBefore(mobileBtn, authSection.nextSibling);
+                            }
+                        }
+                    } else {
+                        // Fallback: Append to end
+                        mobileMenu.appendChild(mobileBtn);
+                    }
+
+                    mobileBtn.style.marginTop = '15px'; // Force separation
+                    mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                }
+                // Update Content
+                if (!mobileBtn.innerHTML.includes('svg')) {
+                    mobileBtn.innerHTML = labelContent;
+                }
+            }
+
+            // --- 2. DESKTOP BUTTON ---
+            let desktopBtn = document.getElementById('lang-switch-btn');
+            if (desktopBtn) {
+                // Enforce Styles
+                desktopBtn.style.width = 'auto';
+                desktopBtn.style.height = '36px';
+                desktopBtn.style.padding = '0 12px';
+                desktopBtn.style.borderRadius = '20px';
+                desktopBtn.style.display = 'flex';
+                desktopBtn.style.alignItems = 'center';
+                desktopBtn.style.justifyContent = 'center';
+                desktopBtn.style.gap = '6px';
+                desktopBtn.style.fontSize = '14px';
+
+                // Enforce Content
+                if (!desktopBtn.innerHTML.includes('svg')) {
+                    desktopBtn.innerHTML = labelContent;
+                }
+
+                // Attach Click
+                if (!desktopBtn.dataset.hasNuclearClick) {
+                    const newDesktopBtn = desktopBtn.cloneNode(true);
+                    desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                    newDesktopBtn.dataset.hasNuclearClick = "true";
+                    newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                    desktopBtn = newDesktopBtn;
+                }
+            }
+
         } catch (e) {
             console.error("Lang Enforce Error", e);
         }
@@ -3325,7 +3513,7 @@ function initLanguageSwitcher() {
 
     // Run Logic
     enforceLanguageButtons();
-// Run periodically to handle dynamic content/late loads
+    // Run periodically to handle dynamic content/late loads
     setInterval(enforceLanguageButtons, 1000);
 }
 
@@ -3347,8 +3535,10 @@ async function loadPublicCategories() {
                 <div class="category-icon">
                     <i class="${c.icon_class}"></i>
                 </div>
-                <h3 class="category-title">${c.title}</h3>
-                <p class="category-desc">${c.description}</p>
+                <div class="category-content">
+                    <h3 class="category-title">${c.title}</h3>
+                    <p class="category-desc">${c.description}</p>
+                </div>
             </a>
         `).join('');
     } catch (e) {

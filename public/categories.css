@@ -25,19 +25,19 @@
 }
 
 .category-card {
-    flex: 1 1 240px;
-    max-width: 280px;
+    flex: 1 1 350px;
+    max-width: 500px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
-    padding: 30px 20px;
+    text-align: left;
+    padding: 30px;
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 20px;
     text-decoration: none;
     color: var(--text-color);
     border: 1px solid var(--header-border);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.05);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
@@ -79,16 +79,18 @@
 }
 
 .category-icon {
-    width: 65px;
-    height: 65px;
+    width: 70px;
+    height: 70px;
     background: rgba(99, 102, 241, 0.1);
     color: #818cf8;
-    border-radius: 16px;
+    border-radius: 18px;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     font-size: 2.2rem;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    margin-right: 25px;
     transition: all 0.3s ease;
     border: none;
     z-index: 1;
@@ -106,18 +108,22 @@
     box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
 }
 
-.category-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+.category-content {
+    display: flex;
+    flex-direction: column;
     z-index: 1;
+}
+
+.category-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .category-desc {
     font-size: 0.95rem;
     color: #64748b;
     line-height: 1.5;
-    z-index: 1;
 }
 
 [data-theme="dark"] .category-desc {
@@ -128,16 +134,24 @@
 @media (max-width: 1024px) {
     .category-card {
         flex: 1 1 45%;
-        max-width: 45%;
+        max-width: 100%;
     }
 }
 
 @media (max-width: 640px) {
     .category-card {
         flex: 1 1 100%;
-        max-width: 100%;
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 20px;
+    }
+    .category-icon {
+        margin-right: 0;
+        margin-bottom: 15px;
     }
     .categories-section {
+        height: auto;
+        min-height: 100vh;
         padding: 40px 16px;
     }
 }
