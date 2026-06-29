@@ -1,9 +1,12 @@
-/* Categories Section */
 .categories-section {
     padding: 60px 20px;
     background: var(--bg-color); /* Same as body to blend perfectly */
     position: relative;
     z-index: 10;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .categories-container {
