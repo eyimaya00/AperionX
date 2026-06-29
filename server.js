@@ -794,6 +794,30 @@ async function ensureSchema() {
             )
         `);
 
+        // --- NEW: Kategori Kartları Tablosu ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS category_cards (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(100) NOT NULL,
+                description TEXT NOT NULL,
+                icon_class VARCHAR(50) NOT NULL,
+                link_url VARCHAR(255) NOT NULL,
+                order_index INT DEFAULT 0
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        // Tablo boşsa varsayılan verileri ekle
+        const [catRows] = await pool.query('SELECT COUNT(*) as cnt FROM category_cards');
+        if (catRows[0].cnt === 0) {
+            await pool.query(`
+                INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
+                ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
+                ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
+                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 3),
+                ('Hakkımızda', 'Biz kimiz, vizyonumuz ne ve AperionX nasıl çalışır öğrenin.', 'ph-fill ph-users-three', '/about', 4);
+            `);
+            console.log('Migration Code: Kategori kartları varsayılan verileri eklendi.');
+        }
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS comments (
