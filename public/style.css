@@ -1205,9 +1205,9 @@ i[class*=" ph"] {
 .hero-slider {
     position: relative;
     width: 100%;
-    /* Desktop: slightly shorter than full viewport */
-    height: calc(90vh + 80px);
-    min-height: 600px;
+    /* Desktop: exactly one viewport height */
+    height: calc(100vh + 80px);
+    min-height: 680px;
 
     overflow: hidden;
     margin: 0;
@@ -4370,8 +4370,8 @@ i[class*=" ph"] {
 .hero-slider {
     position: relative;
     width: 100%;
-    height: calc(90vh + 80px);
-    min-height: 600px;
+    height: calc(100vh + 80px);
+    min-height: 680px;
     display: flex;
     align-items: center;
     justify-content: center;
