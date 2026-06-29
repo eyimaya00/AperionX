@@ -1741,7 +1741,7 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // Get all category cards (Public)
 app.get('/api/categories', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM category_cards ORDER BY order_index ASC');
+        const [rows] = await pool.query('SELECT * FROM category_cards ORDER BY order_index ASC');
         res.json(rows);
     } catch (error) {
         console.error('Error fetching categories:', error);
@@ -1756,7 +1756,7 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
     }
     const { title, description, icon_class, link_url, order_index } = req.body;
     try {
-        const [result] = await db.query(
+        const [result] = await pool.query(
             'INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES (?, ?, ?, ?, ?)',
             [title, description, icon_class, link_url, order_index || 0]
         );
@@ -1769,14 +1769,13 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
 
 // Update category card (Admin only)
 app.put('/api/categories/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Yetkisiz erişim.' });
-    }
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Yetkisiz erişim.' });
+    const { id } = req.params;
     const { title, description, icon_class, link_url, order_index } = req.body;
     try {
-        await db.query(
+        await pool.query(
             'UPDATE category_cards SET title = ?, description = ?, icon_class = ?, link_url = ?, order_index = ? WHERE id = ?',
-            [title, description, icon_class, link_url, order_index || 0, req.params.id]
+            [title, description, icon_class, link_url, order_index || 0, id]
         );
         res.json({ message: 'Kategori başarıyla güncellendi.' });
     } catch (error) {
@@ -1787,12 +1786,11 @@ app.put('/api/categories/:id', authenticateToken, async (req, res) => {
 
 // Delete category card (Admin only)
 app.delete('/api/categories/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Yetkisiz erişim.' });
-    }
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Yetkisiz erişim.' });
+    const { id } = req.params;
     try {
-        await db.query('DELETE FROM category_cards WHERE id = ?', [req.params.id]);
-        res.json({ message: 'Kategori silindi.' });
+        await pool.query('DELETE FROM category_cards WHERE id = ?', [id]);
+        res.json({ message: 'Kategori başarıyla silindi.' });
     } catch (error) {
         console.error('Error deleting category:', error);
         res.status(500).json({ message: 'Kategori silinemedi.' });
