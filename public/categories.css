@@ -1,9 +1,13 @@
 /* Categories Section */
 .categories-section {
-    padding: 80px 20px 40px;
+    padding: 20px;
     position: relative;
     z-index: 10;
     scroll-margin-top: 80px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .categories-container {

@@ -2976,7 +2976,7 @@ function initHeroScroll() {
     if (btn) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.getElementById('showcase');
+            const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
