@@ -1589,9 +1589,9 @@
             }
 
             // Video (YouTube Embed)
-            if (exp.youtube_video_url) {
+            if (exp.youtube_url) {
                 let videoId = '';
-                const url = exp.youtube_video_url;
+                const url = exp.youtube_url;
                 if (url.includes('youtube.com/watch?v=')) {
                     videoId = url.split('v=')[1]?.split('&')[0];
                 } else if (url.includes('youtu.be/')) {
