@@ -1,13 +1,14 @@
 /* Categories Section */
 .categories-section {
-    padding: 20px;
+    padding: 60px 20px;
     position: relative;
     z-index: 10;
-    scroll-margin-top: 80px;
-    min-height: calc(100vh - 80px);
+    scroll-margin-top: 60px;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
 .categories-container {
@@ -16,17 +17,21 @@
 }
 
 .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
 }
 
 .category-card {
+    flex: 1 1 280px;
+    max-width: 320px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 30px 20px;
+    padding: 40px 25px;
     background: var(--card-bg);
     border-radius: 16px;
     text-decoration: none;
@@ -74,16 +79,16 @@
 }
 
 .category-icon {
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     background: rgba(99, 102, 241, 0.1);
     color: var(--primary-color);
-    border-radius: 16px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 25px;
     transition: all 0.4s ease;
     z-index: 1;
 }
@@ -101,14 +106,14 @@
 }
 
 .category-title {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     z-index: 1;
 }
 
 .category-desc {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     color: #64748b;
     line-height: 1.6;
     z-index: 1;
@@ -120,14 +125,16 @@
 
 /* Responsive Grid */
 @media (max-width: 1024px) {
-    .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .category-card {
+        flex: 1 1 45%;
+        max-width: 45%;
     }
 }
 
 @media (max-width: 640px) {
-    .categories-grid {
-        grid-template-columns: repeat(1, 1fr);
+    .category-card {
+        flex: 1 1 100%;
+        max-width: 100%;
     }
     .categories-section {
         padding: 40px 16px;
