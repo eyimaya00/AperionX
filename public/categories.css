@@ -11,7 +11,16 @@
     justify-content: center;
     align-items: center;
     padding: 100px 40px;
-    background: var(--bg-color);
+    background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #f1f5f9);
+    background-size: 400% 400%;
+    animation: categoriesGradient 15s ease infinite;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .categories-section {
+    background: linear-gradient(-45deg, #0f172a, #0b0f19, #131131, #0f172a);
+    background-size: 400% 400%;
+    animation: categoriesGradient 15s ease infinite;
 }
 
 .categories-container {
@@ -185,5 +194,17 @@
     }
     .categories-section .section-header {
         margin-bottom: 36px;
+    }
+}
+
+@keyframes categoriesGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
     }
 }
