@@ -1736,15 +1736,12 @@ window.scrollToShowcase = function () {
     console.log("Scroll triggered!");
     const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
     if (target) {
-        // Offset for fixed header if needed (approx 80px)
-        const headerOffset = 80;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = target.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - headerOffset;
 
         window.scrollTo({
-            top: offsetPosition,
+            top: elementPosition,
             behavior: 'smooth'
         });
     } else {
@@ -1753,7 +1750,6 @@ window.scrollToShowcase = function () {
 };
 
 // Event Delegation for robustness
-
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('#hero-main-btn'); // Robust check
     if (btn) {
