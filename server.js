@@ -45,7 +45,8 @@ app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: false
+    crossOriginResourcePolicy: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 
 const limiter = rateLimit({
