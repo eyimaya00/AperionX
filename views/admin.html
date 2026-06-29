@@ -2374,7 +2374,7 @@
         // --- Category Management ---
         async function loadCategories() {
             try {
-                const res = await fetch(`${API_URL}/categories`);
+                const res = await fetch(`${API_URL}/category_cards`);
                 if (!res.ok) return;
                 const categories = await res.json();
 
@@ -2405,7 +2405,7 @@
             if (!name) return showToast('Kategori adı boş olamaz.', 'error');
 
             try {
-                const res = await fetch(`${API_URL}/categories`, {
+                const res = await fetch(`${API_URL}/category_cards`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2431,7 +2431,7 @@
             if (!confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) return;
 
             try {
-                const res = await fetch(`${API_URL}/categories/${id}`, {
+                const res = await fetch(`${API_URL}/category_cards/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -2451,7 +2451,7 @@
             const newName = prompt('Yeni kategori adı:', currentName);
             if (newName && newName.trim() !== '' && newName !== currentName) {
                 try {
-                    const res = await fetch(`${API_URL}/categories/${id}`, {
+                    const res = await fetch(`${API_URL}/category_cards/${id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -4463,7 +4463,7 @@
             const tbody = document.getElementById('category-cards-tbody');
             if (!tbody) return;
             try {
-                const res = await fetch(`${API_URL}/categories`);
+                const res = await fetch(`${API_URL}/category_cards`);
                 const cards = await res.json();
                 if (!cards || cards.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">Kayıtlı kategori kartı yok.</td></tr>';
@@ -4510,7 +4510,7 @@
         function deleteCategoryCard(id) {
             showConfirmModal('Bu kartı silmek istediğinize emin misiniz?', async () => {
                 try {
-                    const res = await fetch(`${API_URL}/categories/${id}`, {
+                    const res = await fetch(`${API_URL}/category_cards/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -4532,7 +4532,7 @@
                 link_url: document.getElementById('category_card_link').value,
                 order_index: document.getElementById('category_card_order').value || 0
             };
-            const url = id ? `${API_URL}/categories/${id}` : `${API_URL}/categories`;
+            const url = id ? `${API_URL}/category_cards/${id}` : `${API_URL}/category_cards`;
             const method = id ? 'PUT' : 'POST';
             try {
                 const res = await fetch(url, {

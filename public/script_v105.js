@@ -3330,7 +3330,7 @@ async function loadPublicCategories() {
     const grid = document.getElementById('public-categories-grid');
     if (!grid) return;
     try {
-        const res = await fetch('/api/categories');
+        const res = await fetch('/api/category_cards');
         const cards = await res.json();
         if (!cards || cards.length === 0) {
             grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">Kart bulunamadı.</p>';

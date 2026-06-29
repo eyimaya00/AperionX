@@ -4612,9 +4612,9 @@ i[class*=" ph"] {
 
 /* Articles Hero Updates */
 .articles-hero-section {
-    height: calc(55vh + 80px) !important;
-    /* Updated to calc(55vh + 80px) to compensate for -80px header margin pull */
-    min-height: 430px !important;
+    height: calc(35vh + 80px) !important;
+    /* Updated to calc(35vh + 80px) for a much smaller slider */
+    min-height: 280px !important;
     background-color: var(--bg-color) !important;
     position: relative;
     display: block !important;

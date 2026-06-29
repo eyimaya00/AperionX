@@ -1739,7 +1739,7 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // ==========================================
 
 // Get all category cards (Public)
-app.get('/api/categories', async (req, res) => {
+app.get('/api/category_cards', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM category_cards ORDER BY order_index ASC');
         res.json(rows);
@@ -1750,7 +1750,7 @@ app.get('/api/categories', async (req, res) => {
 });
 
 // Add new category card (Admin only)
-app.post('/api/categories', authenticateToken, async (req, res) => {
+app.post('/api/category_cards', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Yetkisiz erişim.' });
     }
@@ -1768,7 +1768,7 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
 });
 
 // Update category card (Admin only)
-app.put('/api/categories/:id', authenticateToken, async (req, res) => {
+app.put('/api/category_cards/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Yetkisiz erişim.' });
     const { id } = req.params;
     const { title, description, icon_class, link_url, order_index } = req.body;
@@ -1785,7 +1785,7 @@ app.put('/api/categories/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete category card (Admin only)
-app.delete('/api/categories/:id', authenticateToken, async (req, res) => {
+app.delete('/api/category_cards/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Yetkisiz erişim.' });
     const { id } = req.params;
     try {
