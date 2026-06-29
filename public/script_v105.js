@@ -23,7 +23,6 @@ window.currentArticleId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
-    initParticles();
     
     // YENİ: Kategori Kartlarını Yükle
     loadPublicCategories();
