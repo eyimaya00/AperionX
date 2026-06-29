@@ -274,6 +274,31 @@ async function getExperimentAuthors(pool, experimentId) {
     }
 }
 
+async function getExperimentAuthors(pool, experimentId) {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.bio, u.job_title 
+            FROM experiment_authors ea
+            JOIN users u ON ea.user_id = u.id
+            WHERE ea.experiment_id = ?
+            ORDER BY ea.order_index ASC, ea.created_at ASC
+        `, [experimentId]);
+
+        // Fallback: if no authors in join table, check experiments.author_id
+        if (rows.length === 0) {
+            const [exp] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+            if (exp.length > 0 && exp[0].author_id) {
+                const [u] = await pool.query('SELECT id, fullname, username, avatar_url, bio, job_title FROM users WHERE id = ?', [exp[0].author_id]);
+                return u;
+            }
+        }
+        return rows;
+    } catch (e) {
+        console.error('getExperimentAuthors Error:', e);
+        return [];
+    }
+}
+
 
 // (Experiment helper functions removed)
 
@@ -586,13 +611,215 @@ app.get('/preview-article/:id', async (req, res, next) => {
         res.status(500).send('Sunucu Hatası');
     }
 });
-// === EXPERIMENT ROUTES REMOVED - Redirect old URLs to articles ===
-app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], (req, res) => {
-    res.redirect(301, '/articles.html');
+// === EXPERIMENT ROUTES (SSR) ===
+app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
+    const slug = req.params.slug;
+
+    if (slug === 'experiments.html' || slug === 'experiment-detail.html') {
+        return res.redirect(301, '/experiments.html');
+    }
+    try {
+        // Fetch experiment by slug
+        const [rows] = await pool.query("SELECT * FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [slug]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Deney bulunamadı (404)');
+        }
+
+        const experiment = rows[0];
+
+        // ============ VIEW COUNTING LOGIC ============
+        const experimentId = experiment.id;
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+        console.log(`[VIEW-COUNT] Experiment ${experimentId} (${slug}) accessed from IP: ${ip}`);
+
+        try {
+            // Only throttle same IP + same experiment within 2 hours
+            const [viewCheck] = await pool.query(
+                `SELECT id FROM experiment_views 
+                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+                [experimentId, ip]
+            );
+
+            if (viewCheck.length === 0) {
+                console.log(`[VIEW-COUNT] ✅ New view for Experiment ${experimentId} from IP ${ip}`);
+                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
+                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
+                experiment.views = (experiment.views || 0) + 1;
+            } else {
+                console.log(`[VIEW-COUNT] ⏳ Throttled for Experiment ${experimentId} from IP ${ip}`);
+            }
+        } catch (vcErr) {
+            console.error('[VIEW-COUNT] Error:', vcErr.message);
+        }
+        // ============ END VIEW COUNTING ============
+
+        // Read Template
+        const filePath = path.join(__dirname, 'views', 'experiment-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+
+                // Get Authors
+                let authorNames = [];
+                let authors = [];
+                try {
+                    authors = await getExperimentAuthors(pool, experiment.id);
+                    if (authors.length > 0) {
+                        authorNames = authors.map(a => a.fullname);
+                    } else {
+                        authorNames = ['AperionX Yazarı'];
+                    }
+                } catch (e) { authorNames = ['AperionX Yazarı']; }
+
+                const authorName = authorNames.join(', ');
+
+                // Prepare Content
+                const title = experiment.title;
+                const summary = experiment.excerpt || experiment.title;
+                const img = experiment.image_url
+                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url}`)
+                    : `${origin}/uploads/logo.png`;
+
+                // Determine current URL structure
+                const isEnglish = req.path.startsWith('/en/');
+                const urlPrefix = isEnglish ? `${origin}/en` : origin;
+                const url = `${urlPrefix}/deney/${experiment.slug}`;
+
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const safeImg = (img || '').replace(/"/g, '&quot;');
+                const safeUrl = (url || '').replace(/"/g, '&quot;');
+
+                // Format Date for Schema
+                const isoDate = new Date(experiment.created_at).toISOString();
+
+                // REPLACEMENT LOGIC
+                let html = htmlData;
+
+                // Title
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX Deneyler</title>`);
+
+                // Meta Tags (Regex replace)
+                const replaceMeta = (name, content) => {
+                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    html = html.replace(regex, `$1${content}$3`);
+                };
+
+                replaceMeta('description', safeSummary);
+                replaceMeta('og:title', safeTitle);
+                replaceMeta('og:description', safeSummary);
+                replaceMeta('og:image', safeImg);
+                replaceMeta('og:url', safeUrl);
+
+                // Add Experiment Published Date Meta
+                if (!html.includes('article:published_time')) {
+                    html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
+                }
+
+                // Add Dynamic Keywords
+                const tags = experiment.tags || 'bilimsel deney, fen deneyleri, laboratuvar, bilim, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
+                if (!html.includes('<meta name="keywords"')) {
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
+                }
+
+                replaceMeta('twitter:title', safeTitle);
+                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:image', safeImg);
+
+                // Canonical Replacement
+                html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${slug}">`);
+
+                // Inject Preloaded Data Script
+                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
+
+                // === JSON-LD STRUCTURED DATA INJECTION ===
+                const schemaData = {
+                    "@context": "https://schema.org",
+                    "@type": "ScholarlyArticle",
+                    "mainEntityOfPage": {
+                        "@type": "WebPage",
+                        "@id": safeUrl
+                    },
+                    "headline": safeTitle,
+                    "image": [safeImg],
+                    "datePublished": isoDate,
+                    "dateModified": isoDate,
+                    "author": {
+                        "@type": "Person",
+                        "name": authorName,
+                        "url": authors.length > 0 ? `${origin}/author-profile.html?u=${authors[0].id}` : `${origin}/author-profile.html`
+                    },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "AperionX",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/uploads/logo.png`
+                        }
+                    },
+                    "description": safeSummary
+                };
+
+                const breadcrumbData = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Ana Sayfa",
+                        "item": "https://aperionx.com"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Deneyler",
+                        "item": "https://aperionx.com/experiments.html"
+                    }, {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": safeTitle,
+                        "item": safeUrl
+                    }]
+                };
+
+                const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
+                const jsonLdBreadcrumb = `<script type="application/ld+json">${JSON.stringify(breadcrumbData)}</script>`;
+
+                // Inject scripts right before </head>
+                html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${jsonLdBreadcrumb}\n</head>`);
+
+                // Send the generated HTML
+                res.send(html);
+
+            } catch (innerErr) {
+                console.error('SSR processing error for /deney/:slug', innerErr);
+                res.send(htmlData);
+            }
+        });
+
+    } catch (e) {
+        console.error('Database error in /deney/:slug', e);
+        res.status(500).send('Sunucu Hatası');
+    }
 });
 
-app.get('/experiment-detail.html', (req, res) => {
-    res.redirect(301, '/articles.html');
+app.get('/experiment-detail.html', async (req, res) => {
+    const id = req.query.id;
+    if (id && /^\d+$/.test(id)) {
+        try {
+            const [rows] = await pool.query('SELECT slug FROM experiments WHERE id = ?', [id]);
+            if (rows.length > 0 && rows[0].slug) {
+                return res.redirect(301, `/deney/${rows[0].slug}`);
+            }
+        } catch (e) {
+            console.error('Error finding experiment slug for redirect:', e);
+        }
+    }
+    res.redirect(301, '/experiments.html');
 });
 
 // Redirect removed so views/experiments.html can be served
@@ -1947,6 +2174,48 @@ app.get('/api/experiments', async (req, res) => {
         res.json(experiments);
     } catch (e) {
         console.error('API Experiments Error:', e);
+        res.status(500).send(e.toString());
+    }
+});
+
+// GET Single Experiment by ID or Slug for Frontend API
+app.get('/api/experiments/:key', async (req, res) => {
+    const key = req.params.key;
+    try {
+        let sql = "SELECT * FROM experiments WHERE status = 'published' AND deleted_at IS NULL AND ";
+        let params = [];
+
+        if (/^\d+$/.test(key)) {
+            sql += 'id = ?';
+            params = [key];
+        } else {
+            sql += 'slug = ?';
+            params = [key];
+        }
+
+        const [rows] = await pool.query(sql, params);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Experiment not found' });
+        }
+
+        const experiment = rows[0];
+
+        // Fetch authors
+        const authors = await getExperimentAuthors(pool, experiment.id);
+        experiment.authors = authors;
+
+        if (authors.length > 0) {
+            experiment.author_name = authors[0].fullname;
+            experiment.author_username = authors[0].username;
+            experiment.author_avatar = authors[0].avatar_url;
+        } else {
+            experiment.author_name = 'Yazar';
+        }
+
+        res.json(experiment);
+    } catch (e) {
+        console.error('API Experiment Detail Error:', e);
         res.status(500).send(e.toString());
     }
 });
@@ -3373,9 +3642,11 @@ app.get('/api/user/comments', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const query = `
-            SELECT c.id, c.content, c.is_approved, c.created_at, c.article_id, a.title as article_title
+            SELECT c.id, c.content, c.is_approved, c.created_at, c.article_id, a.title as article_title,
+                   c.experiment_id, e.title as experiment_title, e.slug as experiment_slug
             FROM comments c
-            JOIN articles a ON c.article_id = a.id
+            LEFT JOIN articles a ON c.article_id = a.id
+            LEFT JOIN experiments e ON c.experiment_id = e.id
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
         `;
@@ -4472,7 +4743,89 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
 
         // Default is_approved = 1 (Auto-approve)
         const cleanContent = DOMPurify.sanitize(content);
-        await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
+        res.json({ message: 'Yorum gönderildi.' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// === EXPERIMENT LIKES API ===
+app.get('/api/experiments/:id/like', authenticateToken, async (req, res) => {
+    try {
+        const experimentId = req.params.id;
+        const userId = req.user.id;
+        const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE experiment_id = ?', [experimentId]);
+        const [me] = await pool.query('SELECT * FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
+        res.json({ count: likes[0].count, liked: !!me.length });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/experiments/:id/like', authenticateToken, async (req, res) => {
+    try {
+        const experimentId = req.params.id;
+        const userId = req.user.id;
+        const [exists] = await pool.query('SELECT * FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
+        if (exists.length) {
+            await pool.query('DELETE FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
+            res.json({ liked: false });
+        } else {
+            await pool.query('INSERT IGNORE INTO likes (experiment_id, user_id) VALUES (?, ?)', [experimentId, userId]);
+            res.json({ liked: true });
+        }
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// === EXPERIMENT COMMENTS API ===
+app.get('/api/experiments/:id/comments', async (req, res) => {
+    try {
+        const experimentId = req.params.id;
+        let userId = null;
+
+        // Manual Auth Check
+        const authHeader = req.headers['authorization'];
+        if (authHeader) {
+            const token = authHeader.split(' ')[1];
+            if (token) {
+                try {
+                    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'gizli_anahtar');
+                    userId = decoded.id;
+                } catch (e) { }
+            }
+        }
+
+        let query = `
+            SELECT c.*, u.fullname 
+            FROM comments c 
+            JOIN users u ON c.user_id = u.id 
+            WHERE c.experiment_id = ? AND (c.is_approved = 1`;
+
+        const params = [experimentId];
+
+        if (userId) {
+            query += ` OR c.user_id = ?)`;
+            params.push(userId);
+        } else {
+            query += `)`;
+        }
+
+        query += ` ORDER BY c.created_at DESC`;
+
+        const [comments] = await pool.query(query, params);
+
+        const result = comments.map(c => ({
+            ...c,
+            is_mine: userId && c.user_id === userId
+        }));
+
+        res.json(result);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/experiments/:id/comments', authenticateToken, async (req, res) => {
+    try {
+        const { content } = req.body;
+        if (!content) return res.status(400).json({ error: 'Yorum boş olamaz' });
+
+        const cleanContent = DOMPurify.sanitize(content);
+        await pool.query('INSERT INTO comments (experiment_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
         res.json({ message: 'Yorum gönderildi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -4505,9 +4858,11 @@ app.delete('/api/comments/:id', authenticateToken, async (req, res) => {
 app.get('/api/user/comments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT c.*, a.title as article_title, a.id as article_id 
+            SELECT c.*, a.title as article_title, a.id as article_id,
+                   e.title as experiment_title, e.slug as experiment_slug
             FROM comments c 
             LEFT JOIN articles a ON c.article_id = a.id 
+            LEFT JOIN experiments e ON c.experiment_id = e.id
             WHERE c.user_id = ? 
             ORDER BY c.created_at DESC`, [req.user.id]);
         res.json(rows);

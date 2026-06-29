@@ -435,6 +435,7 @@
             <nav class="nav-menu">
                 <a href="/" class="nav-link">Ana Sayfa</a>
                 <a href="/articles" class="nav-link">Makaleler</a>
+                <a href="/experiments" class="nav-link">Deneyler</a>
                 <a href="javascript:void(0)" class="nav-link active">Profilim</a>
             </nav>
 
@@ -658,7 +659,12 @@
                         list.innerHTML = comments.map(c => `
                         <div class="my-comment-card" id="comment-card-${c.id}">
                             <div class="comment-meta">
-                                <span>Makale: <a href="/article-detail?id=${c.article_id}" class="article-link">${c.article_title}</a></span>
+                                <span>
+                                    ${c.article_id 
+                                        ? `Makale: <a href="/article-detail?id=${c.article_id}" class="article-link">${c.article_title}</a>` 
+                                        : `Deney: <a href="/deney/${c.experiment_slug}" class="article-link">${c.experiment_title}</a>`
+                                    }
+                                </span>
                                 <span>${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
                             </div>
                             <div class="comment-text" id="comment-text-${c.id}">${c.content}</div>

@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AperionX Deneyler. Bilimsel deney adımları, amaçları, malzemeleri ve bulguları.">
+    <meta property="og:title" content="AperionX - Deneyler">
+    <meta property="og:description" content="Bilimsel deney adımları, amaçları ve sonuçları.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AperionX - Deneyler">
+    <meta name="twitter:description" content="Bilimsel deney adımları, amaçları ve sonuçları.">
+    <meta name="twitter:image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AperionX">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:site" content="@aperionx">
+    <link rel="alternate" type="application/rss+xml" title="AperionX RSS" href="/feed.xml">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://aperionx.com/experiments" />
+    <title>Deney Yükleniyor... - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=246">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        .article-detail-container {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        .header {
+            background-color: var(--card-bg) !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .article-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .article-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .detail-hero-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background-color: transparent;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f8fafc;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+        }
+
+        .unified-article-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+        }
+
+        .article-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin-top: 30px;
+            background: transparent !important;
+        }
+
+        /* Custom Box Styles for Experiments */
+        .section-header-custom {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+        }
+
+        .experiment-objective-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
+            border-left: 5px solid #6366f1;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .experiment-materials-box {
+            background: rgba(148, 163, 184, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .experiment-materials-list {
+            padding-left: 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .experiment-materials-list li {
+            margin-bottom: 8px;
+        }
+
+        .experiment-safety-box {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-left: 5px solid #ef4444;
+            padding: 24px;
+            border-radius: 16px;
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
+
+        .experiment-results-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(99, 102, 241, 0.05));
+            border-left: 5px solid #10b981;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .pdf-download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .pdf-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        /* Reading Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            z-index: 2147483647;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #a855f7);
+            width: 0%;
+            will-change: width;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Author chips */
+        .author-chips-wrapper {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .author-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .author-chip:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .author-chip-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .related-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .slider-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        [data-theme="dark"] .slider-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .slider-nav-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .similar-article-card {
+            min-width: 280px;
+            width: 280px;
+            height: 380px;
+            background-color: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .similar-article-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .similar-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .similar-article-card:hover .similar-card-overlay {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0.95) 100%);
+        }
+
+        .similar-card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-decoration: none;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .similar-card-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .category-badge-slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .similar-article-card {
+                min-width: 260px;
+                width: 260px;
+                height: 350px;
+            }
+
+            .similar-slider-wrapper {
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px;
+            }
+
+            #similar-slider-track {
+                transform: none !important;
+            }
+
+            .slider-nav-btn {
+                display: none !important;
+            }
+
+            .article-title {
+                font-size: 2rem;
+            }
+
+            .detail-hero-image {
+                height: 250px;
+            }
+
+            .unified-article-card {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- Reading Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar" id="reading-progress"></div>
+    </div>
+
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/articles" class="nav-link">Makaleler</a>
+                <a href="/experiments" class="nav-link active">Deneyler</a>
+                <a href="/tools" class="nav-link">Araçlar</a>
+                <a href="/about" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
+
+                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container article-detail-container">
+        <!-- Loading State -->
+        <div id="loading-indicator" style="text-align: center; padding: 100px;">
+            <i class="ph ph-spinner ph-spin" style="font-size: 3rem; color: var(--primary-color);"></i>
+        </div>
+
+        <!-- Content -->
+        <main id="article-wrapper" style="display: none;">
+
+            <!-- Hero Image -->
+            <img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">
+
+            <!-- Unified Card -->
+            <div class="unified-article-card">
+                <div class="article-header">
+                    <div class="article-meta">
+                        <span class="article-badge" id="detail-category">Deney</span>
+                        <span id="detail-date"><i class="ph ph-calendar"></i> 10 Aralık 2025</span>
+                        <span id="detail-views"><i class="ph ph-eye"></i> 0 Görüntülenme</span>
+                        <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
+                    </div>
+                    <h1 class="article-title" id="detail-title">Deney Başlığı</h1>
+                </div>
+
+                <!-- Amaç (Objective) Box -->
+                <div class="experiment-objective-box" id="objective-box" style="display: none;">
+                    <div class="section-header-custom"><i class="ph-bold ph-lightbulb" style="color: #6366f1;"></i> Deneyin Amacı</div>
+                    <div class="article-content" id="detail-objective" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Malzemeler (Materials) Box -->
+                <div class="experiment-materials-box" id="materials-box" style="display: none;">
+                    <div class="section-header-custom"><i class="ph-bold ph-flask" style="color: #64748b;"></i> Gerekli Malzemeler</div>
+                    <div class="article-content" id="detail-materials" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Güvenlik Önlemleri (Safety) Box -->
+                <div class="experiment-safety-box" id="safety-box" style="display: none;">
+                    <div class="section-header-custom"><i class="ph-bold ph-warning-octagon" style="color: #ef4444;"></i> Güvenlik Önlemleri</div>
+                    <div class="article-content" id="detail-safety" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Metot/Adımlar (Procedure Steps) -->
+                <div id="procedure-section" style="display: none; margin-bottom: 30px;">
+                    <div class="section-header-custom" style="border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;">
+                        <i class="ph-bold ph-steps" style="color: var(--primary-color);"></i> Metot ve Adımlar
+                    </div>
+                    <div class="article-content" id="detail-procedure"></div>
+                </div>
+
+                <!-- Bulgular ve Gözlemler (Results) Box -->
+                <div class="experiment-results-box" id="results-box" style="display: none;">
+                    <div class="section-header-custom"><i class="ph-bold ph-chart-line" style="color: #10b981;"></i> Bulgular ve Gözlemler</div>
+                    <div class="article-content" id="detail-results" style="margin-top: 10px;"></div>
+                </div>
+
+                <!-- Genel Sonuç (Conclusion) -->
+                <div id="conclusion-section" style="display: none; margin-bottom: 30px;">
+                    <div class="section-header-custom" style="border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px;">
+                        <i class="ph-bold ph-check-circle" style="color: #10b981;"></i> Sonuç
+                    </div>
+                    <div class="article-content" id="detail-conclusion"></div>
+                </div>
+
+                <!-- YouTube Video Embed -->
+                <div id="video-container" style="display: none; margin-bottom: 30px;">
+                    <div class="section-header-custom"><i class="ph-bold ph-youtube-logo" style="color: #ef4444;"></i> Deney Videosu</div>
+                    <div class="video-wrapper">
+                        <iframe id="video-iframe" src="" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <!-- PDF Link -->
+                <div id="pdf-container" style="display: none; text-align: center; margin-bottom: 30px;">
+                    <a href="" id="pdf-download-link" class="pdf-download-btn" target="_blank">
+                        <i class="ph-bold ph-file-pdf"></i> Deney Kılavuzunu İndir (PDF)
+                    </a>
+                </div>
+
+                <!-- References -->
+                <div class="references-section-simple" id="references-section" style="display: none;">
+                    <h3 class="references-title">Kaynakça</h3>
+                    <ul class="references-list" id="references-list"></ul>
+                </div>
+
+                <!-- Tags -->
+                <div class="tags-container" id="detail-tags" style="margin-top: 30px;"></div>
+            </div>
+
+            <!-- Meta Footer (Actions) -->
+            <div class="article-footer-meta">
+                <div class="action-row">
+                    <!-- Left: Back Button -->
+                    <a href="/experiments" class="btn-back-custom">
+                        <i class="ph-bold ph-arrow-left"></i> Diğer Deneylere Göz At
+                    </a>
+
+                    <!-- Right: Like & Share -->
+                    <div class="right-actions">
+                        <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                            <i class="ph ph-heart"></i> Destek Ol
+                        </button>
+
+                        <div class="share-divider"></div>
+
+                        <div class="share-icons-row">
+                            <span class="share-label">Paylaş:</span>
+                            <a href="javascript:void(0)" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                            <a href="javascript:void(0)" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                            <a href="javascript:void(0)" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                            <a href="javascript:void(0)" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                            <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
+                                title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
+
+                <!-- Comment Form -->
+                <div class="comment-form-wrapper" id="comment-form-container">
+                    <p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal')">giriş yapmalısınız</a>.</p>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-list" id="comments-list">
+                    <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+                </div>
+            </div>
+
+            <!-- Similar Experiments Slider -->
+            <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="related-articles-title" id="similar-articles-title">Önerilen Diğer Deneyler</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="slider-nav-btn" onclick="slideArticles('left')"><i class="ph ph-caret-left"></i></button>
+                        <button class="slider-nav-btn" onclick="slideArticles('right')"><i class="ph ph-caret-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
+                    <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <div id="global-footer"></div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- Login/Register/Forgot Modals (identical to other files for layout/logic) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="remember-me-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <label class="remember-me-label" style="display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; color: var(--text-color);">
+                        <input type="checkbox" id="login-remember" class="remember-checkbox" style="margin-right: 8px;">
+                        <span>Beni Hatırla</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="switchModal('loginModal', 'forgotPasswordModal')" class="forgot-password-link" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Giriş Yap
+                </button>
+            </div>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required aria-label="Ad Soyad">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required aria-label="Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required aria-label="Şifre Tekrar">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Üye Ol
+                </button>
+            </div>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="javascript:void(0)" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script defer src="/script_v105.js?v=246"></script>
+    <script>
+        const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
+        window.currentExperimentId = null;
+
+        // Progress Bar Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.getElementById('reading-progress');
+            let contentElement = null;
+            let ticking = false;
+
+            function updateProgress() {
+                if (!progressBar) return;
+                if (!contentElement) contentElement = document.querySelector('.unified-article-card');
+                if (!contentElement) return;
+
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const rect = contentElement.getBoundingClientRect();
+                const elementTop = rect.top + scrollTop;
+                const elementHeight = contentElement.offsetHeight;
+
+                if (elementHeight === 0) return;
+
+                const startPoint = elementTop;
+                const endPoint = elementTop + elementHeight - windowHeight;
+
+                let pct = 0;
+                if (endPoint > startPoint) {
+                    pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
+                }
+                progressBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateProgress);
+                    ticking = true;
+                }
+            }, { passive: true });
+            
+            window.addEventListener('resize', updateProgress);
+            setInterval(updateProgress, 1000);
+        });
+
+        // Initialize Experiment Details
+        async function initExperimentDetail() {
+            // 1. SSR preloaded data check
+            if (window.SERVER_EXPERIMENT) {
+                renderExperimentDetail(window.SERVER_EXPERIMENT);
+                return;
+            }
+
+            // 2. Client-side fallback fetch
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const pathParts = window.location.pathname.split('/');
+            const key = id || pathParts[pathParts.length - 1];
+
+            if (!key || key === 'experiment-detail') {
+                window.location.href = '/experiments';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/experiments/${key}?t=${Date.now()}`);
+                if (!res.ok) throw new Error('Deney bulunamadı');
+                const data = await res.json();
+                renderExperimentDetail(data);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading-indicator').innerHTML = `<h2 style="color:red;">Hata: Deney yüklenemedi</h2><p>${e.message}</p>`;
+            }
+        }
+
+        function renderExperimentDetail(exp) {
+            window.currentExperimentId = exp.id;
+            document.getElementById('loading-indicator').style.display = 'none';
+            document.getElementById('article-wrapper').style.display = 'block';
+
+            document.title = `${exp.title} - AperionX Deneyler`;
+
+            // Images
+            const img = document.getElementById('detail-image');
+            if (exp.image_url) {
+                img.src = exp.image_url.startsWith('http') ? exp.image_url : '/' + exp.image_url.replace(/\\/g, '/');
+                img.alt = exp.title;
+            } else {
+                img.style.display = 'none';
+            }
+
+            // Title and basic meta
+            document.getElementById('detail-title').innerText = exp.title;
+            document.getElementById('detail-category').innerText = exp.category || 'Deney';
+            document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(exp.created_at).toLocaleDateString('tr-TR')}`;
+            document.getElementById('detail-views').innerHTML = `<i class="ph ph-eye"></i> ${exp.views || 0} Görüntülenme`;
+
+            // Co-authors
+            if (window.SERVER_EXP_AUTHORS && Array.isArray(window.SERVER_EXP_AUTHORS) && window.SERVER_EXP_AUTHORS.length > 0) {
+                exp.authors = window.SERVER_EXP_AUTHORS;
+            }
+            if (exp.authors && exp.authors.length > 0) {
+                const authorsHtml = exp.authors.map(a => {
+                    const avatar = a.avatar_url ? (a.avatar_url.startsWith('http') ? a.avatar_url : '/' + a.avatar_url) : '/uploads/default-avatar.png';
+                    return `<a href="author-profile.html?u=${a.id}" class="author-chip"><img src="${avatar}" alt="${a.fullname}" class="author-chip-avatar">${a.fullname}</a>`;
+                }).join('');
+                document.getElementById('detail-author').innerHTML = `<div class="author-chips-wrapper">${authorsHtml}</div>`;
+            } else {
+                const safeAuthorName = exp.author_name || 'AperionX Yazarı';
+                if (exp.author_id) {
+                    document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${exp.author_id}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+                } else {
+                    document.getElementById('detail-author').innerHTML = `<span class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</span>`;
+                }
+            }
+
+            // Amaç (Objective)
+            const objBox = document.getElementById('objective-box');
+            if (exp.objective) {
+                document.getElementById('detail-objective').innerHTML = exp.objective;
+                objBox.style.display = 'block';
+            }
+
+            // Malzemeler (Materials)
+            const matBox = document.getElementById('materials-box');
+            if (exp.materials) {
+                // If it looks like raw text, list it, otherwise set as html
+                const detailMat = document.getElementById('detail-materials');
+                if (exp.materials.includes('\n')) {
+                    const items = exp.materials.split('\n').filter(x => x.trim());
+                    detailMat.innerHTML = `<ul class="experiment-materials-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+                } else {
+                    detailMat.innerHTML = exp.materials;
+                }
+                matBox.style.display = 'block';
+            }
+
+            // Güvenlik Önlemleri (Safety)
+            const safetyBox = document.getElementById('safety-box');
+            if (exp.safety_notes) {
+                document.getElementById('detail-safety').innerHTML = exp.safety_notes;
+                safetyBox.style.display = 'block';
+            }
+
+            // Adımlar (Procedure)
+            const procSec = document.getElementById('procedure-section');
+            if (exp.procedure_steps) {
+                document.getElementById('detail-procedure').innerHTML = exp.procedure_steps;
+                procSec.style.display = 'block';
+            }
+
+            // Bulgular (Results)
+            const resBox = document.getElementById('results-box');
+            if (exp.results) {
+                document.getElementById('detail-results').innerHTML = exp.results;
+                resBox.style.display = 'block';
+            }
+
+            // Sonuç (Conclusion)
+            const concSec = document.getElementById('conclusion-section');
+            if (exp.conclusion) {
+                document.getElementById('detail-conclusion').innerHTML = exp.conclusion;
+                concSec.style.display = 'block';
+            }
+
+            // Video (YouTube Embed)
+            if (exp.youtube_video_url) {
+                let videoId = '';
+                const url = exp.youtube_video_url;
+                if (url.includes('youtube.com/watch?v=')) {
+                    videoId = url.split('v=')[1]?.split('&')[0];
+                } else if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                } else if (url.includes('youtube.com/embed/')) {
+                    videoId = url.split('embed/')[1]?.split('?')[0];
+                }
+                if (videoId) {
+                    document.getElementById('video-iframe').src = `https://www.youtube.com/embed/${videoId}`;
+                    document.getElementById('video-container').style.display = 'block';
+                }
+            }
+
+            // PDF Link
+            if (exp.pdf_url) {
+                const pdfLink = document.getElementById('pdf-download-link');
+                pdfLink.href = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
+                document.getElementById('pdf-container').style.display = 'block';
+            }
+
+            // References
+            const refSection = document.getElementById('references-section');
+            if (exp.references_list) {
+                refSection.innerHTML = '<h3 class="references-title">Kaynakça</h3><ul class="references-list" id="references-list"></ul>';
+                const refs = exp.references_list.split('\n').filter(r => r.trim());
+                const ul = document.getElementById('references-list');
+                refs.forEach((ref, index) => {
+                    ul.innerHTML += `<li style="margin-bottom: 10px;"><span style="font-weight:700; color: var(--primary-color); margin-right: 8px;">[${index+1}]</span>${ref}</li>`;
+                });
+                refSection.style.display = 'block';
+            }
+
+            // Tags
+            const tagsContainer = document.getElementById('detail-tags');
+            if (exp.tags) {
+                tagsContainer.innerHTML = '';
+                exp.tags.split(',').forEach(tag => {
+                    const t = tag.trim();
+                    if (t) tagsContainer.innerHTML += `<span class="tag-chip">#${t}</span>`;
+                });
+            }
+
+            // Load likes, comments and recommendations
+            loadLikes(exp.id);
+            loadComments(exp.id);
+            loadExperimentSlider(exp.id);
+        }
+
+        // --- LIKES ---
+        async function loadLikes(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`${API_BASE}/experiments/${id}/like`, { headers });
+                const data = await res.json();
+                const btn = document.getElementById('like-btn');
+                if (data.liked) {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                } else {
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function toggleLike() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                openModal('loginModal');
+                return;
+            }
+            if (!window.currentExperimentId) return;
+            try {
+                const res = await fetch(`${API_BASE}/experiments/${window.currentExperimentId}/like`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadLikes(window.currentExperimentId);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // --- COMMENTS ---
+        async function loadComments(id) {
+            const list = document.getElementById('comments-list');
+            const token = localStorage.getItem('token');
+            const formContainer = document.getElementById('comment-form-container');
+
+            if (formContainer) {
+                if (token) {
+                    formContainer.innerHTML = `
+                        <div class="comment-form">
+                            <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                            <div class="form-actions">
+                                <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal')">giriş yapmalısınız</a>.</p>`;
+                }
+            }
+
+            try {
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`${API_BASE}/experiments/${id}/comments`, { headers });
+                const comments = await res.json();
+                document.getElementById('comment-count').innerText = comments.length;
+
+                list.innerHTML = '';
+                if (comments.length === 0) {
+                    list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
+                    return;
+                }
+
+                comments.forEach(com => {
+                    const initials = com.fullname ? com.fullname.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U';
+                    const isMine = com.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === com.user_id);
+                    list.innerHTML += `
+                        <div class="comment-item" id="comment-${com.id}">
+                            <div class="comment-avatar">${initials}</div>
+                            <div class="comment-content-wrapper">
+                                <div class="comment-header">
+                                    <span class="comment-author">${com.fullname || 'Kullanıcı'}</span>
+                                    ${com.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                                    <div class="comment-actions">
+                                        <span class="comment-date">${new Date(com.created_at).toLocaleDateString('tr-TR')}</span>
+                                        ${isMine ? `
+                                            <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                            <span class="action-link delete" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i> Sil</span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="comment-body">${com.content}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function postComment() {
+            const input = document.getElementById('comment-input');
+            const content = input.value.trim();
+            if (!content) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/experiments/${window.currentExperimentId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+                if (res.ok) {
+                    showToast('Yorumunuz başarıyla yayınlandı!', 'success');
+                    input.value = '';
+                    loadComments(window.currentExperimentId);
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showToast('Yorum silindi', 'success');
+                    document.getElementById(`comment-${id}`).remove();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Link başarıyla kopyalandı!', 'success');
+            }).catch(() => {
+                showToast('Link kopyalanamadı', 'error');
+            });
+        }
+
+        // --- RECOMMENDATION SLIDER ---
+        let similarExperiments = [];
+        let sliderIndex = 0;
+
+        async function loadExperimentSlider(currentId) {
+            try {
+                const res = await fetch(`${API_BASE}/experiments`);
+                if (!res.ok) return;
+                const all = await res.json();
+                similarExperiments = all.filter(e => e.id != currentId).slice(0, 10);
+                renderSlider();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('similar-articles-section').style.display = 'none';
+            }
+        }
+
+        function renderSlider() {
+            const track = document.getElementById('similar-slider-track');
+            if (similarExperiments.length === 0) {
+                document.getElementById('similar-articles-section').style.display = 'none';
+                return;
+            }
+            track.innerHTML = similarExperiments.map(exp => {
+                const bgUrl = exp.image_url ? exp.image_url.replace(/\\/g, '/') : 'https://via.placeholder.com/300x400';
+                return `
+                    <div class="similar-article-card" style="background-image: url('${bgUrl}');" onclick="window.location.href='${exp.slug ? '/deney/' + exp.slug : '/experiment-detail.html?id=' + exp.id}'">
+                        <div class="similar-card-overlay">
+                            <span class="category-badge-slider">${exp.category || 'Deney'}</span>
+                            <div class="content-bottom">
+                                <a href="${exp.slug ? '/deney/' + exp.slug : '/experiment-detail.html?id=' + exp.id}" class="similar-card-title">${exp.title}</a>
+                                <div class="similar-card-meta">
+                                    <span>${exp.author_name || 'Admin'}</span>
+                                    <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
+                                    <span>${new Date(exp.created_at).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function slideArticles(direction) {
+            const track = document.getElementById('similar-slider-track');
+            const cardWidth = 300;
+            const containerWidth = document.querySelector('.similar-slider-wrapper').offsetWidth;
+            const trackWidth = track.scrollWidth;
+
+            if (direction === 'left') {
+                sliderIndex = Math.max(sliderIndex - cardWidth, 0);
+            } else {
+                const maxScroll = Math.max(0, trackWidth - containerWidth);
+                sliderIndex = Math.min(sliderIndex + cardWidth, maxScroll);
+            }
+            track.style.transform = `translateX(-${sliderIndex}px)`;
+        }
+
+        document.addEventListener('DOMContentLoaded', initExperimentDetail);
+    </script>
+</body>
+
+</html>
