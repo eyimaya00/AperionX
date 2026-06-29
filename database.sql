@@ -117,6 +117,15 @@ CREATE TABLE IF NOT EXISTS tracked_author_articles (
     author_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     article_date DATE NOT NULL,
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES tracked_authors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Homepage Category Cards Table
+CREATE TABLE IF NOT EXISTS category_cards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    icon_class VARCHAR(50) NOT NULL,
+    link_url VARCHAR(255) NOT NULL,
+    order_index INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

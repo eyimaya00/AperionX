@@ -1710,6 +1710,71 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 
 
 // 3. Articles (GET Public, POST Author)
+// ==========================================
+// CATEGORY CARDS API ROUTES
+// ==========================================
+
+// Get all category cards (Public)
+app.get('/api/categories', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM category_cards ORDER BY order_index ASC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+// Add new category card (Admin only)
+app.post('/api/categories', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Yetkisiz erişim.' });
+    }
+    const { title, description, icon_class, link_url, order_index } = req.body;
+    try {
+        const [result] = await db.query(
+            'INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES (?, ?, ?, ?, ?)',
+            [title, description, icon_class, link_url, order_index || 0]
+        );
+        res.status(201).json({ id: result.insertId, message: 'Kategori başarıyla eklendi.' });
+    } catch (error) {
+        console.error('Error adding category:', error);
+        res.status(500).json({ message: 'Kategori eklenemedi.' });
+    }
+});
+
+// Update category card (Admin only)
+app.put('/api/categories/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Yetkisiz erişim.' });
+    }
+    const { title, description, icon_class, link_url, order_index } = req.body;
+    try {
+        await db.query(
+            'UPDATE category_cards SET title = ?, description = ?, icon_class = ?, link_url = ?, order_index = ? WHERE id = ?',
+            [title, description, icon_class, link_url, order_index || 0, req.params.id]
+        );
+        res.json({ message: 'Kategori başarıyla güncellendi.' });
+    } catch (error) {
+        console.error('Error updating category:', error);
+        res.status(500).json({ message: 'Kategori güncellenemedi.' });
+    }
+});
+
+// Delete category card (Admin only)
+app.delete('/api/categories/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Yetkisiz erişim.' });
+    }
+    try {
+        await db.query('DELETE FROM category_cards WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Kategori silindi.' });
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        res.status(500).json({ message: 'Kategori silinemedi.' });
+    }
+});
+
 app.get('/api/articles', async (req, res) => {
     try {
         const limit = req.query.limit ? parseInt(req.query.limit) : null;

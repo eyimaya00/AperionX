@@ -23,6 +23,14 @@ window.currentArticleId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
+    initParticles();
+    
+    // YENİ: Kategori Kartlarını Yükle
+    loadPublicCategories();
+
+    // ----------------------------------------------------
+    // YENİ: Makaleleri Render Et (İlk Yükleme)
+    // ----------------------------------------------------
 
     // --- Global Loader Logic ---
     Promise.all([
@@ -2978,7 +2986,17 @@ function initHeroScroll() {
             e.preventDefault();
             const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Manuel offsetli scroll
+                const headerOffset = 100;
+                const bodyRect = document.body.getBoundingClientRect().top;
+                const elementRect = target.getBoundingClientRect().top;
+                const elementPosition = elementRect - bodyRect;
+                const offsetPosition = elementPosition - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
             } else {
                 // Fallback for different pages (go to articles)
                 window.location.href = "/articles";
@@ -3308,6 +3326,33 @@ function initLanguageSwitcher() {
 
     // Run Logic
     enforceLanguageButtons();
-    // Run periodically to handle dynamic content/late loads
+// Run periodically to handle dynamic content/late loads
     setInterval(enforceLanguageButtons, 1000);
+}
+
+// =====================================================================
+// YENİ: Kategori Kartları (Dinamik Yükleme)
+// =====================================================================
+async function loadPublicCategories() {
+    const grid = document.getElementById('public-categories-grid');
+    if (!grid) return;
+    try {
+        const res = await fetch('/api/categories');
+        const cards = await res.json();
+        if (!cards || cards.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">Kart bulunamadı.</p>';
+            return;
+        }
+        grid.innerHTML = cards.map(c => `
+            <a href="${c.link_url}" class="category-card">
+                <div class="category-icon">
+                    <i class="${c.icon_class}"></i>
+                </div>
+                <h3 class="category-title">${c.title}</h3>
+                <p class="category-desc">${c.description}</p>
+            </a>
+        `).join('');
+    } catch (e) {
+        console.error('Kategoriler yüklenirken hata:', e);
+    }
 }
