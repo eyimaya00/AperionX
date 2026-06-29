@@ -2986,7 +2986,7 @@ function initHeroScroll() {
             const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
                 // Manuel offsetli scroll
-                const headerOffset = 60;
+                const headerOffset = 30;
                 const bodyRect = document.body.getBoundingClientRect().top;
                 const elementRect = target.getBoundingClientRect().top;
                 const elementPosition = elementRect - bodyRect;
