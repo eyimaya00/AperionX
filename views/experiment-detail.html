@@ -176,6 +176,32 @@
             letter-spacing: -0.5px;
         }
 
+        /* Summary Box - Distinct Background */
+        .article-summary-simple {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(99, 102, 241, 0.04);
+            /* Light Indigo Tint */
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        [data-theme="dark"] .article-summary-simple {
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark mode tint */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
         /* References Section - Simple */
         .references-section-simple {
             margin-top: 30px;
