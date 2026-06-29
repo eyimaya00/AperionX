@@ -1,10 +1,9 @@
 /* Categories Section */
 .categories-section {
-    padding: 100px 20px 40px 20px;
+    padding: 30px 20px;
     position: relative;
     z-index: 10;
-    scroll-margin-top: 20px;
-    min-height: 100vh;
+    scroll-margin-top: 0px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -79,30 +78,33 @@
 }
 
 .category-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary-color);
-    border-radius: 16px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+    color: #818cf8;
+    border-radius: 50%; /* Dairesel modern tasarım */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    margin-bottom: 15px;
-    transition: all 0.4s ease;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     z-index: 1;
 }
 
 [data-theme="dark"] .category-icon {
-    background: rgba(129, 140, 248, 0.15);
-    color: #818cf8;
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(192, 132, 252, 0.15));
+    color: #a78bfa;
+    border-color: rgba(167, 139, 250, 0.2);
 }
 
 .category-card:hover .category-icon {
     background: linear-gradient(135deg, #6366f1, #a855f7);
     color: white;
-    transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    transform: scale(1.15) translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+    border-color: transparent;
 }
 
 .category-title {
