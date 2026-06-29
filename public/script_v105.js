@@ -2985,11 +2985,11 @@ function initHeroScroll() {
             e.preventDefault();
             const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
-                // Scroll so categories fill the viewport (hide slider above)
+                // Scroll to push slider completely above viewport
+                // Categories has 100px top padding so content appears below the 80px header
                 const elementTop = target.getBoundingClientRect().top + window.pageYOffset;
-                // Scroll to element top minus a tiny offset so navbar overlaps the very top of section
                 window.scrollTo({
-                    top: elementTop - 80,
+                    top: elementTop,
                     behavior: 'smooth'
                 });
             } else {
