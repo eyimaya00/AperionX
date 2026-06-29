@@ -2985,10 +2985,12 @@ function initHeroScroll() {
             e.preventDefault();
             const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
-                // ScrollIntoView ile en tepeye kusursuz hizalama
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+                // Scroll so categories fill the viewport (hide slider above)
+                const elementTop = target.getBoundingClientRect().top + window.pageYOffset;
+                // Scroll to element top minus a tiny offset so navbar overlaps the very top of section
+                window.scrollTo({
+                    top: elementTop - 80,
+                    behavior: 'smooth'
                 });
             } else {
                 // Fallback for different pages (go to articles)
