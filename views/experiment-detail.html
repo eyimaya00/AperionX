@@ -618,6 +618,28 @@
             color: #ef4444;
         }
 
+        .delete-comment-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            line-height: 1;
+            margin-left: auto;
+        }
+
+        .delete-comment-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            transform: scale(1.05);
+        }
+
         .edit-area {
             width: 100%;
             padding: 12px;
@@ -669,11 +691,6 @@
         }
 
         @media (max-width: 768px) {
-            .action-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
             .right-actions {
                 justify-content: center;
                 flex-wrap: wrap;
