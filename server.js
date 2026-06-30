@@ -4196,6 +4196,43 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     }
 });
 
+// Admin: Get Monthly Top Articles
+app.get('/api/admin/top-articles', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        const month = parseInt(req.query.month) || (new Date().getMonth() + 1);
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Calculate start and end dates
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01 00:00:00`;
+        let nextMonth = month + 1;
+        let nextYear = year;
+        if (nextMonth > 12) {
+            nextMonth = 1;
+            nextYear += 1;
+        }
+        const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`;
+
+        const query = `
+            SELECT a.id, a.title, a.slug, COUNT(v.id) as view_count, u.fullname as author_name
+            FROM article_views v
+            JOIN articles a ON v.article_id = a.id
+            LEFT JOIN users u ON a.author_id = u.id
+            WHERE v.viewed_at >= ? AND v.viewed_at < ?
+            GROUP BY a.id, a.title, a.slug, u.fullname
+            ORDER BY view_count DESC
+            LIMIT ?
+        `;
+
+        const [rows] = await pool.query(query, [startDate, endDate, limit]);
+        res.json(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Admin: Get All Users
 app.get('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
