@@ -3794,8 +3794,8 @@
                     tr.style.borderBottom = '1px solid #f1f5f9';
                     tr.innerHTML = `
                         <td style="padding:12px;">${c.fullname || 'Misafir'}</td>
-                        <td style="padding:12px;">${c.article_title || '-'}</td>
-                        <td style="padding:12px; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.content}</td>
+                        <td style="padding:12px;">${c.article_title ? `Makale: ${escapeHtml(c.article_title)}` : (c.experiment_title ? `Deney: ${escapeHtml(c.experiment_title)}` : '-')}</td>
+                        <td style="padding:12px; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.content)}</td>
                         <td style="padding:12px;">${new Date(c.created_at).toLocaleDateString('tr-TR')}</td>
                         <td style="padding:12px;">
                             <button onclick="deleteComment(${c.id})" class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;"><i class="ph-bold ph-trash"></i> Sil</button>

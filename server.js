@@ -4905,10 +4905,11 @@ app.get('/api/admin/comments', authenticateToken, async (req, res) => {
     try {
         // Fetch pending comments mostly
         const [rows] = await pool.query(`
-            SELECT c.*, u.fullname, a.title as article_title 
+            SELECT c.*, u.fullname, a.title as article_title, e.title as experiment_title 
             FROM comments c 
             LEFT JOIN users u ON c.user_id = u.id 
             LEFT JOIN articles a ON c.article_id = a.id
+            LEFT JOIN experiments e ON c.experiment_id = e.id
             ORDER BY c.created_at DESC`);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -4936,6 +4937,7 @@ app.get('/sitemap.xml', async (req, res) => {
         // Fetch updated_at for accurate SEO "lastmod"
         const [articles] = await pool.query("SELECT id, slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
+        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
 
         // Use dynamic host but prefer https://www.aperionx.com if host header matches
         let baseUrl = `https://${req.get('host')}`;
@@ -4952,6 +4954,11 @@ app.get('/sitemap.xml', async (req, res) => {
     </url>
     <url>
         <loc>${baseUrl}/articles.html</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>${baseUrl}/experiments.html</loc>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
@@ -4979,6 +4986,18 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `
     <url>
         <loc>${baseUrl}/makale/${art.slug}</loc>
+        <lastmod>${lastMod}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+        });
+
+        // Experiments (Using Slugs)
+        experiments.forEach(exp => {
+            const lastMod = new Date(exp.created_at).toISOString();
+            xml += `
+    <url>
+        <loc>${baseUrl}/deney/${exp.slug}</loc>
         <lastmod>${lastMod}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
