@@ -2838,139 +2838,145 @@ async function toggleLike() {
 
 // --- Comments ---
 
-async function loadComments(id) {
-    const list = document.getElementById('comments-list');
-    if (!list) return;
+if (typeof window.loadComments === 'undefined') {
+    window.loadComments = async function (id) {
+        const list = document.getElementById('comments-list');
+        if (!list) return;
 
-    // Render Comment Form based on auth status
-    const token = localStorage.getItem('token');
-    const formContainer = document.getElementById('comment-form-container');
-    if (formContainer) {
-        if (token) {
-            formContainer.innerHTML = `
-                <div class="comment-form">
-                    <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
-                    <div class="form-actions">
-                        <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+        // Render Comment Form based on auth status
+        const token = localStorage.getItem('token');
+        const formContainer = document.getElementById('comment-form-container');
+        if (formContainer) {
+            if (token) {
+                formContainer.innerHTML = `
+                    <div class="comment-form">
+                        <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                        <div class="form-actions">
+                            <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                        </div>
                     </div>
-                </div>
-            `;
-        } else {
-            formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal'); return false;">giriş yapmalısınız</a>.</p>`;
+                `;
+            } else {
+                formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal'); return false;">giriş yapmalısınız</a>.</p>`;
+            }
         }
-    }
 
-    try {
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const res = await fetch(`${API_URL}/articles/${id}/comments`, { headers });
-        const comments = await res.json();
+        try {
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const res = await fetch(`${API_URL}/articles/${id}/comments`, { headers });
+            const comments = await res.json();
 
-        const countEl = document.getElementById('comment-count');
-        if (countEl) countEl.innerText = comments.length;
+            const countEl = document.getElementById('comment-count');
+            if (countEl) countEl.innerText = comments.length;
 
-        list.innerHTML = '';
-        if (comments.length === 0) {
-            list.innerHTML = '<p class="no-comments">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>';
+            list.innerHTML = '';
+            if (comments.length === 0) {
+                list.innerHTML = '<p class="no-comments">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>';
+                return;
+            }
+
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+            comments.forEach(com => {
+                const isOwner = currentUser && currentUser.id === com.user_id;
+                const dateStr = new Date(com.created_at).toLocaleDateString('tr-TR');
+
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `
+                    <div class="comment-avatar">
+                        <span>${com.fullname.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">${escapeHtml(com.fullname)}</span>
+                            <span class="comment-date">${dateStr}</span>
+                            ${isOwner ? `<button class="delete-comment-btn" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i></button>` : ''}
+                        </div>
+                        <p class="comment-text">${escapeHtml(com.content)}</p>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+        } catch (e) { console.error('Comment load error', e); }
+    };
+}
+
+if (typeof window.postComment === 'undefined') {
+    window.postComment = async function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Yorum yapmak için giriş yapmalısınız.', 'error');
             return;
         }
 
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        // Use global article ID instead of URL params (fixes clean URL support)
+        const id = window.currentArticleId;
+        if (!id) {
+            console.error('postComment: No article ID found');
+            showToast('Hata: Makale bulunamadı.', 'error');
+            return;
+        }
+        const input = document.getElementById('comment-input');
+        const content = input.value.trim();
 
-        comments.forEach(com => {
-            const isOwner = currentUser && currentUser.id === com.user_id;
-            const dateStr = new Date(com.created_at).toLocaleDateString('tr-TR');
+        if (!content) return;
 
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.innerHTML = `
-                <div class="comment-avatar">
-                    <span>${com.fullname.charAt(0).toUpperCase()}</span>
-                </div>
-                <div class="comment-content">
-                    <div class="comment-header">
-                        <span class="comment-author">${escapeHtml(com.fullname)}</span>
-                        <span class="comment-date">${dateStr}</span>
-                        ${isOwner ? `<button class="delete-comment-btn" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i></button>` : ''}
-                    </div>
-                    <p class="comment-text">${escapeHtml(com.content)}</p>
-                </div>
-            `;
-            list.appendChild(div);
-        });
+        try {
+            const res = await fetch(`${API_URL}/articles/${id}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content })
+            });
 
-    } catch (e) { console.error('Comment load error', e); }
-}
-
-async function postComment() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showToast('Yorum yapmak için giriş yapmalısınız.', 'error');
-        return;
-    }
-
-    // Use global article ID instead of URL params (fixes clean URL support)
-    const id = window.currentArticleId;
-    if (!id) {
-        console.error('postComment: No article ID found');
-        showToast('Hata: Makale bulunamadı.', 'error');
-        return;
-    }
-    const input = document.getElementById('comment-input');
-    const content = input.value.trim();
-
-    if (!content) return;
-
-    try {
-        const res = await fetch(`${API_URL}/articles/${id}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ content })
-        });
-
-        if (res.ok) {
-            input.value = '';
-            showToast('Yorum gönderildi!', 'success');
-            loadComments(id);
-        } else {
-            let errorMsg = 'Yorum gönderilemedi.';
-            try {
-                const data = await res.json();
-                if (data && data.error) errorMsg = data.error;
-                else if (data && data.message) errorMsg = data.message;
-            } catch (jsonErr) {
-                if (res.status === 401 || res.status === 403) {
-                    errorMsg = 'Oturum süreniz dolmuş veya yetkisiz işlem. Lütfen tekrar giriş yapın.';
+            if (res.ok) {
+                input.value = '';
+                showToast('Yorum gönderildi!', 'success');
+                loadComments(id);
+            } else {
+                let errorMsg = 'Yorum gönderilemedi.';
+                try {
+                    const data = await res.json();
+                    if (data && data.error) errorMsg = data.error;
+                    else if (data && data.message) errorMsg = data.message;
+                } catch (jsonErr) {
+                    if (res.status === 401 || res.status === 403) {
+                        errorMsg = 'Oturum süreniz dolmuş veya yetkisiz işlem. Lütfen tekrar giriş yapın.';
+                    }
                 }
+                showToast(errorMsg, 'error');
             }
-            showToast(errorMsg, 'error');
+        } catch (e) { 
+            console.error('postComment error:', e); 
+            showToast('Yorum gönderilirken bir hata oluştu.', 'error');
         }
-    } catch (e) { 
-        console.error('postComment error:', e); 
-        showToast('Yorum gönderilirken bir hata oluştu.', 'error');
-    }
+    };
 }
 
-async function deleteComment(commentId) {
-    if (!confirm('Yorumu silmek istediğinize emin misiniz?')) return;
+if (typeof window.deleteComment === 'undefined') {
+    window.deleteComment = async function (commentId) {
+        if (!confirm('Yorumu silmek istediğinize emin misiniz?')) return;
 
-    const token = localStorage.getItem('token');
-    try {
-        const res = await fetch(`${API_URL}/comments/${commentId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${API_URL}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-        if (res.ok) {
-            showToast('Yorum silindi.', 'success');
-            // Use global article ID instead of URL params (fixes clean URL support)
-            loadComments(window.currentArticleId);
-        } else {
-            showToast('Silme başarısız.', 'error');
-        }
-    } catch (e) { console.error(e); }
+            if (res.ok) {
+                showToast('Yorum silindi.', 'success');
+                // Use global article ID instead of URL params (fixes clean URL support)
+                loadComments(window.currentArticleId);
+            } else {
+                showToast('Silme başarısız.', 'error');
+            }
+        } catch (e) { console.error(e); }
+    };
 }
 
 // --- Helper: Force Hero Scroll ---

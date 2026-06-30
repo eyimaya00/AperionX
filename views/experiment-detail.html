@@ -1700,6 +1700,10 @@
             } catch (e) { console.error(e); }
         }
 
+        // Global state for comments
+        let allComments = [];
+        const COMMENT_INITIAL_LIMIT = 3;
+
         // --- COMMENTS ---
         async function loadComments(id) {
             const list = document.getElementById('comments-list');
@@ -1724,39 +1728,76 @@
             try {
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
                 const res = await fetch(`${API_BASE}/experiments/${id}/comments`, { headers });
-                const comments = await res.json();
-                document.getElementById('comment-count').innerText = comments.length;
-
-                list.innerHTML = '';
-                if (comments.length === 0) {
-                    list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
-                    return;
+                
+                if (res.ok) {
+                    allComments = await res.json();
+                } else {
+                    allComments = [];
                 }
 
-                comments.forEach(com => {
-                    const initials = com.fullname ? com.fullname.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U';
-                    const isMine = com.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === com.user_id);
-                    list.innerHTML += `
-                        <div class="comment-item" id="comment-${com.id}">
-                            <div class="comment-avatar">${initials}</div>
-                            <div class="comment-content-wrapper">
-                                <div class="comment-header">
-                                    <span class="comment-author">${com.fullname || 'Kullanıcı'}</span>
-                                    ${com.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
-                                    <div class="comment-actions">
-                                        <span class="comment-date">${new Date(com.created_at).toLocaleDateString('tr-TR')}</span>
-                                        ${isMine ? `
-                                            <span style="margin: 0 8px; color:#cbd5e1;">|</span>
-                                            <span class="action-link delete" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i> Sil</span>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                <div class="comment-body">${com.content}</div>
-                            </div>
-                        </div>
-                    `;
-                });
+                if (!Array.isArray(allComments)) allComments = [];
+
+                document.getElementById('comment-count').innerText = allComments.length;
+
+                renderCommentsList(COMMENT_INITIAL_LIMIT);
             } catch (e) { console.error(e); }
+        }
+
+        function renderCommentsList(limit) {
+            const list = document.getElementById('comments-list');
+            const visibleComments = (limit && limit < allComments.length)
+                ? allComments.slice(0, limit)
+                : allComments;
+
+            if (allComments.length === 0) {
+                list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
+                return;
+            }
+
+            let html = visibleComments.map(com => {
+                const initials = com.fullname ? com.fullname.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U';
+                const isMine = com.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === com.user_id);
+                return `
+                    <div class="comment-item" id="comment-${com.id}">
+                        <div class="comment-avatar">${initials}</div>
+                        <div class="comment-content-wrapper">
+                            <div class="comment-header">
+                                <span class="comment-author">${com.fullname || 'Kullanıcı'}</span>
+                                ${com.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                                <div class="comment-actions">
+                                    <span class="comment-date">${new Date(com.created_at).toLocaleDateString('tr-TR')}</span>
+                                    ${isMine ? `
+                                        <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                        <span class="action-link delete" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i> Sil</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="comment-body">${com.content}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (limit && allComments.length > limit) {
+                const remaining = allComments.length - limit;
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(null)" class="btn-show-more-comments">
+                            Tüm Yorumları Gör (+${remaining}) <i class="ph ph-caret-down"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (!limit && allComments.length > COMMENT_INITIAL_LIMIT) {
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(COMMENT_INITIAL_LIMIT)" class="btn-show-more-comments">
+                            Daha Az Göster <i class="ph ph-caret-up"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            list.innerHTML = html;
         }
 
         async function postComment() {
