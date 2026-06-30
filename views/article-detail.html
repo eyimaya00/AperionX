@@ -332,14 +332,14 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 30px;
+            padding: 10px 22px;
             background: rgba(99, 102, 241, 0.1);
             /* Light Purple Tint */
             color: var(--primary-color);
             border: 1px solid rgba(99, 102, 241, 0.1);
             border-radius: 50px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             text-decoration: none;
             transition: all 0.2s;
         }
@@ -434,23 +434,23 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .btn-like {
+        .btn-like, .btn-comment-action {
             background: rgba(99, 102, 241, 0.1);
             /* Primary instead of red */
             color: var(--primary-color);
             border: none;
-            padding: 10px 20px;
+            padding: 9px 18px;
             border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             font-family: inherit;
             transition: all 0.2s;
         }
 
-        .btn-like:hover {
+        .btn-like:hover, .btn-comment-action:hover {
             background: var(--primary-color);
             color: white;
             transform: scale(1.05);
@@ -1238,6 +1238,10 @@
                                 <i class="ph ph-heart"></i> Destek Ol
                             </button>
 
+                            <button class="btn-comment-action" onclick="scrollToComments()">
+                                <i class="ph ph-chat-text"></i> Yorum Yap
+                            </button>
+
                             <div class="share-divider"></div>
 
                             <div class="share-icons-row">
@@ -1707,6 +1711,17 @@
                 console.error('Kopyalama başarısız:', err);
                 showToast('Link kopyalanamadı', 'error');
             });
+        }
+
+        function scrollToComments() {
+            const el = document.getElementById('comment-form-container') || document.querySelector('.comments-section');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const textarea = el.querySelector('textarea');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 800);
+                }
+            }
         }
 
         // === ARTICLE SLIDER LOGIC ===
