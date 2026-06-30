@@ -4759,6 +4759,7 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
 
         // Default is_approved = 1 (Auto-approve)
         const cleanContent = DOMPurify.sanitize(content);
+        await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
         res.json({ message: 'Yorum gönderildi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
