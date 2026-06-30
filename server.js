@@ -1051,12 +1051,27 @@ async function ensureSchema() {
             CREATE TABLE IF NOT EXISTS comments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
-                article_id INT NOT NULL,
+                article_id INT NULL,
+                experiment_id INT NULL,
                 content TEXT NOT NULL,
                 is_approved BOOLEAN DEFAULT TRUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Ensure article_id is nullable (to allow experiment comments)
+        try {
+            await pool.query("ALTER TABLE comments MODIFY COLUMN article_id INT NULL");
+        } catch (e) { console.error('Migration Error (Comments article_id NULL):', e); }
+
+        // Ensure experiment_id column exists on comments
+        try {
+            const [expCol] = await pool.query("SHOW COLUMNS FROM comments LIKE 'experiment_id'");
+            if (expCol.length === 0) {
+                console.log('Migrating: Adding experiment_id to comments...');
+                await pool.query("ALTER TABLE comments ADD COLUMN experiment_id INT NULL AFTER article_id");
+            }
+        } catch (e) { console.error('Migration Error (Comments experiment_id):', e); }
 
         try {
             const [cCols] = await pool.query("SHOW COLUMNS FROM comments LIKE 'is_approved'");
@@ -1064,7 +1079,7 @@ async function ensureSchema() {
                 console.log('Migrating: Adding is_approved to comments...');
                 await pool.query("ALTER TABLE comments ADD COLUMN is_approved TINYINT(1) DEFAULT 0");
             }
-        } catch (e) { console.error('Migration Error (Comments):', e); }
+        } catch (e) { console.error('Migration Error (Comments is_approved):', e); }
 
 
         try {
@@ -4855,20 +4870,6 @@ app.delete('/api/comments/:id', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Get My Comments (Profile)
-app.get('/api/user/comments', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query(`
-            SELECT c.*, a.title as article_title, a.id as article_id,
-                   e.title as experiment_title, e.slug as experiment_slug
-            FROM comments c 
-            LEFT JOIN articles a ON c.article_id = a.id 
-            LEFT JOIN experiments e ON c.experiment_id = e.id
-            WHERE c.user_id = ? 
-            ORDER BY c.created_at DESC`, [req.user.id]);
-        res.json(rows);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
 // === NOTIFICATIONS SYSTEM ===
 
