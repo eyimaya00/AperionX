@@ -1978,6 +1978,65 @@
             </div>
         </div>
 
+        <!-- Monthly Top Articles Section -->
+        <div id="monthly-top-articles" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Ayın En Çok Okunan Makaleleri</h1>
+            </div>
+            
+            <div class="card" style="margin-bottom: 24px;">
+                <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label for="filter-top-month" style="font-weight: 600; font-size: 0.9rem; color: #475569;">Ay Seçin</label>
+                        <select id="filter-top-month" class="form-control" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; width: 180px; font-family: inherit;">
+                            <option value="1">Ocak</option>
+                            <option value="2">Şubat</option>
+                            <option value="3">Mart</option>
+                            <option value="4">Nisan</option>
+                            <option value="5">Mayıs</option>
+                            <option value="6">Haziran</option>
+                            <option value="7">Temmuz</option>
+                            <option value="8">Ağustos</option>
+                            <option value="9">Eylül</option>
+                            <option value="10">Ekim</option>
+                            <option value="11">Kasım</option>
+                            <option value="12">Aralık</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label for="filter-top-year" style="font-weight: 600; font-size: 0.9rem; color: #475569;">Yıl Seçin</label>
+                        <select id="filter-top-year" class="form-control" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; width: 120px; font-family: inherit;">
+                            <!-- Will be populated dynamically via JS -->
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="loadMonthlyTopArticles()" style="display: inline-flex; align-items: center; gap: 8px; height: 42px;">
+                        <i class="ph ph-funnel"></i> Filtrele / Yenile
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px; width: 80px;">Sıra</th>
+                                <th style="padding: 12px; width: 80px;">ID</th>
+                                <th style="padding: 12px;">Başlık</th>
+                                <th style="padding: 12px; width: 200px;">Yazar</th>
+                                <th style="padding: 12px; width: 150px; text-align: right;">Okunma Sayısı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-articles-table-body">
+                            <!-- JS Populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Newsletter Subscribers Section -->
         <div id="newsletter-subscribers" class="section">
             <h1 class="page-title" style="margin-bottom: 30px;">Bülten Aboneleri</h1>
