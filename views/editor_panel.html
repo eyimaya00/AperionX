@@ -3873,7 +3873,7 @@
 
                 // Footer buttons
                 const footer = document.querySelector('#review-modal .modal-footer');
-                if (isPending) {
+                if (exp.status === 'pending') {
                     footer.innerHTML = `
                         <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
                             <textarea id="exp-reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." 
@@ -3885,6 +3885,20 @@
                             </div>
                             <div id="exp-confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
                                 <button class="btn btn-danger" onclick="submitExperimentDecision('reject')">Reddet ve Bitir</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (exp.status === 'published') {
+                    footer.innerHTML = `
+                        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                            <textarea id="exp-unpublish-reason" placeholder="Yayından kaldırma sebebini yazın (Yazar bunu görecek)..." 
+                                style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit; box-sizing:border-box;"></textarea>
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-secondary" onclick="closeModal()">Kapat</button>
+                                <button class="btn btn-danger" onclick="toggleExpUnpublishInput()">Yayından Kaldır...</button>
+                            </div>
+                            <div id="exp-confirm-unpublish-area" style="display:none; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-danger" onclick="submitExperimentDecision('unpublish')">Yayından Kaldırmayı Onayla</button>
                             </div>
                         </div>
                     `;
@@ -3912,6 +3926,19 @@
             }
         }
 
+        function toggleExpUnpublishInput() {
+            const area = document.getElementById('exp-unpublish-reason');
+            const confirmArea = document.getElementById('exp-confirm-unpublish-area');
+            if (area.style.display === 'none') {
+                area.style.display = 'block';
+                confirmArea.style.display = 'flex';
+                area.focus();
+            } else {
+                area.style.display = 'none';
+                confirmArea.style.display = 'none';
+            }
+        }
+
         async function submitExperimentDecision(decision) {
             if (!currentExperimentId) return;
 
@@ -3925,6 +3952,14 @@
                 }
                 body.rejection_reason = reason;
                 performExpSubmit();
+            } else if (decision === 'unpublish') {
+                const reason = document.getElementById('exp-unpublish-reason').value;
+                if (!reason || !reason.trim()) {
+                    showToast('Lütfen yayından kaldırma sebebini yazınız.', 'error');
+                    return;
+                }
+                body.rejection_reason = reason;
+                showConfirm('Bu deneyi yayından kaldırmak istediğinize emin misiniz?', performExpSubmit);
             } else {
                 showConfirm('Bu deneyi yayına almak istediğinize emin misiniz?', performExpSubmit);
             }
@@ -3938,7 +3973,10 @@
                     });
 
                     if (res.ok) {
-                        showToast(decision === 'approve' ? 'Deney başarıyla yayınlandı!' : 'Deney reddedildi.', 'success');
+                        let successMsg = 'Deney başarıyla yayınlandı!';
+                        if (decision === 'reject') successMsg = 'Deney reddedildi.';
+                        else if (decision === 'unpublish') successMsg = 'Deney yayından kaldırıldı.';
+                        showToast(successMsg, 'success');
                         closeModal();
                         loadExperimentsDashboard();
                     } else {

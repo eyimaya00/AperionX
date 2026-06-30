@@ -2917,6 +2917,15 @@ app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res
             // Notify author
             let msg = `Deneyiniz reddedildi: ${title}. Sebep: ${rejection_reason || 'Belirtilmedi'}`;
             await createNotification(authorId, msg, 'error');
+        } else if (decision === 'unpublish') {
+            await pool.query(
+                "UPDATE experiments SET status = 'pending', approved_by = NULL, rejection_reason = ? WHERE id = ?",
+                [rejection_reason || 'Editör tarafından yayından kaldırıldı.', experimentId]
+            );
+
+            // Notify author
+            let msg = `Yayınlanan deneyiniz yayından kaldırıldı: ${title}. Sebep: ${rejection_reason || 'Belirtilmedi'}`;
+            await createNotification(authorId, msg, 'info');
         } else {
             return res.status(400).json({ error: 'Invalid decision' });
         }
