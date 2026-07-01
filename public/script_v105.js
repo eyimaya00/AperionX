@@ -1821,10 +1821,14 @@ async function loadArticlesPage() {
     if (!grid) return; // Not on articles page
 
     try {
-        // Fetch all published articles
-        const res = await fetch(`${API_URL}/articles`);
-        if (!res.ok) throw new Error('API Error');
-        pageArticles = await res.json();
+        // Use preloaded server articles if available, otherwise fetch from API
+        if (window.SERVER_ARTICLES) {
+            pageArticles = window.SERVER_ARTICLES;
+        } else {
+            const res = await fetch(`${API_URL}/articles`);
+            if (!res.ok) throw new Error('API Error');
+            pageArticles = await res.json();
+        }
 
         // Initial Sort (Newest first)
         pageArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -2006,10 +2010,14 @@ async function loadExperimentsPage() {
     if (!grid) return; // Not on articles page
 
     try {
-        // Fetch all published articles
-        const res = await fetch(`${API_URL}/experiments`);
-        if (!res.ok) throw new Error('API Error');
-        pageExperiments = await res.json();
+        // Use preloaded server experiments if available, otherwise fetch from API
+        if (window.SERVER_EXPERIMENTS) {
+            pageExperiments = window.SERVER_EXPERIMENTS;
+        } else {
+            const res = await fetch(`${API_URL}/experiments`);
+            if (!res.ok) throw new Error('API Error');
+            pageExperiments = await res.json();
+        }
 
         // Initial Sort (Newest first)
         pageExperiments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));

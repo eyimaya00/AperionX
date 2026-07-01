@@ -630,6 +630,282 @@ app.get('/preview-article/:id', async (req, res, next) => {
         res.status(500).send('Sunucu Hatası');
     }
 });
+
+// Helpers for SSR
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function resolveImagePath(url) {
+    if (!url) return null;
+    if (url.startsWith('http') || url.startsWith('//') || url.startsWith('data:')) return url;
+    url = url.replace(/\\/g, '/');
+    if (url.startsWith('/')) return url;
+    return '/' + url;
+}
+
+// === ARTICLES CATALOGUE ROUTE (SSR) ===
+app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'views', 'articles.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) {
+                console.error('Error reading articles.html:', err);
+                return res.status(500).send('Sunucu Hatası');
+            }
+
+            let html = htmlData;
+
+            try {
+                // 1. Fetch Articles
+                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published'";
+                query += " ORDER BY created_at DESC";
+                const [articles] = await pool.query(query);
+
+                if (articles.length > 0) {
+                    const articleIds = articles.map(a => a.id);
+                    // Fetch Authors
+                    const [allAuthors] = await pool.query(`
+                        SELECT aa.article_id, u.id, u.fullname, u.username 
+                        FROM article_authors aa
+                        JOIN users u ON aa.user_id = u.id
+                        WHERE aa.article_id IN (?)
+                        ORDER BY aa.order_index ASC
+                     `, [articleIds]);
+
+                    const authorMap = {};
+                    allAuthors.forEach(row => {
+                        if (!authorMap[row.article_id]) authorMap[row.article_id] = [];
+                        authorMap[row.article_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+                    });
+
+                    articles.forEach(a => {
+                        a.authors = authorMap[a.id] || [];
+                        if (a.authors.length > 0) {
+                            a.author_name = a.authors[0].fullname;
+                            a.author_username = a.authors[0].username;
+                        }
+                    });
+
+                    // Legacy fallback
+                    const legacyIds = articles.filter(a => a.authors.length === 0 && a.author_id).map(a => a.author_id);
+                    if (legacyIds.length > 0) {
+                        const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                        const legacyMap = {};
+                        legacyUsers.forEach(u => legacyMap[u.id] = u);
+                        articles.forEach(a => {
+                            if (a.authors.length === 0 && a.author_id && legacyMap[a.author_id]) {
+                                a.author_name = legacyMap[a.author_id].fullname;
+                                a.author_username = legacyMap[a.author_id].username;
+                            }
+                        });
+                    }
+                }
+
+                // 2. Pre-render the first page (6 items) of articles
+                const itemsPerPage = 6;
+                const toRender = articles.slice(0, itemsPerPage);
+                let cardsHtml = '';
+
+                if (toRender.length === 0) {
+                    cardsHtml = `<div style="grid-column:1/-1; text-align:center; padding:60px; color:#64748b; font-size:1.1rem;">Aradığınız kriterlere uygun makale bulunamadı.</div>`;
+                } else {
+                    toRender.forEach(article => {
+                        const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
+                        const safeTitle = escapeHtml(article.title);
+                        const safecategory = escapeHtml(article.category || 'Genel');
+                        const safeAuthor = escapeHtml(article.author_name || 'Yazar');
+
+                        let authorsLinkHtml = '';
+                        if (article.authors && article.authors.length > 0) {
+                            authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                ${article.authors.map(a => `
+                                    <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                               </div>`;
+                        } else {
+                            authorsLinkHtml = `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                                ${safeAuthor}
+                               </a>`;
+                        }
+
+                        cardsHtml += `
+                            <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
+                                <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
+                                <div class="card-overlay" style="pointer-events: none;"></div>
+                                
+                                <div class="card-top-content" style="pointer-events: none;">
+                                     <span class="category-badge-glass">${safecategory}</span>
+                                </div>
+                                
+                                <div class="card-bottom-content" style="pointer-events: none;">
+                                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
+                                     <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                                         ${authorsLinkHtml}
+                                     </div>
+                                </div>
+
+                                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Makaleyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
+                            </article>
+                        `;
+                    });
+                }
+
+                // 3. Inject cardsHtml into the grid wrapper in the template
+                html = html.replace(/<div class="articles-grid" id="articles-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="articles-grid">${cardsHtml}</div>`);
+
+                // 4. Inject script tag with window.SERVER_ARTICLES data
+                const scriptTag = `<script>window.SERVER_ARTICLES = ${JSON.stringify(articles)};</script>`;
+                html = html.replace('</head>', `${scriptTag}\n</head>`);
+
+                res.send(html);
+
+            } catch (innerErr) {
+                console.error('SSR inner error for /articles:', innerErr);
+                res.send(htmlData);
+            }
+        });
+    } catch (e) {
+        console.error('SSR DB error for /articles:', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+
+// === EXPERIMENTS CATALOGUE ROUTE (SSR) ===
+app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiments.html'], async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'views', 'experiments.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) {
+                console.error('Error reading experiments.html:', err);
+                return res.status(500).send('Sunucu Hatası');
+            }
+
+            let html = htmlData;
+
+            try {
+                // 1. Fetch Experiments
+                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL";
+                query += " ORDER BY created_at DESC";
+                const [experiments] = await pool.query(query);
+
+                if (experiments.length > 0) {
+                    const expIds = experiments.map(e => e.id);
+                    // Fetch Authors
+                    const [allAuthors] = await pool.query(`
+                        SELECT ea.experiment_id, u.id, u.fullname, u.username 
+                        FROM experiment_authors ea
+                        JOIN users u ON ea.user_id = u.id
+                        WHERE ea.experiment_id IN (?)
+                        ORDER BY ea.order_index ASC
+                     `, [expIds]);
+
+                    const authorMap = {};
+                    allAuthors.forEach(row => {
+                        if (!authorMap[row.experiment_id]) authorMap[row.experiment_id] = [];
+                        authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+                    });
+
+                    experiments.forEach(e => {
+                        e.authors = authorMap[e.id] || [];
+                        if (e.authors.length > 0) {
+                            e.author_name = e.authors[0].fullname;
+                            e.author_username = e.authors[0].username;
+                        }
+                    });
+
+                    // Legacy fallback
+                    const legacyIds = experiments.filter(e => e.authors.length === 0 && e.author_id).map(e => e.author_id);
+                    if (legacyIds.length > 0) {
+                        const [legacyUsers] = await pool.query('SELECT id, fullname, username FROM users WHERE id IN (?)', [legacyIds]);
+                        const legacyMap = {};
+                        legacyUsers.forEach(u => legacyMap[u.id] = u);
+                        experiments.forEach(e => {
+                            if (e.authors.length === 0 && e.author_id && legacyMap[e.author_id]) {
+                                e.author_name = legacyMap[e.author_id].fullname;
+                                e.author_username = legacyMap[e.author_id].username;
+                            }
+                        });
+                    }
+                }
+
+                // 2. Pre-render the first page (6 items) of experiments
+                const itemsPerPage = 6;
+                const toRender = experiments.slice(0, itemsPerPage);
+                let cardsHtml = '';
+
+                if (toRender.length === 0) {
+                    cardsHtml = `<div style="grid-column:1/-1; text-align:center; padding:60px; color:#64748b; font-size:1.1rem;">Aradığınız kriterlere uygun makale bulunamadı.</div>`;
+                } else {
+                    toRender.forEach(article => {
+                        const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
+                        const safeTitle = escapeHtml(article.title);
+                        const safecategory = escapeHtml(article.category || 'Genel');
+                        const safeAuthor = escapeHtml(article.author_name || 'Yazar');
+
+                        let authorsLinkHtml = '';
+                        if (article.authors && article.authors.length > 0) {
+                            authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                ${article.authors.map(a => `
+                                    <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                               </div>`;
+                        } else {
+                            authorsLinkHtml = `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                                ${safeAuthor}
+                               </a>`;
+                        }
+
+                        cardsHtml += `
+                            <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
+                                <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
+                                <div class="card-overlay" style="pointer-events: none;"></div>
+                                
+                                <div class="card-top-content" style="pointer-events: none;">
+                                     <span class="category-badge-glass">${safecategory}</span>
+                                </div>
+                                
+                                <div class="card-bottom-content" style="pointer-events: none;">
+                                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
+                                     <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                                         ${authorsLinkHtml}
+                                     </div>
+                                </div>
+
+                                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Deneyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
+                            </article>
+                        `;
+                    });
+                }
+
+                // 3. Inject cardsHtml into the grid wrapper in the template
+                html = html.replace(/<div class="articles-grid" id="experiments-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="experiments-grid">${cardsHtml}</div>`);
+
+                // 4. Inject script tag with window.SERVER_EXPERIMENTS data
+                const scriptTag = `<script>window.SERVER_EXPERIMENTS = ${JSON.stringify(experiments)};</script>`;
+                html = html.replace('</head>', `${scriptTag}\n</head>`);
+
+                res.send(html);
+
+            } catch (innerErr) {
+                console.error('SSR inner error for /experiments:', innerErr);
+                res.send(htmlData);
+            }
+        });
+    } catch (e) {
+        console.error('SSR DB error for /experiments:', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+
 // === EXPERIMENT ROUTES (SSR) ===
 app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
