@@ -1133,7 +1133,7 @@ async function ensureSchema() {
                 INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
                 ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
                 ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
-                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 3),
+                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/vsepr', 3),
                 ('Hakkımızda', 'Biz kimiz, vizyonumuz ne ve AperionX nasıl çalışır öğrenin.', 'ph-fill ph-users-three', '/about', 4);
             `);
             console.log('Migration Code: Kategori kartları varsayılan verileri eklendi.');
