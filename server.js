@@ -2475,10 +2475,9 @@ app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
             } catch (notifErr) { console.error('Notif failed:', notifErr); }
         }
 
-        // SEO: If admin/editor published directly, ping search engines & send newsletter
+        // SEO: If admin/editor published directly, ping search engines (Auto-newsletter disabled)
         if (finalStatus === 'published') {
             pingSearchEngines(slug).catch(err => console.error('[SEO-PING] Error:', err));
-            autoSendNewsletter(newArticleId).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
         }
 
         res.status(201).json({ message: 'Article created', status: finalStatus, id: newArticleId });
@@ -2978,13 +2977,12 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
         // Notify Author
         await createNotification(authorId, msg, type);
 
-        // SEO: Ping search engines & send newsletter on approve
+        // SEO: Ping search engines on approve (Auto-newsletter disabled)
         if (decision === 'approve') {
             const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [articleId]);
             if (slugRow.length > 0) {
                 pingSearchEngines(slugRow[0].slug).catch(err => console.error('[SEO-PING] Error:', err));
             }
-            autoSendNewsletter(articleId).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
         }
 
         res.json({ message: `Article ${status}` });
@@ -3242,13 +3240,12 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
     try {
         await pool.query('UPDATE articles SET status = ?, rejection_reason = ?, approved_by = ? WHERE id = ?', [status, reasonValue, approvedBy, req.params.id]);
 
-        // SEO: Ping search engines & send newsletter on approve
+        // SEO: Ping search engines on approve (Auto-newsletter disabled)
         if (decision === 'approve') {
             const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [req.params.id]);
             if (slugRow.length > 0) {
                 pingSearchEngines(slugRow[0].slug).catch(err => console.error('[SEO-PING] Error:', err));
             }
-            autoSendNewsletter(req.params.id).catch(err => console.error('[AUTO-NEWSLETTER] Error:', err));
         }
 
         clearCache('articles');
@@ -5175,10 +5172,11 @@ app.get('/api/admin/email-logs', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT el.*, a.title as article_title 
+            SELECT el.*, el.created_at AS sent_at, a.title as article_title, e.title as experiment_title
             FROM email_logs el 
             LEFT JOIN articles a ON el.article_id = a.id 
-            ORDER BY el.sent_at DESC LIMIT 50
+            LEFT JOIN experiments e ON el.experiment_id = e.id
+            ORDER BY el.created_at DESC LIMIT 50
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -5403,7 +5401,25 @@ async function autoSendNewsletter(articleId) {
 // Helper: Send New Article Notification to All Users
 // === MANUAL NEWSLETTER SYSTEM ===
 
-// 1. Preview Newsletter
+// 1. Preview Newsletter (Specific to Type)
+app.get('/api/admin/newsletter/preview/:type/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    const { type, id } = req.params;
+    try {
+        let html;
+        if (type === 'experiment') {
+            html = await generateExperimentNewsletterHTML(id);
+        } else {
+            html = await generateNewsletterHTML(id);
+        }
+        if (!html) return res.status(404).send('İçerik bulunamadı');
+        res.send(html);
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
+// Legacy Preview Newsletter
 app.get('/api/admin/newsletter/preview/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
     try {
@@ -5418,7 +5434,10 @@ app.get('/api/admin/newsletter/preview/:id', authenticateToken, async (req, res)
 // 2. Send Newsletter
 app.post('/api/admin/newsletter/send', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
-    const { articleId, target, customEmails } = req.body; // target: 'all', 'test', 'custom'
+    const { contentType, contentId, articleId, target, customEmails } = req.body; // target: 'all', 'test', 'custom'
+
+    const type = contentType || 'article';
+    const id = contentId || articleId;
 
     try {
         let recipients = [];
@@ -5437,7 +5456,11 @@ app.post('/api/admin/newsletter/send', authenticateToken, async (req, res) => {
         if (recipients.length === 0) return res.status(400).json({ error: 'Gönderilecek alıcı bulunamadı.' });
 
         // Send logic
-        await sendNewsletterToRecipients(articleId, recipients);
+        if (type === 'experiment') {
+            await sendExperimentNewsletterToRecipients(id, recipients);
+        } else {
+            await sendNewsletterToRecipients(id, recipients);
+        }
         res.json({ message: `${recipients.length} kişiye gönderim başlatıldı.` });
 
     } catch (e) {
@@ -5507,6 +5530,79 @@ async function generateNewsletterHTML(articleId) {
 
                     <div class="button-container">
                         <a href="${articleLink}" class="read-btn">Makaleyi Oku</a>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>&copy; 2025 AperionX. Bilimin Sınırlarında.</p>
+                    <p>Bu bülten üyelerimize özel otomatik olarak gönderilmiştir. Almak istemiyorsanız <a href="${unsubscribeLink}">buradan ayrılabilirsiniz</a>.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+}
+
+// Helper: Generate HTML for Experiment Newsletter
+async function generateExperimentNewsletterHTML(experimentId) {
+    const [rows] = await pool.query(`
+        SELECT e.*, u.fullname as author_name
+        FROM experiments e
+        LEFT JOIN users u ON e.author_id = u.id
+        WHERE e.id = ?
+    `, [experimentId]);
+
+    if (rows.length === 0) return null;
+    const exp = rows[0];
+
+    const siteUrl = 'https://aperionx.com';
+    const expLink = `${siteUrl}/deney/${exp.slug}`;
+    const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
+    const heroImage = exp.image_url ?
+        (exp.image_url.startsWith('http') ? exp.image_url : `${siteUrl}/${exp.image_url}`) :
+        `${siteUrl}/uploads/default-hero.jpg`;
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; }
+                .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .header { background-color: #0f172a; padding: 25px; text-align: center; }
+                .logo { max-width: 180px; height: auto; display: block; margin: 0 auto; }
+                .hero-image { width: 100%; height: 250px; object-fit: cover; }
+                .content { padding: 30px; color: #334155; }
+                .tag { display: inline-block; background-color: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
+                .title { font-size: 26px; font-weight: 800; color: #0f172a; margin: 10px 0 15px 0; line-height: 1.3; }
+                .author { font-size: 14px; color: #64748b; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+                .excerpt { font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+                .button-container { text-align: center; margin: 30px 0; }
+                .read-btn { background-color: #0ea5e9; color: #ffffff !important; padding: 16px 36px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
+                .footer { background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="header">
+                   <a href="${siteUrl}" style="text-decoration:none;">
+                        <img src="cid:unique-logo-id" alt="AperionX" class="logo" style="color: white; font-size: 24px; font-weight: bold;">
+                   </a>
+                </div>
+                <a href="${expLink}" style="text-decoration:none; display:block;">
+                    <img src="${heroImage}" alt="${exp.title}" class="hero-image">
+                </a>
+                <div class="content">
+                    <span class="tag">YENİ DENEY</span>
+                    <h1 class="title">${exp.title}</h1>
+
+                    <div class="author">
+                        <span>🧪 Hazırlayan: <span style="color: #0f172a;">${exp.author_name || 'AperionX'}</span></span>
+                    </div>
+
+                    <p class="excerpt">${exp.excerpt || 'Yeni ve heyecan verici bir bilimsel deney!'}</p>
+
+                    <div class="button-container">
+                        <a href="${expLink}" class="read-btn">Deneyi İncele</a>
                     </div>
                 </div>
                 <div class="footer">
@@ -5599,6 +5695,85 @@ async function sendNewsletterToRecipients(articleId, recipientEmails) {
     try {
         await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
             [articleId, `✨ Yeni Makale: ${articleTitle}`, successCount, status]);
+    } catch (e) {
+        console.error('[NEWSLETTER] Error logging to DB:', e);
+    }
+}
+
+// Helper: Send Experiment Newsletter to Recipients
+async function sendExperimentNewsletterToRecipients(experimentId, recipientEmails) {
+    if (recipientEmails.length === 0) return;
+
+    const htmlContent = await generateExperimentNewsletterHTML(experimentId);
+    if (!htmlContent) return;
+
+    const logoPath = path.join(__dirname, 'uploads', 'logo.png');
+
+    // Fetch Experiment Title for Subject
+    const [rows] = await pool.query('SELECT title FROM experiments WHERE id = ?', [experimentId]);
+    if (rows.length === 0) return;
+    const expTitle = rows[0].title;
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        },
+        tls: { rejectUnauthorized: false },
+        pool: true,           // Use connection pooling
+        maxConnections: 1,    // Only 1 connection at a time
+        maxMessages: 10,      // Max 10 messages per connection
+        rateDelta: 2000,      // Min 2 seconds between messages
+        rateLimit: 1           // Max 1 message per rateDelta
+    });
+
+    console.log(`[NEWSLETTER] Starting experiment batch send to ${recipientEmails.length} recipients...`);
+
+    let successCount = 0;
+    let failCount = 0;
+    let consecutiveFailures = 0;
+    const MAX_CONSECUTIVE_FAILURES = 5;
+
+    for (const recipient of recipientEmails) {
+        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+            console.error(`[NEWSLETTER] ⛔ Circuit breaker triggered after ${MAX_CONSECUTIVE_FAILURES} consecutive failures. Aborting batch.`);
+            break;
+        }
+
+        try {
+            await transporter.sendMail({
+                from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
+                to: recipient,
+                subject: `🧪 Yeni Deney: ${expTitle}`,
+                html: htmlContent,
+                attachments: [{ filename: 'logo.png', path: logoPath, cid: 'unique-logo-id' }]
+            });
+            successCount++;
+            consecutiveFailures = 0;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        } catch (e) {
+            console.error(`[NEWSLETTER] Failed to send to ${recipient}: ${e.message}`);
+            failCount++;
+            consecutiveFailures++;
+
+            const backoffMs = Math.min(consecutiveFailures * 3000, 30000);
+            console.log(`[NEWSLETTER] Backing off for ${backoffMs / 1000}s after failure...`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+        }
+    }
+
+    console.log(`[NEWSLETTER] Experiment batch finished. Success: ${successCount}, Fail: ${failCount}`);
+
+    transporter.close();
+
+    const status = failCount === 0 ? 'sent' : (successCount > 0 ? 'partial' : 'failed');
+
+    try {
+        await pool.query('INSERT INTO email_logs (article_id, experiment_id, subject, recipient_count, status) VALUES (?, ?, ?, ?, ?)',
+            [null, experimentId, `🧪 Yeni Deney: ${expTitle}`, successCount, status]);
     } catch (e) {
         console.error('[NEWSLETTER] Error logging to DB:', e);
     }

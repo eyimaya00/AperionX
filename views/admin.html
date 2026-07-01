@@ -1226,18 +1226,31 @@
             <div class="header-section">
                 <div>
                     <h1 class="page-title">Bülten Gönderimi</h1>
-                    <p class="subtitle">Makalelerinizi seçip abonelerinize özel bülten olarak gönderin.</p>
+                    <p class="subtitle">İçeriğinizi seçip abonelerinize özel bülten olarak gönderin.</p>
                 </div>
             </div>
 
             <div class="card">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:600; margin-bottom:10px; display:block;">📝 İçerik Türü</label>
+                    <div style="display:flex; gap:20px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="radio" name="newsletter_type" value="article" checked onchange="onNewsletterTypeChange()">
+                            <span style="font-weight: 500;">Makale (Article)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="radio" name="newsletter_type" value="experiment" onchange="onNewsletterTypeChange()">
+                            <span style="font-weight: 500;">Deney (Experiment)</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label style="font-weight:600; margin-bottom:10px; display:block;">📣 Gönderilecek Makale</label>
+                    <label id="newsletter-select-label" style="font-weight:600; margin-bottom:10px; display:block;">📣 Gönderilecek Makale</label>
                     <select id="newsletter-article-select" class="form-control" onchange="previewNewsletter()">
                         <option value="">Makale Seçiniz...</option>
                     </select>
-                    <small style="color:#64748b; display:block; margin-top:5px;">Sadece 'Yayında' (Published) olan
-                        makaleler listelenir.</small>
+                    <small id="newsletter-select-help" style="color:#64748b; display:block; margin-top:5px;">Sadece 'Yayında' (Published) olan makaleler listelenir.</small>
                 </div>
 
                 <div class="form-group" style="margin-top:20px;">
@@ -4322,6 +4335,54 @@
 
 
         /* === NEWSLETTER MANAGEMENT LOGIC === */
+        async function onNewsletterTypeChange() {
+            const type = document.querySelector('input[name="newsletter_type"]:checked').value;
+            const label = document.getElementById('newsletter-select-label');
+            const help = document.getElementById('newsletter-select-help');
+            const select = document.getElementById('newsletter-article-select');
+            
+            if (type === 'experiment') {
+                label.innerText = '📣 Gönderilecek Deney';
+                help.innerText = "Sadece 'Yayında' (Published) olan deneyler listelenir.";
+                select.innerHTML = '<option value="">Deney Seçiniz...</option>';
+                await loadNewsletterExperiments();
+            } else {
+                label.innerText = '📣 Gönderilecek Makale';
+                help.innerText = "Sadece 'Yayında' (Published) olan makaleler listelenir.";
+                select.innerHTML = '<option value="">Makale Seçiniz...</option>';
+                await loadNewsletterManagement();
+            }
+            previewNewsletter();
+        }
+
+        async function loadNewsletterExperiments() {
+            const select = document.getElementById('newsletter-article-select');
+            select.innerHTML = '<option value="">Yükleniyor...</option>';
+            try {
+                const res = await fetch(`${API_URL}/editor/experiments/history`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const exps = await res.json();
+
+                select.innerHTML = '<option value="">Deney Seçiniz...</option>';
+
+                const published = exps.filter(e => e.status === 'published');
+
+                if (published.length === 0) {
+                    select.innerHTML = '<option value="">Yayınlanmış deney yok</option>';
+                    return;
+                }
+
+                published.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.innerText = `${e.title} (${new Date(e.created_at).toLocaleDateString('tr-TR')})`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error(e);
+                showToast('Deneyler yüklenemedi', 'error');
+            }
+        }
+
         async function loadNewsletterManagement() {
             const select = document.getElementById('newsletter-article-select');
             select.innerHTML = '<option value="">Yükleniyor...</option>';
@@ -4353,18 +4414,19 @@
         }
 
         async function previewNewsletter() {
-            const articleId = document.getElementById('newsletter-article-select').value;
+            const id = document.getElementById('newsletter-article-select').value;
             const container = document.getElementById('newsletter-preview-container');
 
-            if (!articleId) {
-                container.innerHTML = '<span style="color:#94a3b8;">Makale seçildiğinde önizleme burada görünecek.</span>';
+            if (!id) {
+                container.innerHTML = '<span style="color:#94a3b8;">İçerik seçildiğinde önizleme burada görünecek.</span>';
                 return;
             }
 
             container.innerHTML = '<span style="color:#6366f1;">Önizleme yükleniyor...</span>';
 
             try {
-                const res = await fetch(`${API_URL}/admin/newsletter/preview/${articleId}`, {
+                const type = document.querySelector('input[name="newsletter_type"]:checked')?.value || 'article';
+                const res = await fetch(`${API_URL}/admin/newsletter/preview/${type}/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const html = await res.text();
@@ -4396,9 +4458,10 @@
         }
 
         async function sendNewsletterVerified() {
-            const articleId = document.getElementById('newsletter-article-select').value;
-            if (!articleId) return showToast('Lütfen bir makale seçin.', 'warning');
+            const id = document.getElementById('newsletter-article-select').value;
+            if (!id) return showToast('Lütfen bir içerik seçin.', 'warning');
 
+            const type = document.querySelector('input[name="newsletter_type"]:checked')?.value || 'article';
             const target = document.querySelector('input[name="recipient_target"]:checked').value;
             let customEmails = [];
 
@@ -4420,7 +4483,7 @@
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ articleId, target, customEmails })
+                        body: JSON.stringify({ contentType: type, contentId: id, target, customEmails })
                     });
 
                     const data = await res.json();
@@ -4465,7 +4528,7 @@
                     return `
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 12px; color: #64748b;">#${log.id}</td>
-                        <td style="padding: 12px; font-weight: 500;">${log.article_title || '-'}</td>
+                        <td style="padding: 12px; font-weight: 500;">${log.article_title || log.experiment_title || '-'}</td>
                         <td style="padding: 12px;">${log.subject}</td>
                         <td style="padding: 12px;">${log.recipient_count}</td>
                         <td style="padding: 12px;">
