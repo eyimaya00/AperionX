@@ -885,41 +885,80 @@ app.get('/feed.xml', async (req, res) => {
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT slug, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
-        const origin = `${req.protocol}://${req.get('host')}`;
+        const [articles] = await pool.query("SELECT slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [categories] = await pool.query("SELECT * FROM categories");
+        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
+        
+        let baseUrl = `${req.protocol}://${req.get('host')}`;
+        if (req.get('host').includes('aperionx.com')) {
+            baseUrl = 'https://www.aperionx.com';
+        }
 
-        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 
-        // Static Pages
-        const staticPages = ['', '/articles.html', '/about.html', '/author.html', '/index.html'];
+        // Static Pages (Using Clean URLs for SEO)
+        const staticPages = [
+            { path: '', priority: '1.0', freq: 'daily' },
+            { path: '/articles', priority: '0.9', freq: 'daily' },
+            { path: '/experiments', priority: '0.9', freq: 'daily' },
+            { path: '/about', priority: '0.7', freq: 'monthly' },
+            { path: '/author', priority: '0.7', freq: 'monthly' }
+        ];
+
         staticPages.forEach(page => {
-            const pathUrl = page === '' ? '/' : page;
-            const enPath = page === '' ? '/en/' : '/en' + page;
-            xml += `
-            <url>
-                <loc>${origin}${pathUrl}</loc>
-                <xhtml:link rel="alternate" hreflang="tr" href="${origin}${pathUrl}"/>
-                <xhtml:link rel="alternate" hreflang="en" href="${origin}${enPath}"/>
-                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}${pathUrl}"/>
-                <changefreq>daily</changefreq>
-                <priority>0.8</priority>
-            </url>`;
+            const pathUrl = page.path === '' ? '/' : page.path;
+            const enPath = page.path === '' ? '/en/' : '/en' + page.path;
+            xml += `    <url>
+        <loc>${baseUrl}${pathUrl}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}${pathUrl}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${enPath}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${pathUrl}"/>
+        <changefreq>${page.freq}</changefreq>
+        <priority>${page.priority}</priority>
+    </url>\n`;
         });
 
-        // Dynamic Articles
+        // Categories
+        categories.forEach(cat => {
+            const catPath = `/articles?category=${encodeURIComponent(cat.name)}`;
+            const enCatPath = `/en/articles?category=${encodeURIComponent(cat.name)}`;
+            xml += `    <url>
+        <loc>${baseUrl}${catPath}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}${catPath}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${enCatPath}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${catPath}"/>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>\n`;
+        });
+
+        // Dynamic Articles (Turkish and English Alternates)
         articles.forEach(article => {
-            const date = new Date(article.created_at).toISOString();
-            xml += `
-            <url>
-                <loc>${origin}/makale/${article.slug}</loc>
-                <xhtml:link rel="alternate" hreflang="tr" href="${origin}/makale/${article.slug}"/>
-                <xhtml:link rel="alternate" hreflang="en" href="${origin}/en/makale/${article.slug}"/>
-                <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/makale/${article.slug}"/>
-                <lastmod>${date}</lastmod>
-                <changefreq>weekly</changefreq>
-                <priority>1.0</priority>
-            </url>`;
+            const date = new Date(article.updated_at || article.created_at).toISOString();
+            xml += `    <url>
+        <loc>${baseUrl}/makale/${article.slug}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/makale/${article.slug}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/makale/${article.slug}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/makale/${article.slug}"/>
+        <lastmod>${date}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>\n`;
+        });
+
+        // Dynamic Experiments (Turkish and English Alternates)
+        experiments.forEach(exp => {
+            const date = new Date(exp.created_at).toISOString();
+            xml += `    <url>
+        <loc>${baseUrl}/deney/${exp.slug}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/deney/${exp.slug}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/deney/${exp.slug}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/deney/${exp.slug}"/>
+        <lastmod>${date}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>\n`;
         });
 
         xml += '</urlset>';
@@ -928,7 +967,6 @@ app.get('/sitemap.xml', async (req, res) => {
         res.send(xml);
     } catch (e) {
         console.error('Sitemap Error:', e);
-        fs.appendFileSync('sitemap_error.log', e.toString() + '\n');
         res.status(500).send('Error generating sitemap');
     }
 });
@@ -3227,33 +3265,7 @@ app.get('/api/editor/trash', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).send(e.toString()); }
 });
 
-app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
-    const status = decision === 'approve' ? 'published' : 'rejected';
-    const reasonValue = decision === 'reject' ? rejection_reason : null;
 
-    // If approving, save who approved it
-    let approvedBy = null;
-    if (decision === 'approve') approvedBy = req.user.id;
-
-    try {
-        await pool.query('UPDATE articles SET status = ?, rejection_reason = ?, approved_by = ? WHERE id = ?', [status, reasonValue, approvedBy, req.params.id]);
-
-        // SEO: Ping search engines on approve (Auto-newsletter disabled)
-        if (decision === 'approve') {
-            const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [req.params.id]);
-            if (slugRow.length > 0) {
-                pingSearchEngines(slugRow[0].slug).catch(err => console.error('[SEO-PING] Error:', err));
-            }
-        }
-
-        clearCache('articles');
-        res.json({ message: `Article ${status}` });
-    } catch (e) {
-        res.status(500).send(e.toString());
-    }
-});
 
 app.get('/api/editor/stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
@@ -4974,90 +4986,7 @@ app.post('/api/admin/comments/:id/reject', authenticateToken, async (req, res) =
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// --- SEO: Sitemap.xml ---
-app.get('/sitemap.xml', async (req, res) => {
-    try {
-        // Fetch updated_at for accurate SEO "lastmod"
-        const [articles] = await pool.query("SELECT id, slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
-        const [categories] = await pool.query("SELECT * FROM categories");
-        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
 
-        // Use dynamic host but prefer https://www.aperionx.com if host header matches
-        let baseUrl = `https://${req.get('host')}`;
-        if (req.get('host').includes('aperionx.com')) {
-            baseUrl = 'https://www.aperionx.com';
-        }
-
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>${baseUrl}/</loc>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>${baseUrl}/articles.html</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>${baseUrl}/experiments.html</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>${baseUrl}/about.html</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>`;
-
-        // Categories
-        categories.forEach(cat => {
-            xml += `
-    <url>
-        <loc>${baseUrl}/articles.html?category=${encodeURIComponent(cat.name)}</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-        });
-
-        // Articles (Using Slugs)
-        articles.forEach(art => {
-            // Prefer updated_at, fallback to created_at
-            const dateStr = art.updated_at || art.created_at;
-            const lastMod = new Date(dateStr).toISOString();
-            xml += `
-    <url>
-        <loc>${baseUrl}/makale/${art.slug}</loc>
-        <lastmod>${lastMod}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-        });
-
-        // Experiments (Using Slugs)
-        experiments.forEach(exp => {
-            const lastMod = new Date(exp.created_at).toISOString();
-            xml += `
-    <url>
-        <loc>${baseUrl}/deney/${exp.slug}</loc>
-        <lastmod>${lastMod}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-        });
-
-        xml += `
-</urlset>`;
-
-        res.header('Content-Type', 'application/xml');
-        res.send(xml);
-
-    } catch (e) {
-        console.error('Sitemap Error:', e);
-        res.status(500).end();
-    }
-});
 
 
 
@@ -5314,27 +5243,7 @@ app.get('/api/editor/authors', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 6. Decide (Approve/Reject)
-app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    const { decision, rejection_reason } = req.body; // decision: 'approve' or 'reject'
 
-    try {
-        if (decision === 'approve') {
-            await pool.query("UPDATE articles SET status = 'published', approved_by = ?, rejection_reason = NULL, updated_at = NOW() WHERE id = ?", [req.user.id, req.params.id]);
-
-            // Trigger Email Notification (Background)
-            // AUTO-SEND DISABLED: Manual control enabled via Admin Panel
-            // sendNewArticleNotification(req.params.id).catch(err => console.error('Notification Error:', err));
-
-        } else if (decision === 'reject') {
-            await pool.query("UPDATE articles SET status = 'rejected', approved_by = ?, rejection_reason = ?, updated_at = NOW() WHERE id = ?", [req.user.id, rejection_reason, req.params.id]);
-        } else {
-            return res.status(400).json({ error: 'Invalid decision' });
-        }
-        res.json({ message: 'Success' });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
 // 7. Restore
 app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
