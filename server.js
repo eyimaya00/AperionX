@@ -135,6 +135,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Redirect old /tools link to the new /vsepr page for compatibility
+app.get(['/tools', '/tools.html'], (req, res) => {
+    res.redirect(301, '/vsepr');
+});
+
 // === MAGIC LINK ROUTE ===
 app.get('/maintenance-access', async (req, res) => {
     const { key } = req.query;
@@ -1399,6 +1404,14 @@ async function ensureSchema() {
             }
         }
         // --------------------------------------------------
+
+        // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /vsepr ---
+        try {
+            await pool.query("UPDATE category_cards SET link_url = '/vsepr' WHERE id = 3 OR title = 'Araçlar' OR title = 'Ka Hesaplama'");
+            console.log('Migration Code: Updated Araçlar/Ka Hesaplama link_url to /vsepr in category_cards');
+        } catch (e) {
+            console.error('Migration Error (category_cards link_url update):', e);
+        }
 
     } catch (e) {
         console.error('Auto-migration Error:', e);
