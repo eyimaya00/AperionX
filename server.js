@@ -955,6 +955,7 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '', priority: '1.0', freq: 'daily' },
             { path: '/articles', priority: '0.9', freq: 'daily' },
             { path: '/experiments', priority: '0.9', freq: 'daily' },
+            { path: '/vsepr', priority: '0.9', freq: 'daily' },
             { path: '/about', priority: '0.7', freq: 'monthly' },
             { path: '/author', priority: '0.7', freq: 'monthly' }
         ];
