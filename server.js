@@ -1849,7 +1849,7 @@ const optimizeImageMiddleware = async (req, res, next) => {
         const filePath = req.file.path;
         const tempPath = filePath + '.tmp';
         const metadata = await sharp(filePath).metadata();
-        let image = sharp(filePath);
+        let image = sharp(filePath).rotate();
         if (metadata.width > 1600) image = image.resize({ width: 1600, withoutEnlargement: true });
         
         if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
