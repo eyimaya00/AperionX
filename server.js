@@ -502,6 +502,19 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 // But the regex <span\s+id="detail-author"> should match <span id="detail-author">
 
 
+                // SSR: Render title, content, image, badge and date directly into HTML for search engines and instant load
+                html = html.replace('<main id="article-wrapper" style="display: none;">', '<main id="article-wrapper">');
+                html = html.replace('<h1 class="article-title" id="detail-title">Makale Başlığı</h1>', `<h1 class="article-title" id="detail-title">${article.title}</h1>`);
+                html = html.replace('<span class="article-badge" id="detail-category">Teknoloji</span>', `<span class="article-badge" id="detail-category">${article.category || 'Bilim'}</span>`);
+                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}</span>`);
+                html = html.replace('<div class="summary-text" id="detail-excerpt"></div>', `<div class="summary-text" id="detail-excerpt">${article.excerpt || ''}</div>`);
+                html = html.replace('<div class="article-content" id="detail-content"></div>', `<div class="article-content" id="detail-content">${article.content}</div>`);
+                if (article.image_url) {
+                    html = html.replace('<img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">', `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image">`);
+                } else {
+                    html = html.replace('<img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">', '');
+                }
+
                 res.send(html);
 
             } catch (parseErr) {
@@ -794,6 +807,46 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${jsonLdBreadcrumb}\n</head>`);
 
                 // Send the generated HTML
+                // SSR: Render title, categories, materials, objective, procedure, safety, conclusion, results directly into HTML for search engines and instant load
+                html = html.replace('<main id="article-wrapper" style="display: none;">', '<main id="article-wrapper">');
+                html = html.replace('<h1 class="article-title" id="detail-title">Deney Başlığı</h1>', `<h1 class="article-title" id="detail-title">${experiment.title}</h1>`);
+                html = html.replace('<span class="article-badge" id="detail-category">Deney</span>', `<span class="article-badge" id="detail-category">${experiment.category || 'Deney'}</span>`);
+                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(experiment.created_at).toLocaleDateString('tr-TR')}</span>`);
+
+                if (experiment.image_url) {
+                    html = html.replace('<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">', `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image">`);
+                } else {
+                    html = html.replace('<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">', '');
+                }
+
+                if (experiment.objective) {
+                    html = html.replace('<div class="article-summary-simple" id="objective-box" style="display: none;">', '<div class="article-summary-simple" id="objective-box">');
+                    html = html.replace('<div class="article-content" id="detail-objective" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-objective" style="margin-top: 10px;">${experiment.objective}</div>`);
+                }
+                if (experiment.materials) {
+                    html = html.replace('<div class="experiment-materials-box" id="materials-box" style="display: none;">', '<div class="experiment-materials-box" id="materials-box">');
+                    html = html.replace('<div class="article-content" id="detail-materials" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-materials" style="margin-top: 10px;">${experiment.materials}</div>`);
+                }
+                if (experiment.safety) {
+                    html = html.replace('<div class="experiment-safety-box" id="safety-box" style="display: none;">', '<div class="experiment-safety-box" id="safety-box">');
+                    html = html.replace('<div class="article-content" id="detail-safety" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-safety" style="margin-top: 10px;">${experiment.safety}</div>`);
+                }
+                if (experiment.procedure) {
+                    html = html.replace('<div id="procedure-section" style="display: none; margin-bottom: 30px;">', '<div id="procedure-section" style="margin-bottom: 30px;">');
+                    html = html.replace('<div class="article-content" id="detail-procedure" style="margin-top: 5px;"></div>', `<div class="article-content" id="detail-procedure" style="margin-top: 5px;">${experiment.procedure}</div>`);
+                }
+                if (experiment.results) {
+                    html = html.replace('<div class="experiment-results-box" id="results-box" style="display: none;">', '<div class="experiment-results-box" id="results-box">');
+                    html = html.replace('<div class="article-content" id="detail-results" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-results" style="margin-top: 10px;">${experiment.results}</div>`);
+                }
+                if (experiment.conclusion) {
+                    html = html.replace('<div id="conclusion-section" style="display: none; margin-bottom: 30px;">', '<div id="conclusion-section" style="margin-bottom: 30px;">');
+                    html = html.replace('<div class="article-content" id="detail-conclusion" style="margin-top: 5px;"></div>', `<div class="article-content" id="detail-conclusion" style="margin-top: 5px;">${experiment.conclusion}</div>`);
+                }
+                if (experiment.video_url) {
+                    html = html.replace('<div id="video-container" style="display: none; margin-bottom: 30px;">', '<div id="video-container" style="margin-bottom: 30px;">');
+                }
+
                 res.send(html);
 
             } catch (innerErr) {
