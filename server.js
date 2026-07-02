@@ -2754,16 +2754,26 @@ app.get('/api/public/author/:identifier', async (req, res) => {
 
         // 2. Get Published Articles
         const [articles] = await pool.query(`
-            SELECT id, title, slug, excerpt, image_url, category, created_at,
-            (SELECT COUNT(*) FROM comments WHERE article_id = articles.id AND is_approved = 1) as comment_count
-            FROM articles 
-            WHERE author_id = ? AND status = 'published'
-            ORDER BY created_at DESC
-        `, [user.id]);
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at
+            FROM articles a
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
+            ORDER BY a.created_at DESC
+        `, [user.id, user.id]);
+
+        // 3. Get Published Experiments
+        const [experiments] = await pool.query(`
+            SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at
+            FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
+            ORDER BY e.created_at DESC
+        `, [user.id, user.id]);
 
         res.json({
             profile: user,
-            articles: articles
+            articles: articles,
+            experiments: experiments
         });
 
     } catch (e) {
@@ -4963,8 +4973,16 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             ORDER BY a.created_at DESC
         `, [user.id, user.id]);
 
-        // Experiments removed - only return articles
-        res.json({ profile: user, articles: articles });
+        // 4. Fetch Experiments (Main author or co-author)
+        const [experiments] = await pool.query(`
+            SELECT DISTINCT e.id, e.title, e.slug, e.image_url, e.excerpt, e.created_at, e.category, e.views, 'experiment' as type
+            FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
+            ORDER BY e.created_at DESC
+        `, [user.id, user.id]);
+
+        res.json({ profile: user, articles: articles, experiments: experiments });
 
     } catch (e) {
         console.error('[API] Public Author Error:', e);

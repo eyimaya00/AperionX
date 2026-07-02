@@ -402,10 +402,11 @@
     <main>
         <section class="profile-hero">
             <div class="profile-hero-content">
-                <img src="uploads/default-avatar.png" alt="Yazar" class="profile-avatar-large" id="p-avatar"
+                <img src="/uploads/default-avatar.png" alt="" class="profile-avatar-large" id="p-avatar"
                     style="opacity:0.5;">
                 <div class="profile-info" id="profile-container">
                     <div id="loading-spinner" style="text-align:center;">
+                        <img src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 140px; margin-bottom: 20px; display: inline-block;">
                         <div class="spinner"></div>
                         <h2 style="font-size:1.5rem; font-weight:600;">Profil Yükleniyor...</h2>
                     </div>
@@ -631,27 +632,38 @@
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
-                // 2. Fill Articles
+                const experiments = data.experiments || [];
+
+                // 2. Fill Articles and Experiments (Combined)
+                const combinedItems = [
+                    ...articles.map(a => ({ ...a, type: 'article' })),
+                    ...experiments.map(e => ({ ...e, type: 'experiment' }))
+                ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
                 const grid = document.getElementById('articles-grid');
-                if (articles.length === 0) {
+                if (combinedItems.length === 0) {
                     grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış bir içeriği yok.</div>';
                 } else {
-                    grid.innerHTML = articles.map(art => {
-                        const linkPath = `/makale/${art.slug || art.id}`;
-                        const badgeLabel = art.category;
+                    grid.innerHTML = combinedItems.map(item => {
+                        const isExperiment = item.type === 'experiment';
+                        const linkPath = isExperiment ? `/deney/${item.slug || item.id}` : `/makale/${item.slug || item.id}`;
+                        const badgeLabel = item.category || 'Genel';
+                        const typeLabel = isExperiment ? 'Deney' : 'Makale';
+
                         return `
                         <a href="${linkPath}" class="author-article-card">
                             <div class="card-image-wrapper">
-                                <img src="${art.image_url ? (art.image_url.startsWith('http') ? art.image_url : '/' + art.image_url) : 'uploads/default-hero.jpg'}" alt="${art.title}" class="card-image">
-                                <span class="card-category">${badgeLabel}</span>
+                                <img src="${item.image_url ? (item.image_url.startsWith('http') ? item.image_url : '/' + item.image_url) : '/uploads/default-hero.jpg'}" alt="${item.title}" class="card-image">
+                                <span class="card-category" style="top: 20px; left: 20px;">${badgeLabel}</span>
+                                <span class="card-category" style="top: 20px; right: 20px; left: auto; background: ${isExperiment ? '#db2777' : '#2563eb'}; border-color: transparent;">${typeLabel}</span>
                             </div>
                             <div class="card-content">
-                                <h3 class="card-title">${art.title}</h3>
+                                <h3 class="card-title">${item.title}</h3>
                                 <!-- Footer inside overlay -->
                                 <div class="card-footer">
                                     <span class="card-date">
                                         <i class="ph ph-calendar-blank" style="vertical-align:middle; margin-right:4px;"></i>
-                                        ${new Date(art.created_at).toLocaleDateString('tr-TR')}
+                                        ${new Date(item.created_at).toLocaleDateString('tr-TR')}
                                     </span>
                                     <div class="circle-arrow-btn">
                                         <i class="ph-bold ph-arrow-right"></i>
