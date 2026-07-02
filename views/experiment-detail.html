@@ -1636,7 +1636,7 @@
                     videoId = url.split('shorts/')[1]?.split('?')[0];
                 }
                 if (videoId) {
-                    document.getElementById('video-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}?origin=${encodeURIComponent(window.location.origin)}&enablejsapi=1`;
+                    document.getElementById('video-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}`;
                     document.getElementById('video-container').style.display = 'block';
                 }
             }
