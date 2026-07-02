@@ -603,24 +603,28 @@
                 if (!res.ok) throw new Error('Yazar bulunamadı');
 
                 const data = await res.json();
-                const profile = data.profile;
-                const articles = data.articles;
+
+                // Hide Spinner & Show Details immediately to prevent stuck loading screen
+                const spinnerEl = document.getElementById('loading-spinner');
+                const detailsEl = document.getElementById('profile-details');
+                if (spinnerEl) spinnerEl.style.display = 'none';
+                if (detailsEl) detailsEl.style.display = 'block';
+
+                const profile = data.profile || {};
+                const articles = data.articles || [];
+                const experiments = data.experiments || [];
 
                 // 1. Fill Profile
-                document.title = `${profile.fullname} - Yazar Profili | AperionX`;
+                document.title = `${profile.fullname || 'Yazar'} - Yazar Profili | AperionX`;
 
                 // Avatar
                 const avatarEl = document.getElementById('p-avatar');
-                if (profile.avatar_url) {
+                if (avatarEl && profile.avatar_url) {
                     avatarEl.src = profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url;
                     avatarEl.style.opacity = '1';
                 }
 
-                // Show Details, Hide Spinner
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('profile-details').style.display = 'block';
-
-                document.getElementById('p-name').textContent = profile.fullname;
+                document.getElementById('p-name').textContent = profile.fullname || '';
 
                 // Job Title with Cleanup (Split by slash for multi-line)
                 const rawJob = profile.job_title || '';
@@ -632,12 +636,10 @@
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
-                const experiments = data.experiments || [];
-
                 // 2. Fill Articles and Experiments (Combined)
                 const combinedItems = [
-                    ...articles.map(a => ({ ...a, type: 'article' })),
-                    ...experiments.map(e => ({ ...e, type: 'experiment' }))
+                    ...(articles || []).map(a => ({ ...a, type: 'article' })),
+                    ...(experiments || []).map(e => ({ ...e, type: 'experiment' }))
                 ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
                 const grid = document.getElementById('articles-grid');
@@ -655,7 +657,7 @@
                             <div class="card-image-wrapper">
                                 <img src="${item.image_url ? (item.image_url.startsWith('http') ? item.image_url : '/' + item.image_url) : '/uploads/default-hero.jpg'}" alt="${item.title}" class="card-image">
                                 <span class="card-category" style="top: 20px; left: 20px;">${badgeLabel}</span>
-                                <span class="card-category" style="top: 20px; right: 20px; left: auto; background: ${isExperiment ? '#db2777' : '#2563eb'}; border-color: transparent;">${typeLabel}</span>
+                                <span class="card-category" style="top: 20px; right: 20px; left: auto; background: #6366f1; border-color: transparent;">${typeLabel}</span>
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${item.title}</h3>
