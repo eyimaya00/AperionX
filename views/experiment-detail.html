@@ -1230,7 +1230,7 @@
                 <div id="video-container" style="display: none; margin-bottom: 30px;">
                     <h2 style="font-size: 1.4rem; margin-top: 25px; margin-bottom: 8px; color: var(--text-color); font-weight: 700;">Deney Videosu</h2>
                     <div class="video-wrapper">
-                        <iframe id="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                        <iframe id="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                 </div>
 
@@ -1636,7 +1636,7 @@
                     videoId = url.split('shorts/')[1]?.split('?')[0];
                 }
                 if (videoId) {
-                    document.getElementById('video-iframe').src = `https://www.youtube.com/embed/${videoId}?origin=${encodeURIComponent(window.location.origin)}&enablejsapi=1`;
+                    document.getElementById('video-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}?origin=${encodeURIComponent(window.location.origin)}&enablejsapi=1`;
                     document.getElementById('video-container').style.display = 'block';
                 }
             }
