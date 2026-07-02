@@ -1230,7 +1230,7 @@
                 <div id="video-container" style="display: none; margin-bottom: 30px;">
                     <h2 style="font-size: 1.4rem; margin-top: 25px; margin-bottom: 8px; color: var(--text-color); font-weight: 700;">Deney Videosu</h2>
                     <div class="video-wrapper">
-                        <iframe id="video-iframe" src="" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <iframe id="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                 </div>
 
@@ -1450,6 +1450,25 @@
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
         window.currentExperimentId = null;
 
+        function formatListText(text) {
+            if (!text) return '';
+            
+            const normalized = text.replace(/\r\n/g, '\n').trim();
+            
+            let items = [];
+            if (normalized.includes('•')) {
+                items = normalized.split('•').map(x => x.trim()).filter(x => x.length > 0);
+            } else if (normalized.includes('\n')) {
+                items = normalized.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+            }
+            
+            if (items.length > 1) {
+                return `<ul class="experiment-materials-list" style="list-style-type: disc; padding-left: 20px;">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+            }
+            
+            return normalized.replace(/\n/g, '<br>');
+        }
+
         // Progress Bar Logic
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('reading-progress');
@@ -1571,21 +1590,14 @@
             // Malzemeler (Materials)
             const matBox = document.getElementById('materials-box');
             if (exp.materials) {
-                // If it looks like raw text, list it, otherwise set as html
-                const detailMat = document.getElementById('detail-materials');
-                if (exp.materials.includes('\n')) {
-                    const items = exp.materials.split('\n').filter(x => x.trim());
-                    detailMat.innerHTML = `<ul class="experiment-materials-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
-                } else {
-                    detailMat.innerHTML = exp.materials;
-                }
+                document.getElementById('detail-materials').innerHTML = formatListText(exp.materials);
                 matBox.style.display = 'block';
             }
 
             // Güvenlik Önlemleri (Safety)
             const safetyBox = document.getElementById('safety-box');
             if (exp.safety_notes) {
-                document.getElementById('detail-safety').innerHTML = exp.safety_notes;
+                document.getElementById('detail-safety').innerHTML = formatListText(exp.safety_notes);
                 safetyBox.style.display = 'block';
             }
 
@@ -1624,7 +1636,7 @@
                     videoId = url.split('shorts/')[1]?.split('?')[0];
                 }
                 if (videoId) {
-                    document.getElementById('video-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}`;
+                    document.getElementById('video-iframe').src = `https://www.youtube.com/embed/${videoId}`;
                     document.getElementById('video-container').style.display = 'block';
                 }
             }
