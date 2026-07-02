@@ -1180,13 +1180,35 @@
                     </div>
                 </div>
 
-                <!-- Okunma -->
+                <!-- Makale Okunma -->
+                <div class="stat-card-modern cyan" onclick="goToAnalytics()">
+                    <div class="stat-icon-wrap">
+                        <i class="ph-bold ph-book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="stat-label">Makale Okunma</h3>
+                        <p id="stat-article-views" class="stat-value">-</p>
+                    </div>
+                </div>
+
+                <!-- Deney Okunma -->
+                <div class="stat-card-modern violet" onclick="goToAnalytics()">
+                    <div class="stat-icon-wrap">
+                        <i class="ph-bold ph-flask"></i>
+                    </div>
+                    <div>
+                        <h3 class="stat-label">Deney Okunma</h3>
+                        <p id="stat-experiment-views" class="stat-value">-</p>
+                    </div>
+                </div>
+
+                <!-- Toplam Okunma -->
                 <div class="stat-card-modern blue" onclick="goToAnalytics()">
                     <div class="stat-icon-wrap">
                         <i class="ph-bold ph-eye"></i>
                     </div>
                     <div>
-                        <h3 class="stat-label">Okunma</h3>
+                        <h3 class="stat-label">Toplam Okunma</h3>
                         <p id="stat-views" class="stat-value">-</p>
                     </div>
                 </div>
@@ -2030,6 +2052,8 @@
                     const data = await res.json();
                     if (document.getElementById('stat-published')) document.getElementById('stat-published').textContent = data.published;
                     if (document.getElementById('stat-exp-published')) document.getElementById('stat-exp-published').textContent = data.expPublished !== undefined ? data.expPublished : '-';
+                    if (document.getElementById('stat-article-views')) document.getElementById('stat-article-views').textContent = data.article_views !== undefined ? data.article_views : '-';
+                    if (document.getElementById('stat-experiment-views')) document.getElementById('stat-experiment-views').textContent = data.experiment_views !== undefined ? data.experiment_views : '-';
                     if (document.getElementById('stat-views')) document.getElementById('stat-views').textContent = data.views;
                     // Handle potential undefined from older server instance
                     if (document.getElementById('stat-likes')) document.getElementById('stat-likes').textContent = (data.likes !== undefined) ? data.likes : '-';

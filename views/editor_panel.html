@@ -2252,6 +2252,7 @@
                             <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Başlık</th>
                             <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Yazar</th>
                             <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Kategori</th>
+                            <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Okunma</th>
                             <th style="padding: 16px 24px; font-weight: 600; color: #475569;">İşlem</th>
                         </tr>
                     </thead>
@@ -4104,7 +4105,7 @@
             tbody.innerHTML = '';
 
             if (experiments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; height:250px; vertical-align:middle; color:#94a3b8;">
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; height:250px; vertical-align:middle; color:#94a3b8;">
                     <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
                         <i class="ph-duotone ph-flask" style="font-size:3rem; opacity:0.5;"></i>
                         <span>Deney bulunamadı.</span>
@@ -4149,6 +4150,12 @@
                         <td style="padding: 14px 24px; font-weight: 500; color: #475569;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</td>
                         <td style="padding: 14px 24px;">
                             <span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; padding:4px 10px; border-radius:6px; font-size:0.8rem;">${escapeHtml(exp.category || 'Genel')}</span>
+                        </td>
+                        <td style="padding: 14px 24px; font-weight: 500; color: #475569;">
+                            <span style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                <i class="ph-bold ph-eye" style="color: #64748b; font-size: 1.05rem;"></i>
+                                <span>${exp.views || 0}</span>
+                            </span>
                         </td>
                         <td style="padding: 14px 24px;">
                             <div style="display: flex; align-items: center; gap: 8px;">

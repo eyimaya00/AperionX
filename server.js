@@ -3492,6 +3492,8 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             pending: pending[0].count,
             expPublished: expPublishedRes[0].count,
             expPending: expPendingRes[0].count,
+            article_views: Number(views[0].count || 0),
+            experiment_views: Number(expViewsRes[0].count || 0),
             views: Number(views[0].count || 0) + Number(expViewsRes[0].count || 0), // Combined views
             likes: Number(likes[0].count || 0),
             comments: Number(comments[0].count || 0)
@@ -4594,6 +4596,43 @@ app.get('/api/admin/top-articles', authenticateToken, async (req, res) => {
     }
 });
 
+// Admin: Get Monthly Top Experiments
+app.get('/api/admin/top-experiments', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        const month = parseInt(req.query.month) || (new Date().getMonth() + 1);
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Calculate start and end dates
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01 00:00:00`;
+        let nextMonth = month + 1;
+        let nextYear = year;
+        if (nextMonth > 12) {
+            nextMonth = 1;
+            nextYear += 1;
+        }
+        const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`;
+
+        const query = `
+            SELECT e.id, e.title, e.slug, COUNT(v.id) as view_count, u.fullname as author_name
+            FROM experiment_views v
+            JOIN experiments e ON v.experiment_id = e.id
+            LEFT JOIN users u ON e.author_id = u.id
+            WHERE v.viewed_at >= ? AND v.viewed_at < ? AND e.deleted_at IS NULL
+            GROUP BY e.id, e.title, e.slug, u.fullname
+            ORDER BY view_count DESC
+            LIMIT ?
+        `;
+
+        const [rows] = await pool.query(query, [startDate, endDate, limit]);
+        res.json(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Admin: Get All Users
 app.get('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
@@ -4650,17 +4689,25 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     try {
         const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
         const [articles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'"); // Published articles only
+        const [experiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status = 'published' AND deleted_at IS NULL"); // Published experiments only
 
-        // Views: Only from published articles
-        const [views] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published'");
+        // Views: Only from published articles & experiments
+        const [articleViews] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published'");
+        const [experimentViews] = await pool.query("SELECT SUM(views) as count FROM experiments WHERE status = 'published' AND deleted_at IS NULL");
 
         const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes');
         const [comments] = await pool.query('SELECT COUNT(*) as count FROM comments');
 
+        const totalArticleViews = Number(articleViews[0].count || 0);
+        const totalExperimentViews = Number(experimentViews[0].count || 0);
+
         res.json({
             users: users[0].count,
             articles: articles[0].count,
-            views: views[0].count || 0,
+            experiments: experiments[0].count,
+            article_views: totalArticleViews,
+            experiment_views: totalExperimentViews,
+            views: totalArticleViews + totalExperimentViews,
             likes: likes[0].count,
             comments: comments[0].count
         });
@@ -4716,17 +4763,24 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
         };
 
         // 3. Monthly Calculated Stats (Last 30 Days) - Published Only
-        const [mViews] = await pool.query(`
+        const [mArticleViews] = await pool.query(`
             SELECT COUNT(*) as count 
             FROM article_views v 
             JOIN articles a ON v.article_id = a.id 
             WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        `);
+        const [mExperimentViews] = await pool.query(`
+            SELECT COUNT(*) as count 
+            FROM experiment_views v 
+            JOIN experiments e ON v.experiment_id = e.id 
+            WHERE e.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND e.deleted_at IS NULL
         `);
 
         const [mLikes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mComments] = await pool.query('SELECT COUNT(*) as count FROM comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mUsers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mArticles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+        const [mExperiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
 
         // 4. Historical Data (Monthly) - Fetch last 12 months
         // Helper to format Date to YYYY-MM
@@ -4781,11 +4835,14 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             views: fillData(viewsRows),
             users: fillData(usersRows),
             monthlyStats: {
-                views: mViews[0].count,
+                article_views: mArticleViews[0].count,
+                experiment_views: mExperimentViews[0].count,
+                views: mArticleViews[0].count + mExperimentViews[0].count,
                 likes: mLikes[0].count,
                 comments: mComments[0].count,
                 users: mUsers[0].count,
-                articles: mArticles[0].count
+                articles: mArticles[0].count,
+                experiments: mExperiments[0].count
             },
             monthlyHistory
         });

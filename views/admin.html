@@ -776,7 +776,7 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('articles-management', this); loadAllArticles();">
                 <i class="ph ph-article"></i> <span>Makale Yönetimi</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('monthly-top-articles', this); loadMonthlyTopArticles();">
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('monthly-top-articles', this); loadMonthlyTopArticles(); loadMonthlyTopExperiments();">
                 <i class="ph ph-crown"></i> <span>Ayın Popülerleri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('newsletter-subscribers', this); loadSubscribers();">
@@ -1435,7 +1435,33 @@
                     </div>
                 </div>
 
-                <!-- Views -->
+                <!-- Article Views -->
+                <div class="stat-card"
+                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-book-open"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-article-views">-</h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Makale Okunma</p>
+                    </div>
+                </div>
+
+                <!-- Experiment Views -->
+                <div class="stat-card"
+                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fdf2f8; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-flask"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-experiment-views">-</h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Deney Okunma</p>
+                    </div>
+                </div>
+
+                <!-- Total Views -->
                 <div class="stat-card"
                     style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
                     <div
@@ -1443,9 +1469,8 @@
                         <i class="ph ph-eye"></i>
                     </div>
                     <div>
-                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-views">-
-                        </h3>
-                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Görüntülenme</p>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-views">-</h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Okunma</p>
                     </div>
                 </div>
 
@@ -2024,7 +2049,7 @@
                         </select>
                     </div>
 
-                    <button class="btn btn-primary" onclick="loadMonthlyTopArticles()" style="display: inline-flex; align-items: center; gap: 8px; height: 42px;">
+                    <button class="btn btn-primary" onclick="loadMonthlyTopArticles(); loadMonthlyTopExperiments();" style="display: inline-flex; align-items: center; gap: 8px; height: 42px;">
                         <i class="ph ph-funnel"></i> Filtrele / Yenile
                     </button>
                 </div>
@@ -2044,6 +2069,32 @@
                         </thead>
                         <tbody id="top-articles-table-body">
                             <!-- JS Populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- New: Ayın En Çok Okunan Deneyleri -->
+            <div class="header-row" style="margin-top: 40px; margin-bottom: 20px;">
+                <h1 class="page-title">Ayın En Çok Okunan Deneyleri</h1>
+            </div>
+
+            <div class="card">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px; width: 80px;">Sıra</th>
+                                <th style="padding: 12px; width: 80px;">ID</th>
+                                <th style="padding: 12px;">Başlık</th>
+                                <th style="padding: 12px; width: 200px;">Yazar</th>
+                                <th style="padding: 12px; width: 150px; text-align: right;">Okunma Sayısı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-experiments-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Deneyler yükleniyor...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -2089,9 +2140,21 @@
                 style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
                 <!-- Card 1 -->
                 <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #3b82f6; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-book-open"></i></div>
+                    <h3 id="m-article-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Makale Okunma</p>
+                </div>
+                <!-- Card 1.2 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #ec4899; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-flask"></i></div>
+                    <h3 id="m-experiment-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Deney Okunma</p>
+                </div>
+                <!-- Card 1.3 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
                     <div style="color: #6366f1; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-eye"></i></div>
                     <h3 id="m-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
-                    <p style="margin: 0; color: #64748b;">Okunma</p>
+                    <p style="margin: 0; color: #64748b;">Toplam Okunma</p>
                 </div>
                 <!-- Card 2 -->
                 <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
@@ -2118,6 +2181,13 @@
                     </div>
                     <h3 id="m-articles" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
                     <p style="margin: 0; color: #64748b;">Yayınlanan Makale</p>
+                </div>
+                <!-- Card 6 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #0d9488; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-flask"></i>
+                    </div>
+                    <h3 id="m-experiments" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Yayınlanan Deney</p>
                 </div>
             </div>
 
@@ -3127,6 +3197,8 @@
                 const stats = await res.json();
                 document.getElementById('stat-users').innerText = stats.users;
                 document.getElementById('stat-articles').innerText = stats.articles;
+                if (document.getElementById('stat-article-views')) document.getElementById('stat-article-views').innerText = stats.article_views;
+                if (document.getElementById('stat-experiment-views')) document.getElementById('stat-experiment-views').innerText = stats.experiment_views;
                 document.getElementById('stat-views').innerText = stats.views;
                 document.getElementById('stat-likes').innerText = stats.likes;
                 document.getElementById('stat-comments').innerText = stats.comments;
@@ -3150,11 +3222,14 @@
         function renderCharts(data) {
             // Update Monthly Stats (30-day summary)
             if (data.monthlyStats) {
+                if (document.getElementById('m-article-views')) document.getElementById('m-article-views').innerText = data.monthlyStats.article_views;
+                if (document.getElementById('m-experiment-views')) document.getElementById('m-experiment-views').innerText = data.monthlyStats.experiment_views;
                 if (document.getElementById('m-views')) document.getElementById('m-views').innerText = data.monthlyStats.views;
                 if (document.getElementById('m-likes')) document.getElementById('m-likes').innerText = data.monthlyStats.likes;
                 if (document.getElementById('m-comments')) document.getElementById('m-comments').innerText = data.monthlyStats.comments;
                 if (document.getElementById('m-users')) document.getElementById('m-users').innerText = data.monthlyStats.users;
                 if (document.getElementById('m-articles')) document.getElementById('m-articles').innerText = data.monthlyStats.articles;
+                if (document.getElementById('m-experiments')) document.getElementById('m-experiments').innerText = data.monthlyStats.experiments;
             }
 
             // Update Monthly History Table
@@ -4185,7 +4260,7 @@
 
                 // Load Section Specific Data
                 if (sectionId === 'articles-management') loadAllArticles();
-                if (sectionId === 'monthly-top-articles') loadMonthlyTopArticles();
+                if (sectionId === 'monthly-top-articles') { loadMonthlyTopArticles(); loadMonthlyTopExperiments(); }
                 if (sectionId === 'article-detail-management') loadArticleDetailSettings();
                 if (sectionId === 'homepage-management') loadHomepageSettings();
                 if (sectionId === 'newsletter-subscribers') loadSubscribers();
@@ -4717,6 +4792,73 @@
                         <td style="padding:14px 12px; color:#334155; vertical-align:middle;">${escapeHtml(art.author_name || 'Bilinmiyor')}</td>
                         <td style="padding:14px 12px; text-align:right; vertical-align:middle;">
                             <span style="background:#f3e8ff; color:#9333ea; padding:4px 12px; border-radius:20px; font-size:0.9rem; font-weight:700;">${art.view_count}</span>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Veriler yüklenirken bir hata oluştu.</td></tr>';
+            }
+        }
+
+        async function loadMonthlyTopExperiments() {
+            const tableBody = document.getElementById('top-experiments-table-body');
+            if (!tableBody) return;
+
+            const yearSelect = document.getElementById('filter-top-year');
+            const monthSelect = document.getElementById('filter-top-month');
+
+            const month = monthSelect ? monthSelect.value : (new Date().getMonth() + 1);
+            const year = yearSelect ? yearSelect.value : new Date().getFullYear();
+
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Veriler yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`/api/admin/top-experiments?month=${month}&year=${year}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        showToast('Bu işlemi yapmak için yetkiniz yok.', 'error');
+                        return;
+                    }
+                    throw new Error('API hatası');
+                }
+
+                const rows = await res.json();
+                tableBody.innerHTML = '';
+
+                if (rows.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;"><i class="ph ph-flask" style="font-size:1.5rem; vertical-align:middle; margin-right:6px;"></i> Seçilen ayda okunma kaydı bulunamadı.</td></tr>';
+                    return;
+                }
+
+                rows.forEach((exp, idx) => {
+                    const rank = idx + 1;
+                    let rankBadge = '';
+                    if (rank === 1) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="1. Sırada">🥇</span>';
+                    } else if (rank === 2) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="2. Sırada">🥈</span>';
+                    } else if (rank === 3) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="3. Sırada">🥉</span>';
+                    } else {
+                        rankBadge = `<span style="font-weight: 600; color: #64748b; padding-left: 4px;">${rank}.</span>`;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f1f5f9';
+                    tr.innerHTML = `
+                        <td style="padding:14px 12px; vertical-align:middle;">${rankBadge}</td>
+                        <td style="padding:14px 12px; color:#64748b; vertical-align:middle;">#${exp.id}</td>
+                        <td style="padding:14px 12px; font-weight:600; vertical-align:middle;">
+                            <a href="/deney/${exp.slug}" target="_blank" style="text-decoration:none; color:inherit; hover:text-decoration:underline;">${escapeHtml(exp.title)}</a>
+                        </td>
+                        <td style="padding:14px 12px; color:#334155; vertical-align:middle;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</td>
+                        <td style="padding:14px 12px; text-align:right; vertical-align:middle;">
+                            <span style="background:#fdf2f8; color:#db2777; padding:4px 12px; border-radius:20px; font-size:0.9rem; font-weight:700;">${exp.view_count}</span>
                         </td>
                     `;
                     tableBody.appendChild(tr);
