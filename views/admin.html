@@ -2216,7 +2216,7 @@
                             <th style="padding: 12px; color:#64748b;">Beğeni</th>
                             <th style="padding: 12px; color:#64748b;">Yorum</th>
                             <th style="padding: 12px; color:#64748b;">Yeni Üye</th>
-                            <th style="padding: 12px; color:#64748b;">Yayınlanan</th>
+                            <th style="padding: 12px; color:#64748b;">Yayınlanan (Makale / Deney)</th>
                         </tr>
                     </thead>
                     <tbody id="monthly-history-body">
@@ -3251,7 +3251,7 @@
                                     <td style="padding:16px;">${m.likes}</td>
                                     <td style="padding:16px;">${m.comments}</td>
                                     <td style="padding:16px;">${m.users}</td>
-                                    <td style="padding:16px;">${m.articles}</td>
+                                    <td style="padding:16px;">${m.articles} Makale / ${m.experiments || 0} Deney</td>
                                 </tr>
                             `;
                         });

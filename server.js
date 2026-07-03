@@ -4812,34 +4812,59 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             return rows;
         };
 
+        const getExperimentViewMonthGroups = async () => {
+            const [rows] = await pool.query(`
+                SELECT DATE_FORMAT(v.viewed_at, '%Y-%m') as month, COUNT(*) as count 
+                FROM experiment_views v
+                JOIN experiments e ON v.experiment_id = e.id
+                WHERE e.status = 'published' AND e.deleted_at IS NULL
+                GROUP BY month ORDER BY month DESC LIMIT 12
+            `);
+            return rows;
+        };
+
         // Articles extra condition
         const getArticleMonthGroups = async () => {
             const [rows] = await pool.query(`SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
 
+        // Experiments extra condition
+        const getExperimentMonthGroups = async () => {
+            const [rows] = await pool.query(`SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL GROUP BY month ORDER BY month DESC LIMIT 12`);
+            return rows;
+        };
+
         const hViews = await getViewMonthGroups();
+        const hExperimentViews = await getExperimentViewMonthGroups();
         const hLikes = await getMonthGroups('likes', 'created_at');
         const hComments = await getMonthGroups('comments', 'created_at');
         const hUsers = await getMonthGroups('users', 'created_at');
         const hArticles = await getArticleMonthGroups();
+        const hExperiments = await getExperimentMonthGroups();
 
         // Merge History
         const allMonths = new Set([
-            ...hViews.map(r => r.month), ...hLikes.map(r => r.month),
-            ...hComments.map(r => r.month), ...hUsers.map(r => r.month),
-            ...hArticles.map(r => r.month)
+            ...hViews.map(r => r.month), ...hExperimentViews.map(r => r.month),
+            ...hLikes.map(r => r.month), ...hComments.map(r => r.month),
+            ...hUsers.map(r => r.month), ...hArticles.map(r => r.month),
+            ...hExperiments.map(r => r.month)
         ]);
         const sortedMonths = Array.from(allMonths).sort().reverse().slice(0, 12);
 
-        const monthlyHistory = sortedMonths.map(m => ({
-            month: m,
-            views: (hViews.find(r => r.month === m) || {}).count || 0,
-            likes: (hLikes.find(r => r.month === m) || {}).count || 0,
-            comments: (hComments.find(r => r.month === m) || {}).count || 0,
-            users: (hUsers.find(r => r.month === m) || {}).count || 0,
-            articles: (hArticles.find(r => r.month === m) || {}).count || 0
-        }));
+        const monthlyHistory = sortedMonths.map(m => {
+            const aViews = (hViews.find(r => r.month === m) || {}).count || 0;
+            const eViews = (hExperimentViews.find(r => r.month === m) || {}).count || 0;
+            return {
+                month: m,
+                views: aViews + eViews,
+                likes: (hLikes.find(r => r.month === m) || {}).count || 0,
+                comments: (hComments.find(r => r.month === m) || {}).count || 0,
+                users: (hUsers.find(r => r.month === m) || {}).count || 0,
+                articles: (hArticles.find(r => r.month === m) || {}).count || 0,
+                experiments: (hExperiments.find(r => r.month === m) || {}).count || 0
+            };
+        });
 
         res.json({
             views: fillData(viewsRows),
