@@ -363,6 +363,33 @@
                 <!-- Interactive SVG Cell -->
                 <div class="cell-svg-wrapper">
                     <svg id="cell-svg" viewBox="0 0 500 500" width="100%" height="100%">
+                        <defs>
+                            <radialGradient id="grad-cytoplasm-animal" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="rgba(99, 102, 241, 0.18)"/>
+                                <stop offset="100%" stop-color="rgba(99, 102, 241, 0.03)"/>
+                            </radialGradient>
+                            <radialGradient id="grad-cytoplasm-plant" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="rgba(16, 185, 129, 0.15)"/>
+                                <stop offset="100%" stop-color="rgba(16, 185, 129, 0.03)"/>
+                            </radialGradient>
+                            <radialGradient id="grad-nucleus" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#b5179e"/>
+                                <stop offset="70%" stop-color="#7209b7"/>
+                                <stop offset="100%" stop-color="#3f37c9"/>
+                            </radialGradient>
+                            <linearGradient id="grad-mitochondria" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ff7b00"/>
+                                <stop offset="100%" stop-color="#d00000"/>
+                            </linearGradient>
+                            <linearGradient id="grad-chloroplast" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#38b000"/>
+                                <stop offset="100%" stop-color="#007200"/>
+                            </linearGradient>
+                            <linearGradient id="grad-vacuole" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00b4d8"/>
+                                <stop offset="100%" stop-color="#0077b6"/>
+                            </linearGradient>
+                        </defs>
                         <!-- Injected programmatically based on active type -->
                     </svg>
                 </div>
@@ -513,55 +540,96 @@
 
             // Interactive Cell SVG Rendering
             function renderCellSVG() {
-                cellSvg.innerHTML = '';
+                // Keep definitions of gradients inside cellSvg defs
+                const defsHTML = cellSvg.querySelector('defs') ? cellSvg.querySelector('defs').outerHTML : '';
+                cellSvg.innerHTML = defsHTML;
+
                 if (activeCellType === 'animal') {
-                    // Animal Cell layout (Circular, smooth border)
-                    cellSvg.innerHTML = `
-                        <!-- Cytoplasm/Cell Body -->
-                        <circle cx="250" cy="250" r="210" fill="rgba(99, 102, 241, 0.08)" stroke="#6366f1" stroke-width="6" />
+                    // Animal Cell layout (Circular, smooth border, detailed organelles)
+                    cellSvg.innerHTML += `
+                        <!-- Cytoplasm/Cell Membrane -->
+                        <circle cx="250" cy="250" r="210" fill="url(#grad-cytoplasm-animal)" stroke="#6366f1" stroke-width="5" />
                         
-                        <!-- Endoplasmic Reticulum (ER) around Nucleus -->
-                        <path d="M 210,210 Q 180,240 210,290 T 290,290" fill="none" stroke="rgba(168, 85, 247, 0.3)" stroke-width="12" class="cell-part" onclick="selectOrganelle('nucleus')" />
+                        <!-- Endoplasmic Reticulum (ER) folds surrounding Nucleus -->
+                        <g class="cell-part" onclick="selectOrganelle('nucleus')" style="color:#c77dff;">
+                            <path d="M 190,210 Q 150,230 170,270 T 210,310" fill="none" stroke="#c77dff" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+                            <path d="M 200,195 Q 140,215 152,275 T 215,325" fill="none" stroke="#c77dff" stroke-width="7" stroke-linecap="round" opacity="0.6"/>
+                            <!-- Ribosomes on ER -->
+                            <circle cx="160" cy="225" r="2" fill="#fff"/>
+                            <circle cx="152" cy="250" r="2" fill="#fff"/>
+                            <circle cx="178" cy="285" r="2" fill="#fff"/>
+                        </g>
                         
-                        <!-- Golgi Apparatus -->
-                        <path d="M 140,290 Q 120,320 160,350 T 220,360" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round" class="cell-part" id="svg-golgi" onclick="selectOrganelle('golgi')" />
+                        <!-- Golgi Apparatus with budding vesicles -->
+                        <g class="cell-part" id="svg-golgi" onclick="selectOrganelle('golgi')" style="color:#f59e0b;">
+                            <path d="M 125,290 C 112,310 132,340 162,350" fill="none" stroke="#f59e0b" stroke-width="7" stroke-linecap="round"/>
+                            <path d="M 115,295 C 102,315 122,345 152,358" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+                            <path d="M 105,300 C 92,320 112,350 142,364" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="172" cy="342" r="4.5" fill="#f59e0b"/>
+                            <circle cx="110" cy="285" r="4" fill="#f59e0b"/>
+                        </g>
                         
-                        <!-- Vacuole (Small in animal) -->
-                        <circle cx="340" cy="160" r="16" fill="rgba(6, 182, 212, 0.3)" stroke="#06b6d4" stroke-width="2" class="cell-part" id="svg-vacuole" onclick="selectOrganelle('vacuole')" />
-                        <circle cx="160" cy="180" r="12" fill="rgba(6, 182, 212, 0.3)" stroke="#06b6d4" stroke-width="2" class="cell-part" id="svg-vacuole-2" onclick="selectOrganelle('vacuole')" />
+                        <!-- Small Storage Vacuoles -->
+                        <circle cx="340" cy="160" r="16" fill="url(#grad-vacuole)" stroke="#90e0ef" stroke-width="2" class="cell-part" id="svg-vacuole" onclick="selectOrganelle('vacuole')" style="color:#06b6d4;" />
+                        <circle cx="160" cy="180" r="12" fill="url(#grad-vacuole)" stroke="#90e0ef" stroke-width="2" class="cell-part" id="svg-vacuole-2" onclick="selectOrganelle('vacuole')" style="color:#06b6d4;" />
 
-                        <!-- Mitochondria -->
-                        <path d="M 320,300 C 350,300 370,330 350,360 C 330,370 300,340 320,300 Z" fill="#ef4444" opacity="0.8" class="cell-part" id="svg-mitochondria" onclick="selectOrganelle('mitochondria')" />
-                        <path d="M 150,130 C 170,110 190,140 180,160 C 160,180 140,150 150,130 Z" fill="#ef4444" opacity="0.8" class="cell-part" id="svg-mitochondria-2" onclick="selectOrganelle('mitochondria')" />
+                        <!-- Mitochondria with Cristae detailed folds -->
+                        <g class="cell-part" id="svg-mitochondria" onclick="selectOrganelle('mitochondria')" style="color:#ef4444;">
+                            <path d="M 330,300 C 370,300 390,320 370,350 C 350,370 310,350 330,300 Z" fill="url(#grad-mitochondria)" stroke="#ff9f1c" stroke-width="1.5" />
+                            <path d="M 338,312 Q 355,315 342,322 T 362,330 T 345,340 T 360,348" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" pointer-events="none"/>
+                        </g>
+                        <g class="cell-part" id="svg-mitochondria-2" onclick="selectOrganelle('mitochondria')" style="color:#ef4444;">
+                            <path d="M 140,130 C 180,120 190,140 180,170 C 160,195 120,170 140,130 Z" fill="url(#grad-mitochondria)" stroke="#ff9f1c" stroke-width="1.5" />
+                            <path d="M 148,138 Q 165,142 153,150 T 172,158 T 158,166" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" pointer-events="none"/>
+                        </g>
 
-                        <!-- Nucleus in the center -->
-                        <circle cx="250" cy="250" r="54" fill="rgba(168, 85, 247, 0.35)" stroke="#a855f7" stroke-width="4" class="cell-part" id="svg-nucleus" onclick="selectOrganelle('nucleus')" />
-                        <circle cx="250" cy="250" r="18" fill="#7c3aed" opacity="0.8" pointer-events="none" />
+                        <!-- Nucleus in the center with nuclear pores -->
+                        <circle cx="250" cy="250" r="54" fill="url(#grad-nucleus)" stroke="#d8f3dc" stroke-width="3" stroke-dasharray="12,4" class="cell-part" id="svg-nucleus" onclick="selectOrganelle('nucleus')" style="color:#a855f7;" />
+                        <circle cx="250" cy="250" r="16" fill="#3c096c" pointer-events="none" />
+                        <!-- Chromatin fibers inside nucleus -->
+                        <path d="M 235,245 Q 242,238 248,246 T 262,242" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1" pointer-events="none"/>
                     `;
                 } else {
-                    // Plant Cell Layout (Rectangular, Thick Cell Wall, Chloroplasts, Big Vacuole)
-                    cellSvg.innerHTML = `
-                        <!-- Cell Wall (Outer green boundary) -->
+                    // Plant Cell Layout (Rectangular, Thick Cell Wall, Chloroplasts, Big Central Vacuole)
+                    cellSvg.innerHTML += `
+                        <!-- Cell Wall (Thick polygon boundary) -->
                         <polygon points="50,50 450,50 450,450 50,450" fill="none" stroke="#10b981" stroke-width="12" stroke-linejoin="round" />
                         <!-- Cell Membrane -->
-                        <polygon points="58,58 442,58 442,442 58,442" fill="rgba(16, 185, 129, 0.05)" stroke="#6366f1" stroke-width="3" stroke-linejoin="round" />
+                        <polygon points="58,58 442,58 442,442 58,442" fill="url(#grad-cytoplasm-plant)" stroke="#6366f1" stroke-width="3" stroke-linejoin="round" />
 
                         <!-- Giant Central Vacuole -->
-                        <polygon points="120,120 280,120 250,300 120,280" fill="rgba(6, 182, 212, 0.3)" stroke="#06b6d4" stroke-width="3" class="cell-part" id="svg-vacuole" onclick="selectOrganelle('vacuole')" />
+                        <polygon points="120,120 280,110 250,300 130,280" fill="url(#grad-vacuole)" stroke="#90e0ef" stroke-width="3.5" class="cell-part" id="svg-vacuole" onclick="selectOrganelle('vacuole')" style="color:#06b6d4;" />
                         
-                        <!-- Chloroplasts (Only in plant) -->
-                        <ellipse cx="370" cy="120" rx="30" ry="18" fill="#10b981" class="cell-part" id="svg-chloroplast" onclick="selectOrganelle('chloroplast')" />
-                        <ellipse cx="370" cy="380" rx="30" ry="18" fill="#10b981" class="cell-part" id="svg-chloroplast-2" onclick="selectOrganelle('chloroplast')" />
+                        <!-- Chloroplasts with Grana Thylakoids stacks -->
+                        <g class="cell-part" id="svg-chloroplast" onclick="selectOrganelle('chloroplast')" style="color:#10b981;">
+                            <ellipse cx="370" cy="120" rx="32" ry="20" fill="url(#grad-chloroplast)" stroke="#adf7b6" stroke-width="1.5" />
+                            <line x1="352" y1="120" x2="388" y2="120" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                            <line x1="358" y1="112" x2="382" y2="112" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                            <line x1="358" y1="128" x2="382" y2="128" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                        </g>
+                        <g class="cell-part" id="svg-chloroplast-2" onclick="selectOrganelle('chloroplast')" style="color:#10b981;">
+                            <ellipse cx="370" cy="380" rx="32" ry="20" fill="url(#grad-chloroplast)" stroke="#adf7b6" stroke-width="1.5" />
+                            <line x1="352" y1="380" x2="388" y2="380" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                            <line x1="358" y1="372" x2="382" y2="372" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                            <line x1="358" y1="388" x2="382" y2="388" stroke="#a3e635" stroke-width="3" pointer-events="none"/>
+                        </g>
                         
                         <!-- Golgi Apparatus -->
-                        <path d="M 90,340 Q 80,380 120,410" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round" class="cell-part" id="svg-golgi" onclick="selectOrganelle('golgi')" />
+                        <g class="cell-part" id="svg-golgi" onclick="selectOrganelle('golgi')" style="color:#f59e0b;">
+                            <path d="M 85,340 Q 75,380 115,410" fill="none" stroke="#f59e0b" stroke-width="7" stroke-linecap="round"/>
+                            <path d="M 75,348 Q 66,385 106,416" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+                            <circle cx="125" cy="405" r="4.5" fill="#f59e0b"/>
+                        </g>
 
-                        <!-- Mitochondria -->
-                        <path d="M 380,240 C 400,240 420,260 400,280 C 380,290 360,270 380,240 Z" fill="#ef4444" opacity="0.8" class="cell-part" id="svg-mitochondria" onclick="selectOrganelle('mitochondria')" />
+                        <!-- Mitochondria with Cristae detailed folds -->
+                        <g class="cell-part" id="svg-mitochondria" onclick="selectOrganelle('mitochondria')" style="color:#ef4444;">
+                            <path d="M 380,240 C 420,240 430,260 410,285 C 390,300 360,275 380,240 Z" fill="url(#grad-mitochondria)" stroke="#ff9f1c" stroke-width="1.5" />
+                            <path d="M 386,249 Q 402,254 391,262 T 408,270" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" pointer-events="none"/>
+                        </g>
 
-                        <!-- Nucleus (Pushed to the side because of vacuole) -->
-                        <circle cx="280" cy="330" r="48" fill="rgba(168, 85, 247, 0.35)" stroke="#a855f7" stroke-width="4" class="cell-part" id="svg-nucleus" onclick="selectOrganelle('nucleus')" />
-                        <circle cx="280" cy="330" r="16" fill="#7c3aed" opacity="0.8" pointer-events="none" />
+                        <!-- Nucleus pushed to the side -->
+                        <circle cx="280" cy="330" r="48" fill="url(#grad-nucleus)" stroke="#d8f3dc" stroke-width="3" stroke-dasharray="10,4" class="cell-part" id="svg-nucleus" onclick="selectOrganelle('nucleus')" style="color:#a855f7;" />
+                        <circle cx="280" cy="330" r="15" fill="#3c096c" pointer-events="none" />
                     `;
                 }
 
@@ -957,6 +1025,9 @@
                 const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
                 return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '99, 102, 241';
             }
+
+            // Expose selectOrganelle globally to window for SVG inline onclick triggers
+            window.selectOrganelle = selectOrganelle;
 
             // Init Page
             renderCellSVG();
