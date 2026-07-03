@@ -85,9 +85,10 @@
         .periodic-table-grid {
             display: grid;
             grid-template-columns: repeat(18, 1fr);
-            gap: 4px;
-            min-width: 780px;
-            max-width: 860px;
+            gap: 3px;
+            min-width: 520px;
+            max-width: 800px;
+            width: 100%;
             margin: 0 auto;
         }
 
@@ -95,12 +96,12 @@
         .element-cell {
             aspect-ratio: 1;
             border-radius: 6px;
-            padding: 2px;
+            padding: 2px 1px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.55rem;
+            font-size: 0.5rem;
             cursor: pointer;
             position: relative;
             user-select: none;
@@ -134,13 +135,13 @@
         .el-num {
             align-self: flex-start;
             font-weight: 800;
-            font-size: 0.45rem;
+            font-size: 0.4rem;
             opacity: 0.8;
             line-height: 1;
         }
 
         .el-symbol {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             font-weight: 900;
             font-family: 'Outfit', sans-serif;
             line-height: 1;
@@ -148,7 +149,7 @@
         }
 
         .el-name {
-            font-size: 0.45rem;
+            font-size: 0.38rem;
             font-weight: 700;
             opacity: 0.8;
             white-space: nowrap;
