@@ -51,7 +51,8 @@
             justify-content: center;
         }
         
-        [data-theme="dark"] .back-to-tools-btn {
+        [data-theme="dark"] .back-to-tools-btn,
+        [data-theme="dark"] #themeToggle {
             background: rgba(30, 41, 59, 0.7) !important;
             border-color: rgba(255, 255, 255, 0.1) !important;
             color: #f1f5f9 !important;
@@ -198,7 +199,7 @@
         }
 
         [data-theme="dark"] .beaker-lip {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Liquid with CSS Wave effect */
@@ -211,36 +212,25 @@
             background: #60a5fa;
             transition: background-color 0.8s ease;
             z-index: 2;
-            overflow: hidden;
             filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.2));
         }
 
-        .liquid::before,
-        .liquid::after {
-            content: '';
+        .liquid-wave {
             position: absolute;
-            width: 300px;
-            height: 300px;
-            top: -270px;
-            left: 50%;
-            background: var(--bg-color);
-            border-radius: 45%;
-            transform: translate(-50%, 0) rotate(0deg);
-            animation: waveRotate 12s infinite linear;
+            top: -12px;
+            left: 0;
+            width: 200%;
+            height: 15px;
+            background-size: 50% 100%;
+            animation: waveMove 4s linear infinite;
             z-index: 3;
-            transition: background-color 0.3s;
+            pointer-events: none;
+            transition: background-image 0.8s ease;
         }
 
-        .liquid::after {
-            border-radius: 40%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: waveRotate 8s infinite linear;
-            z-index: 4;
-        }
-
-        @keyframes waveRotate {
-            from { transform: translate(-50%, 0) rotate(0deg); }
-            to { transform: translate(-50%, 0) rotate(360deg); }
+        @keyframes waveMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         /* --- pH METER PROBE --- */
@@ -475,6 +465,30 @@
         <span>Araçlara Dön</span>
     </a>
 
+    <!-- Floating Theme Toggle -->
+    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir" style="
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        color: var(--text-color);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.2s, background 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+        <i class="ph ph-moon" style="font-size: 1.25rem;"></i>
+    </button>
+
     <!-- Lab simulator Section -->
     <section class="lab-container">
         <div class="lab-grid">
@@ -572,7 +586,9 @@
                     <div class="beaker-lip"></div>
                     <!-- Beaker Inner -->
                     <div class="beaker">
-                        <div id="beaker-liquid" class="liquid"></div>
+                        <div id="beaker-liquid" class="liquid">
+                            <div id="liquid-wave" class="liquid-wave"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -751,6 +767,11 @@
 
             let isProbeInserted = false;
 
+            // Generate dynamic SVG wave background image matching the liquid color
+            const getWaveSvg = (color) => {
+                return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z' fill='${encodeURIComponent(color)}'/%3E%3C/svg%3E")`;
+            };
+
             // Updates the liquid color in the beaker depending on liquid + indicator
             function updateLiquidColor() {
                 const currentLiq = liquids[liquidSelect.value];
@@ -767,6 +788,7 @@
                 }
 
                 beakerLiquid.style.backgroundColor = finalColor;
+                document.getElementById('liquid-wave').style.backgroundImage = getWaveSvg(finalColor);
             }
 
             // Updates the displays & graphs based on the probe state
