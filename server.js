@@ -1655,7 +1655,8 @@ async function ensureSchema() {
             { name: 'tags', def: "TEXT" },
             { name: 'references_list', def: "TEXT" },
             { name: 'visual_references_list', def: "TEXT" },
-            { name: 'pdf_url', def: "VARCHAR(255)" }
+            { name: 'pdf_url', def: "VARCHAR(255)" },
+            { name: 'was_published', def: "TINYINT(1) DEFAULT 0" }
         ];
 
         for (const col of neededColumns) {
@@ -1667,6 +1668,13 @@ async function ensureSchema() {
                     await pool.query(`ALTER TABLE articles ADD COLUMN ${col.name} ${col.def}`);
                 }
             }
+        }
+
+        // Initialize was_published for already published articles
+        try {
+            await pool.query("UPDATE articles SET was_published = 1 WHERE status = 'published'");
+        } catch (e) {
+            console.error('Error initializing was_published status:', e);
         }
 
         // --- NEW: Ensure parent_id exists in menu_items ---
@@ -2887,10 +2895,11 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), optimiz
 app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
     const articleId = req.params.id;
     // Verify ownership
-    const [check] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [articleId]);
+    const [check] = await pool.query('SELECT author_id, was_published FROM articles WHERE id = ?', [articleId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
+    const wasPublished = check[0].was_published;
     const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
 
     // Determine status update logic
@@ -2925,7 +2934,17 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         params.push(DOMPurify.sanitize(content));
     }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
-    if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
+    if (finalStatus === 'published') {
+        updates.push('status = ?');
+        params.push('published');
+        if (!wasPublished) {
+            updates.push('created_at = NOW()');
+            updates.push('was_published = 1');
+        }
+    } else if (finalStatus) {
+        updates.push('status = ?');
+        params.push(finalStatus);
+    }
     if (tags) { updates.push('tags = ?'); params.push(tags); }
     if (references_list !== undefined) { updates.push('references_list = ?'); params.push(references_list); }
     if (visual_references_list !== undefined) { updates.push('visual_references_list = ?'); params.push(visual_references_list); }
@@ -3335,11 +3354,12 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
     const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
 
     try {
-        const [rows] = await pool.query('SELECT author_id, title FROM articles WHERE id = ?', [articleId]);
+        const [rows] = await pool.query('SELECT author_id, title, was_published FROM articles WHERE id = ?', [articleId]);
         if (rows.length === 0) return res.status(404).json({ message: 'Article not found' });
 
         const authorId = rows[0].author_id;
         const title = rows[0].title;
+        const wasPublished = rows[0].was_published;
 
         let status = '';
         let msg = '';
@@ -3351,8 +3371,13 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
             status = 'published';
             msg = `Makaleniz yayına alındı: ${title}`;
             type = 'success';
-            updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, created_at = NOW() WHERE id = ?";
-            queryParams = [articleId];
+            if (wasPublished) {
+                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
+                queryParams = [req.user.id, articleId];
+            } else {
+                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ?, created_at = NOW(), was_published = 1 WHERE id = ?";
+                queryParams = [req.user.id, articleId];
+            }
         } else if (decision === 'reject') {
             status = 'rejected';
             msg = `Makaleniz reddedildi: ${title}. ${rejection_reason ? 'Sebep: ' + rejection_reason : ''}`;
