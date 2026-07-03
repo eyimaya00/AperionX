@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="İnteraktif Kan Grupları ve Transfüzyon Uyumluluk Laboratuvarı. Kan grubu analizi yapın ve güvenli transfüzyon eşleşmelerini test edin.">
+    <meta name="keywords" content="kan grupları, transfüzyon, kan uyumu, anti-a, anti-b, rh faktörü, biyoloji simülatörü, kan analizi">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/blood-lab">
+    <meta property="og:title" content="Kan Grupları ve Transfüzyon Labı - AperionX">
+    <meta property="og:description" content="Sanal Biyoloji Laboratuvarı. Serum testleriyle kan grubu belirleyin ve transfüzyon uyumluluğunu test edin.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+
+    <title>Kan Grupları ve Transfüzyon Laboratuvarı | AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=246">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .lab-container {
+            padding: 90px 0 60px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .lab-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            width: 95%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* --- CARDS --- */
+        .lab-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        [data-theme="dark"] .lab-card {
+            background: rgba(30, 41, 59, 0.45);
+            border-color: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .lab-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #dc2626, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lab-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* --- PHASE BADGE --- */
+        .phase-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            width: fit-content;
+        }
+
+        .phase-badge.analysis {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+        }
+
+        .phase-badge.transfusion {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        /* --- LAB TRAY (test area) --- */
+        .lab-tray {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 24px;
+            padding: 28px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            min-height: 320px;
+        }
+
+        /* --- SERUM BOTTLES --- */
+        .serum-shelf {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .serum-bottle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            user-select: none;
+        }
+
+        .serum-bottle:hover {
+            transform: scale(1.1) translateY(-4px);
+        }
+
+        .serum-bottle.active {
+            transform: scale(1.15) translateY(-6px);
+            filter: drop-shadow(0 0 12px var(--bottle-color));
+        }
+
+        .bottle-body {
+            width: 40px;
+            height: 64px;
+            border-radius: 8px 8px 14px 14px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .bottle-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bottle-color);
+            opacity: 0.85;
+        }
+
+        .bottle-body::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            width: 8px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .bottle-cap {
+            width: 20px;
+            height: 10px;
+            background: #94a3b8;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: -2px;
+        }
+
+        .bottle-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #cbd5e1;
+            text-align: center;
+        }
+
+        /* --- TEST WELLS (slide) --- */
+        .test-slide {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .test-well-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-well {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4a1010, #2d0808);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+
+        .test-well:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .test-well.dropped {
+            cursor: default;
+        }
+
+        .test-well.agglutinated {
+            animation: agglutinate-pulse 1.5s ease infinite;
+        }
+
+        @keyframes agglutinate-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 18px 4px rgba(220, 38, 38, 0.6); }
+        }
+
+        .well-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Agglutination dots inside well */
+        .agglutination-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        /* --- RIGHT PANEL --- */
+        .result-panel {
+            height: fit-content;
+        }
+
+        .blood-type-display {
+            text-align: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="dark"] .blood-type-display {
+            background: rgba(0, 0, 0, 0.15);
+            border-color: rgba(255, 255, 255, 0.04);
+        }
+
+        .blood-type-big {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #dc2626;
+            line-height: 1;
+        }
+
+        .blood-type-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* --- MICROSCOPE VIEW --- */
+        .microscope-view {
+            width: 100%;
+            height: 180px;
+            background: radial-gradient(circle, #0d1117, #000);
+            border-radius: 50%;
+            border: 6px solid #334155;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .microscope-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .microscope-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* --- TRANSFUSION PHASE --- */
+        .transfusion-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .blood-bag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.25s;
+            user-select: none;
+        }
+
+        .blood-bag:hover {
+            border-color: rgba(220, 38, 38, 0.4);
+            background: rgba(220, 38, 38, 0.06);
+            transform: translateY(-3px);
+        }
+
+        .blood-bag.compatible {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+        }
+
+        .blood-bag.incompatible {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+        }
+
+        .bag-icon {
+            width: 36px;
+            height: 44px;
+            background: linear-gradient(to bottom, #991b1b, #7f1d1d);
+            border-radius: 6px 6px 10px 10px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bag-icon::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 8px;
+            background: #64748b;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .bag-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #e2e8f0;
+        }
+
+        .bag-status {
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .bag-status.safe { color: #22c55e; }
+        .bag-status.danger { color: #ef4444; }
+
+        /* --- BUTTONS --- */
+        .btn-primary-lab {
+            background: linear-gradient(135deg, #dc2626, #9333ea);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-primary-lab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(220, 38, 38, 0.45);
+        }
+
+        .btn-primary-lab:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* --- INFO ROW --- */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        [data-theme="dark"] .info-row {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.04);
+        }
+
+        .info-key { font-weight: 700; font-size: 0.85rem; }
+        .info-val { font-weight: 800; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+
+        /* --- FLOATING NAV --- */
+        .back-to-tools-btn {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #themeToggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        [data-theme="dark"] .back-to-tools-btn,
+        [data-theme="dark"] #themeToggle {
+            background: rgba(30, 41, 59, 0.7) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f1f5f9 !important;
+        }
+
+        @media (max-width: 1100px) {
+            .lab-grid-layout {
+                grid-template-columns: 1fr;
+            }
+            .lab-container {
+                padding-top: 85px;
+            }
+            .back-to-tools-btn { top: 16px; left: 16px; }
+            #themeToggle { top: 16px; right: 16px; }
+            .transfusion-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <a href="/tools" class="back-to-tools-btn">
+        <i class="ph-bold ph-arrow-left"></i>
+        <span>Araçlara Dön</span>
+    </a>
+
+    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+        <i class="ph ph-moon" style="font-size: 1.25rem;"></i>
+    </button>
+
+    <section class="lab-container">
+        <div class="lab-grid-layout">
+
+            <!-- LEFT: Lab Work Area -->
+            <div class="lab-card">
+                <div>
+                    <h1 class="lab-title">Kan Grupları Laboratuvarı</h1>
+                    <p class="lab-subtitle">Bilinmeyen kan örneğine serumları damlatarak kan grubunu belirleyin. Ardından güvenli transfüzyon eşleşmelerini test edin.</p>
+                </div>
+
+                <!-- Phase 1: Analysis -->
+                <div id="phase-analysis">
+                    <span class="phase-badge analysis">
+                        <i class="ph-bold ph-eyedropper"></i>
+                        Aşama 1: Kan Grubu Analizi
+                    </span>
+
+                    <div class="lab-tray" id="lab-tray">
+                        <!-- Serum Bottles -->
+                        <div class="serum-shelf">
+                            <div class="serum-bottle" id="serum-a" onclick="selectSerum('anti-a')" style="--bottle-color: #3b82f6;">
+                                <div class="bottle-cap"></div>
+                                <div class="bottle-body"></div>
+                                <span class="bottle-label">Anti-A</span>
+                            </div>
+                            <div class="serum-bottle" id="serum-b" onclick="selectSerum('anti-b')" style="--bottle-color: #eab308;">
+                                <div class="bottle-cap"></div>
+                                <div class="bottle-body"></div>
+                                <span class="bottle-label">Anti-B</span>
+                            </div>
+                            <div class="serum-bottle" id="serum-d" onclick="selectSerum('anti-d')" style="--bottle-color: #22c55e;">
+                                <div class="bottle-cap"></div>
+                                <div class="bottle-body"></div>
+                                <span class="bottle-label">Anti-D (Rh)</span>
+                            </div>
+                        </div>
+
+                        <!-- Test Wells -->
+                        <div class="test-slide">
+                            <div class="test-well-group">
+                                <div class="test-well" id="well-a" onclick="dropSerum('anti-a')">
+                                    <canvas class="agglutination-canvas" id="canvas-a"></canvas>
+                                </div>
+                                <span class="well-label">Anti-A</span>
+                            </div>
+                            <div class="test-well-group">
+                                <div class="test-well" id="well-b" onclick="dropSerum('anti-b')">
+                                    <canvas class="agglutination-canvas" id="canvas-b"></canvas>
+                                </div>
+                                <span class="well-label">Anti-B</span>
+                            </div>
+                            <div class="test-well-group">
+                                <div class="test-well" id="well-d" onclick="dropSerum('anti-d')">
+                                    <canvas class="agglutination-canvas" id="canvas-d"></canvas>
+                                </div>
+                                <span class="well-label">Anti-D</span>
+                            </div>
+                        </div>
+
+                        <p style="color:#94a3b8; font-size:0.8rem; text-align:center; margin-top:16px;">
+                            <i class="ph ph-info"></i>
+                            Önce bir serum şişesi seçin, ardından ilgili test kuyucuğuna tıklayarak damlatın.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Phase 2: Transfusion (hidden initially) -->
+                <div id="phase-transfusion" style="display:none;">
+                    <span class="phase-badge transfusion">
+                        <i class="ph-bold ph-heartbeat"></i>
+                        Aşama 2: Transfüzyon Uyumluluk Testi
+                    </span>
+
+                    <div class="lab-tray">
+                        <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:16px; text-align:center;">
+                            Hastaya aşağıdaki kan torbalarından hangilerinin güvenle verilebileceğini test edin.
+                        </p>
+                        <div class="transfusion-grid" id="transfusion-grid">
+                            <!-- Blood bags injected here -->
+                        </div>
+                    </div>
+
+                    <button class="btn-primary-lab" onclick="resetLab()" style="margin-top:8px;">
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                        Yeni Hasta ile Tekrarla
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT: Result Panel -->
+            <div class="lab-card result-panel">
+                <div class="blood-type-display">
+                    <div class="blood-type-big" id="result-type">?</div>
+                    <div class="blood-type-label" id="result-label">Kan grubu henüz belirlenmedi</div>
+                </div>
+
+                <!-- Microscope View -->
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                    <div class="microscope-view">
+                        <canvas class="microscope-canvas" id="microscope-canvas"></canvas>
+                    </div>
+                    <span class="microscope-label" id="microscope-label">Mikroskop Görüntüsü</span>
+                </div>
+
+                <!-- Info -->
+                <div style="display:flex; flex-direction:column; gap:8px;" id="info-panel">
+                    <div class="info-row">
+                        <span class="info-key">Anti-A Reaksiyon</span>
+                        <span class="info-val" id="info-anti-a">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Anti-B Reaksiyon</span>
+                        <span class="info-val" id="info-anti-b">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Anti-D (Rh) Reaksiyon</span>
+                        <span class="info-val" id="info-anti-d">—</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary-lab" id="btn-determine" onclick="determineBloodType()" disabled>
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                    Kan Grubunu Belirle
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <div id="global-footer"></div>
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group"><div class="input-wrapper"><input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required></div></div>
+                <div class="input-group"><div class="input-wrapper"><input type="password" id="login-password" placeholder="Şifre" required></div></div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <script defer src="/script_v105.js?v=246"></script>
+    <script>
+        // ========= BLOOD LAB ENGINE =========
+        const ALL_TYPES = ['A+','A-','B+','B-','AB+','AB-','0+','0-'];
+
+        // Compatibility table: who can RECEIVE from whom
+        const COMPAT = {
+            'A+':  ['A+','A-','0+','0-'],
+            'A-':  ['A-','0-'],
+            'B+':  ['B+','B-','0+','0-'],
+            'B-':  ['B-','0-'],
+            'AB+': ['A+','A-','B+','B-','AB+','AB-','0+','0-'],
+            'AB-': ['A-','B-','AB-','0-'],
+            '0+':  ['0+','0-'],
+            '0-':  ['0-']
+        };
+
+        // Each blood type's antigen profile
+        const ANTIGEN = {
+            'A+':  { a: true,  b: false, d: true },
+            'A-':  { a: true,  b: false, d: false },
+            'B+':  { a: false, b: true,  d: true },
+            'B-':  { a: false, b: true,  d: false },
+            'AB+': { a: true,  b: true,  d: true },
+            'AB-': { a: true,  b: true,  d: false },
+            '0+':  { a: false, b: false, d: true },
+            '0-':  { a: false, b: false, d: false }
+        };
+
+        // State
+        let patientType = '';
+        let selectedSerum = null;
+        let wellsDropped = { 'anti-a': false, 'anti-b': false, 'anti-d': false };
+        let wellReactions = { 'anti-a': null, 'anti-b': null, 'anti-d': null };
+        let microscopeAnim = null;
+
+        // Pick a random patient
+        function pickRandomPatient() {
+            patientType = ALL_TYPES[Math.floor(Math.random() * ALL_TYPES.length)];
+        }
+
+        // Serum selection
+        function selectSerum(type) {
+            selectedSerum = type;
+            document.querySelectorAll('.serum-bottle').forEach(b => b.classList.remove('active'));
+            const id = type === 'anti-a' ? 'serum-a' : type === 'anti-b' ? 'serum-b' : 'serum-d';
+            document.getElementById(id).classList.add('active');
+        }
+
+        // Drop serum into well
+        function dropSerum(wellType) {
+            if (wellsDropped[wellType]) return;
+            if (!selectedSerum) {
+                // Auto-select matching serum
+                selectSerum(wellType);
+            }
+            if (selectedSerum !== wellType) return;
+
+            wellsDropped[wellType] = true;
+
+            const antigenKey = wellType === 'anti-a' ? 'a' : wellType === 'anti-b' ? 'b' : 'd';
+            const agglutinates = ANTIGEN[patientType][antigenKey];
+            wellReactions[wellType] = agglutinates;
+
+            // Visual
+            const wellEl = document.getElementById('well-' + antigenKey);
+            wellEl.classList.add('dropped');
+            if (agglutinates) wellEl.classList.add('agglutinated');
+
+            // Draw reaction inside well canvas
+            const canvasId = 'canvas-' + antigenKey;
+            drawWellReaction(canvasId, agglutinates);
+
+            // Update info panel
+            const infoEl = document.getElementById('info-' + wellType);
+            if (agglutinates) {
+                infoEl.textContent = 'Çökelme ✓';
+                infoEl.style.color = '#ef4444';
+            } else {
+                infoEl.textContent = 'Yok ✗';
+                infoEl.style.color = '#22c55e';
+            }
+
+            // Show in microscope
+            drawMicroscope(agglutinates);
+
+            // Clear serum selection
+            selectedSerum = null;
+            document.querySelectorAll('.serum-bottle').forEach(b => b.classList.remove('active'));
+
+            // Check if all 3 dropped
+            if (wellsDropped['anti-a'] && wellsDropped['anti-b'] && wellsDropped['anti-d']) {
+                document.getElementById('btn-determine').disabled = false;
+            }
+        }
+
+        // Draw agglutination inside a test well
+        function drawWellReaction(canvasId, agglutinates) {
+            const canvas = document.getElementById(canvasId);
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 72;
+            canvas.height = rect.height || 72;
+            const ctx = canvas.getContext('2d');
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const r = Math.min(cx, cy) - 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (agglutinates) {
+                // Draw clumped blood cells
+                for (let i = 0; i < 18; i++) {
+                    const clusterX = cx + (Math.random() - 0.5) * r * 1.2;
+                    const clusterY = cy + (Math.random() - 0.5) * r * 1.2;
+                    const dist = Math.sqrt((clusterX - cx) ** 2 + (clusterY - cy) ** 2);
+                    if (dist > r - 4) continue;
+
+                    ctx.beginPath();
+                    ctx.arc(clusterX, clusterY, 3 + Math.random() * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(220, 38, 38, ${0.7 + Math.random() * 0.3})`;
+                    ctx.fill();
+                }
+                // Connect with clump lines
+                ctx.strokeStyle = 'rgba(220, 38, 38, 0.4)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx + (Math.random() - 0.5) * r, cy + (Math.random() - 0.5) * r);
+                    ctx.lineTo(cx + (Math.random() - 0.5) * r, cy + (Math.random() - 0.5) * r);
+                    ctx.stroke();
+                }
+            } else {
+                // Smooth, evenly distributed blood cells
+                for (let i = 0; i < 30; i++) {
+                    const angle = (i / 30) * Math.PI * 2 + Math.random() * 0.3;
+                    const dist = Math.random() * (r - 5);
+                    const bx = cx + Math.cos(angle) * dist;
+                    const by = cy + Math.sin(angle) * dist;
+                    ctx.beginPath();
+                    ctx.arc(bx, by, 2 + Math.random() * 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(153, 27, 27, ${0.5 + Math.random() * 0.3})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Microscope animation
+        function drawMicroscope(agglutinates) {
+            if (microscopeAnim) cancelAnimationFrame(microscopeAnim);
+
+            const canvas = document.getElementById('microscope-canvas');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 180;
+            canvas.height = rect.height || 180;
+            const ctx = canvas.getContext('2d');
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            const label = document.getElementById('microscope-label');
+
+            // Generate cells
+            const cells = [];
+            const count = agglutinates ? 40 : 50;
+
+            for (let i = 0; i < count; i++) {
+                cells.push({
+                    x: cx + (Math.random() - 0.5) * canvas.width * 0.8,
+                    y: cy + (Math.random() - 0.5) * canvas.height * 0.8,
+                    r: 4 + Math.random() * 4,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    clump: agglutinates ? (Math.random() > 0.3) : false
+                });
+            }
+
+            // Cluster centers for agglutination
+            const clumpCenters = [];
+            if (agglutinates) {
+                for (let i = 0; i < 5; i++) {
+                    clumpCenters.push({
+                        x: cx + (Math.random() - 0.5) * canvas.width * 0.5,
+                        y: cy + (Math.random() - 0.5) * canvas.height * 0.5
+                    });
+                }
+                label.textContent = '🔴 Çökelme (Aglütinasyon) Tespit Edildi';
+                label.style.color = '#ef4444';
+            } else {
+                label.textContent = '🟢 Çökelme Yok — Hücreler Serbest';
+                label.style.color = '#22c55e';
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Microscope circular mask effect
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, Math.min(cx, cy) - 3, 0, Math.PI * 2);
+                ctx.clip();
+
+                // Background gradient
+                const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(cx, cy));
+                bg.addColorStop(0, '#111827');
+                bg.addColorStop(1, '#000');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                cells.forEach(cell => {
+                    if (cell.clump) {
+                        // Pull toward nearest clump center
+                        let nearest = clumpCenters[0];
+                        let minDist = Infinity;
+                        clumpCenters.forEach(c => {
+                            const d = Math.sqrt((cell.x - c.x) ** 2 + (cell.y - c.y) ** 2);
+                            if (d < minDist) { minDist = d; nearest = c; }
+                        });
+                        cell.vx += (nearest.x - cell.x) * 0.002;
+                        cell.vy += (nearest.y - cell.y) * 0.002;
+                        cell.vx *= 0.98;
+                        cell.vy *= 0.98;
+                    }
+
+                    cell.x += cell.vx;
+                    cell.y += cell.vy;
+
+                    // Bounce
+                    const dist = Math.sqrt((cell.x - cx) ** 2 + (cell.y - cy) ** 2);
+                    if (dist > Math.min(cx, cy) - cell.r - 3) {
+                        cell.vx *= -0.8;
+                        cell.vy *= -0.8;
+                    }
+
+                    // Draw red blood cell (donut shape)
+                    ctx.beginPath();
+                    ctx.arc(cell.x, cell.y, cell.r, 0, Math.PI * 2);
+                    ctx.fillStyle = cell.clump ? 'rgba(239, 68, 68, 0.85)' : 'rgba(185, 28, 28, 0.7)';
+                    ctx.fill();
+
+                    // Inner dimple
+                    ctx.beginPath();
+                    ctx.arc(cell.x, cell.y, cell.r * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = cell.clump ? 'rgba(127, 29, 29, 0.6)' : 'rgba(127, 29, 29, 0.4)';
+                    ctx.fill();
+                });
+
+                // Cross-hair grid lines
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+                ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+                ctx.stroke();
+
+                ctx.restore();
+                microscopeAnim = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Determine blood type from reactions
+        function determineBloodType() {
+            const a = wellReactions['anti-a'];
+            const b = wellReactions['anti-b'];
+            const d = wellReactions['anti-d'];
+
+            let group = '';
+            if (a && b) group = 'AB';
+            else if (a && !b) group = 'A';
+            else if (!a && b) group = 'B';
+            else group = '0';
+
+            const rh = d ? '+' : '-';
+            const determined = group + rh;
+
+            document.getElementById('result-type').textContent = determined;
+            document.getElementById('result-label').textContent = 'Hastanın Kan Grubu Belirlendi';
+
+            // Transition to transfusion phase
+            document.getElementById('phase-analysis').style.display = 'none';
+            document.getElementById('phase-transfusion').style.display = 'flex';
+            document.getElementById('phase-transfusion').style.flexDirection = 'column';
+            document.getElementById('phase-transfusion').style.gap = '20px';
+            document.getElementById('btn-determine').style.display = 'none';
+
+            buildTransfusionGrid(determined);
+            drawMicroscope(false); // Reset microscope
+            document.getElementById('microscope-label').textContent = 'Bir kan torbası seçerek uyumu test edin';
+            document.getElementById('microscope-label').style.color = '';
+        }
+
+        // Build transfusion blood bag grid
+        function buildTransfusionGrid(patientType) {
+            const grid = document.getElementById('transfusion-grid');
+            grid.innerHTML = '';
+            const compatible = COMPAT[patientType] || [];
+
+            ALL_TYPES.forEach(type => {
+                const bag = document.createElement('div');
+                bag.className = 'blood-bag';
+                bag.innerHTML = `
+                    <div class="bag-icon"></div>
+                    <span class="bag-label">${type}</span>
+                    <span class="bag-status" id="status-${type.replace('+','p').replace('-','n')}">Test et</span>
+                `;
+                bag.addEventListener('click', () => {
+                    const isCompat = compatible.includes(type);
+                    const statusEl = bag.querySelector('.bag-status');
+
+                    if (isCompat) {
+                        bag.classList.add('compatible');
+                        statusEl.textContent = '✓ Uyumlu';
+                        statusEl.className = 'bag-status safe';
+                        drawMicroscope(false);
+                        document.getElementById('microscope-label').textContent = `${type} → Uyumlu — Hücreler Serbest Akıyor`;
+                        document.getElementById('microscope-label').style.color = '#22c55e';
+                    } else {
+                        bag.classList.add('incompatible');
+                        statusEl.textContent = '✗ Uyumsuz';
+                        statusEl.className = 'bag-status danger';
+                        drawMicroscope(true);
+                        document.getElementById('microscope-label').textContent = `${type} → Uyumsuz — Aglütinasyon Reaksiyonu!`;
+                        document.getElementById('microscope-label').style.color = '#ef4444';
+                    }
+                });
+                grid.appendChild(bag);
+            });
+        }
+
+        // Reset lab
+        function resetLab() {
+            selectedSerum = null;
+            wellsDropped = { 'anti-a': false, 'anti-b': false, 'anti-d': false };
+            wellReactions = { 'anti-a': null, 'anti-b': null, 'anti-d': null };
+
+            // Reset visuals
+            document.querySelectorAll('.serum-bottle').forEach(b => b.classList.remove('active'));
+            ['a', 'b', 'd'].forEach(key => {
+                const well = document.getElementById('well-' + key);
+                well.classList.remove('dropped', 'agglutinated');
+                const canvas = document.getElementById('canvas-' + key);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+
+            document.getElementById('info-anti-a').textContent = '—';
+            document.getElementById('info-anti-a').style.color = '';
+            document.getElementById('info-anti-b').textContent = '—';
+            document.getElementById('info-anti-b').style.color = '';
+            document.getElementById('info-anti-d').textContent = '—';
+            document.getElementById('info-anti-d').style.color = '';
+
+            document.getElementById('result-type').textContent = '?';
+            document.getElementById('result-label').textContent = 'Kan grubu henüz belirlenmedi';
+            document.getElementById('btn-determine').disabled = true;
+            document.getElementById('btn-determine').style.display = '';
+
+            document.getElementById('phase-analysis').style.display = '';
+            document.getElementById('phase-transfusion').style.display = 'none';
+
+            if (microscopeAnim) cancelAnimationFrame(microscopeAnim);
+            const mc = document.getElementById('microscope-canvas');
+            mc.getContext('2d').clearRect(0, 0, mc.width, mc.height);
+            document.getElementById('microscope-label').textContent = 'Mikroskop Görüntüsü';
+            document.getElementById('microscope-label').style.color = '';
+
+            pickRandomPatient();
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            pickRandomPatient();
+        });
+    </script>
+</body>
+</html>
