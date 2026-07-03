@@ -135,9 +135,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Redirect old /tools link to the new /vsepr page for compatibility
-app.get(['/tools', '/tools.html'], (req, res) => {
-    res.redirect(301, '/vsepr');
+// Redirect old /araclar to /tools
+app.get(['/araclar', '/araclar.html'], (req, res) => {
+    res.redirect(301, '/tools');
 });
 
 // === MAGIC LINK ROUTE ===
@@ -1689,10 +1689,10 @@ async function ensureSchema() {
         }
         // --------------------------------------------------
 
-        // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /vsepr ---
+        // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /tools ---
         try {
-            await pool.query("UPDATE category_cards SET link_url = '/vsepr' WHERE id = 3 OR title = 'Araçlar' OR title = 'Ka Hesaplama'");
-            console.log('Migration Code: Updated Araçlar/Ka Hesaplama link_url to /vsepr in category_cards');
+            await pool.query("UPDATE category_cards SET link_url = '/tools' WHERE id = 3 OR title = 'Araçlar' OR title = 'Ka Hesaplama'");
+            console.log('Migration Code: Updated Araçlar/Ka Hesaplama link_url to /tools in category_cards');
         } catch (e) {
             console.error('Migration Error (category_cards link_url update):', e);
         }
