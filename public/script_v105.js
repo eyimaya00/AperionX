@@ -957,8 +957,9 @@ async function loadMenus() {
         if (navMenu) {
             rootMenus.forEach(menu => {
                 const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
+                const isAraçlarMenu = menu.label.toLowerCase() === 'araçlar';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = hasChildren;
+                const needsDropdown = hasChildren && !isAraçlarMenu;
 
                 if (needsDropdown) {
                     // Create Dropdown Structure
@@ -1106,8 +1107,9 @@ async function loadMenus() {
 
             rootMenus.forEach(menu => {
                 const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
+                const isAraçlarMenu = menu.label.toLowerCase() === 'araçlar';
                 const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
-                const needsDropdown = hasChildren;
+                const needsDropdown = hasChildren && !isAraçlarMenu;
 
                 if (needsDropdown) {
                     // Mobile Dropdown Accordion

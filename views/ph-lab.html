@@ -44,11 +44,17 @@
         }
 
         .lab-container {
-            padding: 100px 0 60px 0;
+            padding: 40px 0 60px 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        
+        [data-theme="dark"] .back-to-tools-btn {
+            background: rgba(30, 41, 59, 0.7) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f1f5f9 !important;
         }
 
         .lab-grid {
@@ -443,43 +449,31 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-content">
-            <a href="/" class="logo">
-                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
-            </a>
-
-            <nav class="nav-menu">
-                <a href="/" class="nav-link">Ana Sayfa</a>
-                <a href="/articles" class="nav-link">Makaleler</a>
-                <a href="/experiments" class="nav-link">Deneyler</a>
-                <a href="/tools" class="nav-link active">Araçlar</a>
-                <a href="/about" class="nav-link">Hakkında</a>
-            </nav>
-
-            <div class="header-actions">
-                <!-- Auth Buttons -->
-                <div class="auth-buttons">
-                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
-                </div>
-
-                <!-- Language Switcher -->
-                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
-                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
-                    <i class="ph-bold ph-globe"></i> EN
-                </a>
-
-                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
-                    <i class="ph ph-moon"></i>
-                </button>
-
-                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
-                    <i class="ph ph-list"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <!-- Floating Back Button -->
+    <a href="/tools" class="back-to-tools-btn" style="
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        color: var(--text-color);
+        padding: 10px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        z-index: 999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.2s, background 0.2s;
+    " onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+        <i class="ph-bold ph-arrow-left"></i>
+        <span>Araçlara Dön</span>
+    </a>
 
     <!-- Lab simulator Section -->
     <section class="lab-container">
