@@ -413,6 +413,37 @@
                 top: 16px;
                 right: 16px;
             }
+            
+            /* Responsive Grid overrides to prevent horizontal scroll on mobile */
+            .periodic-table-grid {
+                min-width: unset !important;
+                gap: 1.5px !important;
+                width: 100% !important;
+            }
+            .element-cell {
+                border-width: 1px !important;
+                padding: 1px !important;
+                border-radius: 4px !important;
+            }
+            .el-num {
+                display: none !important;
+            }
+            .el-symbol {
+                font-size: 0.52rem !important;
+                margin: auto !important;
+            }
+            .el-name {
+                display: none !important;
+            }
+            .element-cell-empty {
+                border-radius: 4px !important;
+            }
+            .element-cell-spacer-row {
+                height: 4px !important;
+            }
+            .table-area-card {
+                padding: 16px !important;
+            }
         }
     </style>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
