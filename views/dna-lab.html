@@ -518,6 +518,7 @@
             let currentBaseIndex = 0;
             let currentCodonIndex = 0;
             let synthesizedProteins = [];
+            let currentStage = 'start'; // 'start', 'transcription_complete', 'translation_complete'
 
             // UI Elements
             const stageBadge = document.getElementById('stage-badge');
@@ -538,9 +539,15 @@
             const trayTiles = document.getElementById('tray-tiles');
             const primaryBtn = document.getElementById('primary-action-btn');
 
-            // Event listener for Start button
+            // Event listener for Start button (State Router)
             primaryBtn.addEventListener('click', () => {
-                startTranscriptionStage();
+                if (currentStage === 'start') {
+                    startTranscriptionStage();
+                } else if (currentStage === 'transcription_complete') {
+                    startTranslationStage();
+                } else if (currentStage === 'translation_complete') {
+                    location.reload();
+                }
             });
 
             // Stage 1: Start Transcription
@@ -558,7 +565,7 @@
 
                 // Setup Board UI
                 board.innerHTML = '';
-                primaryBtn.parentElement.style.display = 'none';
+                document.getElementById('start-btn-wrapper').style.display = 'none';
 
                 // Render DNA strand
                 const strandContainer = document.createElement('div');
@@ -685,15 +692,10 @@
                         // End of Transcription
                         trayArea.style.display = 'none';
                         infoBody.innerHTML = '<strong>Mükemmel!</strong> mRNA molekülünü başarıyla sentezlediniz. Şimdi bu şeridi çekirdek dışına çıkararak ribozomda protein sentezini (Translasyon) başlatalım.';
-                        primaryBtn.querySelector('span').innerText = 'Translasyonu Başlat';
-                        primaryBtn.parentElement.style.display = 'block';
-
-                        // Change click event on primary button to translation
-                        primaryBtn.replaceWith(primaryBtn.cloneNode(true));
-                        const newBtn = document.getElementById('primary-action-btn');
-                        newBtn.addEventListener('click', () => {
-                            startTranslationStage();
-                        });
+                        currentStage = 'transcription_complete';
+                        const btnSpan = primaryBtn.querySelector('span');
+                        if (btnSpan) btnSpan.innerText = 'Translasyonu Başlat';
+                        document.getElementById('start-btn-wrapper').style.display = 'block';
                     } else {
                         highlightActiveBase();
                     }
@@ -722,7 +724,7 @@
 
                 // Setup Board UI
                 board.innerHTML = '';
-                primaryBtn.parentElement.style.display = 'none';
+                document.getElementById('start-btn-wrapper').style.display = 'none';
                 proteinContainer.style.display = 'block';
 
                 // Display mRNA strand in the center of the translation phase
@@ -887,14 +889,10 @@
                 `;
 
                 // Set Primary action to restart simulation
-                primaryBtn.querySelector('span').innerText = 'Yeniden Başlat';
-                primaryBtn.parentElement.style.display = 'block';
-
-                primaryBtn.replaceWith(primaryBtn.cloneNode(true));
-                const restartBtn = document.getElementById('primary-action-btn');
-                restartBtn.addEventListener('click', () => {
-                    location.reload();
-                });
+                currentStage = 'translation_complete';
+                const btnSpan = primaryBtn.querySelector('span');
+                if (btnSpan) btnSpan.innerText = 'Yeniden Başlat';
+                document.getElementById('start-btn-wrapper').style.display = 'block';
             }
         });
     </script>
