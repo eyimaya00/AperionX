@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="İnteraktif DNA & Protein Sentezi Simülatörü. DNA transkripsiyon (yazılım) ve translasyon (okuma) süreçlerini interaktif laboratuvarda deneyimleyin.">
+    <meta name="keywords"
+        content="dna sentezi, protein sentezi, transkripsiyon, translasyon, ribozom, dna simülasyonu, biyoloji simülatörleri">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/dna-lab">
+    <meta property="og:title" content="DNA & Protein Sentezi Simülatörü - AperionX">
+    <meta property="og:description"
+        content="Sanal Biyoloji Laboratuvarı. Adım adım transkripsiyon ve translasyon süreçlerini interaktif animasyonlarla deneyimleyin.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    
+    <title>DNA & Protein Sentezi Simülatörü | AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=246">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .dna-container {
+            padding: 40px 0 60px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dna-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 40px;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- CONTROL CARD --- */
+        .dna-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: 28px;
+            padding: 36px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        [data-theme="dark"] .dna-card {
+            background: rgba(30, 41, 59, 0.45);
+            border-color: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .back-to-tools-btn,
+        [data-theme="dark"] #themeToggle {
+            background: rgba(30, 41, 59, 0.7) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f1f5f9 !important;
+        }
+
+        .dna-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stage-title-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        /* --- PLAYGROUND CARD --- */
+        .workspace-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            border: 1px solid rgba(99, 102, 241, 0.08);
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 520px;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .workspace-card {
+            background: rgba(15, 23, 42, 0.3);
+            border-color: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- CHEMICAL DRAWINGS --- */
+        .lab-board {
+            width: 100%;
+            height: 320px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Helix representation */
+        .dna-strand-svg {
+            width: 100%;
+            height: 200px;
+        }
+
+        .base-bubble {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .base-A { background: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+        .base-T { background: #eab308; box-shadow: 0 0 12px rgba(234, 179, 8, 0.4); }
+        .base-U { background: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4); }
+        .base-G { background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.4); }
+        .base-C { background: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+
+        .base-empty {
+            background: rgba(0, 0, 0, 0.05);
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            color: rgba(99, 102, 241, 0.5);
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .base-empty {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tray of nucleotide tiles */
+        .tile-tray {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .tray-tile {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .tray-tile:hover {
+            transform: translateY(-4px) scale(1.08);
+        }
+
+        .tray-tile:active {
+            transform: scale(0.95);
+        }
+
+        /* Codon Ribosome Frame */
+        .ribosome-body {
+            position: absolute;
+            width: 160px;
+            height: 180px;
+            background: rgba(168, 85, 247, 0.12);
+            border: 2px dashed rgba(168, 85, 247, 0.4);
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            z-index: 1;
+            pointer-events: none;
+            transition: left 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ribosome-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a855f7;
+            position: absolute;
+            bottom: 12px;
+        }
+
+        /* Protein folding chain representation */
+        .polypeptide-chain {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            min-height: 40px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .amino-acid-node {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .amino-acid-node:not(:last-child)::after {
+            content: '-';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e1;
+            font-weight: 900;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-action {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.45);
+        }
+
+        /* Helper Instruction panel */
+        .info-panel {
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 20px;
+            border: 1.5px dashed rgba(99, 102, 241, 0.2);
+            padding: 24px;
+            line-height: 1.7;
+        }
+
+        .info-panel-title {
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .dna-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .dna-container {
+                padding: 100px 0;
+            }
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Back Button -->
+    <a href="/tools" class="back-to-tools-btn" style="
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        color: var(--text-color);
+        padding: 10px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        z-index: 999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.2s, background 0.2s;
+    " onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+        <i class="ph-bold ph-arrow-left"></i>
+        <span>Araçlara Dön</span>
+    </a>
+
+    <!-- Floating Theme Toggle -->
+    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir" style="
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        color: var(--text-color);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.2s, background 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+        <i class="ph ph-moon" style="font-size: 1.25rem;"></i>
+    </button>
+
+    <!-- Main Container -->
+    <section class="dna-container">
+        <div class="dna-grid">
+
+            <!-- Left Side: Controls & Info -->
+            <div class="dna-card">
+                <div>
+                    <div id="stage-badge" class="stage-title-badge">Giriş Aşaması</div>
+                    <h1 class="dna-title" id="side-title">DNA & Protein Labı</h1>
+                    <p style="color:var(--text-secondary); line-height:1.6; font-size: 1.05rem;" id="side-desc">
+                        Hücrenin en gizemli üretim bandına hoş geldiniz. Kalıp DNA zincirini kopyalayarak mRNA yazacak ve ribozomda tRNA'ları eşleştirerek kendi protein molekülünüzü sentezleyeceksiniz.
+                    </p>
+                </div>
+
+                <!-- Live Info Panel / Instructions -->
+                <div class="info-panel" id="instruction-panel">
+                    <div class="info-panel-title">
+                        <i class="ph-bold ph-lightbulb"></i>
+                        <span id="info-header">Laboratuvar Kılavuzu</span>
+                    </div>
+                    <div id="info-body" style="font-size:0.95rem; color:var(--text-secondary);">
+                        Simülasyonu başlatmak için sağ taraftaki panelde bulunan "Sentezi Başlat" düğmesine tıklayın.
+                    </div>
+                </div>
+
+                <!-- DNA / RNA Code display logs -->
+                <div id="sequence-log" style="display:none; font-family:'JetBrains Mono', monospace; font-size:0.85rem; background:rgba(0,0,0,0.05); padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.08);">
+                    <div style="color:#ef4444; margin-bottom: 4px;">Kalıp DNA: <span id="log-dna">TACGGCTAT</span></div>
+                    <div style="color:#6366f1;">Yazılan mRNA: <span id="log-mrna">--</span></div>
+                </div>
+            </div>
+
+            <!-- Right Side: Interactive Board -->
+            <div class="workspace-card" id="main-board-card">
+                
+                <!-- Polypeptide Chain display at the top of translation -->
+                <div id="protein-chain-container" style="display:none; width: 100%; text-align:center;">
+                    <span class="control-label" style="display:block; margin-bottom:10px;">Sentezlenen Polipeptit (Protein)</span>
+                    <div class="polypeptide-chain" id="protein-nodes">
+                        <!-- Dynamic Amino Acids popped here -->
+                    </div>
+                </div>
+
+                <!-- Simulation Board -->
+                <div class="lab-board" id="interactive-board">
+                    <!-- Dynamic animations SVGs / divs will be rendered here -->
+                    <i class="ph-bold ph-dna" style="font-size: 8rem; color:#6366f1; animation: pulse 2s infinite ease-in-out;"></i>
+                </div>
+
+                <!-- Click/Drag Interactive Tray at the bottom -->
+                <div id="tray-area" style="display:none; width: 100%; text-align:center; margin-top: 30px;">
+                    <span class="control-label" style="display:block; margin-bottom:10px;" id="tray-title">Nükleotit Seçimi</span>
+                    <div class="tile-tray" id="tray-tiles">
+                        <!-- Tiles injected here -->
+                    </div>
+                </div>
+
+                <!-- Primary Action Button -->
+                <div id="start-btn-wrapper" style="margin-top: 30px;">
+                    <button class="btn-action" id="primary-action-btn">
+                        <span>Sentezi Başlat</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Global Footer -->
+    <div id="global-footer"></div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Simulator Logic -->
+    <script defer src="/script_v105.js?v=246"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sequence specifications
+            // DNA Template: T-A-C  G-G-C  G-A-T  T-T-A  A-C-T
+            // mRNA output:  A-U-G  C-C-G  C-U-A  A-A-U  U-G-A
+            // Codons:       AUG (Met), CCG (Pro), CUA (Leu), AAU (Asn), UGA (Stop)
+            const dnaSequence = ['T','A','C','G','G','C','G','A','T','T','T','A','A','C','T'];
+            const complementaryDNA = ['A','T','G','C','C','G','C','T','A','A','A','T','T','G','A'];
+            const targetMRNA = ['A','U','G','C','C','G','C','U','A','A','A','U','U','G','A'];
+            const translationSteps = [
+                { codon: 'AUG', anticodon: 'UAC', amino: 'Metiyonin (Start)', color: '#ef4444' },
+                { codon: 'CCG', anticodon: 'GGC', amino: 'Prolin', color: '#f59e0b' },
+                { codon: 'CUA', anticodon: 'GAU', amino: 'Lösin', color: '#10b981' },
+                { codon: 'AAU', anticodon: 'UUA', amino: 'Asparjin', color: '#3b82f6' },
+                { codon: 'UGA', anticodon: 'ACU', amino: 'STOP (Sentez Sonu)', color: '#8b5cf6' }
+            ];
+
+            let transcribedRNA = [];
+            let currentBaseIndex = 0;
+            let currentCodonIndex = 0;
+            let synthesizedProteins = [];
+
+            // UI Elements
+            const stageBadge = document.getElementById('stage-badge');
+            const sideTitle = document.getElementById('side-title');
+            const sideDesc = document.getElementById('side-desc');
+            const infoHeader = document.getElementById('info-header');
+            const infoBody = document.getElementById('info-body');
+            const sequenceLog = document.getElementById('sequence-log');
+            const logDna = document.getElementById('log-dna');
+            const logMrna = document.getElementById('log-mrna');
+
+            const boardCard = document.getElementById('main-board-card');
+            const proteinContainer = document.getElementById('protein-chain-container');
+            const proteinNodes = document.getElementById('protein-nodes');
+            const board = document.getElementById('interactive-board');
+            const trayArea = document.getElementById('tray-area');
+            const trayTitle = document.getElementById('tray-title');
+            const trayTiles = document.getElementById('tray-tiles');
+            const primaryBtn = document.getElementById('primary-action-btn');
+
+            // Event listener for Start button
+            primaryBtn.addEventListener('click', () => {
+                startTranscriptionStage();
+            });
+
+            // Stage 1: Start Transcription
+            function startTranscriptionStage() {
+                // Update Sidebar info
+                stageBadge.innerText = '1. Aşama: Transkripsiyon';
+                sideTitle.innerText = 'mRNA Yazılımı';
+                sideDesc.innerText = 'Çekirdekteki DNA sarmalı çözüldü. Kalıp DNA ipliğindeki her bazın karşısına uygun RNA nükleotidini seçip yerleştirin. Unutmayın: Adenin (A) karşısına Urasil (U) gelir.';
+                infoHeader.innerText = 'Transkripsiyon Rehberi';
+                infoBody.innerText = 'Sıradaki DNA bazına tıklayın veya aşağıdaki nükleotit tepsisinden eşleşen doğru RNA nükleotidine tıklayarak zinciri sentezleyin.';
+                
+                logDna.innerText = dnaSequence.join('');
+                logMrna.innerText = '';
+                sequenceLog.style.display = 'block';
+
+                // Setup Board UI
+                board.innerHTML = '';
+                primaryBtn.parentElement.style.display = 'none';
+
+                // Render DNA strand
+                const strandContainer = document.createElement('div');
+                strandContainer.style.display = 'flex';
+                strandContainer.style.flexDirection = 'column';
+                strandContainer.style.gap = '32px';
+                strandContainer.style.width = '100%';
+                strandContainer.style.maxWidth = '500px';
+
+                // DNA Template strand row
+                const templateRow = document.createElement('div');
+                templateRow.style.display = 'flex';
+                templateRow.style.justifyContent = 'space-between';
+                templateRow.style.width = '100%';
+                templateRow.id = 'dna-template-row';
+
+                dnaSequence.forEach((base, idx) => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `base-bubble base-${base}`;
+                    bubble.innerText = base;
+                    bubble.id = `template-base-${idx}`;
+                    templateRow.appendChild(bubble);
+                });
+
+                // mRNA growing strand row
+                const mrnaRow = document.createElement('div');
+                mrnaRow.style.display = 'flex';
+                mrnaRow.style.justifyContent = 'space-between';
+                mrnaRow.style.width = '100%';
+                mrnaRow.id = 'mrna-row';
+
+                dnaSequence.forEach((_, idx) => {
+                    const emptyBubble = document.createElement('div');
+                    emptyBubble.className = 'base-bubble base-empty';
+                    emptyBubble.innerText = '?';
+                    emptyBubble.id = `mrna-base-${idx}`;
+                    mrnaRow.appendChild(emptyBubble);
+                });
+
+                strandContainer.appendChild(templateRow);
+                strandContainer.appendChild(mrnaRow);
+                board.appendChild(strandContainer);
+
+                // Setup Tray with matching nucleotides
+                trayArea.style.display = 'block';
+                trayTitle.innerText = 'RNA Nükleotidini Eşleştir';
+                trayTiles.innerHTML = '';
+
+                ['A', 'U', 'G', 'C'].forEach(nucleotide => {
+                    const tile = document.createElement('button');
+                    tile.className = `tray-tile base-${nucleotide}`;
+                    tile.innerText = nucleotide;
+                    tile.style.border = 'none';
+                    tile.addEventListener('click', () => handleNucleotideMatch(nucleotide));
+                    trayTiles.appendChild(tile);
+                });
+
+                // Highlight first active base
+                highlightActiveBase();
+            }
+
+            function highlightActiveBase() {
+                // Reset all highlights
+                for (let i = 0; i < dnaSequence.length; i++) {
+                    const tBubble = document.getElementById(`template-base-${i}`);
+                    const mBubble = document.getElementById(`mrna-base-${i}`);
+                    if (tBubble) tBubble.style.transform = 'scale(1)';
+                    if (mBubble) {
+                        mBubble.style.transform = 'scale(1)';
+                        mBubble.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                    }
+                }
+
+                // Apply active highlight
+                if (currentBaseIndex < dnaSequence.length) {
+                    const activeTemplate = document.getElementById(`template-base-${currentBaseIndex}`);
+                    const activeMRNA = document.getElementById(`mrna-base-${currentBaseIndex}`);
+                    if (activeTemplate) activeTemplate.style.transform = 'scale(1.25)';
+                    if (activeMRNA) {
+                        activeMRNA.style.transform = 'scale(1.25)';
+                        activeMRNA.style.borderColor = '#6366f1';
+                        activeMRNA.style.boxShadow = '0 0 15px rgba(99, 102, 241, 0.4)';
+                    }
+                    
+                    const neededDNA = dnaSequence[currentBaseIndex];
+                    let correctRNA = '';
+                    if (neededDNA === 'T') correctRNA = 'A';
+                    if (neededDNA === 'A') correctRNA = 'U';
+                    if (neededDNA === 'C') correctRNA = 'G';
+                    if (neededDNA === 'G') correctRNA = 'C';
+
+                    infoBody.innerHTML = `
+                        Kalıp iplikteki <strong>${currentBaseIndex + 1}. nükleotit (${neededDNA})</strong> için eşleşecek RNA bazını seçin.<br>
+                        <em>İpucu: ${neededDNA} eşi <strong>${correctRNA}</strong> bazıdır.</em>
+                    `;
+                }
+            }
+
+            function handleNucleotideMatch(nucleotide) {
+                if (currentBaseIndex >= dnaSequence.length) return;
+
+                const neededDNA = dnaSequence[currentBaseIndex];
+                let correctRNA = '';
+                if (neededDNA === 'T') correctRNA = 'A';
+                if (neededDNA === 'A') correctRNA = 'U';
+                if (neededDNA === 'C') correctRNA = 'G';
+                if (neededDNA === 'G') correctRNA = 'C';
+
+                if (nucleotide === correctRNA) {
+                    // Correct Match
+                    transcribedRNA.push(nucleotide);
+                    logMrna.innerText = transcribedRNA.join('');
+
+                    const activeMRNA = document.getElementById(`mrna-base-${currentBaseIndex}`);
+                    if (activeMRNA) {
+                        activeMRNA.className = `base-bubble base-${nucleotide}`;
+                        activeMRNA.innerText = nucleotide;
+                        activeMRNA.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.6)';
+                    }
+
+                    currentBaseIndex++;
+
+                    if (currentBaseIndex >= dnaSequence.length) {
+                        // End of Transcription
+                        trayArea.style.display = 'none';
+                        infoBody.innerHTML = '<strong>Mükemmel!</strong> mRNA molekülünü başarıyla sentezlediniz. Şimdi bu şeridi çekirdek dışına çıkararak ribozomda protein sentezini (Translasyon) başlatalım.';
+                        primaryBtn.querySelector('span').innerText = 'Translasyonu Başlat';
+                        primaryBtn.parentElement.style.display = 'block';
+
+                        // Change click event on primary button to translation
+                        primaryBtn.replaceWith(primaryBtn.cloneNode(true));
+                        const newBtn = document.getElementById('primary-action-btn');
+                        newBtn.addEventListener('click', () => {
+                            startTranslationStage();
+                        });
+                    } else {
+                        highlightActiveBase();
+                    }
+                } else {
+                    // Incorrect Match - Vibrate and notify
+                    const activeMRNA = document.getElementById(`mrna-base-${currentBaseIndex}`);
+                    if (activeMRNA) {
+                        activeMRNA.style.transform = 'scale(1.25) translateX(-5px)';
+                        setTimeout(() => {
+                            activeMRNA.style.transform = 'scale(1.25) translateX(5px)';
+                        }, 100);
+                        setTimeout(() => {
+                            activeMRNA.style.transform = 'scale(1.25) translateX(0)';
+                        }, 200);
+                    }
+                }
+            }
+
+            // Stage 2: Translation (Ribosome reading)
+            function startTranslationStage() {
+                stageBadge.innerText = '2. Aşama: Translasyon';
+                sideTitle.innerText = 'Protein Okuması';
+                sideDesc.innerText = 'mRNA ribozoma giriş yaptı. Sıradaki kodonun (üçlü baz grubu) karşısına uygun antikodona sahip tRNA molekülünü seçerek bağlayın.';
+                infoHeader.innerText = 'Translasyon Rehberi';
+                infoBody.innerText = 'Ekranda çerçeve içine alınan kodona uygun antikodona sahip tRNA molekülünü aşağıdan seçin.';
+
+                // Setup Board UI
+                board.innerHTML = '';
+                primaryBtn.parentElement.style.display = 'none';
+                proteinContainer.style.display = 'block';
+
+                // Display mRNA strand in the center of the translation phase
+                const translationBoard = document.createElement('div');
+                translationBoard.style.position = 'relative';
+                translationBoard.style.width = '100%';
+                translationBoard.style.maxWidth = '500px';
+                translationBoard.style.height = '240px';
+                translationBoard.style.display = 'flex';
+                translationBoard.style.alignItems = 'center';
+
+                // Ribosome frame
+                const ribosome = document.createElement('div');
+                ribosome.className = 'ribosome-body';
+                ribosome.id = 'ribosome-frame';
+                ribosome.innerHTML = '<span class="ribosome-label">RİBOZOM</span>';
+                
+                // mRNA row
+                const mrnaRow = document.createElement('div');
+                mrnaRow.style.display = 'flex';
+                mrnaRow.style.justifyContent = 'space-between';
+                mrnaRow.style.width = '100%';
+                mrnaRow.style.position = 'relative';
+                mrnaRow.style.zIndex = '2';
+
+                transcribedRNA.forEach((base, idx) => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `base-bubble base-${base}`;
+                    bubble.innerText = base;
+                    bubble.id = `trans-mrna-${idx}`;
+                    mrnaRow.appendChild(bubble);
+                });
+
+                translationBoard.appendChild(ribosome);
+                translationBoard.appendChild(mrnaRow);
+                board.appendChild(translationBoard);
+
+                // Setup Tray of tRNAs
+                trayArea.style.display = 'block';
+                trayTitle.innerText = 'Uygun tRNA Antikodonunu Seçin';
+                
+                updateTranslationUI();
+            }
+
+            function updateTranslationUI() {
+                if (currentCodonIndex >= translationSteps.length) {
+                    completeTranslation();
+                    return;
+                }
+
+                const currentStep = translationSteps[currentCodonIndex];
+
+                // Position Ribosome Frame over active codon (3 bases at a time)
+                const startBaseIdx = currentCodonIndex * 3;
+                const ribosomeFrame = document.getElementById('ribosome-frame');
+                
+                if (ribosomeFrame) {
+                    // Calculate left offset to center on current 3 bases
+                    // 500px total row width. 15 bases. Each base is approx 33px wide.
+                    // Codon is 3 bases. 3 * 33px = 100px.
+                    // Start of codon left percent: (startBaseIdx / 15) * 100%
+                    const leftPct = (startBaseIdx / 15) * 100;
+                    ribosomeFrame.style.left = `calc(${leftPct}% - 14px)`;
+                }
+
+                // Highlight active 3 bases of codon
+                for (let i = 0; i < transcribedRNA.length; i++) {
+                    const bubble = document.getElementById(`trans-mrna-${i}`);
+                    if (bubble) {
+                        if (i >= startBaseIdx && i < startBaseIdx + 3) {
+                            bubble.style.transform = 'scale(1.2) translateY(-8px)';
+                            bubble.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.5)';
+                        } else {
+                            bubble.style.transform = 'scale(1)';
+                            bubble.style.boxShadow = 'none';
+                        }
+                    }
+                }
+
+                // Update info body
+                infoBody.innerHTML = `
+                    Ribozomdaki aktif kodon: <strong>${currentStep.codon}</strong>.<br>
+                    Eşleşmesi gereken antikodon: <strong>${currentStep.anticodon}</strong>.<br>
+                    Taşıdığı amino asit: <strong>${currentStep.amino}</strong>.
+                `;
+
+                // Render dynamic tRNA tiles in the tray (Shuffled version of tRNA choices)
+                trayTiles.innerHTML = '';
+                const choices = [...translationSteps].sort(() => Math.random() - 0.5);
+
+                choices.forEach(step => {
+                    const tile = document.createElement('button');
+                    tile.className = 'tray-tile';
+                    tile.style.background = '#1e293b';
+                    tile.style.border = `2.5px solid ${step.color}`;
+                    tile.style.color = '#fff';
+                    tile.style.width = '76px';
+                    tile.style.height = '68px';
+                    tile.style.fontSize = '0.9rem';
+                    tile.style.padding = '5px';
+                    tile.style.borderRadius = '16px';
+                    tile.style.boxShadow = `0 4px 12px rgba(0,0,0,0.15)`;
+                    tile.innerHTML = `
+                        <div style="font-weight: 900; color:${step.color};">${step.anticodon}</div>
+                        <div style="font-size: 0.65rem; margin-top:2px; font-weight:700; opacity:0.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${step.amino.split(' ')[0]}</div>
+                    `;
+
+                    tile.addEventListener('click', () => handleTRNAMatch(step.anticodon));
+                    trayTiles.appendChild(tile);
+                });
+            }
+
+            function handleTRNAMatch(anticodon) {
+                const currentStep = translationSteps[currentCodonIndex];
+
+                if (anticodon === currentStep.anticodon) {
+                    // Correct Match
+                    synthesizedProteins.push(currentStep);
+
+                    // Add Amino Acid node to chain
+                    const node = document.createElement('div');
+                    node.className = 'amino-acid-node';
+                    node.innerText = currentStep.amino.split(' ')[0]; // E.g. Metiyonin or Prolin
+                    node.style.background = `linear-gradient(135deg, ${currentStep.color}, #6366f1)`;
+                    node.style.boxShadow = `0 4px 15px rgba(99, 102, 241, 0.3)`;
+                    proteinNodes.appendChild(node);
+
+                    currentCodonIndex++;
+                    updateTranslationUI();
+                } else {
+                    // Incorrect Match
+                    trayTiles.style.transform = 'translateX(-8px)';
+                    setTimeout(() => { trayTiles.style.transform = 'translateX(8px)'; }, 100);
+                    setTimeout(() => { trayTiles.style.transform = 'translateX(0)'; }, 200);
+                }
+            }
+
+            function completeTranslation() {
+                // Clean layout
+                board.innerHTML = '';
+                trayArea.style.display = 'none';
+
+                // Display success
+                stageBadge.innerText = 'Sentez Tamamlandı';
+                sideTitle.innerText = 'Protein Sentezi Başarılı!';
+                sideDesc.innerText = 'Tebrikler! Kodon ve antikodonları hatasız eşleştirerek polipeptit zincirini tamamladınız. Protein molekülünüz başarılı bir şekilde üretildi.';
+                infoHeader.innerText = 'Biyokimyasal Analiz';
+                
+                let aminoNames = synthesizedProteins.map(p => p.amino).join(' ➔ ');
+                infoBody.innerHTML = `
+                    <strong>Üretilen Polipeptit Dizilimi:</strong><br>
+                    <span style="font-family:'JetBrains Mono', monospace; font-size:0.95rem; color:#6366f1;">${aminoNames}</span><br><br>
+                    Üretilen bu protein, hücre içi yapısal faaliyetlerde veya enzimsel tepkimelerde görev alacaktır.
+                `;
+
+                // Beautiful folded protein icon representation
+                board.innerHTML = `
+                    <div style="text-align:center; animation: popIn 0.8s ease;">
+                        <i class="ph-fill ph-dna" style="font-size: 8rem; color:#a855f7; display:inline-block; filter: drop-shadow(0 0 20px rgba(168,85,247,0.5)); transform: rotate(45deg);"></i>
+                        <h2 style="font-size: 1.8rem; margin-top:20px; font-weight:800; font-family:'Outfit', sans-serif;">Fonksiyonel Katlanmış Protein</h2>
+                    </div>
+                `;
+
+                // Set Primary action to restart simulation
+                primaryBtn.querySelector('span').innerText = 'Yeniden Başlat';
+                primaryBtn.parentElement.style.display = 'block';
+
+                primaryBtn.replaceWith(primaryBtn.cloneNode(true));
+                const restartBtn = document.getElementById('primary-action-btn');
+                restartBtn.addEventListener('click', () => {
+                    location.reload();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
