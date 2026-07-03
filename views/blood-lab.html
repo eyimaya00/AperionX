@@ -108,7 +108,7 @@
         .lab-tray {
             background: #f1f5f9;
             border-radius: 24px;
-            padding: 24px;
+            padding: 28px;
             position: relative;
             border: 2px solid rgba(0, 0, 0, 0.06);
         }
@@ -121,7 +121,7 @@
         /* --- SERUM BOTTLES --- */
         .serum-shelf {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             justify-content: center;
             margin-bottom: 24px;
             flex-wrap: wrap;
@@ -141,19 +141,19 @@
 
         .serum-bottle.active {
             transform: scale(1.15) translateY(-6px);
-            filter: drop-shadow(0 0 12px var(--bottle-color));
+            filter: drop-shadow(0 0 16px var(--bottle-color));
         }
 
         .bottle-body {
-            width: 40px;
-            height: 64px;
+            width: 44px;
+            height: 70px;
             border-radius: 8px 8px 14px 14px;
             position: relative;
             overflow: hidden;
-            border: 2px solid rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(0, 0, 0, 0.12);
         }
 
-        [data-theme="dark"] .bottle-body { border-color: rgba(255, 255, 255, 0.15); }
+        [data-theme="dark"] .bottle-body { border-color: rgba(255, 255, 255, 0.2); }
 
         .bottle-body::before {
             content: '';
@@ -168,21 +168,21 @@
             content: '';
             position: absolute;
             top: 4px; left: 6px;
-            width: 8px; height: 30px;
+            width: 10px; height: 32px;
             background: rgba(255, 255, 255, 0.25);
             border-radius: 4px;
         }
 
         .bottle-cap {
-            width: 20px;
-            height: 10px;
-            background: #94a3b8;
+            width: 24px;
+            height: 12px;
+            background: #64748b;
             border-radius: 4px 4px 0 0;
             margin-bottom: -2px;
         }
 
         .bottle-label {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
             color: var(--text-color);
             text-align: center;
@@ -192,12 +192,13 @@
         .test-slide {
             background: rgba(0, 0, 0, 0.04);
             border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 24px;
             display: flex;
             justify-content: center;
-            gap: 24px;
+            gap: 32px;
             flex-wrap: wrap;
+            position: relative;
         }
 
         [data-theme="dark"] .test-slide {
@@ -209,35 +210,30 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .test-well {
-            width: 72px;
-            height: 72px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #4a1010, #2d0808);
-            border: 3px solid rgba(0, 0, 0, 0.12);
+            background: radial-gradient(circle at 30% 30%, #5c1414, #2d0808);
+            border: 3px solid rgba(0, 0, 0, 0.15);
             cursor: pointer;
             position: relative;
             transition: border-color 0.3s, box-shadow 0.3s;
             overflow: hidden;
         }
 
-        [data-theme="dark"] .test-well { border-color: rgba(255, 255, 255, 0.1); }
+        [data-theme="dark"] .test-well { border-color: rgba(255, 255, 255, 0.15); }
 
-        .test-well:hover { border-color: rgba(220, 38, 38, 0.5); box-shadow: 0 0 12px rgba(220, 38, 38, 0.2); }
+        .test-well:hover { border-color: rgba(255, 255, 255, 0.4); }
         .test-well.dropped { cursor: default; }
 
         .test-well.agglutinated { animation: agglutinate-pulse 1.5s ease infinite; }
 
-        @keyframes agglutinate-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-            50% { box-shadow: 0 0 18px 4px rgba(220, 38, 38, 0.6); }
-        }
-
         .well-label {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
             color: var(--text-secondary);
             text-transform: uppercase;
@@ -251,11 +247,28 @@
             border-radius: 50%;
         }
 
+        /* Droplet animation */
+        .droplet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 0 50% 50% 50%;
+            transform: rotate(45deg);
+            animation: drip 0.5s ease-in forwards;
+            z-index: 10;
+        }
+
+        @keyframes drip {
+            0% { transform: translateY(-50px) rotate(45deg); opacity: 1; }
+            100% { transform: translateY(0) rotate(45deg); opacity: 0; }
+        }
+
         .lab-hint {
             color: var(--text-secondary);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             text-align: center;
             margin-top: 16px;
+            font-weight: 500;
         }
 
         /* --- RESULT PANEL --- */
@@ -313,11 +326,12 @@
             margin-top: 8px;
         }
 
-        /* --- TRANSFUSION GRID --- */
+        /* --- TRANSFUSION GRID & PATIENT INFO --- */
         .transfusion-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+            margin-bottom: 20px;
         }
 
         .blood-bag {
@@ -332,6 +346,7 @@
             cursor: pointer;
             transition: all 0.25s;
             user-select: none;
+            position: relative;
         }
 
         [data-theme="dark"] .blood-bag {
@@ -340,21 +355,25 @@
         }
 
         .blood-bag:hover {
-            border-color: rgba(220, 38, 38, 0.4);
-            background: rgba(220, 38, 38, 0.06);
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.04);
             transform: translateY(-3px);
+        }
+
+        .blood-bag.active-bag {
+            border-color: #6366f1 !important;
+            background: rgba(99, 102, 241, 0.08) !important;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
         }
 
         .blood-bag.compatible {
             border-color: #22c55e !important;
-            background: rgba(34, 197, 94, 0.1) !important;
-            box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.06) !important;
         }
 
         .blood-bag.incompatible {
             border-color: #ef4444 !important;
-            background: rgba(239, 68, 68, 0.1) !important;
-            box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.06) !important;
         }
 
         .bag-icon {
@@ -387,6 +406,69 @@
         .bag-status { font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); }
         .bag-status.safe { color: #22c55e; }
         .bag-status.danger { color: #ef4444; }
+
+        /* --- PATIENT / INFUSION UNIT --- */
+        .infusion-unit {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px dashed rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        [data-theme="dark"] .infusion-unit {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .patient-monitor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .monitor-title {
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .monitor-heartbeat {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #22c55e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .monitor-heartbeat.warning {
+            color: #ef4444;
+            animation: pulse-warn 0.6s infinite alternate;
+        }
+
+        @keyframes pulse-warn {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .iv-line-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .iv-stand-icon {
+            font-size: 2.2rem;
+            color: var(--text-secondary);
+        }
 
         /* --- BUTTONS --- */
         .btn-primary-lab {
@@ -480,7 +562,7 @@
             .lab-tray { padding: 16px; }
             .serum-shelf { gap: 14px; }
             .test-slide { gap: 16px; padding: 14px; }
-            .test-well { width: 60px; height: 60px; }
+            .test-well { width: 68px; height: 68px; }
             .transfusion-grid { grid-template-columns: repeat(2, 1fr); }
             .blood-type-big { font-size: 2.5rem; }
             .microscope-view { height: 160px; }
@@ -488,7 +570,7 @@
         }
 
         @media (max-width: 480px) {
-            .test-well { width: 52px; height: 52px; }
+            .test-well { width: 56px; height: 56px; }
             .serum-shelf { gap: 10px; }
             .bottle-body { width: 34px; height: 54px; }
         }
@@ -552,7 +634,7 @@
                         </div>
 
                         <!-- Test Wells -->
-                        <div class="test-slide">
+                        <div class="test-slide" id="test-slide-area">
                             <div class="test-well-group">
                                 <div class="test-well" id="well-a">
                                     <canvas class="agglutination-canvas" id="canvas-a"></canvas>
@@ -573,14 +655,14 @@
                             </div>
                         </div>
 
-                        <p class="lab-hint">
+                        <p class="lab-hint" id="status-hint">
                             <i class="ph ph-info"></i>
-                            Test kuyucuklarına tıklayarak ilgili serumu damlatın.
+                            Önce yukarıdan bir serum şişesi seçin, ardından altındaki test kuyucuğuna damlatın.
                         </p>
                     </div>
                 </div>
 
-                <!-- Phase 2: Transfusion (hidden initially) -->
+                <!-- Phase 2: Transfusion -->
                 <div id="phase-transfusion" style="display:none;">
                     <span class="phase-badge transfusion">
                         <i class="ph-bold ph-heartbeat"></i>
@@ -588,10 +670,26 @@
                     </span>
 
                     <div class="lab-tray">
-                        <p class="lab-hint" style="margin-bottom:12px;">
-                            Hastaya aşağıdaki kan torbalarından hangilerinin güvenle verilebileceğini test edin.
+                        <p class="lab-hint" style="margin-bottom:12px; margin-top:0;">
+                            Hastaya bağlamak istediğiniz kan torbasını seçin ve serum standını gözlemleyin.
                         </p>
                         <div class="transfusion-grid" id="transfusion-grid"></div>
+
+                        <!-- Infusion Status / Monitor -->
+                        <div class="infusion-unit">
+                            <div class="iv-line-container">
+                                <i class="ph-bold ph-activity iv-stand-icon" id="iv-stand-icon"></i>
+                                <span style="font-size:0.75rem; font-weight:800; color:var(--text-secondary);">Stand</span>
+                            </div>
+                            <div class="patient-monitor">
+                                <span class="monitor-title">Hasta Monitörü</span>
+                                <div class="monitor-heartbeat" id="monitor-heartbeat">
+                                    <i class="ph-bold ph-heart"></i>
+                                    <span id="heartbeat-value">Beklemede</span>
+                                </div>
+                                <span style="font-size:0.8rem; color:var(--text-secondary);" id="infusion-feedback">Kan transfüzyonu başlatılmadı.</span>
+                            </div>
+                        </div>
                     </div>
 
                     <button class="btn-primary-lab" onclick="resetLab()" style="margin-top:8px;">
@@ -684,6 +782,7 @@
         };
 
         let patientType = '';
+        let selectedSerum = null;
         let wellsDropped = { a: false, b: false, d: false };
         let wellReactions = { a: null, b: null, d: null };
         let microscopeAnim = null;
@@ -692,53 +791,93 @@
             patientType = ALL_TYPES[Math.floor(Math.random() * ALL_TYPES.length)];
         }
 
-        // Simplified: clicking a well directly drops the matching serum
-        function dropSerumIntoWell(key) {
-            if (wellsDropped[key]) return;
-            wellsDropped[key] = true;
+        function selectSerumBottle(type) {
+            selectedSerum = type;
+            document.querySelectorAll('.serum-bottle').forEach(b => b.classList.remove('active'));
+            const id = type === 'a' ? 'serum-a' : type === 'b' ? 'serum-b' : 'serum-d';
+            document.getElementById(id).classList.add('active');
 
-            const agglutinates = ANTIGEN[patientType][key];
-            wellReactions[key] = agglutinates;
+            const text = type === 'a' ? 'Anti-A' : type === 'b' ? 'Anti-B' : 'Anti-D (Rh)';
+            document.getElementById('status-hint').innerHTML = `<i class="ph ph-info"></i> Seçildi: <strong>${text}</strong>. Şimdi altındaki kuyucuğa tıklayarak damlatın.`;
+        }
 
-            // Highlight the matching serum bottle briefly
-            const serumId = key === 'a' ? 'serum-a' : key === 'b' ? 'serum-b' : 'serum-d';
-            const serumEl = document.getElementById(serumId);
-            serumEl.classList.add('active');
-            setTimeout(() => serumEl.classList.remove('active'), 800);
-
-            // Well visual
+        function triggerDripAnimation(key, callback) {
             const wellEl = document.getElementById('well-' + key);
-            wellEl.classList.add('dropped');
-            if (agglutinates) wellEl.classList.add('agglutinated');
+            const wellRect = wellEl.getBoundingClientRect();
+            const containerRect = document.getElementById('test-slide-area').getBoundingClientRect();
 
-            // Draw inside well
-            drawWellReaction('canvas-' + key, agglutinates);
+            // Create drip particle
+            const drip = document.createElement('div');
+            drip.className = 'droplet';
+            drip.style.background = key === 'a' ? '#3b82f6' : key === 'b' ? '#eab308' : '#22c55e';
+            
+            // Align directly above the clicked well relative to slide container
+            const leftOffset = (wellRect.left - containerRect.left) + (wellRect.width / 2) - 5;
+            drip.style.left = leftOffset + 'px';
+            drip.style.top = '10px';
 
-            // Update info
+            document.getElementById('test-slide-area').appendChild(drip);
+
+            // Trigger animation end
+            setTimeout(() => {
+                drip.remove();
+                callback();
+            }, 500);
+        }
+
+        function handleWellClick(key) {
             const antiKey = key === 'a' ? 'anti-a' : key === 'b' ? 'anti-b' : 'anti-d';
-            const infoEl = document.getElementById('info-' + antiKey);
-            if (agglutinates) {
-                infoEl.textContent = 'Çökelme ✓';
-                infoEl.style.color = '#ef4444';
-            } else {
-                infoEl.textContent = 'Yok ✗';
-                infoEl.style.color = '#22c55e';
+            
+            if (wellsDropped[key]) return;
+
+            if (selectedSerum !== key) {
+                document.getElementById('status-hint').innerHTML = `<i class="ph ph-warning" style="color:#ef4444;"></i> Lütfen önce yukarıdan eşleşen <strong>Anti-${key.toUpperCase()}</strong> serumunu seçin.`;
+                return;
             }
 
-            // Microscope
-            drawMicroscope(agglutinates);
+            triggerDripAnimation(key, () => {
+                wellsDropped[key] = true;
+                const agglutinates = ANTIGEN[patientType][key];
+                wellReactions[key] = agglutinates;
 
-            // All 3 done?
-            if (wellsDropped.a && wellsDropped.b && wellsDropped.d) {
-                document.getElementById('btn-determine').disabled = false;
-            }
+                // Visual updates
+                const wellEl = document.getElementById('well-' + key);
+                wellEl.classList.add('dropped');
+                if (agglutinates) wellEl.classList.add('agglutinated');
+
+                drawWellReaction('canvas-' + key, agglutinates);
+
+                // Update side panel info
+                const infoEl = document.getElementById('info-' + antiKey);
+                if (agglutinates) {
+                    infoEl.textContent = 'Çökelme ✓';
+                    infoEl.style.color = '#ef4444';
+                } else {
+                    infoEl.textContent = 'Yok ✗';
+                    infoEl.style.color = '#22c55e';
+                }
+
+                // Show live inside microscope
+                drawMicroscope(agglutinates);
+
+                // Deselect bottle
+                selectedSerum = null;
+                document.querySelectorAll('.serum-bottle').forEach(b => b.classList.remove('active'));
+                document.getElementById('status-hint').innerHTML = `<i class="ph ph-info"></i> Damlatma başarılı. Kalan serumları test edin.`;
+
+                // All 3 done? Enable determine button
+                if (wellsDropped.a && wellsDropped.b && wellsDropped.d) {
+                    document.getElementById('btn-determine').disabled = false;
+                    document.getElementById('status-hint').innerHTML = `<i class="ph ph-check" style="color:#22c55e;"></i> Tüm testler bitti. <strong>Kan Grubunu Belirle</strong> butonuna tıklayabilirsiniz.`;
+                }
+            });
         }
 
         function drawWellReaction(canvasId, agglutinates) {
             const canvas = document.getElementById(canvasId);
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width || 72;
-            canvas.height = rect.height || 72;
+            canvas.width = rect.width || 80;
+            canvas.height = rect.height || 80;
             const ctx = canvas.getContext('2d');
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
@@ -746,16 +885,17 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (agglutinates) {
-                for (let i = 0; i < 20; i++) {
+                // Clumped blood cells
+                for (let i = 0; i < 24; i++) {
                     const x = cx + (Math.random() - 0.5) * r * 1.2;
                     const y = cy + (Math.random() - 0.5) * r * 1.2;
                     if (Math.sqrt((x - cx) ** 2 + (y - cy) ** 2) > r - 4) continue;
                     ctx.beginPath();
                     ctx.arc(x, y, 3 + Math.random() * 3, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(220, 38, 38, ${0.7 + Math.random() * 0.3})`;
+                    ctx.fillStyle = `rgba(220, 38, 38, ${0.75 + Math.random() * 0.25})`;
                     ctx.fill();
                 }
-                ctx.strokeStyle = 'rgba(220, 38, 38, 0.4)';
+                ctx.strokeStyle = 'rgba(220, 38, 38, 0.45)';
                 ctx.lineWidth = 1;
                 for (let i = 0; i < 8; i++) {
                     ctx.beginPath();
@@ -764,12 +904,13 @@
                     ctx.stroke();
                 }
             } else {
-                for (let i = 0; i < 30; i++) {
-                    const angle = (i / 30) * Math.PI * 2 + Math.random() * 0.3;
-                    const dist = Math.random() * (r - 5);
+                // Free flowing clean blood cells
+                for (let i = 0; i < 35; i++) {
+                    const angle = (i / 35) * Math.PI * 2 + Math.random() * 0.3;
+                    const dist = Math.random() * (r - 6);
                     ctx.beginPath();
                     ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 2 + Math.random() * 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(153, 27, 27, ${0.5 + Math.random() * 0.3})`;
+                    ctx.fillStyle = `rgba(163, 29, 29, ${0.6 + Math.random() * 0.3})`;
                     ctx.fill();
                 }
             }
@@ -788,15 +929,15 @@
             const label = document.getElementById('microscope-label');
 
             const cells = [];
-            const count = agglutinates ? 40 : 50;
+            const count = agglutinates ? 45 : 55;
             for (let i = 0; i < count; i++) {
                 cells.push({
-                    x: cx + (Math.random() - 0.5) * canvas.width * 0.8,
-                    y: cy + (Math.random() - 0.5) * canvas.height * 0.8,
-                    r: 4 + Math.random() * 4,
-                    vx: (Math.random() - 0.5) * 0.4,
-                    vy: (Math.random() - 0.5) * 0.4,
-                    clump: agglutinates ? (Math.random() > 0.3) : false
+                    x: cx + (Math.random() - 0.5) * canvas.width * 0.85,
+                    y: cy + (Math.random() - 0.5) * canvas.height * 0.85,
+                    r: 4 + Math.random() * 4.5,
+                    vx: (Math.random() - 0.5) * 0.45,
+                    vy: (Math.random() - 0.5) * 0.45,
+                    clump: agglutinates ? (Math.random() > 0.25) : false
                 });
             }
 
@@ -804,14 +945,14 @@
             if (agglutinates) {
                 for (let i = 0; i < 5; i++) {
                     clumpCenters.push({
-                        x: cx + (Math.random() - 0.5) * canvas.width * 0.5,
-                        y: cy + (Math.random() - 0.5) * canvas.height * 0.5
+                        x: cx + (Math.random() - 0.5) * canvas.width * 0.45,
+                        y: cy + (Math.random() - 0.5) * canvas.height * 0.45
                     });
                 }
-                label.textContent = '🔴 Çökelme (Aglütinasyon) Tespit Edildi';
+                label.textContent = '🔴 Antikor Bağlanması (Aglütinasyon)';
                 label.style.color = '#ef4444';
             } else {
-                label.textContent = '🟢 Çökelme Yok — Hücreler Serbest';
+                label.textContent = '🟢 Normal Serbest Kan Hücreleri';
                 label.style.color = '#22c55e';
             }
 
@@ -835,16 +976,17 @@
                             const d = Math.sqrt((cell.x - c.x) ** 2 + (cell.y - c.y) ** 2);
                             if (d < minDist) { minDist = d; nearest = c; }
                         });
-                        cell.vx += (nearest.x - cell.x) * 0.002;
-                        cell.vy += (nearest.y - cell.y) * 0.002;
-                        cell.vx *= 0.98;
-                        cell.vy *= 0.98;
+                        cell.vx += (nearest.x - cell.x) * 0.003;
+                        cell.vy += (nearest.y - cell.y) * 0.003;
+                        cell.vx *= 0.97;
+                        cell.vy *= 0.97;
                     }
                     cell.x += cell.vx;
                     cell.y += cell.vy;
                     const dist = Math.sqrt((cell.x - cx) ** 2 + (cell.y - cy) ** 2);
                     if (dist > Math.min(cx, cy) - cell.r - 3) { cell.vx *= -0.8; cell.vy *= -0.8; }
 
+                    // Erythrocyte design
                     ctx.beginPath();
                     ctx.arc(cell.x, cell.y, cell.r, 0, Math.PI * 2);
                     ctx.fillStyle = cell.clump ? 'rgba(239, 68, 68, 0.85)' : 'rgba(185, 28, 28, 0.7)';
@@ -855,7 +997,7 @@
                     ctx.fill();
                 });
 
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
@@ -889,7 +1031,7 @@
 
             buildTransfusionGrid(determined);
             drawMicroscope(false);
-            document.getElementById('microscope-label').textContent = 'Bir kan torbası seçerek uyumu test edin';
+            document.getElementById('microscope-label').textContent = 'Bir kan torbası seçerek transfüzyonu başlatın';
             document.getElementById('microscope-label').style.color = '';
         }
 
@@ -904,27 +1046,58 @@
                 bag.innerHTML = `
                     <div class="bag-icon"></div>
                     <span class="bag-label">${type}</span>
-                    <span class="bag-status">Test et</span>
+                    <span class="bag-status">Bağla</span>
                 `;
                 bag.addEventListener('click', () => {
-                    if (bag.classList.contains('compatible') || bag.classList.contains('incompatible')) return;
+                    // Reset all bags classes
+                    document.querySelectorAll('.blood-bag').forEach(b => {
+                        b.classList.remove('active-bag', 'compatible', 'incompatible');
+                        b.querySelector('.bag-status').className = 'bag-status';
+                        b.querySelector('.bag-status').textContent = 'Bağla';
+                    });
+
+                    // Set active bag visual
+                    bag.classList.add('active-bag');
+
+                    // INFUSION ANIMATION & FEEDBACK
                     const isCompat = compatible.includes(type);
                     const statusEl = bag.querySelector('.bag-status');
-                    if (isCompat) {
-                        bag.classList.add('compatible');
-                        statusEl.textContent = '✓ Uyumlu';
-                        statusEl.className = 'bag-status safe';
-                        drawMicroscope(false);
-                        document.getElementById('microscope-label').textContent = `${type} → Uyumlu — Hücreler Serbest Akıyor`;
-                        document.getElementById('microscope-label').style.color = '#22c55e';
-                    } else {
-                        bag.classList.add('incompatible');
-                        statusEl.textContent = '✗ Uyumsuz';
-                        statusEl.className = 'bag-status danger';
-                        drawMicroscope(true);
-                        document.getElementById('microscope-label').textContent = `${type} → Uyumsuz — Aglütinasyon Reaksiyonu!`;
-                        document.getElementById('microscope-label').style.color = '#ef4444';
-                    }
+                    const heartbeatEl = document.getElementById('monitor-heartbeat');
+                    const feedbackEl = document.getElementById('infusion-feedback');
+                    const heartbeatValue = document.getElementById('heartbeat-value');
+
+                    feedbackEl.textContent = `${type} kan torbası IV hattına bağlandı, kan aktarılıyor...`;
+                    heartbeatValue.textContent = 'Analiz ediliyor';
+
+                    setTimeout(() => {
+                        if (isCompat) {
+                            bag.classList.remove('active-bag');
+                            bag.classList.add('compatible');
+                            statusEl.textContent = '✓ Uyumlu';
+                            statusEl.className = 'bag-status safe';
+                            
+                            heartbeatEl.className = 'monitor-heartbeat';
+                            heartbeatValue.textContent = '76 BPM (Stabil)';
+                            feedbackEl.textContent = `Transfüzyon Başarılı! ${type} grubu hastanın kan grubuyla tam uyumlu çıktı.`;
+
+                            drawMicroscope(false);
+                            document.getElementById('microscope-label').textContent = `Mikroskop: Verici (${type}) -> Alıcı (${pt}) Uyumlu. Hücreler Serbest.`;
+                            document.getElementById('microscope-label').style.color = '#22c55e';
+                        } else {
+                            bag.classList.remove('active-bag');
+                            bag.classList.add('incompatible');
+                            statusEl.textContent = '✗ Uyumsuz';
+                            statusEl.className = 'bag-status danger';
+
+                            heartbeatEl.className = 'monitor-heartbeat warning';
+                            heartbeatValue.textContent = '124 BPM (Kritik)';
+                            feedbackEl.innerHTML = `<strong style="color:#ef4444;">UYARI:</strong> ${type} grubu hastayla uyumsuz! Bağışıklık sistemi çökelme reaksiyonu başlattı.`;
+
+                            drawMicroscope(true);
+                            document.getElementById('microscope-label').textContent = `Mikroskop: Verici (${type}) -> Alıcı (${pt}) Eşleşmesinde Ağır Aglütinasyon!`;
+                            document.getElementById('microscope-label').style.color = '#ef4444';
+                        }
+                    }, 1000);
                 });
                 grid.appendChild(bag);
             });
@@ -945,27 +1118,41 @@
                 el.textContent = '—';
                 el.style.color = '';
             });
+            
             document.getElementById('result-type').textContent = '?';
             document.getElementById('result-label').textContent = 'Kan grubu henüz belirlenmedi';
             document.getElementById('btn-determine').disabled = true;
             document.getElementById('btn-determine').style.display = '';
             document.getElementById('phase-analysis').style.display = '';
             document.getElementById('phase-transfusion').style.display = 'none';
+
+            // Reset infusion monitor
+            document.getElementById('monitor-heartbeat').className = 'monitor-heartbeat';
+            document.getElementById('heartbeat-value').textContent = 'Beklemede';
+            document.getElementById('infusion-feedback').textContent = 'Kan transfüzyonu başlatılmadı.';
+
             if (microscopeAnim) cancelAnimationFrame(microscopeAnim);
             const mc = document.getElementById('microscope-canvas');
             mc.getContext('2d').clearRect(0, 0, mc.width, mc.height);
             document.getElementById('microscope-label').textContent = 'Mikroskop Görüntüsü';
             document.getElementById('microscope-label').style.color = '';
+            document.getElementById('status-hint').innerHTML = `<i class="ph ph-info"></i> Önce yukarıdan bir serum şişesi seçin, ardından altındaki test kuyucuğuna damlatın.`;
+            
             pickRandomPatient();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             pickRandomPatient();
 
-            // Bind well clicks
-            document.getElementById('well-a').addEventListener('click', () => dropSerumIntoWell('a'));
-            document.getElementById('well-b').addEventListener('click', () => dropSerumIntoWell('b'));
-            document.getElementById('well-d').addEventListener('click', () => dropSerumIntoWell('d'));
+            // Bind serum bottles
+            document.getElementById('serum-a').addEventListener('click', () => selectSerumBottle('a'));
+            document.getElementById('serum-b').addEventListener('click', () => selectSerumBottle('b'));
+            document.getElementById('serum-d').addEventListener('click', () => selectSerumBottle('d'));
+
+            // Bind wells
+            document.getElementById('well-a').addEventListener('click', () => handleWellClick('a'));
+            document.getElementById('well-b').addEventListener('click', () => handleWellClick('b'));
+            document.getElementById('well-d').addEventListener('click', () => handleWellClick('d'));
 
             // Bind determine button
             document.getElementById('btn-determine').addEventListener('click', determineBloodType);
