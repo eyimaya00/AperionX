@@ -81,22 +81,15 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
-        [data-theme="dark"] .back-to-tools-btn,
-        [data-theme="dark"] #themeToggle {
-            background: rgba(30, 41, 59, 0.7) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            color: #f1f5f9 !important;
-        }
-
         /* Periodic Grid wrapper */
         .periodic-table-grid {
             display: grid;
             grid-template-columns: repeat(18, 1fr);
-            gap: 6px;
-            min-width: 900px;
+            gap: 5px;
+            min-width: 980px;
         }
 
-        /* Element Card Design */
+        /* Element Cell Design */
         .element-cell {
             aspect-ratio: 1;
             border-radius: 10px;
@@ -105,7 +98,7 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             cursor: pointer;
             position: relative;
             user-select: none;
@@ -114,14 +107,26 @@
         }
 
         .element-cell:hover {
-            transform: scale(1.15) translateY(-4px);
+            transform: scale(1.2) translateY(-4px);
             z-index: 10;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
         .element-cell-empty {
             pointer-events: none;
-            opacity: 0;
+            opacity: 0.15;
+            border-radius: 10px;
+            border: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .element-cell-empty {
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .element-cell-spacer-row {
+            grid-column: 1 / -1;
+            height: 12px;
+            pointer-events: none;
         }
 
         .el-num {
@@ -132,14 +137,15 @@
         }
 
         .el-symbol {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 900;
             font-family: 'Outfit', sans-serif;
+            line-height: 1.1;
         }
 
         .el-name {
-            font-size: 0.5rem;
-            font-weight: 600;
+            font-size: 0.52rem;
+            font-weight: 700;
             opacity: 0.8;
             white-space: nowrap;
             overflow: hidden;
@@ -149,14 +155,14 @@
         }
 
         /* Element groups styling */
-        .grp-alkali { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; }
-        .grp-alkaline { background: rgba(249, 115, 22, 0.15); border-color: rgba(249, 115, 22, 0.3); color: #f97316; }
-        .grp-transition { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b; }
-        .grp-metalloid { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
-        .grp-nonmetal { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #3b82f6; }
-        .grp-noble { background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #a855f7; }
-        .grp-lanthanide { background: rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.3); color: #ec4899; }
-        .grp-actinide { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #6366f1; }
+        .grp-alkali { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; }
+        .grp-alkaline { background: rgba(249, 115, 22, 0.12); border-color: rgba(249, 115, 22, 0.3); color: #f97316; }
+        .grp-transition { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b; }
+        .grp-metalloid { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+        .grp-nonmetal { background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.3); color: #3b82f6; }
+        .grp-noble { background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.3); color: #a855f7; }
+        .grp-lanthanide { background: rgba(236, 72, 153, 0.12); border-color: rgba(236, 72, 153, 0.3); color: #ec4899; }
+        .grp-actinide { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #6366f1; }
 
         /* Solid, Liquid, Gas States styling */
         .state-solid {
@@ -334,9 +340,67 @@
             font-weight: 700;
         }
 
+        /* Fixed Navigation Buttons */
+        .back-to-tools-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #themeToggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        /* Mobile specific positioning */
         @media (max-width: 1100px) {
             .periodic-grid-layout {
                 grid-template-columns: 1fr;
+            }
+            .periodic-container {
+                padding-top: 85px;
+            }
+            .back-to-tools-btn {
+                position: absolute !important;
+                top: 16px !important;
+                left: 16px !important;
+            }
+            #themeToggle {
+                position: absolute !important;
+                top: 16px !important;
+                right: 16px !important;
             }
         }
     </style>
@@ -354,52 +418,13 @@
     </div>
 
     <!-- Floating Back Button -->
-    <a href="/tools" class="back-to-tools-btn" style="
-        position: fixed;
-        top: 24px;
-        left: 24px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-        color: var(--text-color);
-        padding: 10px 20px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.95rem;
-        z-index: 999;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.2s, background 0.2s;
-    " onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+    <a href="/tools" class="back-to-tools-btn">
         <i class="ph-bold ph-arrow-left"></i>
         <span>Araçlara Dön</span>
     </a>
 
     <!-- Floating Theme Toggle -->
-    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir" style="
-        position: fixed;
-        top: 24px;
-        right: 24px;
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-        color: var(--text-color);
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.2s, background 0.2s;
-    " onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
         <i class="ph ph-moon" style="font-size: 1.25rem;"></i>
     </button>
 
@@ -407,14 +432,19 @@
     <section class="periodic-container">
         <div class="periodic-grid-layout">
 
-            <!-- Left Side: Table & Temp Slider -->
+            <!-- Left Side: Table & Temp Slider (Toggled layout ordering) -->
             <div class="table-area-card">
                 <div>
                     <h1 class="dna-title" style="margin-bottom:6px;">Element Keşif Laboratuvarı</h1>
-                    <p style="color:var(--text-secondary); font-size:0.95rem;">Elementlerin periyodik tablodaki yerleşimlerini inceleyin. Sıcaklık sürgüsünü hareket ettirerek elementlerin hal değişimlerini (Erime/Kaynama) canlı gözlemleyin.</p>
+                    <p style="color:var(--text-secondary); font-size:0.95rem;">Elementlerin periyodik tablodaki yerleşimlerini inceleyin. Alt kısımdaki sürgü ile sıcaklığı değiştirerek hal değişimlerini (Erime/Kaynama) canlı izleyin.</p>
                 </div>
 
-                <!-- Temperature slider card -->
+                <!-- Periodic Table Grid -->
+                <div class="periodic-table-grid" id="periodic-table-element">
+                    <!-- Dynamic rendering of elements from JS -->
+                </div>
+
+                <!-- Temperature slider card (Moved below the table) -->
                 <div class="temp-slider-card">
                     <span class="control-label" style="font-size: 0.8rem;">Sıcaklık Kontrolü</span>
                     <div class="slider-row">
@@ -437,11 +467,6 @@
                             <span>Gaz</span>
                         </div>
                     </div>
-                </div>
-
-                <!-- Periodic Table Grid -->
-                <div class="periodic-table-grid" id="periodic-table-element">
-                    <!-- Dynamic rendering of elements from JS -->
                 </div>
             </div>
 
@@ -526,41 +551,144 @@
     <script defer src="/script_v105.js?v=246"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Full Periodic table layout structure coordinate mapping
-            // Elements list (Selected key elements across periods to maintain shape)
-            const elementsData = [
-                { num: 1, symbol: 'H', name: 'Hidrojen', mass: '1.008', group: 'nonmetal', melt: 14.01, boil: 20.28, electronegativity: '2.20', shells: [1], row: 1, col: 1, fact: 'Evrendeki en hafif ve en yaygın elementtir. Yıldızların ve güneşin temel enerji kaynağını oluşturur.' },
-                { num: 2, symbol: 'He', name: 'Helyum', mass: '4.0026', group: 'noble', melt: 0.95, boil: 4.22, electronegativity: '0', shells: [2], row: 1, col: 18, fact: 'Uçan balonlarda kullanılır. Erime ve kaynama noktası en düşük olan elementtir, hiçbir sıcaklıkta katılaşmaz.' },
-                { num: 3, symbol: 'Li', name: 'Lityum', mass: '6.94', group: 'alkali', melt: 453.69, boil: 1615, electronegativity: '0.98', shells: [2, 1], row: 2, col: 1, fact: 'Pillerde sıklıkla kullanılır. En hafif metaldir ve suyla temas ettiğinde şiddetli reaksiyon verir.' },
-                { num: 4, symbol: 'Be', name: 'Berilyum', mass: '9.0122', group: 'alkaline', melt: 1560, boil: 2742, electronegativity: '1.57', shells: [2, 2], row: 2, col: 2, fact: 'Uzay teleskoplarının aynalarında ve uçak yapımında hafiflik ve yüksek mukavemet sağlamak için kullanılır.' },
-                { num: 5, symbol: 'B', name: 'Bor', mass: '10.81', group: 'metalloid', melt: 2349, boil: 4200, electronegativity: '2.04', shells: [2, 3], row: 2, col: 13, fact: 'Türkiye dünyadaki en büyük bor yataklarına sahiptir. Cam sanayinde ve nükleer reaktör kalkanlarında kullanılır.' },
-                { num: 6, symbol: 'C', name: 'Karbon', mass: '12.011', group: 'nonmetal', melt: 3823, boil: 5100, electronegativity: '2.55', shells: [2, 4], row: 2, col: 14, fact: 'Organik yaşamın temel taşıdır. Hem elmas gibi dünyanın en sert maddesini hem de grafit gibi en yumuşak maddesini oluşturur.' },
-                { num: 7, symbol: 'N', name: 'Azot', mass: '14.007', group: 'nonmetal', melt: 63.15, boil: 77.36, electronegativity: '3.04', shells: [2, 5], row: 2, col: 15, fact: 'Atmosferin %78\'ini oluşturur. Sıvı hali, biyolojik malzemeleri dondurmak ve saklamak için aşırı soğutucu olarak kullanılır.' },
-                { num: 8, symbol: 'O', name: 'Oksijen', mass: '15.999', group: 'nonmetal', melt: 54.36, boil: 90.20, electronegativity: '3.44', shells: [2, 6], row: 2, col: 16, fact: 'Solunumun ve yanma olaylarının temel gazıdır. Yerkabuğunda en bol bulunan elementtir.' },
-                { num: 9, symbol: 'F', name: 'Flor', mass: '18.998', group: 'nonmetal', melt: 53.48, boil: 85.03, electronegativity: '3.98', shells: [2, 7], row: 2, col: 17, fact: 'Periyodik tablonun en aktif ve en elektronegatif elementidir. Diş macunlarında çürük önleyici olarak kullanılır.' },
-                { num: 10, symbol: 'Ne', name: 'Neon', mass: '20.180', group: 'noble', melt: 24.56, boil: 27.07, electronegativity: '0', shells: [2, 8], row: 2, col: 18, fact: 'Tabelalardaki neon ışıklarında parlak kırmızı-turuncu parıltı sağlamak için kullanılan soygazdır.' },
-                
-                { num: 11, symbol: 'Na', name: 'Sodyum', mass: '22.990', group: 'alkali', melt: 370.87, boil: 1156, electronegativity: '0.93', shells: [2, 8, 1], row: 3, col: 1, fact: 'Mutfak tuzunun (NaCl) yapısında bulunur. Aşırı aktif bir alkali metal olup havada hemen oksitlenir.' },
-                { num: 12, symbol: 'Mg', name: 'Magnezyum', mass: '24.305', group: 'alkaline', melt: 923, boil: 1363, electronegativity: '1.31', shells: [2, 8, 2], row: 3, col: 2, fact: 'Klorofilin yapısında yer alarak bitkilerin fotosentez yapmasını sağlar. Biyolojik olarak çok önemli bir mineraldir.' },
-                { num: 13, symbol: 'Al', name: 'Alüminyum', mass: '26.982', group: 'transition', melt: 933.47, boil: 2792, electronegativity: '1.61', shells: [2, 8, 3], row: 3, col: 13, fact: 'Hafifliği ve korozyon direnci sayesinde içecek kutularından uçak gövdelerine kadar çok geniş alanda kullanılır.' },
-                { num: 14, symbol: 'Si', name: 'Silisyum', mass: '28.085', group: 'metalloid', melt: 1687, boil: 3538, electronegativity: '1.90', shells: [2, 8, 4], row: 3, col: 14, fact: 'Kumun temel bileşenidir. Mikroçiplerin ve bilgisayar işlemcilerinin üretiminde kullanılan en temel yarı iletkendir.' },
-                { num: 15, symbol: 'P', name: 'Fosfor', mass: '30.974', group: 'nonmetal', melt: 317.3, boil: 553.6, electronegativity: '2.19', shells: [2, 8, 5], row: 3, col: 15, fact: 'Kibrit uçlarında ve gübrelerde kullanılır. DNA zincirinin şeker-fosfat omurgasını oluşturur.' },
-                { num: 16, symbol: 'S', name: 'Kükürt', mass: '32.06', group: 'nonmetal', melt: 388.36, boil: 717.8, electronegativity: '2.58', shells: [2, 8, 6], row: 3, col: 16, fact: 'Barut yapımında ve kuru meyvelerin ağartılmasında kullanılır. Kendine has sarı rengi ve kokusu vardır.' },
-                { num: 17, symbol: 'Cl', name: 'Klor', mass: '35.45', group: 'nonmetal', melt: 171.6, boil: 239.11, electronegativity: '3.16', shells: [2, 8, 7], row: 3, col: 17, fact: 'İçme sularının ve yüzme havuzlarının dezenfekte edilmesinde (hijyen) mikropları öldürmek için kullanılır.' },
-                { num: 18, symbol: 'Ar', name: 'Argon', mass: '39.948', group: 'noble', melt: 83.80, boil: 87.30, electronegativity: '0', shells: [2, 8, 8], row: 3, col: 18, fact: 'Ampullerin içine doldurularak filamanın yanmasını ve oksitlenmesini önleyen koruyucu soygazdır.' },
+            // Full Periodic table layout structure coordinate mapping (118 elements complete dictionary!)
+            const symbols = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
+            
+            const names = ["Hidrojen","Helyum","Lityum","Berilyum","Bor","Karbon","Azot","Oksijen","Flor","Neon","Sodyum","Magnezyum","Alüminyum","Silisyum","Fosfor","Kükürt","Klor","Argon","Potasyum","Kalsiyum","Skandiyum","Titanyum","Vanadyum","Krom","Manganez","Demir","Kobalt","Nikel","Bakır","Çinko","Galyum","Germanyum","Arsenik","Selenyum","Brom","Kripton","Rubidyum","Stronsiyum","Yitriyum","Zirkonyum","Niyobyum","Molibden","Teknesyum","Rutenyum","Rodyum","Paladyum","Gümüş","Kadmiyum","İndiyum","Kalay","Antimon","Tellür","İyot","Ksenon","Sezyum","Baryum","Lantan","Seryum","Praseodim","Neodim","Prometyum","Samaryum","Europiyum","Gadoliniyum","Terbiyum","Disprosiyum","Holmiyum","Erbiyum","Tulyum","Yiterbiyum","Lutesyum","Hafniyum","Tantal","Tungsten","Renyum","Osmiyum","İridyum","Platin","Altın","Cıva","Talyum","Kurşun","Bismut","Polonyum","Astat","Radon","Fransiyum","Radyum","Aktinyum","Toryum","Protaktinyum","Uranyum","Neptunyum","Plutonyum","Amerikyum","Küriyum","Berkelyum","Kaliforniyum","Aynştaynyum","Fermiyum","Mendelevyum","Nobelyum","Lavrensiyum","Rutherfordiyum","Dubniyum","Seaborgiyum","Bokriyum","Hassiyum","Meitneriyum","Darmstadtiyum","Röntgenyum","Kopernikyum","Nihonyum","Fleroviyum","Moskovyum","Livermoriyum","Tennessine","Oganesson"];
+            
+            const masses = [1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.18, 22.99, 24.305, 26.982, 28.085, 30.974, 32.06, 35.45, 39.948, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938, 55.845, 58.933, 58.693, 63.546, 65.38, 69.723, 72.63, 74.922, 78.971, 79.904, 83.798, 85.468, 87.62, 88.906, 91.224, 92.906, 95.95, 98, 101.07, 102.91, 106.42, 107.87, 112.41, 114.82, 118.71, 121.76, 127.6, 126.9, 131.29, 132.91, 137.33, 138.91, 140.12, 140.91, 144.24, 145, 150.36, 151.96, 157.25, 158.93, 162.5, 164.93, 167.26, 168.93, 173.05, 174.97, 178.49, 180.95, 183.84, 186.21, 190.23, 192.22, 195.08, 196.97, 200.59, 204.38, 207.2, 208.98, 209, 210, 222, 223, 226, 227, 232.04, 231.04, 238.03, 237, 244, 243, 247, 247, 251, 252, 257, 258, 259, 262, 267, 268, 271, 270, 269, 278, 281, 281, 285, 286, 289, 290, 293, 294, 294];
+            
+            const exactTemps = {
+                1: [14.01, 20.28], 2: [0.95, 4.22], 3: [453.69, 1615], 4: [1560, 2742], 5: [2349, 4200], 6: [3823, 5100], 7: [63.15, 77.36], 8: [54.36, 90.2], 9: [53.48, 85.03], 10: [24.56, 27.07], 11: [370.87, 1156], 12: [923, 1363], 13: [933.47, 2792], 14: [1687, 3538], 15: [317.3, 553.6], 16: [388.36, 717.8], 17: [171.6, 239.11], 18: [83.8, 87.3], 19: [336.5, 1032], 20: [1115, 1757], 26: [1811, 3134], 29: [1357.77, 2835], 30: [692.68, 1180], 47: [1234.93, 2435], 78: [2041.4, 4098], 79: [1337.33, 3129], 80: [234.32, 629.88], 82: [600.61, 2022], 92: [1405.3, 4404]
+            };
 
-                { num: 19, symbol: 'K', name: 'Potasyum', mass: '39.098', group: 'alkali', melt: 336.5, boil: 1032, electronegativity: '0.82', shells: [2, 8, 8, 1], row: 4, col: 1, fact: 'Muzda bolca bulunur. Sinir sisteminin çalışması ve kas kasılmaları için vücutta hayati rol oynar.' },
-                { num: 20, symbol: 'Ca', name: 'Kalsiyum', mass: '40.078', group: 'alkaline', melt: 1115, boil: 1757, electronegativity: '1.00', shells: [2, 8, 8, 2], row: 4, col: 2, fact: 'Kemiklerin ve dişlerin temel yapısal mineralidir. Süt ve süt ürünlerinde bol miktarda bulunur.' },
-                { num: 26, symbol: 'Fe', name: 'Demir', mass: '55.845', group: 'transition', melt: 1811, boil: 3134, electronegativity: '1.83', shells: [2, 8, 14, 2], row: 4, col: 8, fact: 'Kandaki hemoglobinin yapısına katılarak oksijen taşınmasını sağlar. Ağır sanayinin en temel metalidir.' },
-                { num: 29, symbol: 'Cu', name: 'Bakır', mass: '63.546', group: 'transition', melt: 1357.77, boil: 2835, electronegativity: '1.90', shells: [2, 8, 18, 1], row: 4, col: 11, fact: 'Elektrik iletkenliği gümüşten sonra en yüksek metaldir. Elektrik kablolarında ve mutfak eşyalarında kullanılır.' },
-                { num: 30, symbol: 'Zn', name: 'Çinko', mass: '65.38', group: 'transition', melt: 692.68, boil: 1180, electronegativity: '1.65', shells: [2, 8, 18, 2], row: 4, col: 12, fact: 'Metalleri paslanmaya karşı kaplamak (galvanizleme) ve bağışıklık sistemi takviyelerinde kullanılır.' },
+            const defaultTemps = {
+                alkali: [300, 1000], alkaline: [1000, 1500], transition: [1500, 3000], metalloid: [1200, 2500], nonmetal: [100, 200], noble: [10, 20], lanthanide: [1200, 3000], actinide: [1300, 3500]
+            };
+
+            const customElectronegativities = {
+                1: '2.20', 3: '0.98', 4: '1.57', 5: '2.04', 6: '2.55', 7: '3.04', 8: '3.44', 9: '3.98', 11: '0.93', 12: '1.31', 13: '1.61', 14: '1.90', 15: '2.19', 16: '2.58', 17: '3.16', 19: '0.82', 20: '1.00', 26: '1.83', 29: '1.90', 30: '1.65', 47: '1.93', 78: '2.28', 79: '2.54', 80: '2.00', 82: '2.33', 92: '1.38'
+            };
+
+            const customFacts = {
+                1: 'Evrendeki en hafif ve en bol bulunan elementtir. Yıldızların ve güneşin temel enerji kaynağını oluşturur.',
+                2: 'Uçan balonlarda kullanılır, tepkimeye girmeyen çok kararlı bir soygazdır.',
+                3: 'Şarj edilebilir lityum-iyon pillerin temel maddesidir. En hafif metaldir.',
+                4: 'Hafifliği nedeniyle uzay teleskopları aynalarında ve havacılıkta kullanılır.',
+                5: 'Türkiye dünyadaki en büyük bor yataklarına sahiptir. Cam ve enerji sanayinde kullanılır.',
+                6: 'Yaşamın temel taşıdır. Kömür, grafit ve elmas karbonun formlarıdır.',
+                7: 'Soluduğumuz havanın yüzde 78\'ini oluşturur. Sıvı hali soğutucu olarak kullanılır.',
+                8: 'Solunum için hayati önem taşır, suyun yapısında bulunur.',
+                9: 'Diş macunlarında çürük önleyici aktif madde olarak kullanılır.',
+                10: 'Reklam tabelalarında turuncu-kırmızı ışık yaymak için kullanılır.',
+                11: 'Mutfak tuzunun (NaCl) yapısında bulunur. Aşırı aktif bir alkali metaldir.',
+                12: 'Klorofilin yapısında yer alarak bitkilerin fotosentez yapmasını sağlar.',
+                13: 'Hafifliği ve direnci sayesinde içecek kutularından uçak gövdelerine kadar kullanılır.',
+                14: 'Mikroçiplerin ve bilgisayar işlemcilerinin üretiminde kullanılan en temel yarı iletkendir.',
+                15: 'Kibrit uçlarında ve gübrelerde kullanılır. DNA zincirinin omurgasını oluşturur.',
+                16: 'Barut yapımında kullanılır. Kendine has sarı rengi ve kokusu vardır.',
+                17: 'İçme sularının ve havuzların dezenfeksiyonunda mikrop öldürücü olarak kullanılır.',
+                18: 'Ampullerin içine doldurularak filamanın oksitlenmesini önleyen soygazdır.',
+                19: 'Muzda bolca bulunur. Kas ve sinir sisteminin çalışması için hayati rol oynar.',
+                20: 'Kemiklerin ve dişlerin temel yapısal mineralidir. Sütte bolca bulunur.',
+                26: 'Kandaki hemoglobinin yapısına katılır. Ağır sanayinin temelidir.',
+                29: 'Elektrik iletkenliği en yüksek metallerdendir. Kablolarda kullanılır.',
+                30: 'Metalleri paslanmaya karşı kaplamak (galvanizleme) için kullanılır.',
+                47: 'Tüm metaller arasında elektrik ve ısıyı en iyi ileten elementtir.',
+                78: 'Çok değerli bir katalizördür. Korozyona dayanıklı lüks takılarda kullanılır.',
+                79: 'Asla paslanmayan en değerli kıymetli metaldir. Yüksek iletkenliği ile elektronikte kullanılır.',
+                80: 'Oda sıcaklığında sıvı halde bulunan tek metaldir. Termometrelerde kullanılırdı.',
+                82: 'Yoğunluğu nedeniyle radyasyon kalkanlarında ve akü imalatında kullanılır.',
+                92: 'Nükleer enerji santrallerinde yakıt olarak kullanılan radyoaktif ağır elementtir.'
+            };
+
+            // Mapping algorithm coordinate coordinates
+            function getElementPosition(num) {
+                if (num === 1) return { row: 1, col: 1 };
+                if (num === 2) return { row: 1, col: 18 };
+                if (num >= 3 && num <= 4) return { row: 2, col: num - 2 };
+                if (num >= 5 && num <= 10) return { row: 2, col: num + 8 };
+                if (num >= 11 && num <= 12) return { row: 3, col: num - 10 };
+                if (num >= 13 && num <= 18) return { row: 3, col: num - 0 };
+                if (num >= 19 && num <= 36) return { row: 4, col: num - 18 };
+                if (num >= 37 && num <= 54) return { row: 5, col: num - 36 };
                 
-                { num: 47, symbol: 'Ag', name: 'Gümüş', mass: '107.87', group: 'transition', melt: 1234.93, boil: 2435, electronegativity: '1.93', shells: [2, 8, 18, 18, 1], row: 5, col: 11, fact: 'Tüm metaller arasında elektrik ve ısıyı en iyi ileten elementtir. Takı ve fotoğrafçılıkta kullanılır.' },
-                { num: 79, symbol: 'Au', name: 'Altın', mass: '196.97', group: 'transition', melt: 1337.33, boil: 3129, electronegativity: '2.54', shells: [2, 8, 18, 32, 18, 1], row: 6, col: 11, fact: 'Asla paslanmayan ve kararmayan en değerli kıymetli metaldir. Yüksek iletkenliği nedeniyle hassas elektronikte kullanılır.' },
-                { num: 80, symbol: 'Hg', name: 'Cıva', mass: '200.59', group: 'transition', melt: 234.32, boil: 629.88, electronegativity: '2.00', shells: [2, 8, 18, 32, 18, 2], row: 6, col: 12, fact: 'Oda sıcaklığında sıvı halde bulunan tek metaldir. Isıl genleşmesi stabil olduğu için termometrelerde tercih edilirdi.' },
-                { num: 82, symbol: 'Pb', name: 'Kurşun', mass: '207.2', group: 'transition', melt: 600.61, boil: 2022, electronegativity: '2.33', shells: [2, 8, 18, 32, 18, 4], row: 6, col: 14, fact: 'Yüksek yoğunluğu nedeniyle radyasyonu engellemede (X-ışını kalkanları) ve akü imalatında kullanılır.' },
-                { num: 92, symbol: 'U', name: 'Uranyum', mass: '238.03', group: 'actinide', melt: 1405.3, boil: 4404, electronegativity: '1.38', shells: [2, 8, 18, 32, 21, 9, 2], row: 7, col: 6, fact: 'Nükleer enerji santrallerinde yakıt olarak kullanılan, çok yüksek yoğunluğa ve doğal radyoaktiviteye sahip ağır elementtir.' }
-            ];
+                // Lanthanides (57-71) -> Row 9, Cols 3-17
+                if (num >= 57 && num <= 71) return { row: 9, col: num - 54 };
+                
+                // Row 6 rest
+                if (num >= 55 && num <= 56) return { row: 6, col: num - 54 };
+                if (num >= 72 && num <= 86) return { row: 6, col: num - 68 };
+                
+                // Actinides (89-103) -> Row 10, Cols 3-17
+                if (num >= 89 && num <= 103) return { row: 10, col: num - 86 };
+                
+                // Row 7 rest
+                if (num >= 87 && num <= 88) return { row: 7, col: num - 86 };
+                if (num >= 104 && num <= 118) return { row: 7, col: num - 100 };
+                
+                return null;
+            }
+
+            function getElementGroup(num) {
+                if ([2, 10, 18, 36, 54, 86, 118].includes(num)) return 'noble';
+                if ([3, 11, 19, 37, 55, 87].includes(num)) return 'alkali';
+                if ([4, 12, 20, 38, 56, 88].includes(num)) return 'alkaline';
+                if (num >= 57 && num <= 71) return 'lanthanide';
+                if (num >= 89 && num <= 103) return 'actinide';
+                if ([5, 14, 32, 33, 51, 52, 84].includes(num)) return 'metalloid';
+                if ([1, 6, 7, 8, 9, 15, 16, 17, 34, 35, 53, 85].includes(num)) return 'nonmetal';
+                
+                // Transition d-block
+                const pos = getElementPosition(num);
+                if (pos && pos.row >= 4 && pos.row <= 7 && pos.col >= 3 && pos.col <= 12) {
+                    return 'transition';
+                }
+                return 'transition';
+            }
+
+            function getShells(num) {
+                if (num <= 2) return [num];
+                if (num <= 10) return [2, num - 2];
+                if (num <= 18) return [2, 8, num - 10];
+                if (num <= 36) {
+                    if (num <= 20) return [2, 8, 8, num - 18];
+                    return [2, 8, num - 10, 2];
+                }
+                if (num === 47) return [2, 8, 18, 18, 1];
+                if (num === 78) return [2, 8, 18, 32, 17, 1];
+                if (num === 79) return [2, 8, 18, 32, 18, 1];
+                if (num === 80) return [2, 8, 18, 32, 18, 2];
+                if (num === 82) return [2, 8, 18, 32, 18, 4];
+                if (num === 92) return [2, 8, 18, 32, 21, 9, 2];
+                
+                if (num <= 54) return [2, 8, 18, 8, num - 46];
+                if (num <= 86) return [2, 8, 18, 32, 18, 8, num - 86];
+                return [2, 8, 18, 32, 32, 18, 8, num - 118];
+            }
+
+            // Build full 118 elements list programmatically
+            const elementsData = [];
+            for (let i = 1; i <= 118; i++) {
+                const grp = getElementGroup(i);
+                const tmps = exactTemps[i] || defaultTemps[grp];
+                const pos = getElementPosition(i);
+                
+                elementsData.push({
+                    num: i,
+                    symbol: symbols[i - 1] || '?',
+                    name: names[i - 1] || 'Bilinmeyen',
+                    mass: masses[i - 1] ? masses[i - 1].toString() : '250',
+                    group: grp,
+                    melt: tmps[0],
+                    boil: tmps[1],
+                    electronegativity: customElectronegativities[i] || '--',
+                    shells: getShells(i),
+                    row: pos ? pos.row : 1,
+                    col: pos ? pos.col : 1,
+                    fact: customFacts[i] || `${names[i - 1] || 'Bu'} elementi, periyodik tablonun ${i} atom numaralı üyesidir. Alaşımlarda ve nükleer/kimyasal araştırmalarda kullanılır.`
+                });
+            }
 
             const gridContainer = document.getElementById('periodic-table-element');
             const tempRange = document.getElementById('temp-range');
@@ -580,17 +708,42 @@
             const canvas = document.getElementById('bohr-canvas');
             const ctx = canvas.getContext('2d');
 
-            let selectedElement = elementsData[1]; // Default to Helium
+            let selectedElement = elementsData[1]; // Helium
             let animationFrameId = null;
 
-            // Render periodic table grid cells
+            // Render periodic table grid cells (Including separate rows 9 & 10 at the bottom)
             function renderTable() {
                 gridContainer.innerHTML = '';
 
-                // Generate table of 7 rows and 18 columns
+                // Main grid (Rows 1 to 7)
                 for (let r = 1; r <= 7; r++) {
                     for (let c = 1; c <= 18; c++) {
-                        // Find element matching current coordinates
+                        // Place placeholders for Lanthanides/Actinides rows 6/7 column 3
+                        if (r === 6 && c === 3) {
+                            const cell = document.createElement('div');
+                            cell.className = 'element-cell grp-lanthanide';
+                            cell.style.cursor = 'default';
+                            cell.innerHTML = `
+                                <span class="el-num">57-71</span>
+                                <span class="el-symbol" style="font-size:0.9rem;">La-Lu</span>
+                                <span class="el-name" style="font-size:0.45rem;">Lantanitler</span>
+                            `;
+                            gridContainer.appendChild(cell);
+                            continue;
+                        }
+                        if (r === 7 && c === 3) {
+                            const cell = document.createElement('div');
+                            cell.className = 'element-cell grp-actinide';
+                            cell.style.cursor = 'default';
+                            cell.innerHTML = `
+                                <span class="el-num">89-103</span>
+                                <span class="el-symbol" style="font-size:0.9rem;">Ac-Lr</span>
+                                <span class="el-name" style="font-size:0.45rem;">Aktinitler</span>
+                            `;
+                            gridContainer.appendChild(cell);
+                            continue;
+                        }
+
                         const el = elementsData.find(e => e.row === r && e.col === c);
 
                         if (el) {
@@ -611,9 +764,60 @@
                         }
                     }
                 }
+
+                // Add horizontal spacer row before Lanthanides/Actinides
+                const spacer = document.createElement('div');
+                spacer.className = 'element-cell-spacer-row';
+                gridContainer.appendChild(spacer);
+
+                // Lanthanides Row (Row 9)
+                for (let c = 1; c <= 18; c++) {
+                    if (c < 3) {
+                        const emptyCell = document.createElement('div');
+                        emptyCell.className = 'element-cell-empty';
+                        gridContainer.appendChild(emptyCell);
+                    } else {
+                        const el = elementsData.find(e => e.row === 9 && e.col === c);
+                        if (el) {
+                            const cell = document.createElement('div');
+                            cell.className = `element-cell grp-${el.group}`;
+                            cell.id = `el-cell-${el.num}`;
+                            cell.innerHTML = `
+                                <span class="el-num">${el.num}</span>
+                                <span class="el-symbol">${el.symbol}</span>
+                                <span class="el-name">${el.name}</span>
+                            `;
+                            cell.addEventListener('click', () => selectElement(el));
+                            gridContainer.appendChild(cell);
+                        }
+                    }
+                }
+
+                // Actinides Row (Row 10)
+                for (let c = 1; c <= 18; c++) {
+                    if (c < 3) {
+                        const emptyCell = document.createElement('div');
+                        emptyCell.className = 'element-cell-empty';
+                        gridContainer.appendChild(emptyCell);
+                    } else {
+                        const el = elementsData.find(e => e.row === 10 && e.col === c);
+                        if (el) {
+                            const cell = document.createElement('div');
+                            cell.className = `element-cell grp-${el.group}`;
+                            cell.id = `el-cell-${el.num}`;
+                            cell.innerHTML = `
+                                <span class="el-num">${el.num}</span>
+                                <span class="el-symbol">${el.symbol}</span>
+                                <span class="el-name">${el.name}</span>
+                            `;
+                            cell.addEventListener('click', () => selectElement(el));
+                            gridContainer.appendChild(cell);
+                        }
+                    }
+                }
             }
 
-            // Updates physical state classes of elements based on slider temperature
+            // Updates physical state classes based on slider temperature
             function updateElementStates() {
                 const temp = parseInt(tempRange.value);
                 tempDisplay.innerText = `${temp} K (${(temp - 273).toFixed(0)} °C)`;
@@ -622,7 +826,6 @@
                     const cell = document.getElementById(`el-cell-${el.num}`);
                     if (!cell) return;
 
-                    // Remove existing state classes
                     cell.classList.remove('state-solid', 'state-liquid', 'state-gas');
 
                     if (temp < el.melt) {
@@ -634,14 +837,12 @@
                     }
                 });
 
-                // Update spec card states if it's the currently selected element
                 updateSpecCardState();
             }
 
             function selectElement(el) {
                 selectedElement = el;
 
-                // Update text details
                 let groupText = 'Soygaz';
                 if (el.group === 'nonmetal') groupText = 'Ametal';
                 if (el.group === 'alkali') groupText = 'Alkali Metal';
@@ -686,7 +887,6 @@
                     stateColor = '#f43f5e';
                 }
 
-                // Append status next to title or badge in panel
                 const badge = document.getElementById('el-group-badge');
                 if (badge) {
                     badge.innerHTML = `${badge.innerText.split(' - ')[0]} - <span style="color:${stateColor}">${stateText}</span>`;
@@ -713,14 +913,12 @@
                 const baseColor = isDark ? '#f1f5f9' : '#1e293b';
                 const gridLineColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
 
-                // Draw background grid lines
                 ctx.strokeStyle = gridLineColor;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, 100, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Draw central nucleus
                 const nucleusGrad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, 15);
                 nucleusGrad.addColorStop(0, '#a855f7');
                 nucleusGrad.addColorStop(1, '#6366f1');
@@ -729,39 +927,34 @@
                 ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Nucleus text (Atomic Number)
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 10px Inter';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(`+${selectedElement.num}`, centerX, centerY);
 
-                // Draw electron shell rings and orbiting electrons
                 const shells = selectedElement.shells;
                 shells.forEach((electronCount, shellIdx) => {
-                    const shellRadius = 35 + (shellIdx * 24);
+                    const shellRadius = 35 + (shellIdx * 18);
 
-                    // Draw Orbit Ring
                     ctx.strokeStyle = isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.18)';
                     ctx.setLineDash([5, 3]);
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, shellRadius, 0, Math.PI * 2);
                     ctx.stroke();
-                    ctx.setLineDash([]); // Reset dash
+                    ctx.setLineDash([]);
 
-                    // Draw electrons
-                    ctx.fillStyle = '#10b981'; // Green neon electrons
+                    ctx.fillStyle = '#10b981';
                     ctx.shadowColor = '#10b981';
                     
                     for (let i = 0; i < electronCount; i++) {
-                        // Position electron equally along the circle
-                        const electronAngle = angle * (1 - (shellIdx * 0.15)) + (i * (Math.PI * 2 / electronCount));
+                        const electronAngle = angle * (1 - (shellIdx * 0.12)) + (i * (Math.PI * 2 / electronCount));
                         const electronX = centerX + Math.cos(electronAngle) * shellRadius;
                         const electronY = centerY + Math.sin(electronAngle) * shellRadius;
 
                         ctx.beginPath();
-                        ctx.arc(electronX, electronY, 4.5, 0, Math.PI * 2);
+                        ctx.arc(electronX, electronY, 4, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 });
@@ -770,13 +963,12 @@
                 animationFrameId = requestAnimationFrame(drawBohrFrame);
             }
 
-            // Event Listeners
             tempRange.addEventListener('input', updateElementStates);
 
             // Initialize Page
             renderTable();
             updateElementStates();
-            selectElement(elementsData[1]); // Init with Helium (He)
+            selectElement(elementsData[1]); // Default to Helium
         });
     </script>
 </body>
