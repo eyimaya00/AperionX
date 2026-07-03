@@ -85,29 +85,31 @@
         .periodic-table-grid {
             display: grid;
             grid-template-columns: repeat(18, 1fr);
-            gap: 5px;
-            min-width: 980px;
+            gap: 4px;
+            min-width: 780px;
+            max-width: 860px;
+            margin: 0 auto;
         }
 
         /* Element Cell Design */
         .element-cell {
             aspect-ratio: 1;
-            border-radius: 10px;
-            padding: 4px;
+            border-radius: 6px;
+            padding: 2px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.65rem;
+            font-size: 0.55rem;
             cursor: pointer;
             position: relative;
             user-select: none;
             transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s, border-color 0.2s;
-            border: 2px solid transparent;
+            border: 1.5px solid transparent;
         }
 
         .element-cell:hover {
-            transform: scale(1.2) translateY(-4px);
+            transform: scale(1.3) translateY(-4px);
             z-index: 10;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
@@ -115,7 +117,7 @@
         .element-cell-empty {
             pointer-events: none;
             opacity: 0.15;
-            border-radius: 10px;
+            border-radius: 6px;
             border: 1px dashed rgba(0, 0, 0, 0.08);
         }
 
@@ -125,26 +127,28 @@
 
         .element-cell-spacer-row {
             grid-column: 1 / -1;
-            height: 12px;
+            height: 8px;
             pointer-events: none;
         }
 
         .el-num {
             align-self: flex-start;
             font-weight: 800;
-            font-size: 0.55rem;
+            font-size: 0.45rem;
             opacity: 0.8;
+            line-height: 1;
         }
 
         .el-symbol {
-            font-size: 1.15rem;
+            font-size: 0.9rem;
             font-weight: 900;
             font-family: 'Outfit', sans-serif;
-            line-height: 1.1;
+            line-height: 1;
+            margin-top: 1px;
         }
 
         .el-name {
-            font-size: 0.52rem;
+            font-size: 0.45rem;
             font-weight: 700;
             opacity: 0.8;
             white-space: nowrap;
@@ -152,6 +156,7 @@
             text-overflow: ellipsis;
             width: 100%;
             text-align: center;
+            line-height: 1;
         }
 
         /* Element groups styling */
@@ -340,9 +345,9 @@
             font-weight: 700;
         }
 
-        /* Fixed Navigation Buttons */
+        /* Absolute Navigation Buttons (Scrolls away with page) */
         .back-to-tools-btn {
-            position: fixed;
+            position: absolute;
             top: 24px;
             left: 24px;
             display: flex;
@@ -364,7 +369,7 @@
         }
 
         #themeToggle {
-            position: fixed;
+            position: absolute;
             top: 24px;
             right: 24px;
             background: rgba(255, 255, 255, 0.7);
@@ -384,6 +389,13 @@
             transition: transform 0.2s, background 0.2s;
         }
 
+        [data-theme="dark"] .back-to-tools-btn,
+        [data-theme="dark"] #themeToggle {
+            background: rgba(30, 41, 59, 0.7) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f1f5f9 !important;
+        }
+
         /* Mobile specific positioning */
         @media (max-width: 1100px) {
             .periodic-grid-layout {
@@ -393,14 +405,12 @@
                 padding-top: 85px;
             }
             .back-to-tools-btn {
-                position: absolute !important;
-                top: 16px !important;
-                left: 16px !important;
+                top: 16px;
+                left: 16px;
             }
             #themeToggle {
-                position: absolute !important;
-                top: 16px !important;
-                right: 16px !important;
+                top: 16px;
+                right: 16px;
             }
         }
     </style>
@@ -724,9 +734,9 @@
                             cell.className = 'element-cell grp-lanthanide';
                             cell.style.cursor = 'default';
                             cell.innerHTML = `
-                                <span class="el-num">57-71</span>
-                                <span class="el-symbol" style="font-size:0.9rem;">La-Lu</span>
-                                <span class="el-name" style="font-size:0.45rem;">Lantanitler</span>
+                                <span class="el-num" style="font-size:0.4rem; line-height:1;">57-71</span>
+                                <span class="el-symbol" style="font-size:0.75rem; line-height:1;">La-Lu</span>
+                                <span class="el-name" style="font-size:0.35rem; line-height:1;">Lantanitler</span>
                             `;
                             gridContainer.appendChild(cell);
                             continue;
@@ -736,9 +746,9 @@
                             cell.className = 'element-cell grp-actinide';
                             cell.style.cursor = 'default';
                             cell.innerHTML = `
-                                <span class="el-num">89-103</span>
-                                <span class="el-symbol" style="font-size:0.9rem;">Ac-Lr</span>
-                                <span class="el-name" style="font-size:0.45rem;">Aktinitler</span>
+                                <span class="el-num" style="font-size:0.4rem; line-height:1;">89-103</span>
+                                <span class="el-symbol" style="font-size:0.75rem; line-height:1;">Ac-Lr</span>
+                                <span class="el-name" style="font-size:0.35rem; line-height:1;">Aktinitler</span>
                             `;
                             gridContainer.appendChild(cell);
                             continue;
