@@ -1214,17 +1214,7 @@
                     <div class="article-content" id="detail-procedure" style="margin-top: 5px;"></div>
                 </div>
 
-                <!-- Bulgular ve Gözlemler (Results) Box -->
-                <div class="experiment-results-box" id="results-box" style="display: none;">
-                    <div class="section-header-custom"><i class="ph-bold ph-chart-line" style="color: #10b981;"></i> Bulgular ve Gözlemler</div>
-                    <div class="article-content" id="detail-results" style="margin-top: 10px;"></div>
-                </div>
 
-                <!-- Genel Sonuç (Conclusion) -->
-                <div id="conclusion-section" style="display: none; margin-bottom: 30px;">
-                    <h2 style="font-size: 1.4rem; margin-top: 25px; margin-bottom: 8px; color: var(--text-color); font-weight: 700;">Sonuç</h2>
-                    <div class="article-content" id="detail-conclusion" style="margin-top: 5px;"></div>
-                </div>
 
                 <!-- YouTube Video Embed -->
                 <div id="video-container" style="display: none; margin-bottom: 30px;">
@@ -1608,19 +1598,7 @@
                 procSec.style.display = 'block';
             }
 
-            // Bulgular (Results)
-            const resBox = document.getElementById('results-box');
-            if (exp.results) {
-                document.getElementById('detail-results').innerHTML = exp.results;
-                resBox.style.display = 'block';
-            }
 
-            // Sonuç (Conclusion)
-            const concSec = document.getElementById('conclusion-section');
-            if (exp.conclusion) {
-                document.getElementById('detail-conclusion').innerHTML = exp.conclusion;
-                concSec.style.display = 'block';
-            }
 
             // Video (YouTube Embed)
             if (exp.youtube_url) {
