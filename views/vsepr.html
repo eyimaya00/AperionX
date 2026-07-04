@@ -2172,73 +2172,61 @@
             const token = localStorage.getItem('token');
             const blockOverlay = document.getElementById('trial-block-overlay');
             let trialTimer;
-
-            // Initialize Google Sign-in
-            let googleClientId = null;
-            
-            fetch('/api/settings')
-                .then(res => res.json())
-                .then(settings => {
-                    if (settings.GOOGLE_CLIENT_ID) {
-                        googleClientId = settings.GOOGLE_CLIENT_ID;
-                        
-                        window.renderGoogleButtons = function() {
-                            if (typeof google === 'undefined' || !google.accounts) {
-                                setTimeout(window.renderGoogleButtons, 100);
-                                return;
-                            }
-                            google.accounts.id.initialize({
-                                client_id: googleClientId,
-                                callback: handleGoogleCredentialResponse
-                            });
-                            
-                            const googleBtns = document.querySelectorAll('.google-login-btn, #google-login-btn');
-                            googleBtns.forEach(btn => {
-                                google.accounts.id.renderButton(
-                                    btn,
-                                    { theme: "outline", size: "large", type: "standard", width: 320 }
-                                );
-                            });
-                        };
-                        window.renderGoogleButtons();
-                    }
-                })
-                .catch(err => console.error('Failed to load settings in vsepr.html:', err));
-
-            function handleGoogleCredentialResponse(response) {
-                fetch('/api/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credential: response.credential })
-                })
-                .then(res => res.json().then(data => ({ status: res.status, data })))
-                .then(({ status, data }) => {
-                    if (status === 200) {
-                        localStorage.setItem('token', data.token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        alert('Google ile giriş başarılı!');
-                        if (trialTimer) clearTimeout(trialTimer);
-                        if (blockOverlay) blockOverlay.classList.remove('active');
-                        closeModal('loginModal');
-                        setTimeout(() => window.location.reload(), 500);
-                    } else {
-                        alert(data.message || 'Google ile giriş başarısız.');
-                    }
-                })
-                .catch(err => {
-                    console.error('Google Auth Error:', err);
-                    alert('Google girişinde hata oluştu.');
-                });
-            }
+            const TOOL_NAME = 'vsepr';
 
             // Start Trial Timer if no token
             if (!token) {
-                trialTimer = setTimeout(() => {
+                // Log Tool View
+                fetch('/api/tool-analytics/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'view' })
+                }).catch(err => console.error('Failed to log view:', err));
+
+                const trialExpiredKey = `trial_expired_${TOOL_NAME}`;
+                const trialStartKey = `trial_start_${TOOL_NAME}`;
+
+                if (localStorage.getItem(trialExpiredKey) === 'true') {
                     if (blockOverlay) {
                         blockOverlay.classList.add('active');
                         document.querySelectorAll('.modal-overlay').forEach(m => m.style.zIndex = '10002');
                     }
-                }, 30000); // 30 seconds
+                } else {
+                    let startTime = localStorage.getItem(trialStartKey);
+                    if (!startTime) {
+                        startTime = Date.now().toString();
+                        localStorage.setItem(trialStartKey, startTime);
+                    }
+
+                    const elapsed = Date.now() - parseInt(startTime);
+                    const remainingTime = 30000 - elapsed;
+
+                    if (remainingTime <= 0) {
+                        localStorage.setItem(trialExpiredKey, 'true');
+                        if (blockOverlay) {
+                            blockOverlay.classList.add('active');
+                            document.querySelectorAll('.modal-overlay').forEach(m => m.style.zIndex = '10002');
+                        }
+                        fetch('/api/tool-analytics/log', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'trial_ended' })
+                        }).catch(err => console.error('Failed to log trial end:', err));
+                    } else {
+                        trialTimer = setTimeout(() => {
+                            localStorage.setItem(trialExpiredKey, 'true');
+                            if (blockOverlay) {
+                                blockOverlay.classList.add('active');
+                                document.querySelectorAll('.modal-overlay').forEach(m => m.style.zIndex = '10002');
+                            }
+                            fetch('/api/tool-analytics/log', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'trial_ended' })
+                            }).catch(err => console.error('Failed to log trial end:', err));
+                        }, remainingTime);
+                    }
+                }
             }
 
             // Authentication Handlers for Login
