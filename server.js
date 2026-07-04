@@ -4130,6 +4130,18 @@ app.post('/api/tool-analytics/log', async (req, res) => {
         const { tool_name, action_type } = req.body;
         if (!tool_name || !action_type) return res.status(400).json({ message: 'Missing parameters' });
         const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+        
+        // Check if this action was already logged from this IP within the last 2 hours to prevent duplicates
+        const [duplicateCheck] = await pool.query(
+            `SELECT id FROM tool_analytics 
+             WHERE tool_name = ? AND action_type = ? AND ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+            [tool_name, action_type, ip]
+        );
+
+        if (duplicateCheck.length > 0) {
+            return res.json({ success: true, throttled: true });
+        }
+
         const token = req.headers.authorization?.split(' ')[1];
         let userId = null;
         if (token) {
