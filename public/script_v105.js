@@ -887,7 +887,7 @@ async function loadSettings() {
         
         window.triggerGoogleSignIn = function() {
             const clientId = window.GOOGLE_CLIENT_ID_GLOBAL;
-            const redirectUri = 'https://www.aperionx.com/api/auth/google/callback';
+            const redirectUri = window.location.origin + '/api/auth/google/callback';
             const scope = 'email profile openid';
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
             
