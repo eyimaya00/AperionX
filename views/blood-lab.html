@@ -1325,12 +1325,16 @@
 
             // Start Trial Timer if no token
             if (!token) {
-                // Log Tool View
-                fetch('/api/tool-analytics/log', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'view' })
-                }).catch(err => console.error('Failed to log view:', err));
+                // Log Tool View (once per session)
+                const viewLoggedKey = `view_logged_${TOOL_NAME}`;
+                if (!sessionStorage.getItem(viewLoggedKey)) {
+                    sessionStorage.setItem(viewLoggedKey, 'true');
+                    fetch('/api/tool-analytics/log', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'view' })
+                    }).catch(err => console.error('Failed to log view:', err));
+                }
 
                 const trialExpiredKey = `trial_expired_${TOOL_NAME}`;
                 const trialStartKey = `trial_start_${TOOL_NAME}`;
