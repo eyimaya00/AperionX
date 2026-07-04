@@ -583,26 +583,126 @@
     <div id="global-footer"></div>
 
     <!-- Modals -->
+    <!-- Full Authentication Modals -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
-            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <button class="modal-close" onclick="closeModal('loginModal', event)" aria-label="Kapat"><i class="ph ph-x"></i></button>
             <div class="modal-header">
                 <h2>Giriş Yap</h2>
                 <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
             </div>
-            <form>
+            <form id="lab-login-form">
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required>
                     </div>
                 </div>
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                        <input type="password" id="login-password" placeholder="Şifre" required>
                     </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <a href="javascript:void(0)" onclick="switchModal('loginModal', 'forgotPasswordModal', event)" class="forgot-password-link">Şifremi Unuttum?</a>
                 </div>
                 <button type="submit" class="btn-primary">Giriş Yap</button>
             </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <div class="google-login-btn"></div>
+            </div>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal', event)">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal', event)" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form id="lab-signup-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <div class="google-login-btn"></div>
+            </div>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal', event)">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal', event)" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="javascript:void(0)" onclick="switchModal('forgotPasswordModal', 'loginModal', event)">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Blocker Overlay -->
+    <div id="trial-block-overlay">
+        <div class="trial-block-content">
+            <i class="ph ph-lock-key" style="font-size: 48px; color: var(--primary-accent, #6366f1); margin-bottom: 16px;"></i>
+            <h2 style="font-size: 24px; margin-bottom: 10px; font-weight: 800;">Deneme Süresi Doldu</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
+                İnteraktif Periyodik Tabloyu sınırsız kullanmaya devam etmek için lütfen giriş yapın veya ücretsiz kayıt olun.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-primary" style="padding: 12px 24px; font-size: 15px;" onclick="openModal('loginModal', event)">Giriş Yap</button>
+                <button class="btn-primary" style="padding: 12px 24px; font-size: 15px; background: transparent; border: 1px solid var(--primary-accent, #6366f1); color: var(--text-color);" onclick="openModal('signupModal', event)">Kayıt Ol</button>
+            </div>
         </div>
     </div>
 
@@ -1028,7 +1128,198 @@
             renderTable();
             updateElementStates();
             selectElement(elementsData[1]); // Default to Helium
+
+            // ================== TRIAL AND ANALYTICS LOGIC ==================
+            const token = localStorage.getItem('token');
+            const blockOverlay = document.getElementById('trial-block-overlay');
+            let trialTimer;
+            const TOOL_NAME = 'periodic-table';
+
+            // 1. Log Tool View
+            fetch('/api/tool-analytics/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'view' })
+            }).catch(err => console.error('Failed to log view:', err));
+
+            // 2. Initialize Google Sign-in buttons
+            let googleClientId = null;
+            fetch('/api/settings')
+                .then(res => res.json())
+                .then(settings => {
+                    if (settings.GOOGLE_CLIENT_ID) {
+                        googleClientId = settings.GOOGLE_CLIENT_ID;
+                        
+                        window.renderGoogleButtons = function() {
+                            if (typeof google === 'undefined' || !google.accounts) {
+                                setTimeout(window.renderGoogleButtons, 100);
+                                return;
+                            }
+                            google.accounts.id.initialize({
+                                client_id: googleClientId,
+                                callback: handleGoogleCredentialResponse
+                            });
+                            
+                            const googleBtns = document.querySelectorAll('.google-login-btn');
+                            googleBtns.forEach(btn => {
+                                google.accounts.id.renderButton(
+                                    btn,
+                                    { theme: "outline", size: "large", type: "standard", width: 320 }
+                                );
+                            });
+                        };
+                        window.renderGoogleButtons();
+                    }
+                })
+                .catch(err => console.error('Failed to load settings in periodic-table.html:', err));
+
+            function handleGoogleCredentialResponse(response) {
+                fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                })
+                .then(res => res.json().then(data => ({ status: res.status, data })))
+                .then(({ status, data }) => {
+                    if (status === 200) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        alert('Google ile giriş başarılı!');
+                        if (trialTimer) clearTimeout(trialTimer);
+                        if (blockOverlay) blockOverlay.classList.remove('active');
+                        closeModal('loginModal');
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        alert(data.message || 'Google ile giriş başarısız.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Google Auth Error:', err);
+                    alert('Google girişinde hata oluştu.');
+                });
+            }
+
+            // 3. Start Trial Timer if no token
+            if (!token) {
+                trialTimer = setTimeout(() => {
+                    if (blockOverlay) {
+                        blockOverlay.classList.add('active');
+                        // Log trial ended
+                        fetch('/api/tool-analytics/log', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ tool_name: TOOL_NAME, action_type: 'trial_ended' })
+                        }).catch(err => console.error('Failed to log trial end:', err));
+                    }
+                }, 30000); // 30 seconds
+            }
+
+            // 4. Login form handler
+            const loginForm = document.getElementById('lab-login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    const btn = loginForm.querySelector('button[type="submit"]');
+
+                    btn.disabled = true;
+                    btn.innerHTML = 'Giriş Yapılıyor...';
+
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            if (trialTimer) clearTimeout(trialTimer);
+                            if (blockOverlay) blockOverlay.classList.remove('active');
+                            closeModal('loginModal');
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Giriş başarısız');
+                        }
+                    } catch (err) {
+                        alert('Sunucu hatası');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Giriş Yap';
+                    }
+                });
+            }
+
+            // 5. Signup form handler
+            const signupForm = document.getElementById('lab-signup-form');
+            if (signupForm) {
+                signupForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const fullName = document.getElementById('signup-fullname').value;
+                    const username = document.getElementById('signup-username').value;
+                    const email = document.getElementById('signup-email').value;
+                    const password = document.getElementById('signup-password').value;
+                    const confirmPassword = document.getElementById('signup-confirm').value;
+
+                    if (password !== confirmPassword) return alert("Şifreler eşleşmiyor");
+
+                    const btn = signupForm.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = 'Kayıt Olunuyor...';
+
+                    try {
+                        const res = await fetch('/api/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ fullname: fullName, username, email, password, source: TOOL_NAME })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+                            switchModal('signupModal', 'loginModal');
+                        } else {
+                            alert(data.message || 'Kayıt başarısız');
+                        }
+                    } catch (err) {
+                        alert('Sunucu hatası');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Üye Ol';
+                    }
+                });
+            }
         });
+
+        // Modal helper functions (Local)
+        function openModal(modalId, e) {
+            if (e) e.preventDefault();
+            document.getElementById(modalId).classList.add('active');
+            if (modalId === 'loginModal' || modalId === 'signupModal') {
+                if (typeof window.renderGoogleButtons === 'function') {
+                    setTimeout(() => {
+                        window.renderGoogleButtons();
+                    }, 150);
+                }
+            }
+        }
+        function closeModal(modalId, e) {
+            if (e) e.preventDefault();
+            document.getElementById(modalId).classList.remove('active');
+        }
+        function switchModal(closeId, openId, e) {
+            if (e) e.preventDefault();
+            closeModal(closeId);
+            setTimeout(() => openModal(openId), 200);
+        }
+
+        // Close modal on click outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
     </script>
 </body>
 

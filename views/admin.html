@@ -788,6 +788,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('likes-management', this); loadLikes();">
                 <i class="ph ph-heart"></i> <span>Beğeniler</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('tool-analytics-section', this); loadToolStats();">
+                <i class="ph ph-chart-bar"></i> <span>Araç Analizleri</span>
+            </a>
 
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('user-management', this); loadUsers();">
                 <i class="ph ph-users"></i>
@@ -2251,6 +2254,77 @@
                     </thead>
                     <tbody id="team-table-body">
                         <tr><td colspan="6" style="padding: 20px; text-align: center;">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tool Analytics -->
+        <div id="tool-analytics-section" class="section">
+            <div class="header-row">
+                <h1 class="page-title">Araç Kullanım ve Üye Analizleri</h1>
+            </div>
+            <p class="section-subtitle" style="color: #64748b; margin-bottom: 40px; font-size: 1.1rem;">Simülasyon laboratuvarları ve araçların kullanım istatistikleri ve üye kazanım dönüşüm oranları.</p>
+
+            <div class="stats-grid">
+                <div class="card" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 4px solid #6366f1;">
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                        <i class="ph ph-eye"></i>
+                    </div>
+                    <div>
+                        <h3 id="stat-tool-views" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                        <p style="margin: 0; color: #64748b;">Toplam İzlenme</p>
+                    </div>
+                </div>
+                <div class="card" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 4px solid #ef4444;">
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                        <i class="ph ph-lock"></i>
+                    </div>
+                    <div>
+                        <h3 id="stat-tool-lockouts" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                        <p style="margin: 0; color: #64748b;">Deneme Süresi Dolanlar</p>
+                    </div>
+                </div>
+                <div class="card" style="padding: 24px; display: flex; align-items: center; gap: 20px; border-left: 4px solid #22c55e;">
+                    <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                        <i class="ph ph-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 id="stat-tool-members" style="font-size: 2rem; margin: 0; color: #1e293b;">0</h3>
+                        <p style="margin: 0; color: #64748b;">Kazanılan Üyeler</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div class="card">
+                    <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 24px; color: #1e293b; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;"><i class="ph ph-chart-bar" style="color: #6366f1;"></i> Araç Popülerliği</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="toolUsageChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 24px; color: #1e293b; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;"><i class="ph ph-pie-chart" style="color: #22c55e;"></i> Araçlardan Gelen Üye Dağılımı</h3>
+                    <div style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="toolMembersChart" style="max-height: 280px; max-width: 280px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 24px; color: #1e293b; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;"><i class="ph ph-table" style="color: #a855f7;"></i> Detaylı Araç İstatistikleri</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); background: #f8fafc;">
+                            <th style="padding: 14px; text-align: left; font-weight: 600; color: #475569;">Araç Adı</th>
+                            <th style="padding: 14px; text-align: center; font-weight: 600; color: #475569;">Toplam Görüntülenme</th>
+                            <th style="padding: 14px; text-align: center; font-weight: 600; color: #475569;">Süre Dolanlar (Trial Lockout)</th>
+                            <th style="padding: 14px; text-align: center; font-weight: 600; color: #475569;">Kazanılan Üye</th>
+                            <th style="padding: 14px; text-align: center; font-weight: 600; color: #475569;">Dönüşüm Oranı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tool-stats-table-body">
+                        <tr><td colspan="5" style="padding: 24px; text-align: center; color: #64748b;">Yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -4278,6 +4352,7 @@
                 if (sectionId === 'maintenance-mode') loadMaintenanceSettings();
                 if (sectionId === 'email-management') loadSettings();
                 if (sectionId === 'team-management') loadTeamMembers();
+                if (sectionId === 'tool-analytics-section') loadToolStats();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -5012,6 +5087,112 @@
                 showToast('Sunucu hatası', 'error');
             }
         });
+
+        let toolUsageChartInstance = null;
+        let toolMembersChartInstance = null;
+
+        async function loadToolStats() {
+            const tbody = document.getElementById('tool-stats-table-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch('/api/admin/tool-stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('API request failed');
+                const data = await res.json();
+
+                // 1. Update stats count cards
+                let totalViews = 0;
+                let totalLockouts = 0;
+                let totalMembers = data.total_tool_members || 0;
+
+                data.tools.forEach(t => {
+                    totalViews += parseInt(t.total_views || 0);
+                    totalLockouts += parseInt(t.trial_ended || 0);
+                });
+
+                document.getElementById('stat-tool-views').textContent = totalViews;
+                document.getElementById('stat-tool-lockouts').textContent = totalLockouts;
+                document.getElementById('stat-tool-members').textContent = totalMembers;
+
+                // 2. Render table rows
+                tbody.innerHTML = '';
+                data.tools.forEach(t => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--border-color)';
+                    tr.innerHTML = `
+                        <td style="padding: 14px; text-align: left; font-weight: 500; color: #1e293b;">${t.tool_name.toUpperCase()}</td>
+                        <td style="padding: 14px; text-align: center; color: #475569;">${t.total_views}</td>
+                        <td style="padding: 14px; text-align: center; color: #475569;">${t.trial_ended}</td>
+                        <td style="padding: 14px; text-align: center; color: #475569;">${t.members_gained}</td>
+                        <td style="padding: 14px; text-align: center; font-weight: 600; color: #6366f1;">%${t.conversion_rate}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // 3. Render Chart.js - Tool Usage Bar Chart
+                if (toolUsageChartInstance) toolUsageChartInstance.destroy();
+                const ctxBar = document.getElementById('toolUsageChart').getContext('2d');
+                toolUsageChartInstance = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: data.tools.map(t => t.tool_name.toUpperCase()),
+                        datasets: [
+                            {
+                                label: 'Görüntülenme',
+                                data: data.tools.map(t => t.total_views),
+                                backgroundColor: '#6366f1',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Deneme Bitiş',
+                                data: data.tools.map(t => t.trial_ended),
+                                backgroundColor: '#ef4444',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                // 4. Render Chart.js - Tool Members Doughnut Chart
+                if (toolMembersChartInstance) toolMembersChartInstance.destroy();
+                const ctxPie = document.getElementById('toolMembersChart').getContext('2d');
+                toolMembersChartInstance = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.tools.map(t => t.tool_name.toUpperCase()),
+                        datasets: [{
+                            data: data.tools.map(t => t.members_gained),
+                            backgroundColor: ['#6366f1', '#eab308', '#22c55e', '#ec4899', '#3b82f6'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#ef4444;">Veriler yüklenirken hata oluştu: ${err.message}</td></tr>`;
+            }
+        }
 
     </script>
     

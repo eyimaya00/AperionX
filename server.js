@@ -4079,7 +4079,7 @@ app.get('/api/user/comments', authenticateToken, async (req, res) => {
 
 // User Auth Routes
 app.post('/api/register', async (req, res) => {
-    const { fullname, email, username, password } = req.body;
+    const { fullname, email, username, password, source } = req.body;
     try {
         // Validate Username uniqueness if provided
 
@@ -4089,7 +4089,7 @@ app.post('/api/register', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query('INSERT INTO users (fullname, email, username, password, role) VALUES (?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader']);
+        await pool.query('INSERT INTO users (fullname, email, username, password, role, source) VALUES (?, ?, ?, ?, ?, ?)', [fullname, email, username || null, hashedPassword, 'reader', source || null]);
 
         // Send Welcome Email
         try {
@@ -4121,6 +4121,85 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ message: 'Bu e-posta veya kullanıcı adı zaten kullanımda.' });
         }
         res.status(500).json({ message: 'Kayıt sırasında hata: ' + (error.message || 'Sunucu hatası') });
+    }
+});
+
+// === TOOL ANALYTICS ROUTES ===
+app.post('/api/tool-analytics/log', async (req, res) => {
+    try {
+        const { tool_name, action_type } = req.body;
+        if (!tool_name || !action_type) return res.status(400).json({ message: 'Missing parameters' });
+        const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+        const token = req.headers.authorization?.split(' ')[1];
+        let userId = null;
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                userId = decoded.id;
+            } catch (e) { /* ignore invalid tokens */ }
+        }
+        await pool.query('INSERT INTO tool_analytics (tool_name, action_type, ip_address, user_id) VALUES (?, ?, ?, ?)', [tool_name, action_type, ip, userId]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Tool Analytics Log Error:', error);
+        res.status(500).json({ message: 'Error logging analytics' });
+    }
+});
+
+app.get('/api/admin/tool-stats', async (req, res) => {
+    try {
+        // Verify admin token
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'Token required' });
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const [userRows] = await pool.query('SELECT role FROM users WHERE id = ?', [decoded.id]);
+        if (!userRows.length || userRows[0].role !== 'admin') return res.status(403).json({ message: 'Admin only' });
+
+        // Usage stats per tool
+        const [usageStats] = await pool.query(`
+            SELECT tool_name,
+                   SUM(CASE WHEN action_type = 'view' THEN 1 ELSE 0 END) AS total_views,
+                   SUM(CASE WHEN action_type = 'trial_ended' THEN 1 ELSE 0 END) AS trial_ended
+            FROM tool_analytics
+            GROUP BY tool_name
+            ORDER BY total_views DESC
+        `);
+
+        // Member source stats
+        const [sourceStats] = await pool.query(`
+            SELECT source, COUNT(*) AS member_count
+            FROM users
+            WHERE source IS NOT NULL AND source != ''
+            GROUP BY source
+            ORDER BY member_count DESC
+        `);
+
+        // Total members from tools
+        const [totalFromTools] = await pool.query(`SELECT COUNT(*) AS total FROM users WHERE source IS NOT NULL AND source != ''`);
+
+        // Combined data
+        const toolNames = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab'];
+        const combined = toolNames.map(name => {
+            const usage = usageStats.find(u => u.tool_name === name) || { total_views: 0, trial_ended: 0 };
+            const src = sourceStats.find(s => s.source === name) || { member_count: 0 };
+            const conversionRate = usage.total_views > 0 ? ((src.member_count / usage.total_views) * 100).toFixed(1) : '0.0';
+            return {
+                tool_name: name,
+                total_views: usage.total_views,
+                trial_ended: usage.trial_ended,
+                members_gained: src.member_count,
+                conversion_rate: conversionRate
+            };
+        });
+
+        res.json({
+            tools: combined,
+            total_tool_members: totalFromTools[0]?.total || 0,
+            source_breakdown: sourceStats
+        });
+    } catch (error) {
+        console.error('Tool Stats Error:', error);
+        res.status(500).json({ message: 'Error fetching tool stats' });
     }
 });
 
