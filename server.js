@@ -4338,13 +4338,17 @@ app.get('/api/auth/google/callback', async (req, res) => {
     }
     
     try {
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers.host;
+        const dynamicRedirectUri = `${protocol}://${host}/api/auth/google/callback`;
+
         const axios = require('axios');
         const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
             client_id: process.env.GOOGLE_CLIENT_ID,
             client_secret: process.env.GOOGLE_CLIENT_SECRET,
             code: code,
             grant_type: 'authorization_code',
-            redirect_uri: 'https://www.aperionx.com/api/auth/google/callback'
+            redirect_uri: dynamicRedirectUri
         });
         
         const { id_token } = tokenResponse.data;
@@ -4384,6 +4388,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
         
         // Return HTML that saves token to localStorage and redirects
+        const returnUrl = req.query.state ? decodeURIComponent(req.query.state) : '/';
         const html = `
         <!DOCTYPE html>
         <html>
@@ -4407,7 +4412,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
                         bio: user.bio,
                         job_title: user.job_title
                     })}));
-                    window.location.href = '/';
+                    window.location.href = '${returnUrl}';
                 </script>
             </body>
         </html>
