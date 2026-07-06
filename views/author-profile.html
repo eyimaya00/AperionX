@@ -367,6 +367,16 @@
 </head>
 
 <body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+            <!-- Dynamic Image (Hidden until loaded) -->
+            <img id="loader-logo-img" src="" alt="Site Logo" style="display: none; max-width: 150px; height: auto;">
+        </div>
+    </div>
 
     <!-- Header will be loaded by script.js -->
     <header class="header">
@@ -408,11 +418,8 @@
                 <img src="/uploads/default-avatar.png" alt="" class="profile-avatar-large" id="p-avatar"
                     style="opacity:0.5;">
                 <div class="profile-info" id="profile-container">
-                    <div id="loading-spinner" style="text-align:center;">
-                        <img src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 140px; margin-bottom: 20px; display: inline-block;">
-                        <div class="spinner"></div>
-                        <h2 style="font-size:1.5rem; font-weight:600;">Profil Yükleniyor...</h2>
-                    </div>
+                    <!-- Local spinner hidden since we use global loader -->
+                    <div id="loading-spinner" style="display: none;"></div>
 
                     <div id="profile-details" style="display:none;">
                         <div
@@ -592,12 +599,31 @@
     <!-- SHARED SCRIPTS -->
     <script src="/script_v105.js?v=246"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Overwrite hideLoader to defer until author profile is fully loaded
+        let isProfileLoadingFinished = false;
+        const originalHideLoader = window.hideLoader;
+        window.hideLoader = function() {
+            if (!isProfileLoadingFinished) return;
+            if (typeof originalHideLoader === 'function') originalHideLoader();
+        };
+
+        // Fallback safety timeout for author profile page
+        setTimeout(() => {
+            if (!isProfileLoadingFinished) {
+                console.warn("Profile load timed out, hiding loader.");
+                isProfileLoadingFinished = true;
+                window.hideLoader();
+            }
+        }, 3000);
+
+        document.addEventListener('DOMContentLoaded', async () =>>,StartLine:592,TargetContent: {
             const params = new URLSearchParams(window.location.search);
             const username = params.get('u');
 
             if (!username) {
                 document.querySelector('main').innerHTML = '<div style="text-align:center; padding:100px;"><h2>Kullanıcı bulunamadı.</h2><a href="/" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Dön</a></div>';
+                isProfileLoadingFinished = true;
+                window.hideLoader();
                 return;
             }
 
@@ -695,6 +721,9 @@
                             <i class="ph-bold ph-house" style="margin-right: 8px;"></i> Ana Sayfaya Dön
                         </a>
                     </div>`;
+            } finally {
+                isProfileLoadingFinished = true;
+                window.hideLoader();
             }
         });
     </script>
