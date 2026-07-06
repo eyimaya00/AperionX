@@ -404,9 +404,18 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 // Title
                 html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
 
+                let imgType = 'image/jpeg';
+                if (safeImg.toLowerCase().includes('.png')) {
+                    imgType = 'image/png';
+                } else if (safeImg.toLowerCase().includes('.webp')) {
+                    imgType = 'image/webp';
+                } else if (safeImg.toLowerCase().includes('.gif')) {
+                    imgType = 'image/gif';
+                }
+
                 // Meta Tags (Regex replace)
                 const replaceMeta = (name, content) => {
-                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    const regex = new RegExp(`(<meta\\s+(?:name|property|itemprop)="${name}"\\s+content=")([^"]*)(")`, 'gi');
                     html = html.replace(regex, `$1${content}$3`);
                 };
 
@@ -414,6 +423,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 replaceMeta('og:title', safeTitle);
                 replaceMeta('og:description', safeSummary);
                 replaceMeta('og:image', safeImg);
+                replaceMeta('og:image:secure_url', safeImg);
+                replaceMeta('og:image:type', imgType);
+                replaceMeta('image', safeImg);
                 replaceMeta('og:url', safeUrl);
 
                 // Add Article Published Date Meta
@@ -998,9 +1010,18 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 // Title
                 html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX Deneyler</title>`);
 
+                let imgType = 'image/jpeg';
+                if (safeImg.toLowerCase().includes('.png')) {
+                    imgType = 'image/png';
+                } else if (safeImg.toLowerCase().includes('.webp')) {
+                    imgType = 'image/webp';
+                } else if (safeImg.toLowerCase().includes('.gif')) {
+                    imgType = 'image/gif';
+                }
+
                 // Meta Tags (Regex replace)
                 const replaceMeta = (name, content) => {
-                    const regex = new RegExp(`(<meta\\s+(?:name|property)="${name}"\\s+content=")([^"]*)(")`, 'gi');
+                    const regex = new RegExp(`(<meta\\s+(?:name|property|itemprop)="${name}"\\s+content=")([^"]*)(")`, 'gi');
                     html = html.replace(regex, `$1${content}$3`);
                 };
 
@@ -1008,6 +1029,9 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 replaceMeta('og:title', safeTitle);
                 replaceMeta('og:description', safeSummary);
                 replaceMeta('og:image', safeImg);
+                replaceMeta('og:image:secure_url', safeImg);
+                replaceMeta('og:image:type', imgType);
+                replaceMeta('image', safeImg);
                 replaceMeta('og:url', safeUrl);
 
                 // Add Experiment Published Date Meta
