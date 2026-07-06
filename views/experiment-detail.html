@@ -1766,11 +1766,13 @@
                                     <span class="comment-date">${new Date(com.created_at).toLocaleDateString('tr-TR')}</span>
                                     ${isMine ? `
                                         <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                        <span class="action-link" onclick="startEdit(${com.id})"><i class="ph ph-pencil"></i> Düzenle</span>
                                         <span class="action-link delete" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i> Sil</span>
                                     ` : ''}
                                 </div>
                             </div>
-                            <div class="comment-body">${com.content}</div>
+                            <div class="comment-body" id="body-${com.id}">${com.content}</div>
+                            <div id="edit-form-${com.id}" style="display:none;"></div>
                         </div>
                     </div>
                 `;
@@ -1818,7 +1820,54 @@
                     loadComments(window.currentExperimentId);
                 } else {
                     const data = await res.json();
-                    showToast(data.message || 'Hata oluştu', 'error');
+                    showToast(data.error || data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Edit Functions
+        function startEdit(id) {
+            const bodyEl = document.getElementById(`body-${id}`);
+            const currentContent = bodyEl.innerText;
+            const formContainer = document.getElementById(`edit-form-${id}`);
+
+            bodyEl.style.display = 'none';
+            formContainer.style.display = 'block';
+            formContainer.innerHTML = `
+                <textarea class="edit-area" id="edit-input-${id}" rows="3">${currentContent}</textarea>
+                <div style="margin-top: 8px; text-align: right;">
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-right: 8px;" onclick="saveEdit(${id})">Kaydet</button>
+                    <button class="btn btn-login" style="padding: 6px 12px; font-size: 0.8rem;" onclick="cancelEdit(${id})">İptal</button>
+                </div>
+            `;
+        }
+
+        function cancelEdit(id) {
+            document.getElementById(`body-${id}`).style.display = 'block';
+            document.getElementById(`edit-form-${id}`).style.display = 'none';
+        }
+
+        async function saveEdit(id) {
+            const content = document.getElementById(`edit-input-${id}`).value;
+            if (!content.trim()) return showToast('Yorum boş olamaz', 'error');
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yorum başarıyla güncellendi.', 'success');
+                    loadComments(window.currentExperimentId);
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || data.message || 'Güncelleme başarısız', 'error');
                 }
             } catch (e) { console.error(e); }
         }

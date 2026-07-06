@@ -1596,6 +1596,7 @@
 
         function generateCommentHTML(c) {
             const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+            const isMine = c.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === c.user_id);
             return `
                 <div class="comment-item" id="comment-${c.id}">
                     <div class="comment-avatar">${initials}</div>
@@ -1605,7 +1606,7 @@
                             ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
                             <div class="comment-actions">
                                 <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
-                                ${c.is_mine ? `
+                                ${isMine ? `
                                     <span style="margin: 0 8px; color:#cbd5e1;">|</span>
                                     <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
                                     <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
@@ -1647,7 +1648,7 @@
                     loadComments(id);
                 } else {
                     const data = await res.json();
-                    showToast(data.message || 'Hata oluştu', 'error');
+                    showToast(data.error || data.message || 'Hata oluştu', 'error');
                 }
             } catch (e) { console.error(e); }
         }
@@ -1663,8 +1664,9 @@
             formContainer.innerHTML = `
                 <textarea class="edit-area" id="edit-input-${id}" rows="3">${currentContent}</textarea>
                 <div style="margin-top: 8px; text-align: right;">
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-right: 8px;" onclick="saveEdit(${id})">Kaydet</button>
                     <button class="btn btn-login" style="padding: 6px 12px; font-size: 0.8rem;" onclick="cancelEdit(${id})">İptal</button>
-</div>
+                </div>
             `;
         }
 
@@ -1690,10 +1692,10 @@
 
                 if (res.ok) {
                     showToast('Yorum başarıyla güncellendi.', 'success');
-                    const params = new URLSearchParams(window.location.search);
-                    loadComments(params.get('id'));
+                    loadComments(window.currentArticleId);
                 } else {
-                    showToast('Güncelleme başarısız', 'error');
+                    const data = await res.json();
+                    showToast(data.error || data.message || 'Güncelleme başarısız', 'error');
                 }
             } catch (e) { console.error(e); }
         }
