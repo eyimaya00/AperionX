@@ -730,7 +730,7 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -858,7 +858,7 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -2753,8 +2753,9 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         }
         // 3. Try by Fullname (Fallback if sent directly)
         else {
-            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR fullname = ?';
-            params = [key, key];
+            const spaceKey = key.replace(/-/g, ' ');
+            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR fullname = ? OR fullname = ?';
+            params = [key, key, spaceKey];
         }
 
         const [users] = await pool.query(sql, params);
@@ -5107,6 +5108,12 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             if (!isNaN(identifier)) {
                 const [byId] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE id = ?', [identifier]);
                 if (byId.length > 0) user = byId[0];
+            }
+            // 3. Try by Fullname (Fallback with hyphens replaced by space)
+            if (!user) {
+                const spaceName = identifier.replace(/-/g, ' ');
+                const [byFullname] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE fullname = ?', [spaceName]);
+                if (byFullname.length > 0) user = byFullname[0];
             }
         }
 

@@ -1560,43 +1560,7 @@ function checkAuthStatus() {
                 `;
             }
 
-            // Add Profile/Dashboard Link to Nav if not present
-            const navMenu = document.querySelector('.nav-menu');
-            if (navMenu) {
-                // Clear specialized links first to prevent duplicates on re-render
-                const existingSpecial = navMenu.querySelectorAll('.special-nav-link');
-                existingSpecial.forEach(el => el.remove());
-
-                // 1. Profile Link for ALL users
-                const profileLink = document.createElement('a');
-                profileLink.href = 'profile.html';
-                profileLink.className = 'nav-link special-nav-link';
-                profileLink.innerText = 'Profilim';
-                navMenu.appendChild(profileLink);
-
-                // 2. Admin/Dashboard Link
-                if (user.role === 'admin') {
-                    const adminLink = document.createElement('a');
-                    adminLink.href = '/admin';
-                    adminLink.className = 'nav-link special-nav-link admin-link';
-                    adminLink.innerHTML = '<i class="ph-fill ph-gear"></i> Admin';
-                    adminLink.style.color = 'var(--primary-color)';
-                    navMenu.appendChild(adminLink);
-                } else if (user.role === 'author') {
-                    const authorLink = document.createElement('a');
-                    authorLink.href = '/author';
-                    authorLink.className = 'nav-link special-nav-link author-link';
-                    authorLink.innerHTML = '<i class="ph-fill ph-pencil-simple"></i> Yazar Paneli';
-                    authorLink.style.color = '#10b981'; // Emerald Green distinction
-                    navMenu.appendChild(authorLink);
-                } else if (user.role === 'editor') {
-                    const editorLink = document.createElement('a');
-                    editorLink.href = '/editor';
-                    editorLink.className = 'nav-link special-nav-link editor-link';
-                    editorLink.innerText = 'Editör Paneli';
-                    navMenu.appendChild(editorLink);
-                }
-            }
+            // Redundant profile/dashboard links removed from desktop menu (now only in avatar dropdown)
         });
     } else {
         // Reset to Login/Signup
@@ -1605,13 +1569,6 @@ function checkAuthStatus() {
                 <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
             `;
         });
-
-        // Remove functionality links
-        const navMenu = document.querySelector('.nav-menu');
-        if (navMenu) {
-            const existingSpecial = navMenu.querySelectorAll('.special-nav-link');
-            existingSpecial.forEach(el => el.remove());
-        }
     }
 }
 
@@ -1711,13 +1668,13 @@ async function loadShowcase() {
                         <div class="card-meta-row">
                         <div class="card-meta-row">
                              <div class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">
-                             ${(item.authors && item.authors.length > 0)
+                                   ${(item.authors && item.authors.length > 0)
                         ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     ${item.authors.map((a) => `
-                                        <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
-                                    `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                                         <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
+                                     `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
-                        : `<a href="author-profile.html?u=${(item.author_name || '').replace(/ /g, '-')}" style="color:inherit; text-decoration:none;">${author}</a>`
+                        : `<a href="author-profile.html?u=${item.author_id || ''}" style="color:inherit; text-decoration:none;">${author}</a>`
                     }
                              </div>
                         </div>
@@ -1949,7 +1906,7 @@ function renderArticlesGrid() {
                             <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
@@ -2138,7 +2095,7 @@ function renderExperimentsGrid() {
                             <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="author-profile.html?u=${(article.author_name || '').replace(/ /g, '-')}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
