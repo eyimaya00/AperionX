@@ -1647,6 +1647,7 @@
                 Object.assign(user, freshUser);
                 localStorage.setItem('user', JSON.stringify(user));
                 updateSidebarProfile(user);
+                populateProfileForm(user);
             }
         }).catch(err => {
             console.error('Failed to refresh user profile:', err);
@@ -2404,6 +2405,7 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     document.getElementById('profile-password').value = '';
                     updateSidebarProfile(data.user);
+                    populateProfileForm(data.user);
                 } else {
                     showToast(data.message, 'error');
                 }
@@ -2422,7 +2424,41 @@
             if (welcomeEl) welcomeEl.innerText = displayName;
 
             if (u.avatar_url) {
-                document.getElementById('sidebar-avatar').src = u.avatar_url;
+                let avatarSrc = u.avatar_url;
+                if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                    avatarSrc = '/' + avatarSrc;
+                }
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                if (sidebarAvatar) sidebarAvatar.src = avatarSrc;
+            } else {
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                if (sidebarAvatar) sidebarAvatar.src = '/uploads/default-avatar.png';
+            }
+        }
+
+        function populateProfileForm(u) {
+            if (!u) return;
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            const profileJob = document.getElementById('profile-job');
+            const profileBio = document.getElementById('profile-bio');
+            if (profileName) profileName.value = u.fullname || '';
+            if (profileEmail) profileEmail.value = u.email || '';
+            if (profileJob) profileJob.value = u.job_title || '';
+            if (profileBio) profileBio.value = u.bio || '';
+
+            // Avatar preview
+            const avatarPreview = document.getElementById('profile-avatar-preview');
+            if (avatarPreview) {
+                if (u.avatar_url) {
+                    let avatarSrc = u.avatar_url;
+                    if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                        avatarSrc = '/' + avatarSrc;
+                    }
+                    avatarPreview.src = avatarSrc;
+                } else {
+                    avatarPreview.src = '/uploads/default-avatar.png';
+                }
             }
         }
 
@@ -2593,12 +2629,7 @@
 
             // Load Profile Info
             if (user) {
-                document.getElementById('profile-name').value = user.fullname || '';
-                document.getElementById('profile-email').value = user.email || '';
-                if (document.getElementById('profile-bio')) document.getElementById('profile-bio').value = user.bio || '';
-                if (document.getElementById('profile-job')) document.getElementById('profile-job').value = user.job_title || '';
-                if (user.avatar_url) document.getElementById('profile-avatar-preview').src = user.avatar_url;
-
+                populateProfileForm(user);
                 updateSidebarProfile(user);
             }
         });

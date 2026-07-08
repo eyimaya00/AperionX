@@ -1942,6 +1942,7 @@
                         const welcomeEl = document.getElementById('welcome-name');
                         if (welcomeEl) welcomeEl.textContent = user.fullname;
                     }
+                    populateProfileForm(user);
                 }
             }).catch(err => {
                 console.error('Failed to refresh user profile:', err);
@@ -1962,30 +1963,7 @@
             if (user) {
                 updateSidebarProfile(user);
                 if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
-
-                // Profile form fields
-                const profileName = document.getElementById('profile-name');
-                const profileEmail = document.getElementById('profile-email');
-                const profileJob = document.getElementById('profile-job');
-                const profileBio = document.getElementById('profile-bio');
-                if (profileName) profileName.value = user.fullname || '';
-                if (profileEmail) profileEmail.value = user.email || '';
-                if (profileJob) profileJob.value = user.job_title || '';
-                if (profileBio) profileBio.value = user.bio || '';
-
-                // Public profile link
-                const profileBtn = document.getElementById('view-public-profile-btn');
-                if (profileBtn && user.username) {
-                    profileBtn.href = `/author-profile?u=${user.username}`;
-                } else if (profileBtn) {
-                    profileBtn.style.display = 'none';
-                }
-
-                // Avatar preview
-                if (user.avatar_url) {
-                    const avatarPreview = document.getElementById('profile-avatar-preview');
-                    if (avatarPreview) avatarPreview.src = user.avatar_url;
-                }
+                populateProfileForm(user);
             }
 
             // --- Light Mode Restore (Default to Light) ---
@@ -3716,6 +3694,7 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     document.getElementById('profile-password').value = '';
                     updateSidebarProfile(data.user);
+                    populateProfileForm(data.user);
                 } else {
                     showAuthorToast(data.message, 'error');
                 }
@@ -3734,7 +3713,52 @@
             if (welcomeEl) welcomeEl.innerText = displayName;
 
             if (u.avatar_url) {
-                document.getElementById('sidebar-avatar').src = u.avatar_url;
+                let avatarSrc = u.avatar_url;
+                if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                    avatarSrc = '/' + avatarSrc;
+                }
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                if (sidebarAvatar) sidebarAvatar.src = avatarSrc;
+            } else {
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                if (sidebarAvatar) sidebarAvatar.src = '/uploads/default-avatar.png';
+            }
+        }
+
+        function populateProfileForm(u) {
+            if (!u) return;
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            const profileJob = document.getElementById('profile-job');
+            const profileBio = document.getElementById('profile-bio');
+            if (profileName) profileName.value = u.fullname || '';
+            if (profileEmail) profileEmail.value = u.email || '';
+            if (profileJob) profileJob.value = u.job_title || '';
+            if (profileBio) profileBio.value = u.bio || '';
+
+            // Public profile link
+            const profileBtn = document.getElementById('view-public-profile-btn');
+            if (profileBtn) {
+                if (u.username) {
+                    profileBtn.href = `/author-profile?u=${u.username}`;
+                    profileBtn.style.display = 'inline-flex';
+                } else {
+                    profileBtn.style.display = 'none';
+                }
+            }
+
+            // Avatar preview
+            const avatarPreview = document.getElementById('profile-avatar-preview');
+            if (avatarPreview) {
+                if (u.avatar_url) {
+                    let avatarSrc = u.avatar_url;
+                    if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                        avatarSrc = '/' + avatarSrc;
+                    }
+                    avatarPreview.src = avatarSrc;
+                } else {
+                    avatarPreview.src = '/uploads/default-avatar.png';
+                }
             }
         }
 

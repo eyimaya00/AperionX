@@ -4690,7 +4690,7 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
         await pool.query(query, params);
 
         // Fetch updated user to update local storage on client
-        const [rows] = await pool.query('SELECT id, fullname, email, role, avatar_url, bio, job_title FROM users WHERE id = ?', [userId]);
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title FROM users WHERE id = ?', [userId]);
 
         res.json({ message: 'Profil güncellendi', user: rows[0] });
     } catch (e) {

@@ -648,9 +648,18 @@
 
                 // Avatar
                 const avatarEl = document.getElementById('p-avatar');
-                if (avatarEl && profile.avatar_url) {
-                    avatarEl.src = profile.avatar_url.startsWith('http') ? profile.avatar_url : '/' + profile.avatar_url;
-                    avatarEl.style.opacity = '1';
+                if (avatarEl) {
+                    if (profile.avatar_url) {
+                        let avatarSrc = profile.avatar_url;
+                        if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
+                            avatarSrc = '/' + avatarSrc;
+                        }
+                        avatarEl.src = avatarSrc;
+                        avatarEl.style.opacity = '1';
+                    } else {
+                        avatarEl.src = '/uploads/default-avatar.png';
+                        avatarEl.style.opacity = '1';
+                    }
                 }
 
                 document.getElementById('p-name').textContent = profile.fullname || '';
