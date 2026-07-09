@@ -20,7 +20,7 @@
     "instagram-url-direct": "^2.0.7",
     "morgan": "^1.10.0",
     "node-cron": "^4.2.1",
-    "uuid": "^10.0.0",
+    "uuid": "^14.0.1",
     "winston": "^3.14.0"
   },
   "devDependencies": {
