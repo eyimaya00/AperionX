@@ -1120,6 +1120,126 @@
                 padding: 24px 16px;
             }
         }
+
+        /* Default hidden print elements */
+        .print-header, .print-footer {
+            display: none;
+        }
+
+        @media print {
+            /* Hide all non-printable elements */
+            header, footer, .header, .footer, #global-footer, .progress-container, .auth-buttons, 
+            .lang-btn, .theme-toggle, .mobile-menu-btn, .btn-back-custom, .right-actions, 
+            .comments-section, #similar-articles-section, #pdf-container, .share-divider, 
+            .share-icons-row, #toast-container, .mobile-menu, .modal-overlay, #loading-indicator,
+            .slider-nav-btn {
+                display: none !important;
+            }
+            
+            /* Reset container margins/padding */
+            body, html {
+                background: white !important;
+                color: black !important;
+                font-family: 'Inter', system-ui, sans-serif !important;
+                font-size: 11pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .container, .article-detail-container, .unified-article-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: transparent !important;
+            }
+            
+            /* Print Header (Logo and Site Name) */
+            .print-header {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 2px solid #6366f1;
+                padding-bottom: 12px;
+                margin-bottom: 25px;
+            }
+            
+            .print-logo {
+                height: 45px;
+                width: auto;
+            }
+            
+            .print-site-info {
+                text-align: right;
+                font-size: 9pt;
+                color: #4b5563;
+                line-height: 1.4;
+            }
+            
+            /* Content styling for print */
+            .article-title {
+                font-size: 22pt !important;
+                color: black !important;
+                margin-top: 10px !important;
+                margin-bottom: 8px !important;
+                font-weight: 700 !important;
+            }
+            
+            .article-meta {
+                font-size: 9pt !important;
+                color: #4b5563 !important;
+                margin-bottom: 20px !important;
+                display: flex !important;
+                gap: 15px !important;
+            }
+            
+            .detail-hero-image {
+                max-height: 220px !important;
+                width: 100% !important;
+                object-fit: cover !important;
+                border-radius: 8px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .article-summary-simple, .experiment-materials-box, .experiment-safety-box, .experiment-results-box {
+                background: #f9fafb !important;
+                border: 1px solid #e5e7eb !important;
+                border-left: 5px solid #6366f1 !important;
+                page-break-inside: avoid;
+                margin-bottom: 18px !important;
+                padding: 16px !important;
+                border-radius: 8px !important;
+            }
+            
+            .experiment-safety-box {
+                border-left-color: #ef4444 !important;
+            }
+            
+            .experiment-results-box {
+                border-left-color: #10b981 !important;
+            }
+            
+            .section-header-custom {
+                font-size: 12pt !important;
+                font-weight: 700 !important;
+                color: black !important;
+                margin-bottom: 8px !important;
+            }
+            
+            /* Footer for print */
+            .print-footer {
+                display: block !important;
+                text-align: center;
+                font-size: 8pt;
+                color: #9ca3af;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 8px;
+                margin-top: 40px;
+                page-break-inside: avoid;
+            }
+        }
     </style>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -1183,6 +1303,15 @@
 
         <!-- Content -->
         <main id="article-wrapper" style="display: none;">
+
+            <!-- Print Header (Visible only when printing) -->
+            <div class="print-header">
+                <img src="/uploads/logo.png" alt="AperionX Logo" class="print-logo">
+                <div class="print-site-info">
+                    <strong>AperionX Bilim ve Deney Platformu</strong><br>
+                    <span>https://aperionx.com</span>
+                </div>
+            </div>
 
             <!-- Hero Image -->
             <img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">
@@ -1310,6 +1439,10 @@
                 <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
                     <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;"></div>
                 </div>
+            </div>
+            <!-- Print Footer (Visible only when printing) -->
+            <div class="print-footer">
+                Bu belge AperionX (https://aperionx.com) tarafından otomatik olarak üretilmiştir. © 2026 AperionX. Tüm Hakları Saklıdır.
             </div>
         </main>
     </div>
@@ -1631,12 +1764,20 @@
                 }
             }
 
-            // PDF Link
+            // PDF Link (Dynamic PDF generation via print fallback if no file is uploaded)
+            const pdfContainer = document.getElementById('pdf-container');
+            const pdfLink = document.getElementById('pdf-download-link');
             if (exp.pdf_url) {
-                const pdfLink = document.getElementById('pdf-download-link');
                 pdfLink.href = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
-                document.getElementById('pdf-container').style.display = 'block';
+                pdfLink.removeAttribute('onclick');
+            } else {
+                pdfLink.href = 'javascript:void(0)';
+                pdfLink.onclick = function(e) {
+                    e.preventDefault();
+                    window.print();
+                };
             }
+            pdfContainer.style.display = 'block';
 
             // References
             const refSection = document.getElementById('references-section');
@@ -1691,15 +1832,27 @@
                 return;
             }
             if (!window.currentExperimentId) return;
+            const btn = document.getElementById('like-btn');
+            const isLiked = btn.classList.contains('liked');
             try {
+                if (isLiked) {
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                } else {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                }
                 const res = await fetch(`${API_BASE}/experiments/${window.currentExperimentId}/like`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
+                if (!res.ok) {
                     loadLikes(window.currentExperimentId);
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                loadLikes(window.currentExperimentId);
+            }
         }
 
         // Global state for comments

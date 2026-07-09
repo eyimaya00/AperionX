@@ -1427,6 +1427,30 @@ async function ensureSchema() {
             )
         `);
 
+        // Ensure article_id is nullable on likes (to allow experiment likes)
+        try {
+            await pool.query("ALTER TABLE likes MODIFY COLUMN article_id INT NULL");
+        } catch (e) { console.error('Migration Error (Likes article_id NULL):', e); }
+
+        // Ensure experiment_id column exists on likes
+        try {
+            const [expCol] = await pool.query("SHOW COLUMNS FROM likes LIKE 'experiment_id'");
+            if (expCol.length === 0) {
+                console.log('Migrating: Adding experiment_id to likes...');
+                await pool.query("ALTER TABLE likes ADD COLUMN experiment_id INT NULL AFTER article_id");
+            }
+        } catch (e) { console.error('Migration Error (Likes experiment_id):', e); }
+
+        // Ensure unique_experiment_like constraint exists on likes
+        try {
+            const [indexes] = await pool.query("SHOW INDEX FROM likes WHERE Key_name = 'unique_experiment_like'");
+            if (indexes.length === 0) {
+                console.log('Migrating: Adding unique_experiment_like key...');
+                await pool.query("ALTER TABLE likes ADD UNIQUE KEY unique_experiment_like (user_id, experiment_id)");
+            }
+        } catch (e) { console.error('Migration Error (Likes unique_experiment_like):', e); }
+
+
         // --- NEW: Kategori Kartları Tablosu ---
         await pool.query(`
             CREATE TABLE IF NOT EXISTS category_cards (
