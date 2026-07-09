@@ -1675,7 +1675,7 @@
             window.currentExperimentId = exp.id;
             
             // Load likes, comments and recommendations first to ensure they run even if rendering has minor errors
-            loadLikes(exp.id);
+            loadExperimentLikes(exp.id);
             loadComments(exp.id);
             loadExperimentSlider(exp.id);
 
@@ -1806,8 +1806,8 @@
         }
 
         // --- LIKES ---
-        async function loadLikes(id) {
-            console.log("loadLikes called for experiment ID:", id);
+        async function loadExperimentLikes(id) {
+            console.log("loadExperimentLikes called for experiment ID:", id);
             try {
                 const token = localStorage.getItem('token');
                 console.log("loadLikes token:", token ? "exists" : "null");
@@ -1867,11 +1867,11 @@
                     console.log("toggleExperimentLike response data:", data);
                 } else {
                     console.warn("toggleExperimentLike: Server returned non-ok status, reverting UI...");
-                    loadLikes(window.currentExperimentId);
+                    loadExperimentLikes(window.currentExperimentId);
                 }
             } catch (e) {
                 console.error("toggleExperimentLike error:", e);
-                loadLikes(window.currentExperimentId);
+                loadExperimentLikes(window.currentExperimentId);
             }
         }
 
