@@ -1673,6 +1673,12 @@
 
         function renderExperimentDetail(exp) {
             window.currentExperimentId = exp.id;
+            
+            // Load likes, comments and recommendations first to ensure they run even if rendering has minor errors
+            loadLikes(exp.id);
+            loadComments(exp.id);
+            loadExperimentSlider(exp.id);
+
             document.getElementById('loading-indicator').style.display = 'none';
             document.getElementById('article-wrapper').style.display = 'block';
 
@@ -1789,7 +1795,7 @@
 
             // Tags
             const tagsContainer = document.getElementById('detail-tags');
-            if (exp.tags) {
+            if (exp.tags && typeof exp.tags === 'string') {
                 tagsContainer.innerHTML = '';
                 exp.tags.split(',').forEach(tag => {
                     const t = tag.trim();
@@ -1797,10 +1803,6 @@
                 });
             }
 
-            // Load likes, comments and recommendations
-            loadLikes(exp.id);
-            loadComments(exp.id);
-            loadExperimentSlider(exp.id);
         }
 
         // --- LIKES ---
