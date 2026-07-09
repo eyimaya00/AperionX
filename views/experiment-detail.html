@@ -1860,7 +1860,10 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 console.log("toggleExperimentLike response status:", res.status);
-                if (!res.ok) {
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log("toggleExperimentLike response data:", data);
+                } else {
                     console.warn("toggleExperimentLike: Server returned non-ok status, reverting UI...");
                     loadLikes(window.currentExperimentId);
                 }
