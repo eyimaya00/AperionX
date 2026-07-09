@@ -185,30 +185,6 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
         const filenameToUse = req.targetFilename || '%(id)s.%(ext)s';
         const outputTemplate = path.join(videosDir, filenameToUse);
 
-        await new Promise<void>((resolve, reject) => {
-            const args = [
-                ...formatArg,
-                ...cookiesArg,
-                '--remux-video', 'mp4',
-                '-o', outputTemplate,
-                '--no-playlist',
-                '--no-warnings',
-                '--no-simulate',
-                req.url,
-            ];
-
-            execFile('yt-dlp', args, { timeout: 120000 }, (error, stdout, stderr) => {
-                if (error) {
-                    logger.error(`İndirme hatası: ${error.message}`);
-                    if (stderr) logger.error(`stderr: ${stderr}`);
-                    reject(new Error(`Video indirilemedi: ${error.message}`));
-                    return;
-                }
-                logger.debug(`yt-dlp stdout: ${stdout}`);
-                resolve();
-            });
-        });
-
         let filename = req.targetFilename || '';
         let downloadSuccess = false;
         let ytDlpError: any = null;
