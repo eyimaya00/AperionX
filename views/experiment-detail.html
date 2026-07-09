@@ -1378,7 +1378,7 @@
 
                     <!-- Right: Like & Share -->
                     <div class="right-actions">
-                        <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                        <button class="btn-like" id="like-btn" onclick="toggleExperimentLike()">
                             <i class="ph ph-heart"></i> Beğen
                         </button>
 
@@ -1764,15 +1764,15 @@
                 }
             }
 
-            // PDF Link (Always print webpage to PDF to include site logo and branding)
-            const pdfContainer = document.getElementById('pdf-container');
-            const pdfLink = document.getElementById('pdf-download-link');
-            pdfLink.href = 'javascript:void(0)';
-            pdfLink.onclick = function(e) {
-                e.preventDefault();
-                window.print();
-            };
-            pdfContainer.style.display = 'block';
+            // PDF Link
+            if (exp.pdf_url) {
+                const pdfLink = document.getElementById('pdf-download-link');
+                pdfLink.href = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
+                pdfLink.removeAttribute('onclick');
+                document.getElementById('pdf-container').style.display = 'block';
+            } else {
+                document.getElementById('pdf-container').style.display = 'none';
+            }
 
             // References
             const refSection = document.getElementById('references-section');
@@ -1831,21 +1831,21 @@
             } catch (e) { console.error("loadLikes error:", e); }
         }
 
-        async function toggleLike() {
-            console.log("toggleLike button clicked!");
+        async function toggleExperimentLike() {
+            console.log("toggleExperimentLike button clicked!");
             const token = localStorage.getItem('token');
             if (!token) {
-                console.log("toggleLike: No token found, opening loginModal.");
+                console.log("toggleExperimentLike: No token found, opening loginModal.");
                 openModal('loginModal');
                 return;
             }
             if (!window.currentExperimentId) {
-                console.warn("toggleLike: window.currentExperimentId is not set.");
+                console.warn("toggleExperimentLike: window.currentExperimentId is not set.");
                 return;
             }
             const btn = document.getElementById('like-btn');
             const isLiked = btn.classList.contains('liked');
-            console.log("toggleLike current isLiked state:", isLiked, "for experiment ID:", window.currentExperimentId);
+            console.log("toggleExperimentLike current isLiked state:", isLiked, "for experiment ID:", window.currentExperimentId);
             try {
                 if (isLiked) {
                     btn.classList.remove('liked');
@@ -1858,13 +1858,13 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                console.log("toggleLike response status:", res.status);
+                console.log("toggleExperimentLike response status:", res.status);
                 if (!res.ok) {
-                    console.warn("toggleLike: Server returned non-ok status, reverting UI...");
+                    console.warn("toggleExperimentLike: Server returned non-ok status, reverting UI...");
                     loadLikes(window.currentExperimentId);
                 }
             } catch (e) {
-                console.error("toggleLike error:", e);
+                console.error("toggleExperimentLike error:", e);
                 loadLikes(window.currentExperimentId);
             }
         }
