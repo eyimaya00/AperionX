@@ -1151,7 +1151,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     html = html.replace('<div id="conclusion-section" style="display: none; margin-bottom: 30px;">', '<div id="conclusion-section" style="margin-bottom: 30px;">');
                     html = html.replace('<div class="article-content" id="detail-conclusion" style="margin-top: 5px;"></div>', `<div class="article-content" id="detail-conclusion" style="margin-top: 5px;">${experiment.conclusion}</div>`);
                 }
-                if (experiment.video_url) {
+                if (experiment.youtube_url) {
                     html = html.replace('<div id="video-container" style="display: none; margin-bottom: 30px;">', '<div id="video-container" style="margin-bottom: 30px;">');
                 }
 

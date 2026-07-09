@@ -1250,7 +1250,7 @@
                     <!-- Right: Like & Share -->
                     <div class="right-actions">
                         <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                            <i class="ph ph-heart"></i> Destek Ol
+                            <i class="ph ph-heart"></i> Beğen
                         </button>
 
                         <button class="btn-comment-action" onclick="scrollToComments()">
@@ -1622,7 +1622,11 @@
                     videoId = url.split('shorts/')[1]?.split('?')[0];
                 }
                 if (videoId) {
-                    document.getElementById('video-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}`;
+                    const origin = encodeURIComponent(window.location.origin);
+                    const referrer = encodeURIComponent(window.location.href);
+                    const iframe = document.getElementById('video-iframe');
+                    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                    iframe.src = `https://www.youtube.com/embed/${videoId}?origin=${origin}&widget_referrer=${referrer}`;
                     document.getElementById('video-container').style.display = 'block';
                 }
             }
@@ -1672,10 +1676,10 @@
                 const btn = document.getElementById('like-btn');
                 if (data.liked) {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
                 } else {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
                 }
             } catch (e) { console.error(e); }
         }

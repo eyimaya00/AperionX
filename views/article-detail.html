@@ -1244,7 +1244,7 @@
 
                         <div class="right-actions">
                             <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                                <i class="ph ph-heart"></i> Destek Ol
+                                <i class="ph ph-heart"></i> Beğen
                             </button>
 
                             <button class="btn-comment-action" onclick="scrollToComments()">
@@ -1465,9 +1465,9 @@
 
                 if (data.liked) {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
                 } else {
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
                 }
             } catch (e) { console.error('Like load', e); }
         }
@@ -1491,10 +1491,10 @@
 
                 if (isLiked) {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Destek Ol`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
                 } else {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
                 }
 
                 const res = await fetch(`${API_BASE}/articles/${id}/like`, {
