@@ -4,7 +4,8 @@ import fs from 'fs';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import { scanVideosDirectory, ScanResult } from './scanner.service';
-import { generateYouTubeMetadata } from './ai.service';
+import { generateYouTubeMetadata, analyzeVideoWithGemini } from './ai.service';
+
 
 export interface DownloadRequest {
     url: string;
@@ -100,6 +101,43 @@ function getExistingMp4Files(dir: string): Set<string> {
     }
 }
 
+
+async function downloadFileFromUrl(url: string, destPath: string): Promise<void> {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    fs.writeFileSync(destPath, buffer);
+}
+
+async function downloadWithCobalt(url: string, destPath: string): Promise<void> {
+    const response = await fetch('https://api.cobalt.tools/api/json', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            url: url,
+            videoQuality: '1080',
+            filenamePattern: 'basic'
+        })
+    });
+    if (!response.ok) {
+        throw new Error(`Cobalt API failed with status ${response.status}`);
+    }
+    const data = await response.json() as any;
+    if (data.status === 'error') {
+        throw new Error(`Cobalt error: ${data.text || 'Unknown error'}`);
+    }
+    if (data.status === 'stream' && data.url) {
+        logger.info(`Cobalt direct link obtained: ${data.url}. Downloading file...`);
+        await downloadFileFromUrl(data.url, destPath);
+    } else {
+        throw new Error(`Unsupported Cobalt status or missing URL: ${data.status}`);
+    }
+}
+
 /**
  * yt-dlp ile videoyu indir + metadata dosyası oluştur + tarama yap
  */
@@ -171,10 +209,57 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
             });
         });
 
-        // 4. Yeni eklenen mp4 dosyasını bul
-        const afterFiles = getExistingMp4Files(videosDir);
         let filename = req.targetFilename || '';
+        let downloadSuccess = false;
+        let ytDlpError: any = null;
+
+        try {
+            await new Promise<void>((resolve, reject) => {
+                const args = [
+                    ...formatArg,
+                    ...cookiesArg,
+                    '--remux-video', 'mp4',
+                    '-o', outputTemplate,
+                    '--no-playlist',
+                    '--no-warnings',
+                    '--no-simulate',
+                    req.url,
+                ];
+
+                execFile('yt-dlp', args, { timeout: 120000 }, (error, stdout, stderr) => {
+                    if (error) {
+                        logger.error(`yt-dlp indirme hatası: ${error.message}`);
+                        if (stderr) logger.error(`stderr: ${stderr}`);
+                        reject(error);
+                        return;
+                    }
+                    logger.debug(`yt-dlp stdout: ${stdout}`);
+                    resolve();
+                });
+            });
+            downloadSuccess = true;
+        } catch (err: any) {
+            ytDlpError = err;
+            logger.warn(`yt-dlp indirme başarısız oldu: ${err.message}. Cobalt ile alternatif indirme deneniyor...`);
+        }
+
+        if (!downloadSuccess) {
+            try {
+                const finalFilename = req.targetFilename || `dl_${Date.now()}.mp4`;
+                const finalPath = path.join(videosDir, finalFilename);
+                await downloadWithCobalt(req.url, finalPath);
+                downloadSuccess = true;
+                filename = finalFilename;
+                logger.info(`✅ Cobalt ile indirme başarılı: ${finalFilename}`);
+            } catch (cobaltErr: any) {
+                logger.error(`❌ Cobalt indirmesi de başarısız oldu: ${cobaltErr.message}`);
+                throw new Error(`Video indirilemedi (yt-dlp ve Cobalt başarısız oldu). yt-dlp Hatası: ${ytDlpError.message} | Cobalt Hatası: ${cobaltErr.message}`);
+            }
+        }
+
+        // 4. Yeni eklenen mp4 dosyasını bul (Eğer yt-dlp başarılı olduysa ve filename yoksa)
         if (!filename) {
+            const afterFiles = getExistingMp4Files(videosDir);
             for (const f of afterFiles) {
                 if (!beforeFiles.has(f)) {
                     filename = f;
@@ -207,8 +292,26 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
         const rawDescription = req.description || metadata.description;
         const rawTags = req.tags ? req.tags.split(',').map(t => t.trim()) : metadata.tags;
 
-        logger.info('AI metadata üretiliyor...');
-        const aiMetadata = await generateYouTubeMetadata(rawDescription, rawTags);
+        let aiMetadata;
+        const videoFilePath = path.join(videosDir, filename);
+
+        // Eğer açıklama ve etiketler yoksa/boşsa, doğrudan Gemini ile videoyu izleyip sıfırdan metadata üretsin!
+        if (!rawDescription && rawTags.length === 0) {
+            logger.info('Kaynak açıklaması ve etiketleri boş (Instagram engeli nedeniyle çekilemedi). Gemini ile video doğrudan analiz ediliyor...');
+            try {
+                aiMetadata = await analyzeVideoWithGemini(videoFilePath);
+            } catch (geminiErr: any) {
+                logger.error(`Gemini video analiz hatası: ${geminiErr.message}. Fallback metadatalar kullanılacak.`);
+                aiMetadata = {
+                    title: baseName,
+                    description: 'Otomatik analiz başarısız oldu.',
+                    tags: ['shorts', 'automation']
+                };
+            }
+        } else {
+            logger.info('AI metadata üretiliyor...');
+            aiMetadata = await generateYouTubeMetadata(rawDescription, rawTags);
+        }
 
         // Nihai değerleri txt dosyasına yaz
         const txtContent = [
