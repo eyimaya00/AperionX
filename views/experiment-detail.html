@@ -1764,19 +1764,14 @@
                 }
             }
 
-            // PDF Link (Dynamic PDF generation via print fallback if no file is uploaded)
+            // PDF Link (Always print webpage to PDF to include site logo and branding)
             const pdfContainer = document.getElementById('pdf-container');
             const pdfLink = document.getElementById('pdf-download-link');
-            if (exp.pdf_url) {
-                pdfLink.href = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
-                pdfLink.removeAttribute('onclick');
-            } else {
-                pdfLink.href = 'javascript:void(0)';
-                pdfLink.onclick = function(e) {
-                    e.preventDefault();
-                    window.print();
-                };
-            }
+            pdfLink.href = 'javascript:void(0)';
+            pdfLink.onclick = function(e) {
+                e.preventDefault();
+                window.print();
+            };
             pdfContainer.style.display = 'block';
 
             // References
@@ -1809,11 +1804,22 @@
 
         // --- LIKES ---
         async function loadLikes(id) {
+            console.log("loadLikes called for experiment ID:", id);
             try {
                 const token = localStorage.getItem('token');
+                console.log("loadLikes token:", token ? "exists" : "null");
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
                 const res = await fetch(`${API_BASE}/experiments/${id}/like`, { headers });
+                console.log("loadLikes response status:", res.status);
+                if (res.status === 401 || res.status === 403) {
+                    console.log("loadLikes: User is not logged in or token is expired/invalid.");
+                    const btn = document.getElementById('like-btn');
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    return;
+                }
                 const data = await res.json();
+                console.log("loadLikes data received:", data);
                 const btn = document.getElementById('like-btn');
                 if (data.liked) {
                     btn.classList.add('liked');
@@ -1822,18 +1828,24 @@
                     btn.classList.remove('liked');
                     btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("loadLikes error:", e); }
         }
 
         async function toggleLike() {
+            console.log("toggleLike button clicked!");
             const token = localStorage.getItem('token');
             if (!token) {
+                console.log("toggleLike: No token found, opening loginModal.");
                 openModal('loginModal');
                 return;
             }
-            if (!window.currentExperimentId) return;
+            if (!window.currentExperimentId) {
+                console.warn("toggleLike: window.currentExperimentId is not set.");
+                return;
+            }
             const btn = document.getElementById('like-btn');
             const isLiked = btn.classList.contains('liked');
+            console.log("toggleLike current isLiked state:", isLiked, "for experiment ID:", window.currentExperimentId);
             try {
                 if (isLiked) {
                     btn.classList.remove('liked');
@@ -1846,11 +1858,13 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                console.log("toggleLike response status:", res.status);
                 if (!res.ok) {
+                    console.warn("toggleLike: Server returned non-ok status, reverting UI...");
                     loadLikes(window.currentExperimentId);
                 }
             } catch (e) {
-                console.error(e);
+                console.error("toggleLike error:", e);
                 loadLikes(window.currentExperimentId);
             }
         }
