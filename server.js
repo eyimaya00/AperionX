@@ -571,7 +571,10 @@ app.get('/preview-article/:id', async (req, res, next) => {
 
         // Verify authorization
         if (req.user.role !== 'admin' && req.user.role !== 'editor' && article.author_id !== req.user.id) {
-            return res.status(403).send('Erişim Reddedildi');
+            const [coAuthors] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [id, req.user.id]);
+            if (coAuthors.length === 0) {
+                return res.status(403).send('Erişim Reddedildi');
+            }
         }
 
         // Read Template
@@ -2927,7 +2930,12 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     // Verify ownership
     const [check] = await pool.query('SELECT author_id, was_published FROM articles WHERE id = ?', [articleId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
-    if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') {
+        const [coAuthors] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [articleId, req.user.id]);
+        if (coAuthors.length === 0) {
+            return res.sendStatus(403);
+        }
+    }
 
     const wasPublished = check[0].was_published;
     const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
@@ -3492,32 +3500,7 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Restored to draft' });
 });
 
-// [REMOVED DUPLICATE POST /api/articles ROUTE]
-
-// Update Article
-app.put('/api/articles/:id', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
-    try {
-        const { title, content, category, tags, status } = req.body;
-        const articleId = req.params.id;
-
-        // Check ownership
-        const [check] = await pool.query('SELECT author_id, image_url FROM articles WHERE id = ?', [articleId]);
-        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
-        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
-
-        let image_url = check[0].image_url;
-        if (req.file) image_url = `/uploads/${req.file.filename}`;
-
-        await pool.query(
-            'UPDATE articles SET title = ?, content = ?, category = ?, tags = ?, status = ?, image_url = ?, updated_at = NOW() WHERE id = ?',
-            [title, content, category, tags, status, image_url, articleId]
-        );
-
-        res.json({ message: 'Article updated' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
+// [REMOVED DUPLICATE PUT /api/articles/:id ROUTE]
 
 
 
@@ -5104,17 +5087,9 @@ app.post('/api/settings_v2', authenticateToken, (req, res, next) => {
 });
 
 // Serve Admin Panel
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'admin.html'));
-});
-
-// Serve Author Panel
-app.get('/author', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'author.html'));
-});
-
+// Serve Admin Panel (DUPLICATE REMOVED - primary route at line ~4549)
+// Serve Author Panel (DUPLICATE REMOVED - primary route at line ~4578)
 // Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
-// app.get('/editor', ...) -> already defined above serving editor_panel.html
 
 // === PUBLIC AUTHOR PROFILE (Username or ID) ===
 app.get('/api/public/author/:identifier', async (req, res) => {
@@ -5309,13 +5284,8 @@ app.get('/article-detail.html', async (req, res) => {
     }
 });
 
-// Serve Author Panel
-app.get('/author', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'author.html'));
-});
-
+// Serve Author Panel (DUPLICATE REMOVED - primary route at line ~4553)
 // Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
-// app.get('/editor', ...) -> already defined above serving editor_panel.html
 
 // === LIKES & COMMENTS ===
 
