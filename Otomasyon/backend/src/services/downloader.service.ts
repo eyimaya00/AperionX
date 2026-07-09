@@ -41,7 +41,9 @@ export interface DownloadResult {
 export function extractMetadata(url: string): Promise<VideoMetadataFromUrl> {
     return new Promise((resolve, reject) => {
         const isInstagram = url.includes('instagram.com');
-        const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const localCookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const fallbackCookiesPath = path.resolve(__dirname, '../../cookies.txt');
+        const cookiesPath = fs.existsSync(localCookiesPath) ? localCookiesPath : fallbackCookiesPath;
         const cookiesArg = fs.existsSync(cookiesPath) && isInstagram ? ['--cookies', cookiesPath] : [];
 
         const args = [
@@ -137,7 +139,9 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
             ? ['-f', 'b'] 
             : ['-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best', '--merge-output-format', 'mp4'];
             
-        const cookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const localCookiesPath = path.resolve(process.cwd(), 'cookies.txt');
+        const fallbackCookiesPath = path.resolve(__dirname, '../../cookies.txt');
+        const cookiesPath = fs.existsSync(localCookiesPath) ? localCookiesPath : fallbackCookiesPath;
         const cookiesArg = fs.existsSync(cookiesPath) && isInstagram ? ['--cookies', cookiesPath] : [];
 
         const filenameToUse = req.targetFilename || '%(id)s.%(ext)s';
