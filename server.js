@@ -1155,6 +1155,9 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     html = html.replace('<div id="video-container" style="display: none; margin-bottom: 30px;">', '<div id="video-container" style="margin-bottom: 30px;">');
                 }
 
+                res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+                res.set('Pragma', 'no-cache');
+                res.set('Expires', '0');
                 res.send(html);
 
             } catch (innerErr) {
@@ -5414,13 +5417,25 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
 });
 
 // === EXPERIMENT LIKES API ===
-app.get('/api/experiments/:id/like', authenticateToken, async (req, res) => {
+app.get('/api/experiments/:id/like', async (req, res) => {
     try {
         const experimentId = req.params.id;
-        const userId = req.user.id;
         const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE experiment_id = ?', [experimentId]);
-        const [me] = await pool.query('SELECT * FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
-        res.json({ count: likes[0].count, liked: !!me.length });
+        
+        // Check if user is logged in (optional auth)
+        let liked = false;
+        const authHeader = req.headers['authorization'];
+        if (authHeader) {
+            try {
+                const token = authHeader.split(' ')[1];
+                const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'gizli_anahtar');
+                const [me] = await pool.query('SELECT * FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, decoded.id]);
+                liked = !!me.length;
+            } catch (tokenErr) {
+                // Token invalid or expired, just return liked=false
+            }
+        }
+        res.json({ count: likes[0].count, liked });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
