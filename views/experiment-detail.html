@@ -1767,7 +1767,8 @@
             // PDF Link
             if (exp.pdf_url) {
                 const pdfLink = document.getElementById('pdf-download-link');
-                pdfLink.href = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
+                const baseUrl = exp.pdf_url.startsWith('http') ? exp.pdf_url : '/' + exp.pdf_url.replace(/\\/g, '/');
+                pdfLink.href = baseUrl + '?v=' + Date.now(); // Cache buster to force download of updated stamped PDF
                 pdfLink.removeAttribute('onclick');
                 document.getElementById('pdf-container').style.display = 'block';
             } else {
