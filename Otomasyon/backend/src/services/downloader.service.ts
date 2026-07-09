@@ -5,6 +5,7 @@ import { config } from '../config';
 import { logger } from '../utils/logger';
 import { scanVideosDirectory, ScanResult } from './scanner.service';
 import { generateYouTubeMetadata, analyzeVideoWithGemini } from './ai.service';
+import { instagramGetUrl } from 'instagram-url-direct';
 
 
 export interface DownloadRequest {
@@ -103,39 +104,58 @@ function getExistingMp4Files(dir: string): Set<string> {
 
 
 async function downloadFileFromUrl(url: string, destPath: string): Promise<void> {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    fs.writeFileSync(destPath, buffer);
+    const http = url.startsWith('https') ? require('https') : require('http');
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(destPath);
+        http.get(url, (response: any) => {
+            // Follow redirects
+            if (response.statusCode === 301 || response.statusCode === 302) {
+                const redirectUrl = response.headers.location;
+                if (redirectUrl) {
+                    file.close();
+                    return downloadFileFromUrl(redirectUrl, destPath).then(resolve).catch(reject);
+                }
+            }
+            if (response.statusCode !== 200) {
+                file.close();
+                fs.unlinkSync(destPath);
+                reject(new Error(`HTTP error! status: ${response.statusCode}`));
+                return;
+            }
+            response.pipe(file);
+            file.on('finish', () => {
+                file.close();
+                const stats = fs.statSync(destPath);
+                if (stats.size < 1000) {
+                    fs.unlinkSync(destPath);
+                    reject(new Error('İndirilen dosya çok küçük, muhtemelen geçersiz.'));
+                    return;
+                }
+                resolve();
+            });
+        }).on('error', (err: any) => {
+            file.close();
+            if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+            reject(err);
+        });
+    });
 }
 
-async function downloadWithCobalt(url: string, destPath: string): Promise<void> {
-    const response = await fetch('https://api.cobalt.tools/api/json', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            url: url,
-            videoQuality: '1080',
-            filenamePattern: 'basic'
-        })
-    });
-    if (!response.ok) {
-        throw new Error(`Cobalt API failed with status ${response.status}`);
+/**
+ * instagram-url-direct paketi ile Instagram videosunu indir (yt-dlp başarısız olduğunda fallback)
+ */
+async function downloadWithInstagramDirect(url: string, destPath: string): Promise<void> {
+    logger.info(`instagram-url-direct ile indirme deneniyor: ${url}`);
+    const result = await instagramGetUrl(url);
+
+    if (!result || !result.url_list || result.url_list.length === 0) {
+        throw new Error('instagram-url-direct: Video URL bulunamadı. Post özel veya erişilemez olabilir.');
     }
-    const data = await response.json() as any;
-    if (data.status === 'error') {
-        throw new Error(`Cobalt error: ${data.text || 'Unknown error'}`);
-    }
-    if (data.status === 'stream' && data.url) {
-        logger.info(`Cobalt direct link obtained: ${data.url}. Downloading file...`);
-        await downloadFileFromUrl(data.url, destPath);
-    } else {
-        throw new Error(`Unsupported Cobalt status or missing URL: ${data.status}`);
-    }
+
+    const videoUrl = result.url_list[0];
+    logger.info(`instagram-url-direct: Direkt video linki alındı. İndiriliyor...`);
+    await downloadFileFromUrl(videoUrl, destPath);
+    logger.info(`instagram-url-direct: İndirme tamamlandı -> ${path.basename(destPath)}`);
 }
 
 /**
@@ -219,18 +239,20 @@ export async function downloadVideo(req: DownloadRequest): Promise<DownloadResul
             logger.warn(`yt-dlp indirme başarısız oldu: ${err.message}. Cobalt ile alternatif indirme deneniyor...`);
         }
 
-        if (!downloadSuccess) {
+        if (!downloadSuccess && isInstagram) {
             try {
                 const finalFilename = req.targetFilename || `dl_${Date.now()}.mp4`;
                 const finalPath = path.join(videosDir, finalFilename);
-                await downloadWithCobalt(req.url, finalPath);
+                await downloadWithInstagramDirect(req.url, finalPath);
                 downloadSuccess = true;
                 filename = finalFilename;
-                logger.info(`✅ Cobalt ile indirme başarılı: ${finalFilename}`);
-            } catch (cobaltErr: any) {
-                logger.error(`❌ Cobalt indirmesi de başarısız oldu: ${cobaltErr.message}`);
-                throw new Error(`Video indirilemedi (yt-dlp ve Cobalt başarısız oldu). yt-dlp Hatası: ${ytDlpError.message} | Cobalt Hatası: ${cobaltErr.message}`);
+                logger.info(`✅ instagram-url-direct ile indirme başarılı: ${finalFilename}`);
+            } catch (igErr: any) {
+                logger.error(`❌ instagram-url-direct indirmesi de başarısız oldu: ${igErr.message}`);
+                throw new Error(`Video indirilemedi. yt-dlp Hatası: ${ytDlpError?.message || 'Bilinmiyor'} | instagram-url-direct Hatası: ${igErr.message}`);
             }
+        } else if (!downloadSuccess) {
+            throw new Error(`Video indirilemedi: ${ytDlpError?.message || 'Bilinmeyen hata'}`);
         }
 
         // 4. Yeni eklenen mp4 dosyasını bul (Eğer yt-dlp başarılı olduysa ve filename yoksa)
