@@ -2307,11 +2307,61 @@
                 const article = articles.find(a => a.id === id);
                 if (!article) return;
 
+                // Clear file input values so previously selected files do not carry over
+                const imgInput = document.getElementById('imageInput');
+                if (imgInput) imgInput.value = '';
+                const pdfInput = document.getElementById('pdfInput');
+                if (pdfInput) pdfInput.value = '';
+
                 document.getElementById('title').value = article.title;
                 document.getElementById('tags').value = article.tags || '';
                 document.getElementById('excerpt').value = article.excerpt || '';
                 document.getElementById('references').value = article.references_list || '';
                 quill.root.innerHTML = article.content || '';
+
+                // Image Preview Logic
+                const previewZone = document.getElementById('preview-zone');
+                if (previewZone) {
+                    if (article.image_url) {
+                        // Normalize path
+                        let imgUrl = article.image_url.replace(/\\/g, '/');
+                        if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) imgUrl = '/' + imgUrl;
+
+                        previewZone.innerHTML = `
+                             <img src="${imgUrl}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                             <p style="margin-top: 10px; font-weight: 600; color: #64748b;">Mevcut Görsel (Değiştirmek için tıklayın)</p>
+                         `;
+                        previewZone.classList.add('has-file');
+                    } else {
+                        previewZone.classList.remove('has-file');
+                        previewZone.innerHTML = `
+                            <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                            <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                            <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                            <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
+                }
+
+                // PDF Preview Logic
+                const pdfZone = document.getElementById('pdf-zone');
+                if (pdfZone) {
+                    if (article.pdf_url) {
+                        pdfZone.classList.add('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);">Mevcut Dosya: ${article.pdf_url.split('/').pop()}</p>
+                        `;
+                    } else {
+                        pdfZone.classList.remove('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
+                }
 
                 const categorySelect = document.getElementById('category');
                 const options = Array.from(categorySelect.options).map(o => o.value);
@@ -2337,6 +2387,29 @@
             document.getElementById('form-title').innerText = 'İçerik Stüdyosu';
             document.getElementById('reset-form-btn').style.display = 'none';
             document.getElementById('custom-category-group').style.display = 'none';
+
+            // Reset Image Preview
+            const previewZone = document.getElementById('preview-zone');
+            if (previewZone) {
+                previewZone.classList.remove('has-file');
+                previewZone.innerHTML = `
+                    <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                    <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                    <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                    <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                `;
+            }
+
+            // Reset PDF Preview
+            const pdfZone = document.getElementById('pdf-zone');
+            if (pdfZone) {
+                pdfZone.classList.remove('has-file');
+                pdfZone.innerHTML = `
+                    <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                    <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                `;
+            }
         }
 
         function showToast(msg, type) {

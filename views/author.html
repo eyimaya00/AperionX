@@ -2968,6 +2968,12 @@
                 }
                 const article = await res.json();
 
+                // Clear file input values so previously selected files do not carry over
+                const imgInput = document.getElementById('imageInput');
+                if (imgInput) imgInput.value = '';
+                const pdfInput = document.getElementById('pdfInput');
+                if (pdfInput) pdfInput.value = '';
+
                 // Populate Authors
                 if (article.authors && Array.isArray(article.authors)) {
                     const authorIds = article.authors.map(a => a.id);
@@ -3007,17 +3013,47 @@
                 }
 
                 // Image Preview Logic
-                if (article.image_url) {
-                    const previewZone = document.getElementById('preview-zone');
-                    // Normalize path
-                    let imgUrl = article.image_url.replace(/\\/g, '/');
-                    if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) imgUrl = '/' + imgUrl;
+                const previewZone = document.getElementById('preview-zone');
+                if (previewZone) {
+                    if (article.image_url) {
+                        // Normalize path
+                        let imgUrl = article.image_url.replace(/\\/g, '/');
+                        if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) imgUrl = '/' + imgUrl;
 
-                    previewZone.innerHTML = `
-                         <img src="${imgUrl}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                         <p style="margin-top: 10px; font-weight: 600; color: #64748b;">Mevcut Görsel (Değiştirmek için tıklayın)</p>
-                     `;
-                    previewZone.classList.add('has-file');
+                        previewZone.innerHTML = `
+                             <img src="${imgUrl}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                             <p style="margin-top: 10px; font-weight: 600; color: #64748b;">Mevcut Görsel (Değiştirmek için tıklayın)</p>
+                         `;
+                        previewZone.classList.add('has-file');
+                    } else {
+                        previewZone.classList.remove('has-file');
+                        previewZone.innerHTML = `
+                            <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                            <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                            <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                            <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
+                }
+
+                // PDF Preview Logic
+                const pdfZone = document.getElementById('pdf-zone');
+                if (pdfZone) {
+                    if (article.pdf_url) {
+                        pdfZone.classList.add('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);">Mevcut Dosya: ${article.pdf_url.split('/').pop()}</p>
+                        `;
+                    } else {
+                        pdfZone.classList.remove('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
                 }
 
                 const categorySelect = document.getElementById('category');
@@ -3058,13 +3094,26 @@
 
             // Reset Image Preview
             const previewZone = document.getElementById('preview-zone');
-            previewZone.classList.remove('has-file');
-            previewZone.innerHTML = `
-                <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
-                <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
-                <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
-                <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
-            `;
+            if (previewZone) {
+                previewZone.classList.remove('has-file');
+                previewZone.innerHTML = `
+                    <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                    <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                    <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                    <p id="file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                `;
+            }
+
+            // Reset PDF Preview
+            const pdfZone = document.getElementById('pdf-zone');
+            if (pdfZone) {
+                pdfZone.classList.remove('has-file');
+                pdfZone.innerHTML = `
+                    <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                    <p id="pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                `;
+            }
 
             // Reset Authors (Removed from Author Panel)
             // document.querySelectorAll('input[name="article_authors"]').forEach...
@@ -3328,6 +3377,12 @@
                 if (!resD.ok) throw new Error('Deney yüklenemedi');
                 const data = await resD.json();
 
+                // Clear file input values so previously selected files do not carry over
+                const expImgInput = document.getElementById('exp-imageInput');
+                if (expImgInput) expImgInput.value = '';
+                const expPdfInput = document.getElementById('exp-pdfInput');
+                if (expPdfInput) expPdfInput.value = '';
+
                 editingExperimentId = id;
                 document.getElementById('exp-title').value = data.title || '';
                 document.getElementById('exp-category').value = data.category || 'Biyoloji';
@@ -3342,10 +3397,24 @@
                 if (expProcedureQuill) expProcedureQuill.root.innerHTML = data.procedure_steps || '';
                 if (expResultsQuill) expResultsQuill.root.innerHTML = data.results || '';
 
-                if (data.pdf_url) {
-                    document.getElementById('exp-pdf-name').textContent = 'Mevcut Dosya: ' + data.pdf_url.split('/').pop();
-                } else {
-                    document.getElementById('exp-pdf-name').textContent = '';
+                // PDF Preview Logic
+                const pdfZone = document.getElementById('exp-pdf-zone');
+                if (pdfZone) {
+                    if (data.pdf_url) {
+                        pdfZone.classList.add('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="exp-pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);">Mevcut Dosya: ${data.pdf_url.split('/').pop()}</p>
+                        `;
+                    } else {
+                        pdfZone.classList.remove('has-file');
+                        pdfZone.innerHTML = `
+                            <i class="ph ph-file-pdf" style="font-size: 28px; color: #ef4444; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">PDF dosyasını yüklemek için tıklayın</p>
+                            <p id="exp-pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
                 }
 
                 // Restore references
@@ -3365,10 +3434,21 @@
                 document.getElementById('exp-form-title').textContent = 'Deneyi Düzenle';
                 document.getElementById('exp-reset-form-btn').style.display = 'inline-flex';
 
-                if (data.image_url) {
-                    const zone = document.getElementById('exp-preview-zone');
-                    zone.innerHTML = `<img src="/${data.image_url}" style="max-height:200px; max-width:100%; border-radius:8px;"><p style="margin-top:10px;">Görseli değiştirmek için tıklayın</p>`;
-                    zone.classList.add('has-file');
+                // Image Preview Logic
+                const zone = document.getElementById('exp-preview-zone');
+                if (zone) {
+                    if (data.image_url) {
+                        zone.innerHTML = `<img src="/${data.image_url}" style="max-height:200px; max-width:100%; border-radius:8px;"><p style="margin-top:10px;">Görseli değiştirmek için tıklayın</p>`;
+                        zone.classList.add('has-file');
+                    } else {
+                        zone.classList.remove('has-file');
+                        zone.innerHTML = `
+                            <i class="ph ph-image" style="font-size: 32px; color: #94a3b8; margin-bottom: 15px;"></i>
+                            <h4 style="margin: 0; color: #334155;">Görsel Yükle</h4>
+                            <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem;">Sürükleyip bırakın veya tıklayın</p>
+                            <p id="exp-file-name" style="margin-top: 10px; font-weight: 600; color: var(--primary-accent);"></p>
+                        `;
+                    }
                 }
 
                 showSection('new-experiment', document.querySelector('a[title="Yeni Deney"]'));
