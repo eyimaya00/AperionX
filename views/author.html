@@ -2041,6 +2041,18 @@
 
             // Notification polling (every 30s)
             setInterval(loadNotifications, 30000);
+
+            // Heartbeat tracking for online status & work time
+            function sendHeartbeat() {
+                if (token) {
+                    fetch(`${API_URL}/heartbeat`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(e => console.warn('Heartbeat failed:', e));
+                }
+            }
+            sendHeartbeat(); // First call immediately
+            setInterval(sendHeartbeat, 60000); // Call every 60s
         });
 
         // Navigation Helpers
@@ -4162,7 +4174,17 @@
             } catch (e) { console.error('Error loading settings:', e); }
         }
 
-        function logout() {
+        async function logout() {
+            if (token) {
+                try {
+                    await fetch(`${API_URL}/logout-activity`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch(e) {
+                    console.warn('Logout tracking failed:', e);
+                }
+            }
             // Clear all auth data
             localStorage.removeItem('token');
             localStorage.removeItem('user');

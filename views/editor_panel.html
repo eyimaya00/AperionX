@@ -2989,6 +2989,18 @@
                     });
                 } catch(e) { console.error('Failed to bind expQuillResultsEdit image handler:', e); }
             }
+
+            // Heartbeat tracking for online status & work time
+            function sendHeartbeat() {
+                if (token) {
+                    fetch(`${API_URL}/heartbeat`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(e => console.warn('Heartbeat failed:', e));
+                }
+            }
+            sendHeartbeat(); // First call immediately
+            setInterval(sendHeartbeat, 60000); // Call every 60s
         });
 
         let allAuthorsData = []; // Store for filtering
@@ -5163,7 +5175,21 @@
 
         loadAuthorsForEditorSelection();
 
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/index'; }
+        async function logout() {
+            if (token) {
+                try {
+                    await fetch(`${API_URL}/logout-activity`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch(e) {
+                    console.warn('Logout tracking failed:', e);
+                }
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index';
+        }
     </script>
     <!-- === COMMENTS === -->
 
