@@ -2704,184 +2704,223 @@
             loadAnalysisAuthors(); // Init analysis module
             loadAuthorsForEditorSelection(); // Load authors for edit modal
 
-            // Resolve UMD default exports safely
-            const TableBetterModule = typeof QuillTableBetter !== 'undefined' ? (QuillTableBetter.default || QuillTableBetter) : null;
-            const ResizeModule = typeof QuillResizeModule !== 'undefined' ? (QuillResizeModule.default || QuillResizeModule) : null;
+            // === QUILL EDITOR INITIALIZATION ===
+            console.log('=== QUILL INIT START ===');
+            let TableBetterModule = null;
+            let ResizeModule = null;
 
-            // Register the modules for Quill 2.0
-            if (ResizeModule) {
-                Quill.register('modules/resize', ResizeModule);
-            }
+            try {
+                if (typeof QuillTableBetter !== 'undefined') {
+                    TableBetterModule = QuillTableBetter.default || QuillTableBetter;
+                }
+            } catch(e) { console.error('Failed to resolve QuillTableBetter:', e); }
+
+            try {
+                if (typeof QuillResizeModule !== 'undefined') {
+                    ResizeModule = QuillResizeModule.default || QuillResizeModule;
+                }
+            } catch(e) { console.error('Failed to resolve QuillResizeModule:', e); }
+
+            try {
+                if (ResizeModule) {
+                    Quill.register('modules/resize', ResizeModule);
+                }
+            } catch(e) { console.error('Failed to register ResizeModule:', e); ResizeModule = null; }
+
+            try {
+                if (TableBetterModule) {
+                    Quill.register({ 'modules/table-better': TableBetterModule }, true);
+                }
+            } catch(e) { console.error('Failed to register TableBetterModule:', e); TableBetterModule = null; }
+
+            var toolbarConfig = [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video']
+            ];
             if (TableBetterModule) {
-                Quill.register({ 'modules/table-better': TableBetterModule }, true);
+                toolbarConfig[toolbarConfig.length - 1].push('table-better');
+            }
+            toolbarConfig.push(['clean']);
+
+            function buildModulesConfig() {
+                var mods = {
+                    toolbar: toolbarConfig
+                };
+                if (ResizeModule) {
+                    mods.resize = { showSize: true };
+                }
+                if (TableBetterModule) {
+                    mods.table = false;
+                    mods['table-better'] = {
+                        language: 'tr_TR',
+                        menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                        toolbarTable: true
+                    };
+                    if (TableBetterModule.keyboardBindings) {
+                        var bindings = {};
+                        for (var key in TableBetterModule.keyboardBindings) {
+                            if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
+                                bindings[key] = Object.assign({}, TableBetterModule.keyboardBindings[key]);
+                            }
+                        }
+                        mods.keyboard = { bindings: bindings };
+                    }
+                }
+                return mods;
             }
 
-            // Helper to get cloned keyboard bindings for each Quill instance
-            const getTableKeyboardBindings = () => {
-                if (!TableBetterModule || !TableBetterModule.keyboardBindings) return {};
-                const bindings = {};
-                for (const key in TableBetterModule.keyboardBindings) {
-                    if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
-                        bindings[key] = { ...TableBetterModule.keyboardBindings[key] };
-                    }
-                }
-                return bindings;
-            };
-
-            // Initialize Quill for Edit Modal
-            quillEdit = new Quill('#editor-container', {
-                theme: 'snow',
-                modules: {
-                    resize: ResizeModule ? {
-                        showSize: true
-                    } : false,
-                    table: false,
-                    'table-better': {
-                        language: 'tr_TR',
-                        menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                        toolbarTable: true
-                    },
-                    keyboard: TableBetterModule ? {
-                        bindings: getTableKeyboardBindings()
-                    } : {},
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'font': [] }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'indent': '-1'}, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'align': [] }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'table-better'],
-                        ['clean']
-                    ]
-                }
-            });
-
-            // Initialize Quill for Experiment Edit Modal
-            expQuillProcedureEdit = new Quill('#edit-exp-procedure-editor', {
-                theme: 'snow',
-                modules: {
-                    resize: ResizeModule ? {
-                        showSize: true
-                    } : false,
-                    table: false,
-                    'table-better': {
-                        language: 'tr_TR',
-                        menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                        toolbarTable: true
-                    },
-                    keyboard: TableBetterModule ? {
-                        bindings: getTableKeyboardBindings()
-                    } : {},
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'font': [] }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'indent': '-1'}, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'align': [] }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'table-better'],
-                        ['clean']
-                    ]
-                }
-            });
-
-            expQuillProcedureEdit.getModule('toolbar').addHandler('image', function() {
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
-                input.onchange = async () => {
-                    const file = input.files[0];
-                    if (file) {
-                        const formData = new FormData();
-                        formData.append('image', file);
-                        const q = this.quill || expQuillProcedureEdit;
-                        try {
-                            const res = await fetch(`${API_URL}/upload-image`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
-                            if (!res.ok) throw new Error('Yükleme başarısız');
-                            const data = await res.json();
-                            let range = q.getSelection();
-                            if (!range) range = { index: q.getLength() - 1, length: 0 };
-                            q.insertEmbed(range.index, 'image', '/' + data.url);
-                            q.setSelection(range.index + 1);
-                        } catch (e) {
-                            console.error(e);
-                            showToast('Görsel yüklenemedi', 'error');
+            // Initialize quillEdit
+            try {
+                quillEdit = new Quill('#editor-container', {
+                    theme: 'snow',
+                    modules: buildModulesConfig()
+                });
+            } catch(e) {
+                console.error('Failed to initialize quillEdit, trying basic:', e);
+                try {
+                    quillEdit = new Quill('#editor-container', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image', 'video'],
+                                ['clean']
+                            ]
                         }
-                    }
-                };
-            });
-
-            expQuillResultsEdit = new Quill('#edit-exp-results-editor', {
-                theme: 'snow',
-                modules: {
-                    resize: ResizeModule ? {
-                        showSize: true
-                    } : false,
-                    table: false,
-                    'table-better': {
-                        language: 'tr_TR',
-                        menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                        toolbarTable: true
-                    },
-                    keyboard: TableBetterModule ? {
-                        bindings: getTableKeyboardBindings()
-                    } : {},
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'font': [] }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'indent': '-1'}, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'align': [] }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'table-better'],
-                        ['clean']
-                    ]
+                    });
+                } catch(e2) {
+                    console.error('Basic quillEdit init also failed:', e2);
                 }
-            });
+            }
 
-            expQuillResultsEdit.getModule('toolbar').addHandler('image', function() {
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
-                input.onchange = async () => {
-                    const file = input.files[0];
-                    if (file) {
-                        const formData = new FormData();
-                        formData.append('image', file);
-                        const q = this.quill || expQuillResultsEdit;
-                        try {
-                            const res = await fetch(`${API_URL}/upload-image`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
-                            if (!res.ok) throw new Error('Yükleme başarısız');
-                            const data = await res.json();
-                            let range = q.getSelection();
-                            if (!range) range = { index: q.getLength() - 1, length: 0 };
-                            q.insertEmbed(range.index, 'image', '/' + data.url);
-                            q.setSelection(range.index + 1);
-                        } catch (e) {
-                            console.error(e);
-                            showToast('Görsel yüklenemedi', 'error');
+            // Initialize expQuillProcedureEdit
+            try {
+                expQuillProcedureEdit = new Quill('#edit-exp-procedure-editor', {
+                    theme: 'snow',
+                    modules: buildModulesConfig()
+                });
+            } catch(e) {
+                console.error('Failed to initialize expQuillProcedureEdit, trying basic:', e);
+                try {
+                    expQuillProcedureEdit = new Quill('#edit-exp-procedure-editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image', 'video'],
+                                ['clean']
+                            ]
                         }
-                    }
-                };
-            });
+                    });
+                } catch(e2) {
+                    console.error('Basic expQuillProcedureEdit init also failed:', e2);
+                }
+            }
+
+            // Initialize expQuillResultsEdit
+            try {
+                expQuillResultsEdit = new Quill('#edit-exp-results-editor', {
+                    theme: 'snow',
+                    modules: buildModulesConfig()
+                });
+            } catch(e) {
+                console.error('Failed to initialize expQuillResultsEdit, trying basic:', e);
+                try {
+                    expQuillResultsEdit = new Quill('#edit-exp-results-editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image', 'video'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                } catch(e2) {
+                    console.error('Basic expQuillResultsEdit init also failed:', e2);
+                }
+            }
+
+            // Bind handlers for expQuillProcedureEdit images if initialization succeeded
+            if (expQuillProcedureEdit && expQuillProcedureEdit.getModule('toolbar')) {
+                try {
+                    expQuillProcedureEdit.getModule('toolbar').addHandler('image', function() {
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            if (file) {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const q = this.quill || expQuillProcedureEdit;
+                                try {
+                                    const res = await fetch(`${API_URL}/upload-image`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                                    if (!res.ok) throw new Error('Yükleme başarısız');
+                                    const data = await res.json();
+                                    let range = q.getSelection();
+                                    if (!range) range = { index: q.getLength() - 1, length: 0 };
+                                    q.insertEmbed(range.index, 'image', '/' + data.url);
+                                    q.setSelection(range.index + 1);
+                                } catch (e) {
+                                    console.error(e);
+                                    showToast('Görsel yüklenemedi', 'error');
+                                }
+                            }
+                        };
+                    });
+                } catch(e) { console.error('Failed to bind expQuillProcedureEdit image handler:', e); }
+            }
+
+            console.log('=== QUILL INIT END ===');
+
+            if (expQuillResultsEdit && expQuillResultsEdit.getModule('toolbar')) {
+                try {
+                    expQuillResultsEdit.getModule('toolbar').addHandler('image', function() {
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            if (file) {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const q = this.quill || expQuillResultsEdit;
+                                try {
+                                    const res = await fetch(`${API_URL}/upload-image`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                                    if (!res.ok) throw new Error('Yükleme başarısız');
+                                    const data = await res.json();
+                                    let range = q.getSelection();
+                                    if (!range) range = { index: q.getLength() - 1, length: 0 };
+                                    q.insertEmbed(range.index, 'image', '/' + data.url);
+                                    q.setSelection(range.index + 1);
+                                } catch (e) {
+                                    console.error(e);
+                                    showToast('Görsel yüklenemedi', 'error');
+                                }
+                            }
+                        };
+                    });
+                } catch(e) { console.error('Failed to bind expQuillResultsEdit image handler:', e); }
+            }
         });
 
         let allAuthorsData = []; // Store for filtering

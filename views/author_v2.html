@@ -1891,62 +1891,114 @@
             } catch (e) { }
         }
 
-        // Resolve UMD default exports safely
-        const TableBetterModule = typeof QuillTableBetter !== 'undefined' ? (QuillTableBetter.default || QuillTableBetter) : null;
-        const ResizeModule = typeof QuillResizeModule !== 'undefined' ? (QuillResizeModule.default || QuillResizeModule) : null;
+        // === QUILL EDITOR INITIALIZATION ===
+        console.log('=== QUILL INIT START ===');
+        let TableBetterModule = null;
+        let ResizeModule = null;
 
-        // Register the modules for Quill 2.0
-        if (ResizeModule) {
-            Quill.register('modules/resize', ResizeModule);
-        }
-        if (TableBetterModule) {
-            Quill.register({ 'modules/table-better': TableBetterModule }, true);
-        }
-
-        // Helper to get cloned keyboard bindings for Quill instance
-        const getTableKeyboardBindings = () => {
-            if (!TableBetterModule || !TableBetterModule.keyboardBindings) return {};
-            const bindings = {};
-            for (const key in TableBetterModule.keyboardBindings) {
-                if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
-                    bindings[key] = { ...TableBetterModule.keyboardBindings[key] };
-                }
+        try {
+            if (typeof QuillTableBetter !== 'undefined') {
+                TableBetterModule = QuillTableBetter.default || QuillTableBetter;
             }
-            return bindings;
-        };
+        } catch(e) { console.error('Failed to resolve QuillTableBetter:', e); }
 
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                resize: ResizeModule ? {
-                    showSize: true
-                } : false,
-                table: false,
-                'table-better': {
-                    language: 'tr_TR',
-                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                    toolbarTable: true
-                },
-                keyboard: TableBetterModule ? {
-                    bindings: getTableKeyboardBindings()
-                } : {},
+        try {
+            if (typeof QuillResizeModule !== 'undefined') {
+                ResizeModule = QuillResizeModule.default || QuillResizeModule;
+            }
+        } catch(e) { console.error('Failed to resolve QuillResizeModule:', e); }
+
+        try {
+            if (ResizeModule) {
+                Quill.register('modules/resize', ResizeModule);
+            }
+        } catch(e) { console.error('Failed to register ResizeModule:', e); ResizeModule = null; }
+
+        try {
+            if (TableBetterModule) {
+                Quill.register({ 'modules/table-better': TableBetterModule }, true);
+            }
+        } catch(e) { console.error('Failed to register TableBetterModule:', e); TableBetterModule = null; }
+
+        var toolbarConfig = [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'align': [] }],
+            ['blockquote', 'code-block'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image', 'video']
+        ];
+        if (TableBetterModule) {
+            toolbarConfig[toolbarConfig.length - 1].push('table-better');
+        }
+        toolbarConfig.push(['clean']);
+
+        function buildModulesConfig() {
+            var mods = {
                 toolbar: {
-                    container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'align': [] }],
-                        ['blockquote', 'code-block'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        ['link', 'image', 'video', 'table-better'],
-                        ['clean']
-                    ],
+                    container: toolbarConfig,
                     handlers: {
                         image: imageHandler
                     }
                 }
-            },
-            placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
-        });
+            };
+            if (ResizeModule) {
+                mods.resize = { showSize: true };
+            }
+            if (TableBetterModule) {
+                mods.table = false;
+                mods['table-better'] = {
+                    language: 'tr_TR',
+                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                    toolbarTable: true
+                };
+                if (TableBetterModule.keyboardBindings) {
+                    var bindings = {};
+                    for (var key in TableBetterModule.keyboardBindings) {
+                        if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
+                            bindings[key] = Object.assign({}, TableBetterModule.keyboardBindings[key]);
+                        }
+                    }
+                    mods.keyboard = { bindings: bindings };
+                }
+            }
+            return mods;
+        }
+
+        var quill;
+        try {
+            quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: buildModulesConfig(),
+                placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
+            });
+        } catch(e) {
+            console.error('Failed to initialize Quill with modules, trying basic:', e);
+            try {
+                quill = new Quill('#editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'align': [] }],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image', 'video'],
+                                ['clean']
+                            ],
+                            handlers: {
+                                image: imageHandler
+                            }
+                        }
+                    },
+                    placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
+                });
+            } catch(e2) {
+                console.error('Basic Quill init also failed:', e2);
+            }
+        }
+        console.log('=== QUILL INIT END ===');
 
         function imageHandler() {
             // Capture the quill instance from the handler context (this.quill is bound by standard Quill toolbar)
