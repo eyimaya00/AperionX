@@ -1891,18 +1891,34 @@
             } catch (e) { }
         }
 
+        // Resolve UMD default exports safely
+        const TableBetterModule = typeof QuillTableBetter !== 'undefined' ? (QuillTableBetter.default || QuillTableBetter) : null;
+        const ResizeModule = typeof QuillResizeModule !== 'undefined' ? (QuillResizeModule.default || QuillResizeModule) : null;
+
         // Register the modules for Quill 2.0
-        if (typeof QuillResizeModule !== 'undefined') {
-            Quill.register('modules/resize', QuillResizeModule);
+        if (ResizeModule) {
+            Quill.register('modules/resize', ResizeModule);
         }
-        if (typeof QuillTableBetter !== 'undefined') {
-            Quill.register({ 'modules/table-better': QuillTableBetter }, true);
+        if (TableBetterModule) {
+            Quill.register({ 'modules/table-better': TableBetterModule }, true);
         }
+
+        // Helper to get cloned keyboard bindings for Quill instance
+        const getTableKeyboardBindings = () => {
+            if (!TableBetterModule || !TableBetterModule.keyboardBindings) return {};
+            const bindings = {};
+            for (const key in TableBetterModule.keyboardBindings) {
+                if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
+                    bindings[key] = { ...TableBetterModule.keyboardBindings[key] };
+                }
+            }
+            return bindings;
+        };
 
         var quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
-                resize: (typeof QuillResizeModule !== 'undefined') ? {
+                resize: ResizeModule ? {
                     showSize: true
                 } : false,
                 table: false,
@@ -1911,8 +1927,8 @@
                     menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
                     toolbarTable: true
                 },
-                keyboard: (typeof QuillTableBetter !== 'undefined') ? {
-                    bindings: QuillTableBetter.keyboardBindings
+                keyboard: TableBetterModule ? {
+                    bindings: getTableKeyboardBindings()
                 } : {},
                 toolbar: {
                     container: [

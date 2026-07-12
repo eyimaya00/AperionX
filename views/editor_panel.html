@@ -2614,12 +2614,12 @@
                         <div id="edit-exp-procedure-editor" style="height: 250px;"></div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label>Elde Edilen Bulgular (Results)</label>
                         <div id="edit-exp-results-editor" style="height: 200px;"></div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label>Sonuç (Conclusion)</label>
                         <textarea id="edit-exp-conclusion" class="form-control" rows="4"></textarea>
                     </div>
@@ -2704,19 +2704,35 @@
             loadAnalysisAuthors(); // Init analysis module
             loadAuthorsForEditorSelection(); // Load authors for edit modal
 
+            // Resolve UMD default exports safely
+            const TableBetterModule = typeof QuillTableBetter !== 'undefined' ? (QuillTableBetter.default || QuillTableBetter) : null;
+            const ResizeModule = typeof QuillResizeModule !== 'undefined' ? (QuillResizeModule.default || QuillResizeModule) : null;
+
             // Register the modules for Quill 2.0
-            if (typeof QuillResizeModule !== 'undefined') {
-                Quill.register('modules/resize', QuillResizeModule);
+            if (ResizeModule) {
+                Quill.register('modules/resize', ResizeModule);
             }
-            if (typeof QuillTableBetter !== 'undefined') {
-                Quill.register({ 'modules/table-better': QuillTableBetter }, true);
+            if (TableBetterModule) {
+                Quill.register({ 'modules/table-better': TableBetterModule }, true);
             }
+
+            // Helper to get cloned keyboard bindings for each Quill instance
+            const getTableKeyboardBindings = () => {
+                if (!TableBetterModule || !TableBetterModule.keyboardBindings) return {};
+                const bindings = {};
+                for (const key in TableBetterModule.keyboardBindings) {
+                    if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
+                        bindings[key] = { ...TableBetterModule.keyboardBindings[key] };
+                    }
+                }
+                return bindings;
+            };
 
             // Initialize Quill for Edit Modal
             quillEdit = new Quill('#editor-container', {
                 theme: 'snow',
                 modules: {
-                    resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    resize: ResizeModule ? {
                         showSize: true
                     } : false,
                     table: false,
@@ -2725,8 +2741,8 @@
                         menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
                         toolbarTable: true
                     },
-                    keyboard: (typeof QuillTableBetter !== 'undefined') ? {
-                        bindings: QuillTableBetter.keyboardBindings
+                    keyboard: TableBetterModule ? {
+                        bindings: getTableKeyboardBindings()
                     } : {},
                     toolbar: [
                         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -2750,7 +2766,7 @@
             expQuillProcedureEdit = new Quill('#edit-exp-procedure-editor', {
                 theme: 'snow',
                 modules: {
-                    resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    resize: ResizeModule ? {
                         showSize: true
                     } : false,
                     table: false,
@@ -2759,8 +2775,8 @@
                         menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
                         toolbarTable: true
                     },
-                    keyboard: (typeof QuillTableBetter !== 'undefined') ? {
-                        bindings: QuillTableBetter.keyboardBindings
+                    keyboard: TableBetterModule ? {
+                        bindings: getTableKeyboardBindings()
                     } : {},
                     toolbar: [
                         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -2810,7 +2826,7 @@
             expQuillResultsEdit = new Quill('#edit-exp-results-editor', {
                 theme: 'snow',
                 modules: {
-                    resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    resize: ResizeModule ? {
                         showSize: true
                     } : false,
                     table: false,
@@ -2819,8 +2835,8 @@
                         menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
                         toolbarTable: true
                     },
-                    keyboard: (typeof QuillTableBetter !== 'undefined') ? {
-                        bindings: QuillTableBetter.keyboardBindings
+                    keyboard: TableBetterModule ? {
+                        bindings: getTableKeyboardBindings()
                     } : {},
                     toolbar: [
                         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
