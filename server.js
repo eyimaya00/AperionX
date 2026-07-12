@@ -4582,20 +4582,23 @@ app.get('/api/debug-ip', (req, res) => {
 
 // Clean URLs
 app.get('/admin', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('admin.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/author', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('author.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/author_v2', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('author_v2.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/editor', (req, res) => {
     console.log('Serving editor_panel.html');
-    res.set('Cache-Control', 'no-store');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('editor_panel.html', { root: path.join(__dirname, 'views') });
 });
 
