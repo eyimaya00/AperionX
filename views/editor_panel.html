@@ -2752,9 +2752,34 @@
             }
             toolbarConfig.push(['clean']);
 
+            // Common handler for table-better insertion
+            function handleTableBetterInsert() {
+                var tableModule = this.quill.getModule('table-better');
+                if (!tableModule) {
+                    alert("Tablo modülü yüklenemedi.");
+                    return;
+                }
+                var size = prompt("Eklenecek tablo boyutunu giriniz (Satır x Sütun, Örn: 3x3):", "3x3");
+                if (size) {
+                    var parts = size.split('x');
+                    var rows = parseInt(parts[0], 10);
+                    var cols = parseInt(parts[1], 10);
+                    if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0) {
+                        tableModule.insertTable(rows, cols);
+                    } else {
+                        alert("Geçersiz boyut formatı! Lütfen 3x3 şeklinde girin.");
+                    }
+                }
+            }
+
             function buildModulesConfig() {
                 var mods = {
-                    toolbar: toolbarConfig
+                    toolbar: {
+                        container: toolbarConfig,
+                        handlers: {
+                            'table-better': handleTableBetterInsert
+                        }
+                    }
                 };
                 if (ResizeModule) {
                     mods.resize = { showSize: true };
