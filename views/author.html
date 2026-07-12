@@ -2348,6 +2348,19 @@
             return mods;
         }
 
+        // Helper to cleanup failed Quill toolbars before fallback init
+        function cleanExistingToolbar(selector) {
+            try {
+                var container = document.querySelector(selector);
+                if (container) {
+                    var prev = container.previousElementSibling;
+                    if (prev && prev.classList.contains('ql-toolbar')) {
+                        prev.remove();
+                    }
+                }
+            } catch(e) { console.error('Error cleaning toolbar:', e); }
+        }
+
         // Step 5: Initialize editors with try-catch fallback
         var quill, expProcedureQuill, expResultsQuill;
 
@@ -2361,6 +2374,8 @@
             console.log('Main editor (#editor) initialized OK');
         } catch(e) {
             console.error('Main editor FAILED with table modules, trying basic:', e);
+            alert("Main Editor Init Error: " + e.message + "\nStack: " + e.stack);
+            cleanExistingToolbar('#editor');
             try {
                 quill = new Quill('#editor', {
                     theme: 'snow',
@@ -2392,6 +2407,8 @@
             console.log('Procedure editor (#exp-procedure-editor) initialized OK');
         } catch(e) {
             console.error('Procedure editor FAILED with table modules, trying basic:', e);
+            alert("Procedure Editor Init Error: " + e.message + "\nStack: " + e.stack);
+            cleanExistingToolbar('#exp-procedure-editor');
             try {
                 expProcedureQuill = new Quill('#exp-procedure-editor', {
                     theme: 'snow',
@@ -2423,6 +2440,8 @@
             console.log('Results editor (#exp-results-editor) initialized OK');
         } catch(e) {
             console.error('Results editor FAILED with table modules, trying basic:', e);
+            alert("Results Editor Init Error: " + e.message + "\nStack: " + e.stack);
+            cleanExistingToolbar('#exp-results-editor');
             try {
                 expResultsQuill = new Quill('#exp-results-editor', {
                     theme: 'snow',
