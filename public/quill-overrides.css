@@ -29,3 +29,9 @@
 .ql-editor th.selected {
     background-color: rgba(99, 102, 241, 0.15) !important;
 }
+
+/* Allow table resizing (grow/shrink) by overriding the global 100% width rule inside the active editor */
+.ql-editor table {
+    width: auto !important;
+    max-width: 100% !important;
+}

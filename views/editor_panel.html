@@ -2678,6 +2678,31 @@
         </div>
     </div>
 
+    <!-- TABLE INSERT MODAL -->
+    <div class="modal-overlay" id="table-insert-modal" style="z-index: 2000;">
+        <div class="modal-box" style="text-align: left;">
+            <div class="modal-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);">
+                <i class="ph-bold ph-table"></i>
+            </div>
+            <h3 class="modal-title" style="text-align: center;">Tablo Ekle</h3>
+            <p class="modal-desc" style="text-align: center; margin-bottom: 20px;">Eklenecek tablonun satır ve sütun sayısını giriniz.</p>
+            <div style="margin-bottom: 24px; display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; color: #475569; display: block; margin-bottom: 6px; font-size: 0.9rem;">Satır Sayısı</label>
+                    <input type="number" id="table-rows" class="form-control" value="3" min="1" max="25" style="width: 100%; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; color: #475569; display: block; margin-bottom: 6px; font-size: 0.9rem;">Sütun Sayısı</label>
+                    <input type="number" id="table-cols" class="form-control" value="3" min="1" max="25" style="width: 100%; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px;">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-cancel" id="table-cancel-btn" style="padding: 10px;">İptal</button>
+                <button class="modal-btn modal-confirm" id="table-confirm-btn" style="background: var(--primary-accent); color: white; padding: 10px;">Ekle</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000;"></div>
 
     <script>
@@ -2753,24 +2778,42 @@
             toolbarConfig.push(['clean']);
 
             // Common handler for table-better insertion
+            var activeQuillForTable = null;
             function handleTableBetterInsert() {
                 var tableModule = this.quill.getModule('table-better');
                 if (!tableModule) {
-                    alert("Tablo modülü yüklenemedi.");
+                    showToast("Tablo modülü yüklenemedi.", "error");
                     return;
                 }
-                var size = prompt("Eklenecek tablo boyutunu giriniz (Satır x Sütun, Örn: 3x3):", "3x3");
-                if (size) {
-                    var parts = size.split('x');
-                    var rows = parseInt(parts[0], 10);
-                    var cols = parseInt(parts[1], 10);
-                    if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0) {
-                        tableModule.insertTable(rows, cols);
-                    } else {
-                        alert("Geçersiz boyut formatı! Lütfen 3x3 şeklinde girin.");
-                    }
-                }
+                activeQuillForTable = this.quill;
+                document.getElementById('table-rows').value = 3;
+                document.getElementById('table-cols').value = 3;
+                document.getElementById('table-insert-modal').classList.add('show');
             }
+
+            // Bind Table Modal Events
+            document.addEventListener('DOMContentLoaded', function() {
+                var cancelBtn = document.getElementById('table-cancel-btn');
+                var confirmBtn = document.getElementById('table-confirm-btn');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        document.getElementById('table-insert-modal').classList.remove('show');
+                    });
+                }
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', function() {
+                        var rows = parseInt(document.getElementById('table-rows').value, 10);
+                        var cols = parseInt(document.getElementById('table-cols').value, 10);
+                        if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0 && activeQuillForTable) {
+                            var tableModule = activeQuillForTable.getModule('table-better');
+                            if (tableModule) {
+                                tableModule.insertTable(rows, cols);
+                            }
+                        }
+                        document.getElementById('table-insert-modal').classList.remove('show');
+                    });
+                }
+            });
 
             function buildModulesConfig() {
                 var mods = {
