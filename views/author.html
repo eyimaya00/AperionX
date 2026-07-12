@@ -2257,137 +2257,193 @@
             loadMyArticles();
         }
 
-        // Resolve UMD default exports safely
-        const TableBetterModule = typeof QuillTableBetter !== 'undefined' ? (QuillTableBetter.default || QuillTableBetter) : null;
-        const ResizeModule = typeof QuillResizeModule !== 'undefined' ? (QuillResizeModule.default || QuillResizeModule) : null;
+        // === QUILL EDITOR INITIALIZATION ===
+        console.log('=== QUILL INIT START ===');
+        console.log('Quill available:', typeof Quill);
+        console.log('QuillTableBetter available:', typeof QuillTableBetter);
+        console.log('QuillResizeModule available:', typeof QuillResizeModule);
 
-        // Register the modules for Quill 2.0
-        if (ResizeModule) {
-            Quill.register('modules/resize', ResizeModule);
-        }
+        // Step 1: Resolve UMD default exports
+        let TableBetterModule = null;
+        let ResizeModule = null;
+
+        try {
+            if (typeof QuillTableBetter !== 'undefined') {
+                TableBetterModule = QuillTableBetter.default || QuillTableBetter;
+                console.log('TableBetterModule resolved:', typeof TableBetterModule, TableBetterModule);
+            }
+        } catch(e) { console.error('Failed to resolve QuillTableBetter:', e); }
+
+        try {
+            if (typeof QuillResizeModule !== 'undefined') {
+                ResizeModule = QuillResizeModule.default || QuillResizeModule;
+                console.log('ResizeModule resolved:', typeof ResizeModule, ResizeModule);
+            }
+        } catch(e) { console.error('Failed to resolve QuillResizeModule:', e); }
+
+        // Step 2: Register modules
+        try {
+            if (ResizeModule) {
+                Quill.register('modules/resize', ResizeModule);
+                console.log('ResizeModule registered OK');
+            }
+        } catch(e) { console.error('Failed to register ResizeModule:', e); ResizeModule = null; }
+
+        try {
+            if (TableBetterModule) {
+                Quill.register({ 'modules/table-better': TableBetterModule }, true);
+                console.log('TableBetterModule registered OK');
+            }
+        } catch(e) { console.error('Failed to register TableBetterModule:', e); TableBetterModule = null; }
+
+        // Step 3: Build toolbar config
+        var toolbarConfig = [
+            [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'script': 'sub' }, { 'script': 'super' }],
+            [{ 'align': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+            ['blockquote', 'code-block'],
+            ['link', 'image', 'video', 'formula']
+        ];
+        // Only add table-better button if module loaded
         if (TableBetterModule) {
-            Quill.register({ 'modules/table-better': TableBetterModule }, true);
+            toolbarConfig[toolbarConfig.length - 1].push('table-better');
         }
+        toolbarConfig.push(['clean']);
 
-        // Helper to get cloned keyboard bindings for each Quill instance
-        const getTableKeyboardBindings = () => {
-            if (!TableBetterModule || !TableBetterModule.keyboardBindings) return {};
-            const bindings = {};
-            for (const key in TableBetterModule.keyboardBindings) {
-                if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
-                    bindings[key] = { ...TableBetterModule.keyboardBindings[key] };
+        // Step 4: Build modules config
+        function buildModulesConfig() {
+            var mods = {
+                toolbar: {
+                    container: toolbarConfig,
+                    handlers: {
+                        image: imageHandler
+                    }
+                }
+            };
+            if (ResizeModule) {
+                mods.resize = { showSize: true };
+            }
+            if (TableBetterModule) {
+                mods.table = false;
+                mods['table-better'] = {
+                    language: 'tr_TR',
+                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                    toolbarTable: true
+                };
+                // Clone keyboard bindings
+                if (TableBetterModule.keyboardBindings) {
+                    var bindings = {};
+                    for (var key in TableBetterModule.keyboardBindings) {
+                        if (TableBetterModule.keyboardBindings.hasOwnProperty(key)) {
+                            bindings[key] = Object.assign({}, TableBetterModule.keyboardBindings[key]);
+                        }
+                    }
+                    mods.keyboard = { bindings: bindings };
                 }
             }
-            return bindings;
-        };
+            return mods;
+        }
 
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                resize: ResizeModule ? {
-                    showSize: true
-                } : false,
-                table: false,
-                'table-better': {
-                    language: 'tr_TR',
-                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                    toolbarTable: true
-                },
-                keyboard: TableBetterModule ? {
-                    bindings: getTableKeyboardBindings()
-                } : {},
-                toolbar: {
-                    container: [
-                        [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'align': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula', 'table-better'],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: imageHandler
-                    }
-                }
-            },
-            placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
-        });
+        // Step 5: Initialize editors with try-catch fallback
+        var quill, expProcedureQuill, expResultsQuill;
 
-        var expProcedureQuill = new Quill('#exp-procedure-editor', {
-            theme: 'snow',
-            modules: {
-                resize: ResizeModule ? {
-                    showSize: true
-                } : false,
-                table: false,
-                'table-better': {
-                    language: 'tr_TR',
-                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                    toolbarTable: true
-                },
-                keyboard: TableBetterModule ? {
-                    bindings: getTableKeyboardBindings()
-                } : {},
-                toolbar: {
-                    container: [
-                        [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'align': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula', 'table-better'],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: imageHandler
-                    }
-                }
-            },
-            placeholder: 'Deneyin yapılış adımlarını buraya yazın...'
-        });
+        // Main article editor
+        try {
+            quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: buildModulesConfig(),
+                placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
+            });
+            console.log('Main editor (#editor) initialized OK');
+        } catch(e) {
+            console.error('Main editor FAILED with table modules, trying basic:', e);
+            try {
+                quill = new Quill('#editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'align': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['link', 'image', 'video'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Bilimsel keşiflerinizi buraya yazın...'
+                });
+                console.log('Main editor initialized in BASIC mode (no table)');
+            } catch(e2) {
+                console.error('Main editor BASIC mode also failed:', e2);
+            }
+        }
 
-        var expResultsQuill = new Quill('#exp-results-editor', {
-            theme: 'snow',
-            modules: {
-                resize: ResizeModule ? {
-                    showSize: true
-                } : false,
-                table: false,
-                'table-better': {
-                    language: 'tr_TR',
-                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
-                    toolbarTable: true
-                },
-                keyboard: TableBetterModule ? {
-                    bindings: getTableKeyboardBindings()
-                } : {},
-                toolbar: {
-                    container: [
-                        [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'align': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula', 'table-better'],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: imageHandler
-                    }
-                }
-            },
-            placeholder: 'Elde edilen bulguları ve verileri buraya yazın...'
-        });
+        // Experiment procedure editor
+        try {
+            expProcedureQuill = new Quill('#exp-procedure-editor', {
+                theme: 'snow',
+                modules: buildModulesConfig(),
+                placeholder: 'Deneyin yapılış adımlarını buraya yazın...'
+            });
+            console.log('Procedure editor (#exp-procedure-editor) initialized OK');
+        } catch(e) {
+            console.error('Procedure editor FAILED with table modules, trying basic:', e);
+            try {
+                expProcedureQuill = new Quill('#exp-procedure-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'align': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['link', 'image', 'video'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Deneyin yapılış adımlarını buraya yazın...'
+                });
+                console.log('Procedure editor initialized in BASIC mode');
+            } catch(e2) {
+                console.error('Procedure editor BASIC mode also failed:', e2);
+            }
+        }
+
+        // Experiment results editor (hidden but still needs to init)
+        try {
+            expResultsQuill = new Quill('#exp-results-editor', {
+                theme: 'snow',
+                modules: buildModulesConfig(),
+                placeholder: 'Elde edilen bulguları ve verileri buraya yazın...'
+            });
+            console.log('Results editor (#exp-results-editor) initialized OK');
+        } catch(e) {
+            console.error('Results editor FAILED with table modules, trying basic:', e);
+            try {
+                expResultsQuill = new Quill('#exp-results-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['link', 'image'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Elde edilen bulguları ve verileri buraya yazın...'
+                });
+                console.log('Results editor initialized in BASIC mode');
+            } catch(e2) {
+                console.error('Results editor BASIC mode also failed:', e2);
+            }
+        }
+
+        console.log('=== QUILL INIT END ===');
 
         // === WORD / CHARACTER COUNTER ===
         function updateEditorCounter() {
