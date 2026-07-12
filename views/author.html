@@ -31,11 +31,13 @@
     <link rel="icon" type="image/png" href="/uploads/favicon.png" id="favicon">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill-table-better@1.0.5/dist/quill-table-better.css" rel="stylesheet">
     <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=246" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=246"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=246" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=246"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=246" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=246"></noscript>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill-table-better@1.0.5/dist/quill-table-better.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@botom/quill-resize-module@2.0.0/dist/quill-resize-module.js"></script>
     <link href="quill-overrides.css" rel="stylesheet">
     <link href="author-modern.css" rel="stylesheet">
     <style>
@@ -2249,32 +2251,29 @@
             loadMyArticles();
         }
 
-        // Register the image resize module
-        /* global ImageResize */
-        // Check if ImageResize is defined to avoid errors if script fails to load
-        console.log('Checking ImageResize:', typeof ImageResize);
-
-        let ImageResizeModule = null;
-        if (typeof ImageResize !== 'undefined') {
-            ImageResizeModule = ImageResize;
-            // Handle default export if present (common in some builds)
-            if (ImageResize.default) {
-                ImageResizeModule = ImageResize.default;
-            }
-            console.log('Registering ImageResize module...');
-            Quill.register('modules/imageResize', ImageResizeModule);
-        } else {
-            console.error('ImageResize module NOT found!');
-            // Fallback warning or toast could go here
+        // Register the modules for Quill 2.0
+        if (typeof QuillResizeModule !== 'undefined') {
+            Quill.register('modules/resize', QuillResizeModule);
+        }
+        if (typeof QuillTableBetter !== 'undefined') {
+            Quill.register({ 'modules/table-better': QuillTableBetter }, true);
         }
 
         var quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
-                // Only enable if module is loaded
-                imageResize: ImageResizeModule ? {
-                    displaySize: true
+                resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    showSize: true
                 } : false,
+                table: false,
+                'table-better': {
+                    language: 'tr_TR',
+                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                    toolbarTable: true
+                },
+                keyboard: (typeof QuillTableBetter !== 'undefined') ? {
+                    bindings: QuillTableBetter.keyboardBindings
+                } : {},
                 toolbar: {
                     container: [
                         [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
@@ -2285,7 +2284,7 @@
                         [{ 'align': [] }],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                         ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
+                        ['link', 'image', 'video', 'formula', 'table-better'],
                         ['clean']
                     ],
                     handlers: {
@@ -2299,7 +2298,18 @@
         var expProcedureQuill = new Quill('#exp-procedure-editor', {
             theme: 'snow',
             modules: {
-                imageResize: ImageResizeModule ? { displaySize: true } : false,
+                resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    showSize: true
+                } : false,
+                table: false,
+                'table-better': {
+                    language: 'tr_TR',
+                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                    toolbarTable: true
+                },
+                keyboard: (typeof QuillTableBetter !== 'undefined') ? {
+                    bindings: QuillTableBetter.keyboardBindings
+                } : {},
                 toolbar: {
                     container: [
                         [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
@@ -2310,7 +2320,7 @@
                         [{ 'align': [] }],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                         ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
+                        ['link', 'image', 'video', 'formula', 'table-better'],
                         ['clean']
                     ],
                     handlers: {
@@ -2324,7 +2334,18 @@
         var expResultsQuill = new Quill('#exp-results-editor', {
             theme: 'snow',
             modules: {
-                imageResize: ImageResizeModule ? { displaySize: true } : false,
+                resize: (typeof QuillResizeModule !== 'undefined') ? {
+                    showSize: true
+                } : false,
+                table: false,
+                'table-better': {
+                    language: 'tr_TR',
+                    menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
+                    toolbarTable: true
+                },
+                keyboard: (typeof QuillTableBetter !== 'undefined') ? {
+                    bindings: QuillTableBetter.keyboardBindings
+                } : {},
                 toolbar: {
                     container: [
                         [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
@@ -2335,7 +2356,7 @@
                         [{ 'align': [] }],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                         ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
+                        ['link', 'image', 'video', 'formula', 'table-better'],
                         ['clean']
                     ],
                     handlers: {

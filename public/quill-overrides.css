@@ -23,3 +23,9 @@
     overflow: visible !important;
     /* Important for resize handles */
 }
+
+/* Quill Table Better Selection Overrides */
+.ql-editor td.selected,
+.ql-editor th.selected {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}

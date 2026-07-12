@@ -6052,3 +6052,68 @@ body.dark-mode .dropdown-menu {
     content-visibility: auto;
     contain-intrinsic-size: auto 600px;
 }
+
+
+/* Beautiful and Premium Table Formatting for SSR detail pages */
+.article-content table,
+.procedure-steps table,
+.results-content table,
+.ql-editor table {
+    width: 100% !important;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    background: var(--card-bg, #ffffff);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.article-content table th,
+.article-content table td,
+.procedure-steps table th,
+.procedure-steps table td,
+.results-content table th,
+.results-content table td,
+.ql-editor table th,
+.ql-editor table td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.article-content table th,
+.procedure-steps table th,
+.results-content table th,
+.ql-editor table th {
+    background-color: rgba(99, 102, 241, 0.08) !important;
+    color: var(--primary-color, #6366f1);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .article-content table th,
+[data-theme="dark"] .procedure-steps table th,
+[data-theme="dark"] .results-content table th {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+    color: #a5b4fc;
+}
+
+.article-content table tr:nth-child(even),
+.procedure-steps table tr:nth-child(even),
+.results-content table tr:nth-child(even),
+.ql-editor table tr:nth-child(even) {
+    background-color: rgba(99, 102, 241, 0.02);
+}
+
+.article-content table tr:hover,
+.procedure-steps table tr:hover,
+.results-content table tr:hover,
+.ql-editor table tr:hover {
+    background-color: rgba(99, 102, 241, 0.04);
+}
