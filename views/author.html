@@ -2330,7 +2330,7 @@
             if (TableBetterModule) {
                 mods.table = false;
                 mods['table-better'] = {
-                    language: 'tr_TR',
+                    language: 'en_US',
                     menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'delete'],
                     toolbarTable: true
                 };
@@ -2374,7 +2374,6 @@
             console.log('Main editor (#editor) initialized OK');
         } catch(e) {
             console.error('Main editor FAILED with table modules, trying basic:', e);
-            alert("Main Editor Init Error: " + e.message + "\nStack: " + e.stack);
             cleanExistingToolbar('#editor');
             try {
                 quill = new Quill('#editor', {
@@ -2407,7 +2406,6 @@
             console.log('Procedure editor (#exp-procedure-editor) initialized OK');
         } catch(e) {
             console.error('Procedure editor FAILED with table modules, trying basic:', e);
-            alert("Procedure Editor Init Error: " + e.message + "\nStack: " + e.stack);
             cleanExistingToolbar('#exp-procedure-editor');
             try {
                 expProcedureQuill = new Quill('#exp-procedure-editor', {
@@ -2440,7 +2438,6 @@
             console.log('Results editor (#exp-results-editor) initialized OK');
         } catch(e) {
             console.error('Results editor FAILED with table modules, trying basic:', e);
-            alert("Results Editor Init Error: " + e.message + "\nStack: " + e.stack);
             cleanExistingToolbar('#exp-results-editor');
             try {
                 expResultsQuill = new Quill('#exp-results-editor', {
