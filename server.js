@@ -4892,6 +4892,108 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// === USER ACTIVITY TRACKING ENDPOINTS ===
+
+// Heartbeat - called every 60s by author/editor panels
+app.post('/api/heartbeat', authenticateToken, async (req, res) => {
+    try {
+        await pool.query(
+            'UPDATE users SET last_heartbeat = NOW(), is_online = 1, total_work_seconds = COALESCE(total_work_seconds, 0) + 60 WHERE id = ?',
+            [req.user.id]
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Logout activity
+app.post('/api/logout-activity', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT current_session_start FROM users WHERE id = ?', [req.user.id]);
+        if (rows.length > 0 && rows[0].current_session_start) {
+            const sessionStart = new Date(rows[0].current_session_start);
+            const sessionSeconds = Math.floor((Date.now() - sessionStart.getTime()) / 1000);
+            const cappedSeconds = Math.min(sessionSeconds, 86400);
+            await pool.query(
+                'UPDATE users SET is_online = 0, current_session_start = NULL WHERE id = ?',
+                [req.user.id]
+            );
+        } else {
+            await pool.query('UPDATE users SET is_online = 0, current_session_start = NULL WHERE id = ?', [req.user.id]);
+        }
+        
+        await pool.query(
+            'INSERT INTO user_activity_log (user_id, action, ip_address) VALUES (?, ?, ?)',
+            [req.user.id, 'logout', req.headers['x-forwarded-for'] || req.ip || 'unknown']
+        ).catch(() => {});
+        
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin: Get team activity data (authors & editors only)
+app.get('/api/admin/user-activity', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        await pool.query(
+            `UPDATE users SET is_online = 0 WHERE is_online = 1 AND last_heartbeat < DATE_SUB(NOW(), INTERVAL 5 MINUTE)`
+        );
+        
+        const [users] = await pool.query(`
+            SELECT id, fullname, email, role, avatar_url,
+                   COALESCE(login_count, 0) as login_count,
+                   last_login,
+                   COALESCE(is_online, 0) as is_online,
+                   last_heartbeat,
+                   COALESCE(total_work_seconds, 0) as total_work_seconds,
+                   current_session_start,
+                   created_at
+            FROM users
+            WHERE role IN ('author', 'editor')
+            ORDER BY is_online DESC, last_login DESC
+        `);
+        
+        const [dailyLogins] = await pool.query(`
+            SELECT u.id as user_id, u.fullname,
+                   DATE(l.created_at) as login_date,
+                   COUNT(*) as login_count
+            FROM user_activity_log l
+            JOIN users u ON l.user_id = u.id
+            WHERE l.action = 'login'
+              AND u.role IN ('author', 'editor')
+              AND l.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY u.id, u.fullname, DATE(l.created_at)
+            ORDER BY login_date ASC
+        `);
+        
+        const onlineCount = users.filter(u => u.is_online).length;
+        const todayLogins = users.filter(u => {
+            if (!u.last_login) return false;
+            const today = new Date();
+            const login = new Date(u.last_login);
+            return login.toDateString() === today.toDateString();
+        }).length;
+        const totalWorkHours = users.reduce((sum, u) => sum + (u.total_work_seconds || 0), 0) / 3600;
+        
+        res.json({
+            users,
+            dailyLogins,
+            summary: {
+                onlineCount,
+                todayLogins,
+                totalWorkHours: Math.round(totalWorkHours * 10) / 10,
+                totalMembers: users.length
+            }
+        });
+    } catch (e) {
+        console.error('User Activity Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Admin: Get Dashboard Stats
 app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
@@ -6444,113 +6546,6 @@ app.get('/makale/:slug', async (req, res) => {
     });
 });
 
-// === USER ACTIVITY TRACKING ENDPOINTS ===
-
-// Heartbeat - called every 60s by author/editor panels
-app.post('/api/heartbeat', authenticateToken, async (req, res) => {
-    try {
-        await pool.query(
-            'UPDATE users SET last_heartbeat = NOW(), is_online = 1, total_work_seconds = COALESCE(total_work_seconds, 0) + 60 WHERE id = ?',
-            [req.user.id]
-        );
-        res.json({ success: true });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Logout activity
-app.post('/api/logout-activity', authenticateToken, async (req, res) => {
-    try {
-        // Calculate session duration and add to total
-        const [rows] = await pool.query('SELECT current_session_start FROM users WHERE id = ?', [req.user.id]);
-        if (rows.length > 0 && rows[0].current_session_start) {
-            const sessionStart = new Date(rows[0].current_session_start);
-            const sessionSeconds = Math.floor((Date.now() - sessionStart.getTime()) / 1000);
-            // Cap at 24 hours to prevent bugs
-            const cappedSeconds = Math.min(sessionSeconds, 86400);
-            await pool.query(
-                'UPDATE users SET is_online = 0, current_session_start = NULL WHERE id = ?',
-                [req.user.id]
-            );
-        } else {
-            await pool.query('UPDATE users SET is_online = 0, current_session_start = NULL WHERE id = ?', [req.user.id]);
-        }
-        
-        await pool.query(
-            'INSERT INTO user_activity_log (user_id, action, ip_address) VALUES (?, ?, ?)',
-            [req.user.id, 'logout', req.headers['x-forwarded-for'] || req.ip || 'unknown']
-        ).catch(() => {});
-        
-        res.json({ success: true });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Admin: Get team activity data (authors & editors only)
-app.get('/api/admin/user-activity', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        // Mark stale users as offline (no heartbeat for 5 minutes)
-        await pool.query(
-            `UPDATE users SET is_online = 0 WHERE is_online = 1 AND last_heartbeat < DATE_SUB(NOW(), INTERVAL 5 MINUTE)`
-        );
-        
-        // Get authors and editors with activity data
-        const [users] = await pool.query(`
-            SELECT id, fullname, email, role, avatar_url,
-                   COALESCE(login_count, 0) as login_count,
-                   last_login,
-                   COALESCE(is_online, 0) as is_online,
-                   last_heartbeat,
-                   COALESCE(total_work_seconds, 0) as total_work_seconds,
-                   current_session_start,
-                   created_at
-            FROM users
-            WHERE role IN ('author', 'editor')
-            ORDER BY is_online DESC, last_login DESC
-        `);
-        
-        // Get daily login counts for last 7 days
-        const [dailyLogins] = await pool.query(`
-            SELECT u.id as user_id, u.fullname,
-                   DATE(l.created_at) as login_date,
-                   COUNT(*) as login_count
-            FROM user_activity_log l
-            JOIN users u ON l.user_id = u.id
-            WHERE l.action = 'login'
-              AND u.role IN ('author', 'editor')
-              AND l.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY u.id, u.fullname, DATE(l.created_at)
-            ORDER BY login_date ASC
-        `);
-        
-        // Summary stats
-        const onlineCount = users.filter(u => u.is_online).length;
-        const todayLogins = users.filter(u => {
-            if (!u.last_login) return false;
-            const today = new Date();
-            const login = new Date(u.last_login);
-            return login.toDateString() === today.toDateString();
-        }).length;
-        const totalWorkHours = users.reduce((sum, u) => sum + (u.total_work_seconds || 0), 0) / 3600;
-        
-        res.json({
-            users,
-            dailyLogins,
-            summary: {
-                onlineCount,
-                todayLogins,
-                totalWorkHours: Math.round(totalWorkHours * 10) / 10,
-                totalMembers: users.length
-            }
-        });
-    } catch (e) {
-        console.error('User Activity Error:', e);
-        res.status(500).json({ error: e.message });
-    }
-});
 
 app.use((req, res) => {
     // Check if it looks like an API call first
