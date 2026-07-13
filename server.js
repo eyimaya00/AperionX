@@ -6572,12 +6572,24 @@ app.listen(PORT, async () => {
 
     // === AUTO MIGRATION: User Activity Tracking ===
     try {
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INT DEFAULT 0`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login DATETIME NULL`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online TINYINT(1) DEFAULT 0`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_heartbeat DATETIME NULL`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS total_work_seconds INT DEFAULT 0`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_session_start DATETIME NULL`);
+        const addColumnIfMissing = async (tableName, columnName, columnDefinition) => {
+            const [columns] = await pool.query(
+                `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+                [tableName, columnName]
+            );
+            if (columns.length === 0) {
+                await pool.query(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`);
+                console.log(`[MIGRATION] Added column ${columnName} to ${tableName}`);
+            }
+        };
+
+        await addColumnIfMissing('users', 'login_count', 'INT DEFAULT 0');
+        await addColumnIfMissing('users', 'last_login', 'DATETIME NULL');
+        await addColumnIfMissing('users', 'is_online', 'TINYINT(1) DEFAULT 0');
+        await addColumnIfMissing('users', 'last_heartbeat', 'DATETIME NULL');
+        await addColumnIfMissing('users', 'total_work_seconds', 'INT DEFAULT 0');
+        await addColumnIfMissing('users', 'current_session_start', 'DATETIME NULL');
         
         await pool.query(`CREATE TABLE IF NOT EXISTS user_activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
