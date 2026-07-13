@@ -1911,24 +1911,49 @@ const articleStorage = multer.diskStorage({
 const uploadArticleImage = multer({ storage: articleStorage });
 
 const optimizeImageMiddleware = async (req, res, next) => {
-    if (!req.file || req.file.mimetype === 'application/pdf') return next();
     try {
-        const filePath = req.file.path;
-        const tempPath = filePath + '.tmp';
-        const metadata = await sharp(filePath).metadata();
-        let image = sharp(filePath).rotate();
-        if (metadata.width > 1600) image = image.resize({ width: 1600, withoutEnlargement: true });
-        
-        if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
-            image = image.jpeg({ quality: 80 });
-        } else if (metadata.format === 'png') {
-            image = image.png({ quality: 80, compressionLevel: 8 });
-        } else if (metadata.format === 'webp') {
-            image = image.webp({ quality: 80 });
+        const filesToOptimize = [];
+
+        if (req.file) {
+            filesToOptimize.push(req.file);
         }
-        
-        await image.toFile(tempPath);
-        fs.renameSync(tempPath, filePath);
+
+        if (req.files) {
+            if (Array.isArray(req.files)) {
+                filesToOptimize.push(...req.files);
+            } else if (typeof req.files === 'object') {
+                for (const key in req.files) {
+                    if (Array.isArray(req.files[key])) {
+                        filesToOptimize.push(...req.files[key]);
+                    }
+                }
+            }
+        }
+
+        for (const file of filesToOptimize) {
+            if (file.mimetype && file.mimetype.startsWith('image/') && file.mimetype !== 'image/gif') {
+                const filePath = file.path;
+                const tempPath = filePath + '.tmp';
+                const metadata = await sharp(filePath).metadata();
+                
+                let image = sharp(filePath).rotate();
+                // Resize to max width 1200 (standard for og:image and banners)
+                if (metadata.width > 1200) {
+                    image = image.resize({ width: 1200, withoutEnlargement: true });
+                }
+
+                if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+                    image = image.jpeg({ quality: 75, progressive: true });
+                } else if (metadata.format === 'png') {
+                    image = image.png({ quality: 70, compressionLevel: 9, palette: true });
+                } else if (metadata.format === 'webp') {
+                    image = image.webp({ quality: 75 });
+                }
+
+                await image.toFile(tempPath);
+                fs.renameSync(tempPath, filePath);
+            }
+        }
         next();
     } catch (err) {
         console.error('Image optimization error:', err);
@@ -2853,7 +2878,7 @@ app.get('/api/public/author/:identifier', async (req, res) => {
 
 // Moved to top to avoid collision with :key
 
-app.post('/api/articles', authenticateToken, upload.any(), async (req, res) => {
+app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddleware, async (req, res) => {
     // Both Author and Admin can post.
     // Logic: If Author -> status defaults to 'pending' (unless saving as draft).
     // If Admin -> can publish directly (optional, but let's stick to flow or allow override).
@@ -2952,7 +2977,7 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), optimiz
     res.json({ url: 'uploads/' + req.file.filename });
 });
 
-app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const articleId = req.params.id;
     // Verify ownership
     const [check] = await pool.query('SELECT author_id, was_published FROM articles WHERE id = ?', [articleId]);
@@ -3067,7 +3092,7 @@ app.get('/api/author/experiments', authenticateToken, async (req, res) => {
 });
 
 // 2. Create Experiment (POST)
-app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const body = req.body || {};
     const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, coAuthors } = body;
     let author_id = req.user.id;
@@ -3152,7 +3177,7 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
 });
 
 // 3. Update Experiment (PUT)
-app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), async (req, res) => {
+app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const experimentId = req.params.id;
     const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
