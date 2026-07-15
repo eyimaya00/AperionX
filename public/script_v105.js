@@ -213,7 +213,8 @@ async function loadHero() {
             'footer-twitter': settings.social_twitter,
             'footer-instagram': settings.social_instagram,
             'footer-linkedin': settings.social_linkedin,
-            'footer-youtube': settings.social_youtube
+            'footer-youtube': settings.social_youtube,
+            'footer-spotify': settings.social_spotify
         };
 
         for (const [id, url] of Object.entries(socialMap)) {
@@ -871,6 +872,21 @@ async function loadSettings() {
                 tt.href = settings.social_tiktok;
                 tt.style.display = 'flex';
             } else if (tt) { tt.style.display = 'none'; }
+
+            // Spotify
+            let sp = document.getElementById('footer-spotify');
+            if (settings.social_spotify) {
+                if (!sp) {
+                    sp = document.createElement('a');
+                    sp.id = 'footer-spotify';
+                    sp.className = 'social-link';
+                    sp.target = '_blank';
+                    sp.innerHTML = '<i class="ph-fill ph-spotify-logo"></i>';
+                    socialContainer.appendChild(sp);
+                }
+                sp.href = settings.social_spotify;
+                sp.style.display = 'flex';
+            } else if (sp) { sp.style.display = 'none'; }
         }
 
         if (settings.newsletter_title) {
@@ -894,6 +910,10 @@ async function loadSettings() {
             
             window.location.href = authUrl;
         };
+
+        // Spotify integration initialization
+        initSpotifyAnnouncement(settings);
+        initSpotifyPodcastShowcase(settings);
 
     } catch (error) {
         console.error('Settings load error:', error);
@@ -3326,5 +3346,84 @@ async function loadPublicCategories() {
         }).join('');
     } catch (e) {
         console.error('Kategoriler yüklenirken hata:', e);
+    }
+}
+
+// === SPOTIFY ANNOUNCEMENT & PLAYER LOADERS ===
+function initSpotifyAnnouncement(settings) {
+    if (settings.spotify_announcement_active === 'true' || settings.spotify_announcement_active === 1 || settings.spotify_announcement_active === true) {
+        // Check if announcement bar already exists
+        if (document.getElementById('spotify-announcement-bar')) return;
+
+        // Check if user dismissed it in this session
+        if (sessionStorage.getItem('spotify-announcement-dismissed') === 'true') return;
+
+        const bar = document.createElement('div');
+        bar.id = 'spotify-announcement-bar';
+        bar.className = 'spotify-promo-bar';
+        
+        const text = settings.spotify_announcement_text || 'AperionX Podcast Spotify\'da yayında! Kulak verin →';
+        const url = settings.social_spotify || 'https://open.spotify.com';
+
+        bar.innerHTML = `
+            <div class="spotify-promo-content">
+                <i class="ph-fill ph-spotify-logo spotify-promo-icon"></i>
+                <span class="spotify-promo-text">${text}</span>
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="spotify-promo-btn">Dinle <i class="ph-bold ph-arrow-right"></i></a>
+            </div>
+            <button class="spotify-promo-close" aria-label="Kapat"><i class="ph ph-x"></i></button>
+        `;
+
+        // Prepend to body
+        document.body.insertBefore(bar, document.body.firstChild);
+        document.body.classList.add('has-spotify-announcement');
+
+        const closeBtn = bar.querySelector('.spotify-promo-close');
+        closeBtn.addEventListener('click', () => {
+            bar.remove();
+            document.body.classList.remove('has-spotify-announcement');
+            sessionStorage.setItem('spotify-announcement-dismissed', 'true');
+            document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+        });
+
+        // Set CSS variable for layouts to adjust (e.g. fixed header top position)
+        setTimeout(() => {
+            const height = bar.offsetHeight;
+            document.documentElement.style.setProperty('--announcement-bar-height', `${height}px`);
+        }, 100);
+    }
+}
+
+function initSpotifyPodcastShowcase(settings) {
+    const section = document.getElementById('spotify-podcast-section');
+    if (!section) return; // Only exists on homepage
+
+    if (settings.spotify_podcast_embed && settings.spotify_podcast_embed.trim() !== '') {
+        // Show section
+        section.style.display = 'block';
+
+        // Load embed code
+        const playerContainer = document.getElementById('spotify-podcast-player-container');
+        if (playerContainer) {
+            playerContainer.innerHTML = settings.spotify_podcast_embed;
+            // Ensure the iframe has 100% width and correct styles
+            const iframe = playerContainer.querySelector('iframe');
+            if (iframe) {
+                iframe.style.width = '100%';
+                iframe.style.borderRadius = '12px';
+                iframe.style.border = 'none';
+                if (!iframe.getAttribute('height')) {
+                    iframe.setAttribute('height', '232');
+                }
+            }
+        }
+
+        // Set button URL
+        const followBtn = document.getElementById('spotify-podcast-follow-btn');
+        if (followBtn && settings.social_spotify) {
+            followBtn.href = settings.social_spotify;
+        }
+    } else {
+        section.style.display = 'none';
     }
 }

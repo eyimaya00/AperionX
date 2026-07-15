@@ -1717,6 +1717,46 @@
                     </div>
                 </div>
 
+                <!-- Spotify Podcast Entegrasyonu -->
+                <div class="card">
+                    <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;"><i class="ph-fill ph-spotify-logo" style="color: #1DB954; font-size: 1.5rem;"></i> Spotify Podcast Entegrasyonu</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label>Spotify Podcast Profil Linki</label>
+                            <input type="text" id="social_spotify" class="form-control"
+                                placeholder="https://open.spotify.com/show/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Duyuru Çubuğu Durumu</label>
+                            <div style="display: flex; align-items: center; gap: 12px; height: 50px;">
+                                <label class="switch" style="position: relative; display: inline-block; width: 60px; height: 34px; margin-bottom: 0;">
+                                    <input type="checkbox" id="spotify_announcement_active">
+                                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;"></span>
+                                </label>
+                                <span style="font-weight: 600;">Duyuru Çubuğu Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label>Duyuru Çubuğu Metni</label>
+                            <input type="text" id="spotify_announcement_text" class="form-control"
+                                placeholder="AperionX Podcast Spotify'da yayında! Kulak verin →">
+                        </div>
+                        <div class="form-group">
+                            <label>Spotify Oynatıcı Embed Kodu (iframe)</label>
+                            <textarea id="spotify_podcast_embed" class="form-control" rows="4"
+                                placeholder='<iframe src="https://open.spotify.com/embed/show/..." width="100%" height="232" ...></iframe>'></textarea>
+                            <small style="color: #94a3b8; display: block; margin-top: 8px;">Spotify'dan paylaş seçeneğini kullanarak aldığınız "Embed" (Gömme) kodunu buraya yapıştırın.</small>
+                        </div>
+                    </div>
+                    <style>
+                        #spotify_announcement_active:checked+.slider {
+                            background-color: #1DB954;
+                        }
+                    </style>
+                </div>
+
                 <!-- Page Specific -->
                 <div class="card">
                     <h3 class="card-title"><i class="ph-duotone ph-browsers"></i> Sayfa Başlıkları</h3>
@@ -3179,6 +3219,14 @@
                 if (settings.social_linkedin) document.getElementById('social_linkedin').value = settings.social_linkedin;
                 if (settings.social_youtube) document.getElementById('social_youtube').value = settings.social_youtube;
                 if (settings.social_tiktok) document.getElementById('social_tiktok').value = settings.social_tiktok;
+                if (settings.social_spotify) document.getElementById('social_spotify').value = settings.social_spotify;
+                if (settings.spotify_announcement_active === 'true' || settings.spotify_announcement_active === 1 || settings.spotify_announcement_active === true) {
+                    document.getElementById('spotify_announcement_active').checked = true;
+                } else {
+                    document.getElementById('spotify_announcement_active').checked = false;
+                }
+                if (settings.spotify_announcement_text) document.getElementById('spotify_announcement_text').value = settings.spotify_announcement_text;
+                if (settings.spotify_podcast_embed) document.getElementById('spotify_podcast_embed').value = settings.spotify_podcast_embed;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_copyright) document.getElementById('footer_copyright').value = settings.footer_copyright;
@@ -3406,6 +3454,10 @@
             formData.append('social_linkedin', document.getElementById('social_linkedin').value);
             formData.append('social_youtube', document.getElementById('social_youtube').value);
             formData.append('social_tiktok', document.getElementById('social_tiktok').value);
+            formData.append('social_spotify', document.getElementById('social_spotify').value);
+            formData.append('spotify_announcement_active', document.getElementById('spotify_announcement_active').checked ? 'true' : 'false');
+            formData.append('spotify_announcement_text', document.getElementById('spotify_announcement_text').value);
+            formData.append('spotify_podcast_embed', document.getElementById('spotify_podcast_embed').value);
             formData.append('footer_desc', document.getElementById('footer_desc').value);
             formData.append('footer_copyright', document.getElementById('footer_copyright').value);
 
