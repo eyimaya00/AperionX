@@ -99,7 +99,7 @@ app.use(async (req, res, next) => {
 
     // 3. Check DB setting
     try {
-        const [rows] = await pool.query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
+        const [rows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_mode'");
         if (rows.length > 0 && rows[0].setting_value === 'true') {
             // Maintenance Active -> Block
             if (req.accepts('html')) {
@@ -1768,7 +1768,7 @@ ensureSchema();
 // === SHOWCASE ROTATION LOGIC ===
 async function rotateShowcaseArticles() {
     try {
-        const [rows] = await pool.query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')");
+        const [rows] = await pool.query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('showcase_auto_rotate', 'showcase_last_rotate_time', 'showcase_current_offset')");
         const settings = {};
         rows.forEach(r => settings[r.setting_key] = r.setting_value);
 
@@ -1816,11 +1816,11 @@ async function rotateShowcaseArticles() {
 
             for (const item of updates) {
                 // Upsert
-                const [check] = await pool.query('SELECT id FROM settings WHERE setting_key = ?', [item.key]);
+                const [check] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [item.key]);
                 if (check.length > 0) {
-                    await pool.query('UPDATE settings SET setting_value = ? WHERE setting_key = ?', [item.value, item.key]);
+                    await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [item.value, item.key]);
                 } else {
-                    await pool.query('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)', [item.key, item.value]);
+                    await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [item.key, item.value]);
                 }
             }
 
@@ -2037,7 +2037,7 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
         } else {
             // Try to find logo in DB settings
             try {
-                const [logoRow] = await pool.query("SELECT setting_value FROM settings WHERE setting_key = 'site_logo'");
+                const [logoRow] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'site_logo'");
                 if (logoRow.length > 0 && logoRow[0].setting_value) {
                     logoLink = logoRow[0].setting_value;
                     // FIX: Process relative paths (uploads/...) to be absolute
@@ -2074,7 +2074,7 @@ async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride 
 
         // Send
         // Fetch SMTP Settings
-        const [smtpRows] = await pool.query('SELECT * FROM settings WHERE setting_key LIKE ?', ['smtp_%']);
+        const [smtpRows] = await pool.query('SELECT * FROM site_settings WHERE setting_key LIKE ?', ['smtp_%']);
         const smtpConfig = {};
         smtpRows.forEach(r => smtpConfig[r.setting_key] = r.setting_value);
 
@@ -5829,7 +5829,7 @@ app.get('/api/settings', async (req, res) => {
         const cached = getCachedData(cacheKey);
         if (cached) return res.json(cached);
 
-        const [rows] = await pool.query('SELECT * FROM settings');
+        const [rows] = await pool.query('SELECT * FROM site_settings');
         const settings = {};
         rows.forEach(row => {
             settings[row.setting_key] = row.setting_value;
@@ -5883,11 +5883,11 @@ app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
         // Save each setting
         for (const [key, value] of Object.entries(settings)) {
             // Upsert into settings (NOT site_settings)
-            const [rows] = await pool.query('SELECT setting_key FROM settings WHERE setting_key = ?', [key]);
+            const [rows] = await pool.query('SELECT setting_key FROM site_settings WHERE setting_key = ?', [key]);
             if (rows.length > 0) {
-                await pool.query('UPDATE settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+                await pool.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
             } else {
-                await pool.query('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+                await pool.query('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
             }
         }
 
