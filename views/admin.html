@@ -19,7 +19,7 @@
     <title>Admin Paneli - AperionX</title>
     <link rel="icon" type="image/png" href="/uploads/favicon.png" id="favicon">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=275" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=275"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=275" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=275"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=275" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=275"></noscript>
+    <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=276" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=276"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=276" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=276"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=276" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=276"></noscript>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -1737,7 +1737,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 10px;">
                         <div class="form-group">
                             <label>Duyuru Çubuğu Metni</label>
                             <input type="text" id="spotify_announcement_text" class="form-control"
@@ -1748,6 +1748,18 @@
                             <textarea id="spotify_podcast_embed" class="form-control" rows="4"
                                 placeholder='<iframe src="https://open.spotify.com/embed/show/..." width="100%" height="232" ...></iframe>'></textarea>
                             <small style="color: #94a3b8; display: block; margin-top: 8px;">Spotify'dan paylaş seçeneğini kullanarak aldığınız "Embed" (Gömme) kodunu buraya yapıştırın.</small>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label>Ana Sayfa Podcast Kartı Başlığı</label>
+                            <input type="text" id="spotify_podcast_title" class="form-control"
+                                placeholder="Bilimin Sesini Spotify'da Dinleyin">
+                        </div>
+                        <div class="form-group">
+                            <label>Ana Sayfa Podcast Kartı Açıklaması</label>
+                            <textarea id="spotify_podcast_desc" class="form-control" rows="2"
+                                placeholder="Geleceği şekillendiren keşifleri, teknoloji ve uzay dünyasını enine boyuna tartıştığımız podcast serimiz yayında. Şimdi kulak verin."></textarea>
                         </div>
                     </div>
                     <style>
@@ -3227,6 +3239,8 @@
                 }
                 if (settings.spotify_announcement_text) document.getElementById('spotify_announcement_text').value = settings.spotify_announcement_text;
                 if (settings.spotify_podcast_embed) document.getElementById('spotify_podcast_embed').value = settings.spotify_podcast_embed;
+                if (settings.spotify_podcast_title) document.getElementById('spotify_podcast_title').value = settings.spotify_podcast_title;
+                if (settings.spotify_podcast_desc) document.getElementById('spotify_podcast_desc').value = settings.spotify_podcast_desc;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_desc) document.getElementById('footer_desc').value = settings.footer_desc;
                 if (settings.footer_copyright) document.getElementById('footer_copyright').value = settings.footer_copyright;
@@ -3458,6 +3472,8 @@
             formData.append('spotify_announcement_active', document.getElementById('spotify_announcement_active').checked ? 'true' : 'false');
             formData.append('spotify_announcement_text', document.getElementById('spotify_announcement_text').value);
             formData.append('spotify_podcast_embed', document.getElementById('spotify_podcast_embed').value);
+            formData.append('spotify_podcast_title', document.getElementById('spotify_podcast_title').value);
+            formData.append('spotify_podcast_desc', document.getElementById('spotify_podcast_desc').value);
             formData.append('footer_desc', document.getElementById('footer_desc').value);
             formData.append('footer_copyright', document.getElementById('footer_copyright').value);
 
@@ -4877,7 +4893,7 @@
             if (savedDarkMode === null) localStorage.setItem('darkMode', 'true');
         }
     </script>
-    <script defer src="/script_v105.js?v=275"></script>
+    <script defer src="/script_v105.js?v=276"></script>
     <script>
         // Helper: Fetch with Auth Token
         async function fetchWithAuth(url, options = {}) {

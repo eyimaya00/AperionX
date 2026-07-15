@@ -6129,11 +6129,11 @@ body.dark-mode .dropdown-menu {
     align-items: center;
     justify-content: space-between;
     padding: 12px 24px;
-    background: linear-gradient(90deg, #090d16 0%, #151e2d 50%, #090d16 100%);
-    border-bottom: 2px solid rgba(29, 185, 84, 0.4);
+    background: linear-gradient(90deg, #041209 0%, #0e2a16 50%, #041209 100%);
+    border-bottom: 2px solid rgba(29, 185, 84, 0.6);
     z-index: 1001;
     color: #ffffff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.15);
     font-family: 'Inter', sans-serif;
 }
 

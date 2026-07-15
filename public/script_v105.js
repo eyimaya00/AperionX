@@ -3418,6 +3418,18 @@ function initSpotifyPodcastShowcase(settings) {
             }
         }
 
+        // Update Title if present
+        const titleEl = document.getElementById('spotify-podcast-title-text');
+        if (titleEl && settings.spotify_podcast_title && settings.spotify_podcast_title.trim() !== '') {
+            titleEl.innerHTML = settings.spotify_podcast_title;
+        }
+
+        // Update Description if present
+        const descEl = document.getElementById('spotify-podcast-desc-text');
+        if (descEl && settings.spotify_podcast_desc && settings.spotify_podcast_desc.trim() !== '') {
+            descEl.innerHTML = settings.spotify_podcast_desc;
+        }
+
         // Set button URL
         const followBtn = document.getElementById('spotify-podcast-follow-btn');
         if (followBtn && settings.social_spotify) {
