@@ -3308,17 +3308,22 @@ async function loadPublicCategories() {
             grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">Kart bulunamadı.</p>';
             return;
         }
-        grid.innerHTML = cards.map(c => `
-            <a href="${c.link_url}" class="category-card">
-                <div class="category-icon">
-                    <i class="${c.icon_class}"></i>
-                </div>
-                <div class="category-content">
-                    <h3 class="category-title">${c.title}</h3>
-                    <p class="category-desc">${c.description}</p>
-                </div>
-            </a>
-        `).join('');
+        grid.innerHTML = cards.map(c => {
+            const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
+            const href = isArticles ? '#showcase' : c.link_url;
+            const onclick = isArticles ? `onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }"` : '';
+            return `
+                <a href="${href}" ${onclick} class="category-card">
+                    <div class="category-icon">
+                        <i class="${c.icon_class}"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">${c.title}</h3>
+                        <p class="category-desc">${c.description}</p>
+                    </div>
+                </a>
+            `;
+        }).join('');
     } catch (e) {
         console.error('Kategoriler yüklenirken hata:', e);
     }
