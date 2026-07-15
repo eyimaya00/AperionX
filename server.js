@@ -330,27 +330,41 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
         // ============ VIEW COUNTING LOGIC ============
         const articleId = article.id;
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+        let ip = req.headers['cf-connecting-ip'] || req.headers['x-real-ip'];
+        if (!ip && req.headers['x-forwarded-for']) {
+            ip = req.headers['x-forwarded-for'].split(',')[0].trim();
+        }
+        if (!ip) {
+            ip = req.ip || req.socket.remoteAddress || 'unknown';
+        }
 
-        console.log(`[VIEW-COUNT] Article ${articleId} (${slug}) accessed from IP: ${ip}`);
+        const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+        const botKeywords = ['bot', 'crawler', 'spider', 'yahoo', 'bing', 'yandex', 'baidu', 'googlebot', 'lighthouse', 'slurp', 'archive'];
+        const isBot = botKeywords.some(keyword => userAgent.includes(keyword));
 
-        try {
-            // Only throttle same IP + same article within 2 hours
-            const [viewCheck] = await pool.query(
-                `SELECT id FROM article_views 
-                 WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
-                [articleId, ip]
-            );
+        console.log(`[VIEW-COUNT] Article ${articleId} (${slug}) accessed from IP: ${ip}, isBot: ${isBot}`);
 
-            if (viewCheck.length === 0) {
-                console.log(`[VIEW-COUNT] ✅ New view for Article ${articleId} from IP ${ip}`);
-                await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
-                await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
-            } else {
-                console.log(`[VIEW-COUNT] ⏳ Throttled for Article ${articleId} from IP ${ip} (already viewed in last 24h)`);
+        if (!isBot) {
+            try {
+                // Only throttle same IP + same article within 2 hours
+                const [viewCheck] = await pool.query(
+                    `SELECT id FROM article_views 
+                     WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+                    [articleId, ip]
+                );
+
+                if (viewCheck.length === 0) {
+                    console.log(`[VIEW-COUNT] ✅ New view for Article ${articleId} from IP ${ip}`);
+                    await pool.query('INSERT INTO article_views (article_id, ip_address) VALUES (?, ?)', [articleId, ip]);
+                    await pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [articleId]);
+                } else {
+                    console.log(`[VIEW-COUNT] ⏳ Throttled for Article ${articleId} from IP ${ip}`);
+                }
+            } catch (vcErr) {
+                console.error('[VIEW-COUNT] Error:', vcErr.message);
             }
-        } catch (vcErr) {
-            console.error('[VIEW-COUNT] Error:', vcErr.message);
+        } else {
+            console.log(`[VIEW-COUNT] 🤖 Ignored bot visit for Article ${articleId} from IP ${ip} (UA: ${req.headers['user-agent']})`);
         }
         // ============ END VIEW COUNTING ============
 
@@ -940,28 +954,42 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
 
         // ============ VIEW COUNTING LOGIC ============
         const experimentId = experiment.id;
-        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+        let ip = req.headers['cf-connecting-ip'] || req.headers['x-real-ip'];
+        if (!ip && req.headers['x-forwarded-for']) {
+            ip = req.headers['x-forwarded-for'].split(',')[0].trim();
+        }
+        if (!ip) {
+            ip = req.ip || req.socket.remoteAddress || 'unknown';
+        }
 
-        console.log(`[VIEW-COUNT] Experiment ${experimentId} (${slug}) accessed from IP: ${ip}`);
+        const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+        const botKeywords = ['bot', 'crawler', 'spider', 'yahoo', 'bing', 'yandex', 'baidu', 'googlebot', 'lighthouse', 'slurp', 'archive'];
+        const isBot = botKeywords.some(keyword => userAgent.includes(keyword));
 
-        try {
-            // Only throttle same IP + same experiment within 2 hours
-            const [viewCheck] = await pool.query(
-                `SELECT id FROM experiment_views 
-                 WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
-                [experimentId, ip]
-            );
+        console.log(`[VIEW-COUNT] Experiment ${experimentId} (${slug}) accessed from IP: ${ip}, isBot: ${isBot}`);
 
-            if (viewCheck.length === 0) {
-                console.log(`[VIEW-COUNT] ✅ New view for Experiment ${experimentId} from IP ${ip}`);
-                await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
-                await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
-                experiment.views = (experiment.views || 0) + 1;
-            } else {
-                console.log(`[VIEW-COUNT] ⏳ Throttled for Experiment ${experimentId} from IP ${ip}`);
+        if (!isBot) {
+            try {
+                // Only throttle same IP + same experiment within 2 hours
+                const [viewCheck] = await pool.query(
+                    `SELECT id FROM experiment_views 
+                     WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+                    [experimentId, ip]
+                );
+
+                if (viewCheck.length === 0) {
+                    console.log(`[VIEW-COUNT] ✅ New view for Experiment ${experimentId} from IP ${ip}`);
+                    await pool.query('INSERT INTO experiment_views (experiment_id, ip_address) VALUES (?, ?)', [experimentId, ip]);
+                    await pool.query('UPDATE experiments SET views = views + 1 WHERE id = ?', [experimentId]);
+                    experiment.views = (experiment.views || 0) + 1;
+                } else {
+                    console.log(`[VIEW-COUNT] ⏳ Throttled for Experiment ${experimentId} from IP ${ip}`);
+                }
+            } catch (vcErr) {
+                console.error('[VIEW-COUNT] Error:', vcErr.message);
             }
-        } catch (vcErr) {
-            console.error('[VIEW-COUNT] Error:', vcErr.message);
+        } else {
+            console.log(`[VIEW-COUNT] 🤖 Ignored bot visit for Experiment ${experimentId} from IP ${ip} (UA: ${req.headers['user-agent']})`);
         }
         // ============ END VIEW COUNTING ============
 
