@@ -3386,6 +3386,22 @@ function initSpotifyAnnouncement(settings) {
         document.body.insertBefore(bar, document.body.firstChild);
         document.body.classList.add('has-spotify-announcement');
 
+        const promoBtn = bar.querySelector('.spotify-promo-btn');
+        if (promoBtn) {
+            promoBtn.addEventListener('click', (e) => {
+                const targetSec = document.getElementById('spotify-podcast-section');
+                if (targetSec) {
+                    e.preventDefault();
+                    const headerEl = document.querySelector('.header');
+                    const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+                    window.scrollTo({
+                        top: targetSec.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20, // Add 20px extra padding
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        }
+
         const closeBtn = bar.querySelector('.spotify-promo-close');
         closeBtn.addEventListener('click', () => {
             bar.remove();
@@ -3417,6 +3433,7 @@ function initSpotifyPodcastShowcase(settings) {
             // Ensure the iframe has 100% width and correct styles
             const iframe = playerContainer.querySelector('iframe');
             if (iframe) {
+                iframe.setAttribute('loading', 'lazy');
                 iframe.style.width = '100%';
                 iframe.style.borderRadius = '12px';
                 iframe.style.border = 'none';
