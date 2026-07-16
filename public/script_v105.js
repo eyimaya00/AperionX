@@ -920,6 +920,21 @@ async function loadSettings() {
     }
 }
 
+function handleHashLinkClick(e, url) {
+    if (url && url.startsWith('#')) {
+        const target = document.getElementById(url.substring(1));
+        if (target) {
+            e.preventDefault();
+            const headerEl = document.querySelector('.header');
+            const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+            window.scrollTo({
+                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20, // Add 20px extra padding
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
 // --- Dynamic Menus ---
 // --- Dynamic Menus ---
 async function loadMenus() {
@@ -1074,6 +1089,9 @@ async function loadMenus() {
                     if (menu.url === currentPath) {
                         a.classList.add('active');
                     }
+                    
+                    a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                    
                     navMenu.appendChild(a);
                 }
             });
@@ -1225,6 +1243,9 @@ async function loadMenus() {
                     if (menu.url === currentPath) {
                         a.classList.add('active');
                     }
+                    
+                    a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                    
                     linksContainer.appendChild(a);
                 }
             });
@@ -1239,6 +1260,9 @@ async function loadMenus() {
                 const a = document.createElement('a');
                 a.href = menu.url || '#';
                 a.innerText = menu.label;
+                
+                a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                
                 li.appendChild(a);
                 footerLinksContainer.appendChild(li);
             });
