@@ -2224,6 +2224,14 @@ async function loadArticleDetail() {
 }
 
 function renderArticleDetail(article) {
+    // Send View Log to API (JS-only client validation)
+    if (article && article.id) {
+        fetch(`/api/articles/${article.id}/view`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log('[VIEW-TRACKING] Article view logged:', data))
+            .catch(err => console.error('[VIEW-TRACKING] Failed to log article view:', err));
+    }
+
     // Render content
     document.getElementById('loading-indicator').style.display = 'none';
     document.getElementById('article-wrapper').style.display = 'block';
