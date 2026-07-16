@@ -4465,11 +4465,10 @@ i[class*=" ph"] {
 
 @media (max-width: 1024px) {
     .hero-slider {
-        height: 100vh !important;
-        min-height: 100vh !important;
-        height: 100dvh !important;
-        min-height: 100dvh !important;
-        /* Force extra height to kill whitespace */
+        height: calc(100vh + 80px) !important;
+        min-height: calc(100vh + 80px) !important;
+        height: calc(100dvh + 80px) !important;
+        min-height: calc(100dvh + 80px) !important;
     }
 
     .hero-title {
