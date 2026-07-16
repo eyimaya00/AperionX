@@ -81,6 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 header.classList.remove('scrolled');
             }
+
+            // Dynamically adjust header top when Spotify announcement bar scrolls out of view
+            const announcementBar = document.getElementById('spotify-announcement-bar');
+            if (announcementBar && document.body.classList.contains('has-spotify-announcement')) {
+                const barHeight = announcementBar.offsetHeight;
+                const remainingBarVisible = Math.max(0, barHeight - window.scrollY);
+                header.style.top = remainingBarVisible + 'px';
+            }
+
             ticking = false;
         };
 
@@ -3432,6 +3441,9 @@ function initSpotifyAnnouncement(settings) {
             document.body.classList.remove('has-spotify-announcement');
             sessionStorage.setItem('spotify-announcement-dismissed', 'true');
             document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+            // Reset header top position
+            const headerEl = document.querySelector('.header');
+            if (headerEl) headerEl.style.top = '0px';
         });
 
         // Set CSS variable for layouts to adjust (e.g. fixed header top position)
