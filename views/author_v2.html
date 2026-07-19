@@ -2819,8 +2819,10 @@
                 loadNotifications();
                 const dashboard = document.getElementById('dashboard');
                 const analytics = document.getElementById('analytics');
+                const tracking = document.getElementById('tracking');
                 if (analytics && analytics.classList.contains('active')) loadAnalytics(true);
                 if (dashboard && dashboard.classList.contains('active')) loadDashboardStats();
+                if (tracking && tracking.classList.contains('active')) loadTrackingStatus();
             }, 5000); // 5s interval
 
             // Load Theme

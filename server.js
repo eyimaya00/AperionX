@@ -3852,11 +3852,29 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
         }
         const tracking = rows[0];
         
+        // Fetch their most recent article date
+        const [articles] = await pool.query(
+            'SELECT article_date FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC LIMIT 1',
+            [tracking.id]
+        );
+
+        // Determine reference date (MAX of conversation_date and last article date)
+        let referenceDate = new Date(tracking.conversation_date);
+        if (articles.length > 0) {
+            const lastArticleDate = new Date(articles[0].article_date);
+            if (lastArticleDate > referenceDate) {
+                referenceDate = lastArticleDate;
+            }
+        }
+        referenceDate.setHours(0, 0, 0, 0);
+
         // Calculate days left
-        const lastDate = new Date(tracking.conversation_date);
         const today = new Date();
-        const nextDate = new Date(lastDate);
-        nextDate.setDate(lastDate.getDate() + tracking.frequency);
+        today.setHours(0, 0, 0, 0);
+
+        const nextDate = new Date(referenceDate);
+        nextDate.setDate(referenceDate.getDate() + tracking.frequency);
+        nextDate.setHours(0, 0, 0, 0);
         
         // Difference in ms, then convert to days
         const diffMs = nextDate - today;
@@ -3866,7 +3884,7 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
             tracked: true,
             university: tracking.university,
             frequency: tracking.frequency,
-            last_conversation: tracking.conversation_date,
+            last_conversation: referenceDate.toISOString(),
             next_deadline: nextDate.toISOString(),
             days_left: diffDays,
             violations: tracking.violations
