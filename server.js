@@ -3036,10 +3036,11 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
 app.get('/api/author/experiments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT * FROM experiments 
-            WHERE author_id = ? AND deleted_at IS NULL 
-            ORDER BY created_at DESC
-        `, [req.user.id]);
+            SELECT DISTINCT e.* FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.deleted_at IS NULL
+            ORDER BY e.created_at DESC
+        `, [req.user.id, req.user.id]);
         res.json(rows);
     } catch (e) {
         res.status(500).send(e.toString());
@@ -3157,7 +3158,13 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     }
     if (category) { updates.push('category = ?'); params.push(category); }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
-    if (finalStatus) { updates.push('status = ?'); params.push(finalStatus); }
+    if (finalStatus) {
+        updates.push('status = ?');
+        params.push(finalStatus);
+        if (finalStatus === 'pending' || finalStatus === 'draft') {
+            updates.push('rejection_reason = NULL');
+        }
+    }
     if (tags !== undefined) { updates.push('tags = ?'); params.push(tags); }
     if (youtube_url !== undefined) { updates.push('youtube_url = ?'); params.push(youtube_url); }
     if (references_list !== undefined) { updates.push('references_list = ?'); params.push(DOMPurify.sanitize(references_list)); }
@@ -3237,10 +3244,11 @@ app.delete('/api/experiments/:id', authenticateToken, async (req, res) => {
 app.get('/api/author/trash', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT * FROM experiments 
-            WHERE author_id = ? AND deleted_at IS NOT NULL 
-            ORDER BY deleted_at DESC
-        `, [req.user.id]);
+            SELECT DISTINCT e.* FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.deleted_at IS NOT NULL
+            ORDER BY e.deleted_at DESC
+        `, [req.user.id, req.user.id]);
         res.json(rows);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -3538,9 +3546,23 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
         `, [userId]);
 
         // Experiment stats
-        const [expPublishedRes] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE author_id = ? AND status = 'published' AND deleted_at IS NULL", [userId]);
-        const [expPendingRes] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE author_id = ? AND status = 'pending' AND deleted_at IS NULL", [userId]);
-        const [expViewsRes] = await pool.query("SELECT SUM(views) as count FROM experiments WHERE author_id = ? AND status = 'published' AND deleted_at IS NULL", [userId]);
+        const [expPublishedRes] = await pool.query(`
+            SELECT COUNT(DISTINCT e.id) as count FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
+        `, [userId, userId]);
+        const [expPendingRes] = await pool.query(`
+            SELECT COUNT(DISTINCT e.id) as count FROM experiments e
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'pending' AND e.deleted_at IS NULL
+        `, [userId, userId]);
+        const [expViewsRes] = await pool.query(`
+            SELECT SUM(views) as count FROM (
+                SELECT DISTINCT e.id, e.views FROM experiments e
+                LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+                WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
+            ) t
+        `, [userId, userId]);
 
         res.json({
             published: published[0].count,
@@ -3571,14 +3593,15 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
             FROM articles a
             WHERE a.author_id = ? AND a.status = 'published'
             UNION ALL
-            SELECT 
+            SELECT DISTINCT
                 e.id, e.title, e.created_at, e.views, 'experiment' as type,
                 0 as likes,
                 0 as comments
             FROM experiments e
-            WHERE e.author_id = ? AND e.status = 'published' AND e.deleted_at IS NULL
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
             ORDER BY created_at DESC
-        `, [userId, userId]);
+        `, [userId, userId, userId]);
 
         // Calculate totals
         let totalViews = 0;

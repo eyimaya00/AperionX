@@ -2699,6 +2699,11 @@
                 loadMyArticles();
             }
             if (id === 'my-experiments') {
+                currentExperimentFilter = 'all';
+                document.querySelectorAll('#exp-status-filters .stat-card-modern').forEach(c => {
+                    c.style.border = 'none';
+                    c.style.boxShadow = 'none';
+                });
                 loadMyExperiments();
             }
             if (id === 'dashboard') {
@@ -3830,10 +3835,38 @@
         }
 
         function setExperimentFilter(status) {
-            currentExperimentFilter = status;
+            if (currentExperimentFilter === status) {
+                currentExperimentFilter = 'all';
+                showAuthorToast('Tüm deneyler listeleniyor.');
+            } else {
+                currentExperimentFilter = status;
+                let text = '';
+                if (status === 'published') text = 'Yayınlananlar';
+                if (status === 'pending') text = 'Onay Bekleyenler';
+                if (status === 'rejected') text = 'Reddedilenler';
+                if (status === 'draft') text = 'Taslaklar';
+                showAuthorToast(`${text} listeleniyor.`);
+            }
+
             document.querySelectorAll('#exp-status-filters .stat-card-modern').forEach(c => {
                 c.style.border = 'none';
+                c.style.boxShadow = 'none';
             });
+
+            if (currentExperimentFilter !== 'all') {
+                const cards = document.querySelectorAll('#exp-status-filters .stat-card-modern');
+                let targetCard = null;
+                if (status === 'published') targetCard = cards[0];
+                else if (status === 'pending') targetCard = cards[1];
+                else if (status === 'rejected') targetCard = cards[2];
+                else if (status === 'draft') targetCard = cards[3];
+
+                if (targetCard) {
+                    targetCard.style.border = '2px solid var(--primary-accent)';
+                    targetCard.style.boxShadow = '0 8px 30px rgba(0,0,0,0.1)';
+                }
+            }
+
             renderMyExperimentsTable();
         }
 
