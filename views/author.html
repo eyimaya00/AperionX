@@ -1952,7 +1952,7 @@
         // === UNIFIED INIT — Single DOMContentLoaded ===
         // =============================================
         document.addEventListener('DOMContentLoaded', () => {
-            if (!token || !user || user.role !== 'author') {
+            if (!token || !user || (user.role !== 'author' && user.role !== 'editor' && user.role !== 'admin')) {
                 window.location.href = '/?login=true';
                 return;
             }
