@@ -3317,7 +3317,7 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
             SELECT e.*, u.fullname as author_name 
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
-            WHERE e.status = 'pending' 
+            WHERE e.status = 'pending' AND e.deleted_at IS NULL
             ORDER BY e.created_at ASC
         `);
         for (let row of rows) {
@@ -3337,7 +3337,7 @@ app.get('/api/editor/experiments/history', authenticateToken, async (req, res) =
             SELECT e.*, u.fullname as author_name 
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
-            WHERE e.status IN ('published', 'rejected') 
+            WHERE e.status IN ('published', 'rejected') AND e.deleted_at IS NULL
             ORDER BY e.created_at DESC 
             LIMIT 50
         `);
