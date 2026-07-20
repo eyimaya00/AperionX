@@ -5764,6 +5764,24 @@ async function createNotification(userId, message, type = 'info') {
     }
 }
 
+app.get('/api/debug-db-status', async (req, res) => {
+    try {
+        const [users] = await pool.query("SELECT id, fullname, email, role FROM users WHERE fullname LIKE '%Fırat%' OR fullname LIKE '%Avcı%' OR email LIKE '%firat%'");
+        const [experiments] = await pool.query("SELECT id, title, author_id, status, deleted_at, rejection_reason FROM experiments WHERE title LIKE '%Vitro%' OR title LIKE '%Hücre%'");
+        const [allExpsCount] = await pool.query("SELECT COUNT(*) as count FROM experiments");
+        const [allUsersCount] = await pool.query("SELECT COUNT(*) as count FROM users");
+        
+        res.json({
+            users,
+            experiments,
+            allExpsCount: allExpsCount[0].count,
+            allUsersCount: allUsersCount[0].count
+        });
+    } catch (e) {
+        res.status(500).send(e.toString());
+    }
+});
+
 app.get('/api/notifications', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [req.user.id]);
