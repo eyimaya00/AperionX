@@ -5499,10 +5499,10 @@ app.post('/api/articles/:id/view', async (req, res) => {
             return res.json({ success: false, message: 'Bot request ignored' });
         }
 
-        // Only throttle same IP + same article within 2 hours
+        // Only throttle same IP + same article within 30 minutes
         const [viewCheck] = await pool.query(
             `SELECT id FROM article_views 
-             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+             WHERE article_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)`,
             [articleId, ip]
         );
 
@@ -5539,10 +5539,10 @@ app.post('/api/experiments/:id/view', async (req, res) => {
             return res.json({ success: false, message: 'Bot request ignored' });
         }
 
-        // Only throttle same IP + same experiment within 2 hours
+        // Only throttle same IP + same experiment within 30 minutes
         const [viewCheck] = await pool.query(
             `SELECT id FROM experiment_views 
-             WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+             WHERE experiment_id = ? AND ip_address = ? AND viewed_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)`,
             [experimentId, ip]
         );
 
