@@ -1204,9 +1204,9 @@ app.get('/feed.xml', async (req, res) => {
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT slug, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
-        const [experiments] = await pool.query("SELECT slug, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
+        const [experiments] = await pool.query("SELECT title, slug, image_url, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
         
         let baseUrl = `${req.protocol}://${req.get('host')}`;
         if (req.get('host').includes('aperionx.com')) {
@@ -1214,7 +1214,7 @@ app.get('/sitemap.xml', async (req, res) => {
         }
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
 
         // Static Pages (Using Clean URLs for SEO)
         const staticPages = [
@@ -1258,9 +1258,15 @@ app.get('/sitemap.xml', async (req, res) => {
     </url>\n`;
         });
 
-        // Dynamic Articles (Turkish and English Alternates)
+        // Dynamic Articles (Turkish and English Alternates + Image Sitemap)
         articles.forEach(article => {
             const date = new Date(article.updated_at || article.created_at).toISOString();
+            let imageXml = '';
+            if (article.image_url) {
+                const imgLoc = article.image_url.startsWith('http') ? article.image_url : `${baseUrl}/${article.image_url.replace(/\\/g, '/')}`;
+                const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                imageXml = `\n        <image:image>\n            <image:loc>${imgLoc}</image:loc>\n            <image:title>${safeTitle}</image:title>\n        </image:image>`;
+            }
             xml += `    <url>
         <loc>${baseUrl}/makale/${article.slug}</loc>
         <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/makale/${article.slug}"/>
@@ -1268,13 +1274,19 @@ app.get('/sitemap.xml', async (req, res) => {
         <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/makale/${article.slug}"/>
         <lastmod>${date}</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.8</priority>${imageXml}
     </url>\n`;
         });
 
-        // Dynamic Experiments (Turkish and English Alternates)
+        // Dynamic Experiments (Turkish and English Alternates + Image Sitemap)
         experiments.forEach(exp => {
             const date = new Date(exp.created_at).toISOString();
+            let imageXml = '';
+            if (exp.image_url) {
+                const imgLoc = exp.image_url.startsWith('http') ? exp.image_url : `${baseUrl}/${exp.image_url.replace(/\\/g, '/')}`;
+                const safeTitle = (exp.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                imageXml = `\n        <image:image>\n            <image:loc>${imgLoc}</image:loc>\n            <image:title>${safeTitle}</image:title>\n        </image:image>`;
+            }
             xml += `    <url>
         <loc>${baseUrl}/deney/${exp.slug}</loc>
         <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/deney/${exp.slug}"/>
@@ -1282,7 +1294,7 @@ app.get('/sitemap.xml', async (req, res) => {
         <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/deney/${exp.slug}"/>
         <lastmod>${date}</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.8</priority>${imageXml}
     </url>\n`;
         });
 
@@ -6098,12 +6110,56 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// === SEO PING SYSTEM ===
+// === SEO PING & INDEXNOW FAST INDEXING SYSTEM ===
+const INDEXNOW_KEY = '4f8c9b3a1d7e2f5a8b0c9d3e7f1a5b8c';
+
+// IndexNow Verification File Route
+app.get(`/${INDEXNOW_KEY}.txt`, (req, res) => {
+    res.type('text/plain').send(INDEXNOW_KEY);
+});
+
 async function pingSearchEngines(articleSlug) {
     const https = require('https');
     const sitemapUrl = encodeURIComponent('https://aperionx.com/sitemap.xml');
-    const articleUrl = encodeURIComponent(`https://aperionx.com/makale/${articleSlug}`);
 
+    // 1. IndexNow API Request (Fast indexing for Bing, Yandex, Seznam, Naver)
+    try {
+        const indexNowData = JSON.stringify({
+            host: 'aperionx.com',
+            key: INDEXNOW_KEY,
+            keyLocation: `https://aperionx.com/${INDEXNOW_KEY}.txt`,
+            urlList: [
+                `https://aperionx.com/makale/${articleSlug}`,
+                `https://aperionx.com/en/makale/${articleSlug}`
+            ]
+        });
+
+        const reqOptions = {
+            hostname: 'api.indexnow.org',
+            path: '/indexnow',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': Buffer.byteLength(indexNowData)
+            }
+        };
+
+        const indexNowReq = https.request(reqOptions, (resp) => {
+            console.log(`[INDEXNOW-PING] ✅ Sent IndexNow request for ${articleSlug} -> Status: ${resp.statusCode}`);
+            resp.resume();
+        });
+
+        indexNowReq.on('error', (err) => {
+            console.error(`[INDEXNOW-PING] ❌ IndexNow request failed for ${articleSlug}:`, err.message);
+        });
+
+        indexNowReq.write(indexNowData);
+        indexNowReq.end();
+    } catch (e) {
+        console.error(`[INDEXNOW-PING] Error in IndexNow ping:`, e.message);
+    }
+
+    // 2. Legacy Sitemap Pings
     const targets = [
         `https://www.google.com/ping?sitemap=${sitemapUrl}`,
         `https://www.bing.com/ping?sitemap=${sitemapUrl}`,
@@ -6111,7 +6167,7 @@ async function pingSearchEngines(articleSlug) {
 
     for (const url of targets) {
         try {
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 https.get(url, (resp) => {
                     console.log(`[SEO-PING] ✅ Pinged: ${url.split('?')[0]} -> Status: ${resp.statusCode}`);
                     resp.resume();
