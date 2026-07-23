@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
+     crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AperionX ile Bilimin Sınırlarını Keşfedin. Geleceği Şekillendiren Teknoloji Analizleri ve Derinlemesine Makalelerle Bilgiye Yön Verin.">
+    <meta property="og:title" content="AperionX">
+    <meta property="og:description" content="Bilim ve teknolojinin sınırlarını zorlayın.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:image:secure_url" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta itemprop="image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AperionX">
+    <meta name="twitter:description" content="Bilim ve teknolojinin sınırlarını zorlayın.">
+    <meta name="twitter:image" content="https://aperionx.com/uploads/logo.png">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AperionX">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:site" content="@aperionx">
+    <link rel="alternate" type="application/rss+xml" title="AperionX RSS" href="/feed.xml">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://aperionx.com/" />
+    <title>Makale Yükleniyor... - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=280">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+
+
+        .article-detail-container {
+            padding-top: 80px;
+            /* Exact Header Height */
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+            /* Mobile padding */
+        }
+
+        /* Force Header to match Index (Solid White) */
+        .header {
+            background-color: var(--card-bg) !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Header Area */
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            /* Slate-500 */
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .article-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .article-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        /* Hero Image - Corrected Class */
+        .detail-hero-image {
+            width: 100%;
+            height: 400px;
+            /* Fixed form height */
+            object-fit: cover;
+            /* Fill the form cleanly */
+            background-color: transparent;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Page Background Override for Contrast */
+        body {
+            background-color: #f8fafc;
+            /* Slate-50 */
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+            /* Slate-900 */
+        }
+
+        /* Unified Card Style */
+        /* Unified Card Style */
+        .unified-article-card {
+            background: var(--card-bg);
+            /* White in light mode */
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            /* Enhanced shadow */
+            margin-bottom: 20px;
+        }
+
+        /* Content Area - Clean & Readability Focused */
+        .article-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin-top: 30px;
+            background: transparent !important;
+            /* Force transparent */
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Fix for User Issue: Images having unwanted 'layers' */
+        .article-content img {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 20px 0;
+            max-width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .article-content h2 {
+            font-size: 1.8rem;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Summary Box - Distinct Background */
+        .article-summary-simple {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(99, 102, 241, 0.04);
+            /* Light Indigo Tint */
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        [data-theme="dark"] .article-summary-simple {
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark mode tint */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* References Section - Simple */
+        .references-section-simple {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .ref-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+        }
+
+        .ref-list {
+            padding-left: 20px;
+            color: #475569;
+        }
+
+        .ref-list li {
+            margin-bottom: 8px;
+        }
+
+        /* References List (ul#references-list) */
+        .references-list {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 0;
+        }
+
+        .references-list li {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .references-list li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        [data-theme="dark"] .references-list li {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .references-list li {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Mobile adjustment for card */
+        @media (max-width: 768px) {
+            .unified-article-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
+
+        /* Share Buttons */
+        .share-section {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .share-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .share-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .share-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .share-twitter {
+            background: #000000;
+        }
+
+        /* X brand color */
+        .share-facebook {
+            background: #1877f2;
+        }
+
+        .share-linkedin {
+            background: #0a66c2;
+        }
+
+        .share-whatsapp {
+            background: #25d366;
+        }
+
+        /* Customized Back Button Style (Matching Login Button) */
+        .btn-back-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            /* Light Purple Tint */
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back-custom:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Typography Review Override (Ensuring comfort) */
+        .article-content {
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            /* Slate 700 - slightly softer than black */
+            font-weight: 400;
+        }
+
+        [data-theme="dark"] .article-content {
+            color: #e2e8f0;
+            /* Slate 200 */
+        }
+
+        /* Meta Footer */
+        .article-footer-meta {
+            margin-top: 10px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            /* Reduced space from content */
+            margin-bottom: 20px;
+            justify-content: flex-start;
+            /* Left aligned */
+        }
+
+        /* Updated Tag Pill Style - Neutral & Transparent */
+        .tag-pill {
+            background: transparent;
+            color: #64748b;
+            /* Slate-500 */
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            /* Slate-300 */
+            display: inline-block;
+        }
+
+        .tag-pill:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .tag-pill {
+            color: #94a3b8;
+            border-color: #334155;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Dark Mode for Right Actions container */
+        [data-theme="dark"] .right-actions {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-like, .btn-comment-action {
+            background: rgba(99, 102, 241, 0.1);
+            /* Primary instead of red */
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-like:hover, .btn-comment-action:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-like.liked {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .share-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        .share-icons-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        [data-theme="dark"] .share-label {
+            color: #94a3b8;
+        }
+
+        .share-icon {
+            color: #64748b;
+            font-size: 1.2rem;
+            /* Slightly bigger */
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dark Mode Share Icons */
+        [data-theme="dark"] .share-icon {
+            color: #cbd5e1;
+            /* Much lighter slate */
+        }
+
+        .share-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .share-icon.twitter:hover {
+            color: #1da1f2;
+        }
+
+        .share-icon.instagram:hover {
+            color: #e1306c;
+        }
+
+        .share-icon.linkedin:hover {
+            color: #0077b5;
+        }
+
+        .share-icon.whatsapp:hover {
+            color: #25d366;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 60px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comments-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .comment-form-wrapper textarea {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .comment-form-wrapper textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .comments-list {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .comment-body {
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .login-prompt {
+            text-align: center;
+            background: rgba(99, 102, 241, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            color: #64748b;
+        }
+
+        .login-prompt a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .right-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* Mobile Optimizations */
+            .article-title {
+                font-size: 2rem;
+                /* Reduced from 2.8rem */
+                line-height: 1.2;
+                text-align: left !important;
+                /* Fix for word spacing gaps */
+            }
+
+            .detail-hero-image {
+                height: 250px;
+                /* Reduced from 450px */
+                margin-bottom: 30px;
+            }
+
+            .article-detail-container {
+                padding-top: 20px;
+                /* Reduced spacing */
+                padding-bottom: 40px;
+                width: 100%;
+                /* Max width */
+                padding-left: 6px;
+                /* Absolute Minimal padding */
+                padding-right: 6px;
+            }
+
+            .unified-article-card {
+                padding: 10px 0px !important;
+                /* Zero side padding is key */
+                /* tighter padding */
+                border-radius: 20px;
+                border: none;
+                /* Cleaner look on mobile */
+                box-shadow: none;
+                /* Flat look for performance/cleanliness */
+                background: transparent;
+                /* Seamless integration */
+            }
+
+            .article-content {
+                font-size: 1.05rem;
+                /* Slightly smaller for mobile reading */
+            }
+
+            /* FORCE AUTHOR VISIBILITY ON MOBILE */
+            #detail-author {
+                display: inline-flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                margin-top: 10px;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                align-items: center !important;
+                z-index: 10;
+                width: auto;
+                justify-content: center;
+            }
+        }
+
+        .btn-show-more-comments {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-show-more-comments:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Modern Comment Section */
+        .comments-section {
+            margin-top: 60px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background: #f8fafc;
+            /* Light Gray Layer */
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item:hover {
+            border-color: var(--primary-color);
+            background: #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .comment-item {
+            background: #334155;
+            /* Slate 700 - Lighter than bg #1e293b */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .comment-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* Force light text in dark mode for comments */
+        [data-theme="dark"] .comment-author,
+        [data-theme="dark"] .comment-body,
+        [data-theme="dark"] .comment-date {
+            color: #f1f5f9 !important;
+        }
+
+        .comment-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-accent);
+        }
+
+        .comment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .comment-content-wrapper {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .comment-body {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .comment-status-pending {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .comment-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-link {
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-link:hover {
+            color: var(--primary-accent);
+        }
+
+        .action-link.delete:hover {
+            color: #ef4444;
+        }
+
+        .delete-comment-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            line-height: 1;
+            margin-left: auto;
+        }
+
+        .delete-comment-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            transform: scale(1.05);
+        }
+
+        .edit-area {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            margin-top: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        /* Comment Form */
+        #comment-form-container textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            min-height: 120px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        #comment-form-container textarea:focus {
+            border-color: var(--primary-accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Updated Slider UI - Full Image Overlay */
+        .slider-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        [data-theme="dark"] .slider-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .slider-nav-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .similar-article-card {
+            min-width: 280px;
+            width: 280px;
+            height: 380px;
+            /* Taller fixed height */
+            background-color: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 1px solid transparent;
+            /* No visible border usually, relies on image */
+        }
+
+        .similar-article-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        /* Gradient Overlay */
+        .similar-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .similar-article-card:hover .similar-card-overlay {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0.95) 100%);
+        }
+
+        .similar-card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+            /* Always white on overlay */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* Allow more lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-decoration: none;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .similar-card-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .category-badge-slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* Moved to left usually looks better on these cards */
+            right: auto;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .media-slider-container {
+            /* Wrapper to ensure buttons don't overlap awkwardly if we move them */
+        }
+
+        @media (max-width: 768px) {
+            .similar-article-card {
+                min-width: 260px;
+                width: 260px;
+                height: 350px;
+            }
+
+            /* Mobile: Allow manual scrolling for Similar Articles */
+            .similar-slider-wrapper {
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px;
+                /* Space for scrollbar if any, though usually hidden on mobile */
+            }
+
+            /* Disable JS transform on mobile to prevent conflict */
+            #similar-slider-track {
+                transform: none !important;
+            }
+
+            /* Hide Slider Navigation Buttons on Mobile */
+            .slider-nav-btn {
+                display: none !important;
+            }
+        }
+    </style>
+    <style>
+        /* Reading Progress Bar - Fixed Top */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            /* Sleek & Thin */
+            background: transparent;
+            z-index: 2147483647;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            /* Theme Colors: Restored */
+            background: linear-gradient(90deg, var(--primary-color), #a855f7);
+            width: 0%;
+            /* Optimized for performance */
+            will-change: width;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- Reading Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar" id="reading-progress"></div>
+    </div>
+
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+                <!-- Dynamic Image (Hidden until loaded) -->
+                <img id="loader-logo-img" src="" alt="Site Logo" style="display: none; max-width: 150px; height: auto;">
+            </div>
+        </div>
+
+    <script>
+        // Progress Bar Logic (Heartbeat & Self-Healing)
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.getElementById('reading-progress');
+            let articleElement = null;
+            let ticking = false;
+
+            // Main Update Function
+            function updateProgress() {
+                try {
+                    if (!progressBar) return;
+
+                    // 1. Zombie Check
+                    if (articleElement && !articleElement.isConnected) {
+                        articleElement = null;
+                    }
+
+                    // 2. Locate
+                    if (!articleElement) {
+                        articleElement = document.querySelector('.unified-article-card');
+                    }
+
+                    // 3. Visibility Check we can trust
+                    // If no element, we can't show progress.
+                    if (!articleElement) return;
+
+                    // 4. Metrics
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    const rect = articleElement.getBoundingClientRect();
+
+                    // Absolute Calcs
+                    const elementTop = rect.top + scrollTop;
+                    const elementHeight = articleElement.offsetHeight;
+
+                    if (elementHeight === 0) return;
+
+                    const startPoint = elementTop;
+                    const endPoint = elementTop + elementHeight - windowHeight;
+
+                    // 5. Calculate & Apply
+                    let pct = 0;
+                    if (endPoint > startPoint) {
+                        pct = ((scrollTop - startPoint) / (endPoint - startPoint)) * 100;
+                    }
+
+                    // Direct application (Unthrottled for smoothness)
+                    progressBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+
+                } catch (e) {
+                    console.error("PB Error:", e);
+                } finally {
+                    ticking = false;
+                }
+            }
+
+            // Scroll Handler (RAF)
+            function onScroll() {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateProgress);
+                    ticking = true;
+                }
+            }
+
+            // 1. Scroll Listener (Primary)
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+
+            // 2. Debounced Observer (Secondary - for resizing content)
+            let observerTimer;
+            const observer = new MutationObserver(() => {
+                if (observerTimer) clearTimeout(observerTimer);
+                observerTimer = setTimeout(onScroll, 200); // Wait for layout to settle
+            });
+            // Watch article card only to avoid infinite feedback loop when progress bar updates
+            const targetNode = document.querySelector('.unified-article-card') || document.body;
+            observer.observe(targetNode, { childList: true, subtree: true, attributes: false });
+
+            // 3. HEARTBEAT (The Failsafe)
+            // Even if everything else dies, this checks every 1 second
+            // preventing "permanent freeze"
+            setInterval(updateProgress, 1000);
+
+            // Initial kick
+            updateProgress();
+        });
+    </script>
+
+
+    <!-- Header -->
+    <header class="header">
+
+
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/articles" class="nav-link active">Makaleler</a>
+                <a href="/experiments" class="nav-link">Deneyler</a>
+                <a href="/tools" class="nav-link">Araçlar</a>
+                <a href="/about" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
+
+                <!-- Language Switcher -->
+                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container article-detail-container">
+        <!-- Loading State -->
+        <div id="loading-indicator" style="text-align: center; padding: 100px;">
+            <i class="ph ph-spinner ph-spin" style="font-size: 3rem; color: var(--primary-color);"></i>
+        </div>
+
+        <!-- Content -->
+        <!-- Content -->
+        <main id="article-wrapper" style="display: none;">
+
+            <!-- Hero Image (LCP Optimized) -->
+            <img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image" fetchpriority="high" decoding="async">
+
+            <!-- Unified Card -->
+            <div class="unified-article-card">
+                <div class="article-header">
+                    <div class="article-meta">
+                        <span class="article-badge" id="detail-category">Teknoloji</span>
+                        <span id="detail-date"><i class="ph ph-calendar"></i> 10 Aralık 2025</span>
+                        <span id="detail-author"><i class="ph ph-user"></i> Admin</span>
+                    </div>
+                    <h1 class="article-title" id="detail-title">Makale Başlığı</h1>
+                </div>
+
+                <!-- Summary -->
+                <div class="article-summary-simple" id="summary-box">
+                    <div class="summary-title"><i class="ph-fill ph-sparkle"></i> Bu Makalede Neler Öğreneceğiz?</div>
+                    <div class="summary-text" id="detail-excerpt"></div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="article-content-simple">
+                    <div class="article-content" id="detail-content"></div>
+                </div>
+
+
+                <div class="article-footer-meta">
+                    <div class="action-row">
+
+                        <a href="/articles" class="btn-back-custom">
+                            <i class="ph-bold ph-arrow-left"></i> Diğer Makaleler
+                        </a>
+
+
+                        <div class="right-actions">
+                            <button class="btn-like" id="like-btn" onclick="toggleLike()">
+                                <i class="ph ph-heart"></i> Beğen
+                            </button>
+
+                            <button class="btn-comment-action" onclick="scrollToComments()">
+                                <i class="ph ph-chat-text"></i> Yorum Yap
+                            </button>
+
+                            <div class="share-divider"></div>
+
+                            <div class="share-icons-row">
+                                <span class="share-label">Paylaş:</span>
+                                <a href="javascript:void(0)" class="share-icon twitter"><i class="ph-fill ph-twitter-logo"></i></a>
+                                <a href="javascript:void(0)" class="share-icon instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                                <a href="javascript:void(0)" class="share-icon linkedin"><i class="ph-fill ph-linkedin-logo"></i></a>
+                                <a href="javascript:void(0)" class="share-icon whatsapp"><i class="ph-fill ph-whatsapp-logo"></i></a>
+                                <a href="javascript:void(0)" onclick="copyToClipboard()" class="share-icon copy-link"
+                                    title="Linki Kopyala"><i class="ph-fill ph-link"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="references-section-simple" id="references-section" style="display: none;">
+                    <h3 class="references-title">Kaynakça</h3>
+                    <ul class="references-list" id="references-list"></ul>
+                </div>
+
+                <div class="tags-container" id="detail-tags"></div>
+            </div>
+
+
+            <div class="comments-section">
+                <h3 class="comments-title">Yorumlar (<span id="comment-count">0</span>)</h3>
+
+                <div class="comment-form-wrapper" id="comment-form-container">
+                    <p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal')">giriş
+                            yapmalısınız</a>.</p>
+                </div>
+
+                <div class="comments-list" id="comments-list">
+                    <div class="comment-item placeholder">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+                </div>
+            </div>
+
+            <div id="similar-articles-section" style="margin-top: 60px; margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="related-articles-title">
+                        Diğer Makalelere Göz At</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="slider-nav-btn" onclick="slideArticles('left')"><i
+                                class="ph ph-caret-left"></i></button>
+                        <button class="slider-nav-btn" onclick="slideArticles('right')"><i
+                                class="ph ph-caret-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="similar-slider-wrapper" style="overflow: hidden; position: relative;">
+                    <div id="similar-slider-track" style="display: flex; gap: 20px; transition: transform 0.4s ease;">
+                        <!-- JS Injected Cards -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Footer -->
+    <div id="global-footer"></div>
+
+
+        <div class="mobile-menu" id="mobileMenu">
+<div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="remember-me-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <label class="remember-me-label" style="display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; color: var(--text-color);">
+                        <input type="checkbox" id="login-remember" class="remember-checkbox" style="margin-right: 8px;">
+                        <span>Beni Hatırla</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="switchModal('loginModal', 'forgotPasswordModal')" class="forgot-password-link" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Google ile Giriş Yap
+</button>
+            </div>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-user"></i> -->
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required aria-label="Ad Soyad">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required aria-label="Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-envelope-simple"></i> -->
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <!-- <i class="ph ph-lock-key"></i> -->
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required aria-label="Şifre Tekrar">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Google ile Üye Ol
+</button>
+            </div>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="javascript:void(0)" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script defer src="/script_v105.js?v=280"></script>
+    <script>
+        // Use API_URL from script.js or default
+        const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
+
+
+
+        async function loadLikes(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`${API_BASE}/articles/${id}/like`, { headers });
+                const data = await res.json();
+
+                const btn = document.getElementById('like-btn');
+
+                if (data.liked) {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                } else {
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                }
+            } catch (e) { console.error('Like load', e); }
+        }
+
+        async function toggleLike() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                openModal('loginModal');
+                return;
+            }
+
+            const id = window.currentArticleId;
+            if (!id) {
+                console.error('toggleLike: No article ID found');
+                return;
+            }
+            const btn = document.getElementById('like-btn');
+
+            try {
+                const isLiked = btn.classList.contains('liked');
+
+                if (isLiked) {
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                } else {
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                }
+
+                const res = await fetch(`${API_BASE}/articles/${id}/like`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    loadLikes(id); // Revert on error
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Global state for comments
+        let allComments = [];
+        const COMMENT_INITIAL_LIMIT = 3; // Show last 3 comments
+
+        async function loadComments(id) {
+            const token = localStorage.getItem('token');
+            const formContainer = document.getElementById('comment-form-container');
+
+            // 1. Initial Form Setup (Render immediately)
+            if (formContainer) {
+                if (token) {
+                    formContainer.innerHTML = `
+                        <div class="comment-form">
+                            <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                            <div class="form-actions">
+                                <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    formContainer.innerHTML = '<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal(\'loginModal\')">giriş yapmalısınız</a>.</p>';
+                }
+            }
+
+            try {
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                // 2. Fetch Comments
+                const res = await fetch(`${API_BASE}/articles/${id}/comments`, { headers });
+
+                if (res.ok) {
+                    allComments = await res.json();
+                } else {
+                    allComments = [];
+                }
+
+                // Safety check
+                if (!Array.isArray(allComments)) allComments = [];
+
+                document.getElementById('comment-count').innerText = allComments.length;
+
+                // Render with initial limit
+                renderCommentsList(COMMENT_INITIAL_LIMIT);
+
+            } catch (e) { console.error('Comment load error:', e); }
+        }
+
+        function renderCommentsList(limit) {
+            const list = document.getElementById('comments-list');
+            // Determine which comments to show
+            const visibleComments = (limit && limit < allComments.length)
+                ? allComments.slice(0, limit)
+                : allComments;
+
+            if (allComments.length === 0) {
+                list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
+                return;
+            }
+
+            // Generate HTML for visible comments
+            let html = visibleComments.map(c => generateCommentHTML(c)).join('');
+
+            // Append "Show More" button if needed
+            if (limit && allComments.length > limit) {
+                const remaining = allComments.length - limit;
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(null)" class="btn-show-more-comments">
+                            Tüm Yorumları Gör (+${remaining}) <i class="ph ph-caret-down"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (!limit && allComments.length > COMMENT_INITIAL_LIMIT) {
+                // Optional: "Show Less" button when fully expanded
+                html += `
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="renderCommentsList(COMMENT_INITIAL_LIMIT)" class="btn-show-more-comments">
+                            Daha Az Göster <i class="ph ph-caret-up"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            list.innerHTML = html;
+        }
+
+        function generateCommentHTML(c) {
+            const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+            const isMine = c.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === c.user_id);
+            return `
+                <div class="comment-item" id="comment-${c.id}">
+                    <div class="comment-avatar">${initials}</div>
+                    <div class="comment-content-wrapper">
+                        <div class="comment-header">
+                            <span class="comment-author">${c.fullname || 'Kullanıcı'}</span>
+                            ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                            <div class="comment-actions">
+                                <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                                ${isMine ? `
+                                    <span style="margin: 0 8px; color:#cbd5e1;">|</span>
+                                    <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
+                                    <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="comment-body" id="body-${c.id}">${c.content}</div>
+                        <div id="edit-form-${c.id}" style="display:none;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function postComment() {
+            const content = document.getElementById('comment-input').value;
+            if (!content || !content.trim()) return showToast('Lütfen bir yorum yazın', 'error');
+
+            const id = window.currentArticleId;
+            if (!id) {
+                console.error('postComment: No article ID found');
+                showToast('Hata: Makale bulunamadı.', 'error');
+                return;
+            }
+            const token = localStorage.getItem('token');
+
+            try {
+                const res = await fetch(`${API_BASE}/articles/${id}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yorumunuz başarıyla yayınlandı!', 'success');
+                    document.getElementById('comment-input').value = '';
+                    loadComments(id);
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || data.message || 'Hata oluştu', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Edit Functions
+        function startEdit(id) {
+            const bodyEl = document.getElementById(`body-${id}`);
+            const currentContent = bodyEl.innerText;
+            const formContainer = document.getElementById(`edit-form-${id}`);
+
+            bodyEl.style.display = 'none';
+            formContainer.style.display = 'block';
+            formContainer.innerHTML = `
+                <textarea class="edit-area" id="edit-input-${id}" rows="3">${currentContent}</textarea>
+                <div style="margin-top: 8px; text-align: right;">
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-right: 8px;" onclick="saveEdit(${id})">Kaydet</button>
+                    <button class="btn btn-login" style="padding: 6px 12px; font-size: 0.8rem;" onclick="cancelEdit(${id})">İptal</button>
+                </div>
+            `;
+        }
+
+        function cancelEdit(id) {
+            document.getElementById(`body-${id}`).style.display = 'block';
+            document.getElementById(`edit-form-${id}`).style.display = 'none';
+        }
+
+        async function saveEdit(id) {
+            const content = document.getElementById(`edit-input-${id}`).value;
+            if (!content.trim()) return showToast('Yorum boş olamaz', 'error');
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yorum başarıyla güncellendi.', 'success');
+                    loadComments(window.currentArticleId);
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || data.message || 'Güncelleme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/comments/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    showToast('Yorum silindi', 'success');
+                    document.getElementById(`comment-${id}`).remove();
+                    // optional: update count
+                } else {
+                    showToast('Silme başarısız', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Link başarıyla kopyalandı!', 'success');
+            }).catch(err => {
+                console.error('Kopyalama başarısız:', err);
+                showToast('Link kopyalanamadı', 'error');
+            });
+        }
+
+        function scrollToComments() {
+            const el = document.getElementById('comment-form-container') || document.querySelector('.comments-section');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const textarea = el.querySelector('textarea');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 800);
+                }
+            }
+        }
+
+        // === ARTICLE SLIDER LOGIC ===
+        let similarArticles = [];
+        let sliderIndex = 0;
+
+        async function loadArticleSlider(currentId) {
+            console.log('loadArticleSlider called for ID:', currentId);
+            try {
+                // Fetch recent articles (simplest "related" logic for now)
+                const res = await fetch(`${API_BASE}/articles?limit=10`);
+                if (!res.ok) {
+                    console.error('Slider fetch failed:', res.status);
+                    return;
+                }
+
+                const all = await res.json();
+                console.log('Slider fetched articles:', all.length);
+                // Filter out current article
+                similarArticles = all.filter(a => a.id != currentId);
+                console.log('Slider relevant articles:', similarArticles.length);
+
+                renderSlider();
+            } catch (e) {
+                console.error('Slider load error:', e);
+                document.getElementById('similar-articles-section').style.display = 'none';
+            }
+        }
+
+        function renderSlider() {
+            const track = document.getElementById('similar-slider-track');
+            if (similarArticles.length === 0) {
+                document.getElementById('similar-articles-section').style.display = 'none';
+                return;
+            }
+
+            track.innerHTML = similarArticles.map(article => `
+                <div class="related-article-card">
+                    <div class="related-card-image-wrapper">
+                        <span class="related-card-category">${article.category || 'Genel'}</span>
+                        <img src="${article.image_url || 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=800&q=80'}" 
+                             alt="${article.title}" 
+                             class="related-card-img">
+                    </div>
+                    <div class="related-card-content">
+                        <h4 class="related-card-title">
+                            <a href="/article-detail?id=${article.id}">${article.title}</a>
+                        </h4>
+                        <div class="related-card-footer">
+                             <div class="related-card-author">
+                                <i class="ph-fill ph-user-circle"></i> 
+                                <span>${article.author_name || 'Yazar'}</span>
+                             </div>
+                             <span>${new Date(article.created_at).toLocaleDateString('tr-TR')}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function slideArticles(direction) {
+            const track = document.getElementById('similar-slider-track');
+            const cardWidth = 320; // 300px width + 20px gap
+            const visibleWidth = document.querySelector('.similar-slider-wrapper').offsetWidth;
+            const maxScroll = Math.max(0, (similarArticles.length * cardWidth) - visibleWidth);
+
+            if (direction === 'left') {
+                sliderIndex = Math.max(sliderIndex - cardWidth, 0);
+            } else {
+                sliderIndex = Math.min(sliderIndex + cardWidth, maxScroll);
+            }
+
+            track.style.transform = `translateX(-${sliderIndex}px)`;
+        }
+    </script>
+
+
+    <!-- <script src="/script.js?v=241.0"></script> -->
+    <script src="/lightbox.js"></script>
+</body>
+
+</html>
