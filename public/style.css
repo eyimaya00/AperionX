@@ -4652,28 +4652,77 @@ i[class*=" ph"] {
 }
 
 /* Articles Hero Updates */
+.hero-slider.articles-hero-section,
 .articles-hero-section {
-    min-height: 250px !important;
-    padding-top: 100px !important;
-    padding-bottom: 40px !important;
+    position: relative !important;
+    width: 100% !important;
+    min-height: 220px !important;
+    height: 220px !important;
+    margin-top: 80px !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
     background-color: var(--bg-color) !important;
-    position: relative;
     display: flex !important;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
     margin-bottom: 0 !important;
+}
+
+@media (max-width: 1024px) {
+    .hero-slider.articles-hero-section,
+    .articles-hero-section {
+        margin-top: 80px !important;
+        min-height: 220px !important;
+        height: 220px !important;
+        padding: 0 20px !important;
+    }
+}
+
+.articles-hero-section .hero-content {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    z-index: 10 !important;
+    padding: 0 !important;
+}
+
+.articles-hero-section .articles-page-title,
+.articles-hero-section h1 {
+    font-size: 2.6rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    width: 100% !important;
+    color: var(--text-color);
+}
+
+.articles-hero-section .articles-page-description,
+.articles-hero-section p {
+    font-size: 1.05rem !important;
+    margin: 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    opacity: 0.9 !important;
+    color: var(--nav-text);
 }
 
 /* Hide unused featured section on articles page */
 .featured-slider-section {
     display: none !important;
-}
-
-@media (max-width: 1024px) {
-    .articles-hero-section {
-        min-height: 280px !important;
-        padding-top: 100px !important;
-    }
 }
 
 /* Hide overlay in light mode if it makes it dark */
