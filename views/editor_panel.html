@@ -2731,6 +2731,50 @@
 
             // === QUILL EDITOR INITIALIZATION ===
             console.log('=== QUILL INIT START ===');
+
+            // Register Custom Image Format so Quill preserves style, width, height, align attributes
+            try {
+                const ImageFormat = Quill.import('formats/image');
+                class CustomImageFormat extends ImageFormat {
+                    static create(value) {
+                        const node = super.create(value);
+                        if (typeof value === 'object') {
+                            if (value.url) node.setAttribute('src', value.url);
+                            if (value.style) node.setAttribute('style', value.style);
+                            if (value.width) node.setAttribute('width', value.width);
+                            if (value.height) node.setAttribute('height', value.height);
+                        } else if (typeof value === 'string') {
+                            node.setAttribute('src', value);
+                        }
+                        return node;
+                    }
+                    static formats(domNode) {
+                        const formats = super.formats(domNode) || {};
+                        if (domNode.hasAttribute('style')) formats.style = domNode.getAttribute('style');
+                        if (domNode.hasAttribute('width')) formats.width = domNode.getAttribute('width');
+                        if (domNode.hasAttribute('height')) formats.height = domNode.getAttribute('height');
+                        return formats;
+                    }
+                    format(name, value) {
+                        if (name === 'style') {
+                            if (value) this.domNode.setAttribute('style', value);
+                            else this.domNode.removeAttribute('style');
+                        } else if (name === 'width') {
+                            if (value) this.domNode.setAttribute('width', value);
+                            else this.domNode.removeAttribute('width');
+                        } else if (name === 'height') {
+                            if (value) this.domNode.setAttribute('height', value);
+                            else this.domNode.removeAttribute('height');
+                        } else {
+                            super.format(name, value);
+                        }
+                    }
+                }
+                CustomImageFormat.blotName = 'image';
+                CustomImageFormat.tagName = 'IMG';
+                Quill.register(CustomImageFormat, true);
+            } catch(e) { console.error('Failed to register CustomImageFormat:', e); }
+
             let TableBetterModule = null;
             let ResizeModule = null;
 
@@ -2988,6 +3032,13 @@
                         };
                     });
                 } catch(e) { console.error('Failed to bind expQuillResultsEdit image handler:', e); }
+            }
+
+            // Attach floating image resize & alignment helper to all Quill instances
+            if (typeof attachImageResizeHelper === 'function') {
+                if (quillEdit) attachImageResizeHelper(quillEdit);
+                if (expQuillProcedureEdit) attachImageResizeHelper(expQuillProcedureEdit);
+                if (expQuillResultsEdit) attachImageResizeHelper(expQuillResultsEdit);
             }
 
             // Heartbeat tracking for online status & work time
@@ -5174,6 +5225,126 @@
         }
 
         loadAuthorsForEditorSelection();
+
+        function attachImageResizeHelper(quill) {
+            if (!quill || !quill.root) return;
+            
+            let activeImg = null;
+            let toolbarEl = document.getElementById('quill-image-floating-toolbar');
+            
+            if (!toolbarEl) {
+                toolbarEl = document.createElement('div');
+                toolbarEl.id = 'quill-image-floating-toolbar';
+                toolbarEl.style.cssText = `
+                    position: absolute;
+                    z-index: 99999;
+                    display: none;
+                    background: #0f172a;
+                    color: #ffffff;
+                    padding: 8px 14px;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    font-size: 0.85rem;
+                    align-items: center;
+                    gap: 6px;
+                    user-select: none;
+                    border: 1px solid rgba(99, 102, 241, 0.4);
+                `;
+                toolbarEl.innerHTML = `
+                    <span style="font-weight:600; color:#94a3b8; margin-right:2px;">Boyut:</span>
+                    <button type="button" class="img-tb-btn" data-size="25%" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600;">25%</button>
+                    <button type="button" class="img-tb-btn" data-size="50%" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600;">50%</button>
+                    <button type="button" class="img-tb-btn" data-size="75%" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600;">75%</button>
+                    <button type="button" class="img-tb-btn" data-size="100%" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600;">100%</button>
+                    <button type="button" class="img-tb-btn" data-size="custom" style="background:#6366f1; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:600;">Özel</button>
+                    <span style="font-weight:600; color:#94a3b8; margin:0 2px 0 8px;">Hizalama:</span>
+                    <button type="button" class="img-tb-btn" data-align="left" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer;">Sol</button>
+                    <button type="button" class="img-tb-btn" data-align="center" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer;">Orta</button>
+                    <button type="button" class="img-tb-btn" data-align="right" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:4px 8px; border-radius:6px; cursor:pointer;">Sağ</button>
+                    <button type="button" class="img-tb-btn" data-action="delete" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; margin-left:6px; font-weight:600;">Sil</button>
+                `;
+                document.body.appendChild(toolbarEl);
+
+                toolbarEl.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.img-tb-btn');
+                    if (!btn || !activeImg) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const size = btn.getAttribute('data-size');
+                    const align = btn.getAttribute('data-align');
+                    const action = btn.getAttribute('data-action');
+
+                    if (size) {
+                        let newWidth = size;
+                        if (size === 'custom') {
+                            const val = prompt('Resim genişliğini girin (ör. 350px, 40%, 600px):', activeImg.style.width || '50%');
+                            if (val && val.trim() !== '') newWidth = val.trim();
+                            else return;
+                        }
+                        activeImg.style.width = newWidth;
+                        activeImg.style.maxWidth = '100%';
+                        activeImg.style.height = 'auto';
+                        activeImg.setAttribute('width', newWidth);
+                    }
+
+                    if (align) {
+                        if (align === 'center') {
+                            activeImg.style.display = 'block';
+                            activeImg.style.marginLeft = 'auto';
+                            activeImg.style.marginRight = 'auto';
+                            activeImg.style.float = 'none';
+                        } else if (align === 'left') {
+                            activeImg.style.display = 'inline-block';
+                            activeImg.style.float = 'left';
+                            activeImg.style.margin = '0 15px 15px 0';
+                        } else if (align === 'right') {
+                            activeImg.style.display = 'inline-block';
+                            activeImg.style.float = 'right';
+                            activeImg.style.margin = '0 0 15px 15px';
+                        }
+                    }
+
+                    if (action === 'delete') {
+                        activeImg.remove();
+                        hideToolbar();
+                    } else {
+                        positionToolbar(activeImg);
+                    }
+                });
+            }
+
+            function positionToolbar(img) {
+                if (!img) return;
+                const rect = img.getBoundingClientRect();
+                toolbarEl.style.top = (window.scrollY + rect.top - 52) + 'px';
+                toolbarEl.style.left = Math.max(10, (window.scrollX + rect.left + (rect.width / 2) - 200)) + 'px';
+                toolbarEl.style.display = 'flex';
+            }
+
+            function hideToolbar() {
+                toolbarEl.style.display = 'none';
+                if (activeImg) {
+                    activeImg.style.outline = 'none';
+                    activeImg = null;
+                }
+            }
+
+            quill.root.addEventListener('click', function(e) {
+                if (e.target && e.target.tagName === 'IMG') {
+                    if (activeImg) activeImg.style.outline = 'none';
+                    activeImg = e.target;
+                    activeImg.style.outline = '3px solid #6366f1';
+                    positionToolbar(activeImg);
+                } else {
+                    hideToolbar();
+                }
+            });
+
+            document.addEventListener('scroll', function() {
+                if (activeImg) positionToolbar(activeImg);
+            }, true);
+        }
 
         async function logout() {
             if (token) {

@@ -1636,12 +1636,6 @@ i[class*=" ph"] {
     /* Allow alignment */
 }
 
-/* Override to allow explicit width from style attribute if set by editor */
-.article-content img[style*="width"] {
-    width: auto !important;
-    /* Let the inline style take precedence effectively? No, inline style wins usually */
-}
-
 /* Actually, standard img max-width 100% is good. If user sets width 50%, browser applies it. */
 
 /* Quill Alignment Classes */
