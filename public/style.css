@@ -2511,7 +2511,8 @@ i[class*=" ph"] {
 }
 
 .articles-hero-section .articles-page-title,
-.articles-hero-section h1 {
+.articles-hero-section h1,
+#about-hero-title {
     font-size: 4.5rem !important;
     font-weight: 900 !important;
     margin: 0 0 16px 0 !important;
