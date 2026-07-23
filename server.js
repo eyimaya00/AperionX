@@ -802,9 +802,9 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
             let html = htmlData;
 
             try {
-                // 1. Fetch Experiments
+                // 1. Fetch Experiments (Newest first)
                 let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL";
-                query += " ORDER BY created_at DESC";
+                query += " ORDER BY created_at DESC, id DESC";
                 const [experiments] = await pool.query(query);
 
                 if (experiments.length > 0) {
@@ -1747,6 +1747,14 @@ async function ensureSchema() {
         } catch (e) {
             console.error('Error initializing was_published status:', e);
         }
+
+        // Migration for experiments was_published
+        try {
+            await pool.query("ALTER TABLE experiments ADD COLUMN was_published TINYINT(1) DEFAULT 0");
+        } catch (e) {}
+        try {
+            await pool.query("UPDATE experiments SET was_published = 1 WHERE status = 'published'");
+        } catch (e) {}
 
         // --- NEW: Ensure parent_id exists in menu_items ---
         try {
@@ -3192,7 +3200,7 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
 // 3. Update Experiment (PUT)
 app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const experimentId = req.params.id;
-    const [check] = await pool.query('SELECT author_id FROM experiments WHERE id = ?', [experimentId]);
+    const [check] = await pool.query('SELECT author_id, was_published FROM experiments WHERE id = ?', [experimentId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
@@ -3218,6 +3226,10 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (finalStatus) {
         updates.push('status = ?');
         params.push(finalStatus);
+        if (finalStatus === 'published' && (!check[0] || !check[0].was_published)) {
+            updates.push('created_at = NOW()');
+            updates.push('was_published = 1');
+        }
         if (finalStatus === 'pending' || finalStatus === 'draft') {
             updates.push('rejection_reason = NULL');
         }
@@ -3411,17 +3423,25 @@ app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res
     const experimentId = req.params.id;
 
     try {
-        const [check] = await pool.query('SELECT author_id, title FROM experiments WHERE id = ?', [experimentId]);
+        const [check] = await pool.query('SELECT author_id, title, was_published FROM experiments WHERE id = ?', [experimentId]);
         if (check.length === 0) return res.status(404).json({ message: 'Experiment not found' });
 
         const authorId = check[0].author_id;
         const title = check[0].title;
+        const wasPublished = check[0].was_published;
 
         if (decision === 'approve') {
-            await pool.query(
-                "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL WHERE id = ?",
-                [req.user.id, experimentId]
-            );
+            if (wasPublished) {
+                await pool.query(
+                    "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL WHERE id = ?",
+                    [req.user.id, experimentId]
+                );
+            } else {
+                await pool.query(
+                    "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL, created_at = NOW(), was_published = 1 WHERE id = ?",
+                    [req.user.id, experimentId]
+                );
+            }
 
             // Notify author
             let msg = `Tebrikler! Deneyiniz onaylandı ve yayınlandı: ${title}`;
