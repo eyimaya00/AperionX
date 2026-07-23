@@ -2500,27 +2500,44 @@ i[class*=" ph"] {
 /* Hero Slider Adaptation for Articles Page */
 /* Hero Slider Adaptation for Articles Page */
 .articles-hero-section {
-    height: 35vh !important;
     min-height: 250px !important;
+    padding-top: 100px !important;
+    padding-bottom: 40px !important;
+    background-color: var(--bg-color) !important;
     position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
-    margin-bottom: 30px;
-    /* Removed flex to rely on absolute positioning */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0 !important;
 }
 
+/* Hide unused featured section on articles page */
+.featured-slider-section {
+    display: none !important;
+}
+
+@media (max-width: 1024px) {
+    .articles-hero-section {
+        min-height: 280px !important;
+        padding-top: 100px !important;
+    }
+}
+
+/* Hide overlay in light mode if it makes it dark */
+.articles-hero-section .hero-overlay {
+    background: transparent;
+}
+
+/* Ensure text is visible in light mode */
 .articles-hero-section .hero-content {
-    position: absolute !important;
-    bottom: 80px !important;
-    /* Moved up from 40px */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    top: auto !important;
-    /* Override potential defaults */
-    right: auto !important;
-    width: 100%;
+    color: var(--text-color);
+    z-index: 10;
     text-align: center;
-    padding: 0 20px;
-    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 /* Darker Overlay for Articles Slider - Adjusted for Visibility */
@@ -4591,9 +4608,6 @@ i[class*=" ph"] {
     justify-content: center;
     text-align: center;
     width: 100%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    /* Ensure it stays centered if absolutely positioned */
 }
 
 /* Ensure title is centered */
@@ -4611,15 +4625,15 @@ i[class*=" ph"] {
 
 /* Articles Hero Updates */
 .articles-hero-section {
-    height: calc(35vh + 80px) !important;
-    /* Updated to calc(35vh + 80px) for a much smaller slider */
-    min-height: 280px !important;
+    min-height: 250px !important;
+    padding-top: 100px !important;
+    padding-bottom: 40px !important;
     background-color: var(--bg-color) !important;
     position: relative;
-    display: block !important;
-    /* Ensure it is visible */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 0 !important;
-    /* Remove bottom margin */
 }
 
 /* Hide unused featured section on articles page */
@@ -4627,13 +4641,10 @@ i[class*=" ph"] {
     display: none !important;
 }
 
-
-
 @media (max-width: 1024px) {
     .articles-hero-section {
-        height: calc(55vh + 80px) !important;
-        /* Match desktop/mobile */
-        min-height: 430px !important;
+        min-height: 280px !important;
+        padding-top: 100px !important;
     }
 }
 

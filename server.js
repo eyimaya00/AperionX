@@ -1421,6 +1421,15 @@ async function ensureSchema() {
         } catch (e) { console.error('Migration Error (Likes unique_experiment_like):', e); }
 
 
+        // --- NEW: Categories Tablosu ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS categories (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
         // --- NEW: Kategori Kartları Tablosu ---
         await pool.query(`
             CREATE TABLE IF NOT EXISTS category_cards (
@@ -4649,59 +4658,97 @@ app.get('/editor', (req, res) => {
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/experiments/categories', async (req, res) => {
     try {
-        const [expRows] = await pool.query("SELECT category FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != ''");
-        const [catRows] = await pool.query("SELECT name FROM categories");
         const catSet = new Set();
 
-        expRows.forEach(row => {
-            if (row.category) {
-                row.category.split(',').forEach(c => {
-                    const trimmed = c.trim();
-                    if (trimmed) catSet.add(trimmed);
-                });
-            }
-        });
+        try {
+            const [expRows] = await pool.query("SELECT category FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != ''");
+            expRows.forEach(row => {
+                if (row.category) {
+                    row.category.split(',').forEach(c => {
+                        const trimmed = c.trim();
+                        if (trimmed) catSet.add(trimmed);
+                    });
+                }
+            });
+        } catch (e) {
+            console.error('Safe category fetch from experiments warning:', e.message);
+        }
 
-        catRows.forEach(row => {
-            if (row.name) {
-                const trimmed = row.name.trim();
-                if (trimmed) catSet.add(trimmed);
-            }
-        });
+        try {
+            const [catRows] = await pool.query("SELECT name FROM categories");
+            catRows.forEach(row => {
+                if (row.name) {
+                    const trimmed = row.name.trim();
+                    if (trimmed) catSet.add(trimmed);
+                }
+            });
+        } catch (e) {
+            console.error('Safe category fetch from categories table warning:', e.message);
+        }
+
+        if (catSet.size === 0) {
+            ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => catSet.add(c));
+        }
 
         const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
         res.json(sortedCats);
     } catch (e) {
-        res.status(500).json({ message: e.message });
+        res.json([
+            { name: 'Biyoloji' },
+            { name: 'Fizik' },
+            { name: 'Kimya' },
+            { name: 'Teknoloji' },
+            { name: 'Uzay' },
+            { name: 'Genel' }
+        ]);
     }
 });
 
 app.get('/api/categories', async (req, res) => {
     try {
-        const [artRows] = await pool.query("SELECT category FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != ''");
-        const [catRows] = await pool.query("SELECT name FROM categories");
         const catSet = new Set();
 
-        artRows.forEach(row => {
-            if (row.category) {
-                row.category.split(',').forEach(c => {
-                    const trimmed = c.trim();
-                    if (trimmed) catSet.add(trimmed);
-                });
-            }
-        });
+        try {
+            const [artRows] = await pool.query("SELECT category FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != ''");
+            artRows.forEach(row => {
+                if (row.category) {
+                    row.category.split(',').forEach(c => {
+                        const trimmed = c.trim();
+                        if (trimmed) catSet.add(trimmed);
+                    });
+                }
+            });
+        } catch (e) {
+            console.error('Safe category fetch from articles warning:', e.message);
+        }
 
-        catRows.forEach(row => {
-            if (row.name) {
-                const trimmed = row.name.trim();
-                if (trimmed) catSet.add(trimmed);
-            }
-        });
+        try {
+            const [catRows] = await pool.query("SELECT name FROM categories");
+            catRows.forEach(row => {
+                if (row.name) {
+                    const trimmed = row.name.trim();
+                    if (trimmed) catSet.add(trimmed);
+                }
+            });
+        } catch (e) {
+            console.error('Safe category fetch from categories table warning:', e.message);
+        }
+
+        if (catSet.size === 0) {
+            ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => catSet.add(c));
+        }
 
         const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
         res.json(sortedCats);
     } catch (e) {
-        res.status(500).json({ message: e.message });
+        res.json([
+            { name: 'Biyoloji' },
+            { name: 'Fizik' },
+            { name: 'Kimya' },
+            { name: 'Teknoloji' },
+            { name: 'Uzay' },
+            { name: 'Genel' }
+        ]);
     }
 });
 
