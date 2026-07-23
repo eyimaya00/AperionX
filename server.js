@@ -1753,7 +1753,7 @@ async function ensureSchema() {
             await pool.query("ALTER TABLE experiments ADD COLUMN was_published TINYINT(1) DEFAULT 0");
         } catch (e) {}
         try {
-            await pool.query("UPDATE experiments SET was_published = 1 WHERE status = 'published'");
+            await pool.query("UPDATE experiments SET created_at = NOW(), was_published = 1 WHERE status = 'published' AND (was_published = 0 OR was_published IS NULL)");
         } catch (e) {}
 
         // --- NEW: Ensure parent_id exists in menu_items ---
@@ -2633,8 +2633,8 @@ app.get('/api/experiments', async (req, res) => {
         const cached = getCachedData(cacheKey);
         if (cached) return res.json(cached);
 
-        // 1. Fetch Experiments
-        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
+        // 1. Fetch Experiments (Newest first)
+        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC, id DESC");
 
         if (experiments.length > 0) {
             const expIds = experiments.map(e => e.id);
