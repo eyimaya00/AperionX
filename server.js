@@ -754,6 +754,31 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                 // 3. Inject cardsHtml into the grid wrapper in the template
                 html = html.replace(/<div class="articles-grid" id="articles-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="articles-grid">${cardsHtml}</div>`);
 
+                // 3.5. Pre-render Categories for SSR
+                const artCatSet = new Set();
+                articles.forEach(a => {
+                    if (a.category) {
+                        a.category.split(',').forEach(c => {
+                            const trimmed = c.trim();
+                            if (trimmed) artCatSet.add(trimmed);
+                        });
+                    }
+                });
+                try {
+                    const [dbCats] = await pool.query("SELECT name FROM categories");
+                    dbCats.forEach(c => { if (c.name) artCatSet.add(c.name.trim()); });
+                } catch (e) {}
+                if (artCatSet.size === 0) {
+                    ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => artCatSet.add(c));
+                }
+
+                let artCatChipsHtml = `<button class="filter-chip active" onclick="filterPageArticles('all', this)">Tümü</button>`;
+                Array.from(artCatSet).sort((a, b) => a.localeCompare(b, 'tr')).forEach(catName => {
+                    const safeName = escapeHtml(catName);
+                    artCatChipsHtml += `\n<button class="filter-chip" onclick="filterPageArticles('${safeName}', this)">${safeName}</button>`;
+                });
+                html = html.replace(/<div class="category-filters" id="category-filters">[\s\S]*?<\/div>/, `<div class="category-filters" id="category-filters">\n${artCatChipsHtml}\n</div>`);
+
                 // 4. Inject script tag with window.SERVER_ARTICLES data
                 const scriptTag = `<script>window.SERVER_ARTICLES = ${JSON.stringify(articles)};</script>`;
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
@@ -881,6 +906,31 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
 
                 // 3. Inject cardsHtml into the grid wrapper in the template
                 html = html.replace(/<div class="articles-grid" id="experiments-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="experiments-grid">${cardsHtml}</div>`);
+
+                // 3.5. Pre-render Categories for SSR
+                const expCatSet = new Set();
+                experiments.forEach(e => {
+                    if (e.category) {
+                        e.category.split(',').forEach(c => {
+                            const trimmed = c.trim();
+                            if (trimmed) expCatSet.add(trimmed);
+                        });
+                    }
+                });
+                try {
+                    const [dbCats] = await pool.query("SELECT name FROM categories");
+                    dbCats.forEach(c => { if (c.name) expCatSet.add(c.name.trim()); });
+                } catch (e) {}
+                if (expCatSet.size === 0) {
+                    ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => expCatSet.add(c));
+                }
+
+                let expCatChipsHtml = `<button class="filter-chip active" onclick="filterPageExperiments('all', this)">Tümü</button>`;
+                Array.from(expCatSet).sort((a, b) => a.localeCompare(b, 'tr')).forEach(catName => {
+                    const safeName = escapeHtml(catName);
+                    expCatChipsHtml += `\n<button class="filter-chip" onclick="filterPageExperiments('${safeName}', this)">${safeName}</button>`;
+                });
+                html = html.replace(/<div class="category-filters" id="category-filters">[\s\S]*?<\/div>/, `<div class="category-filters" id="category-filters">\n${expCatChipsHtml}\n</div>`);
 
                 // 4. Inject script tag with window.SERVER_EXPERIMENTS data
                 const scriptTag = `<script>window.SERVER_EXPERIMENTS = ${JSON.stringify(experiments)};</script>`;

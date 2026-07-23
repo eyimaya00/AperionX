@@ -2036,6 +2036,32 @@ async function loadExperimentsPage() {
         pageExperiments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         filteredExperiments = [...pageExperiments];
 
+        // Ensure category filter chips exist for loaded experiments
+        const list = document.getElementById('category-filters');
+        if (list && pageExperiments.length > 0) {
+            const catSet = new Set();
+            pageExperiments.forEach(e => {
+                if (e.category) {
+                    e.category.split(',').forEach(c => {
+                        const trimmed = c.trim();
+                        if (trimmed) catSet.add(trimmed);
+                    });
+                }
+            });
+            const existingChips = new Set(Array.from(list.querySelectorAll('.filter-chip')).map(c => c.innerText.trim()));
+            catSet.forEach(catName => {
+                if (!existingChips.has(catName)) {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-chip';
+                    btn.innerText = catName;
+                    btn.onclick = function () {
+                        filterPageExperiments(catName, this);
+                    };
+                    list.appendChild(btn);
+                }
+            });
+        }
+
         // Check URL Params for Category
         const urlParams = new URLSearchParams(window.location.search);
         const catParam = urlParams.get('category');
