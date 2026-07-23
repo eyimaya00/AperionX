@@ -1748,12 +1748,12 @@ async function ensureSchema() {
             console.error('Error initializing was_published status:', e);
         }
 
-        // Migration for experiments was_published
+        // Migration for experiments was_published & latest publish date fix
         try {
             await pool.query("ALTER TABLE experiments ADD COLUMN was_published TINYINT(1) DEFAULT 0");
         } catch (e) {}
         try {
-            await pool.query("UPDATE experiments SET created_at = NOW(), was_published = 1 WHERE status = 'published' AND (was_published = 0 OR was_published IS NULL)");
+            await pool.query("UPDATE experiments SET created_at = NOW(), was_published = 1 WHERE title LIKE '%İn Vitro Memeli Hücre%' OR title LIKE '%Hücre Çözme%'");
         } catch (e) {}
 
         // --- NEW: Ensure parent_id exists in menu_items ---
