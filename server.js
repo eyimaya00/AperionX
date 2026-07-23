@@ -4649,8 +4649,28 @@ app.get('/editor', (req, res) => {
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/experiments/categories', async (req, res) => {
     try {
-        const [rows] = await pool.query("SELECT DISTINCT category AS name FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != '' ORDER BY category ASC");
-        res.json(rows);
+        const [expRows] = await pool.query("SELECT category FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != ''");
+        const [catRows] = await pool.query("SELECT name FROM categories");
+        const catSet = new Set();
+
+        expRows.forEach(row => {
+            if (row.category) {
+                row.category.split(',').forEach(c => {
+                    const trimmed = c.trim();
+                    if (trimmed) catSet.add(trimmed);
+                });
+            }
+        });
+
+        catRows.forEach(row => {
+            if (row.name) {
+                const trimmed = row.name.trim();
+                if (trimmed) catSet.add(trimmed);
+            }
+        });
+
+        const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
+        res.json(sortedCats);
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -4658,8 +4678,28 @@ app.get('/api/experiments/categories', async (req, res) => {
 
 app.get('/api/categories', async (req, res) => {
     try {
-        const [rows] = await pool.query("SELECT DISTINCT category AS name FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != '' ORDER BY category ASC");
-        res.json(rows);
+        const [artRows] = await pool.query("SELECT category FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != ''");
+        const [catRows] = await pool.query("SELECT name FROM categories");
+        const catSet = new Set();
+
+        artRows.forEach(row => {
+            if (row.category) {
+                row.category.split(',').forEach(c => {
+                    const trimmed = c.trim();
+                    if (trimmed) catSet.add(trimmed);
+                });
+            }
+        });
+
+        catRows.forEach(row => {
+            if (row.name) {
+                const trimmed = row.name.trim();
+                if (trimmed) catSet.add(trimmed);
+            }
+        });
+
+        const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
+        res.json(sortedCats);
     } catch (e) {
         res.status(500).json({ message: e.message });
     }

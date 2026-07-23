@@ -1891,7 +1891,7 @@ function filterPageArticles(category, btnElement) {
     if (category === 'all') {
         filteredArticles = [...pageArticles];
     } else {
-        filteredArticles = pageArticles.filter(a => a.category === category);
+        filteredArticles = pageArticles.filter(a => a.category && a.category.split(',').map(c => c.trim()).includes(category));
     }
 
     currentPage = 1;
@@ -2080,7 +2080,7 @@ function filterPageExperiments(category, btnElement) {
     if (category === 'all') {
         filteredExperiments = [...pageExperiments];
     } else {
-        filteredExperiments = pageExperiments.filter(a => a.category === category);
+        filteredExperiments = pageExperiments.filter(a => a.category && a.category.split(',').map(c => c.trim()).includes(category));
     }
 
     currentPage = 1;
@@ -2635,6 +2635,10 @@ async function loadFrontendCategories() {
         const categories = await catRes.json();
 
         if (list) {
+            // Remove any previously appended dynamic chips (keep the first 'Tümü' chip)
+            const chips = list.querySelectorAll('.filter-chip:not(:first-child)');
+            chips.forEach(c => c.remove());
+
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-chip';
@@ -2654,6 +2658,11 @@ async function loadFrontendCategories() {
                         const allBtn = list.querySelector('.filter-chip.active');
                         if (allBtn) allBtn.classList.remove('active');
                         child.classList.add('active');
+                        if (window.location.pathname.includes('/experiments')) {
+                            filterPageExperiments(activeCat, child);
+                        } else {
+                            filterPageArticles(activeCat, child);
+                        }
                     }
                 });
             }
