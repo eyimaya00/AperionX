@@ -2478,23 +2478,39 @@ i[class*=" ph"] {
     text-decoration: none;
 }
 
-/* --- Articles Page Specific Styles (Restored V3) --- */
-
-/* Decoupled Articles Title - Reverted to Clean White per request */
-.articles-page-title {
-    font-size: 4.0rem;
-    font-weight: 800;
-    margin-bottom: 16px;
-    line-height: 1.1;
-    /* color: white; Removed to allow gradient */
-    /* text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); Removed to keep gradient clean */
-    /* text-transform: uppercase; Removed per user request */
-    letter-spacing: -1px;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+/* --- Articles Page Specific Styles --- */
+.hero-slider.articles-hero-section,
+.articles-hero-section {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 240px !important;
+    height: 240px !important;
+    margin-top: 0 !important;
+    padding-top: 80px !important;
+    padding-bottom: 0 !important;
+    box-sizing: border-box !important;
+    background-color: var(--bg-color) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
 }
 
-#about-hero-title {
-    font-size: 3.5rem !important;
+.featured-slider-section {
+    display: none !important;
+}
+
+@media (max-width: 1024px) {
+    .hero-slider.articles-hero-section,
+    .articles-hero-section {
+        min-height: 260px !important;
+        height: 260px !important;
+        padding-top: 80px !important;
+        margin-top: 0 !important;
+    }
+}    font-size: 3.5rem !important;
 }
 
 /* Hero Slider Adaptation for Articles Page */

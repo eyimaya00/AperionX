@@ -754,7 +754,7 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                 // 3. Inject cardsHtml into the grid wrapper in the template
                 html = html.replace(/<div class="articles-grid" id="articles-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="articles-grid">${cardsHtml}</div>`);
 
-                // 3.5. Pre-render Categories for SSR
+                // 3.5. Pre-render Categories for SSR (ONLY Published Item Categories)
                 const artCatSet = new Set();
                 articles.forEach(a => {
                     if (a.category) {
@@ -764,13 +764,6 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                         });
                     }
                 });
-                try {
-                    const [dbCats] = await pool.query("SELECT name FROM categories");
-                    dbCats.forEach(c => { if (c.name) artCatSet.add(c.name.trim()); });
-                } catch (e) {}
-                if (artCatSet.size === 0) {
-                    ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => artCatSet.add(c));
-                }
 
                 let artCatChipsHtml = `<button class="filter-chip active" onclick="filterPageArticles('all', this)">Tümü</button>`;
                 Array.from(artCatSet).sort((a, b) => a.localeCompare(b, 'tr')).forEach(catName => {
@@ -907,7 +900,7 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
                 // 3. Inject cardsHtml into the grid wrapper in the template
                 html = html.replace(/<div class="articles-grid" id="experiments-grid">[\s\S]*?<i class="ph ph-spinner ph-spin"[\s\S]*?<\/p>[\s\S]*?<\/div>[\s\S]*?<\/div>/, `<div class="articles-grid" id="experiments-grid">${cardsHtml}</div>`);
 
-                // 3.5. Pre-render Categories for SSR
+                // 3.5. Pre-render Categories for SSR (ONLY Published Item Categories)
                 const expCatSet = new Set();
                 experiments.forEach(e => {
                     if (e.category) {
@@ -917,13 +910,6 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
                         });
                     }
                 });
-                try {
-                    const [dbCats] = await pool.query("SELECT name FROM categories");
-                    dbCats.forEach(c => { if (c.name) expCatSet.add(c.name.trim()); });
-                } catch (e) {}
-                if (expCatSet.size === 0) {
-                    ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => expCatSet.add(c));
-                }
 
                 let expCatChipsHtml = `<button class="filter-chip active" onclick="filterPageExperiments('all', this)">Tümü</button>`;
                 Array.from(expCatSet).sort((a, b) => a.localeCompare(b, 'tr')).forEach(catName => {
@@ -4708,97 +4694,39 @@ app.get('/editor', (req, res) => {
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/experiments/categories', async (req, res) => {
     try {
+        const [expRows] = await pool.query("SELECT category FROM experiments WHERE status = 'published' AND deleted_at IS NULL AND category IS NOT NULL AND category != ''");
         const catSet = new Set();
-
-        try {
-            const [expRows] = await pool.query("SELECT category FROM experiments WHERE status = 'published' AND category IS NOT NULL AND category != ''");
-            expRows.forEach(row => {
-                if (row.category) {
-                    row.category.split(',').forEach(c => {
-                        const trimmed = c.trim();
-                        if (trimmed) catSet.add(trimmed);
-                    });
-                }
-            });
-        } catch (e) {
-            console.error('Safe category fetch from experiments warning:', e.message);
-        }
-
-        try {
-            const [catRows] = await pool.query("SELECT name FROM categories");
-            catRows.forEach(row => {
-                if (row.name) {
-                    const trimmed = row.name.trim();
+        expRows.forEach(row => {
+            if (row.category) {
+                row.category.split(',').forEach(c => {
+                    const trimmed = c.trim();
                     if (trimmed) catSet.add(trimmed);
-                }
-            });
-        } catch (e) {
-            console.error('Safe category fetch from categories table warning:', e.message);
-        }
-
-        if (catSet.size === 0) {
-            ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => catSet.add(c));
-        }
-
+                });
+            }
+        });
         const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
         res.json(sortedCats);
     } catch (e) {
-        res.json([
-            { name: 'Biyoloji' },
-            { name: 'Fizik' },
-            { name: 'Kimya' },
-            { name: 'Teknoloji' },
-            { name: 'Uzay' },
-            { name: 'Genel' }
-        ]);
+        res.status(500).json({ message: e.message });
     }
 });
 
 app.get('/api/categories', async (req, res) => {
     try {
+        const [artRows] = await pool.query("SELECT category FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != ''");
         const catSet = new Set();
-
-        try {
-            const [artRows] = await pool.query("SELECT category FROM articles WHERE status = 'published' AND category IS NOT NULL AND category != ''");
-            artRows.forEach(row => {
-                if (row.category) {
-                    row.category.split(',').forEach(c => {
-                        const trimmed = c.trim();
-                        if (trimmed) catSet.add(trimmed);
-                    });
-                }
-            });
-        } catch (e) {
-            console.error('Safe category fetch from articles warning:', e.message);
-        }
-
-        try {
-            const [catRows] = await pool.query("SELECT name FROM categories");
-            catRows.forEach(row => {
-                if (row.name) {
-                    const trimmed = row.name.trim();
+        artRows.forEach(row => {
+            if (row.category) {
+                row.category.split(',').forEach(c => {
+                    const trimmed = c.trim();
                     if (trimmed) catSet.add(trimmed);
-                }
-            });
-        } catch (e) {
-            console.error('Safe category fetch from categories table warning:', e.message);
-        }
-
-        if (catSet.size === 0) {
-            ['Biyoloji', 'Fizik', 'Kimya', 'Teknoloji', 'Uzay', 'Genel'].forEach(c => catSet.add(c));
-        }
-
+                });
+            }
+        });
         const sortedCats = Array.from(catSet).sort((a, b) => a.localeCompare(b, 'tr')).map(name => ({ name }));
         res.json(sortedCats);
     } catch (e) {
-        res.json([
-            { name: 'Biyoloji' },
-            { name: 'Fizik' },
-            { name: 'Kimya' },
-            { name: 'Teknoloji' },
-            { name: 'Uzay' },
-            { name: 'Genel' }
-        ]);
+        res.status(500).json({ message: e.message });
     }
 });
 
