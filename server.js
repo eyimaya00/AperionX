@@ -357,10 +357,12 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 // Prepare Content
                 const title = article.title;
-                const summary = article.excerpt || article.title;
-                const img = article.image_url
-                    ? (article.image_url.startsWith('http') ? article.image_url : `${origin}/${article.image_url}`)
-                    : `${origin}/uploads/logo.png`;
+                let rawImg = article.image_url || '/uploads/logo.png';
+                let img = rawImg;
+                if (!rawImg.startsWith('http')) {
+                    const cleanPath = rawImg.startsWith('/') ? rawImg : '/' + rawImg;
+                    img = `${origin}${cleanPath}`;
+                }
 
                 // Determine current URL structure
                 const isEnglish = req.path.startsWith('/en/');
