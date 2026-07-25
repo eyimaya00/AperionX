@@ -357,6 +357,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 // Prepare Content
                 const title = article.title;
+                const summary = article.excerpt || article.title;
                 let rawImg = article.image_url || '/uploads/logo.png';
                 let img = rawImg;
                 if (!rawImg.startsWith('http')) {
