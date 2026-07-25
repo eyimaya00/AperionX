@@ -3828,21 +3828,25 @@
 
         async function loadAllArticles() {
             try {
-                // Fetch data in parallel
-                const [resPending, resHistory, resTrash, resAuthors] = await Promise.all([
+                // Fetch data in parallel with resilient allSettled
+                const results = await Promise.allSettled([
                     fetch(`${API_URL}/editor/pending-articles`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch(`${API_URL}/editor/history`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch(`${API_URL}/editor/trash`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch(`${API_URL}/editor/authors`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
-                // Safe parsing helper
-                const safeJson = async (r) => r.ok ? await r.json() : [];
+                const safeJson = async (resObj) => {
+                    if (resObj.status === 'fulfilled' && resObj.value && resObj.value.ok) {
+                        try { return await resObj.value.json(); } catch(e) { return []; }
+                    }
+                    return [];
+                };
 
-                const pending = await safeJson(resPending);
-                const history = await safeJson(resHistory);
-                const trash = await safeJson(resTrash);
-                const authors = await safeJson(resAuthors);
+                const pending = await safeJson(results[0]);
+                const history = await safeJson(results[1]);
+                const trash = await safeJson(results[2]);
+                const authors = await safeJson(results[3]);
 
                 // Author Helper
                 const getAuthorName = (id) => {

@@ -1776,12 +1776,10 @@ async function ensureSchema() {
         // --------------------------------------------------
 
         // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /tools ---
-        try {
-            await pool.query("UPDATE category_cards SET link_url = '/tools' WHERE id = 3 OR title = 'Araçlar' OR title = 'Ka Hesaplama'");
-            console.log('Migration Code: Updated Araçlar/Ka Hesaplama link_url to /tools in category_cards');
-        } catch (e) {
-            console.error('Migration Error (category_cards link_url update):', e);
-        }
+        // --- Performance Optimization: DB Indexes ---
+        try { await pool.query("CREATE INDEX idx_articles_status ON articles(status)"); } catch (e) {}
+        try { await pool.query("CREATE INDEX idx_articles_author ON articles(author_id)"); } catch (e) {}
+        try { await pool.query("CREATE INDEX idx_exp_status ON experiments(status)"); } catch (e) {}
 
     } catch (e) {
         console.error('Auto-migration Error:', e);
@@ -3742,47 +3740,49 @@ app.get('/api/author/comments', authenticateToken, async (req, res) => {
 });
 
 
-// === EDITOR ROUTES ===
+// === EDITOR ROUTES (OPTIMIZED LIGHTWEIGHT METADATA) ===
 app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
-            JOIN users u ON a.author_id = u.id 
+            LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'pending' 
             ORDER BY a.created_at ASC
         `);
         res.json(rows);
-    } catch (e) { res.status(500).send(e.toString()); }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/editor/history', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
-            JOIN users u ON a.author_id = u.id 
+            LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status IN ('published', 'rejected')
-            ORDER BY a.created_at DESC
+            ORDER BY a.updated_at DESC, a.created_at DESC
+            LIMIT 100
         `);
         res.json(rows);
-    } catch (e) { res.status(500).send(e.toString()); }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/editor/trash', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.*, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
-            JOIN users u ON a.author_id = u.id 
+            LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'trash' 
-            ORDER BY a.created_at DESC
+            ORDER BY a.updated_at DESC, a.created_at DESC
+            LIMIT 100
         `);
         res.json(rows);
-    } catch (e) { res.status(500).send(e.toString()); }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 
@@ -6145,73 +6145,6 @@ app.use((err, req, res, next) => {
 });
 
 
-// === EDITOR PANEL API ROUTES ===
-
-// 1. Editor Stats
-app.get('/api/editor/stats', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [pending] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'pending'");
-        const [published] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'");
-        const [rejected] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'rejected'");
-
-        // Engagement Stats
-        const [views] = await pool.query("SELECT SUM(views) as total FROM articles WHERE status = 'published'");
-        const [likes] = await pool.query("SELECT COUNT(*) as total FROM likes");
-        const [comments] = await pool.query("SELECT COUNT(*) as total FROM comments");
-
-        res.json({
-            pending: pending[0].count,
-            published: published[0].count,
-            rejected: rejected[0].count,
-            total_views: views[0].total || 0,
-            total_likes: likes[0].total || 0,
-            total_comments: comments[0].total || 0
-        });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 2. Pending Articles
-app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [rows] = await pool.query("SELECT * FROM articles WHERE status = 'pending' ORDER BY created_at ASC");
-        res.json(rows);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 3. History (Published/Rejected)
-app.get('/api/editor/history', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [rows] = await pool.query("SELECT * FROM articles WHERE status IN ('published', 'rejected') ORDER BY updated_at DESC LIMIT 50");
-        res.json(rows);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 4. Trash
-app.get('/api/editor/trash', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        // Assuming 'trash' status exists or logical delete logic. 
-        // If not using 'trash' status, we can return empty or implement a status.
-        // Schema check: status ENUM('published', 'draft', 'pending', 'rejected') - 'trash' might fail?
-        // Let's check ENUM. If needed, we alter table. 
-        // For now, let's assume 'rejected' acts as trash or return empty if not implemented.
-        // The user hasn't explicitly asked for trash logic, just that panel works.
-        const [rows] = await pool.query("SELECT * FROM articles WHERE status = 'trash' ORDER BY updated_at DESC");
-        res.json(rows);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 5. Authors List
-app.get('/api/editor/authors', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [rows] = await pool.query("SELECT id, fullname, email FROM users WHERE role = 'author'");
-        res.json(rows);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
 
 
