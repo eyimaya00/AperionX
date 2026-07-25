@@ -4072,6 +4072,14 @@
                 document.getElementById('modal-title').innerText = '(Önizleme) ' + article.title;
                 const isPending = article.status === 'pending';
 
+                let rejectionHtml = '';
+                if (article.status === 'rejected' && article.rejection_reason) {
+                    rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
+                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
+                        ${article.rejection_reason}
+                    </div>`;
+                }
+
                 let pdfBannerHtml = '';
                 if (article.pdf_url) {
                     const pdfPath = article.pdf_url.startsWith('/') ? article.pdf_url : '/' + article.pdf_url;
