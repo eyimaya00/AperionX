@@ -3297,10 +3297,20 @@
 
         async function executeSoftDelete() {
             if (!deleteId) return;
-            await fetch(`${API_URL}/articles/${deleteId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            closeConfirmModal();
-            loadMyArticles();
-            showAuthorToast('Makale çöp kutusuna taşındı.', 'success');
+            try {
+                const res = await fetch(`${API_URL}/articles/${deleteId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                closeConfirmModal();
+                if (!res.ok) {
+                    alert(data.message || 'Silme işlemi gerçekleşmedi.');
+                    return;
+                }
+                loadMyArticles();
+                showAuthorToast('Makale çöp kutusuna taşındı.', 'success');
+            } catch (err) {
+                closeConfirmModal();
+                alert('Silme işlemi sırasında bir hata oluştu.');
+            }
         }
 
         async function restoreArticle(id) {
@@ -3315,10 +3325,20 @@
             const btn = document.getElementById('modal-confirm-btn');
             btn.innerText = "Tamamen Sil";
             btn.onclick = async () => {
-                await fetch(`${API_URL}/articles/permanent/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                closeConfirmModal();
-                loadMyArticles();
-                showAuthorToast('Makale tamamen silindi.', 'success');
+                try {
+                    const res = await fetch(`${API_URL}/articles/permanent/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    closeConfirmModal();
+                    if (!res.ok) {
+                        alert(data.message || 'Silme işlemi gerçekleşmedi.');
+                        return;
+                    }
+                    loadMyArticles();
+                    showAuthorToast('Makale tamamen silindi.', 'success');
+                } catch (err) {
+                    closeConfirmModal();
+                    alert('Silme işlemi sırasında bir hata oluştu.');
+                }
             };
             document.getElementById('modal-desc-text').innerText = "Bu işlem geri alınamaz! Makale tamamen silinecektir.";
         }

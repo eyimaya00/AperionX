@@ -3550,9 +3550,14 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
 app.delete('/api/articles/:id', authenticateToken, async (req, res) => {
     // Owner or Admin
     try {
-        const [check] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [req.params.id]);
+        const [check] = await pool.query('SELECT author_id, status FROM articles WHERE id = ?', [req.params.id]);
         if (check.length === 0) return res.status(404).json({ message: 'Not found' });
         if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+        // Published articles cannot be deleted by normal authors without editor/admin privileges
+        if (check[0].status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+            return res.status(403).json({ message: 'Yayınlanmış makaleler yalnızca editör veya yönetici tarafından silinebilir.' });
+        }
 
         await pool.query("UPDATE articles SET status = 'trash' WHERE id = ?", [req.params.id]);
         res.json({ message: 'Moved to trash' });
@@ -3581,12 +3586,20 @@ User: ${req.user.username} (ID: ${req.user.id}, Role: ${req.user.role})
 });
 
 app.delete('/api/articles/permanent/:id', authenticateToken, async (req, res) => {
-    const [check] = await pool.query('SELECT author_id FROM articles WHERE id = ?', [req.params.id]);
-    if (check.length === 0) return res.status(404).json({ message: 'Not found' });
-    if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        const [check] = await pool.query('SELECT author_id, status FROM articles WHERE id = ?', [req.params.id]);
+        if (check.length === 0) return res.status(404).json({ message: 'Not found' });
+        if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-    await pool.query('DELETE FROM articles WHERE id = ?', [req.params.id]);
-    res.json({ message: 'Deleted permanently' });
+        if (check[0].status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+            return res.status(403).json({ message: 'Yayınlanmış makaleler yalnızca editör veya yönetici tarafından silinebilir.' });
+        }
+
+        await pool.query('DELETE FROM articles WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Deleted permanently' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
