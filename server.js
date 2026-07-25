@@ -1357,7 +1357,14 @@ app.get('/article-detail.html', async (req, res, next) => {
         next();
     } catch (e) { next(); }
 });
-app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { res.setHeader('Cache-Control', 'public, max-age=604800'); } }));
+app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { 
+    if (p.endsWith('.js') || p.endsWith('.css')) {
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+    } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+} }));
 app.use(express.static(path.join(__dirname, 'views'), { extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
@@ -4597,6 +4604,15 @@ app.get('/api/me', authenticateToken, async (req, res) => {
         console.error(e);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+const APP_SYSTEM_VERSION = process.env.APP_VERSION || "v1.0.6-20260725";
+// Public: System Version Endpoint for Frontend Cache & Stale Detection
+app.get('/api/system/version', (req, res) => {
+    res.json({
+        version: APP_SYSTEM_VERSION,
+        timestamp: Date.now()
+    });
 });
 
 // Public: Get all published articles with filters

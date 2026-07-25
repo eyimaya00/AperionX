@@ -1403,6 +1403,12 @@
         <div id="profile" class="section">
             <h1 class="page-title">Profilim</h1>
             <div class="card">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                    <button type="button" onclick="clearSystemCacheAndReload()" class="btn btn-secondary"
+                        style="padding: 8px 14px; font-size: 0.85rem; opacity: 0.8; background: transparent; border: 1px solid rgba(255,255,255,0.15);" title="Olası önbellek ve veri hatalarını çözmek için yerel verileri sıfırlar">
+                        <i class="ph ph-arrows-counter-clockwise"></i> Önbelleği Temizle
+                    </button>
+                </div>
                 <form id="profile-form" onsubmit="updateProfile(event)">
                     <div class="form-grid">
                         <div class="form-group full-width">

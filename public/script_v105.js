@@ -3535,3 +3535,123 @@ function initSpotifyPodcastShowcase(settings) {
         section.style.display = 'none';
     }
 }
+
+// ============================================================================
+// SYSTEM GUARD & CACHE MANAGEMENT (Kalıcı Önbellek ve Oturum Koruma Sistemi)
+// ============================================================================
+
+// 1. Önbellek & Depolama Temizleme Fonksiyonu
+window.clearSystemCacheAndReload = function () {
+    if (confirm("Önbellek ve geçici veriler temizlenerek sayfa yeniden yüklenecektir. Devam etmek istiyor musunuz?")) {
+        try {
+            // Yazılmakta olan taslak varsa sakla
+            const savedDraft = localStorage.getItem('aperionx_author_draft');
+            localStorage.clear();
+            sessionStorage.clear();
+            if (savedDraft) {
+                localStorage.setItem('aperionx_author_draft', savedDraft);
+            }
+
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+        } catch (e) {
+            console.error("Önbellek temizleme hatası:", e);
+        }
+        window.location.reload(true);
+    }
+};
+
+// 2. Arka Plan Sürüm Kontrolü (Version Checker)
+(function initVersionChecker() {
+    let currentVersion = null;
+
+    async function checkVersion() {
+        try {
+            const res = await fetch('/api/system/version', { cache: 'no-store' });
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            if (currentVersion === null) {
+                currentVersion = data.version;
+            } else if (currentVersion !== data.version) {
+                showUpdateNotice();
+            }
+        } catch (e) {
+            // Sessizce yut
+        }
+    }
+
+    function showUpdateNotice() {
+        if (document.getElementById('aperionx-update-banner')) return;
+        const banner = document.createElement('div');
+        banner.id = 'aperionx-update-banner';
+        banner.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 99999; background: #1e1b4b; color: #fff; border: 1px solid #6366f1; padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; font-family: sans-serif; font-size: 0.9rem; animation: slideIn 0.3s ease;';
+        banner.innerHTML = `
+            <span>💡 Sistem güncellendi. En iyi performans için lütfen sayfayı yenileyiniz.</span>
+            <button onclick="window.location.reload(true)" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Şimdi Yenile</button>
+            <button onclick="this.parentElement.remove()" style="background: transparent; color: #94a3b8; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 4px;">&times;</button>
+        `;
+        document.body.appendChild(banner);
+    }
+
+    setTimeout(checkVersion, 10000);
+    setInterval(checkVersion, 5 * 60 * 1000);
+})();
+
+// 3. Heartbeat & Sekmeye Dönüş (Visibility) Dinleyicisi
+(function initHeartbeatGuard() {
+    setInterval(async () => {
+        if (window.location.pathname.includes('/author') || window.location.pathname.includes('/editor') || window.location.pathname.includes('/admin')) {
+            try {
+                const res = await fetch('/api/me');
+                if (res.status === 401) {
+                    console.warn("Session expired. Auto-saving draft if present.");
+                    triggerAutoDraftSave();
+                }
+            } catch (e) {}
+        }
+    }, 15 * 60 * 1000);
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            if (window.location.pathname.includes('/author') || window.location.pathname.includes('/editor') || window.location.pathname.includes('/admin')) {
+                fetch('/api/me').then(res => {
+                    if (res.status === 401) {
+                        triggerAutoDraftSave();
+                    }
+                }).catch(() => {});
+            }
+        }
+    });
+})();
+
+// 4. Yazı Editörü Otomatik Taslak Kaydı (Auto-Save Draft)
+function triggerAutoDraftSave() {
+    try {
+        const titleInput = document.getElementById('title') || document.getElementById('article-title');
+        const contentEl = document.getElementById('editor') || document.getElementById('content');
+        
+        let contentText = '';
+        if (typeof quill !== 'undefined' && quill.root) {
+            contentText = quill.root.innerHTML;
+        } else if (contentEl) {
+            contentText = contentEl.value || contentEl.innerHTML;
+        }
+
+        if (titleInput && titleInput.value && contentText && contentText.length > 20) {
+            const draftData = {
+                title: titleInput.value,
+                content: contentText,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('aperionx_author_draft', JSON.stringify(draftData));
+        }
+    } catch (e) {
+        console.error("Auto draft save error:", e);
+    }
+}
+
+setInterval(triggerAutoDraftSave, 30000);
