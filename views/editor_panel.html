@@ -2524,9 +2524,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label>PDF Dosyasını Değiştir</label>
+                        <label>PDF Dosyasını Değiştir / Yükle</label>
                         <input type="file" id="edit-pdfInput" accept=".pdf" class="form-control" style="margin-top: 5px; padding: 10px;">
                         <small style="color: #64748b; display: block; margin-top: 5px;">Mevcut PDF'i korumak için boş bırakın.</small>
+                        <div id="edit-current-pdf-link" style="margin-top: 8px;"></div>
                     </div>
 
                     <div class="form-group">
@@ -3434,6 +3435,15 @@
                 document.getElementById('edit-tags').value = article.tags || '';
                 document.getElementById('edit-imageInput').value = '';
                 document.getElementById('edit-pdfInput').value = '';
+                const pdfLinkDiv = document.getElementById('edit-current-pdf-link');
+                if (pdfLinkDiv) {
+                    if (article.pdf_url) {
+                        const pdfPath = article.pdf_url.startsWith('/') ? article.pdf_url : '/' + article.pdf_url;
+                        pdfLinkDiv.innerHTML = `<div style="background:#eff6ff; padding:8px 12px; border-radius:6px; border:1px solid #bae6fd; font-size:0.85rem;"><i class="ph-bold ph-file-pdf" style="color:#2563eb;"></i> <strong>Mevcut PDF:</strong> <a href="${pdfPath}" target="_blank" download style="color:#2563eb; font-weight:600; text-decoration:underline; margin-left:5px;">İndir / Görüntüle</a></div>`;
+                    } else {
+                        pdfLinkDiv.innerHTML = `<span style="color:#94a3b8; font-size:0.85rem;">Bu makaleye henüz bir PDF yüklenmemiş.</span>`;
+                    }
+                }
                 let allRefs = article.references_list || '';
                 let visRefs = article.visual_references_list || '';
                 
@@ -3875,7 +3885,14 @@
                             else if (article.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
                             else if (article.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
 
+                            const pdfBtn = article.pdf_url ? `
+                                <a href="${article.pdf_url.startsWith('/') ? article.pdf_url : '/' + article.pdf_url}" target="_blank" download class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem; color:#dc2626; border-color:#fca5a5; background:#fef2f2; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Yazarın Yüklediği PDF'i İndir">
+                                    <i class="ph-bold ph-file-pdf"></i> PDF
+                                </a>
+                            ` : '';
+
                             actions = `
+                                ${pdfBtn}
                                 <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="openReview(${article.id})"><i class="ph-bold ph-eye"></i> İncele</button>
                                 <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="editArticle(${article.id})"><i class="ph-bold ph-pencil-simple"></i> Düzenle</button>
                                 <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteArticle(${article.id})"><i class="ph-bold ph-trash"></i> Sil</button>
@@ -4051,17 +4068,26 @@
                 document.getElementById('modal-title').innerText = '(Önizleme) ' + article.title;
                 const isPending = article.status === 'pending';
 
-                let rejectionHtml = '';
-                if (article.status === 'rejected' && article.rejection_reason) {
-                    rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
-                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
-                        ${article.rejection_reason}
-                    </div>`;
+                let pdfBannerHtml = '';
+                if (article.pdf_url) {
+                    const pdfPath = article.pdf_url.startsWith('/') ? article.pdf_url : '/' + article.pdf_url;
+                    pdfBannerHtml = `
+                        <div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 10px; padding: 12px 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px; color: #1e40af; font-weight: 600;">
+                                <i class="ph-bold ph-file-pdf" style="font-size: 1.5rem; color: #2563eb;"></i>
+                                <span>Yazar Tarafından Yüklenen PDF Dosyası Mevcut</span>
+                            </div>
+                            <a href="${pdfPath}" target="_blank" download class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="ph-bold ph-download-simple"></i> PDF İndir / Görüntüle
+                            </a>
+                        </div>
+                    `;
                 }
 
                 const token = localStorage.getItem('token');
                 let html = `
                     ${rejectionHtml}
+                    ${pdfBannerHtml}
                     <iframe src="/preview-article/${article.id}?token=${token}" width="100%" height="650px" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #fff;"></iframe>
                 `;
 
