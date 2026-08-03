@@ -1576,7 +1576,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script defer src="/script_v105.js?v=280"></script>
+    <script defer src="/script_v105.js?v=285"></script>
     <script>
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
         window.currentExperimentId = null;
@@ -1846,8 +1846,8 @@
             console.log("toggleExperimentLike button clicked!");
             const token = localStorage.getItem('token');
             if (!token) {
-                console.log("toggleExperimentLike: No token found, opening loginModal.");
-                openModal('loginModal');
+                console.log("toggleExperimentLike: No token found, opening signupModal.");
+                openModal('signupModal');
                 return;
             }
             if (!window.currentExperimentId) {

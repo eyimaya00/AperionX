@@ -1244,7 +1244,7 @@
 
                         <div class="right-actions">
                             <button class="btn-like" id="like-btn" onclick="toggleLike()">
-                                <i class="ph ph-heart"></i> Beğen
+                                <i class="ph ph-heart"></i> Beğen & Destek Ol
                             </button>
 
                             <button class="btn-comment-action" onclick="scrollToComments()">
@@ -1447,7 +1447,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script defer src="/script_v105.js?v=280"></script>
+    <script defer src="/script_v105.js?v=285"></script>
     <script>
         // Use API_URL from script.js or default
         const API_BASE = typeof API_URL !== 'undefined' ? API_URL : '/api';
@@ -1483,7 +1483,7 @@
         async function toggleLike() {
             const token = localStorage.getItem('token');
             if (!token) {
-                openModal('loginModal');
+                openModal('signupModal');
                 return;
             }
 

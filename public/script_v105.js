@@ -3098,7 +3098,7 @@ async function loadLikes(id) {
 async function toggleLike() {
     const token = localStorage.getItem('token');
     if (!token) {
-        openModal('loginModal');
+        openModal('signupModal');
         return;
     }
 
