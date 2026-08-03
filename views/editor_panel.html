@@ -4803,17 +4803,21 @@
         }
 
         function getYazarLastReferenceDate(author) {
+            let convDate = new Date(author.conversation_date);
+            convDate.setHours(0, 0, 0, 0);
+
             if (author.articles && author.articles.length > 0) {
-                const lastArticle = author.articles.reduce((latest, article) => {
+                const lastArticleDate = author.articles.reduce((latest, article) => {
                     const d = new Date(article.article_date);
                     return d > latest ? d : latest;
                 }, new Date(author.articles[0].article_date));
-                lastArticle.setHours(0, 0, 0, 0);
-                return lastArticle;
+                lastArticleDate.setHours(0, 0, 0, 0);
+
+                if (lastArticleDate > convDate) {
+                    return lastArticleDate;
+                }
             }
 
-            const convDate = new Date(author.conversation_date);
-            convDate.setHours(0, 0, 0, 0);
             return convDate;
         }
 
@@ -4964,8 +4968,9 @@
             }
 
             const refDate = getYazarLastReferenceDate(author);
-            const hasArticles = author.articles && author.articles.length > 0;
-            const refLabel = hasArticles ? 'Son Makale Tarihi' : 'Konuşma Tarihi';
+            const convDateObj = new Date(author.conversation_date);
+            convDateObj.setHours(0, 0, 0, 0);
+            const refLabel = (refDate.getTime() === convDateObj.getTime()) ? 'Son Görüşme / Başlangıç' : 'Son Makale Tarihi';
 
             const deadlineDate = new Date(refDate);
             deadlineDate.setDate(deadlineDate.getDate() + deadlineDays);
