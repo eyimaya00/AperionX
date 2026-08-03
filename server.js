@@ -1267,6 +1267,8 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/periodic-table', priority: '0.9', freq: 'daily' },
             { path: '/blood-lab', priority: '0.9', freq: 'daily' },
             { path: '/about', priority: '0.7', freq: 'monthly' },
+            { path: '/gizlilik-politikasi', priority: '0.5', freq: 'monthly' },
+            { path: '/kullanim-sartlari', priority: '0.5', freq: 'monthly' },
             { path: '/author', priority: '0.7', freq: 'monthly' }
         ];
 

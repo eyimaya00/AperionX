@@ -545,9 +545,9 @@ function initCookieConsent() {
         '</div>' +
         '<p class="ccb-desc">Web sitemizde deneyiminizi geliştirmek için çerezler kullanıyoruz. Detaylı bilgi için gizlilik politikamızı inceleyebilirsiniz.</p>' +
         '<div class="ccb-links">' +
-            '<a href="/about#gizlilik">Gizlilik Politikası</a>' +
+            '<a href="/gizlilik-politikasi">Gizlilik Politikası</a>' +
             '<span class="ccb-link-dot">•</span>' +
-            '<a href="/about#kullanim-sartlari">Kullanım Şartları</a>' +
+            '<a href="/kullanim-sartlari">Kullanım Şartları</a>' +
         '</div>' +
         '<div class="ccb-actions">' +
             '<div class="ccb-actions-primary">' +
