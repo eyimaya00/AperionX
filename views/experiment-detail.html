@@ -1379,7 +1379,7 @@
                     <!-- Right: Like & Share -->
                     <div class="right-actions">
                         <button class="btn-like" id="like-btn" onclick="toggleExperimentLike()">
-                            <i class="ph ph-heart"></i> Beğen
+                            <i class="ph ph-heart"></i> Beğen & Destek Ol
                         </button>
 
                         <button class="btn-comment-action" onclick="scrollToComments()">
@@ -1826,7 +1826,7 @@
                     console.log("loadLikes: User is not logged in or token is expired/invalid.");
                     const btn = document.getElementById('like-btn');
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
                     return;
                 }
                 const data = await res.json();
@@ -1834,10 +1834,10 @@
                 const btn = document.getElementById('like-btn');
                 if (data.liked) {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
                 } else {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
                 }
             } catch (e) { console.error("loadLikes error:", e); }
         }
@@ -1860,10 +1860,10 @@
             try {
                 if (isLiked) {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
                 } else {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
                 }
                 const res = await fetch(`${API_BASE}/experiments/${window.currentExperimentId}/like`, {
                     method: 'POST',

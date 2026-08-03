@@ -3072,12 +3072,18 @@ async function loadArticleSlider(currentId) {
 async function loadLikes(id) {
     try {
         const token = localStorage.getItem('token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const res = await fetch(`${API_URL}/articles/${id}/like`, { headers });
-        const data = await res.json();
-
         const btn = document.getElementById('like-btn');
         if (!btn) return;
+
+        if (!token) {
+            btn.classList.remove('liked');
+            btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+            return;
+        }
+
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const res = await fetch(`${API_URL}/articles/${id}/like`, { headers });
+        const data = await res.json();
 
         if (data.liked) {
             btn.classList.add('liked');
@@ -3092,7 +3098,7 @@ async function loadLikes(id) {
 async function toggleLike() {
     const token = localStorage.getItem('token');
     if (!token) {
-        showToast('Beğenmek için giriş yapmalısınız.', 'error');
+        openModal('loginModal');
         return;
     }
 

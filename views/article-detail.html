@@ -1457,17 +1457,25 @@
         async function loadLikes(id) {
             try {
                 const token = localStorage.getItem('token');
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const btn = document.getElementById('like-btn');
+                if (!btn) return;
+
+                if (!token) {
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
+                    return;
+                }
+
+                const headers = { 'Authorization': `Bearer ${token}` };
                 const res = await fetch(`${API_BASE}/articles/${id}/like`, { headers });
                 const data = await res.json();
 
-                const btn = document.getElementById('like-btn');
-
                 if (data.liked) {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
                 } else {
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    btn.classList.remove('liked');
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
                 }
             } catch (e) { console.error('Like load', e); }
         }
@@ -1491,10 +1499,10 @@
 
                 if (isLiked) {
                     btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen`;
+                    btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
                 } else {
                     btn.classList.add('liked');
-                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendiniz`;
+                    btn.innerHTML = `<i class="ph-fill ph-heart"></i> Beğendin & Destek Oldun`;
                 }
 
                 const res = await fetch(`${API_BASE}/articles/${id}/like`, {
