@@ -1,6 +1,24 @@
 // Base API URL
 var API_URL = '/api';
 
+// --- Google Consent Mode v2 Defaults (runs before gtag config) ---
+(function() {
+    window.dataLayer = window.dataLayer || [];
+    function gtagCM() { dataLayer.push(arguments); }
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem('aperionx_cookie_consent')); } catch(e) {}
+    var analyticsGranted = saved && saved.analytics ? 'granted' : 'denied';
+    var marketingGranted = saved && saved.marketing ? 'granted' : 'denied';
+    gtagCM('consent', 'default', {
+        'analytics_storage': analyticsGranted,
+        'ad_storage': marketingGranted,
+        'ad_user_data': marketingGranted,
+        'ad_personalization': marketingGranted,
+        'functionality_storage': 'granted',
+        'security_storage': 'granted'
+    });
+})();
+
 // Inject author-chip hover CSS (can't do :hover with inline styles)
 (function () {
     const style = document.createElement('style');
@@ -49,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMenus();
     checkAuthStatus();
     initTheme();
+    initCookieConsent(); // Cookie Consent Banner
     initSearch(); // Initialize Search
     initLanguageSwitcher(); // Add Language Support
     
@@ -504,6 +523,199 @@ function initTheme() {
         }
     });
 }
+
+// --- Cookie Consent Banner & Settings Modal ---
+var COOKIE_CONSENT_KEY = 'aperionx_cookie_consent';
+
+function initCookieConsent() {
+    var saved = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (saved) return; // Kullanıcı zaten tercih yapmış, banner gösterme
+
+    // Banner HTML
+    var bannerHTML = '<div class="ccb-card">' +
+        '<div class="ccb-header">' +
+            '<div class="ccb-icon">🍪</div>' +
+            '<h3 class="ccb-title">Çerez Kullanımı</h3>' +
+            '<button class="ccb-close" id="ccb-close" aria-label="Kapat">✕</button>' +
+        '</div>' +
+        '<p class="ccb-desc">Web sitemizde deneyiminizi geliştirmek için çerezler kullanıyoruz. Detaylı bilgi için gizlilik politikamızı inceleyebilirsiniz.</p>' +
+        '<div class="ccb-links">' +
+            '<a href="/about">Gizlilik Politikası</a>' +
+            '<span class="ccb-link-dot">•</span>' +
+            '<a href="/about">Kullanım Şartları</a>' +
+        '</div>' +
+        '<div class="ccb-actions">' +
+            '<div class="ccb-actions-primary">' +
+                '<button class="ccb-btn ccb-btn-accept" id="ccb-accept-all">Tümünü Kabul Et</button>' +
+                '<button class="ccb-btn ccb-btn-settings" id="ccb-settings-btn" aria-label="Çerez Ayarları">⚙</button>' +
+            '</div>' +
+            '<button class="ccb-btn ccb-btn-reject" id="ccb-reject-all">Tümünü Reddet</button>' +
+        '</div>' +
+    '</div>';
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'ccb-wrapper';
+    wrapper.id = 'ccb-wrapper';
+    wrapper.innerHTML = bannerHTML;
+    document.body.appendChild(wrapper);
+
+    // Inject settings modal
+    _createCookieSettingsModal();
+
+    // --- Event Bindings ---
+    document.getElementById('ccb-accept-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: true, marketing: true });
+    });
+
+    document.getElementById('ccb-reject-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: false, marketing: false });
+    });
+
+    document.getElementById('ccb-settings-btn').addEventListener('click', function() {
+        var overlay = document.getElementById('csm-overlay');
+        if (overlay) overlay.classList.add('active');
+    });
+
+    document.getElementById('ccb-close').addEventListener('click', function() {
+        // Kapatma = Tümünü Reddet ile aynı davranış
+        _saveConsentPrefs({ necessary: true, analytics: false, marketing: false });
+    });
+}
+
+function _createCookieSettingsModal() {
+    if (document.getElementById('csm-overlay')) return;
+
+    var modalHTML = '<div class="csm-modal">' +
+        '<div class="csm-header">' +
+            '<h3 class="csm-title">Çerez Tercihleri</h3>' +
+            '<button class="csm-close" id="csm-close" aria-label="Kapat">✕</button>' +
+        '</div>' +
+        '<p class="csm-desc">Çerez tercihlerinizi aşağıdan özelleştirebilirsiniz. Zorunlu çerezler sitenin düzgün çalışması için gereklidir ve devre dışı bırakılamaz.</p>' +
+        '<div class="csm-categories">' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">🔒</span>' +
+                        '<h4>Zorunlu Çerezler</h4>' +
+                    '</div>' +
+                    '<p>Oturum yönetimi ve temel site işlevleri için gereklidir.</p>' +
+                '</div>' +
+                '<label class="csm-switch csm-switch-locked">' +
+                    '<input type="checkbox" checked disabled>' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">📊</span>' +
+                        '<h4>Performans & Analiz</h4>' +
+                    '</div>' +
+                    '<p>Google Analytics ile site kullanımını analiz etmemize yardımcı olur.</p>' +
+                '</div>' +
+                '<label class="csm-switch">' +
+                    '<input type="checkbox" id="csm-toggle-analytics">' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">📢</span>' +
+                        '<h4>Pazarlama Çerezleri</h4>' +
+                    '</div>' +
+                    '<p>Kişiselleştirilmiş içerik ve reklamlar için kullanılır.</p>' +
+                '</div>' +
+                '<label class="csm-switch">' +
+                    '<input type="checkbox" id="csm-toggle-marketing">' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+        '</div>' +
+        '<div class="csm-footer">' +
+            '<button class="csm-btn csm-btn-save" id="csm-save">Seçilenleri Kaydet</button>' +
+            '<button class="csm-btn csm-btn-accept" id="csm-accept-all">Tümünü Kabul Et</button>' +
+        '</div>' +
+    '</div>';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'csm-overlay';
+    overlay.id = 'csm-overlay';
+    overlay.innerHTML = modalHTML;
+    document.body.appendChild(overlay);
+
+    // Close overlay on backdrop click
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+
+    // Close button
+    document.getElementById('csm-close').addEventListener('click', function() {
+        overlay.classList.remove('active');
+    });
+
+    // Save selected
+    document.getElementById('csm-save').addEventListener('click', function() {
+        var analytics = document.getElementById('csm-toggle-analytics').checked;
+        var marketing = document.getElementById('csm-toggle-marketing').checked;
+        _saveConsentPrefs({ necessary: true, analytics: analytics, marketing: marketing });
+    });
+
+    // Accept all from modal
+    document.getElementById('csm-accept-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: true, marketing: true });
+    });
+}
+
+function _saveConsentPrefs(prefs) {
+    prefs.timestamp = new Date().toISOString();
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(prefs));
+
+    // Google Consent Mode v2 güncelle
+    if (typeof gtag === 'function') {
+        gtag('consent', 'update', {
+            'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+            'ad_storage': prefs.marketing ? 'granted' : 'denied',
+            'ad_user_data': prefs.marketing ? 'granted' : 'denied',
+            'ad_personalization': prefs.marketing ? 'granted' : 'denied'
+        });
+    }
+
+    // Banner'ı kaldır (animasyonlu)
+    var banner = document.getElementById('ccb-wrapper');
+    if (banner) {
+        banner.style.animation = 'ccb-slide-down 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+        setTimeout(function() { banner.remove(); }, 450);
+    }
+
+    // Modal'ı kapat
+    var overlay = document.getElementById('csm-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+// Global fonksiyon: Footer'daki "Çerez Tercihleri" linki için
+window.openCookieSettings = function() {
+    // Modal yoksa oluştur
+    _createCookieSettingsModal();
+
+    // Kaydedilmiş tercihleri yükle
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY)); } catch(e) {}
+
+    var analyticsToggle = document.getElementById('csm-toggle-analytics');
+    var marketingToggle = document.getElementById('csm-toggle-marketing');
+
+    if (saved) {
+        if (analyticsToggle) analyticsToggle.checked = !!saved.analytics;
+        if (marketingToggle) marketingToggle.checked = !!saved.marketing;
+    } else {
+        if (analyticsToggle) analyticsToggle.checked = false;
+        if (marketingToggle) marketingToggle.checked = false;
+    }
+
+    var overlay = document.getElementById('csm-overlay');
+    if (overlay) overlay.classList.add('active');
+};
 
 // --- Expanding Search Bar ---
 function initSearch() {
