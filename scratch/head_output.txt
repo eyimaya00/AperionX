@@ -1,0 +1,1055 @@
+<!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454" crossorigin="anonymous" type="68b6badfe565591786e5bbaf-text/javascript"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86" type="68b6badfe565591786e5bbaf-text/javascript"></script>
+    <script type="68b6badfe565591786e5bbaf-text/javascript">
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Bağırsak mikrobiyotası, sindirim sistemi içerisinde yaşayan ve sağlığımız üzerinde önemli etkileri bulunan mikroorganizmalardan oluşan karmaşık bir ekosistemdir. Bu mikroorganizmalar sindirim, bağışıklık sistemi, metabolizma ve hatta beyin fonksiyonlarının düzenlenmesinde rol oynar. Mikrobiyota dengesinin bozulması sonucu ortaya çıkan disbiyozis ise çeşitli sindirim problemleri, inflamasyon ve kronik hastalıklarla ilişkilendirilmektedir.">
+    <meta property="og:title" content="Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi ">
+    <meta property="og:description" content="Bağırsak mikrobiyotası, sindirim sistemi içerisinde yaşayan ve sağlığımız üzerinde önemli etkileri bulunan mikroorganizmalardan oluşan karmaşık bir ekosistemdir. Bu mikroorganizmalar sindirim, bağışıklık sistemi, metabolizma ve hatta beyin fonksiyonlarının düzenlenmesinde rol oynar. Mikrobiyota dengesinin bozulması sonucu ortaya çıkan disbiyozis ise çeşitli sindirim problemleri, inflamasyon ve kronik hastalıklarla ilişkilendirilmektedir.">
+    <meta property="og:image" content="https://www.aperionx.com/uploads/image-1782754981659-984419155.png">
+    <meta property="og:image:secure_url" content="https://www.aperionx.com/uploads/image-1782754981659-984419155.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta itemprop="image" content="https://www.aperionx.com/uploads/image-1782754981659-984419155.png">
+    <meta property="og:url" content="https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi ">
+    <meta name="twitter:description" content="Bağırsak mikrobiyotası, sindirim sistemi içerisinde yaşayan ve sağlığımız üzerinde önemli etkileri bulunan mikroorganizmalardan oluşan karmaşık bir ekosistemdir. Bu mikroorganizmalar sindirim, bağışıklık sistemi, metabolizma ve hatta beyin fonksiyonlarının düzenlenmesinde rol oynar. Mikrobiyota dengesinin bozulması sonucu ortaya çıkan disbiyozis ise çeşitli sindirim problemleri, inflamasyon ve kronik hastalıklarla ilişkilendirilmektedir.">
+    <meta name="twitter:image" content="https://www.aperionx.com/uploads/image-1782754981659-984419155.png">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AperionX">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:site" content="@aperionx">
+    <link rel="alternate" type="application/rss+xml" title="AperionX RSS" href="/feed.xml">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi" />
+    <link rel="alternate" hreflang="tr" href="https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi">
+    <link rel="alternate" hreflang="en" href="https://www.aperionx.com/en/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi">
+    <link rel="alternate" hreflang="x-default" href="https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi">
+    <title>Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi  - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=246">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web" type="68b6badfe565591786e5bbaf-text/javascript"></script>
+    <style>
+
+
+        .article-detail-container {
+            padding-top: 80px;
+            /* Exact Header Height */
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 90%;
+            /* Mobile padding */
+        }
+
+        /* Force Header to match Index (Solid White) */
+        .header {
+            background-color: var(--card-bg) !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Header Area */
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            color: #64748b;
+            /* Slate-500 */
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .article-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .article-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        /* Hero Image - Corrected Class */
+        .detail-hero-image {
+            width: 100%;
+            height: 400px;
+            /* Fixed form height */
+            object-fit: cover;
+            /* Fill the form cleanly */
+            background-color: transparent;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Page Background Override for Contrast */
+        body {
+            background-color: #f8fafc;
+            /* Slate-50 */
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+            /* Slate-900 */
+        }
+
+        /* Unified Card Style */
+        /* Unified Card Style */
+        .unified-article-card {
+            background: var(--card-bg);
+            /* White in light mode */
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            /* Enhanced shadow */
+            margin-bottom: 20px;
+        }
+
+        /* Content Area - Clean & Readability Focused */
+        .article-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin-top: 30px;
+            background: transparent !important;
+            /* Force transparent */
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Fix for User Issue: Images having unwanted 'layers' */
+        .article-content img {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 20px 0;
+            max-width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .article-content h2 {
+            font-size: 1.8rem;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Summary Box - Distinct Background */
+        .article-summary-simple {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(99, 102, 241, 0.04);
+            /* Light Indigo Tint */
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        [data-theme="dark"] .article-summary-simple {
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark mode tint */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* References Section - Simple */
+        .references-section-simple {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .ref-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+        }
+
+        .ref-list {
+            padding-left: 20px;
+            color: #475569;
+        }
+
+        .ref-list li {
+            margin-bottom: 8px;
+        }
+
+        /* References List (ul#references-list) */
+        .references-list {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 0;
+        }
+
+        .references-list li {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .references-list li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        [data-theme="dark"] .references-list li {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .references-list li {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Mobile adjustment for card */
+        @media (max-width: 768px) {
+            .unified-article-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
+
+        /* Share Buttons */
+        .share-section {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .share-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .share-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .share-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .share-twitter {
+            background: #000000;
+        }
+
+        /* X brand color */
+        .share-facebook {
+            background: #1877f2;
+        }
+
+        .share-linkedin {
+            background: #0a66c2;
+        }
+
+        .share-whatsapp {
+            background: #25d366;
+        }
+
+        /* Customized Back Button Style (Matching Login Button) */
+        .btn-back-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            /* Light Purple Tint */
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back-custom:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Typography Review Override (Ensuring comfort) */
+        .article-content {
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            /* Slate 700 - slightly softer than black */
+            font-weight: 400;
+        }
+
+        [data-theme="dark"] .article-content {
+            color: #e2e8f0;
+            /* Slate 200 */
+        }
+
+        /* Meta Footer */
+        .article-footer-meta {
+            margin-top: 10px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            /* Reduced space from content */
+            margin-bottom: 20px;
+            justify-content: flex-start;
+            /* Left aligned */
+        }
+
+        /* Updated Tag Pill Style - Neutral & Transparent */
+        .tag-pill {
+            background: transparent;
+            color: #64748b;
+            /* Slate-500 */
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            /* Slate-300 */
+            display: inline-block;
+        }
+
+        .tag-pill:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .tag-pill {
+            color: #94a3b8;
+            border-color: #334155;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Dark Mode for Right Actions container */
+        [data-theme="dark"] .right-actions {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-like, .btn-comment-action {
+            background: rgba(99, 102, 241, 0.1);
+            /* Primary instead of red */
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-like:hover, .btn-comment-action:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-like.liked {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .share-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        .share-icons-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        [data-theme="dark"] .share-label {
+            color: #94a3b8;
+        }
+
+        .share-icon {
+            color: #64748b;
+            font-size: 1.2rem;
+            /* Slightly bigger */
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dark Mode Share Icons */
+        [data-theme="dark"] .share-icon {
+            color: #cbd5e1;
+            /* Much lighter slate */
+        }
+
+        .share-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .share-icon.twitter:hover {
+            color: #1da1f2;
+        }
+
+        .share-icon.instagram:hover {
+            color: #e1306c;
+        }
+
+        .share-icon.linkedin:hover {
+            color: #0077b5;
+        }
+
+        .share-icon.whatsapp:hover {
+            color: #25d366;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 60px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comments-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .comment-form-wrapper textarea {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .comment-form-wrapper textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .comments-list {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .comment-body {
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .login-prompt {
+            text-align: center;
+            background: rgba(99, 102, 241, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            color: #64748b;
+        }
+
+        .login-prompt a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .right-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* Mobile Optimizations */
+            .article-title {
+                font-size: 2rem;
+                /* Reduced from 2.8rem */
+                line-height: 1.2;
+                text-align: left !important;
+                /* Fix for word spacing gaps */
+            }
+
+            .detail-hero-image {
+                height: 250px;
+                /* Reduced from 450px */
+                margin-bottom: 30px;
+            }
+
+            .article-detail-container {
+                padding-top: 20px;
+                /* Reduced spacing */
+                padding-bottom: 40px;
+                width: 100%;
+                /* Max width */
+                padding-left: 6px;
+                /* Absolute Minimal padding */
+                padding-right: 6px;
+            }
+
+            .unified-article-card {
+                padding: 10px 0px !important;
+                /* Zero side padding is key */
+                /* tighter padding */
+                border-radius: 20px;
+                border: none;
+                /* Cleaner look on mobile */
+                box-shadow: none;
+                /* Flat look for performance/cleanliness */
+                background: transparent;
+                /* Seamless integration */
+            }
+
+            .article-content {
+                font-size: 1.05rem;
+                /* Slightly smaller for mobile reading */
+            }
+
+            /* FORCE AUTHOR VISIBILITY ON MOBILE */
+            #detail-author {
+                display: inline-flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                margin-top: 10px;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                align-items: center !important;
+                z-index: 10;
+                width: auto;
+                justify-content: center;
+            }
+        }
+
+        .btn-show-more-comments {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-show-more-comments:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Modern Comment Section */
+        .comments-section {
+            margin-top: 60px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background: #f8fafc;
+            /* Light Gray Layer */
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item:hover {
+            border-color: var(--primary-color);
+            background: #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .comment-item {
+            background: #334155;
+            /* Slate 700 - Lighter than bg #1e293b */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .comment-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* Force light text in dark mode for comments */
+        [data-theme="dark"] .comment-author,
+        [data-theme="dark"] .comment-body,
+        [data-theme="dark"] .comment-date {
+            color: #f1f5f9 !important;
+        }
+
+        .comment-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-accent);
+        }
+
+        .comment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .comment-content-wrapper {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .comment-body {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .comment-status-pending {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .comment-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-link {
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-link:hover {
+            color: var(--primary-accent);
+        }
+
+        .action-link.delete:hover {
+            color: #ef4444;
+        }
+
+        .delete-comment-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            line-height: 1;
+            margin-left: auto;
+        }
+
+        .delete-comment-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            transform: scale(1.05);
+        }
+
+        .edit-area {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            margin-top: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        /* Comment Form */
+        #comment-form-container textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            min-height: 120px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        #comment-form-container textarea:focus {
+            border-color: var(--primary-accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Updated Slider UI - Full Image Overlay */
+        .slider-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        [data-theme="dark"] .slider-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .slider-nav-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .similar-article-card {
+            min-width: 280px;
+            width: 280px;
+            height: 380px;
+            /* Taller fixed height */
+            background-color: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 1px solid transparent;
+            /* No visible border usually, relies on image */
+        }
+
+        .similar-article-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        /* Gradient Overlay */
+        .similar-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .similar-article-card:hover .similar-card-overlay {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0.95) 100%);
+        }
+
+        .similar-card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+            /* Always white on overlay */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* Allow more lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-decoration: none;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .similar-card-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .category-badge-slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* Moved to left usually looks better on these cards */
+            right: auto;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .media-slider-container {
+            /* Wrapper to ensure buttons don't overlap awkwardly if we move them */
+        }
+
+        @media (max-width: 768px) {
+            .similar-article-card {
+                min-width: 260px;
+                width: 260px;
+                height: 350px;
+            }
+
+            /* Mobile: Allow manual scrolling for Similar Articles */
+            .similar-slider-wrapper {
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px;
+                /* Space for scrollbar if any, though usually hidden on mobile */
+            }
+
+            /* Disable JS transform on mobile to prevent conflict */
+            #similar-slider-track {
+                transform: none !important;
+            }
+
+            /* Hide Slider Navigation Buttons on Mobile */
+            .slider-nav-btn {
+                display: none !important;
+            }
+        }
+    </style>
+    <style>
+        /* Reading Progress Bar - Fixed Top */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            /* Sleek & Thin */
+            background: transparent;
+            z-index: 2147483647;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            /* Theme Colors: Restored */
+            background: linear-gradient(90deg, var(--primary-color), #a855f7);
+            width: 0%;
+            /* Optimized for performance */
+            will-change: width;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer type="68b6badfe565591786e5bbaf-text/javascript"></script>
+<meta property="article:published_time" content="2026-07-06T16:58:16.000Z">
+<meta name="keywords" content="bağırsak mikrobiyotası, mikrobiyota, bağırsak florası, disbiyozis, bağırsak sağlığı, epigenetik, mikrobiyota ve epigenetik, bağırsak-beyin ekseni, bağırsak bakterileri, bağırsak mikrobiyomu, mikrobiyom, probiyotikler, prebiyotikler, postbiyotikler, fekal mikrobiyota transplantasyonu, FMT, bağırsak geçirgenliği, leaky gut, inflamasyon, bağışıklık sistemi, kısa zincirli yağ asitleri, bütirat, asetat, propiyonat, kişiselleştirilmiş beslenme, fonksiyonel tıp, metabolik sağlık, bağırsak ve bağışıklık, bağırsak ve beyin sağlığı, kronik inflamasyon, bağırsak mikrobiyotası tedavileri, mikrobiyota analizi, bağırsak mikrobiyotası testi, mikrobiyom mühendisliği, sağlıklı bağırsaklar, sindirim sistemi sağlığı, bağırsak ekosistemi, bağırsak mikrobiyota dengesi, bağırsak hastalıkları, aperion, aperionx, makale">
+<script type="68b6badfe565591786e5bbaf-text/javascript">window.SERVER_ARTICLE = {"id":131,"title":"Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi ","slug":"bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi","excerpt":"Bağırsak mikrobiyotası, sindirim sistemi içerisinde yaşayan ve sağlığımız üzerinde önemli etkileri bulunan mikroorganizmalardan oluşan karmaşık bir ekosistemdir. Bu mikroorganizmalar sindirim, bağışıklık sistemi, metabolizma ve hatta beyin fonksiyonlarının düzenlenmesinde rol oynar. Mikrobiyota dengesinin bozulması sonucu ortaya çıkan disbiyozis ise çeşitli sindirim problemleri, inflamasyon ve kronik hastalıklarla ilişkilendirilmektedir.","content":"<h2><strong>Bağırsak mikrobiyotası nedir?</strong></h2><p class=\"ql-align-justify\"><span style=\"color: rgb(27, 27, 27);\">İnsan mikrobiyomu, bakteri, mantar ve virüsler de dahil olmak üzere çeşitli ve dinamik bir mikroorganizma çokluğunu, genetik materyallerini ve doğumdan itibaren vücudumuzda yer tutan ve nesiller boyunca dikey olarak aktarılan bileşenleri kapsar. Bağırsak mikrobiyotası, konakçının sağlığını korumak için gerekli olan çeşitli önemli işlevleri yerine getirir. Mikrobiyota ayrıca patojenik mikroplarla kaynaklar ve alan için rekabet ederek, kolonizasyonlarını ve potansiyel istilalarını önler. Belirli mikroplara maruz kalma ve çevreyle etkileşim, mikrobiyomun şekillenmesinde çok önemli roller oynar ve dış faktörler ile vücudumuz arasındaki etkileşimi vurgular. Kolonizasyon tüm vücut bölgelerinde gerçekleşirken, bağırsak en büyük mikrobiyal popülasyonlara ev sahipliği yapar.</span><sup style=\"color: rgb(27, 27, 27);\">1</sup></p><h2 class=\"ql-align-justify\"><strong>Disbiyozis ve Bağırsak Sağlığı</strong></h2><p class=\"ql-align-justify\"><span style=\"color: rgb(21, 27, 38);\">Disbiyozis, vücuttaki mikroorganizmaların dengesinin bozulmasıdır. </span><span style=\"color: rgb(27, 27, 27);\">Vücuttaki patojenik olmayan bakterilerin sağlık üzerinde önemli ölçüde etkisi vardır. Farklı konakçı faktörleri mikrobiyal ortamı etkiler.</span><sup style=\"color: rgb(27, 27, 27);\">2 </sup><span style=\"color: rgb(27, 27, 27);\">Mikrobiyomun bileşimi konakçıya özgüdür ve bireyin yaşamı boyunca değişir.</span><sup style=\"color: rgb(27, 27, 27);\">3</sup></p><p> <img src=\"uploads/article_images/article-1782750286104-207306719.jpeg\"></p><p><strong>Şekil 1. </strong>Sağlıklı bağırsak mikrobiyotası ile disbiyotik mikrobiyotanın karşılaştırılması.</p><p><br></p><h2>Disbiyozise ne yol açar?</h2><p class=\"ql-align-justify\"><span style=\"color: rgb(21, 27, 38);\">Disbiyozis, vücuttaki mikroorganizmaların dengesinin bozulmasıdır. </span><span style=\"color: rgb(27, 27, 27);\">Bir bireyin mikrobiyota çeşitliliği, konak genetiği, doğum yolu, beslenme alışkanlıkları (insan anne sütü tüketimi dahil), yaş, ilaç kullanımı (örneğin antibiyotikler veya proton pompa inhibitörleri (PPI'ler)), alkol veya şeker tüketimi ve yüksek stres ve kaygı düzeyleri gibi çeşitli faktörlerden etkilenir.</span><sup style=\"color: rgb(27, 27, 27);\">4 </sup><span style=\"color: rgb(27, 27, 27);\">Çeşitli bağırsak hastalıklarının semptomlarını kontrol etmek ve iyileştirmek için umut vadeden yardımcı tedaviler olarak probiyotiklere yönelik araştırmalar giderek artan bir ilgi uyandırmıştır.</span><sup style=\"color: rgb(27, 27, 27);\">5</sup></p><h2><img src=\"uploads/article_images/article-1782749962204-177226981.png\" style=\"display: block; margin: auto;\" width=\"737\"></h2><p><strong>Şekil 2. </strong>Disbiyozise neden olan başlıca faktörler.</p><p><br></p><h2><strong>Disbiyozis ve Epigenetik İlişkisi</strong></h2><p class=\"ql-align-justify\">Son yıllarda yapılan araştırmalar, bağırsak mikrobiyotasının yalnızca sindirim sistemi üzerinde değil, epigenetik mekanizmalar üzerinde de etkili olabileceğini göstermektedir. Mikrobiyota tarafından üretilen kısa zincirli yağ asitleri, DNA metilasyonu ve histon modifikasyonları gibi epigenetik süreçleri etkileyerek gen ekspresyonunun düzenlenmesine katkıda bulunabilir. Disbiyozis ise bu mekanizmaların bozulmasına neden olarak inflamasyon, metabolik hastalıklar ve bazı kanser türlerinin gelişme riskini artırabilir. <sup>10</sup></p><p class=\"ql-align-justify\"><br></p><h2 class=\"ql-align-justify\"> <strong>Güncel Tedavi ve Yönetim Yaklaşımları</strong></h2><p class=\"ql-align-justify\"><br></p><h3 class=\"ql-align-justify\">1-Probiyotikler ve antibiyotikler</h3><p class=\"ql-align-justify\">Fonksiyonel gastrointestinal bozukluk (FGID) semptomları için probiyotik tedavisinin etkinliği belgelenmiştir, ancak semptom iyileşmesinde tutarlılık bulunmamaktadır. Çok sayıda çalışma,&nbsp;<em style=\"color: rgb(27, 27, 27);\">Bifidobacterium animalis</em>&nbsp;DN‐173010154,&nbsp;<em style=\"color: rgb(27, 27, 27);\">Bifidobacterium lactis</em>&nbsp;DN‐173 ve çok türlü probiyotikler gibi belirli probiyotik suşlarının IBS hastalarında fayda sağladığını öne sürmüştür.<sup>6 </sup><em style=\"color: rgb(27, 27, 27);\">Bir çalışma, Lactobacillus gasseri</em>&nbsp;OLL2716 ile tedavinin, sağlıklı bireylerde bulunan mide sıvısındaki mikrobiyal topluluk bileşimini değiştirdiğini&nbsp;göstermiştir .&nbsp;<sup>7</sup></p><p class=\"ql-align-justify\"><br></p><h3 class=\"ql-align-justify\">2-Diyet müdahalesi</h3><p class=\"ql-align-justify\">İnsan diyeti ve bağırsak mikrobiyotası yakından ilişkilidir ve toplumsal geli��meyle birlikte rafine karbonhidratların, Batı tarzı yüksek yağlı diyetlerin (YYD) ve şekerin tüketiminde artış olmuştur. Özellikle, son araştırmalar, diyet-mikrobiyota etkileşiminin giderek daha kişiselleştirilmiş hale geldiğini ve bireysel koşullara göre özel ayarlamalara duyulan ihtiyacı vurguladığını göstermektedir.<sup>8 </sup>Meyve, sebze, tam tahıl, baklagiller ve fermente gıdaların düzenli tüketimi kısa zincirli yağ asidi üretimini destekleyerek bağırsak sağlığını olumlu yönde etkileyebilir.<sup>9</sup></p><p class=\"ql-align-justify\"><br></p><h3 class=\"ql-align-justify\"><strong>3- Kişiselleştirilmiş Mikrobiyota Tedavileri</strong></h3><p class=\"ql-align-justify\">Yeni nesil yaklaşımlar, bireyin genetik yapısı, yaşam tarzı ve mikrobiyota profiline göre kişiselleştirilmiş beslenme ve mikrobiyal müdahaleler geliştirmeyi hedeflemektedir.Yapay zekâ destekli mikrobiyom analizleri ve hassas tıp uygulamaları geleceğin tedavi yöntemleri arasında yer alabilir.</p>","image_url":"uploads/image-1782754981659-984419155.png","views":32,"author_id":430,"status":"published","rejection_reason":null,"created_at":"2026-07-06T16:58:16.000Z","updated_at":"2026-07-06T17:31:52.000Z","approved_by":8,"category":"Gelişimsel Biyoloji","tags":"bağırsak mikrobiyotası, mikrobiyota, bağırsak florası, disbiyozis, bağırsak sağlığı, epigenetik, mikrobiyota ve epigenetik, bağırsak-beyin ekseni, bağırsak bakterileri, bağırsak mikrobiyomu, mikrobiyom, probiyotikler, prebiyotikler, postbiyotikler, fekal mikrobiyota transplantasyonu, FMT, bağırsak geçirgenliği, leaky gut, inflamasyon, bağışıklık sistemi, kısa zincirli yağ asitleri, bütirat, asetat, propiyonat, kişiselleştirilmiş beslenme, fonksiyonel tıp, metabolik sağlık, bağırsak ve bağışıklık, bağırsak ve beyin sağlığı, kronik inflamasyon, bağırsak mikrobiyotası tedavileri, mikrobiyota analizi, bağırsak mikrobiyotası testi, mikrobiyom mühendisliği, sağlıklı bağırsaklar, sindirim sistemi sağlığı, bağırsak ekosistemi, bağırsak mikrobiyota dengesi, bağırsak hastalıkları","references_list":"Vos WM, Tilg H, Van Hul M, ve diğerleri. Bağırsak mikrobiyomu ve sağlık: mekanistik bilgiler. Gut. 2022;71:1020–32. doi: 10.1136/gutjnl-2021-326789.\r\nBütünleyici İnsan Mikrobiyomu (iHMP) Araştırma Ağı Konsorsiyumu. Bütünleyici insan mikrobiyomu projesi. Nature. (2019) 569:641–8. doi: 10.1038/s41586-019-1238-8 \r\nSekirov I, Russell SL, Antunes LCM, Finlay BB. Sağlık ve hastalıkta bağırsak mikrobiyotası. Physiol Rev. (2010) 90:859–904. doi: 10.1152/physrev.00045.2009\r\nLin TY, Wu PH, Lin YT, Hung SC (2021) Hemodiyaliz hastalarında bağırsak disbiyozu ve mortalite. NPJ  Biofilms Microbiomes [İnternet]. 1 Aralık 2021 [erişim tarihi 11 Ağustos 2024];7(1).\r\nDi Stefano M, Santonocito S, Polizzi A, Mauceri R, Troiano G, Lo Giudice A, et al. (2023) A reciprocal link between oral and gut microbiota during periodontitis: the potential role of probiotics in reducing dysbiosis-induced inflammation. Int J Mol Sci [Internet]. 2023 Jan 1 [cited 2024 Aug 11];24(2)\r\nAragon G, Graham DB, Borum M, Doman DB. İrritabl bağırsak sendromu için probiyotik tedavisi. Gastroenterol. Hepatol. (N Y). 2010; 6: 39–44. \r\nOhtsu T, Haruma K, Ide Y, Takagi A. The Effect of Continuous Intake of Lactobacillus gasseri OLL2716 on Mild to Moderate Delayed Gastric Emptying: A Randomized Controlled Study. Nutrients. 2021;13(6):1852. doi:10.3390/nu13061852.  \r\nValdes AM, Walter J, Segal E, Spector TD. Role of the gut microbiota in nutrition and health. BMJ. 2018.\r\nMakki K, Deehan EC, Walter J, Bäckhed F. The Impact of Dietary Fiber on Gut Microbiota in Host Health and Disease. Cell Host & Microbe. 2018;23(6):705–715. doi:10.1016/j.chom.2018.05.012.  \r\nKrautkramer KA, Fan J, Bäckhed F. Gut microbial metabolites as multi-kingdom intermediates. Nature Reviews Microbiology. 2021;19(2):77–94. doi:10.1038/s41579-020-0438-4.","pdf_url":null,"last_showcase_at":null,"notification_sent":0,"deleted_at":null,"visual_references_list":"OpenAI ChatGPT (AI ile oluşturulmuş görsel), 2026.\r\n    OpenAI ChatGPT (AI ile oluşturulmuş görsel), 2026.\r\n    OpenAI ChatGPT (AI ile oluşturulmuş görsel), 2026.","was_published":1}; window.SERVER_AUTHORS = [{"id":430,"fullname":"Senanur Tınaz ","username":"senanur141","avatar_url":"uploads/avatar-1783353834446-494859802.jpeg","bio":"","job_title":"Moleküler Biyolog"}];</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi"},"headline":"Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi ","image":["https://www.aperionx.com/uploads/image-1782754981659-984419155.png"],"datePublished":"2026-07-06T16:58:16.000Z","dateModified":"2026-07-06T16:58:16.000Z","author":{"@type":"Person","name":"Senanur Tınaz ","url":"https://www.aperionx.com/author.html?username=senanur141"},"publisher":{"@type":"Organization","name":"AperionX","logo":{"@type":"ImageObject","url":"https://www.aperionx.com/uploads/logo.png"}},"description":"Bağırsak mikrobiyotası, sindirim sistemi içerisinde yaşayan ve sağlığımız üzerinde önemli etkileri bulunan mikroorganizmalardan oluşan karmaşık bir ekosistemdir. Bu mikroorganizmalar sindirim, bağışıklık sistemi, metabolizma ve hatta beyin fonksiyonlarının düzenlenmesinde rol oynar. Mikrobiyota dengesinin bozulması sonucu ortaya çıkan disbiyozis ise çeşitli sindirim problemleri, inflamasyon ve kronik hastalıklarla ilişkilendirilmektedir."}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://aperionx.com"},{"@type":"ListItem","position":2,"name":"Makaleler","item":"https://aperionx.com/articles.html"},{"@type":"ListItem","position":3,"name":"Bağırsak Mikrobiyotası Nedir?Disbiyozis ve Epigenetik İlişkisi ","item":"https://www.aperionx.com/makale/bagirsak-mikrobiyotasi-nedirdisbiyozis-ve-epigenetik-iliskisi"}]}</script>

@@ -146795,3 +146795,80 @@ Node.js v22.17.1
   sqlState: undefined,
   sqlMessage: undefined
 }
+[SHOWCASE] Rotation Error: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1717:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNRESET',
+  errno: -4077,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[SHOWCASE] Rotation Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1726:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[MIGRATION] Username Backfill Error: Error: connect ECONNREFUSED 127.0.0.1:3306
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.ensureUsernameMigration [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:5276:36)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNREFUSED',
+  errno: -4078,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[SHOWCASE] Rotation Error: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1726:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNRESET',
+  errno: -4077,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[SHOWCASE] Rotation Error: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1726:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNRESET',
+  errno: -4077,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[SHOWCASE] Rotation Error: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1738:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNRESET',
+  errno: -4077,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}
+[SHOWCASE] Rotation Error: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\node_modules\mysql2\lib\promise\pool.js:36:22)
+    at Timeout.rotateShowcaseArticles [as _onTimeout] (C:\Users\eyima\.gemini\antigravity\scratch\AperionX\server.js:1799:35)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  code: 'ECONNRESET',
+  errno: -4077,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
+}

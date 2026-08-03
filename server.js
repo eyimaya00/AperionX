@@ -513,6 +513,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                     html = html.replace('<img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">', '');
                 }
 
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+                res.setHeader('Pragma', 'no-cache');
+                res.setHeader('Expires', '0');
                 res.send(html);
 
             } catch (parseErr) {
@@ -1364,8 +1367,9 @@ app.get('/article-detail.html', async (req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { 
     if (p.endsWith('.js') || p.endsWith('.css')) {
-        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
     } else {
         res.setHeader('Cache-Control', 'public, max-age=86400');
     }
