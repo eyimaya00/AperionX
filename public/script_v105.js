@@ -42,6 +42,11 @@ window.currentArticleId = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
     
+    // Loader aktifken scroll'u engelle
+    if (document.getElementById('global-loader')) {
+        document.body.classList.add('loader-active');
+    }
+    
     // YENİ: Kategori Kartlarını Yükle
     loadPublicCategories();
 
@@ -3282,6 +3287,7 @@ function hideLoader() {
     const loader = document.getElementById('global-loader');
     if (loader && !loader.classList.contains('hidden')) {
         loader.classList.add('hidden');
+        document.body.classList.remove('loader-active');
         // Remove from DOM after transition
         setTimeout(() => {
             loader.style.display = 'none';

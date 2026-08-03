@@ -5191,11 +5191,17 @@ i[class*=" ph"] {
     align-items: center;
     justify-content: center;
     transition: opacity 0.2s ease, visibility 0.2s ease;
+    overflow: hidden;
+}
+
+body.loader-active {
+    overflow: hidden !important;
 }
 
 #global-loader.hidden {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 /* Loader Animation */
@@ -6509,11 +6515,11 @@ body.has-spotify-announcement .mobile-menu {
 /* --- Cookie Banner --- */
 .ccb-wrapper {
     position: fixed;
-    bottom: 24px;
-    left: 24px;
+    bottom: 20px;
+    left: 20px;
     z-index: 99999;
-    max-width: 440px;
-    width: calc(100% - 48px);
+    max-width: 370px;
+    width: calc(100% - 40px);
     font-family: 'Inter', sans-serif;
     animation: ccb-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -6523,36 +6529,36 @@ body.has-spotify-announcement .mobile-menu {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(226, 232, 240, 0.8);
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.12),
-                0 8px 24px -8px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.12),
+                0 6px 20px -8px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .ccb-card {
     background: rgba(30, 41, 59, 0.97);
     border-color: rgba(71, 85, 105, 0.6);
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5),
-                0 8px 24px -8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
+                0 6px 20px -8px rgba(0, 0, 0, 0.3);
 }
 
 /* Banner Header */
 .ccb-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .ccb-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(129, 140, 248, 0.18));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 18px;
     flex-shrink: 0;
 }
 
@@ -6562,16 +6568,16 @@ body.has-spotify-announcement .mobile-menu {
 
 .ccb-title {
     flex: 1;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-color);
     letter-spacing: -0.01em;
 }
 
 .ccb-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: none;
     background: transparent;
     color: var(--text-color);
@@ -6580,7 +6586,7 @@ body.has-spotify-announcement .mobile-menu {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 15px;
     transition: all 0.2s ease;
     flex-shrink: 0;
     line-height: 1;
@@ -6597,24 +6603,24 @@ body.has-spotify-announcement .mobile-menu {
 
 /* Banner Description */
 .ccb-desc {
-    font-size: 0.9rem;
-    line-height: 1.6;
+    font-size: 0.82rem;
+    line-height: 1.55;
     color: var(--text-color);
     opacity: 0.75;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 /* Banner Links */
 .ccb-links {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
 }
 
 .ccb-links a {
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--primary-color);
     text-decoration: none;
@@ -6649,9 +6655,9 @@ body.has-spotify-announcement .mobile-menu {
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 0.92rem;
-    border-radius: 14px;
-    padding: 13px 20px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    padding: 10px 16px;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     line-height: 1;
@@ -6675,14 +6681,14 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .ccb-btn-settings {
-    width: 48px;
+    width: 42px;
     flex-shrink: 0;
     background: rgba(99, 102, 241, 0.1);
     color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 17px;
     padding: 0;
 }
 
@@ -6742,14 +6748,14 @@ body.has-spotify-announcement .mobile-menu {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 520px;
+    width: 460px;
     max-width: calc(100% - 32px);
     max-height: calc(100vh - 48px);
     overflow-y: auto;
     background: var(--card-bg, #ffffff);
     border: 1px solid var(--header-border);
-    border-radius: 24px;
-    padding: 32px;
+    border-radius: 20px;
+    padding: 24px;
     box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.2);
     font-family: 'Inter', sans-serif;
     animation: csm-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -6788,7 +6794,7 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .csm-title {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-color);
     letter-spacing: -0.01em;
@@ -6822,28 +6828,28 @@ body.has-spotify-announcement .mobile-menu {
 
 /* Modal Description */
 .csm-desc {
-    font-size: 0.88rem;
-    line-height: 1.65;
+    font-size: 0.8rem;
+    line-height: 1.6;
     color: var(--text-color);
     opacity: 0.7;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 /* Cookie Categories */
 .csm-categories {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 28px;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 
 .csm-category {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px;
-    border-radius: 16px;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
     background: rgba(0, 0, 0, 0.025);
     border: 1px solid rgba(0, 0, 0, 0.06);
     transition: all 0.2s ease;
@@ -6880,15 +6886,15 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .csm-cat-header h4 {
-    font-size: 0.92rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-color);
     margin: 0;
 }
 
 .csm-cat-info p {
-    font-size: 0.8rem;
-    line-height: 1.5;
+    font-size: 0.73rem;
+    line-height: 1.4;
     color: var(--text-color);
     opacity: 0.6;
     margin: 0;
@@ -6898,8 +6904,8 @@ body.has-spotify-announcement .mobile-menu {
 .csm-switch {
     position: relative;
     display: inline-block;
-    width: 48px;
-    height: 28px;
+    width: 42px;
+    height: 24px;
     flex-shrink: 0;
     cursor: pointer;
 }
@@ -6927,8 +6933,8 @@ body.has-spotify-announcement .mobile-menu {
 .csm-slider::before {
     content: '';
     position: absolute;
-    height: 22px;
-    width: 22px;
+    height: 18px;
+    width: 18px;
     left: 3px;
     bottom: 3px;
     background: #ffffff;
@@ -6942,7 +6948,7 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .csm-switch input:checked + .csm-slider::before {
-    transform: translateX(20px);
+    transform: translateX(18px);
 }
 
 /* Locked (disabled) toggle */
@@ -6971,9 +6977,9 @@ body.has-spotify-announcement .mobile-menu {
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 0.9rem;
-    border-radius: 14px;
-    padding: 14px 20px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    padding: 11px 16px;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     line-height: 1;
@@ -7018,16 +7024,16 @@ body.has-spotify-announcement .mobile-menu {
 /* Tablet */
 @media (max-width: 992px) {
     .ccb-wrapper {
-        max-width: 400px;
+        max-width: 340px;
     }
 
     .ccb-card {
-        padding: 24px;
+        padding: 18px;
     }
 
     .csm-modal {
-        width: 480px;
-        padding: 28px;
+        width: 420px;
+        padding: 22px;
     }
 }
 
@@ -7041,38 +7047,38 @@ body.has-spotify-announcement .mobile-menu {
     }
 
     .ccb-card {
-        border-radius: 20px 20px 0 0;
-        padding: 24px 20px;
+        border-radius: 16px 16px 0 0;
+        padding: 18px 16px;
         border-bottom: none;
     }
 
     .ccb-icon {
-        width: 38px;
-        height: 38px;
-        font-size: 20px;
-        border-radius: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        border-radius: 8px;
     }
 
     .ccb-title {
-        font-size: 1rem;
+        font-size: 0.88rem;
     }
 
     .ccb-desc {
-        font-size: 0.85rem;
-    }
-
-    .ccb-links a {
         font-size: 0.78rem;
     }
 
+    .ccb-links a {
+        font-size: 0.72rem;
+    }
+
     .ccb-btn {
-        font-size: 0.88rem;
-        padding: 14px 16px;
-        border-radius: 12px;
+        font-size: 0.8rem;
+        padding: 11px 14px;
+        border-radius: 10px;
     }
 
     .ccb-btn-settings {
-        width: 50px;
+        width: 42px;
     }
 
     .csm-modal {
@@ -7083,22 +7089,22 @@ body.has-spotify-announcement .mobile-menu {
         width: 100%;
         max-width: 100%;
         max-height: 85vh;
-        border-radius: 24px 24px 0 0;
-        padding: 24px 20px;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 16px;
         animation: csm-slide-up-mobile 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .csm-category {
-        padding: 14px 16px;
-        border-radius: 14px;
+        padding: 12px 14px;
+        border-radius: 10px;
     }
 
     .csm-cat-header h4 {
-        font-size: 0.88rem;
+        font-size: 0.82rem;
     }
 
     .csm-cat-info p {
-        font-size: 0.78rem;
+        font-size: 0.7rem;
     }
 
     .csm-footer {
@@ -7106,9 +7112,9 @@ body.has-spotify-announcement .mobile-menu {
     }
 
     .csm-btn {
-        font-size: 0.88rem;
-        padding: 14px 16px;
-        border-radius: 12px;
+        font-size: 0.8rem;
+        padding: 11px 14px;
+        border-radius: 10px;
     }
 }
 
