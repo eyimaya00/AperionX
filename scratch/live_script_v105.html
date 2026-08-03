@@ -1,5 +1,30 @@
 // Base API URL
-const API_URL = '/api';
+var API_URL = '/api';
+
+// --- Google Consent Mode v2 Defaults (runs before gtag config) ---
+(function() {
+    window.dataLayer = window.dataLayer || [];
+    function gtagCM() { dataLayer.push(arguments); }
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem('aperionx_cookie_consent')); } catch(e) {}
+    var analyticsGranted = saved && saved.analytics ? 'granted' : 'denied';
+    var marketingGranted = saved && saved.marketing ? 'granted' : 'denied';
+    gtagCM('consent', 'default', {
+        'analytics_storage': analyticsGranted,
+        'ad_storage': marketingGranted,
+        'ad_user_data': marketingGranted,
+        'ad_personalization': marketingGranted,
+        'functionality_storage': 'granted',
+        'security_storage': 'granted'
+    });
+})();
+
+// Inject author-chip hover CSS (can't do :hover with inline styles)
+(function () {
+    const style = document.createElement('style');
+    style.textContent = `.author-chip:hover { background: rgba(99,102,241,0.25) !important; color: #4f46e5 !important; border-color: rgba(99,102,241,0.5) !important; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(99,102,241,0.2); }`;
+    document.head.appendChild(style);
+})();
 
 // --- HELPER: Resolve Image Path ---
 function resolveImagePath(url) {
@@ -16,21 +41,24 @@ window.currentArticleId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
+    
+    // Loader aktifken scroll'u engelle
+    if (document.getElementById('global-loader')) {
+        document.body.classList.add('loader-active');
+    }
+    
+    // YENİ: Kategori Kartlarını Yükle
+    loadPublicCategories();
 
-    // Connection Check
-    fetch(`${API_URL}/settings`)
-        .then(res => {
-            if (!res.ok) showToast('Sunucu bağlantı hatası (API)', 'error');
-        })
-        .catch(err => {
-            console.error('API Check Error:', err);
-            showToast('Sunucuya bağlanılamadı. Lütfen node server.js çalıştığından emin olun.', 'error');
-        });
+    // ----------------------------------------------------
+    // YENİ: Makaleleri Render Et (İlk Yükleme)
+    // ----------------------------------------------------
 
     // --- Global Loader Logic ---
     Promise.all([
         loadSettings(),
-        loadHero()
+        loadHero(),
+        loadShowcase()
     ]).then(() => {
         hideLoader();
     }).catch(err => {
@@ -44,14 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMenus();
     checkAuthStatus();
     initTheme();
+    initCookieConsent(); // Cookie Consent Banner
+    initSearch(); // Initialize Search
     initLanguageSwitcher(); // Add Language Support
-    loadUserInfo();
+    
     setupMobileMenu();
     updateActiveNavLink();
 
-    loadShowcase();
     loadFrontendCategories(); // Dynamic Categories
-    initCategoryScroll(); // Initialize Category Scroll Logic
     initCategoryScroll(); // Initialize Category Scroll Logic
     initHeroScroll(); // Force Scroll Logic
 
@@ -59,8 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArticlesPage();
     }
 
-    if (window.location.pathname.includes('/article-detail') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/')) {
+    if (window.location.pathname.includes('/article-detail') || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article/') || window.location.pathname.includes('/preview-article')) {
         loadArticleDetail();
+    }
+
+    if (window.location.pathname.includes('/about')) {
+        loadTeam();
     }
 
     // Header Scroll Effect (Performance Optimized via RAF & Passive Event)
@@ -73,6 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 header.classList.remove('scrolled');
             }
+
+            // Dynamically adjust header top when Spotify announcement bar scrolls out of view
+            const announcementBar = document.getElementById('spotify-announcement-bar');
+            if (announcementBar && document.body.classList.contains('has-spotify-announcement')) {
+                const barHeight = announcementBar.offsetHeight;
+                const remainingBarVisible = Math.max(0, barHeight - window.scrollY);
+                header.style.top = remainingBarVisible + 'px';
+            }
+
             ticking = false;
         };
 
@@ -153,14 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal('resetPasswordModal');
         }, 500); // Small delay to ensure modals are ready
     }
-
-    // Check for Login Redirect
-    if (urlParams.has('openLogin')) {
-        setTimeout(() => {
-            openModal('loginModal');
-            showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'warning');
-        }, 500);
-    }
 });
 
 let heroInterval; // Global for sorting or stopping if needed
@@ -173,8 +206,7 @@ async function loadHero() {
     // --- PART 1: TEXT & SETTINGS ---
     try {
         // Fetch Settings for Text
-        const settingsRes = await fetch(`${API_URL}/settings`);
-        const settings = await settingsRes.json();
+        const settings = await fetchSettingsCached();
 
         // Determine which title/desc to use based on page
         let titleToUse = null;
@@ -214,7 +246,8 @@ async function loadHero() {
             'footer-twitter': settings.social_twitter,
             'footer-instagram': settings.social_instagram,
             'footer-linkedin': settings.social_linkedin,
-            'footer-youtube': settings.social_youtube
+            'footer-youtube': settings.social_youtube,
+            'footer-spotify': settings.social_spotify
         };
 
         for (const [id, url] of Object.entries(socialMap)) {
@@ -412,6 +445,41 @@ async function loadHero() {
     }
 }
 
+// === TEAM MEMBERS LOADER ===
+async function loadTeam() {
+    const teamGrid = document.getElementById('team-grid');
+    if (!teamGrid) return;
+
+    try {
+        const res = await fetch(`${API_URL}/team`);
+        if (!res.ok) throw new Error('Team fetch failed');
+        const members = await res.json();
+
+        if (!members || members.length === 0) {
+            teamGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary, #94a3b8); grid-column: 1 / -1;">Henüz ekip üyesi eklenmemiş.</p>';
+            return;
+        }
+
+        teamGrid.innerHTML = members.map(member => {
+            const avatarSrc = member.image_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.fullname) + '&background=6366f1&color=fff&size=220&bold=true';
+            const emailLink = member.email ? `<a href="mailto:${member.email}" title="E-posta" aria-label="E-posta gönder"><i class="ph-fill ph-envelope-simple"></i></a>` : '';
+            const linkedinLink = member.linkedin_url ? `<a href="${member.linkedin_url}" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn profili"><i class="ph-fill ph-linkedin-logo"></i></a>` : '';
+
+            return `
+                <div class="team-card">
+                    <img class="team-card-avatar" src="${avatarSrc}" alt="${member.fullname}" loading="lazy">
+                    <div class="team-card-name">${member.fullname}</div>
+                    <div class="team-card-role">${member.role}</div>
+                    ${(emailLink || linkedinLink) ? `<div class="team-card-socials">${emailLink}${linkedinLink}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error('Team Load Error:', e);
+        if (teamGrid) teamGrid.innerHTML = '';
+    }
+}
+
 function startHeroLoop(count) {
     let currentIndex = 0;
     const slides = document.querySelectorAll('.hero-slide');
@@ -430,15 +498,21 @@ function initTheme() {
     const themeBtn = document.getElementById('themeToggle');
     if (!themeBtn) return;
 
-    // Check saved theme (default to dark)
-    const savedTheme = localStorage.getItem('theme');
+    // Check saved theme (default to dark, except author panel defaults to light)
+    let savedTheme = localStorage.getItem('theme');
+    const isAuthorPanel = window.location.pathname.includes('/author');
+
+    if (!savedTheme) {
+        savedTheme = isAuthorPanel ? 'light' : 'dark';
+        localStorage.setItem('theme', savedTheme);
+    }
+
     if (savedTheme === 'light') {
         document.documentElement.removeAttribute('data-theme');
         themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
     } else {
         document.documentElement.setAttribute('data-theme', 'dark');
         themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
-        if (!savedTheme) localStorage.setItem('theme', 'dark');
     }
 
     themeBtn.addEventListener('click', () => {
@@ -454,6 +528,199 @@ function initTheme() {
         }
     });
 }
+
+// --- Cookie Consent Banner & Settings Modal ---
+var COOKIE_CONSENT_KEY = 'aperionx_cookie_consent';
+
+function initCookieConsent() {
+    var saved = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (saved) return; // Kullanıcı zaten tercih yapmış, banner gösterme
+
+    // Banner HTML
+    var bannerHTML = '<div class="ccb-card">' +
+        '<div class="ccb-header">' +
+            '<div class="ccb-icon"><i class="ph-fill ph-cookie"></i></div>' +
+            '<h3 class="ccb-title">Çerez Kullanımı</h3>' +
+            '<button class="ccb-close" id="ccb-close" aria-label="Kapat">✕</button>' +
+        '</div>' +
+        '<p class="ccb-desc">Web sitemizde deneyiminizi geliştirmek için çerezler kullanıyoruz. Detaylı bilgi için gizlilik politikamızı inceleyebilirsiniz.</p>' +
+        '<div class="ccb-links">' +
+            '<a href="/gizlilik-politikasi">Gizlilik Politikası</a>' +
+            '<span class="ccb-link-dot">•</span>' +
+            '<a href="/kullanim-sartlari">Kullanım Şartları</a>' +
+        '</div>' +
+        '<div class="ccb-actions">' +
+            '<div class="ccb-actions-primary">' +
+                '<button class="ccb-btn ccb-btn-accept" id="ccb-accept-all">Tümünü Kabul Et</button>' +
+                '<button class="ccb-btn ccb-btn-settings" id="ccb-settings-btn" aria-label="Çerez Ayarları">⚙</button>' +
+            '</div>' +
+            '<button class="ccb-btn ccb-btn-reject" id="ccb-reject-all">Tümünü Reddet</button>' +
+        '</div>' +
+    '</div>';
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'ccb-wrapper';
+    wrapper.id = 'ccb-wrapper';
+    wrapper.innerHTML = bannerHTML;
+    document.body.appendChild(wrapper);
+
+    // Inject settings modal
+    _createCookieSettingsModal();
+
+    // --- Event Bindings ---
+    document.getElementById('ccb-accept-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: true, marketing: true });
+    });
+
+    document.getElementById('ccb-reject-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: false, marketing: false });
+    });
+
+    document.getElementById('ccb-settings-btn').addEventListener('click', function() {
+        var overlay = document.getElementById('csm-overlay');
+        if (overlay) overlay.classList.add('active');
+    });
+
+    document.getElementById('ccb-close').addEventListener('click', function() {
+        // Kapatma = Tümünü Reddet ile aynı davranış
+        _saveConsentPrefs({ necessary: true, analytics: false, marketing: false });
+    });
+}
+
+function _createCookieSettingsModal() {
+    if (document.getElementById('csm-overlay')) return;
+
+    var modalHTML = '<div class="csm-modal">' +
+        '<div class="csm-header">' +
+            '<h3 class="csm-title">Çerez Tercihleri</h3>' +
+            '<button class="csm-close" id="csm-close" aria-label="Kapat">✕</button>' +
+        '</div>' +
+        '<p class="csm-desc">Çerez tercihlerinizi aşağıdan özelleştirebilirsiniz. Zorunlu çerezler sitenin düzgün çalışması için gereklidir ve devre dışı bırakılamaz.</p>' +
+        '<div class="csm-categories">' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">🔒</span>' +
+                        '<h4>Zorunlu Çerezler</h4>' +
+                    '</div>' +
+                    '<p>Oturum yönetimi ve temel site işlevleri için gereklidir.</p>' +
+                '</div>' +
+                '<label class="csm-switch csm-switch-locked">' +
+                    '<input type="checkbox" checked disabled>' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">📊</span>' +
+                        '<h4>Performans & Analiz</h4>' +
+                    '</div>' +
+                    '<p>Google Analytics ile site kullanımını analiz etmemize yardımcı olur.</p>' +
+                '</div>' +
+                '<label class="csm-switch">' +
+                    '<input type="checkbox" id="csm-toggle-analytics">' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+            '<div class="csm-category">' +
+                '<div class="csm-cat-info">' +
+                    '<div class="csm-cat-header">' +
+                        '<span class="csm-cat-icon">📢</span>' +
+                        '<h4>Pazarlama Çerezleri</h4>' +
+                    '</div>' +
+                    '<p>Kişiselleştirilmiş içerik ve reklamlar için kullanılır.</p>' +
+                '</div>' +
+                '<label class="csm-switch">' +
+                    '<input type="checkbox" id="csm-toggle-marketing">' +
+                    '<span class="csm-slider"></span>' +
+                '</label>' +
+            '</div>' +
+        '</div>' +
+        '<div class="csm-footer">' +
+            '<button class="csm-btn csm-btn-save" id="csm-save">Seçilenleri Kaydet</button>' +
+            '<button class="csm-btn csm-btn-accept" id="csm-accept-all">Tümünü Kabul Et</button>' +
+        '</div>' +
+    '</div>';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'csm-overlay';
+    overlay.id = 'csm-overlay';
+    overlay.innerHTML = modalHTML;
+    document.body.appendChild(overlay);
+
+    // Close overlay on backdrop click
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+
+    // Close button
+    document.getElementById('csm-close').addEventListener('click', function() {
+        overlay.classList.remove('active');
+    });
+
+    // Save selected
+    document.getElementById('csm-save').addEventListener('click', function() {
+        var analytics = document.getElementById('csm-toggle-analytics').checked;
+        var marketing = document.getElementById('csm-toggle-marketing').checked;
+        _saveConsentPrefs({ necessary: true, analytics: analytics, marketing: marketing });
+    });
+
+    // Accept all from modal
+    document.getElementById('csm-accept-all').addEventListener('click', function() {
+        _saveConsentPrefs({ necessary: true, analytics: true, marketing: true });
+    });
+}
+
+function _saveConsentPrefs(prefs) {
+    prefs.timestamp = new Date().toISOString();
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(prefs));
+
+    // Google Consent Mode v2 güncelle
+    if (typeof gtag === 'function') {
+        gtag('consent', 'update', {
+            'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+            'ad_storage': prefs.marketing ? 'granted' : 'denied',
+            'ad_user_data': prefs.marketing ? 'granted' : 'denied',
+            'ad_personalization': prefs.marketing ? 'granted' : 'denied'
+        });
+    }
+
+    // Banner'ı kaldır (animasyonlu)
+    var banner = document.getElementById('ccb-wrapper');
+    if (banner) {
+        banner.style.animation = 'ccb-slide-down 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+        setTimeout(function() { banner.remove(); }, 450);
+    }
+
+    // Modal'ı kapat
+    var overlay = document.getElementById('csm-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+// Global fonksiyon: Footer'daki "Çerez Tercihleri" linki için
+window.openCookieSettings = function() {
+    // Modal yoksa oluştur
+    _createCookieSettingsModal();
+
+    // Kaydedilmiş tercihleri yükle
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(COOKIE_CONSENT_KEY)); } catch(e) {}
+
+    var analyticsToggle = document.getElementById('csm-toggle-analytics');
+    var marketingToggle = document.getElementById('csm-toggle-marketing');
+
+    if (saved) {
+        if (analyticsToggle) analyticsToggle.checked = !!saved.analytics;
+        if (marketingToggle) marketingToggle.checked = !!saved.marketing;
+    } else {
+        if (analyticsToggle) analyticsToggle.checked = false;
+        if (marketingToggle) marketingToggle.checked = false;
+    }
+
+    var overlay = document.getElementById('csm-overlay');
+    if (overlay) overlay.classList.add('active');
+};
 
 // --- Expanding Search Bar ---
 function initSearch() {
@@ -538,12 +805,43 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// --- Dynamic Settings ---
+// Settings Cache to optimize page load times
+let settingsCache = null;
+async function fetchSettingsCached() {
+    if (settingsCache) return settingsCache;
+    try {
+        const res = await fetch(`${API_URL}/settings`);
+        if (res.ok) {
+            settingsCache = await res.json();
+            return settingsCache;
+        } else {
+            showToast('Sunucu bağlantı hatası (API)', 'error');
+        }
+    } catch (e) {
+        console.error('Settings load error:', e);
+        showToast('Sunucuya bağlanılamadı. Lütfen node server.js çalıştığından emin olun.', 'error');
+    }
+    return {};
+}
+
 // --- Dynamic Settings ---
 async function loadSettings() {
     try {
-        const res = await fetch(`${API_URL}/settings`);
-        const settings = res.ok ? await res.json() : {};
+        // --- LOAD GLOBAL FOOTER ---
+        const footerPlaceholder = document.getElementById('global-footer');
+        if (footerPlaceholder) {
+            try {
+                const footerRes = await fetch('/footer');
+                if (footerRes.ok) {
+                     const footerHtml = await footerRes.text();
+                     footerPlaceholder.outerHTML = footerHtml;
+                }
+            } catch (footerErr) {
+                console.error('Failed to load global footer:', footerErr);
+            }
+        }
+
+        const settings = await fetchSettingsCached();
 
         // Update Title - Safe Check
         const siteTitle = settings.site_title || '';
@@ -582,8 +880,8 @@ async function loadSettings() {
                 img.alt = settings.site_title || 'Logo';
 
                 // Height Logic
-                const height = settings.logo_height ? `${settings.logo_height}px` : '36px';
-                img.style.height = height;
+                const height = settings.logo_height ? `${settings.logo_height}px` : (window.innerWidth <= 1024 ? '48px' : '60px');
+                img.style.setProperty('height', height, 'important');
                 img.style.width = 'auto';
                 img.style.borderRadius = '8px';
 
@@ -756,35 +1054,22 @@ async function loadSettings() {
         // Ensure Social Container exists for LinkedIn/YouTube
         const socialContainer = document.querySelector('.footer-socials');
         if (socialContainer) {
-            // LinkedIn (Hardcoded)
+            // LinkedIn
             let lnk = document.getElementById('footer-linkedin');
-            if (!lnk) {
-                lnk = document.createElement('a');
-                lnk.id = 'footer-linkedin';
-                lnk.className = 'social-link';
-                lnk.target = '_blank';
-                lnk.setAttribute('aria-label', 'LinkedIn');
-                lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
-                socialContainer.appendChild(lnk);
-            }
-            lnk.href = settings.social_linkedin || 'https://www.linkedin.com/company/aperionx';
-            lnk.style.display = 'flex';
+            if (settings.social_linkedin) {
+                if (!lnk) {
+                    lnk = document.createElement('a');
+                    lnk.id = 'footer-linkedin';
+                    lnk.className = 'social-link';
+                    lnk.target = '_blank';
+                    lnk.innerHTML = '<i class="ph-fill ph-linkedin-logo"></i>';
+                    socialContainer.appendChild(lnk);
+                }
+                lnk.href = settings.social_linkedin;
+                lnk.style.display = 'flex';
+            } else if (lnk) { lnk.style.display = 'none'; }
 
-            // TikTok (Hardcoded)
-            let tk = document.getElementById('footer-tiktok');
-            if (!tk) {
-                tk = document.createElement('a');
-                tk.id = 'footer-tiktok';
-                tk.className = 'social-link';
-                tk.target = '_blank';
-                tk.setAttribute('aria-label', 'TikTok');
-                tk.innerHTML = '<i class="ph-fill ph-tiktok-logo"></i>';
-                socialContainer.appendChild(tk);
-            }
-            tk.href = settings.social_tiktok || 'https://www.tiktok.com/@aperionx';
-            tk.style.display = 'flex';
-
-            // YouTube (Dynamic fallback)
+            // YouTube
             let yt = document.getElementById('footer-youtube');
             if (settings.social_youtube) {
                 if (!yt) {
@@ -792,13 +1077,42 @@ async function loadSettings() {
                     yt.id = 'footer-youtube';
                     yt.className = 'social-link';
                     yt.target = '_blank';
-                    yt.setAttribute('aria-label', 'YouTube');
                     yt.innerHTML = '<i class="ph-fill ph-youtube-logo"></i>';
                     socialContainer.appendChild(yt);
                 }
                 yt.href = settings.social_youtube;
                 yt.style.display = 'flex';
             } else if (yt) { yt.style.display = 'none'; }
+
+            // TikTok
+            let tt = document.getElementById('footer-tiktok');
+            if (settings.social_tiktok) {
+                if (!tt) {
+                    tt = document.createElement('a');
+                    tt.id = 'footer-tiktok';
+                    tt.className = 'social-link';
+                    tt.target = '_blank';
+                    tt.innerHTML = '<i class="ph-fill ph-tiktok-logo"></i>';
+                    socialContainer.appendChild(tt);
+                }
+                tt.href = settings.social_tiktok;
+                tt.style.display = 'flex';
+            } else if (tt) { tt.style.display = 'none'; }
+
+            // Spotify
+            let sp = document.getElementById('footer-spotify');
+            if (settings.social_spotify) {
+                if (!sp) {
+                    sp = document.createElement('a');
+                    sp.id = 'footer-spotify';
+                    sp.className = 'social-link';
+                    sp.target = '_blank';
+                    sp.innerHTML = '<i class="ph-fill ph-spotify-logo"></i>';
+                    socialContainer.appendChild(sp);
+                }
+                sp.href = settings.social_spotify;
+                sp.style.display = 'flex';
+            } else if (sp) { sp.style.display = 'none'; }
         }
 
         if (settings.newsletter_title) {
@@ -810,8 +1124,40 @@ async function loadSettings() {
             if (el) el.innerText = settings.newsletter_desc;
         }
 
+        // Hardcode Client ID since it's a public key, avoids API caching/env issues
+        window.GOOGLE_CLIENT_ID_GLOBAL = "181445432661-0i7m20n5leci7raa45o249a86tnb53cn.apps.googleusercontent.com";
+        
+        window.triggerGoogleSignIn = function() {
+            const clientId = window.GOOGLE_CLIENT_ID_GLOBAL;
+            const redirectUri = window.location.origin + '/api/auth/google/callback';
+            const scope = 'email profile openid';
+            const state = encodeURIComponent(window.location.pathname + window.location.search);
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+            
+            window.location.href = authUrl;
+        };
+
+        // Spotify integration initialization
+        initSpotifyAnnouncement(settings);
+        initSpotifyPodcastShowcase(settings);
+
     } catch (error) {
         console.error('Settings load error:', error);
+    }
+}
+
+function handleHashLinkClick(e, url) {
+    if (url && url.startsWith('#')) {
+        const target = document.getElementById(url.substring(1));
+        if (target) {
+            e.preventDefault();
+            const headerEl = document.querySelector('.header');
+            const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+            window.scrollTo({
+                top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20, // Add 20px extra padding
+                behavior: 'smooth'
+            });
+        }
     }
 }
 
@@ -825,12 +1171,21 @@ async function loadMenus() {
 
         if (menus.length === 0) return; // Keep default if empty
 
+        // Standardize Home Link
+        menus.forEach(m => {
+            if (m.url === 'index' || m.label === 'Ana Sayfa') m.url = '/';
+        });
+
         const navMenu = document.querySelector('.nav-menu');
         const mobileMenu = document.querySelector('.mobile-menu');
 
         // Get current page filename
-        let currentPath = window.location.pathname.split('/').pop();
-        if (!currentPath || currentPath === '/') currentPath = 'index.html'; // Default for root
+        let currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath.endsWith('/index') || currentPath.endsWith('index')) {
+            currentPath = '/';
+        } else {
+            currentPath = currentPath.split('/').pop();
+        }
 
         // Clear existing (except auth buttons in mobile)
         if (navMenu) navMenu.innerHTML = '';
@@ -844,40 +1199,52 @@ async function loadMenus() {
             console.error('Failed to load categories for menu dropdown', e);
         }
 
+        // Build a tree of menus initially to share between desktop and mobile.
+        const menuTree = {};
+        const rootMenus = [];
+
+        menus.forEach(menu => {
+            if (menu.label === 'Hakkında' && menu.url !== 'about') menu.url = 'about.html'; // Override
+
+            const pid = menu.parent_id || null;
+            if (!pid) {
+                rootMenus.push(menu);
+            } else {
+                if (!menuTree[pid]) menuTree[pid] = [];
+                menuTree[pid].push(menu);
+            }
+        });
+
         // Rebuild Desktop
         if (navMenu) {
+            rootMenus.forEach(menu => {
+                const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
+                const isAraçlarMenu = menu.label.toLowerCase() === 'araçlar';
+                const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
+                const needsDropdown = hasChildren && !isAraçlarMenu;
 
-
-            menus.forEach(menu => {
-                // Check if this is the "Categories" menu item
-                // matching by label roughly or url
-                const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
-
-                if (isCategoryMenu && categories.length > 0) {
+                if (needsDropdown) {
                     // Create Dropdown Structure
                     const dropdownContainer = document.createElement('div');
                     dropdownContainer.className = 'nav-item-dropdown';
 
                     const mainLink = document.createElement('a');
-                    if (menu.label === 'Hakkında') menu.url = 'about.html'; // Override for About page
-                    mainLink.href = menu.url; // Usually '#' or 'articles.html'
+                    mainLink.href = menu.url || '#';
                     mainLink.className = 'nav-link';
-                    mainLink.innerText = menu.label;
                     if (menu.url === currentPath) mainLink.classList.add('active');
-
-                    // Add Icon for visual cue
-                    mainLink.innerHTML += ' <i class="ph-bold ph-caret-down" style="font-size: 0.8em; margin-left: 4px; transition: transform 0.2s;"></i>';
+                    mainLink.innerHTML = `${menu.label} <i class="ph-bold ph-caret-down" style="font-size: 0.8em; margin-left: 4px; transition: transform 0.2s;"></i>`;
 
                     // TOGGLE LOGIC (Click instead of Hover)
                     mainLink.addEventListener('click', (e) => {
-                        e.preventDefault();
+                        // Only prevent default if it's purely a dropdown trigger (url is # or empty)
+                        if (!menu.url || menu.url === '#' || menu.label.toLowerCase() === 'makaleler') {
+                            e.preventDefault();
+                        }
                         e.stopPropagation();
 
-                        // Close other dropdowns if any (future proofing)
                         document.querySelectorAll('.nav-item-dropdown.active').forEach(el => {
                             if (el !== dropdownContainer) el.classList.remove('active');
                         });
-
                         dropdownContainer.classList.toggle('active');
                     });
 
@@ -891,16 +1258,49 @@ async function loadMenus() {
                     const dropdownContent = document.createElement('div');
                     dropdownContent.className = 'nav-dropdown-content';
 
-                    // "Tümü" (All) link removed as per user request
-                    // Categories only
+                    // Populate Dropdown
+                    if (isMakalelerMenu) {
+                        // Add link to all articles first
+                        const allLink = document.createElement('a');
+                        allLink.href = 'articles.html';
+                        allLink.className = 'dropdown-link';
+                        allLink.innerText = 'Tümü';
+                        allLink.style.fontWeight = 'bold'; // Emphasize "Tümü"
+                        dropdownContent.appendChild(allLink);
 
-                    categories.forEach(cat => {
-                        const catLink = document.createElement('a');
-                        catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                        catLink.className = 'dropdown-link';
-                        catLink.innerText = cat.name;
-                        dropdownContent.appendChild(catLink);
-                    });
+                        // Then add dynamic categories
+                        if (categories.length > 0) {
+                            // Add a label/divider for custom categories
+                            const catLabel = document.createElement('div');
+                            catLabel.innerText = 'Kategoriler';
+                            catLabel.style.fontSize = '0.75rem';
+                            catLabel.style.textTransform = 'uppercase';
+                            catLabel.style.color = '#94a3b8';
+                            catLabel.style.padding = '8px 16px 4px 16px';
+                            catLabel.style.fontWeight = '700';
+                            catLabel.style.letterSpacing = '0.5px';
+                            dropdownContent.appendChild(catLabel);
+
+                            categories.forEach(cat => {
+                                const catLink = document.createElement('a');
+                                catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                                catLink.className = 'dropdown-link';
+                                catLink.innerText = cat.name;
+                                dropdownContent.appendChild(catLink);
+                            });
+                        }
+                    }
+
+                    if (hasChildren) {
+                        menuTree[menu.id].forEach(child => {
+                            const childLink = document.createElement('a');
+                            childLink.href = child.url;
+                            if (child.label === 'Hakkında') childLink.href = 'about.html';
+                            childLink.className = 'dropdown-link';
+                            childLink.innerText = child.label;
+                            dropdownContent.appendChild(childLink);
+                        });
+                    }
 
                     dropdownContainer.appendChild(mainLink);
                     dropdownContainer.appendChild(dropdownContent);
@@ -908,15 +1308,16 @@ async function loadMenus() {
                 } else {
                     // Standard Link
                     const a = document.createElement('a');
-                    if (menu.label === 'Hakkında') menu.url = 'about.html'; // Override for About page
                     a.href = menu.url;
                     a.className = 'nav-link';
                     a.innerText = menu.label;
 
-                    // Add active class if matches
                     if (menu.url === currentPath) {
                         a.classList.add('active');
                     }
+                    
+                    a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                    
                     navMenu.appendChild(a);
                 }
             });
@@ -929,7 +1330,30 @@ async function loadMenus() {
 
             if (!linksContainer) {
                 // Determine insertion point: before auth buttons if they exist
-                const mobileAuth = mobileMenu.querySelector('.mobile-auth');
+                let mobileAuth = mobileMenu.querySelector('.mobile-auth');
+
+                // 1. Ensure Auth Container Exists (Crucial for author-profile.html which starts empty)
+                if (!mobileAuth) {
+                    mobileAuth = document.createElement('div');
+                    mobileAuth.className = 'mobile-auth';
+                    mobileAuth.style.marginTop = 'auto'; // Push to bottom
+                    mobileAuth.style.padding = '20px';
+                    mobileAuth.style.display = 'flex';
+                    mobileAuth.style.flexDirection = 'column';
+                    mobileAuth.style.gap = '10px';
+                    mobileAuth.style.borderTop = '1px solid rgba(255,255,255,0.1)';
+
+                    // Default Content (Login/Signup) - will be updated by checkAuthStatus
+                    mobileAuth.innerHTML = `
+                        <button class="btn btn-login" onclick="openModal('loginModal')" style="width:100%;">Giriş Yap</button>
+                    `;
+
+                    mobileMenu.appendChild(mobileAuth);
+
+                    // Trigger Re-check to populate if logged in
+                    setTimeout(checkAuthStatus, 100);
+                }
+
                 linksContainer = document.createElement('div');
                 linksContainer.className = 'mobile-links-container';
                 linksContainer.style.width = '100%';
@@ -946,10 +1370,13 @@ async function loadMenus() {
                 linksContainer.innerHTML = ''; // safely clear only links
             }
 
-            menus.forEach(menu => {
-                const isCategoryMenu = menu.label.toLowerCase().includes('kategori');
+            rootMenus.forEach(menu => {
+                const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
+                const isAraçlarMenu = menu.label.toLowerCase() === 'araçlar';
+                const hasChildren = menuTree[menu.id] && menuTree[menu.id].length > 0;
+                const needsDropdown = hasChildren && !isAraçlarMenu;
 
-                if (isCategoryMenu && categories.length > 0) {
+                if (needsDropdown) {
                     // Mobile Dropdown Accordion
                     const dropdownDiv = document.createElement('div');
                     dropdownDiv.className = 'mobile-nav-dropdown';
@@ -961,20 +1388,56 @@ async function loadMenus() {
                     const content = document.createElement('div');
                     content.className = 'mobile-dropdown-content';
 
-                    // "Tümü" removed for mobile as well
+                    if (isMakalelerMenu) {
+                        // All Articles Link
+                        const allLink = document.createElement('a');
+                        allLink.href = 'articles.html';
+                        allLink.className = 'mobile-dropdown-link';
+                        allLink.innerText = 'Tümü';
+                        allLink.style.fontWeight = 'bold'; // Emphasize
+                        allLink.addEventListener('click', (e) => e.stopPropagation());
+                        content.appendChild(allLink);
 
-                    categories.forEach(cat => {
-                        const catLink = document.createElement('a');
-                        catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
-                        catLink.className = 'mobile-dropdown-link';
-                        catLink.innerText = cat.name;
-                        catLink.addEventListener('click', (e) => e.stopPropagation()); // Prevent closing
-                        content.appendChild(catLink);
-                    });
+                        if (categories.length > 0) {
+                            // Add a label/divider
+                            const catLabel = document.createElement('div');
+                            catLabel.innerText = 'Kategoriler';
+                            catLabel.style.fontSize = '0.75rem';
+                            catLabel.style.textTransform = 'uppercase';
+                            catLabel.style.color = '#94a3b8';
+                            catLabel.style.padding = '10px 24px 5px 24px';
+                            catLabel.style.fontWeight = '700';
+                            catLabel.style.letterSpacing = '0.5px';
+                            content.appendChild(catLabel);
+
+                            categories.forEach(cat => {
+                                const catLink = document.createElement('a');
+                                catLink.href = `articles.html?category=${encodeURIComponent(cat.name)}`;
+                                catLink.className = 'mobile-dropdown-link';
+                                catLink.innerText = cat.name;
+                                catLink.addEventListener('click', (e) => e.stopPropagation());
+                                content.appendChild(catLink);
+                            });
+                        }
+                    }
+
+                    if (hasChildren) {
+                        menuTree[menu.id].forEach(child => {
+                            const childLink = document.createElement('a');
+                            childLink.href = child.url;
+                            if (child.label === 'Hakkında') childLink.href = 'about.html';
+                            childLink.className = 'mobile-dropdown-link';
+                            childLink.innerText = child.label;
+                            childLink.addEventListener('click', (e) => e.stopPropagation());
+                            content.appendChild(childLink);
+                        });
+                    }
 
                     // Toggle Logic
                     header.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        // If it's a real link, and they click the text, let them go, otherwise expand/collapse on arrow
+                        // For simplicity, make header expand/collapse always, if they want link, it should not be root
                         content.classList.toggle('active');
                         // Rotate arrow
                         const icon = header.querySelector('i');
@@ -1006,8 +1469,28 @@ async function loadMenus() {
                     if (menu.url === currentPath) {
                         a.classList.add('active');
                     }
+                    
+                    a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                    
                     linksContainer.appendChild(a);
                 }
+            });
+        }
+
+        // Rebuild Footer Links
+        const footerLinksContainer = document.getElementById('footer-links-container');
+        if (footerLinksContainer) {
+            footerLinksContainer.innerHTML = '';
+            rootMenus.forEach(menu => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = menu.url || '#';
+                a.innerText = menu.label;
+                
+                a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
+                
+                li.appendChild(a);
+                footerLinksContainer.appendChild(li);
             });
         }
 
@@ -1034,89 +1517,59 @@ function closeModal(modalId) {
 }
 
 // --- Mobile Menu Logic ---
+// --- Mobile Menu Logic ---
 function setupMobileMenu() {
-    console.log("MOBILE MENU SETUP RUNNING V3 (DEBUG MODE)");
-
-    // --- GLOBAL DEBUG BUTTON (ALWAYS VISIBLE) ---
-    // This part runs regardless of hamburger btn existence
-    let mobileGlobalBtn = document.getElementById('global-mobile-lang-btn');
-    if (!mobileGlobalBtn) {
-        mobileGlobalBtn = document.createElement('div');
-        mobileGlobalBtn.id = 'global-mobile-lang-btn';
-        mobileGlobalBtn.style.position = 'fixed';
-        mobileGlobalBtn.style.bottom = '150px'; // High up
-        mobileGlobalBtn.style.left = '50%';
-        mobileGlobalBtn.style.transform = 'translateX(-50%)';
-        mobileGlobalBtn.style.zIndex = '2147483647';
-        mobileGlobalBtn.style.display = 'flex'; // ALWAYS VISIBLE FOR TEST
-
-        const btn = document.createElement('button');
-        btn.className = 'lang-btn';
-        btn.innerHTML = '<i class="ph-bold ph-globe"></i> LANG TEST';
-        btn.style.padding = '15px 30px';
-        btn.style.borderRadius = '50px';
-        btn.style.background = 'red'; // VISIBLE RED
-        btn.style.color = 'white';
-        btn.style.fontWeight = 'bold';
-        btn.style.boxShadow = '0 0 20px rgba(255,0,0,0.5)';
-
-        btn.onclick = (e) => {
-            e.preventDefault();
-            // Simple toggle for test
-            if (btn.innerText.includes('EN')) {
-                btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
-            } else {
-                btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN/TR TEST';
-            }
-            // Add cookie logic later
-        };
-
-        mobileGlobalBtn.appendChild(btn);
-        document.body.appendChild(mobileGlobalBtn);
-    }
-
     const btn = document.getElementById('hamburgerBtn');
-    const nav = document.querySelector('.nav-menu');
-    const header = document.querySelector('.header');
+    const mobileMenu = document.getElementById('mobileMenu');
 
-    if (btn) btn.style.border = "2px solid red"; // BORDER TEST
-    if (nav) nav.style.borderBottom = "2px solid red"; // NAV BORDER TEST
-
-    if (btn && nav) {
-        btn.addEventListener('click', () => {
-            nav.classList.toggle('active');
+    // --- Mobile Menu Toggle Logic ---
+    if (btn && mobileMenu) {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // prevent document click immediately
+            mobileMenu.classList.toggle('active');
             btn.classList.toggle('active');
 
-            // Lock body scroll logic
-            if (nav.classList.contains('active')) {
+            if (mobileMenu.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
+                btn.innerHTML = '<i class="ph ph-x"></i>';
             } else {
                 document.body.style.overflow = '';
+                btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
 
-        // Close when clicking links
-        nav.querySelectorAll('a').forEach(link => {
+        mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                nav.classList.remove('active');
-                btn.classList.remove('active');
-                document.body.style.overflow = '';
+                // Only close if it's not a dropdown toggle
+                if (!link.classList.contains('mobile-dropdown-header')) {
+                    mobileMenu.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                    btn.innerHTML = '<i class="ph ph-list"></i>';
+                }
             });
         });
 
-        // Close on click outside
         document.addEventListener('click', (e) => {
-            if (!nav.contains(e.target) && !btn.contains(e.target) && nav.classList.contains('active')) {
-                nav.classList.remove('active');
+            if (!mobileMenu.contains(e.target) && !btn.contains(e.target) && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
+                btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
 
-        // --- GLOBAL BODY-LEVEL MOBILE LANGUAGE TOGGLE ---
-        // We append to body to avoid z-index/overflow issues within nav containers
-        // The button creation is now at the top and always visible for testing.
-        // The original visibility logic is removed.
+        // Handle Resize (Hide if desktop)
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 1024) {
+                if (mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                    btn.innerHTML = '<i class="ph ph-list"></i>';
+                }
+            }
+        });
     }
 }
 function switchModal(closeId, openId) {
@@ -1179,12 +1632,13 @@ if (loginForm) {
         e.preventDefault();
         const identifier = document.getElementById('login-email').value; // Email or Username
         const password = document.getElementById('login-password').value;
+        const rememberMe = document.getElementById('login-remember') ? document.getElementById('login-remember').checked : false;
 
         try {
             const res = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier, password })
+                body: JSON.stringify({ identifier, password, rememberMe })
             });
 
             const data = await res.json();
@@ -1192,28 +1646,81 @@ if (loginForm) {
             if (!res.ok) {
                 showToast(data.message || 'Giriş başarısız.', 'error');
             } else {
+                // DEBUG: Verify Token
+                // alert('Login Response: ' + JSON.stringify(data));
+                if (!data.token) {
+                    alert('HATA: Sunucu token göndermedi! Giriş başarısız sayılıyor.');
+                    return;
+                }
+
                 // Store Token and User Info
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+
+                console.log('Login Success. Token saved:', data.token);
+                // alert('Giriş Başarılı! Token kaydedildi: ' + data.token.substring(0, 10) + '...');
 
                 showToast('Giriş başarılı!', 'success');
                 closeModal('loginModal');
                 checkAuthStatus(); // Update UI
 
-                if (data.redirectUrl) {
-                    setTimeout(() => window.location.href = '/' + data.redirectUrl, 1000);
-                } else if (data.user.role === 'admin') {
+                // Role-based redirect logic
+                if (data.user.role === 'admin') {
                     setTimeout(() => window.location.href = '/admin', 1000);
                 } else if (data.user.role === 'editor') {
                     setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
                     setTimeout(() => window.location.href = '/author', 1000);
+                } else {
+                    // Reader: Stay on current page, reload to refresh comment forms & UI
+                    setTimeout(() => window.location.reload(), 800);
                 }
             }
         } catch (error) {
             console.error(error);
             showToast('Bir hata oluştu.', 'error');
         }
+    });
+}
+
+// Google Identity Services callback
+function handleGoogleCredentialResponse(response) {
+    fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.token) {
+            showToast(data.message || 'Google ile giriş başarısız.', 'error');
+            return;
+        }
+        
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        showToast('Google ile giriş başarılı!', 'success');
+        closeModal('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        if (signupModal && signupModal.classList.contains('active')) {
+            closeModal('signupModal');
+        }
+        checkAuthStatus();
+        
+        if (data.user.role === 'admin') {
+            setTimeout(() => window.location.href = '/admin', 1000);
+        } else if (data.user.role === 'editor') {
+            setTimeout(() => window.location.href = '/editor', 1000);
+        } else if (data.user.role === 'author') {
+            setTimeout(() => window.location.href = '/author', 1000);
+        } else {
+            setTimeout(() => window.location.reload(), 800);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('Google ile giriş sırasında hata oluştu.', 'error');
     });
 }
 
@@ -1228,90 +1735,110 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
+// NEW: Global Navigation Handler - Defined ONCE globally at TOP
+// (Updated v118 - Force Refresh)
+window.navigateToDashboard = function () {
+    try {
+        console.log("navigateToDashboard called");
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            console.warn("No user found in localStorage, redirecting to home.");
+            window.location.href = "/index";
+            return;
+        }
+
+        const u = JSON.parse(userStr);
+        console.log('Navigating dashboard for role:', u.role);
+
+        if (u.role === 'admin') window.location.href = '/admin';
+        else if (u.role === 'author') window.location.href = '/author';
+        else if (u.role === 'editor') window.location.href = '/editor';
+        else window.location.href = "/profile";
+    } catch (err) {
+        console.error("Navigation Error:", err);
+        window.location.href = "/index";
+    }
+};
+
+// NEW: Logout Handler - Defined ONCE globally at TOP
+window.logout = function () {
+    console.log('Logging out...');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = "/index";
+};
+
 // Check Auth & Update UI
 function checkAuthStatus() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    // Select both desktop and mobile auth containers
+    let user = null;
+    try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser && storedUser !== 'undefined') {
+            user = JSON.parse(storedUser);
+        }
+    } catch (e) {
+        console.error('checkAuthStatus: Failed to parse user from localStorage', e);
+        localStorage.removeItem('user');
+    }
+    const token = localStorage.getItem('token');
     const authButtons = document.querySelectorAll('.auth-buttons, .mobile-auth');
 
-    if (user) {
+    // FIX: Zombie Session Detection
+    // If we have a user object but NO token, the session is invalid.
+    if (user && !token) {
+        console.warn('Zombie session detected (User set, Token missing).');
+        // TEMPORARILY DISABLED AUTO-LOGOUT FOR DEBUGGING
+        // localStorage.removeItem('user'); 
+        // alert('Debug: Token eksik ama oturum açık görünüyor. Lütfen sayfayı yenileyin.');
+    }
+
+    if (user && token) {
         authButtons.forEach(container => {
-            let dashboardAction = "window.location.href = "/profile"";
-            let cursorStyle = 'pointer';
-            let titleAttr = 'Profilime Git';
-            let roleBadge = '';
-
-            if (user.role === 'admin') {
-                dashboardAction = "window.location.href='/admin'";
-                roleBadge = '<span class="role-badge admin">Admin</span>';
-            } else if (user.role === 'author') {
-                dashboardAction = "window.location.href='/author'";
-                roleBadge = '<span class="role-badge author">Yazar</span>';
-            } else if (user.role === 'editor') {
-                dashboardAction = "window.location.href='/editor'";
-                roleBadge = '<span class="role-badge editor">Editör</span>';
+            if (container.classList.contains('mobile-auth')) {
+                container.innerHTML = `
+                    <div class="mobile-user-profile" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #333;">
+                        <div class="mobile-user-info">
+                            <span class="name">${escapeHtml(user.fullname || user.username)}</span>
+                            <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-user-links">
+                        ${user.role === 'admin' ? '<a href="/admin" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                        ${user.role === 'author' || user.role === 'admin' ? '<a href="/author" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                        ${user.role === 'editor' ? '<a href="/editor" class="btn btn-outline"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
+                        <a href="/profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
+                        <button onclick="window.logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="user-dropdown" style="position:relative;">
+                        <button class="user-btn" onclick="toggleUserDropdown(event)">
+                            <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" class="user-avatar-small">
+                            <span>${escapeHtml((user.fullname || user.username || '').split(' ')[0] || 'Üye')}</span>
+                            <i class="ph-bold ph-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="user-dropdown-menu">
+                            ${user.role === 'admin' ? '<a href="/admin"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                            ${(user.role === 'author' || user.role === 'admin') ? '<a href="/author"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
+                            ${user.role === 'editor' ? '<a href="/editor"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
+                            <a href="/profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
+                            <a href="#" onclick="window.logout(); return false;"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
+                        </div>
+                    </div>
+                `;
             }
 
-            container.innerHTML = `
-                <button class="btn btn-login" onclick="${dashboardAction}" title="${titleAttr}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="user-name">${escapeHtml(user.fullname)}</span>
-                    <i class="ph-fill ph-user-circle" style="font-size: 1.2rem;"></i>
-                </button>
-                <button class="btn btn-login btn-sm" onclick="logout()">Çıkış</button>
-            `;
-
-            // Add Profile/Dashboard Link to Nav if not present
-            const navMenu = document.querySelector('.nav-menu');
-            if (navMenu) {
-                // Clear specialized links first to prevent duplicates on re-render
-                const existingSpecial = navMenu.querySelectorAll('.special-nav-link');
-                existingSpecial.forEach(el => el.remove());
-
-                // 1. Profile Link for ALL users
-                const profileLink = document.createElement('a');
-                profileLink.href = 'profile.html';
-                profileLink.className = 'nav-link special-nav-link';
-                profileLink.innerText = 'Profilim';
-                navMenu.appendChild(profileLink);
-
-                // 2. Admin/Dashboard Link
-                if (user.role === 'admin') {
-                    const adminLink = document.createElement('a');
-                    adminLink.href = '/admin';
-                    adminLink.className = 'nav-link special-nav-link admin-link';
-                    adminLink.innerHTML = '<i class="ph-fill ph-gear"></i> Admin';
-                    adminLink.style.color = 'var(--primary-color)';
-                    navMenu.appendChild(adminLink);
-                } else if (user.role === 'editor') {
-                    const editorLink = document.createElement('a');
-                    editorLink.href = '/editor';
-                    editorLink.className = 'nav-link special-nav-link';
-                    editorLink.innerText = 'Editör Paneli';
-                    navMenu.appendChild(editorLink);
-                } else if (user.role === 'author') {
-                    const authorLink = document.createElement('a');
-                    authorLink.href = '/author';
-                    authorLink.className = 'nav-link special-nav-link';
-                    authorLink.innerText = 'Yazar Paneli';
-                    navMenu.appendChild(authorLink);
-                }
-            }
+            // Redundant profile/dashboard links removed from desktop menu (now only in avatar dropdown)
         });
     } else {
         // Reset to Login/Signup
         authButtons.forEach(container => {
             container.innerHTML = `
                 <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
-                <button class="btn btn-signup" onclick="openModal('signupModal')">Kayıt Ol</button>
             `;
         });
-
-        // Remove functionality links
-        const navMenu = document.querySelector('.nav-menu');
-        if (navMenu) {
-            const existingSpecial = navMenu.querySelectorAll('.special-nav-link');
-            existingSpecial.forEach(el => el.remove());
-        }
     }
 }
 
@@ -1321,52 +1848,52 @@ function logout() {
     localStorage.removeItem('user');
     window.location.href = "/index";
 }
+// Expose globally for onclick handlers
+window.logout = logout;
 
 // --- Mobile Menu Toggle ---
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const mobileMenu = document.getElementById('mobileMenu');
-
-if (hamburgerBtn && mobileMenu) {
-    hamburgerBtn.addEventListener('click', () => {
-        const isActive = mobileMenu.classList.contains('active');
-        if (isActive) {
-            mobileMenu.classList.remove('active');
-            hamburgerBtn.innerHTML = '<i class="ph ph-list"></i>';
-        } else {
-            mobileMenu.classList.add('active');
-            hamburgerBtn.innerHTML = '<i class="ph ph-x"></i>';
-        }
-    });
-}
+// (Handled completely by setupMobileMenu now)
 
 // --- Showcase Loader ---
 async function loadShowcase() {
     try {
         const sliderContainer = document.getElementById('showcase-grid');
-        console.log('DEBUG: loadShowcase started, container:', sliderContainer);
         if (!sliderContainer) return; // Only run if showcase exists
 
-        // 1. Fetch Settings & Articles in Parallel
-        const [settingsRes, articlesRes] = await Promise.all([
-            fetch(`${API_URL}/settings`),
-            fetch(`${API_URL}/articles`)
+        // 1. Fetch Settings (cached) & only top 3 articles in parallel
+        const [settings, articlesRes] = await Promise.all([
+            fetchSettingsCached(),
+            fetch(`${API_URL}/articles?limit=3`)
         ]);
 
-        console.log('DEBUG: Fetch results:', settingsRes.status, articlesRes.status);
+        if (!articlesRes.ok) return;
 
-        if (!settingsRes.ok || !articlesRes.ok) {
-            console.error('DEBUG: One of the fetches failed');
-            return;
+        const top3Articles = await articlesRes.json(); // Already sorted by date desc
+        let allArticles = [...top3Articles];
+
+        // Find missing IDs from settings
+        const requiredIds = [];
+        if (settings.homepage_article_1) requiredIds.push(parseInt(settings.homepage_article_1));
+        if (settings.homepage_article_2) requiredIds.push(parseInt(settings.homepage_article_2));
+        if (settings.homepage_article_3) requiredIds.push(parseInt(settings.homepage_article_3));
+
+        const missingIds = requiredIds.filter(id => !isNaN(id) && !allArticles.some(a => a.id == id));
+
+        if (missingIds.length > 0) {
+            try {
+                const missingRes = await fetch(`${API_URL}/articles?ids=${missingIds.join(',')}`);
+                if (missingRes.ok) {
+                    const missingArticles = await missingRes.json();
+                    allArticles = allArticles.concat(missingArticles);
+                }
+            } catch (err) {
+                console.error("Error fetching missing showcase articles:", err);
+            }
         }
-
-        console.log('DEBUG: Fetch OK');
-
-        const settings = await settingsRes.json();
-        const allArticles = await articlesRes.json(); // Already sorted by date desc
 
         // 2. Determine Slots
         // Default: Top 3
-        let slots = [allArticles[0], allArticles[1], allArticles[2]];
+        let slots = [top3Articles[0], top3Articles[1], top3Articles[2]];
 
         // Override with User Selections
         if (settings.homepage_article_1) {
@@ -1399,7 +1926,7 @@ async function loadShowcase() {
                 console.log(`[DEBUG] Rendering Card ${index + 1}:`, { title: item.title, author, bgImage });
 
                 card.innerHTML = `
-                    <div class="card-bg" style="background-image: url('${bgImage}'); background-color: #1e293b;"></div>
+                    <img src="${bgImage}" class="card-bg" loading="eager" fetchpriority="high" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%; background-color: #1e293b;" alt="Makale Kapak Resmi">
                     <div class="card-overlay"></div>
                     
                     <div class="card-top-content">
@@ -1409,12 +1936,23 @@ async function loadShowcase() {
                     <div class="card-bottom-content">
                         <h3 class="card-title">${item.title}</h3>
                         <div class="card-meta-row">
-                            <span class="author-name">${author}</span>
+                        <div class="card-meta-row">
+                             <div class="author-name" style="text-decoration:none; color:inherit; z-index:10; position:relative;">
+                                   ${(item.authors && item.authors.length > 0)
+                        ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    ${item.authors.map((a) => `
+                                         <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
+                                     `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                                   </span>`
+                        : `<a href="author-profile.html?u=${item.author_id || ''}" style="color:inherit; text-decoration:none;">${author}</a>`
+                    }
+                             </div>
+                        </div>
                         </div>
                     </div>
                     
-                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="read-btn-circle"><i class="ph-bold ph-arrow-right"></i></a>
-                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;"></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="read-btn-circle" aria-label="Makaleyi oku: ${escapeHtml(item.title)}"><i class="ph-bold ph-arrow-right"></i></a>
+                    <a href="${item.slug ? '/makale/' + item.slug : '/article-detail.html?id=' + item.id}" class="card-link-full" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1;" aria-label="${escapeHtml(item.title)}"></a>
                 `;
             }
         });
@@ -1426,17 +1964,14 @@ async function loadShowcase() {
 // Global Scroll Handler
 window.scrollToShowcase = function () {
     console.log("Scroll triggered!");
-    const showcase = document.querySelector('.showcase');
-    if (showcase) {
-        // Offset for fixed header if needed (approx 80px)
-        const headerOffset = 100;
+    const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
+    if (target) {
         const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = showcase.getBoundingClientRect().top;
+        const elementRect = target.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - headerOffset;
 
         window.scrollTo({
-            top: offsetPosition,
+            top: elementPosition,
             behavior: 'smooth'
         });
     } else {
@@ -1445,7 +1980,6 @@ window.scrollToShowcase = function () {
 };
 
 // Event Delegation for robustness
-
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('#hero-main-btn'); // Robust check
     if (btn) {
@@ -1504,6 +2038,8 @@ if (newsletterForm) {
 
 let pageArticles = [];
 let filteredArticles = [];
+let pageExperiments = [];
+let filteredExperiments = [];
 let currentPage = 1;
 const itemsPerPage = 6;
 
@@ -1515,10 +2051,14 @@ async function loadArticlesPage() {
     if (!grid) return; // Not on articles page
 
     try {
-        // Fetch all published articles
-        const res = await fetch(`${API_URL}/articles`);
-        if (!res.ok) throw new Error('API Error');
-        pageArticles = await res.json();
+        // Use preloaded server articles if available, otherwise fetch from API
+        if (window.SERVER_ARTICLES) {
+            pageArticles = window.SERVER_ARTICLES;
+        } else {
+            const res = await fetch(`${API_URL}/articles`);
+            if (!res.ok) throw new Error('API Error');
+            pageArticles = await res.json();
+        }
 
         // Initial Sort (Newest first)
         pageArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -1568,7 +2108,7 @@ function filterPageArticles(category, btnElement) {
     if (category === 'all') {
         filteredArticles = [...pageArticles];
     } else {
-        filteredArticles = pageArticles.filter(a => a.category === category);
+        filteredArticles = pageArticles.filter(a => a.category && a.category.split(',').map(c => c.trim()).includes(category));
     }
 
     currentPage = 1;
@@ -1620,7 +2160,7 @@ function renderArticlesGrid() {
 
         const html = `
             <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
-                <div class="card-bg" style="background-image: url('${bgMeasure}')"></div>
+                <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
                 <div class="card-overlay" style="pointer-events: none;"></div>
                 
                 <div class="card-top-content" style="pointer-events: none;">
@@ -1629,13 +2169,22 @@ function renderArticlesGrid() {
                 
                 <div class="card-bottom-content" style="pointer-events: none;">
                     <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
-                    <div class="author-name" style="font-size: 0.85rem; opacity: 0.9;">
+            <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                ${(article.authors && article.authors.length > 0)
+                ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        ${article.authors.map((a) => `
+                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                        `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                       </div>`
+                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
-                    </div>
+                       </a>`
+            }
+            </div>
                 </div>
 
-                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;"><i class="ph-bold ph-arrow-right"></i></a>
-                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;"></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Makaleyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/makale/' + article.slug : '/article-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
             </article>
         `;
         grid.innerHTML += html;
@@ -1671,6 +2220,221 @@ function renderPaginationControls() {
             renderArticlesGrid();
             // Scroll to top of grid
             const grid = document.getElementById('articles-grid');
+            if (grid) {
+                const headerOffset = 150;
+                const elementPosition = grid.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
+        };
+        pagination.appendChild(btn);
+    }
+}
+
+
+
+// --- EXPERIMENTS LISTING --- 
+async function loadExperimentsPage() {
+    console.log('Loading Articles Page...');
+    const grid = document.getElementById('experiments-grid');
+    if (!grid) return; // Not on articles page
+
+    try {
+        // Use preloaded server experiments if available, otherwise fetch from API
+        if (window.SERVER_EXPERIMENTS) {
+            pageExperiments = window.SERVER_EXPERIMENTS;
+        } else {
+            const res = await fetch(`${API_URL}/experiments`);
+            if (!res.ok) throw new Error('API Error');
+            pageExperiments = await res.json();
+        }
+
+        // Initial Sort (Newest first)
+        pageExperiments.sort((a, b) => (new Date(b.created_at) - new Date(a.created_at)) || (b.id - a.id));
+        filteredExperiments = [...pageExperiments];
+
+        // Ensure category filter chips exist for loaded experiments
+        const list = document.getElementById('category-filters');
+        if (list && pageExperiments.length > 0) {
+            const catSet = new Set();
+            pageExperiments.forEach(e => {
+                if (e.category) {
+                    e.category.split(',').forEach(c => {
+                        const trimmed = c.trim();
+                        if (trimmed) catSet.add(trimmed);
+                    });
+                }
+            });
+            const existingChips = new Set(Array.from(list.querySelectorAll('.filter-chip')).map(c => c.innerText.trim()));
+            catSet.forEach(catName => {
+                if (!existingChips.has(catName)) {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-chip';
+                    btn.innerText = catName;
+                    btn.onclick = function () {
+                        filterPageExperiments(catName, this);
+                    };
+                    list.appendChild(btn);
+                }
+            });
+        }
+
+        // Check URL Params for Category
+        const urlParams = new URLSearchParams(window.location.search);
+        const catParam = urlParams.get('category');
+        if (catParam) {
+            // Activate chip
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(c => {
+                if (c.innerText === catParam) {
+                    c.click(); // Trigger click logic
+                }
+            });
+            // If manual filter needed:
+            filterPageExperiments(catParam, null);
+        } else {
+            // Check URL Params for Search
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                // Pre-fill input if exists
+                const searchInput = document.getElementById('experiment-search-input');
+                if (searchInput) {
+                    searchInput.value = searchParam;
+                }
+                searchPageExperiments(searchParam);
+            } else {
+                renderExperimentsGrid();
+            }
+        }
+
+    } catch (e) {
+        console.error('Experiments Page Error:', e);
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">Hata oluştu: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function filterPageExperiments(category, btnElement) {
+    // UI Update
+    if (btnElement) {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+
+    if (category === 'all') {
+        filteredExperiments = [...pageExperiments];
+    } else {
+        filteredExperiments = pageExperiments.filter(a => a.category && a.category.split(',').map(c => c.trim()).includes(category));
+    }
+
+    currentPage = 1;
+    renderExperimentsGrid();
+}
+
+function searchPageExperiments(query) {
+    const term = query.toLowerCase();
+
+    filteredExperiments = pageExperiments.filter(a =>
+        (a.title && a.title.toLowerCase().includes(term)) ||
+        (a.excerpt && a.excerpt.toLowerCase().includes(term)) ||
+        (a.tags && a.tags.toLowerCase().includes(term))
+    );
+
+    currentPage = 1;
+    renderExperimentsGrid();
+}
+
+function renderExperimentsGrid() {
+    const grid = document.getElementById('experiments-grid');
+    const pagination = document.getElementById('pagination-container');
+
+    if (!grid) return;
+
+    // Filter Logic
+    // If we are just rendering page, we rely on filteredExperiments state
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const toRender = filteredExperiments.slice(start, end);
+
+    // Scroll to top of grid smoothly if it's a page change (optional, but nice)
+    // if (currentPage > 1) { ... }
+
+    grid.innerHTML = ''; // Always clear for page replacement
+
+    if (filteredExperiments.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:60px; color:#64748b; font-size:1.1rem;">Aradığınız kriterlere uygun makale bulunamadı.</div>`;
+        if (pagination) pagination.style.display = 'none';
+        return;
+    }
+
+    toRender.forEach(article => {
+        const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
+        const safeTitle = escapeHtml(article.title);
+        const safecategory = escapeHtml(article.category || 'Genel');
+        const safeAuthor = escapeHtml(article.author_name || 'Yazar');
+
+        const html = `
+            <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
+                <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
+                <div class="card-overlay" style="pointer-events: none;"></div>
+                
+                <div class="card-top-content" style="pointer-events: none;">
+                     <span class="category-badge-glass">${safecategory}</span>
+                </div>
+                
+                <div class="card-bottom-content" style="pointer-events: none;">
+                    <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 8px;">${safeTitle}</h3>
+            <div class="author-name" style="font-size: 0.85rem; opacity: 0.9; position: relative; z-index: 12; pointer-events: auto;">
+                ${(article.authors && article.authors.length > 0)
+                ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        ${article.authors.map((a) => `
+                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                        `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                       </div>`
+                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                        ${safeAuthor}
+                       </a>`
+            }
+            </div>
+                </div>
+
+                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" class="read-btn-circle" style="pointer-events: auto; z-index: 10;" aria-label="Deneyi oku: ${safeTitle}"><i class="ph-bold ph-arrow-right"></i></a>
+                <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
+            </article>
+        `;
+        grid.innerHTML += html;
+    });
+
+    // Numeric Pagination Logic
+    renderExperimentPaginationControls();
+}
+
+function renderExperimentPaginationControls() {
+    const pagination = document.getElementById('pagination-container');
+    if (!pagination) return;
+
+    const totalPages = Math.ceil(filteredExperiments.length / itemsPerPage);
+
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    pagination.style.display = 'flex';
+    pagination.innerHTML = '';
+
+    // Previous
+    // const prevBtn = document.createElement('button'); ... (Optional)
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.onclick = () => {
+            currentPage = i;
+            renderExperimentsGrid();
+            // Scroll to top of grid
+            const grid = document.getElementById('experiments-grid');
             if (grid) {
                 const headerOffset = 150;
                 const elementPosition = grid.getBoundingClientRect().top;
@@ -1736,6 +2500,14 @@ async function loadArticleDetail() {
 }
 
 function renderArticleDetail(article) {
+    // Send View Log to API (JS-only client validation)
+    if (article && article.id) {
+        fetch(`/api/articles/${article.id}/view`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log('[VIEW-TRACKING] Article view logged:', data))
+            .catch(err => console.error('[VIEW-TRACKING] Failed to log article view:', err));
+    }
+
     // Render content
     document.getElementById('loading-indicator').style.display = 'none';
     document.getElementById('article-wrapper').style.display = 'block';
@@ -1828,9 +2600,28 @@ function renderArticleDetail(article) {
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
     document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
-    const authorName = article.author_name || window.SERVER_AUTHOR || 'Gizli Yazar';
+    // Multi-author Support
+    // Multi-author Support
+    // MERGE: Ensure article.authors is populated from SSR global if missing
+    if ((!article.authors || article.authors.length === 0) && window.SERVER_AUTHORS) {
+        article.authors = window.SERVER_AUTHORS;
+    }
 
-    document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${authorName}`;
+    if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
+        const authorsHtml = article.authors.map((a) => {
+            const avatarSrc = a.avatar_url ? resolveImagePath(a.avatar_url) : '/uploads/default-avatar.png';
+            return `<a href="author-profile.html?u=${a.id}" class="author-chip"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" class="author-chip-avatar">${escapeHtml(a.fullname)}</a>`;
+        }).join('');
+        document.getElementById('detail-author').innerHTML = `<div class="author-chips-wrapper">${authorsHtml}</div>`;
+    } else {
+        const safeAuthorName = article.author_name || (window.SERVER_AUTHORS ? window.SERVER_AUTHORS[0]?.fullname : null) || 'AperionX Yazarı';
+        if (article.author_id) {
+            document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+        } else {
+            document.getElementById('detail-author').innerHTML = `<span class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</span>`;
+        }
+    }
+
     document.getElementById('detail-title').innerText = article.title;
 
     // Excerpt
@@ -1866,7 +2657,7 @@ function renderArticleDetail(article) {
     // References
     const refSection = document.getElementById('references-section');
 
-    if (article.references_list && refSection) {
+    if ((article.references_list || article.visual_references_list) && refSection) {
         // Clear and rebuild section content
         refSection.innerHTML = '';
 
@@ -1878,16 +2669,23 @@ function renderArticleDetail(article) {
         refSection.appendChild(mainTitle); 
         */
 
-        const allRefs = article.references_list;
         let textRefs = [];
         let imgRefs = [];
 
-        if (allRefs.includes('[IMAGES]')) {
-            const parts = allRefs.split('[IMAGES]');
-            textRefs = parts[0].trim().split('\n').filter(r => r.trim());
-            imgRefs = parts[1].trim().split('\n').filter(r => r.trim());
-        } else {
-            textRefs = allRefs.split('\n').filter(r => r.trim());
+        let rawRefs = article.references_list || '';
+        let rawVisual = article.visual_references_list || '';
+
+        if (!rawVisual.trim() && rawRefs.includes('[IMAGES]')) {
+            const parts = rawRefs.split('[IMAGES]');
+            rawRefs = parts[0];
+            rawVisual = parts[1];
+        }
+
+        if (rawRefs) {
+            textRefs = rawRefs.split('\n').filter(r => r.trim());
+        }
+        if (rawVisual) {
+            imgRefs = rawVisual.split('\n').filter(r => r.trim());
         }
 
         // 1. Text References
@@ -2057,7 +2855,7 @@ async function loadFrontendCategories() {
         // Fetch Settings & Categories in parallel or sequence
         // Optimized: parallel
         const [catRes, setRes] = await Promise.all([
-            fetch(`${API_URL}/categories`),
+            fetch(window.location.pathname.includes("/experiments") ? `${API_URL}/experiments/categories` : `${API_URL}/categories`),
             fetch(`${API_URL}/settings`)
         ]);
 
@@ -2080,12 +2878,16 @@ async function loadFrontendCategories() {
         const categories = await catRes.json();
 
         if (list) {
+            // Remove any previously appended dynamic chips (keep the first 'Tümü' chip)
+            const chips = list.querySelectorAll('.filter-chip:not(:first-child)');
+            chips.forEach(c => c.remove());
+
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-chip';
                 btn.innerText = cat.name;
                 btn.onclick = function () {
-                    filterPageArticles(cat.name, this);
+                    if (window.location.pathname.includes('/experiments')) { filterPageExperiments(cat.name, this); } else { filterPageArticles(cat.name, this); }
                 };
                 list.appendChild(btn);
             });
@@ -2099,6 +2901,11 @@ async function loadFrontendCategories() {
                         const allBtn = list.querySelector('.filter-chip.active');
                         if (allBtn) allBtn.classList.remove('active');
                         child.classList.add('active');
+                        if (window.location.pathname.includes('/experiments')) {
+                            filterPageExperiments(activeCat, child);
+                        } else {
+                            filterPageArticles(activeCat, child);
+                        }
                     }
                 });
             }
@@ -2229,7 +3036,17 @@ async function loadArticleSlider(currentId) {
                      <div class="content-bottom">
                         <a href="${art.slug ? '/makale/' + art.slug : '/article-detail.html?id=' + art.id}" class="similar-card-title">${art.title}</a>
                         <div class="similar-card-meta">
-                            <span>${art.author_name || 'Admin'}</span>
+                            ${(art.authors && art.authors.length > 0)
+                    ? `<span style="display:inline-flex; gap:4px; flex-wrap:wrap;">
+                                    ${art.authors.map((a, idx) => `
+                                        ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
+                                        <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    `).join(' <span style="opacity:0.6">&amp;</span> ')}
+                                   </span>`
+                    : (art.author_id
+                        ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
+                        : `<span>${art.author_name || 'Admin'}</span>`)
+                }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
                             <span>${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>
                         </div>
@@ -2255,18 +3072,12 @@ async function loadArticleSlider(currentId) {
 async function loadLikes(id) {
     try {
         const token = localStorage.getItem('token');
-        const btn = document.getElementById('like-btn');
-        if (!btn) return;
-
-        if (!token) {
-            btn.classList.remove('liked');
-            btn.innerHTML = `<i class="ph ph-heart"></i> Beğen & Destek Ol`;
-            return;
-        }
-
-        const headers = { 'Authorization': `Bearer ${token}` };
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const res = await fetch(`${API_URL}/articles/${id}/like`, { headers });
         const data = await res.json();
+
+        const btn = document.getElementById('like-btn');
+        if (!btn) return;
 
         if (data.liked) {
             btn.classList.add('liked');
@@ -2281,7 +3092,7 @@ async function loadLikes(id) {
 async function toggleLike() {
     const token = localStorage.getItem('token');
     if (!token) {
-        openModal('loginModal');
+        showToast('Beğenmek için giriş yapmalısınız.', 'error');
         return;
     }
 
@@ -2313,12 +3124,31 @@ if (typeof window.loadComments === 'undefined') {
         const list = document.getElementById('comments-list');
         if (!list) return;
 
+        // Render Comment Form based on auth status
+        const token = localStorage.getItem('token');
+        const formContainer = document.getElementById('comment-form-container');
+        if (formContainer) {
+            if (token) {
+                formContainer.innerHTML = `
+                    <div class="comment-form">
+                        <textarea id="comment-input" rows="4" placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                        <div class="form-actions">
+                            <button onclick="postComment()" class="btn btn-primary">Yorum Yap</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                formContainer.innerHTML = `<p class="login-prompt">Yorum yapabilmek için <a href="javascript:void(0)" onclick="openModal('loginModal'); return false;">giriş yapmalısınız</a>.</p>`;
+            }
+        }
+
         try {
-            const res = await fetch(`${API_URL}/articles/${id}/comments`);
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const res = await fetch(`${API_URL}/articles/${id}/comments`, { headers });
             const comments = await res.json();
 
             const countEl = document.getElementById('comment-count');
-            if (countEl) countEl.innerText = `(${comments.length})`;
+            if (countEl) countEl.innerText = comments.length;
 
             list.innerHTML = '';
             if (comments.length === 0) {
@@ -2389,9 +3219,22 @@ if (typeof window.postComment === 'undefined') {
                 showToast('Yorum gönderildi!', 'success');
                 loadComments(id);
             } else {
-                showToast('Yorum gönderilemedi.', 'error');
+                let errorMsg = 'Yorum gönderilemedi.';
+                try {
+                    const data = await res.json();
+                    if (data && data.error) errorMsg = data.error;
+                    else if (data && data.message) errorMsg = data.message;
+                } catch (jsonErr) {
+                    if (res.status === 401 || res.status === 403) {
+                        errorMsg = 'Oturum süreniz dolmuş veya yetkisiz işlem. Lütfen tekrar giriş yapın.';
+                    }
+                }
+                showToast(errorMsg, 'error');
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error('postComment error:', e); 
+            showToast('Yorum gönderilirken bir hata oluştu.', 'error');
+        }
     };
 }
 
@@ -2423,9 +3266,15 @@ function initHeroScroll() {
     if (btn) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.getElementById('showcase');
+            const target = document.getElementById('categories') || document.getElementById('showcase');
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Scroll to push slider completely above viewport
+                // Categories has 100px top padding so content appears below the 80px header
+                const elementTop = target.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({
+                    top: elementTop,
+                    behavior: 'smooth'
+                });
             } else {
                 // Fallback for different pages (go to articles)
                 window.location.href = "/articles";
@@ -2438,6 +3287,7 @@ function hideLoader() {
     const loader = document.getElementById('global-loader');
     if (loader && !loader.classList.contains('hidden')) {
         loader.classList.add('hidden');
+        document.body.classList.remove('loader-active');
         // Remove from DOM after transition
         setTimeout(() => {
             loader.style.display = 'none';
@@ -2490,68 +3340,6 @@ function initLanguageSwitcher_OLD() {
 
 
 // --- Restore: Load User Info ---
-async function loadUserInfo() {
-    const token = localStorage.getItem('token');
-    const userMenuContainer = document.getElementById('user-menu-container');
-    const mobileAuth = document.querySelector('.mobile-auth');
-
-    if (token) {
-        try {
-            const res = await fetch(`${API_URL}/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                const user = await res.json();
-
-                // Desktop Header
-                if (userMenuContainer) {
-                    userMenuContainer.innerHTML = `
-                        <div class="user-dropdown">
-                            <button class="user-btn" onclick="toggleUserDropdown()">
-                                <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User" class="user-avatar-small">
-                                <span>${user.fullname.split(' ')[0]}</span>
-                                <i class="ph-bold ph-caret-down"></i>
-                            </button>
-                            <div class="dropdown-menu" id="user-dropdown-menu">
-                                ${user.role === 'admin' ? '<a href="admin.html"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
-                                ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
-                                <a href="profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
-                                <a href="#" onclick="logout()"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Mobile Menu
-                if (mobileAuth) {
-                    mobileAuth.innerHTML = `
-                        <div class="mobile-user-profile" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.fullname}" alt="User" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #333;">
-                            <div class="mobile-user-info">
-                                <span class="name">${user.fullname}</span>
-                                <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'author' ? 'Yazar' : 'Üye')}</span>
-                            </div>
-                        </div>
-                        <div class="mobile-user-links">
-                            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Panel</a>' : ''}
-                            ${user.role === 'author' || user.role === 'admin' ? '<a href="author.html" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
-                            <a href="profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
-                            <button onclick="logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
-                        </div>
-                    `;
-                }
-            } else {
-                localStorage.removeItem('token'); // Invalid token
-            }
-        } catch (e) {
-            console.error('User info load error:', e);
-        }
-    } else {
-        // Not logged in (Default state is already static HTML, but ensure correctness)
-    }
-}
-
 function toggleUserDropdown() {
     const menu = document.getElementById('user-dropdown-menu');
     if (menu) menu.classList.toggle('active');
@@ -2561,20 +3349,6 @@ function logout() {
     localStorage.removeItem('token');
     showToast('Çıkış yapıldı', 'success');
     setTimeout(() => window.location.reload(), 1000);
-}
-
-// --- Mobile Menu ---
-function setupMobileMenu() {
-    const btn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('mobileMenu');
-    const closeBtn = document.getElementById('mobile-menu-close');
-
-    if (btn && menu) {
-        btn.onclick = () => menu.classList.add('active');
-    }
-    if (closeBtn && menu) {
-        closeBtn.onclick = () => menu.classList.remove('active');
-    }
 }
 
 // --- Active Nav Link ---
@@ -2590,146 +3364,512 @@ function updateActiveNavLink() {
 }
 
 
+// --- GOOGLE BANNER KILLER ---
+function hideGoogleBanner() {
+    // 1. Remove the Banner Frame completely
+    const startBanner = document.querySelector('.goog-te-banner-frame');
+    if (startBanner) {
+        startBanner.remove(); // DELETE IT
+    }
+
+    // 2. Also check specifically for iframes that might be the banner
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        // Log found iframes for debugging
+        // console.log("Checking iframe:", iframe.id, iframe.className, iframe.parentElement);
+
+        if (iframe.className.includes('goog-te-banner-frame') ||
+            iframe.id === 'goog-te-banner-frame' ||
+            (iframe.src && iframe.src.includes('google.com/translate')) ||
+            // AGGRESSIVE: If it's fixed at top and has no ID/Class, it might be it
+            (getComputedStyle(iframe).position === 'fixed' && getComputedStyle(iframe).top === '0px')
+        ) {
+            console.log("Hiding (NOT Killing) Google Banner Iframe:", iframe);
+            // DO NOT REMOVE! Removing it kills the translation engine.
+            // Just hide it visibly.
+            iframe.style.display = 'none';
+            iframe.style.visibility = 'hidden';
+            iframe.style.height = '0px';
+            iframe.style.width = '0px';
+            iframe.style.opacity = '0';
+            iframe.style.pointerEvents = 'none';
+            iframe.style.zIndex = '-1000';
+        }
+    });
+
+    // 3. Force Body Reset
+    if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
+        document.body.style.top = '0px';
+        document.body.style.marginTop = '0px';
+        document.body.classList.remove('translated-ltr'); // Remove Google class
+    }
+
+    // 4. Hide Gadget Icon
+    const icon = document.querySelector('.goog-te-gadget-icon');
+    if (icon) icon.style.display = 'none';
+
+    // 5. Hide Tooltip
+    const tooltip = document.querySelector('.goog-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+}
+// Run extremely aggressively at start, then periodically
+setInterval(hideGoogleBanner, 100);
+
+
+// --- Language Switcher (Robust / "Nuclear" Version) ---
 function initLanguageSwitcher() {
-    // 1. Inject Google Translate Script if not present
-    if (!document.querySelector('#google-translate-script')) {
+    // 0. INJECT GOOGLE TRANSLATE SCRIPT IF MISSING
+    if (!document.getElementById('google-translate-script')) {
         const script = document.createElement('script');
         script.id = 'google-translate-script';
         script.type = 'text/javascript';
-        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
         document.head.appendChild(script);
 
-        // Add hidden element for Google Translate
-        const div = document.createElement('div');
-        div.id = 'google_translate_element';
-        div.style.display = 'none'; // Hide default widget
-        document.body.appendChild(div);
-
-        // Add CSS to hide Google Top Bar
-        const style = document.createElement('style');
-        style.innerHTML = `
-            /* NUCLEAR OPTION: Hide Google Translate Top Banner */
-            .goog-te-banner-frame { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; }
-            .skiptranslate { display: none !important; } 
-            iframe.goog-te-banner-frame { display: none !important; }
-            
-            /* Force Body/HTML to top */
-            body { top: 0px !important; position: inherit !important; margin-top: 0 !important; }
-            html { top: 0px !important; margin-top: 0 !important; }
-            
-            /* Hide Widget */
-            #google_translate_element { display: none !important; }
-            .goog-tooltip { display: none !important; }
-            .goog-te-gadget-simple { display: none !important; }
-            
-            font { background-color: transparent !important; box-shadow: none !important; }
-        `;
-        document.head.appendChild(style);
-
-        // --- Mobile Menu Injection ---
-        const mobileMenu = document.querySelector('.nav-links'); // This is usually the container
-        // Or specifically for mobile-menu specific div if it exists. 
-        // In this theme, .nav-links becomes the mobile menu on small screens.
-
-        // We want to append a list item for the language Switcher at the bottom of the list
-        if (mobileMenu && !document.getElementById('mobile-lang-btn-li')) {
-            const li = document.createElement('li');
-            li.id = 'mobile-lang-btn-li';
-            li.className = 'mobile-only'; // Ensure it can be styled if needed
-            li.style.marginTop = '20px';
-            li.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-            li.style.paddingTop = '10px';
-
-            const a = document.createElement('a');
-            a.href = '#';
-            a.id = 'mobile-lang-switch-btn';
-            a.className = 'lang-btn';
-            a.style.justifyContent = 'center'; // Center text
-
-            // Initial Text (will be updated by the logic below)
-            a.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
-
-            li.appendChild(a);
-            mobileMenu.appendChild(li);
+        // Add hidden target element
+        if (!document.getElementById('google_translate_element')) {
+            const div = document.createElement('div');
+            div.id = 'google_translate_element';
+            div.style.display = 'none';
+            document.body.appendChild(div);
         }
 
+        // Init Callback
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement({
+                pageLanguage: 'tr',
+                includedLanguages: 'en,tr',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        };
+    }
 
-        // AGGRESSIVE REMOVAL: Force remove the banner from DOM
-        const removeBanner = setInterval(() => {
-            // Remove iframe
-            const iframes = document.querySelectorAll('iframe.goog-te-banner-frame');
-            iframes.forEach(el => el.remove());
-
-            // Remove skiptranslate divs
-            const banners = document.querySelectorAll('.goog-te-banner-frame');
-            banners.forEach(el => el.remove());
-
-            // Force body/html styles
-            if (document.body.style.top !== '0px' || document.body.style.marginTop !== '0px') {
-                document.body.style.top = '0px';
-                document.body.style.marginTop = '0px';
-                document.body.style.position = 'inherit';
+    const enforceLanguageButtons = () => {
+        try {
+            // --- COOKIE HELPERS ---
+            function getCookie(name) {
+                const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                return v ? v[2] : null;
             }
-            if (document.documentElement.style.top !== '0px' || document.documentElement.style.marginTop !== '0px') {
-                document.documentElement.style.top = '0px';
-                document.documentElement.style.marginTop = '0px';
-                document.documentElement.style.height = '100%';
+            function setCookie(name, value) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=${value}; path=/`;
+                document.cookie = `${name}=${value}; path=/; domain=${domain}`;
+                document.cookie = `${name}=${value}; path=/; domain=.${domain}`;
             }
-        }, 10); // Check every 10ms
+            function deleteCookie(name) {
+                const domain = window.location.hostname;
+                document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+                document.cookie = `${name}=; path=/; domain=.${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+            }
 
-        // Run for 10 seconds to cover slow loads
-        setTimeout(() => clearInterval(removeBanner), 10000);
-    }
+            // --- STATE ---
+            const currentTrans = getCookie('googtrans');
+            const isEnglish = currentTrans === '/tr/en';
 
-    // 2. Define Init Function Global
-    window.googleTranslateElementInit = function () {
-        new google.translate.TranslateElement({
-            pageLanguage: 'tr',
-            includedLanguages: 'en,tr',
-            autoDisplay: false
-        }, 'google_translate_element');
-    };
+            // --- SVG FLAGS ---
+            const trFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#e30a17"/><circle cx="13" cy="16" r="6" fill="#fff"/><circle cx="14.5" cy="16" r="5" fill="#e30a17"/><path d="M19 16 L20.5 14.5 L20.5 17.5 Z" fill="#fff" stroke="#fff" stroke-width="2"/></svg>`;
+            const enFlag = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="border-radius: 50%; display: block;"><rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#00247d"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#fff" stroke-width="6"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#fff" stroke-width="10"/><path d="M1 4 L31 28 M31 4 L1 28" stroke="#cf142b" stroke-width="3"/><path d="M16 4 L16 28 M1 16 L31 16" stroke="#cf142b" stroke-width="6"/></svg>`;
 
-    // 3. Read Cookie to determine state
-    function getCookie(name) {
-        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-        return v ? v[2] : null;
-    }
+            const labelContent = isEnglish
+                ? `<div style="display:flex; align-items:center; gap:6px;">${trFlag} <span style="font-weight:700;">TR</span></div>`
+                : `<div style="display:flex; align-items:center; gap:6px;">${enFlag} <span style="font-weight:700;">EN</span></div>`;
 
-    function setCookie(name, value, days) {
-        const d = new Date();
-        d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
-        document.cookie = name + "=" + value + ";path=/;domain=" + window.location.hostname;
-    }
+            // --- HANDLER --- 
+            const handleLangClick = (e, btnElement) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-    // Check current state
-    const currentLang = getCookie('googtrans');
-    const isEnglish = currentLang === '/tr/en';
+                if (btnElement) {
+                    btnElement.style.transform = 'scale(0.95)';
+                    setTimeout(() => btnElement.style.transform = 'scale(1)', 100);
+                    btnElement.style.opacity = '0.7';
+                }
 
-    // Update Buttons
-    const btns = document.querySelectorAll('.lang-btn, #lang-switch-btn');
-    btns.forEach(btn => {
-        if (isEnglish) {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> TR';
-            btn.title = "Türkçe'ye dön";
-        } else {
-            btn.innerHTML = '<i class="ph-bold ph-globe"></i> EN';
-            btn.title = "Translate to English";
-        }
-
-        btn.onclick = (e) => {
-            e.preventDefault();
-            if (isEnglish) {
-                // Switch to TR
-                setCookie('googtrans', '/tr/tr', 1);
+                // NUCLEAR CLEAR
+                deleteCookie('googtrans');
                 document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
-                window.location.reload();
-            } else {
-                // Switch to EN
-                setCookie('googtrans', '/tr/en', 1);
-                window.location.reload();
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.aperionx.com";
+                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=aperionx.com";
+
+                if (isEnglish) {
+                    // Switch to Turkish
+                    document.cookie = "googtrans=/tr/tr; path=/";
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/tr; path=/; domain=.aperionx.com";
+                } else {
+                    // Switch to English
+                    document.cookie = "googtrans=/tr/en; path=/";
+                    document.cookie = "googtrans=/tr/en; path=/; domain=" + window.location.hostname;
+                    document.cookie = "googtrans=/tr/en; path=/; domain=.aperionx.com";
+                }
+
+                console.log("Language Switched. Reloading...");
+                setTimeout(() => window.location.reload(), 200);
+            };
+
+            // --- 1. MOBILE MENU BUTTON ---
+            const mobileMenu = document.querySelector('.mobile-menu');
+            if (mobileMenu) {
+                let mobileBtn = document.getElementById('nuclear-mobile-btn');
+                // Ensure it exists and is inside the menu
+                if (!mobileBtn || mobileBtn.parentNode !== mobileMenu) {
+                    if (mobileBtn) mobileBtn.remove();
+                    mobileBtn = document.createElement('a');
+                    mobileBtn.id = 'nuclear-mobile-btn';
+                    mobileBtn.href = "#";
+                    mobileBtn.setAttribute('role', 'button');
+                    // Static Styles
+                    mobileBtn.style.cssText = `
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 8px !important;
+                        padding: 12px 25px !important;
+                        border-radius: 50px !important;
+                        background-color: rgba(255,255,255,0.1) !important;
+                        border: 1px solid rgba(255,255,255,0.2) !important;
+                        color: var(--text-color, #fff) !important;
+                        font-family: sans-serif !important;
+                        font-weight: bold !important;
+                        font-size: 14px !important;
+                        margin-bottom: 15px !important;
+                        width: auto !important;
+                        max-width: 200px !important;
+                        cursor: pointer !important;
+                        transition: transform 0.1s !important;
+                    `;
+
+                    // --- POSITIONING FIX ---
+                    // Want it explicitly at the bottom, after auth buttons
+                    const authSection = mobileMenu.querySelector('.mobile-auth');
+
+                    if (authSection) {
+                        // Insert AFTER auth section
+                        if (mobileBtn.parentNode !== mobileMenu || mobileBtn.previousElementSibling !== authSection) {
+                            // Check if already after
+                            if (authSection.nextSibling !== mobileBtn) {
+                                authSection.parentNode.insertBefore(mobileBtn, authSection.nextSibling);
+                            }
+                        }
+                    } else {
+                        // Fallback: Append to end
+                        mobileMenu.appendChild(mobileBtn);
+                    }
+
+                    mobileBtn.style.marginTop = '15px'; // Force separation
+                    mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
+                }
+                // Update Content
+                if (!mobileBtn.innerHTML.includes('svg')) {
+                    mobileBtn.innerHTML = labelContent;
+                }
             }
-        };
-    });
+
+            // --- 2. DESKTOP BUTTON ---
+            let desktopBtn = document.getElementById('lang-switch-btn');
+            if (desktopBtn) {
+                // Enforce Styles
+                desktopBtn.style.width = 'auto';
+                desktopBtn.style.height = '36px';
+                desktopBtn.style.padding = '0 12px';
+                desktopBtn.style.borderRadius = '20px';
+                desktopBtn.style.display = 'flex';
+                desktopBtn.style.alignItems = 'center';
+                desktopBtn.style.justifyContent = 'center';
+                desktopBtn.style.gap = '6px';
+                desktopBtn.style.fontSize = '14px';
+
+                // Enforce Content
+                if (!desktopBtn.innerHTML.includes('svg')) {
+                    desktopBtn.innerHTML = labelContent;
+                }
+
+                // Attach Click
+                if (!desktopBtn.dataset.hasNuclearClick) {
+                    const newDesktopBtn = desktopBtn.cloneNode(true);
+                    desktopBtn.parentNode.replaceChild(newDesktopBtn, desktopBtn);
+                    newDesktopBtn.dataset.hasNuclearClick = "true";
+                    newDesktopBtn.onclick = (e) => handleLangClick(e, newDesktopBtn);
+                    desktopBtn = newDesktopBtn;
+                }
+            }
+
+        } catch (e) {
+            console.error("Lang Enforce Error", e);
+        }
+    };
+
+    // Run Logic
+    enforceLanguageButtons();
+// Run periodically to handle dynamic content/late loads
+    setInterval(enforceLanguageButtons, 1000);
 }
+
+// =====================================================================
+// YENİ: Kategori Kartları (Dinamik Yükleme)
+// =====================================================================
+async function loadPublicCategories() {
+    const grid = document.getElementById('public-categories-grid');
+    if (!grid) return;
+    try {
+        const res = await fetch('/api/category_cards');
+        const cards = await res.json();
+        if (!cards || cards.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">Kart bulunamadı.</p>';
+            return;
+        }
+        grid.innerHTML = cards.map(c => {
+            const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
+            const href = isArticles ? '#showcase' : c.link_url;
+            const onclick = isArticles ? `onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }"` : '';
+            return `
+                <a href="${href}" ${onclick} class="category-card">
+                    <div class="category-icon">
+                        <i class="${c.icon_class}"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">${c.title}</h3>
+                        <p class="category-desc">${c.description}</p>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error('Kategoriler yüklenirken hata:', e);
+    }
+}
+
+// === SPOTIFY ANNOUNCEMENT & PLAYER LOADERS ===
+function initSpotifyAnnouncement(settings) {
+    if (settings.spotify_announcement_active === 'true' || settings.spotify_announcement_active === 1 || settings.spotify_announcement_active === true) {
+        // Check if announcement bar already exists
+        if (document.getElementById('spotify-announcement-bar')) return;
+
+        // Check if user dismissed it in this session
+        if (sessionStorage.getItem('spotify-announcement-dismissed') === 'true') return;
+
+        const bar = document.createElement('div');
+        bar.id = 'spotify-announcement-bar';
+        bar.className = 'spotify-promo-bar';
+        
+        const text = settings.spotify_announcement_text || 'AperionX Podcast Spotify\'da yayında! Kulak verin →';
+        const url = settings.social_spotify || 'https://open.spotify.com';
+
+        bar.innerHTML = `
+            <div class="spotify-promo-content">
+                <i class="ph-fill ph-spotify-logo spotify-promo-icon"></i>
+                <span class="spotify-promo-text">${text}</span>
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="spotify-promo-btn">Dinle <i class="ph-bold ph-arrow-right"></i></a>
+            </div>
+            <button class="spotify-promo-close" aria-label="Kapat"><i class="ph ph-x"></i></button>
+        `;
+
+        // Prepend to body
+        document.body.insertBefore(bar, document.body.firstChild);
+        document.body.classList.add('has-spotify-announcement');
+
+        const promoBtn = bar.querySelector('.spotify-promo-btn');
+        if (promoBtn) {
+            promoBtn.addEventListener('click', (e) => {
+                const targetSec = document.getElementById('spotify-podcast-section');
+                if (targetSec) {
+                    e.preventDefault();
+                    const headerEl = document.querySelector('.header');
+                    const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+                    window.scrollTo({
+                        top: targetSec.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20, // Add 20px extra padding
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        }
+
+        const closeBtn = bar.querySelector('.spotify-promo-close');
+        closeBtn.addEventListener('click', () => {
+            bar.remove();
+            document.body.classList.remove('has-spotify-announcement');
+            sessionStorage.setItem('spotify-announcement-dismissed', 'true');
+            document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+            // Reset header top position
+            const headerEl = document.querySelector('.header');
+            if (headerEl) headerEl.style.top = '0px';
+        });
+
+        // Set CSS variable for layouts to adjust (e.g. fixed header top position)
+        setTimeout(() => {
+            const height = bar.offsetHeight;
+            document.documentElement.style.setProperty('--announcement-bar-height', `${height}px`);
+        }, 100);
+    }
+}
+
+function initSpotifyPodcastShowcase(settings) {
+    const section = document.getElementById('spotify-podcast-section');
+    if (!section) return; // Only exists on homepage
+
+    if (settings.spotify_podcast_embed && settings.spotify_podcast_embed.trim() !== '') {
+        // Show section
+        section.style.display = 'block';
+
+        // Load embed code
+        const playerContainer = document.getElementById('spotify-podcast-player-container');
+        if (playerContainer) {
+            playerContainer.innerHTML = settings.spotify_podcast_embed;
+            // Ensure the iframe has 100% width and correct styles
+            const iframe = playerContainer.querySelector('iframe');
+            if (iframe) {
+                iframe.setAttribute('loading', 'lazy');
+                iframe.style.width = '100%';
+                iframe.style.borderRadius = '12px';
+                iframe.style.border = 'none';
+                if (!iframe.getAttribute('height')) {
+                    iframe.setAttribute('height', '232');
+                }
+            }
+        }
+
+        // Update Title if present
+        const titleEl = document.getElementById('spotify-podcast-title-text');
+        if (titleEl && settings.spotify_podcast_title && settings.spotify_podcast_title.trim() !== '') {
+            titleEl.innerHTML = settings.spotify_podcast_title;
+        }
+
+        // Update Description if present
+        const descEl = document.getElementById('spotify-podcast-desc-text');
+        if (descEl && settings.spotify_podcast_desc && settings.spotify_podcast_desc.trim() !== '') {
+            descEl.innerHTML = settings.spotify_podcast_desc;
+        }
+
+        // Set button URL
+        const followBtn = document.getElementById('spotify-podcast-follow-btn');
+        if (followBtn && settings.social_spotify) {
+            followBtn.href = settings.social_spotify;
+        }
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+// ============================================================================
+// SYSTEM GUARD & CACHE MANAGEMENT (Kalıcı Önbellek ve Oturum Koruma Sistemi)
+// ============================================================================
+
+// 1. Önbellek & Depolama Temizleme Fonksiyonu
+window.clearSystemCacheAndReload = function () {
+    if (confirm("Önbellek ve geçici veriler temizlenerek sayfa yeniden yüklenecektir. Devam etmek istiyor musunuz?")) {
+        try {
+            // Yazılmakta olan taslak varsa sakla
+            const savedDraft = localStorage.getItem('aperionx_author_draft');
+            localStorage.clear();
+            sessionStorage.clear();
+            if (savedDraft) {
+                localStorage.setItem('aperionx_author_draft', savedDraft);
+            }
+
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+        } catch (e) {
+            console.error("Önbellek temizleme hatası:", e);
+        }
+        window.location.reload(true);
+    }
+};
+
+// 2. Arka Plan Sürüm Kontrolü (Version Checker)
+(function initVersionChecker() {
+    let currentVersion = null;
+
+    async function checkVersion() {
+        try {
+            const res = await fetch('/api/system/version', { cache: 'no-store' });
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            if (currentVersion === null) {
+                currentVersion = data.version;
+            } else if (currentVersion !== data.version) {
+                showUpdateNotice();
+            }
+        } catch (e) {
+            // Sessizce yut
+        }
+    }
+
+    function showUpdateNotice() {
+        if (document.getElementById('aperionx-update-banner')) return;
+        const banner = document.createElement('div');
+        banner.id = 'aperionx-update-banner';
+        banner.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 99999; background: #1e1b4b; color: #fff; border: 1px solid #6366f1; padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; font-family: sans-serif; font-size: 0.9rem; animation: slideIn 0.3s ease;';
+        banner.innerHTML = `
+            <span>💡 Sistem güncellendi. En iyi performans için lütfen sayfayı yenileyiniz.</span>
+            <button onclick="window.location.reload(true)" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Şimdi Yenile</button>
+            <button onclick="this.parentElement.remove()" style="background: transparent; color: #94a3b8; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 4px;">&times;</button>
+        `;
+        document.body.appendChild(banner);
+    }
+
+    setTimeout(checkVersion, 10000);
+    setInterval(checkVersion, 5 * 60 * 1000);
+})();
+
+// 3. Heartbeat & Sekmeye Dönüş (Visibility) Dinleyicisi
+(function initHeartbeatGuard() {
+    setInterval(async () => {
+        if (window.location.pathname.includes('/author') || window.location.pathname.includes('/editor') || window.location.pathname.includes('/admin')) {
+            try {
+                const res = await fetch('/api/me');
+                if (res.status === 401) {
+                    console.warn("Session expired. Auto-saving draft if present.");
+                    triggerAutoDraftSave();
+                }
+            } catch (e) {}
+        }
+    }, 15 * 60 * 1000);
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            if (window.location.pathname.includes('/author') || window.location.pathname.includes('/editor') || window.location.pathname.includes('/admin')) {
+                fetch('/api/me').then(res => {
+                    if (res.status === 401) {
+                        triggerAutoDraftSave();
+                    }
+                }).catch(() => {});
+            }
+        }
+    });
+})();
+
+// 4. Yazı Editörü Otomatik Taslak Kaydı (Auto-Save Draft)
+function triggerAutoDraftSave() {
+    try {
+        const titleInput = document.getElementById('title') || document.getElementById('article-title');
+        const contentEl = document.getElementById('editor') || document.getElementById('content');
+        
+        let contentText = '';
+        if (typeof quill !== 'undefined' && quill.root) {
+            contentText = quill.root.innerHTML;
+        } else if (contentEl) {
+            contentText = contentEl.value || contentEl.innerHTML;
+        }
+
+        if (titleInput && titleInput.value && contentText && contentText.length > 20) {
+            const draftData = {
+                title: titleInput.value,
+                content: contentText,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('aperionx_author_draft', JSON.stringify(draftData));
+        }
+    } catch (e) {
+        console.error("Auto draft save error:", e);
+    }
+}
+
+setInterval(triggerAutoDraftSave, 30000);
