@@ -539,7 +539,7 @@ function initCookieConsent() {
     // Banner HTML
     var bannerHTML = '<div class="ccb-card">' +
         '<div class="ccb-header">' +
-            '<div class="ccb-icon">🍪</div>' +
+            '<div class="ccb-icon"><i class="ph-fill ph-cookie"></i></div>' +
             '<h3 class="ccb-title">Çerez Kullanımı</h3>' +
             '<button class="ccb-close" id="ccb-close" aria-label="Kapat">✕</button>' +
         '</div>' +
