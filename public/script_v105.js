@@ -533,6 +533,9 @@ function initTheme() {
 var COOKIE_CONSENT_KEY = 'aperionx_cookie_consent';
 
 function initCookieConsent() {
+    var path = window.location.pathname.toLowerCase();
+    if (path.includes('author') || path.includes('admin') || path.includes('editor')) return;
+
     var saved = localStorage.getItem(COOKIE_CONSENT_KEY);
     if (saved) return; // Kullanıcı zaten tercih yapmış, banner gösterme
 
@@ -588,6 +591,9 @@ function initCookieConsent() {
 }
 
 function _createCookieSettingsModal() {
+    var path = window.location.pathname.toLowerCase();
+    if (path.includes('author') || path.includes('admin') || path.includes('editor')) return;
+
     if (document.getElementById('csm-overlay')) return;
 
     var modalHTML = '<div class="csm-modal">' +
