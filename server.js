@@ -1630,13 +1630,17 @@ async function ensureSchema() {
         try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         // Backfill published_at from created_at for existing published records
-        try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) {}
-        try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) {}
+        try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 1:', e); }
+        try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
 
         // Fix the 'İn Vitro' experiment date (ID 27) which was corrupted by the old buggy migration
         try { 
-            await pool.query("UPDATE experiments SET created_at = '2026-07-11 12:00:00', published_at = '2026-07-11 12:00:00' WHERE id = 27 AND (created_at > '2026-08-01' OR published_at > '2026-08-01')"); 
-        } catch(e) {}
+            console.log('[MIGRATION] Attempting to fix date for experiment 27...');
+            const [result] = await pool.query("UPDATE experiments SET created_at = '2026-07-11 12:00:00', published_at = '2026-07-11 12:00:00' WHERE id = 27"); 
+            console.log('[MIGRATION] Fix result:', result);
+        } catch(e) {
+            console.error('[MIGRATION] Error fixing experiment 27:', e);
+        }
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS experiment_authors (
