@@ -377,7 +377,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const safeUrl = (url || '').replace(/"/g, '&quot;');
 
                 // Format Date for Schema
-                const isoDate = new Date(article.created_at).toISOString();
+                const isoDate = new Date(article.published_at || article.created_at).toISOString();
 
                 // REPLACEMENT LOGIC
                 let html = htmlData;
@@ -504,7 +504,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace('<main id="article-wrapper" style="display: none;">', '<main id="article-wrapper">');
                 html = html.replace('<h1 class="article-title" id="detail-title">Makale Başlığı</h1>', `<h1 class="article-title" id="detail-title">${article.title}</h1>`);
                 html = html.replace('<span class="article-badge" id="detail-category">Teknoloji</span>', `<span class="article-badge" id="detail-category">${article.category || 'Bilim'}</span>`);
-                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}</span>`);
+                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(article.published_at || article.created_at).toLocaleDateString('tr-TR')}</span>`);
                 html = html.replace('<div class="summary-text" id="detail-excerpt"></div>', `<div class="summary-text" id="detail-excerpt">${article.excerpt || ''}</div>`);
                 html = html.replace('<div class="article-content" id="detail-content"></div>', `<div class="article-content" id="detail-content">${article.content}</div>`);
                 if (article.image_url) {
@@ -592,7 +592,7 @@ app.get('/preview-article/:id', async (req, res, next) => {
                 const safeSummary = (summary || '').replace(/"/g, '&quot;');
                 const safeImg = (img || '').replace(/"/g, '&quot;');
                 const safeUrl = `${origin}/makale/${article.slug}`;
-                const isoDate = new Date(article.created_at).toISOString();
+                const isoDate = new Date(article.published_at || article.created_at).toISOString();
 
                 let html = htmlData;
 
@@ -663,8 +663,8 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
 
             try {
                 // 1. Fetch Articles
-                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published'";
-                query += " ORDER BY created_at DESC";
+                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published'";
+                query += " ORDER BY COALESCE(published_at, created_at) DESC";
                 const [articles] = await pool.query(query);
 
                 if (articles.length > 0) {
@@ -809,8 +809,8 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
 
             try {
                 // 1. Fetch Experiments (Newest first)
-                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL";
-                query += " ORDER BY created_at DESC, id DESC";
+                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL";
+                query += " ORDER BY COALESCE(published_at, created_at) DESC, id DESC";
                 const [experiments] = await pool.query(query);
 
                 if (experiments.length > 0) {
@@ -1002,7 +1002,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 const safeUrl = (url || '').replace(/"/g, '&quot;');
 
                 // Format Date for Schema
-                const isoDate = new Date(experiment.created_at).toISOString();
+                const isoDate = new Date(experiment.published_at || experiment.created_at).toISOString();
 
                 // REPLACEMENT LOGIC
                 let html = htmlData;
@@ -1116,7 +1116,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 html = html.replace('<main id="article-wrapper" style="display: none;">', '<main id="article-wrapper">');
                 html = html.replace('<h1 class="article-title" id="detail-title">Deney Başlığı</h1>', `<h1 class="article-title" id="detail-title">${experiment.title}</h1>`);
                 html = html.replace('<span class="article-badge" id="detail-category">Deney</span>', `<span class="article-badge" id="detail-category">${experiment.category || 'Deney'}</span>`);
-                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(experiment.created_at).toLocaleDateString('tr-TR')}</span>`);
+                html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(experiment.published_at || experiment.created_at).toLocaleDateString('tr-TR')}</span>`);
 
                 if (experiment.image_url) {
                     html = html.replace('<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">', `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image">`);
@@ -1190,7 +1190,7 @@ app.get('/experiment-detail.html', async (req, res) => {
 app.get('/feed.xml', async (req, res) => {
     try {
         const [articles] = await pool.query(
-            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, author_id FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 30"
+            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, published_at, author_id FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC LIMIT 30"
         );
         const origin = `${req.protocol}://${req.get('host')}`;
 
@@ -1213,7 +1213,7 @@ app.get('/feed.xml', async (req, res) => {
             } catch (e) { /* ignore */ }
 
             const articleUrl = `${origin}/makale/${article.slug}`;
-            const pubDate = new Date(article.created_at).toUTCString();
+            const pubDate = new Date(article.published_at || article.created_at).toUTCString();
             const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const safeExcerpt = (article.excerpt || article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const imgUrl = article.image_url
@@ -1246,9 +1246,9 @@ app.get('/feed.xml', async (req, res) => {
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, updated_at FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, published_at, updated_at FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
-        const [experiments] = await pool.query("SELECT title, slug, image_url, created_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC");
+        const [experiments] = await pool.query("SELECT title, slug, image_url, created_at, published_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC");
         
         let baseUrl = `${req.protocol}://${req.get('host')}`;
         if (req.get('host').includes('aperionx.com')) {
@@ -1304,7 +1304,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // Dynamic Articles (Turkish and English Alternates + Image Sitemap)
         articles.forEach(article => {
-            const date = new Date(article.updated_at || article.created_at).toISOString();
+            const date = new Date(article.updated_at || article.published_at || article.created_at).toISOString();
             let imageXml = '';
             if (article.image_url) {
                 const imgLoc = article.image_url.startsWith('http') ? article.image_url : `${baseUrl}/${article.image_url.replace(/\\/g, '/')}`;
@@ -1324,7 +1324,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
         // Dynamic Experiments (Turkish and English Alternates + Image Sitemap)
         experiments.forEach(exp => {
-            const date = new Date(exp.created_at).toISOString();
+            const date = new Date(exp.published_at || exp.created_at).toISOString();
             let imageXml = '';
             if (exp.image_url) {
                 const imgLoc = exp.image_url.startsWith('http') ? exp.image_url : `${baseUrl}/${exp.image_url.replace(/\\/g, '/')}`;
@@ -1616,6 +1616,7 @@ async function ensureSchema() {
                 approved_by INT,
                 views INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                published_at TIMESTAMP NULL,
                 deleted_at TIMESTAMP NULL,
                 FOREIGN KEY (author_id) REFERENCES users(id)
             )
@@ -1624,6 +1625,13 @@ async function ensureSchema() {
         // Add deleted_at to existing tables if missing (Soft Delete support)
         try { await pool.query('ALTER TABLE experiments ADD COLUMN deleted_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN deleted_at TIMESTAMP NULL'); } catch(e) {}
+
+        // Add published_at to existing tables if missing
+        try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
+        // Backfill published_at from created_at for existing published records
+        try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) {}
+        try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) {}
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS experiment_authors (
@@ -1764,12 +1772,9 @@ async function ensureSchema() {
             console.error('Error initializing was_published status:', e);
         }
 
-        // Migration for experiments was_published & latest publish date fix
+        // Migration for experiments was_published
         try {
             await pool.query("ALTER TABLE experiments ADD COLUMN was_published TINYINT(1) DEFAULT 0");
-        } catch (e) {}
-        try {
-            await pool.query("UPDATE experiments SET created_at = NOW(), was_published = 1 WHERE title LIKE '%İn Vitro Memeli Hücre%' OR title LIKE '%Hücre Çözme%'");
         } catch (e) {}
 
         // --- NEW: Ensure parent_id exists in menu_items ---
@@ -1818,7 +1823,7 @@ async function rotateShowcaseArticles() {
             console.log('[SHOWCASE] Auto-rotating articles...');
 
             // 1. Fetch all published articles
-            const [articles] = await pool.query("SELECT id FROM articles WHERE status = 'published' ORDER BY created_at DESC");
+            const [articles] = await pool.query("SELECT id FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
             if (articles.length === 0) return;
 
             let offset = parseInt(settings.showcase_current_offset || '0');
@@ -2473,10 +2478,10 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, u.fullname as author_name  
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.published_at, a.image_url, u.fullname as author_name  
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
-            ORDER BY a.created_at DESC
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `);
         res.json(rows);
     } catch (e) { res.status(500).send(e.toString()); }
@@ -2557,7 +2562,7 @@ app.get('/api/articles', async (req, res) => {
         if (cached) return res.json(cached);
 
         // 1. Fetch Articles
-        let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM articles WHERE status = 'published'";
+        let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published'";
         const params = [];
 
         if (idsParam && idsParam.length > 0) {
@@ -2565,7 +2570,7 @@ app.get('/api/articles', async (req, res) => {
             params.push(idsParam);
         }
 
-        query += " ORDER BY created_at DESC";
+        query += " ORDER BY COALESCE(published_at, created_at) DESC";
 
         if (limit && (!idsParam || idsParam.length === 0)) {
             query += " LIMIT ?";
@@ -2648,7 +2653,7 @@ app.get('/api/experiments', async (req, res) => {
         if (cached) return res.json(cached);
 
         // 1. Fetch Experiments (Newest first)
-        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY created_at DESC, id DESC");
+        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC, id DESC");
 
         if (experiments.length > 0) {
             const expIds = experiments.map(e => e.id);
@@ -2747,12 +2752,12 @@ app.get('/api/experiments/:key', async (req, res) => {
 app.get('/api/author/articles', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.published_at, a.image_url, a.rejection_reason, 
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
             WHERE author_id = ? 
-            ORDER BY created_at DESC
+            ORDER BY COALESCE(published_at, created_at) DESC
         `, [req.user.id]);
         res.json(rows);
     } catch (e) {
@@ -2765,12 +2770,12 @@ app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
     console.log('[DEBUG] Route Hit: /api/articles/my-articles (User ID: ' + req.user.id + ')');
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.image_url, a.rejection_reason, 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.published_at, a.image_url, a.rejection_reason, 
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
             WHERE author_id = ? 
-            ORDER BY created_at DESC
+            ORDER BY COALESCE(published_at, created_at) DESC
         `, [req.user.id]);
         res.json(rows);
     } catch (e) {
@@ -2881,20 +2886,20 @@ app.get('/api/public/author/:identifier', async (req, res) => {
 
         // 2. Get Published Articles
         const [articles] = await pool.query(`
-            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at
             FROM articles a
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
-            ORDER BY a.created_at DESC
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `, [user.id, user.id]);
 
         // 3. Get Published Experiments
         const [experiments] = await pool.query(`
-            SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at
+            SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at, e.published_at
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
-            ORDER BY e.created_at DESC
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
         `, [user.id, user.id]);
 
         res.json({
@@ -3062,7 +3067,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         updates.push('status = ?');
         params.push('published');
         if (!wasPublished) {
-            updates.push('created_at = NOW()');
+            updates.push('published_at = NOW()');
             updates.push('was_published = 1');
         }
     } else if (finalStatus) {
@@ -3241,7 +3246,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
         updates.push('status = ?');
         params.push(finalStatus);
         if (finalStatus === 'published' && (!check[0] || !check[0].was_published)) {
-            updates.push('created_at = NOW()');
+            updates.push('published_at = NOW()');
             updates.push('was_published = 1');
         }
         if (finalStatus === 'pending' || finalStatus === 'draft') {
@@ -3452,7 +3457,7 @@ app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res
                 );
             } else {
                 await pool.query(
-                    "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL, created_at = NOW(), was_published = 1 WHERE id = ?",
+                    "UPDATE experiments SET status = 'published', approved_by = ?, rejection_reason = NULL, published_at = NOW(), was_published = 1 WHERE id = ?",
                     [req.user.id, experimentId]
                 );
             }
@@ -3519,7 +3524,7 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             } else {
-                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ?, created_at = NOW(), was_published = 1 WHERE id = ?";
+                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ?, published_at = NOW(), was_published = 1 WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             }
         } else if (decision === 'reject') {
@@ -3691,20 +3696,20 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
         // Get all articles and experiments with their view counts, like counts AND COMMENT counts
         const [items] = await pool.query(`
             SELECT 
-                a.id, a.title, a.created_at, a.views, 'article' as type,
+                a.id, a.title, a.created_at, a.published_at, a.views, 'article' as type,
                 (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as likes,
                 (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comments
             FROM articles a
             WHERE a.author_id = ? AND a.status = 'published'
             UNION ALL
             SELECT DISTINCT
-                e.id, e.title, e.created_at, e.views, 'experiment' as type,
+                e.id, e.title, e.created_at, e.published_at, e.views, 'experiment' as type,
                 0 as likes,
                 0 as comments
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
-            ORDER BY created_at DESC
+            ORDER BY COALESCE(published_at, created_at) DESC
         `, [userId, userId, userId]);
 
         // Calculate totals
@@ -3807,7 +3812,7 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
         let viewsQ = "SELECT SUM(views) as count FROM articles";
         let likesQ = "SELECT COUNT(*) as count FROM likes";
         let commentsQ = "SELECT COUNT(*) as count FROM comments";
-        let articlesQ = "SELECT articles.id, articles.title, articles.category, articles.status, articles.created_at, articles.views, users.fullname as author_name, (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count, (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count FROM articles LEFT JOIN users ON articles.author_id = users.id WHERE articles.status = 'published'";
+        let articlesQ = "SELECT articles.id, articles.title, articles.category, articles.status, articles.created_at, articles.published_at, articles.views, users.fullname as author_name, (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count, (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count FROM articles LEFT JOIN users ON articles.author_id = users.id WHERE articles.status = 'published'";
 
         let params = [];
         if (author_id && author_id !== 'all') {
@@ -3823,7 +3828,7 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
             articlesQ += " AND articles.author_id = ?";
         }
 
-        articlesQ += " ORDER BY created_at DESC";
+        articlesQ += " ORDER BY COALESCE(articles.published_at, articles.created_at) DESC";
 
         const [
             [pendingRows],
@@ -4886,13 +4891,13 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.status, a.created_at, 
+            SELECT a.id, a.title, a.status, a.created_at, a.published_at, 
                    u.fullname as author_name,
                    u2.fullname as approver_name
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
             LEFT JOIN users u2 ON a.approved_by = u2.id
-            ORDER BY a.created_at DESC
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `);
         res.json(rows);
     } catch (e) {
@@ -6816,7 +6821,7 @@ app.listen(PORT, async () => {
 async function checkAndSendLatestNotification() {
     try {
         // 1. Get Latest Published Article
-        const [rows] = await pool.query("SELECT id, title FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT 1");
+        const [rows] = await pool.query("SELECT id, title FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC LIMIT 1");
         if (rows.length === 0) return;
 
         const article = rows[0];
