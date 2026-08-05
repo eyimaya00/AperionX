@@ -1972,12 +1972,15 @@ window.scrollToShowcase = function () {
     console.log("Scroll triggered!");
     const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
     if (target) {
+        const header = document.querySelector('.header');
+        const headerOffset = header ? header.offsetHeight : 70;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = target.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
+        const offsetPosition = Math.max(0, elementPosition - headerOffset);
 
         window.scrollTo({
-            top: elementPosition,
+            top: offsetPosition,
             behavior: 'smooth'
         });
     } else {
@@ -3278,18 +3281,8 @@ function initHeroScroll() {
     if (btn) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.getElementById('categories') || document.getElementById('showcase');
-            if (target) {
-                // Scroll to push slider completely above viewport
-                // Categories has 100px top padding so content appears below the 80px header
-                const elementTop = target.getBoundingClientRect().top + window.pageYOffset;
-                window.scrollTo({
-                    top: elementTop,
-                    behavior: 'smooth'
-                });
-            } else {
-                // Fallback for different pages (go to articles)
-                window.location.href = "/articles";
+            if (typeof window.scrollToShowcase === 'function') {
+                window.scrollToShowcase();
             }
         });
     }

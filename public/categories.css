@@ -5,12 +5,13 @@
 .categories-section {
     position: relative;
     z-index: 10;
-    min-height: auto;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 80px 40px;
+    padding: 60px 40px;
     background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #f1f5f9);
     background-size: 400% 400%;
     animation: categoriesGradient 15s ease infinite;
@@ -177,8 +178,8 @@
         margin: 0 auto;
     }
     .categories-section {
-        padding: 60px 16px;
-        min-height: auto;
+        padding: 50px 16px;
+        min-height: calc(100vh - 70px);
     }
     .category-card {
         padding: 36px 24px 30px;
