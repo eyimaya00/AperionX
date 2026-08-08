@@ -2,6 +2,16 @@
 <html lang="tr">
 
 <head>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && !window.location.pathname.includes('author'))) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
      crossorigin="anonymous"></script>

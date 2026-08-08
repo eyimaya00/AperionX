@@ -5192,7 +5192,7 @@ i[class*=" ph"] {
     position: fixed;
     inset: 0;
     z-index: 999999 !important;
-    background-color: #ffffff;
+    background-color: #0f172a;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -5202,8 +5202,14 @@ i[class*=" ph"] {
     overflow: hidden;
 }
 
-[data-theme="dark"] #global-loader {
+[data-theme="dark"] #global-loader,
+html[data-theme="dark"] #global-loader {
     background-color: #0f172a;
+}
+
+[data-theme="light"] #global-loader,
+html[data-theme="light"] #global-loader {
+    background-color: #ffffff;
 }
 
 body.loader-active {
