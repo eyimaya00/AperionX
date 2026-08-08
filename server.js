@@ -1633,13 +1633,32 @@ async function ensureSchema() {
         try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 1:', e); }
         try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
 
-        // Fix the 'İn Vitro' experiment date (ID 27) which was corrupted by the old buggy migration
+        // Fix the experiment dates to match exact publication order (oldest to newest):
+        // 1. Bakır Sülfatın Kristallendirme Yöntemi ile Saflaştırılması
+        // 2. Ispanak Yapraklarından Kloroplast İzolasyonu
+        // 3. Sütten Yapıştırıcı Elde Edilmesi
+        // 4. İn Vitro Memeli Hücre Kültür Teknikleri Vol-1 ''Hücre Çözme''
+        // 5. Bitkisel Yağlardan Sabun Sentezi
+        // 6. İnsan Periferik Kan Lenfosit Kültürü ile Karyotip Analizi ve GTG Bantlama Yöntemi
         try { 
-            console.log('[MIGRATION] Attempting to fix date for experiment 27...');
-            const [result] = await pool.query("UPDATE experiments SET created_at = '2026-07-11 12:00:00', published_at = '2026-07-11 12:00:00' WHERE id = 27"); 
-            console.log('[MIGRATION] Fix result:', result);
+            console.log('[MIGRATION] Setting chronological publication dates for initial 6 experiments...');
+            const experimentDateFixes = [
+                { pattern: '%Bakır Sülfat%', date: '2026-07-01 12:00:00' },
+                { pattern: '%Kloroplast%', date: '2026-07-02 12:00:00' },
+                { pattern: '%Sütten%', date: '2026-07-03 12:00:00' },
+                { pattern: '%İn Vitro%', date: '2026-07-04 12:00:00' },
+                { pattern: '%Sabun%', date: '2026-07-05 12:00:00' },
+                { pattern: '%Lenfosit%', date: '2026-07-06 12:00:00' }
+            ];
+            for (const fix of experimentDateFixes) {
+                await pool.query(
+                    "UPDATE experiments SET created_at = ?, published_at = ? WHERE title LIKE ? OR slug LIKE ?",
+                    [fix.date, fix.date, fix.pattern, fix.pattern]
+                );
+            }
+            console.log('[MIGRATION] Initial 6 experiments dates updated successfully.');
         } catch(e) {
-            console.error('[MIGRATION] Error fixing experiment 27:', e);
+            console.error('[MIGRATION] Error updating experiment dates:', e);
         }
 
         await pool.query(`

@@ -2259,7 +2259,7 @@ async function loadExperimentsPage() {
         }
 
         // Initial Sort (Newest first)
-        pageExperiments.sort((a, b) => (new Date(b.created_at) - new Date(a.created_at)) || (b.id - a.id));
+        pageExperiments.sort((a, b) => (new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at)) || (b.id - a.id));
         filteredExperiments = [...pageExperiments];
 
         // Ensure category filter chips exist for loaded experiments
