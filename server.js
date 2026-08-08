@@ -950,7 +950,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
     }
     try {
         // Fetch experiment by slug
-        const [rows] = await pool.query("SELECT * FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [slug]);
+        const [rows] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, objective, materials, safety_notes, procedure_steps, youtube_url, pdf_url, references_list FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [slug]);
 
         if (rows.length === 0) {
             return res.status(404).send('Deney bulunamadı (404)');
@@ -2738,7 +2738,7 @@ app.get('/api/experiments', async (req, res) => {
 app.get('/api/experiments/:key', async (req, res) => {
     const key = req.params.key;
     try {
-        let sql = "SELECT * FROM experiments WHERE status = 'published' AND deleted_at IS NULL AND ";
+        let sql = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, objective, materials, safety_notes, procedure_steps, youtube_url, pdf_url, references_list FROM experiments WHERE status = 'published' AND deleted_at IS NULL AND ";
         let params = [];
 
         if (/^\d+$/.test(key)) {

@@ -1648,7 +1648,7 @@
             }, { passive: true });
             
             window.addEventListener('resize', updateProgress);
-            setInterval(updateProgress, 1000);
+            updateProgress();
         });
 
         // Initialize Experiment Details
@@ -1802,23 +1802,24 @@
             // References
             const refSection = document.getElementById('references-section');
             if (exp.references_list) {
-                refSection.innerHTML = '<h3 class="references-title">Kaynakça</h3><ul class="references-list" id="references-list"></ul>';
                 const refs = exp.references_list.split('\n').filter(r => r.trim());
-                const ul = document.getElementById('references-list');
+                let refsHtml = '';
                 refs.forEach((ref, index) => {
-                    ul.innerHTML += `<li style="margin-bottom: 10px;"><span style="font-weight:700; color: var(--primary-color); margin-right: 8px;">[${index+1}]</span>${ref}</li>`;
+                    refsHtml += `<li style="margin-bottom: 10px;"><span style="font-weight:700; color: var(--primary-color); margin-right: 8px;">[${index+1}]</span>${ref}</li>`;
                 });
+                refSection.innerHTML = '<h3 class="references-title">Kaynakça</h3><ul class="references-list" id="references-list">' + refsHtml + '</ul>';
                 refSection.style.display = 'block';
             }
 
             // Tags
             const tagsContainer = document.getElementById('detail-tags');
             if (exp.tags && typeof exp.tags === 'string') {
-                tagsContainer.innerHTML = '';
+                let tagsHtml = '';
                 exp.tags.split(',').forEach(tag => {
                     const t = tag.trim();
-                    if (t) tagsContainer.innerHTML += `<span class="tag-chip">#${t}</span>`;
+                    if (t) tagsHtml += `<span class="tag-chip">#${t}</span>`;
                 });
+                tagsContainer.innerHTML = tagsHtml;
             }
 
         }
@@ -2107,9 +2108,15 @@
 
         async function loadExperimentSlider(currentId) {
             try {
-                const res = await fetch(`${API_BASE}/experiments`);
-                if (!res.ok) return;
-                const all = await res.json();
+                let all;
+                // Use preloaded experiments from catalogue if available (avoids extra API call)
+                if (window.SERVER_EXPERIMENTS && Array.isArray(window.SERVER_EXPERIMENTS)) {
+                    all = window.SERVER_EXPERIMENTS;
+                } else {
+                    const res = await fetch(`${API_BASE}/experiments`);
+                    if (!res.ok) return;
+                    all = await res.json();
+                }
                 similarExperiments = all.filter(e => e.id != currentId).slice(0, 10);
                 renderSlider();
             } catch (e) {

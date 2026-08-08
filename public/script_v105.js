@@ -2376,13 +2376,14 @@ function renderExperimentsGrid() {
         return;
     }
 
+    let cardsHtml = '';
     toRender.forEach(article => {
         const bgMeasure = resolveImagePath(article.image_url) || 'https://via.placeholder.com/600x400';
         const safeTitle = escapeHtml(article.title);
         const safecategory = escapeHtml(article.category || 'Genel');
         const safeAuthor = escapeHtml(article.author_name || 'Yazar');
 
-        const html = `
+        cardsHtml += `
             <article class="featured-card small" style="min-height: 350px; cursor: pointer; position: relative;">
                 <img src="${bgMeasure}" class="card-bg" loading="lazy" width="400" height="250" style="object-fit: cover; width: 100%; height: 100%;" alt="Ölçüm Arka Planı">
                 <div class="card-overlay" style="pointer-events: none;"></div>
@@ -2411,8 +2412,8 @@ function renderExperimentsGrid() {
                 <a href="${article.slug ? '/deney/' + article.slug : '/experiment-detail.html?id=' + article.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" aria-label="${safeTitle}"></a>
             </article>
         `;
-        grid.innerHTML += html;
     });
+    grid.innerHTML = cardsHtml;
 
     // Numeric Pagination Logic
     renderExperimentPaginationControls();
