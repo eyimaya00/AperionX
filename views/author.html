@@ -4253,7 +4253,7 @@
             if (profileJob) profileJob.value = u.job_title || '';
             if (profileBio) profileBio.value = u.bio || '';
             if (profileLinkedin) profileLinkedin.value = u.linkedin_url || '';
-            if (profilePublicEmail) profilePublicEmail.value = u.public_email || u.email || '';
+            if (profilePublicEmail) profilePublicEmail.value = u.public_email || '';
             if (profileShowEmail) profileShowEmail.checked = (u.show_email === undefined || u.show_email == 1 || u.show_email === true);
 
             // Public profile link
