@@ -433,6 +433,7 @@
                             style="text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-width: 600px; margin-left: auto; margin-right: auto; font-weight: 500;">
                         </div>
                         <p class="profile-bio" id="p-bio"></p>
+                        <div id="profile-social-links" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap;"></div>
                     </div>
                 </div>
             </div>
@@ -686,6 +687,38 @@
                 document.getElementById('p-job').innerHTML = cleanJob || 'Yazar';
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
+
+                // Render Social & Contact Buttons
+                const socialContainer = document.getElementById('profile-social-links');
+                if (socialContainer) {
+                    let socialHtml = '';
+
+                    // LinkedIn Button
+                    if (profile.linkedin_url && profile.linkedin_url.trim() !== '') {
+                        let lUrl = profile.linkedin_url.trim();
+                        if (!lUrl.startsWith('http://') && !lUrl.startsWith('https://')) {
+                            lUrl = 'https://' + lUrl;
+                        }
+                        socialHtml += `
+                            <a href="${lUrl}" target="_blank" rel="noopener noreferrer" class="social-badge linkedin-badge" style="display: inline-flex; align-items: center; gap: 8px; background: #0077b5; color: #ffffff; padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 14px rgba(0,119,181,0.3);">
+                                <i class="ph-bold ph-linkedin-logo" style="font-size: 1.15rem;"></i> LinkedIn
+                            </a>
+                        `;
+                    }
+
+                    // Email Button
+                    const mailAddress = (profile.public_email && profile.public_email.trim() !== '') ? profile.public_email.trim() : profile.email;
+                    const showMail = (profile.show_email === undefined || profile.show_email == 1 || profile.show_email === true);
+                    if (mailAddress && showMail) {
+                        socialHtml += `
+                            <a href="mailto:${mailAddress}" class="social-badge email-badge" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); color: #f8fafc; border: 1px solid rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, background 0.2s;">
+                                <i class="ph-bold ph-envelope" style="font-size: 1.15rem; color: #a5b4fc;"></i> E-posta Gönder
+                            </a>
+                        `;
+                    }
+
+                    socialContainer.innerHTML = socialHtml;
+                }
 
                 // 2. Fill Articles and Experiments (Combined)
                 const combinedItems = [

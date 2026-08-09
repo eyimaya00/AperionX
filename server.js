@@ -1643,6 +1643,10 @@ async function ensureSchema() {
         // Add published_at to existing tables if missing
         try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
+        // Add linkedin_url, public_email, show_email to users table if missing
+        try { await pool.query('ALTER TABLE users ADD COLUMN linkedin_url VARCHAR(255) NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE users ADD COLUMN public_email VARCHAR(255) NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE users ADD COLUMN show_email TINYINT(1) DEFAULT 1'); } catch(e) {}
         // Backfill published_at from created_at for existing published records
         try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 1:', e); }
         try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
@@ -2906,7 +2910,7 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         const key = decodeURIComponent(req.params.identifier).trim();
         console.log('[API] Fetching author profile for:', key);
 
-        const [allUsers] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users');
+        const [allUsers] = await pool.query('SELECT id, fullname, username, email, bio, job_title, avatar_url, linkedin_url, public_email, show_email, created_at FROM users');
         const targetSlug = slugify(key);
 
         // 1. Find primary user matching ID, username, or slugified fullname/username
@@ -2931,11 +2935,14 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         });
         const userIds = matchingUsers.map(u => u.id);
 
-        // Merge profile info if primary account is missing avatar_url, bio, or job_title
+        // Merge profile info if primary account is missing fields
         for (const mUser of matchingUsers) {
             if ((!user.avatar_url || user.avatar_url.trim() === '') && mUser.avatar_url) user.avatar_url = mUser.avatar_url;
             if ((!user.bio || user.bio.trim() === '') && mUser.bio) user.bio = mUser.bio;
             if ((!user.job_title || user.job_title.trim() === '') && mUser.job_title) user.job_title = mUser.job_title;
+            if ((!user.linkedin_url || user.linkedin_url.trim() === '') && mUser.linkedin_url) user.linkedin_url = mUser.linkedin_url;
+            if ((!user.public_email || user.public_email.trim() === '') && mUser.public_email) user.public_email = mUser.public_email;
+            if (user.show_email === undefined && mUser.show_email !== undefined) user.show_email = mUser.show_email;
         }
 
         // 3. Fetch Published Articles for all matching user IDs
@@ -4690,14 +4697,11 @@ app.get('/api/auth/google/callback', async (req, res) => {
 // NEW: Validate Token / Get Current User
 app.get('/api/me', authenticateToken, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title FROM users WHERE id = ?', [req.user.id]);
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, linkedin_url, public_email, show_email FROM users WHERE id = ?', [req.user.id]);
         if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
-        // script_v105.js expects the response to be the user object directly: `const user = await res.json();`
-        // We will return the user object directly, but also include `{ user: ... }` wrapper just in case other scripts expect it.
-        // Wait, script_v105.js does `const user = await res.json(); user.fullname...`. It expects the user object at the root.
         res.json({
             ...rows[0],
-            user: rows[0] // Backward compatibility for scripts expecting data.user
+            user: rows[0]
         });
     } catch (e) {
         console.error(e);
@@ -4935,7 +4939,7 @@ app.put('/api/categories/:id', authenticateToken, async (req, res) => {
 
 // === USER PROFILE UPDATE ===
 app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImageMiddleware, async (req, res) => {
-    const { fullname, email, password, bio, job_title } = req.body;
+    const { fullname, email, password, bio, job_title, linkedin_url, public_email, show_email } = req.body;
     const userId = req.user.id;
 
     try {
@@ -4958,6 +4962,22 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
             params.push(job_title);
         }
 
+        if (linkedin_url !== undefined) {
+            query += ', linkedin_url = ?';
+            params.push(linkedin_url);
+        }
+
+        if (public_email !== undefined) {
+            query += ', public_email = ?';
+            params.push(public_email);
+        }
+
+        if (show_email !== undefined) {
+            const showEmailVal = (show_email == '1' || show_email == 1 || show_email === 'true' || show_email === true) ? 1 : 0;
+            query += ', show_email = ?';
+            params.push(showEmailVal);
+        }
+
         if (req.file) {
             query += ', avatar_url = ?';
             params.push('uploads/' + req.file.filename);
@@ -4969,7 +4989,7 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
         await pool.query(query, params);
 
         // Fetch updated user to update local storage on client
-        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title FROM users WHERE id = ?', [userId]);
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, linkedin_url, public_email, show_email FROM users WHERE id = ?', [userId]);
 
         res.json({ message: 'Profil güncellendi', user: rows[0] });
     } catch (e) {

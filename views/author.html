@@ -1722,6 +1722,24 @@
                             <label>Ünvan / Okul / Bölüm</label>
                             <input type="text" id="profile-job" class="form-control" placeholder="Örn: Kıdemli Editör">
                         </div>
+                        <div class="form-group">
+                            <label>LinkedIn Profil Linki</label>
+                            <div style="position: relative;">
+                                <i class="ph-fill ph-linkedin-logo" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #0077b5; font-size: 1.2rem;"></i>
+                                <input type="url" id="profile-linkedin" class="form-control" style="padding-left: 40px;" placeholder="https://www.linkedin.com/in/kullaniciadi">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>İletişim E-posta Adresi (Profilde Gösterilecek)</label>
+                            <div style="position: relative;">
+                                <i class="ph-fill ph-envelope" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6366f1; font-size: 1.2rem;"></i>
+                                <input type="email" id="profile-public-email" class="form-control" style="padding-left: 40px;" placeholder="ornek@domain.com">
+                            </div>
+                        </div>
+                        <div class="form-group full-width" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <input type="checkbox" id="profile-show-email" style="width: 18px; height: 18px; cursor: pointer;" checked>
+                            <label for="profile-show-email" style="margin: 0; cursor: pointer; font-weight: 500;">E-posta adresim yazar profilimde iletişim ikonu olarak görünsün</label>
+                        </div>
                         <div class="form-group full-width">
                             <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
                             <input type="password" id="profile-password" class="form-control">
@@ -4167,6 +4185,9 @@
             formData.append('password', document.getElementById('profile-password').value);
             formData.append('bio', document.getElementById('profile-bio').value);
             formData.append('job_title', document.getElementById('profile-job').value);
+            formData.append('linkedin_url', document.getElementById('profile-linkedin') ? document.getElementById('profile-linkedin').value : '');
+            formData.append('public_email', document.getElementById('profile-public-email') ? document.getElementById('profile-public-email').value : '');
+            formData.append('show_email', (document.getElementById('profile-show-email') && document.getElementById('profile-show-email').checked) ? '1' : '0');
 
             const fileInput = document.getElementById('profile-avatar');
             if (fileInput.files[0]) {
@@ -4223,10 +4244,17 @@
             const profileEmail = document.getElementById('profile-email');
             const profileJob = document.getElementById('profile-job');
             const profileBio = document.getElementById('profile-bio');
+            const profileLinkedin = document.getElementById('profile-linkedin');
+            const profilePublicEmail = document.getElementById('profile-public-email');
+            const profileShowEmail = document.getElementById('profile-show-email');
+
             if (profileName) profileName.value = u.fullname || '';
             if (profileEmail) profileEmail.value = u.email || '';
             if (profileJob) profileJob.value = u.job_title || '';
             if (profileBio) profileBio.value = u.bio || '';
+            if (profileLinkedin) profileLinkedin.value = u.linkedin_url || '';
+            if (profilePublicEmail) profilePublicEmail.value = u.public_email || u.email || '';
+            if (profileShowEmail) profileShowEmail.checked = (u.show_email === undefined || u.show_email == 1 || u.show_email === true);
 
             // Public profile link
             const profileBtn = document.getElementById('view-public-profile-btn');
