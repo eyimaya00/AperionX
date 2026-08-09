@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '.env') });
+const pool = require('./config/db');
 
 
 
@@ -1400,8 +1401,6 @@ const dbConfig = {
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'aperionx_db'
 };
-
-const pool = require('./config/db');
 
 // --- Simple API Cache ---
 const apiCache = {};
