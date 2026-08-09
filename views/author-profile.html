@@ -132,6 +132,31 @@
             z-index: 2;
         }
 
+        .social-circle-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+            font-size: 1.35rem;
+            text-decoration: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+        }
+
+        .social-circle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
         .section-title {
             text-align: center;
             font-size: 1.5rem;
@@ -688,31 +713,31 @@
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
-                // Render Social & Contact Buttons
+                // Render Social & Contact Icon Buttons (Circular style matching screenshot)
                 const socialContainer = document.getElementById('profile-social-links');
                 if (socialContainer) {
                     let socialHtml = '';
 
-                    // LinkedIn Button
+                    // 1. Email Button (Left)
+                    const mailAddress = (profile.public_email && profile.public_email.trim() !== '') ? profile.public_email.trim() : profile.email;
+                    const showMail = (profile.show_email === undefined || profile.show_email == 1 || profile.show_email === true);
+                    if (mailAddress && showMail) {
+                        socialHtml += `
+                            <a href="mailto:${mailAddress}" class="social-circle-btn" title="E-posta Gönder (${mailAddress})" aria-label="E-posta Gönder">
+                                <i class="ph-bold ph-envelope-simple"></i>
+                            </a>
+                        `;
+                    }
+
+                    // 2. LinkedIn Button (Right)
                     if (profile.linkedin_url && profile.linkedin_url.trim() !== '') {
                         let lUrl = profile.linkedin_url.trim();
                         if (!lUrl.startsWith('http://') && !lUrl.startsWith('https://')) {
                             lUrl = 'https://' + lUrl;
                         }
                         socialHtml += `
-                            <a href="${lUrl}" target="_blank" rel="noopener noreferrer" class="social-badge linkedin-badge" style="display: inline-flex; align-items: center; gap: 8px; background: #0077b5; color: #ffffff; padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 14px rgba(0,119,181,0.3);">
-                                <i class="ph-bold ph-linkedin-logo" style="font-size: 1.15rem;"></i> LinkedIn
-                            </a>
-                        `;
-                    }
-
-                    // Email Button
-                    const mailAddress = (profile.public_email && profile.public_email.trim() !== '') ? profile.public_email.trim() : profile.email;
-                    const showMail = (profile.show_email === undefined || profile.show_email == 1 || profile.show_email === true);
-                    if (mailAddress && showMail) {
-                        socialHtml += `
-                            <a href="mailto:${mailAddress}" class="social-badge email-badge" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); color: #f8fafc; border: 1px solid rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, background 0.2s;">
-                                <i class="ph-bold ph-envelope" style="font-size: 1.15rem; color: #a5b4fc;"></i> E-posta Gönder
+                            <a href="${lUrl}" target="_blank" rel="noopener noreferrer" class="social-circle-btn" title="LinkedIn Profili" aria-label="LinkedIn Profili">
+                                <i class="ph-bold ph-linkedin-logo"></i>
                             </a>
                         `;
                     }
