@@ -905,6 +905,7 @@ async function loadSettings() {
                 link = document.createElement('link');
                 link.rel = 'icon';
                 document.head.appendChild(link);
+            }
             const logoSrc = (settings.site_logo.startsWith('/') || settings.site_logo.startsWith('http')) ? settings.site_logo : '/' + settings.site_logo;
             link.href = logoSrc;
 
