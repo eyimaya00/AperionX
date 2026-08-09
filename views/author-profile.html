@@ -658,8 +658,12 @@
                 // Avatar
                 const avatarEl = document.getElementById('p-avatar');
                 if (avatarEl) {
-                    if (profile.avatar_url) {
-                        let avatarSrc = profile.avatar_url;
+                    avatarEl.onerror = () => {
+                        avatarEl.src = '/uploads/default-avatar.png';
+                        avatarEl.style.opacity = '1';
+                    };
+                    if (profile.avatar_url && profile.avatar_url.trim() !== '') {
+                        let avatarSrc = profile.avatar_url.trim();
                         if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('/')) {
                             avatarSrc = '/' + avatarSrc;
                         }

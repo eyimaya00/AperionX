@@ -2931,6 +2931,13 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         });
         const userIds = matchingUsers.map(u => u.id);
 
+        // Merge profile info if primary account is missing avatar_url, bio, or job_title
+        for (const mUser of matchingUsers) {
+            if ((!user.avatar_url || user.avatar_url.trim() === '') && mUser.avatar_url) user.avatar_url = mUser.avatar_url;
+            if ((!user.bio || user.bio.trim() === '') && mUser.bio) user.bio = mUser.bio;
+            if ((!user.job_title || user.job_title.trim() === '') && mUser.job_title) user.job_title = mUser.job_title;
+        }
+
         // 3. Fetch Published Articles for all matching user IDs
         const [articles] = await pool.query(`
             SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at, a.views
