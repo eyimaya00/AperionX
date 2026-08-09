@@ -1236,7 +1236,7 @@ function checkAuthStatus() {
 
     if (user) {
         authButtons.forEach(container => {
-            let dashboardAction = "window.location.href = "/profile"";
+            let dashboardAction = "window.location.href = '/profile'";
             let cursorStyle = 'pointer';
             let titleAttr = 'Profilime Git';
             let roleBadge = '';
@@ -1516,12 +1516,12 @@ async function loadArticlesPage() {
 
     try {
         // Fetch all published articles
-        const res = await fetch(`${API_URL}/articles`);
+        const res = await fetch(`${API_URL}/articles?t=${Date.now()}`);
         if (!res.ok) throw new Error('API Error');
         pageArticles = await res.json();
 
-        // Initial Sort (Newest first)
-        pageArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        // Initial Sort (Newest published first, fallback created_at, then id)
+        pageArticles.sort((a, b) => (new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at)) || (b.id - a.id));
         filteredArticles = [...pageArticles];
 
         // Check URL Params for Category

@@ -2612,7 +2612,7 @@ app.get('/api/articles', async (req, res) => {
             params.push(idsParam);
         }
 
-        query += " ORDER BY COALESCE(published_at, created_at) DESC";
+        query += " ORDER BY COALESCE(published_at, created_at) DESC, id DESC";
 
         if (limit && (!idsParam || idsParam.length === 0)) {
             query += " LIMIT ?";
@@ -3007,9 +3007,12 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         // Generate Slug
         const slug = await getUniqueSlug(pool, title);
 
+        const publishedAt = finalStatus === 'published' ? new Date() : null;
+        const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
+
         const [insertResult] = await pool.query(
-            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url]
+            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url, published_at, was_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url, publishedAt, wasPublishedVal]
         );
 
         const newArticleId = insertResult.insertId;
@@ -3021,6 +3024,9 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         }
 
         console.log('Route: Article inserted successfully');
+
+        // Clear cache so new article appears immediately in list
+        clearCache('articles');
 
         // NOTIFY EDITORS & ADMINS if Pending
         if (finalStatus === 'pending') {
@@ -3154,6 +3160,8 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
                 await createNotification(authorId, msg, type);
             }
         }
+        // Clear cache so updated article reflects immediately
+        clearCache('articles');
     }
     res.json({ message: 'Updated' });
 });
@@ -3581,6 +3589,7 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
         }
 
         await pool.query(updateQuery, queryParams);
+        clearCache('articles');
 
         // Notify Author
         await createNotification(authorId, msg, type);
@@ -3615,6 +3624,7 @@ app.delete('/api/articles/:id', authenticateToken, async (req, res) => {
         }
 
         await pool.query("UPDATE articles SET status = 'trash' WHERE id = ?", [req.params.id]);
+        clearCache('articles');
         res.json({ message: 'Moved to trash' });
     } catch (e) {
         console.error('Delete Error:', e);
@@ -3651,6 +3661,7 @@ app.delete('/api/articles/permanent/:id', authenticateToken, async (req, res) =>
         }
 
         await pool.query('DELETE FROM articles WHERE id = ?', [req.params.id]);
+        clearCache('articles');
         res.json({ message: 'Deleted permanently' });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -3664,6 +3675,7 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
 
     // Restore to 'draft' to be safe? Or 'pending'? Let's restore to 'draft' so they can resubmit.
     await pool.query("UPDATE articles SET status = 'draft' WHERE id = ?", [req.params.id]);
+    clearCache('articles');
     res.json({ message: 'Restored to draft' });
 });
 
