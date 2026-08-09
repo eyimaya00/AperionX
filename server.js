@@ -1662,7 +1662,7 @@ async function ensureSchema() {
                 { pattern: '%Sütten%', date: '2026-07-03 12:00:00' },
                 { pattern: '%İn Vitro%', date: '2026-07-04 12:00:00' },
                 { pattern: '%Sabun%', date: '2026-07-05 12:00:00' },
-                { pattern: '%Lenfosit%', date: '2026-07-06 12:00:00' }
+                { pattern: '%Lenfosit%', date: '2026-08-06 12:00:00' }
             ];
             for (const fix of experimentDateFixes) {
                 await pool.query(
@@ -1670,6 +1670,10 @@ async function ensureSchema() {
                     [fix.date, fix.date, fix.pattern, fix.pattern]
                 );
             }
+            // Ensure Lenfosit experiment date is updated to August 2026 on existing databases
+            await pool.query(
+                "UPDATE experiments SET created_at = '2026-08-06 12:00:00', published_at = '2026-08-06 12:00:00' WHERE title LIKE '%Lenfosit%' OR slug LIKE '%lenfosit%'"
+            );
             console.log('[MIGRATION] Initial 6 experiments dates updated successfully.');
         } catch(e) {
             console.error('[MIGRATION] Error updating experiment dates:', e);
