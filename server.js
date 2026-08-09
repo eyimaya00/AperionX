@@ -2913,36 +2913,69 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         const [allUsers] = await pool.query('SELECT id, fullname, username, email, bio, job_title, avatar_url, linkedin_url, public_email, show_email, created_at FROM users');
         const targetSlug = slugify(key);
 
-        // 1. Find primary user matching ID, username, or slugified fullname/username
-        let user = allUsers.find(u => {
+        // 1. Find ALL matching user accounts for this author identifier
+        const matchingUsers = allUsers.filter(u => {
             if (/^\d+$/.test(key) && u.id === parseInt(key)) return true;
             if (u.username && u.username.toLowerCase() === key.toLowerCase()) return true;
             const fSlug = slugify(u.fullname);
             const uSlug = slugify(u.username);
             return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
-        }) || null;
+        });
 
-        if (!user) {
+        if (matchingUsers.length === 0) {
             return res.status(404).json({ message: 'Yazar bulunamadı' });
         }
 
-        // 2. Find ALL matching user IDs for this author (handles multiple accounts or duplicate entries)
-        const matchingUsers = allUsers.filter(u => {
-            if (u.id === user.id) return true;
-            const fSlug = slugify(u.fullname);
-            const uSlug = slugify(u.username);
-            return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
+        const isCustomAvatar = (url) => url && url.trim() !== '' && !url.includes('ui-avatars.com');
+        const hasContent = (val) => val && val.trim() !== '';
+
+        // Priority sort: Pick active account with real avatar, bio, linkedin_url, public_email, job_title, then newest ID
+        matchingUsers.sort((a, b) => {
+            let scoreA = 0;
+            let scoreB = 0;
+
+            if (isCustomAvatar(a.avatar_url)) scoreA += 10;
+            if (isCustomAvatar(b.avatar_url)) scoreB += 10;
+
+            if (hasContent(a.bio)) scoreA += 5;
+            if (hasContent(b.bio)) scoreB += 5;
+
+            if (hasContent(a.linkedin_url)) scoreA += 5;
+            if (hasContent(b.linkedin_url)) scoreB += 5;
+
+            if (hasContent(a.public_email)) scoreA += 5;
+            if (hasContent(b.public_email)) scoreB += 5;
+
+            if (hasContent(a.job_title)) scoreA += 3;
+            if (hasContent(b.job_title)) scoreB += 3;
+
+            if (scoreA !== scoreB) return scoreB - scoreA;
+            return b.id - a.id;
         });
+
+        let user = { ...matchingUsers[0] };
         const userIds = matchingUsers.map(u => u.id);
 
-        // Merge profile info if primary account is missing fields
+        // Merge any remaining missing fields from other matching user accounts
         for (const mUser of matchingUsers) {
-            if ((!user.avatar_url || user.avatar_url.trim() === '') && mUser.avatar_url) user.avatar_url = mUser.avatar_url;
-            if ((!user.bio || user.bio.trim() === '') && mUser.bio) user.bio = mUser.bio;
-            if ((!user.job_title || user.job_title.trim() === '') && mUser.job_title) user.job_title = mUser.job_title;
-            if ((!user.linkedin_url || user.linkedin_url.trim() === '') && mUser.linkedin_url) user.linkedin_url = mUser.linkedin_url;
-            if ((!user.public_email || user.public_email.trim() === '') && mUser.public_email) user.public_email = mUser.public_email;
-            if (user.show_email === undefined && mUser.show_email !== undefined) user.show_email = mUser.show_email;
+            if (!isCustomAvatar(user.avatar_url) && isCustomAvatar(mUser.avatar_url)) {
+                user.avatar_url = mUser.avatar_url;
+            }
+            if (!hasContent(user.bio) && hasContent(mUser.bio)) {
+                user.bio = mUser.bio;
+            }
+            if (!hasContent(user.job_title) && hasContent(mUser.job_title)) {
+                user.job_title = mUser.job_title;
+            }
+            if (!hasContent(user.linkedin_url) && hasContent(mUser.linkedin_url)) {
+                user.linkedin_url = mUser.linkedin_url;
+            }
+            if (!hasContent(user.public_email) && hasContent(mUser.public_email)) {
+                user.public_email = mUser.public_email;
+            }
+            if (user.show_email === undefined && mUser.show_email !== undefined) {
+                user.show_email = mUser.show_email;
+            }
         }
 
         // 3. Fetch Published Articles for all matching user IDs
