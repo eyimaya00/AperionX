@@ -725,11 +725,11 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                         if (article.authors && article.authors.length > 0) {
                             authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 ${article.authors.map(a => `
-                                    <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    <a href="/yazar/${slugify(a.fullname) || a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="/yazar/${slugify(article.author_name) || article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -871,11 +871,11 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
                         if (article.authors && article.authors.length > 0) {
                             authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 ${article.authors.map(a => `
-                                    <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    <a href="/yazar/${slugify(a.fullname) || a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="/yazar/${slugify(article.author_name) || article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -1071,7 +1071,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     "author": {
                         "@type": "Person",
                         "name": authorName,
-                        "url": authors.length > 0 ? `${origin}/yazar/${authors[0].username || authors[0].id}` : `${origin}/yazar`
+                        "url": authors.length > 0 ? `${origin}/yazar/${slugify(authors[0].fullname) || authors[0].username || authors[0].id}` : `${origin}/yazar`
                     },
                     "publisher": {
                         "@type": "Organization",
@@ -2897,48 +2897,49 @@ app.post('/api/public/unsubscribe', async (req, res) => {
 // Helper Function: Send New Article Notification
 // [Duplicate Function Removed]
 
-// NEW: Public Author Profile Endpoint
+// PUBLIC AUTHOR PROFILE (by Username, ID, or Ad-Soyad slug)
 app.get('/api/public/author/:identifier', async (req, res) => {
     try {
         const key = req.params.identifier;
         console.log('[API] Fetching author profile for:', key);
 
-        // 1. Try by Username (Exact match)
-        let sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ?';
-        let params = [key];
+        let user = null;
 
-        // 2. Try by ID
-        if (/^\d+$/.test(key)) {
-            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE id = ? OR username = ?';
-            params = [key, key];
+        // 1. Try exact Username or ID match
+        const [byExact] = await pool.query(
+            'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR id = ?',
+            [key, /^\d+$/.test(key) ? parseInt(key) : -1]
+        );
+
+        if (byExact.length > 0) {
+            user = byExact[0];
+        } else {
+            // 2. Fallback: Try matching by slugified fullname or username (e.g. 'beyza-satioglu' -> 'Beyza Satıoğlu')
+            const [allUsers] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users');
+            const targetSlug = slugify(key);
+            user = allUsers.find(u => {
+                const fSlug = slugify(u.fullname);
+                const uSlug = slugify(u.username);
+                return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
+            }) || null;
         }
-        // 3. Try by Fullname (Fallback if sent directly)
-        else {
-            const spaceKey = key.replace(/-/g, ' ');
-            sql = 'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR fullname = ? OR fullname = ?';
-            params = [key, key, spaceKey];
-        }
 
-        const [users] = await pool.query(sql, params);
-
-        if (users.length === 0) {
+        if (!user) {
             return res.status(404).json({ message: 'Yazar bulunamadı' });
         }
 
-        const user = users[0];
-
-        // 2. Get Published Articles
+        // 3. Fetch Articles (Main author or co-author)
         const [articles] = await pool.query(`
-            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at, a.views
             FROM articles a
             LEFT JOIN article_authors aa ON a.id = aa.article_id
-            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
+            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published' AND a.deleted_at IS NULL
             ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `, [user.id, user.id]);
 
-        // 3. Get Published Experiments
+        // 4. Fetch Experiments (Main author or co-author)
         const [experiments] = await pool.query(`
-            SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at, e.published_at
+            SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at, e.published_at, e.views
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
@@ -4791,9 +4792,10 @@ app.get(['/author-profile', '/author-profile.html'], async (req, res) => {
     const u = req.query.u;
     if (u) {
         try {
-            const [rows] = await pool.query('SELECT username FROM users WHERE id = ? OR username = ?', [u, u]);
-            if (rows.length > 0 && rows[0].username) {
-                return res.redirect(301, `/yazar/${rows[0].username}`);
+            const [rows] = await pool.query('SELECT username, fullname FROM users WHERE id = ? OR username = ?', [u, u]);
+            if (rows.length > 0) {
+                const targetSlug = slugify(rows[0].fullname) || rows[0].username || u;
+                return res.redirect(301, `/yazar/${targetSlug}`);
             }
         } catch (e) {}
         return res.redirect(301, `/yazar/${u}`);
@@ -5459,61 +5461,7 @@ app.post('/api/settings_v2', authenticateToken, (req, res, next) => {
 // Serve Author Panel (DUPLICATE REMOVED - primary route at line ~4578)
 // Serve Editor Panel (DUPLICATE REMOVED - primary route at line ~2762)
 
-// === PUBLIC AUTHOR PROFILE (Username or ID) ===
-app.get('/api/public/author/:identifier', async (req, res) => {
-    const { identifier } = req.params;
-    console.log('[API] Fetching public author profile for:', identifier);
-
-    try {
-        let user;
-        // 1. Try by Username
-        const [byUsername] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE username = ?', [identifier]);
-        if (byUsername.length > 0) {
-            user = byUsername[0];
-        } else {
-            // 2. Try by ID (Fallback)
-            if (!isNaN(identifier)) {
-                const [byId] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE id = ?', [identifier]);
-                if (byId.length > 0) user = byId[0];
-            }
-            // 3. Try by Fullname (Fallback with hyphens replaced by space)
-            if (!user) {
-                const spaceName = identifier.replace(/-/g, ' ');
-                const [byFullname] = await pool.query('SELECT id, fullname, bio, job_title, avatar_url, username FROM users WHERE fullname = ?', [spaceName]);
-                if (byFullname.length > 0) user = byFullname[0];
-            }
-        }
-
-        if (!user) {
-            console.log('[API] Author not found:', identifier);
-            return res.status(404).json({ message: 'Author not found' });
-        }
-
-        // 3. Fetch Articles (Main author or co-author)
-        const [articles] = await pool.query(`
-            SELECT DISTINCT a.id, a.title, a.slug, a.image_url, a.excerpt, a.created_at, a.category, a.views, 'article' as type
-            FROM articles a
-            LEFT JOIN article_authors aa ON a.id = aa.article_id
-            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
-            ORDER BY a.created_at DESC
-        `, [user.id, user.id]);
-
-        // 4. Fetch Experiments (Main author or co-author)
-        const [experiments] = await pool.query(`
-            SELECT DISTINCT e.id, e.title, e.slug, e.image_url, e.excerpt, e.created_at, e.category, e.views, 'experiment' as type
-            FROM experiments e
-            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
-            ORDER BY e.created_at DESC
-        `, [user.id, user.id]);
-
-        res.json({ profile: user, articles: articles, experiments: experiments });
-
-    } catch (e) {
-        console.error('[API] Public Author Error:', e);
-        res.status(500).json({ error: e.message });
-    }
-});
+// PUBLIC AUTHOR PROFILE (DUPLICATE REMOVED - primary route defined above)
 
 // Helper: Ensure Usernames are Populated
 async function ensureUsernameMigration() {

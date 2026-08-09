@@ -26,6 +26,39 @@ var API_URL = '/api';
     document.head.appendChild(style);
 })();
 
+// --- HELPER: Slugify Text for Author Profile URLs ---
+function slugifyText(text) {
+    if (!text) return '';
+    const trMap = {
+        'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ş': 's', 'Ş': 's',
+        'ü': 'u', 'Ü': 'u', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'Ö': 'o'
+    };
+    return text.toString()
+        .split('')
+        .map(c => trMap[c] || c)
+        .join('')
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
+}
+
+function getAuthorSlug(authorObj, fallbackId) {
+    if (typeof authorObj === 'string') return slugifyText(authorObj) || fallbackId || '';
+    if (!authorObj) return fallbackId || '';
+    if (authorObj.fullname) {
+        const slug = slugifyText(authorObj.fullname);
+        if (slug) return slug;
+    }
+    if (authorObj.author_name) {
+        const slug = slugifyText(authorObj.author_name);
+        if (slug) return slug;
+    }
+    return authorObj.username || authorObj.id || fallbackId || '';
+}
+
 // --- HELPER: Resolve Image Path ---
 function resolveImagePath(url) {
     if (!url) return null;
@@ -872,8 +905,8 @@ async function loadSettings() {
                 link = document.createElement('link');
                 link.rel = 'icon';
                 document.head.appendChild(link);
-            }
-            link.href = settings.site_logo;
+            const logoSrc = (settings.site_logo.startsWith('/') || settings.site_logo.startsWith('http')) ? settings.site_logo : '/' + settings.site_logo;
+            link.href = logoSrc;
 
             // Update Header Logo
             const logoContainer = document.querySelector('.logo');
@@ -882,7 +915,7 @@ async function loadSettings() {
 
                 // 1. Image
                 const img = document.createElement('img');
-                img.src = settings.site_logo;
+                img.src = logoSrc;
                 img.alt = settings.site_title || 'Logo';
 
                 // Height Logic
@@ -1947,10 +1980,10 @@ async function loadShowcase() {
                                    ${(item.authors && item.authors.length > 0)
                         ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     ${item.authors.map((a) => `
-                                         <a href="/yazar/${a.username || a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
+                                         <a href="/yazar/${getAuthorSlug(a, a.id)}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
                                      `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
-                        : `<a href="/yazar/${item.author_username || item.author_id || ''}" style="color:inherit; text-decoration:none;">${author}</a>`
+                        : `<a href="/yazar/${getAuthorSlug(item.author_name, item.author_id)}" style="color:inherit; text-decoration:none;">${author}</a>`
                     }
                              </div>
                         </div>
@@ -2182,10 +2215,10 @@ function renderArticlesGrid() {
                 ${(article.authors && article.authors.length > 0)
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
-                            <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                            <a href="/yazar/${getAuthorSlug(a, a.id)}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="/yazar/${getAuthorSlug(article.author_name, article.author_id)}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
@@ -2398,10 +2431,10 @@ function renderExperimentsGrid() {
                 ${(article.authors && article.authors.length > 0)
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
-                            <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                            <a href="/yazar/${getAuthorSlug(a, a.id)}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="/yazar/${getAuthorSlug(article.author_name, article.author_id)}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
@@ -2620,13 +2653,13 @@ function renderArticleDetail(article) {
     if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
         const authorsHtml = article.authors.map((a) => {
             const avatarSrc = a.avatar_url ? resolveImagePath(a.avatar_url) : '/uploads/default-avatar.png';
-            return `<a href="/yazar/${a.username || a.id}" class="author-chip"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" class="author-chip-avatar">${escapeHtml(a.fullname)}</a>`;
+            return `<a href="/yazar/${getAuthorSlug(a, a.id)}" class="author-chip"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" class="author-chip-avatar">${escapeHtml(a.fullname)}</a>`;
         }).join('');
         document.getElementById('detail-author').innerHTML = `<div class="author-chips-wrapper">${authorsHtml}</div>`;
     } else {
         const safeAuthorName = article.author_name || (window.SERVER_AUTHORS ? window.SERVER_AUTHORS[0]?.fullname : null) || 'AperionX Yazarı';
         if (article.author_id) {
-            document.getElementById('detail-author').innerHTML = `<a href="/yazar/${article.author_username || article.author_id}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+            document.getElementById('detail-author').innerHTML = `<a href="/yazar/${getAuthorSlug(article.author_name, article.author_id)}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
         } else {
             document.getElementById('detail-author').innerHTML = `<span class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</span>`;
         }
@@ -3050,11 +3083,11 @@ async function loadArticleSlider(currentId) {
                     ? `<span style="display:inline-flex; gap:4px; flex-wrap:wrap;">
                                     ${art.authors.map((a, idx) => `
                                         ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
-                                        <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                        <a href="/yazar/${getAuthorSlug(a, a.id)}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                     `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
                     : (art.author_id
-                        ? `<a href="/yazar/${art.author_username || art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
+                        ? `<a href="/yazar/${getAuthorSlug(art.author_name, art.author_id)}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
                         : `<span>${art.author_name || 'Admin'}</span>`)
                 }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
