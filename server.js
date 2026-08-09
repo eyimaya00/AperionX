@@ -1666,7 +1666,7 @@ async function ensureSchema() {
             ];
             for (const fix of experimentDateFixes) {
                 await pool.query(
-                    "UPDATE experiments SET created_at = ?, published_at = ? WHERE title LIKE ? OR slug LIKE ?",
+                    "UPDATE experiments SET created_at = ?, published_at = ? WHERE (published_at IS NULL OR created_at IS NULL) AND (title LIKE ? OR slug LIKE ?)",
                     [fix.date, fix.date, fix.pattern, fix.pattern]
                 );
             }
@@ -2897,53 +2897,54 @@ app.post('/api/public/unsubscribe', async (req, res) => {
 // [Duplicate Function Removed]
 
 // PUBLIC AUTHOR PROFILE (by Username, ID, or Ad-Soyad slug)
+// PUBLIC AUTHOR PROFILE (by Username, ID, or Ad-Soyad slug)
 app.get('/api/public/author/:identifier', async (req, res) => {
     try {
-        const key = req.params.identifier;
+        const key = decodeURIComponent(req.params.identifier).trim();
         console.log('[API] Fetching author profile for:', key);
 
-        let user = null;
+        const [allUsers] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users');
+        const targetSlug = slugify(key);
 
-        // 1. Try exact Username or ID match
-        const [byExact] = await pool.query(
-            'SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users WHERE username = ? OR id = ?',
-            [key, /^\d+$/.test(key) ? parseInt(key) : -1]
-        );
-
-        if (byExact.length > 0) {
-            user = byExact[0];
-        } else {
-            // 2. Fallback: Try matching by slugified fullname or username (e.g. 'beyza-satioglu' -> 'Beyza Satıoğlu')
-            const [allUsers] = await pool.query('SELECT id, fullname, username, bio, job_title, avatar_url, created_at FROM users');
-            const targetSlug = slugify(key);
-            user = allUsers.find(u => {
-                const fSlug = slugify(u.fullname);
-                const uSlug = slugify(u.username);
-                return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
-            }) || null;
-        }
+        // 1. Find primary user matching ID, username, or slugified fullname/username
+        let user = allUsers.find(u => {
+            if (/^\d+$/.test(key) && u.id === parseInt(key)) return true;
+            if (u.username && u.username.toLowerCase() === key.toLowerCase()) return true;
+            const fSlug = slugify(u.fullname);
+            const uSlug = slugify(u.username);
+            return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
+        }) || null;
 
         if (!user) {
             return res.status(404).json({ message: 'Yazar bulunamadı' });
         }
 
-        // 3. Fetch Articles (Main author or co-author)
+        // 2. Find ALL matching user IDs for this author (handles multiple accounts or duplicate entries)
+        const matchingUsers = allUsers.filter(u => {
+            if (u.id === user.id) return true;
+            const fSlug = slugify(u.fullname);
+            const uSlug = slugify(u.username);
+            return (fSlug && fSlug === targetSlug) || (uSlug && uSlug === targetSlug);
+        });
+        const userIds = matchingUsers.map(u => u.id);
+
+        // 3. Fetch Published Articles for all matching user IDs
         const [articles] = await pool.query(`
             SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at, a.views
             FROM articles a
             LEFT JOIN article_authors aa ON a.id = aa.article_id
-            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published' AND a.deleted_at IS NULL
+            WHERE (a.author_id IN (?) OR aa.user_id IN (?)) AND LOWER(a.status) = 'published' AND a.deleted_at IS NULL
             ORDER BY COALESCE(a.published_at, a.created_at) DESC
-        `, [user.id, user.id]);
+        `, [userIds, userIds]);
 
-        // 4. Fetch Experiments (Main author or co-author)
+        // 4. Fetch Published Experiments for all matching user IDs
         const [experiments] = await pool.query(`
             SELECT DISTINCT e.id, e.title, e.slug, e.excerpt, e.image_url, e.category, e.created_at, e.published_at, e.views
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
+            WHERE (e.author_id IN (?) OR ea.user_id IN (?)) AND LOWER(e.status) = 'published' AND e.deleted_at IS NULL
             ORDER BY COALESCE(e.published_at, e.created_at) DESC
-        `, [user.id, user.id]);
+        `, [userIds, userIds]);
 
         res.json({
             profile: user,
@@ -3212,16 +3213,21 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const cleanSafety = safety_notes ? DOMPurify.sanitize(safety_notes) : null;
         const cleanReferences = references_list ? DOMPurify.sanitize(references_list) : null;
 
+        const publishedAt = finalStatus === 'published' ? new Date() : null;
+        const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
+
         const [insertResult] = await pool.query(
             `INSERT INTO experiments (
                 title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
-                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, published_at, was_published
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
-                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, publishedAt, wasPublishedVal
             ]
         );
+
+        clearCache('experiments');
 
         const newExperimentId = insertResult.insertId;
 
@@ -3327,6 +3333,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (updates.length > 0) {
         params.push(experimentId);
         await pool.query(`UPDATE experiments SET ${updates.join(', ')} WHERE id = ?`, params);
+        clearCache('experiments');
 
         if (finalStatus && req.user.role !== 'author') {
             const authorId = check[0].author_id;
@@ -5304,8 +5311,8 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
         const [mLikes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mComments] = await pool.query('SELECT COUNT(*) as count FROM comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mUsers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
-        const [mArticles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
-        const [mExperiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+        const [mArticles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+        const [mExperiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
 
         // 4. Historical Data (Monthly) - Fetch last 12 months
         // Helper to format Date to YYYY-MM
@@ -5340,13 +5347,13 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
 
         // Articles extra condition
         const getArticleMonthGroups = async () => {
-            const [rows] = await pool.query(`SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' GROUP BY month ORDER BY month DESC LIMIT 12`);
+            const [rows] = await pool.query(`SELECT DATE_FORMAT(COALESCE(published_at, created_at), '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
 
         // Experiments extra condition
         const getExperimentMonthGroups = async () => {
-            const [rows] = await pool.query(`SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL GROUP BY month ORDER BY month DESC LIMIT 12`);
+            const [rows] = await pool.query(`SELECT DATE_FORMAT(COALESCE(published_at, created_at), '%Y-%m') as month, COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
 
