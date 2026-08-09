@@ -2901,7 +2901,6 @@ app.post('/api/public/unsubscribe', async (req, res) => {
 // [Duplicate Function Removed]
 
 // PUBLIC AUTHOR PROFILE (by Username, ID, or Ad-Soyad slug)
-// PUBLIC AUTHOR PROFILE (by Username, ID, or Ad-Soyad slug)
 app.get('/api/public/author/:identifier', async (req, res) => {
     try {
         const key = decodeURIComponent(req.params.identifier).trim();
