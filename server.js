@@ -4787,7 +4787,7 @@ app.get(['/yazar/:identifier', '/yazar/:identifier.html', '/en/yazar/:identifier
     res.sendFile('author-profile.html', { root: path.join(__dirname, 'views') });
 });
 
-app.get('/author-profile.html', async (req, res) => {
+app.get(['/author-profile', '/author-profile.html'], async (req, res) => {
     const u = req.query.u;
     if (u) {
         try {

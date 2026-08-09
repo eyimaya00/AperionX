@@ -4232,7 +4232,7 @@
             const profileBtn = document.getElementById('view-public-profile-btn');
             if (profileBtn) {
                 if (u.username) {
-                    profileBtn.href = `/author-profile?u=${u.username}`;
+                    profileBtn.href = `/yazar/${u.username}`;
                     profileBtn.style.display = 'inline-flex';
                 } else {
                     profileBtn.style.display = 'none';
