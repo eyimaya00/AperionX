@@ -618,7 +618,16 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
-            const username = params.get('u');
+            let username = params.get('u');
+            if (!username) {
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                if (pathParts.length > 0) {
+                    const lastPart = pathParts[pathParts.length - 1];
+                    if (lastPart && lastPart !== 'author-profile.html' && lastPart !== 'author-profile') {
+                        username = lastPart;
+                    }
+                }
+            }
 
             if (!username) {
                 document.querySelector('main').innerHTML = '<div style="text-align:center; padding:100px;"><h2>Kullanıcı bulunamadı.</h2><a href="/" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Dön</a></div>';

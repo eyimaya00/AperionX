@@ -725,11 +725,11 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
                         if (article.authors && article.authors.length > 0) {
                             authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 ${article.authors.map(a => `
-                                    <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -871,11 +871,11 @@ app.get(['/experiments', '/experiments.html', '/en/experiments', '/en/experiment
                         if (article.authors && article.authors.length > 0) {
                             authorsLinkHtml = `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 ${article.authors.map(a => `
-                                    <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                    <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                 `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                </div>`;
                         } else {
-                            authorsLinkHtml = `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            authorsLinkHtml = `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                                 ${safeAuthor}
                                </a>`;
                         }
@@ -1071,7 +1071,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     "author": {
                         "@type": "Person",
                         "name": authorName,
-                        "url": authors.length > 0 ? `${origin}/author-profile.html?u=${authors[0].id}` : `${origin}/author-profile.html`
+                        "url": authors.length > 0 ? `${origin}/yazar/${authors[0].username || authors[0].id}` : `${origin}/yazar`
                     },
                     "publisher": {
                         "@type": "Organization",
@@ -1341,6 +1341,21 @@ app.get('/sitemap.xml', async (req, res) => {
         <priority>0.8</priority>${imageXml}
     </url>\n`;
         });
+
+        // Dynamic Author Profiles
+        try {
+            const [authorsList] = await pool.query("SELECT id, username FROM users WHERE role IN ('author', 'editor', 'admin') AND username IS NOT NULL AND username != ''");
+            authorsList.forEach(auth => {
+                xml += `    <url>
+        <loc>${baseUrl}/yazar/${auth.username}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/yazar/${auth.username}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/yazar/${auth.username}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/yazar/${auth.username}"/>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>\n`;
+            });
+        } catch (e) { console.error('Sitemap author error:', e); }
 
         xml += '</urlset>';
 
@@ -4764,6 +4779,27 @@ app.get('/api/debug-ip', (req, res) => {
 app.get('/admin', (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('admin.html', { root: path.join(__dirname, 'views') });
+});
+
+// Clean Author Profile Route & 301 Redirect for legacy URLs
+app.get(['/yazar/:identifier', '/yazar/:identifier.html', '/en/yazar/:identifier'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('author-profile.html', { root: path.join(__dirname, 'views') });
+});
+
+app.get('/author-profile.html', async (req, res) => {
+    const u = req.query.u;
+    if (u) {
+        try {
+            const [rows] = await pool.query('SELECT username FROM users WHERE id = ? OR username = ?', [u, u]);
+            if (rows.length > 0 && rows[0].username) {
+                return res.redirect(301, `/yazar/${rows[0].username}`);
+            }
+        } catch (e) {}
+        return res.redirect(301, `/yazar/${u}`);
+    }
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('author-profile.html', { root: path.join(__dirname, 'views') });
 });
 
 app.get('/author', (req, res) => {

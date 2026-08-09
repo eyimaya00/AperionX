@@ -1947,10 +1947,10 @@ async function loadShowcase() {
                                    ${(item.authors && item.authors.length > 0)
                         ? `<span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     ${item.authors.map((a) => `
-                                         <a href="author-profile.html?u=${a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
+                                         <a href="/yazar/${a.username || a.id}" style="color:inherit; text-decoration:none;">${escapeHtml(a.fullname)}</a>
                                      `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
-                        : `<a href="author-profile.html?u=${item.author_id || ''}" style="color:inherit; text-decoration:none;">${author}</a>`
+                        : `<a href="/yazar/${item.author_username || item.author_id || ''}" style="color:inherit; text-decoration:none;">${author}</a>`
                     }
                              </div>
                         </div>
@@ -2182,10 +2182,10 @@ function renderArticlesGrid() {
                 ${(article.authors && article.authors.length > 0)
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
-                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                            <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
@@ -2398,10 +2398,10 @@ function renderExperimentsGrid() {
                 ${(article.authors && article.authors.length > 0)
                 ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         ${article.authors.map((a) => `
-                            <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                            <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                         `).join(' <span style="opacity:0.6">&amp;</span> ')}
                        </div>`
-                : `<a href="author-profile.html?u=${article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                : `<a href="/yazar/${article.author_username || article.author_id || ''}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         ${safeAuthor}
                        </a>`
             }
@@ -2620,13 +2620,13 @@ function renderArticleDetail(article) {
     if (article.authors && Array.isArray(article.authors) && article.authors.length > 0) {
         const authorsHtml = article.authors.map((a) => {
             const avatarSrc = a.avatar_url ? resolveImagePath(a.avatar_url) : '/uploads/default-avatar.png';
-            return `<a href="author-profile.html?u=${a.id}" class="author-chip"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" class="author-chip-avatar">${escapeHtml(a.fullname)}</a>`;
+            return `<a href="/yazar/${a.username || a.id}" class="author-chip"><img src="${avatarSrc}" alt="${escapeHtml(a.fullname)}" class="author-chip-avatar">${escapeHtml(a.fullname)}</a>`;
         }).join('');
         document.getElementById('detail-author').innerHTML = `<div class="author-chips-wrapper">${authorsHtml}</div>`;
     } else {
         const safeAuthorName = article.author_name || (window.SERVER_AUTHORS ? window.SERVER_AUTHORS[0]?.fullname : null) || 'AperionX Yazarı';
         if (article.author_id) {
-            document.getElementById('detail-author').innerHTML = `<a href="author-profile.html?u=${article.author_id}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
+            document.getElementById('detail-author').innerHTML = `<a href="/yazar/${article.author_username || article.author_id}" class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</a>`;
         } else {
             document.getElementById('detail-author').innerHTML = `<span class="author-chip"><i class="ph ph-user"></i> ${safeAuthorName}</span>`;
         }
@@ -3050,11 +3050,11 @@ async function loadArticleSlider(currentId) {
                     ? `<span style="display:inline-flex; gap:4px; flex-wrap:wrap;">
                                     ${art.authors.map((a, idx) => `
                                         ${idx > 0 ? '<span style="opacity:0.7">,</span>' : ''}
-                                        <a href="author-profile.html?u=${a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
+                                        <a href="/yazar/${a.username || a.id}" style="color: inherit; text-decoration: none;">${escapeHtml(a.fullname)}</a>
                                     `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
                     : (art.author_id
-                        ? `<a href="author-profile.html?u=${art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
+                        ? `<a href="/yazar/${art.author_username || art.author_id}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
                         : `<span>${art.author_name || 'Admin'}</span>`)
                 }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
