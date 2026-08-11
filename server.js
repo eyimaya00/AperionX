@@ -6930,14 +6930,15 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
 
         const consent = rows[0];
         const consentDate = new Date(consent.consented_at);
-        // Manual date formatting for consistent output in Puppeteer
-        const dd = String(consentDate.getDate()).padStart(2, '0');
-        const mm = String(consentDate.getMonth() + 1).padStart(2, '0');
-        const yyyy = consentDate.getFullYear();
-        const hh = String(consentDate.getHours()).padStart(2, '0');
-        const mi = String(consentDate.getMinutes()).padStart(2, '0');
-        const ss = String(consentDate.getSeconds()).padStart(2, '0');
-        const formattedDate = `${dd}.${mm}.${yyyy} - ${hh}:${mi}:${ss}`;
+        // Force Turkey timezone (UTC+3)
+        const turkeyOffset = 3 * 60 * 60 * 1000;
+        const turkeyDate = new Date(consentDate.getTime() + turkeyOffset + (consentDate.getTimezoneOffset() * 60 * 1000));
+        const dd = String(turkeyDate.getDate()).padStart(2, '0');
+        const mm = String(turkeyDate.getMonth() + 1).padStart(2, '0');
+        const yyyy = turkeyDate.getFullYear();
+        const hh = String(turkeyDate.getHours()).padStart(2, '0');
+        const mi = String(turkeyDate.getMinutes()).padStart(2, '0');
+        const formattedDate = `${dd}.${mm}.${yyyy} - ${hh}:${mi}`;
 
         // Read logo as base64
         let logoBase64 = '';
@@ -6972,10 +6973,11 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         .header .version { font-size: 9px; color: #64748b; margin-top: 3px; }
         .contract-body { margin-bottom: 15px; font-size: 9px; color: #334155; text-align: justify; line-height: 1.5; }
         .contract-body br { line-height: 1.2; }
-        .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 10px; padding: 16px 20px; margin: 15px 0; page-break-inside: avoid; }
-        .fingerprint-section h2 { font-size: 12px; font-weight: 700; color: #4338ca; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .record-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 10px; padding: 16px 20px; margin: 15px 0; page-break-inside: avoid; }
+        .record-section h2 { font-size: 12px; font-weight: 700; color: #4338ca; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .record-desc { font-size: 9px; color: #64748b; margin-bottom: 10px; line-height: 1.4; }
         .lock-icon { width: 16px; height: 16px; fill: #4338ca; flex-shrink: 0; }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; }
+        .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-weight: 600; color: #475569; min-width: 160px; }
         .info-value { color: #1e293b; font-weight: 500; text-align: right; }
@@ -6992,13 +6994,17 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
     </div>
     <div class="contract-body">${consentTextHtml}</div>
     <div class="bottom-block">
-        <div class="fingerprint-section">
-            <h2><svg class="lock-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> DİJİTAL PARMAK İZİ BİLGİLERİ</h2>
+        <div class="record-section">
+            <h2><svg class="lock-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> ELEKTRONİK ONAY KAYDI</h2>
+            <div class="record-desc">Yazarın onay işlemi sırasında sistem tarafından aşağıdaki kayıt oluşturulmuştur:</div>
             <div class="info-row"><span class="info-label">Yazar Adı Soyadı:</span><span class="info-value">${consent.full_name}</span></div>
+            <div class="info-row"><span class="info-label">Kullanıcı ID:</span><span class="info-value">${consent.user_id}</span></div>
             <div class="info-row"><span class="info-label">Kayıtlı E-posta:</span><span class="info-value">${consent.email}</span></div>
+            <div class="info-row"><span class="info-label">Sözleşme Versiyonu:</span><span class="info-value">v1.0</span></div>
             <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
             <div class="info-row"><span class="info-label">İşlem Yapılan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
-            <div class="info-row"><span class="info-label">Sözleşme Versiyonu:</span><span class="info-value">v1.0</span></div>
+            <div class="info-row"><span class="info-label">Onay Durumu:</span><span class="info-value" style="color: #16a34a; font-weight: 700;">Kabul Edildi</span></div>
+            <div class="info-row"><span class="info-label">Onay Kaydı ID:</span><span class="info-value">#${consent.id}</span></div>
         </div>
         <div class="footer">
             <div class="badge">DİJİTAL OLARAK ONAYLANMIŞTIR</div>
