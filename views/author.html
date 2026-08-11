@@ -1080,6 +1080,14 @@
             color: white;
             text-align: center;
         }
+        .consent-modal-header .consent-logo {
+            height: 48px;
+            width: auto;
+            max-width: 220px;
+            margin-bottom: 12px;
+            display: inline-block;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+        }
         .consent-modal-header .consent-icon {
             font-size: 2.5rem;
             margin-bottom: 10px;
@@ -4807,20 +4815,52 @@
     <div class="consent-overlay" id="consent-overlay" style="display: none;">
         <div class="consent-modal">
             <div class="consent-modal-header">
-                <span class="consent-icon">📋</span>
+                <img src="/uploads/logo.png" alt="AperionX Logo" class="consent-logo">
                 <h2>Yazar Yayın ve Kullanım İzni Beyanı</h2>
                 <p>Lütfen aşağıdaki beyanı dikkatlice okuyunuz</p>
             </div>
             <div class="consent-modal-body">
-                <h3>İşbu beyan ile AperionX platformunda yazar olarak yer alan ben, aşağıdaki koşulları kabul ettiğimi beyan ederim:</h3>
-                <ol>
-                    <li>Yayınladığım tüm içeriklerin özgün olduğunu ve herhangi bir telif hakkı ihlali içermediğini taahhüt ederim.</li>
-                    <li>AperionX platformuna gönderdiğim içeriklerin, platform üzerinde yayınlanması, düzenlenmesi ve paylaşılması için izin verdiğimi kabul ederim.</li>
-                    <li>İçeriklerimin AperionX’in editöryal standartlarına uygun olarak düzenlenebileceğini kabul ederim.</li>
-                    <li>Yayınladığım içeriklerdeki bilgilerin doğruluğundan şahsen sorumlu olduğumu kabul ederim.</li>
-                    <li>AperionX platformunun kullanım koşullarına ve topluluk kurallarına uyacağımı taahhüt ederim.</li>
-                    <li>Bu beyanı dijital olarak onayladığımda, imza yerine geçen dijital parmak izimin (ad-soyad, e-posta, IP adresi, tarih-saat) kaydedileceğini biliyorum ve kabul ediyorum.</li>
-                </ol>
+                <p class="consent-intro" style="font-weight: 500; color: #475569; margin-bottom: 16px; line-height: 1.6;">
+                    Bu beyan, <strong>AperionX</strong> platformunda ("Platform") içerik üreten yazarların ("Yazar"), bugüne kadar ürettikleri ve bundan sonra üretecekleri tüm eserlerin (makale, inceleme, deneme vb.) yayınlanma, kullanım ve dağıtım koşullarını düzenlemektedir. Platforma içerik gönderen veya geçmişte göndermiş olan her Yazar, aşağıdaki koşulları peşinen kabul etmiş sayılır:
+                </p>
+                
+                <div class="consent-article-section" style="margin-bottom: 16px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 8px;">1. Özgünlük ve Yasal Sorumluluk</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 6px;">AperionX platformuna bugüne kadar gönderdiğim ve gelecekte göndereceğim tüm içeriklerin bizzat kendi eserim olduğunu, intihal (kopyalama) içermediğini ve üçüncü şahısların (kişi veya kurumların) telif haklarını hiçbir şekilde ihlal etmediğini beyan ederim.</li>
+                        <li style="margin-bottom: 6px;">Yazılarımda kullandığım her türlü alıntı, veri veya kaynağı akademik ve etik kurallara uygun şekilde referanslandırdığımı taahhüt ederim.</li>
+                        <li style="margin-bottom: 6px;">İçeriklerimin yayınlanması sonucunda doğabilecek telif hakkı ihlalleri dahil olmak üzere, her türlü hukuki, cezai ve mali sorumluluğun tamamen şahsıma ait olduğunu kabul ederim.</li>
+                    </ul>
+                </div>
+
+                <div class="consent-article-section" style="margin-bottom: 16px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 8px;">2. Yayın İzni ve Kapsam (Dijital Lisans)</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 6px;">Eserlerimin AperionX web sitesinde, resmi sosyal medya hesaplarında, e-posta bültenlerinde ve platformun diğer yayın organlarında süresiz olarak yayınlanmasına, dijital ortamda umuma iletilmesine ve arşivlenmesine gayrikabili rücu (geri alınamaz) şekilde izin veriyorum.</li>
+                        <li style="margin-bottom: 6px;">Bu iznin, eserlerimin mülkiyet haklarının tamamen devri anlamına gelmediğini; eser sahibi sıfatımın korunduğunu, ancak AperionX'e içerikleri dilediği zaman yayınlama ve yayından kaldırma yetkisi tanıyan geniş kapsamlı bir kullanım lisansı verdiğimi onaylıyorum.</li>
+                    </ul>
+                </div>
+
+                <div class="consent-article-section" style="margin-bottom: 16px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 8px;">3. Ekip Ayrılıkları ve İçeriklerin Durumu</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 6px;">İleride AperionX yazar kadrosundan kendi isteğimle ayrılsam veya ilişiğim kesilse dahi; daha önce yazmış olduğum ve platformda yayınlanmış olan içeriklerin yayında kalmaya devam etmesi veya yayından kaldırılması konusındaki tek inisiyatifin AperionX yönetimine ait olduğunu kabul ederim.</li>
+                    </ul>
+                </div>
+
+                <div class="consent-article-section" style="margin-bottom: 16px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 8px;">4. Editöryal Düzenleme Yetkisi</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 6px;">AperionX editörlerinin, gönderdiğim içeriklerin ana fikrini, bağlamını ve bütünlüğünü bozmamak şartıyla; yazım kuralları, noktalama, paragraf yapısı, okunabilirlik, başlıklandırma ve görsel seçimi gibi konularda gerekli gördüğü teknik ve editoryal düzenlemeleri yapma hakkına sahip olduğunu onaylıyorum.</li>
+                    </ul>
+                </div>
+
+                <div class="consent-article-section" style="margin-bottom: 16px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 8px;">5. Mali Hükümler</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 6px;">AperionX yönetimi ile aramızda ıslak imzalı veya resmi bir maddi sözleşme bulunmadığı sürece, gönüllülük esasıyla ürettiğim bu içeriklerin yayınlanması karşılığında platformdan geçmişe veya geleceğe dönük herhangi bir telif ücreti, hak ediş veya maddi talepte bulunmayacağımı beyan ve kabul ederim.</li>
+                    </ul>
+                </div>
             </div>
             <div class="consent-modal-footer">
                 <div class="consent-checkbox-wrap" onclick="document.getElementById('consent-checkbox').click()">
@@ -4837,7 +4877,7 @@
 
     <script>
         // === CONSENT MODAL LOGIC ===
-        const CONSENT_TEXT = `İşbu beyan ile AperionX platformunda yazar olarak yer alan ben, aşağıdaki koşulları kabul ettiğimi beyan ederim:\n\n1. Yayınladığım tüm içeriklerin özgün olduğunu ve herhangi bir telif hakkı ihlali içermediğini taahhüt ederim.\n\n2. AperionX platformuna gönderdiğim içeriklerin, platform üzerinde yayınlanması, düzenlenmesi ve paylaşılması için izin verdiğimi kabul ederim.\n\n3. İçeriklerimin AperionX’in editöryal standartlarına uygun olarak düzenlenebileceğini kabul ederim.\n\n4. Yayınladığım içeriklerdeki bilgilerin doğruluğundan şahsen sorumlu olduğumu kabul ederim.\n\n5. AperionX platformunun kullanım koşullarına ve topluluk kurallarına uyacağımı taahhüt ederim.\n\n6. Bu beyanı dijital olarak onayladığımda, imza yerine geçen dijital parmak izimin (ad-soyad, e-posta, IP adresi, tarih-saat) kaydedileceğini biliyorum ve kabul ediyorum.`;
+        const CONSENT_TEXT = `Bu beyan, AperionX platformunda ("Platform") içerik üreten yazarların ("Yazar"), bugüne kadar ürettikleri ve bundan sonra üretecekleri tüm eserlerin (makale, inceleme, deneme vb.) yayınlanma, kullanım ve dağıtım koşullarını düzenlemektedir. Platforma içerik gönderen veya geçmişte göndermiş olan her Yazar, aşağıdaki koşulları peşinen kabul etmiş sayılır:\n\n1. Özgünlük ve Yasal Sorumluluk\n- AperionX platformuna bugüne kadar gönderdiğim ve gelecekte göndereceğim tüm içeriklerin bizzat kendi eserim olduğunu, intihal (kopyalama) içermediğini ve üçüncü şahısların (kişi veya kurumların) telif haklarını hiçbir şekilde ihlal etmediğini beyan ederim.\n- Yazılarımda kullandığım her türlü alıntı, veri veya kaynağı akademik ve etik kurallara uygun şekilde referanslandırdığımı taahhüt ederim.\n- İçeriklerimin yayınlanması sonucunda doğabilecek telif hakkı ihlalleri dahil olmak üzere, her türlü hukuki, cezai ve mali sorumluluğun tamamen şahsıma ait olduğunu kabul ederim.\n\n2. Yayın İzni ve Kapsam (Dijital Lisans)\n- Eserlerimin AperionX web sitesinde, resmi sosyal medya hesaplarında, e-posta bültenlerinde ve platformun diğer yayın organlarında süresiz olarak yayınlanmasına, dijital ortamda umuma iletilmesine ve arşivlenmesine gayrikabili rücu (geri alınamaz) şekilde izin veriyorum.\n- Bu iznin, eserlerimin mülkiyet haklarının tamamen devri anlamına gelmediğini; eser sahibi sıfatımın korunduğunu, ancak AperionX'e içerikleri dilediği zaman yayınlama ve yayından kaldırma yetkisi tanıyan geniş kapsamlı bir kullanım lisansı verdiğimi onaylıyorum.\n\n3. Ekip Ayrılıkları ve İçeriklerin Durumu\n- İleride AperionX yazar kadrosundan kendi isteğimle ayrılsam veya ilişiğim kesilse dahi; daha önce yazmış olduğum ve platformda yayınlanmış olan içeriklerin yayında kalmaya devam etmesi veya yayından kaldırılması konusundaki tek inisiyatifin AperionX yönetimine ait olduğunu kabul ederim.\n\n4. Editöryal Düzenleme Yetkisi\n- AperionX editörlerinin, gönderdiğim içeriklerin ana fikrini, bağlamını ve bütünlüğünü bozmamak şartıyla; yazım kuralları, noktalama, paragraf yapısı, okunabilirlik, başlıklandırma ve görsel seçimi gibi konularda gerekli gördüğü teknik ve editoryal düzenlemeleri yapma hakkına sahip olduğunu onaylıyorum.\n\n5. Mali Hükümler\n- AperionX yönetimi ile aramızda ıslak imzalı veya resmi bir maddi sözleşme bulunmadığı sürece, gönüllülük esasıyla ürettiğim bu içeriklerin yayınlanması karşılığında platformdan geçmişe veya geleceğe dönük herhangi bir telif ücreti, hak ediş veya maddi talepte bulunmayacağımı beyan ve kabul ederim.`;
 
         function showConsentModal() {
             const overlay = document.getElementById('consent-overlay');

@@ -6943,43 +6943,97 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @page { size: A4 portrait; margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 50px; line-height: 1.7; background: #fff; }
-        .header { text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 3px solid #6366f1; }
-        .header img { height: 60px; margin-bottom: 15px; }
-        .header h1 { font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: 1px; }
-        .header p { font-size: 12px; color: #64748b; margin-top: 6px; }
-        .contract-body { margin-bottom: 35px; font-size: 13px; color: #334155; text-align: justify; }
-        .contract-body p { margin-bottom: 10px; }
-        .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 12px; padding: 28px 32px; margin: 35px 0; }
-        .fingerprint-section h2 { font-size: 16px; font-weight: 700; color: #4338ca; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-        .fingerprint-section h2::before { content: '🔒'; font-size: 18px; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 24px 36px 18px 36px; line-height: 1.35; background: #fff; -webkit-print-color-adjust: exact; }
+        .header { text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #6366f1; }
+        .header img { height: 36px; width: auto; margin-bottom: 4px; }
+        .header h1 { font-size: 14px; font-weight: 700; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase; }
+        .header p { font-size: 9px; color: #64748b; margin-top: 2px; }
+        
+        .intro-p { font-size: 8.8px; color: #475569; margin-bottom: 8px; text-align: justify; line-height: 1.35; }
+        
+        .section-block { margin-bottom: 6px; }
+        .section-title { font-size: 9.2px; font-weight: 700; color: #312e81; margin-bottom: 2px; }
+        .bullet-list { margin: 0; padding-left: 14px; }
+        .bullet-list li { font-size: 8.4px; color: #334155; margin-bottom: 2px; line-height: 1.32; text-align: justify; }
+        
+        .fingerprint-section { background: #f8fafc; border: 1.5px solid #6366f1; border-radius: 8px; padding: 10px 16px; margin: 10px 0 8px 0; }
+        .fingerprint-section h2 { font-size: 10px; font-weight: 700; color: #4338ca; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #e2e8f0; font-size: 8.5px; }
         .info-row:last-child { border-bottom: none; }
-        .info-label { font-weight: 600; color: #475569; min-width: 180px; }
-        .info-value { color: #1e293b; font-weight: 500; text-align: right; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
-        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 4px 14px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .info-label { font-weight: 600; color: #475569; }
+        .info-value { color: #0f172a; font-weight: 600; }
+        
+        .footer { text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-size: 8px; color: #94a3b8; }
+        .footer .badge { display: inline-block; background: #4f46e5; color: white; padding: 2px 10px; border-radius: 12px; font-size: 8px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
     <div class="header">
-        ${logoBase64 ? '<img src="data:image/png;base64,' + logoBase64 + '" alt="AperionX Logo">' : '<h2 style="color: #6366f1;">AperionX</h2>'}
-        <h1>YAZAR YAYIN VE KULLANIM \u0130ZN\u0130 BEYANI</h1>
-        <p>Dijital S\u00f6zle\u015fme Belgesi</p>
+        ${logoBase64 ? '<img src="data:image/png;base64,' + logoBase64 + '" alt="AperionX Logo">' : '<h2 style="color: #6366f1; font-size: 20px;">AperionX</h2>'}
+        <h1>Yazar Yayın ve Kullanım İzni Beyanı</h1>
+        <p>Dijital Sözleşme Belgesi</p>
     </div>
-    <div class="contract-body">${consentTextHtml}</div>
+
+    <p class="intro-p">
+        Bu beyan, <strong>AperionX</strong> platformunda ("Platform") içerik üreten yazarların ("Yazar"), bugüne kadar ürettikleri ve bundan sonra üretecekleri tüm eserlerin (makale, inceleme, deneme vb.) yayınlanma, kullanım ve dağıtım koşullarını düzenlemektedir. Platforma içerik gönderen veya geçmişte göndermiş olan her Yazar, aşağıdaki koşulları peşinen kabul etmiş sayılır:
+    </p>
+
+    <div class="section-block">
+        <div class="section-title">1. Özgünlük ve Yasal Sorumluluk</div>
+        <ul class="bullet-list">
+            <li>AperionX platformuna bugüne kadar gönderdiğim ve gelecekte göndereceğim tüm içeriklerin bizzat kendi eserim olduğunu, intihal (kopyalama) içermediğini ve üçüncü şahısların (kişi veya kurumların) telif haklarını hiçbir şekilde ihlal etmediğini beyan ederim.</li>
+            <li>Yazılarımda kullandığım her türlü alıntı, veri veya kaynağı akademik ve etik kurallara uygun şekilde referanslandırdığımı taahhüt ederim.</li>
+            <li>İçeriklerimin yayınlanması sonucunda doğabilecek telif hakkı ihlalleri dahil olmak üzere, her türlü hukuki, cezai ve mali sorumluluğun tamamen şahsıma ait olduğunu kabul ederim.</li>
+        </ul>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">2. Yayın İzni ve Kapsam (Dijital Lisans)</div>
+        <ul class="bullet-list">
+            <li>Eserlerimin AperionX web sitesinde, resmi sosyal medya hesaplarında, e-posta bültenlerinde ve platformun diğer yayın organlarında süresiz olarak yayınlanmasına, dijital ortamda umuma iletilmesine ve arşivlenmesine gayrikabili rücu (geri alınamaz) şekilde izin veriyorum.</li>
+            <li>Bu iznin, eserlerimin mülkiyet haklarının tamamen devri anlamına gelmediğini; eser sahibi sıfatımın korunduğunu, ancak AperionX'e içerikleri dilediği zaman yayınlama ve yayından kaldırma yetkisi tanıyan geniş kapsamlı bir kullanım lisansı verdiğimi onaylıyorum.</li>
+        </ul>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">3. Ekip Ayrılıkları ve İçeriklerin Durumu</div>
+        <ul class="bullet-list">
+            <li>İleride AperionX yazar kadrosundan kendi isteğimle ayrılsam veya ilişiğim kesilse dahi; daha önce yazmış olduğum ve platformda yayınlanmış olan içeriklerin yayında kalmaya devam etmesi veya yayından kaldırılması konusundaki tek inisiyatifin AperionX yönetimine ait olduğunu kabul ederim.</li>
+        </ul>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">4. Editöryal Düzenleme Yetkisi</div>
+        <ul class="bullet-list">
+            <li>AperionX editörlerinin, gönderdiğim içeriklerin ana fikrini, bağlamını ve bütünlüğünü bozmamak şartıyla; yazım kuralları, noktalama, paragraf yapısı, okunabilirlik, başlıklandırma ve görsel seçimi gibi konularda gerekli gördüğü teknik ve editoryal düzenlemeleri yapma hakkına sahip olduğunu onaylıyorum.</li>
+        </ul>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">5. Mali Hükümler</div>
+        <ul class="bullet-list">
+            <li>AperionX yönetimi ile aramızda ıslak imzalı veya resmi bir maddi sözleşme bulunmadığı sürece, gönüllülük esasıyla ürettiğim bu içeriklerin yayınlanması karşılığında platformdan geçmişe veya geleceğe dönük herhangi bir telif ücreti, hak ediş veya maddi talepte bulunmayacağımı beyan ve kabul ederim.</li>
+        </ul>
+    </div>
+
     <div class="fingerprint-section">
-        <h2>D\u0130J\u0130TAL PARMAK \u0130Z\u0130 B\u0130LG\u0130LER\u0130</h2>
-        <div class="info-row"><span class="info-label">Yazar Ad\u0131 Soyad\u0131:</span><span class="info-value">${consent.full_name}</span></div>
-        <div class="info-row"><span class="info-label">Kay\u0131tl\u0131 E-posta:</span><span class="info-value">${consent.email}</span></div>
-        <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
-        <div class="info-row"><span class="info-label">\u0130\u015flem Yap\u0131lan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
+        <h2>🔒 DİJİTAL PARMAK İZİ BİLGİLERİ</h2>
+        <div class="info-grid">
+            <div class="info-row"><span class="info-label">Yazar Adı Soyadı:</span><span class="info-value">${consent.full_name}</span></div>
+            <div class="info-row"><span class="info-label">Kayıtlı E-posta:</span><span class="info-value">${consent.email}</span></div>
+            <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
+            <div class="info-row"><span class="info-label">İşlem Yapılan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
+        </div>
     </div>
+
     <div class="footer">
-        <div class="badge">D\u0130J\u0130TAL OLARAK ONAYLANMI\u015eTIR</div>
-        <p>Bu belge, yazar\u0131n dijital ortamda onaylad\u0131\u011f\u0131 s\u00f6zle\u015fmenin resmi kopyas\u0131d\u0131r.</p>
-        <p>AperionX &copy; ${new Date().getFullYear()} &mdash; T\u00fcm haklar\u0131 sakl\u0131d\u0131r.</p>
+        <div class="badge">DİJİTAL OLARAK ONAYLANMIŞTIR</div>
+        <p>Bu belge, yazarın dijital ortamda onayladığı sözleşmenin resmi kopyasıdır.</p>
+        <p>AperionX &copy; ${new Date().getFullYear()} &mdash; Tüm hakları saklıdır.</p>
     </div>
 </body>
 </html>`;
@@ -6988,7 +7042,7 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' } });
+        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' } });
         await browser.close();
 
         const safeFileName = consent.full_name.replace(/[^a-zA-Z0-9\u00e7\u011f\u0131\u00f6\u015f\u00fc\u00c7\u011e\u0130\u00d6\u015e\u00dc\s]/g, '').replace(/\s+/g, '_');
