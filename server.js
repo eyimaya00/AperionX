@@ -6969,11 +6969,17 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-          .contract-section { margin-bottom: 12px; }
-        .contract-article { page-break-inside: avoid; break-inside: avoid; margin-bottom: 8px; }
-        .contract-section h3 { font-size: 9px; font-weight: 700; color: #1e1b4b; margin: 8px 0 3px 0; page-break-after: avoid; break-after: avoid; }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 25px 35px; line-height: 1.5; background: #fff; font-size: 8.5px; }
+        .header { text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2.5px solid #6366f1; }
+        .header img { height: 40px; margin-bottom: 6px; }
+        .header h1 { font-size: 13px; font-weight: 700; color: #0f172a; letter-spacing: 0.6px; text-transform: uppercase; }
+        .header .version { font-size: 8px; color: #64748b; margin-top: 2px; }
+        .contract-section { margin-bottom: 12px; }
+        .contract-section h3 { font-size: 9px; font-weight: 700; color: #1e1b4b; margin: 10px 0 4px 0; page-break-after: avoid; break-after: avoid; }
         .contract-section p { font-size: 8px; color: #334155; margin-bottom: 4px; text-align: justify; line-height: 1.45; }
-        .contract-section ul, .contract-section ol { font-size: 8px; color: #334155; padding-left: 16px; margin: 3px 0 4px 0; }
+        .contract-section ul, .contract-section ol { font-size: 8px; color: #334155; padding-left: 16px; margin: 3px 0 4px 0; page-break-inside: avoid; break-inside: avoid; }
         .contract-section li { margin-bottom: 2px; line-height: 1.4; }
         .contract-section strong { font-weight: 700; }
         .bottom-block { page-break-inside: avoid; break-inside: avoid; margin-top: 20px; text-align: center; width: 100%; }
@@ -6997,256 +7003,212 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
     </div>
 
     <div class="contract-section">
-        <div class="contract-article">
-            <p>Bu S\u00f6zle\u015fme, AperionX platformunda (\u201cPlatform\u201d) i\u00e7erik \u00fcreten veya Platforma i\u00e7erik g\u00f6nderen yazarlar\u0131n (\u201cYazar\u201d), Platforma g\u00f6nderdikleri i\u00e7eriklerin yay\u0131nlanmas\u0131, kullan\u0131lmas\u0131, d\u00fczenlenmesi, ar\u015fivlenmesi ve da\u011f\u0131t\u0131lmas\u0131na ili\u015fkin hak ve sorumluluklar\u0131n\u0131 belirlemek amac\u0131yla haz\u0131rlanm\u0131\u015ft\u0131r.</p>
-            <p>Platforma i\u00e7erik g\u00f6nderen Yazar, bu S\u00f6zle\u015fmeyi elektronik ortamda onaylayarak a\u015fa\u011f\u0131daki h\u00fck\u00fcmleri kabul etmi\u015f olur.</p>
-        </div>
+        <p>Bu S\u00f6zle\u015fme, AperionX platformunda (\u201cPlatform\u201d) i\u00e7erik \u00fcreten veya Platforma i\u00e7erik g\u00f6nderen yazarlar\u0131n (\u201cYazar\u201d), Platforma g\u00f6nderdikleri i\u00e7eriklerin yay\u0131nlanmas\u0131, kullan\u0131lmas\u0131, d\u00fczenlenmesi, ar\u015fivlenmesi ve da\u011f\u0131t\u0131lmas\u0131na ili\u015fkin hak ve sorumluluklar\u0131n\u0131 belirlemek amac\u0131yla haz\u0131rlanm\u0131\u015ft\u0131r.</p>
+        <p>Platforma i\u00e7erik g\u00f6nderen Yazar, bu S\u00f6zle\u015fmeyi elektronik ortamda onaylayarak a\u015fa\u011f\u0131daki h\u00fck\u00fcmleri kabul etmi\u015f olur.</p>
 
-        <div class="contract-article">
-            <h3>1. Ama\u00e7 ve Kapsam</h3>
-            <p>Bu S\u00f6zle\u015fme; Yazar taraf\u0131ndan AperionX\u2019e g\u00f6nderilen veya AperionX taraf\u0131ndan yay\u0131nlanan makale, inceleme, deneme, ara\u015ft\u0131rma yaz\u0131s\u0131, r\u00f6portaj, deneyler, haber/yorum niteli\u011findeki \u00e7al\u0131\u015fmalar ve benzeri yaz\u0131l\u0131 i\u00e7erikleri kapsar.</p>
-            <p>Bu S\u00f6zle\u015fme, Yazar ile AperionX aras\u0131ndaki i\u00e7erik \u00fcretimi ve yay\u0131n ili\u015fkisine ili\u015fkin temel kurallar\u0131 belirler.</p>
-        </div>
+        <h3>1. Ama\u00e7 ve Kapsam</h3>
+        <p>Bu S\u00f6zle\u015fme; Yazar taraf\u0131ndan AperionX\u2019e g\u00f6nderilen veya AperionX taraf\u0131ndan yay\u0131nlanan makale, inceleme, deneme, ara\u015ft\u0131rma yaz\u0131s\u0131, r\u00f6portaj, deneyler, haber/yorum niteli\u011findeki \u00e7al\u0131\u015fmalar ve benzeri yaz\u0131l\u0131 i\u00e7erikleri kapsar.</p>
+        <p>Bu S\u00f6zle\u015fme, Yazar ile AperionX aras\u0131ndaki i\u00e7erik \u00fcretimi ve yay\u0131n ili\u015fkisine ili\u015fkin temel kurallar\u0131 belirler.</p>
 
-        <div class="contract-article">
-            <h3>2. \u00d6zg\u00fcnl\u00fck ve Yazar\u0131n Beyan\u0131</h3>
-            <p>Yazar, AperionX\u2019e g\u00f6nderdi\u011fi i\u00e7eriklerin kendi \u00f6zg\u00fcn \u00e7al\u0131\u015fmas\u0131 oldu\u011funu ve s\u00f6z konusu i\u00e7erikleri Platforma g\u00f6ndermek ve yay\u0131nlatmak i\u00e7in gerekli haklara sahip oldu\u011funu kabul ve beyan eder.</p>
-            <p>Yazar;</p>
-            <ul>
-                <li>Ba\u015fka bir eseri izinsiz \u015fekilde kopyalamamay\u0131,</li>
-                <li>\u0130ntihal yapmamay\u0131,</li>
-                <li>Ba\u015fka ki\u015fi veya kurumlar\u0131n eserlerini kendi eseri gibi sunmamay\u0131,</li>
-                <li>Kulland\u0131\u011f\u0131 al\u0131nt\u0131, bilgi, veri ve kaynaklar\u0131 uygun \u015fekilde belirtmeyi,</li>
-                <li>\u00dc\u00e7\u00fcnc\u00fc ki\u015filerin telif hakk\u0131, marka hakk\u0131, ki\u015filik hakk\u0131 veya di\u011fer yasal haklar\u0131n\u0131 ihlal eden materyalleri gerekli izin olmadan kullanmamay\u0131</li>
-            </ul>
-            <p>kabul eder.</p>
-            <p>Yazar taraf\u0131ndan sa\u011flanan i\u00e7eri\u011fin bu y\u00fck\u00fcml\u00fcl\u00fcklere ayk\u0131r\u0131 olmas\u0131 nedeniyle ortaya \u00e7\u0131kabilecek sorumluluk, Yazar\u0131n kendi fiil ve kusuru \u00f6l\u00e7\u00fcs\u00fcnde Yazar\u2019a aittir.</p>
-        </div>
+        <h3>2. \u00d6zg\u00fcnl\u00fck ve Yazar\u0131n Beyan\u0131</h3>
+        <p>Yazar, AperionX\u2019e g\u00f6nderdi\u011fi i\u00e7eriklerin kendi \u00f6zg\u00fcn \u00e7al\u0131\u015fmas\u0131 oldu\u011funu ve s\u00f6z konusu i\u00e7erikleri Platforma g\u00f6ndermek ve yay\u0131nlatmak i\u00e7in gerekli haklara sahip oldu\u011funu kabul ve beyan eder.</p>
+        <p>Yazar;</p>
+        <ul>
+            <li>Ba\u015fka bir eseri izinsiz \u015fekilde kopyalamamay\u0131,</li>
+            <li>\u0130ntihal yapmamay\u0131,</li>
+            <li>Ba\u015fka ki\u015fi veya kurumlar\u0131n eserlerini kendi eseri gibi sunmamay\u0131,</li>
+            <li>Kulland\u0131\u011f\u0131 al\u0131nt\u0131, bilgi, veri ve kaynaklar\u0131 uygun \u015fekilde belirtmeyi,</li>
+            <li>\u00dc\u00e7\u00fcnc\u00fc ki\u015filerin telif hakk\u0131, marka hakk\u0131, ki\u015filik hakk\u0131 veya di\u011fer yasal haklar\u0131n\u0131 ihlal eden materyalleri gerekli izin olmadan kullanmamay\u0131</li>
+        </ul>
+        <p>kabul eder.</p>
+        <p>Yazar taraf\u0131ndan sa\u011flanan i\u00e7eri\u011fin bu y\u00fck\u00fcml\u00fcl\u00fcklere ayk\u0131r\u0131 olmas\u0131 nedeniyle ortaya \u00e7\u0131kabilecek sorumluluk, Yazar\u0131n kendi fiil ve kusuru \u00f6l\u00e7\u00fcs\u00fcnde Yazar\u2019a aittir.</p>
 
-        <div class="contract-article">
-            <h3>3. Kaynak G\u00f6sterme ve Etik \u0130lkeler</h3>
-            <p>Yazar, \u00f6zellikle akademik, bilimsel veya ara\u015ft\u0131rmaya dayal\u0131 i\u00e7eriklerde yararland\u0131\u011f\u0131 kaynaklar\u0131 do\u011fru ve anla\u015f\u0131l\u0131r \u015fekilde belirtmeyi kabul eder.</p>
-            <p>Uydurma kaynak, sahte veri, yan\u0131lt\u0131c\u0131 bilgi, ba\u015fkas\u0131na ait \u00e7al\u0131\u015fman\u0131n izinsiz kullan\u0131lmas\u0131 veya intihal gibi uygulamalar AperionX\u2019in yay\u0131n ilkelerine ayk\u0131r\u0131d\u0131r.</p>
-            <p>AperionX, gerekli g\u00f6rd\u00fc\u011f\u00fc durumlarda i\u00e7erik hakk\u0131nda Yazar\u2019dan kaynak, a\u00e7\u0131klama veya d\u00fczeltme talep edebilir.</p>
-        </div>
+        <h3>3. Kaynak G\u00f6sterme ve Etik \u0130lkeler</h3>
+        <p>Yazar, \u00f6zellikle akademik, bilimsel veya ara\u015ft\u0131rmaya dayal\u0131 i\u00e7eriklerde yararland\u0131\u011f\u0131 kaynaklar\u0131 do\u011fru ve anla\u015f\u0131l\u0131r \u015fekilde belirtmeyi kabul eder.</p>
+        <p>Uydurma kaynak, sahte veri, yan\u0131lt\u0131c\u0131 bilgi, ba\u015fkas\u0131na ait \u00e7al\u0131\u015fman\u0131n izinsiz kullan\u0131lmas\u0131 veya intihal gibi uygulamalar AperionX\u2019in yay\u0131n ilkelerine ayk\u0131r\u0131d\u0131r.</p>
+        <p>AperionX, gerekli g\u00f6rd\u00fc\u011f\u00fc durumlarda i\u00e7erik hakk\u0131nda Yazar\u2019dan kaynak, a\u00e7\u0131klama veya d\u00fczeltme talep edebilir.</p>
 
-        <div class="contract-article">
-            <h3>4. AperionX\u2019e Verilen Kullan\u0131m Lisans\u0131</h3>
-            <p>Yazar, AperionX taraf\u0131ndan kabul edilerek yay\u0131nlanan i\u00e7erikleri i\u00e7in AperionX\u2019e <strong>m\u00fcnhas\u0131r olmayan, s\u00fcresiz ve d\u00fcnya \u00e7ap\u0131nda ge\u00e7erli bir kullan\u0131m lisans\u0131</strong> verir.</p>
-            <p>Bu lisans kapsam\u0131nda AperionX;</p>
-            <ul>
-                <li>\u0130\u00e7eri\u011fi kendi internet sitesinde yay\u0131nlayabilir,</li>
-                <li>\u0130\u00e7eri\u011fi dijital ar\u015fivinde saklayabilir,</li>
-                <li>Resm\u00ee sosyal medya hesaplar\u0131nda payla\u015fabilir,</li>
-                <li>E-posta b\u00fcltenlerinde yay\u0131nlayabilir,</li>
-                <li>Platformun dijital yay\u0131n ve ileti\u015fim kanallar\u0131nda kullanabilir,</li>
-                <li>Platformun tan\u0131t\u0131m faaliyetlerinde i\u00e7eri\u011fe yer verebilir,</li>
-                <li>\u0130\u00e7eri\u011fi dijital ortamda eri\u015fime sunabilir,</li>
-                <li>\u0130\u00e7eri\u011fi daha \u00f6nce yay\u0131nland\u0131\u011f\u0131 bi\u00e7imiyle yeniden payla\u015fabilir.</li>
-            </ul>
-            <p>Bu lisans, Yazar\u0131n eser \u00fczerindeki sahipli\u011finin veya eser sahibi s\u0131fat\u0131n\u0131n AperionX\u2019e devredildi\u011fi anlam\u0131na gelmez.</p>
-            <p>Yazar, eser \u00fczerindeki haklar\u0131n\u0131 korumaya devam eder.</p>
-        </div>
+        <h3>4. AperionX\u2019e Verilen Kullan\u0131m Lisans\u0131</h3>
+        <p>Yazar, AperionX taraf\u0131ndan kabul edilerek yay\u0131nlanan i\u00e7erikleri i\u00e7in AperionX\u2019e <strong>m\u00fcnhas\u0131r olmayan, s\u00fcresiz ve d\u00fcnya \u00e7ap\u0131nda ge\u00e7erli bir kullan\u0131m lisans\u0131</strong> verir.</p>
+        <p>Bu lisans kapsam\u0131nda AperionX;</p>
+        <ul>
+            <li>\u0130\u00e7eri\u011fi kendi internet sitesinde yay\u0131nlayabilir,</li>
+            <li>\u0130\u00e7eri\u011fi dijital ar\u015fivinde saklayabilir,</li>
+            <li>Resm\u00ee sosyal medya hesaplar\u0131nda payla\u015fabilir,</li>
+            <li>E-posta b\u00fcltenlerinde yay\u0131nlayabilir,</li>
+            <li>Platformun dijital yay\u0131n ve ileti\u015fim kanallar\u0131nda kullanabilir,</li>
+            <li>Platformun tan\u0131t\u0131m faaliyetlerinde i\u00e7eri\u011fe yer verebilir,</li>
+            <li>\u0130\u00e7eri\u011fi dijital ortamda eri\u015fime sunabilir,</li>
+            <li>\u0130\u00e7eri\u011fi daha \u00f6nce yay\u0131nland\u0131\u011f\u0131 bi\u00e7imiyle yeniden payla\u015fabilir.</li>
+        </ul>
+        <p>Bu lisans, Yazar\u0131n eser \u00fczerindeki sahipli\u011finin veya eser sahibi s\u0131fat\u0131n\u0131n AperionX\u2019e devredildi\u011fi anlam\u0131na gelmez.</p>
+        <p>Yazar, eser \u00fczerindeki haklar\u0131n\u0131 korumaya devam eder.</p>
 
-        <div class="contract-article">
-            <h3>5. M\u00fcnhas\u0131r Olmayan Kullan\u0131m</h3>
-            <p>AperionX\u2019e verilen kullan\u0131m lisans\u0131 m\u00fcnhas\u0131r de\u011fildir.</p>
-            <p>Bu nedenle Yazar, AperionX\u2019e g\u00f6nderdi\u011fi ve yay\u0131nlanan eserlerini, ayr\u0131ca ba\u015fka bir s\u00f6zle\u015fmeyle aksi kararla\u015ft\u0131r\u0131lmad\u0131\u011f\u0131 s\u00fcrece;</p>
-            <ul>
-                <li>Ki\u015fisel internet sitesinde,</li>
-                <li>Portf\u00f6y\u00fcnde,</li>
-                <li>Akademik veya mesleki profillerinde,</li>
-                <li>Sosyal medya hesaplar\u0131nda,</li>
-                <li>Ba\u015fka yay\u0131nlarda</li>
-            </ul>
-            <p>kullanabilir veya payla\u015fabilir.</p>
-            <p>Ancak AperionX\u2019e \u00f6zel olarak haz\u0131rlanan, hen\u00fcz yay\u0131nlanmam\u0131\u015f veya ayr\u0131ca gizlilik kapsam\u0131nda de\u011ferlendirilen i\u00e7erikler i\u00e7in taraflar aras\u0131nda belirlenen \u00f6zel \u015fartlar ge\u00e7erlidir.</p>
-        </div>
+        <h3>5. M\u00fcnhas\u0131r Olmayan Kullan\u0131m</h3>
+        <p>AperionX\u2019e verilen kullan\u0131m lisans\u0131 m\u00fcnhas\u0131r de\u011fildir.</p>
+        <p>Bu nedenle Yazar, AperionX\u2019e g\u00f6nderdi\u011fi ve yay\u0131nlanan eserlerini, ayr\u0131ca ba\u015fka bir s\u00f6zle\u015fmeyle aksi kararla\u015ft\u0131r\u0131lmad\u0131\u011f\u0131 s\u00fcrece;</p>
+        <ul>
+            <li>Ki\u015fisel internet sitesinde,</li>
+            <li>Portf\u00f6y\u00fcnde,</li>
+            <li>Akademik veya mesleki profillerinde,</li>
+            <li>Sosyal medya hesaplar\u0131nda,</li>
+            <li>Ba\u015fka yay\u0131nlarda</li>
+        </ul>
+        <p>kullanabilir veya payla\u015fabilir.</p>
+        <p>Ancak AperionX\u2019e \u00f6zel olarak haz\u0131rlanan, hen\u00fcz yay\u0131nlanmam\u0131\u015f veya ayr\u0131ca gizlilik kapsam\u0131nda de\u011ferlendirilen i\u00e7erikler i\u00e7in taraflar aras\u0131nda belirlenen \u00f6zel \u015fartlar ge\u00e7erlidir.</p>
 
-        <div class="contract-article">
-            <h3>6. Edit\u00f6ryal ve Teknik D\u00fczenleme</h3>
-            <p>AperionX, yay\u0131n kalitesini ve okunabilirli\u011fi sa\u011flamak amac\u0131yla Yazar taraf\u0131ndan g\u00f6nderilen i\u00e7eriklerde gerekli edit\u00f6ryal ve teknik d\u00fczenlemeleri yapabilir.</p>
-            <p>Bu d\u00fczenlemeler;</p>
-            <ul>
-                <li>Yaz\u0131m ve imla,</li>
-                <li>Noktalama,</li>
-                <li>Paragraf yap\u0131s\u0131,</li>
-                <li>Ba\u015fl\u0131k ve alt ba\u015fl\u0131k d\u00fczenlemesi,</li>
-                <li>Anlat\u0131m bozukluklar\u0131n\u0131n giderilmesi,</li>
-                <li>Bi\u00e7imlendirme,</li>
-                <li>Okunabilirli\u011fin art\u0131r\u0131lmas\u0131,</li>
-                <li>Dijital yay\u0131n format\u0131na uyarlama,</li>
-                <li>G\u00f6rsel se\u00e7imi ve yerle\u015fimi</li>
-            </ul>
-            <p>gibi i\u015flemleri kapsayabilir.</p>
-            <p>Yap\u0131lan d\u00fczenlemeler, m\u00fcmk\u00fcn oldu\u011funca Yazar\u0131n temel fikrini, anlat\u0131m amac\u0131n\u0131 ve i\u00e7eri\u011fin b\u00fct\u00fcnl\u00fc\u011f\u00fcn\u00fc koruyacak \u015fekilde ger\u00e7ekle\u015ftirilir.</p>
-            <p>\u0130\u00e7eri\u011fin temel anlam\u0131n\u0131 veya ana fikrini \u00f6nemli \u00f6l\u00e7\u00fcde de\u011fi\u015ftirecek d\u00fczenlemelerde, gerekli g\u00f6r\u00fclmesi halinde Yazar\u0131n g\u00f6r\u00fc\u015f\u00fc al\u0131nabilir.</p>
-        </div>
+        <h3>6. Edit\u00f6ryal ve Teknik D\u00fczenleme</h3>
+        <p>AperionX, yay\u0131n kalitesini ve okunabilirli\u011fi sa\u011flamak amac\u0131yla Yazar taraf\u0131ndan g\u00f6nderilen i\u00e7eriklerde gerekli edit\u00f6ryal ve teknik d\u00fczenlemeleri yapabilir.</p>
+        <p>Bu d\u00fczenlemeler;</p>
+        <ul>
+            <li>Yaz\u0131m ve imla,</li>
+            <li>Noktalama,</li>
+            <li>Paragraf yap\u0131s\u0131,</li>
+            <li>Ba\u015fl\u0131k ve alt ba\u015fl\u0131k d\u00fczenlemesi,</li>
+            <li>Anlat\u0131m bozukluklar\u0131n\u0131n giderilmesi,</li>
+            <li>Bi\u00e7imlendirme,</li>
+            <li>Okunabilirli\u011fin art\u0131r\u0131lmas\u0131,</li>
+            <li>Dijital yay\u0131n format\u0131na uyarlama,</li>
+            <li>G\u00f6rsel se\u00e7imi ve yerle\u015fimi</li>
+        </ul>
+        <p>gibi i\u015flemleri kapsayabilir.</p>
+        <p>Yap\u0131lan d\u00fczenlemeler, m\u00fcmk\u00fcn oldu\u011funca Yazar\u0131n temel fikrini, anlat\u0131m amac\u0131n\u0131 ve i\u00e7eri\u011fin b\u00fct\u00fcnl\u00fc\u011f\u00fcn\u00fc koruyacak \u015fekilde ger\u00e7ekle\u015ftirilir.</p>
+        <p>\u0130\u00e7eri\u011fin temel anlam\u0131n\u0131 veya ana fikrini \u00f6nemli \u00f6l\u00e7\u00fcde de\u011fi\u015ftirecek d\u00fczenlemelerde, gerekli g\u00f6r\u00fclmesi halinde Yazar\u0131n g\u00f6r\u00fc\u015f\u00fc al\u0131nabilir.</p>
 
-        <div class="contract-article">
-            <h3>7. Ba\u015fl\u0131k, \u00d6zet ve Tan\u0131t\u0131m \u0130\u00e7eri\u011fi</h3>
-            <p>AperionX, yay\u0131nlanan i\u00e7eriklerin daha anla\u015f\u0131l\u0131r ve eri\u015filebilir olmas\u0131 amac\u0131yla i\u00e7eriklere uygun ba\u015fl\u0131k, alt ba\u015fl\u0131k, k\u0131sa a\u00e7\u0131klama, \u00f6zet veya tan\u0131t\u0131m metni olu\u015fturabilir.</p>
-            <p>AperionX ayr\u0131ca i\u00e7eriklerin tan\u0131t\u0131lmas\u0131 amac\u0131yla yay\u0131nlanan i\u00e7eriklerden makul uzunlukta k\u0131sa b\u00f6l\u00fcmler veya al\u0131nt\u0131lar kullanabilir.</p>
-            <p>Bu i\u015flemler, i\u00e7eri\u011fin temel anlam\u0131n\u0131 ve Yazar\u0131n ana fikrini de\u011fi\u015ftirmeyecek \u015fekilde ger\u00e7ekle\u015ftirilir.</p>
-        </div>
+        <h3>7. Ba\u015fl\u0131k, \u00d6zet ve Tan\u0131t\u0131m \u0130\u00e7eri\u011fi</h3>
+        <p>AperionX, yay\u0131nlanan i\u00e7eriklerin daha anla\u015f\u0131l\u0131r ve eri\u015filebilir olmas\u0131 amac\u0131yla i\u00e7eriklere uygun ba\u015fl\u0131k, alt ba\u015fl\u0131k, k\u0131sa a\u00e7\u0131klama, \u00f6zet veya tan\u0131t\u0131m metni olu\u015fturabilir.</p>
+        <p>AperionX ayr\u0131ca i\u00e7eriklerin tan\u0131t\u0131lmas\u0131 amac\u0131yla yay\u0131nlanan i\u00e7eriklerden makul uzunlukta k\u0131sa b\u00f6l\u00fcmler veya al\u0131nt\u0131lar kullanabilir.</p>
+        <p>Bu i\u015flemler, i\u00e7eri\u011fin temel anlam\u0131n\u0131 ve Yazar\u0131n ana fikrini de\u011fi\u015ftirmeyecek \u015fekilde ger\u00e7ekle\u015ftirilir.</p>
 
-        <div class="contract-article">
-            <h3>8. G\u00f6rsel, Veri ve \u00dc\u00e7\u00fcnc\u00fc Taraf Materyalleri</h3>
-            <p>Yazar taraf\u0131ndan g\u00f6nderilen i\u00e7erikte \u00fc\u00e7\u00fcnc\u00fc ki\u015filere ait foto\u011fraf, grafik, tablo, video, ses, ill\u00fcstrasyon, veri veya benzeri materyallerin kullan\u0131lmas\u0131 halinde, Yazar bu materyallerin kullan\u0131m\u0131na ili\u015fkin gerekli hak veya izinlere sahip oldu\u011funu kabul eder.</p>
-            <p>AperionX, telif veya di\u011fer hak ihlali \u015f\u00fcphesi bulunan materyalleri kald\u0131rabilir, de\u011fi\u015ftirebilir veya Yazar\u2019dan uygun bir materyal sa\u011flamas\u0131n\u0131 isteyebilir.</p>
-        </div>
+        <h3>8. G\u00f6rsel, Veri ve \u00dc\u00e7\u00fcnc\u00fc Taraf Materyalleri</h3>
+        <p>Yazar taraf\u0131ndan g\u00f6nderilen i\u00e7erikte \u00fc\u00e7\u00fcnc\u00fc ki\u015filere ait foto\u011fraf, grafik, tablo, video, ses, ill\u00fcstrasyon, veri veya benzeri materyallerin kullan\u0131lmas\u0131 halinde, Yazar bu materyallerin kullan\u0131m\u0131na ili\u015fkin gerekli hak veya izinlere sahip oldu\u011funu kabul eder.</p>
+        <p>AperionX, telif veya di\u011fer hak ihlali \u015f\u00fcphesi bulunan materyalleri kald\u0131rabilir, de\u011fi\u015ftirebilir veya Yazar\u2019dan uygun bir materyal sa\u011flamas\u0131n\u0131 isteyebilir.</p>
 
-        <div class="contract-article">
-            <h3>9. Yapay Zek\u00e2 Ara\u00e7lar\u0131n\u0131n Kullan\u0131m\u0131</h3>
-            <p>Yazar, i\u00e7erik \u00fcretim s\u00fcrecinde yapay zek\u00e2 destekli ara\u00e7lardan yararlanabilir.</p>
-            <p>Ancak Yazar, Platforma g\u00f6nderdi\u011fi i\u00e7eri\u011fin do\u011frulu\u011fundan, \u00f6zg\u00fcnl\u00fc\u011f\u00fcnden, hukuka uygunlu\u011fundan ve i\u00e7erikte kullan\u0131lan bilgi ve kaynaklar\u0131n g\u00fcvenilirli\u011finden sorumludur.</p>
-            <p>Yapay zek\u00e2 ara\u00e7lar\u0131 kullan\u0131larak olu\u015fturulan i\u00e7eriklerde;</p>
-            <ul>
-                <li>Uydurma kaynak,</li>
-                <li>Yanl\u0131\u015f veya yan\u0131lt\u0131c\u0131 bilgi,</li>
-                <li>Ba\u015fka i\u00e7eri\u011fin izinsiz kullan\u0131lmas\u0131,</li>
-                <li>Telif hakk\u0131 ihlali</li>
-            </ul>
-            <p>bulunmamas\u0131na dikkat edilmelidir.</p>
-            <p>AperionX, yay\u0131n politikalar\u0131 do\u011frultusunda yapay zek\u00e2 kullan\u0131m\u0131n\u0131n a\u00e7\u0131klanmas\u0131n\u0131 veya i\u00e7eri\u011fin yeniden d\u00fczenlenmesini talep edebilir.</p>
-        </div>
+        <h3>9. Yapay Zek\u00e2 Ara\u00e7lar\u0131n\u0131n Kullan\u0131m\u0131</h3>
+        <p>Yazar, i\u00e7erik \u00fcretim s\u00fcrecinde yapay zek\u00e2 destekli ara\u00e7lardan yararlanabilir.</p>
+        <p>Ancak Yazar, Platforma g\u00f6nderdi\u011fi i\u00e7eri\u011fin do\u011frulu\u011fundan, \u00f6zg\u00fcnl\u00fc\u011f\u00fcnden, hukuka uygunlu\u011fundan ve i\u00e7erikte kullan\u0131lan bilgi ve kaynaklar\u0131n g\u00fcvenilirli\u011finden sorumludur.</p>
+        <p>Yapay zek\u00e2 ara\u00e7lar\u0131 kullan\u0131larak olu\u015fturulan i\u00e7eriklerde;</p>
+        <ul>
+            <li>Uydurma kaynak,</li>
+            <li>Yanl\u0131\u015f veya yan\u0131lt\u0131c\u0131 bilgi,</li>
+            <li>Ba\u015fka i\u00e7eri\u011fin izinsiz kullan\u0131lmas\u0131,</li>
+            <li>Telif hakk\u0131 ihlali</li>
+        </ul>
+        <p>bulunmamas\u0131na dikkat edilmelidir.</p>
+        <p>AperionX, yay\u0131n politikalar\u0131 do\u011frultusunda yapay zek\u00e2 kullan\u0131m\u0131n\u0131n a\u00e7\u0131klanmas\u0131n\u0131 veya i\u00e7eri\u011fin yeniden d\u00fczenlenmesini talep edebilir.</p>
 
-        <div class="contract-article">
-            <h3>10. \u0130\u00e7eri\u011fin Yay\u0131nlanmas\u0131</h3>
-            <p>Bir i\u00e7eri\u011fin AperionX\u2019e g\u00f6nderilmi\u015f olmas\u0131, i\u00e7eri\u011fin mutlaka yay\u0131nlanaca\u011f\u0131 anlam\u0131na gelmez.</p>
-            <p>AperionX;</p>
-            <ul>
-                <li>Edit\u00f6ryal uygunluk,</li>
-                <li>\u0130\u00e7erik kalitesi,</li>
-                <li>\u00d6zg\u00fcnl\u00fck,</li>
-                <li>Yay\u0131n politikalar\u0131,</li>
-                <li>Hukuki riskler,</li>
-                <li>Teknik nedenler</li>
-            </ul>
-            <p>gibi gerek\u00e7elerle g\u00f6nderilen bir i\u00e7eri\u011fi yay\u0131nlamama hakk\u0131na sahiptir.</p>
-            <p>AperionX, yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fi de gerekli g\u00f6rd\u00fc\u011f\u00fcnde ge\u00e7ici veya kal\u0131c\u0131 olarak yay\u0131ndan kald\u0131rabilir.</p>
-        </div>
+        <h3>10. \u0130\u00e7eri\u011fin Yay\u0131nlanmas\u0131</h3>
+        <p>Bir i\u00e7eri\u011fin AperionX\u2019e g\u00f6nderilmi\u015f olmas\u0131, i\u00e7eri\u011fin mutlaka yay\u0131nlanaca\u011f\u0131 anlam\u0131na gelmez.</p>
+        <p>AperionX;</p>
+        <ul>
+            <li>Edit\u00f6ryal uygunluk,</li>
+            <li>\u0130\u00e7erik kalitesi,</li>
+            <li>\u00d6zg\u00fcnl\u00fck,</li>
+            <li>Yay\u0131n politikalar\u0131,</li>
+            <li>Hukuki riskler,</li>
+            <li>Teknik nedenler</li>
+        </ul>
+        <p>gibi gerek\u00e7elerle g\u00f6nderilen bir i\u00e7eri\u011fi yay\u0131nlamama hakk\u0131na sahiptir.</p>
+        <p>AperionX, yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fi de gerekli g\u00f6rd\u00fc\u011f\u00fcnde ge\u00e7ici veya kal\u0131c\u0131 olarak yay\u0131ndan kald\u0131rabilir.</p>
 
-        <div class="contract-article">
-            <h3>11. Yazar\u0131n Platformdan Ayr\u0131lmas\u0131 ve Daha \u00d6nce Yay\u0131nlanan \u0130\u00e7erikler</h3>
-            <p>Yazar\u0131n AperionX ile olan g\u00f6n\u00fcll\u00fc, profesyonel veya di\u011fer \u00e7al\u0131\u015fma ili\u015fkisinin herhangi bir nedenle sona ermesi; daha \u00f6nce AperionX taraf\u0131ndan kabul edilmi\u015f ve yay\u0131nlanm\u0131\u015f i\u00e7erikler i\u00e7in bu S\u00f6zle\u015fme kapsam\u0131nda verilen kullan\u0131m lisans\u0131n\u0131 kendili\u011finden sona erdirmez.</p>
-            <p>Yazar\u0131n;</p>
-            <ul>
-                <li>Platformdan ayr\u0131lmas\u0131,</li>
-                <li>Yazar hesab\u0131n\u0131 kapatmas\u0131,</li>
-                <li>Yazarl\u0131k faaliyetini sonland\u0131rmas\u0131,</li>
-                <li>AperionX ile olan \u00e7al\u0131\u015fma ili\u015fkisinin sona ermesi</li>
-            </ul>
-            <p>daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklerin otomatik olarak yay\u0131ndan kald\u0131r\u0131lmas\u0131n\u0131 veya silinmesini gerektirmez.</p>
-            <p>AperionX, daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7erikleri bu S\u00f6zle\u015fme kapsam\u0131nda verilen kullan\u0131m lisans\u0131 do\u011frultusunda;</p>
-            <ul>
-                <li>Platformun internet sitesinde,</li>
-                <li>Dijital ar\u015fivlerinde,</li>
-                <li>Resm\u00ee sosyal medya hesaplar\u0131nda,</li>
-                <li>E-posta b\u00fcltenlerinde,</li>
-                <li>Ge\u00e7mi\u015f yay\u0131n kay\u0131tlar\u0131nda,</li>
-                <li>Platformun tan\u0131t\u0131m ve ileti\u015fim faaliyetlerinde</li>
-            </ul>
-            <p>yay\u0131nlamaya, eri\u015fime sunmaya, ar\u015fivlemeye ve yeniden payla\u015fmaya devam edebilir.</p>
-            <p><strong>Yazar\u0131n Platformdan ayr\u0131lmas\u0131, daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7erikler i\u00e7in AperionX\u2019e verilmi\u015f kullan\u0131m lisans\u0131n\u0131 geriye d\u00f6n\u00fck olarak ortadan kald\u0131rmaz.</strong></p>
-            <p>Yazar, ciddi ve hakl\u0131 bir gerek\u00e7enin bulunmas\u0131 halinde daha \u00f6nce yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fin kald\u0131r\u0131lmas\u0131 veya kullan\u0131m\u0131n\u0131n s\u0131n\u0131rland\u0131r\u0131lmas\u0131 i\u00e7in AperionX\u2019e yaz\u0131l\u0131 olarak ba\u015fvurabilir.</p>
-            <p>AperionX, bu t\u00fcr talepleri ilgili i\u00e7eri\u011fin hukuki durumu, yay\u0131n politikalar\u0131 ve di\u011fer ko\u015fullar \u00e7er\u00e7evesinde de\u011ferlendirir.</p>
-        </div>
+        <h3>11. Yazar\u0131n Platformdan Ayr\u0131lmas\u0131 ve Daha \u00d6nce Yay\u0131nlanan \u0130\u00e7erikler</h3>
+        <p>Yazar\u0131n AperionX ile olan g\u00f6n\u00fcll\u00fc, profesyonel veya di\u011fer \u00e7al\u0131\u015fma ili\u015fkisinin herhangi bir nedenle sona ermesi; daha \u00f6nce AperionX taraf\u0131ndan kabul edilmi\u015f ve yay\u0131nlanm\u0131\u015f i\u00e7erikler i\u00e7in bu S\u00f6zle\u015fme kapsam\u0131nda verilen kullan\u0131m lisans\u0131n\u0131 kendili\u011finden sona erdirmez.</p>
+        <p>Yazar\u0131n;</p>
+        <ul>
+            <li>Platformdan ayr\u0131lmas\u0131,</li>
+            <li>Yazar hesab\u0131n\u0131 kapatmas\u0131,</li>
+            <li>Yazarl\u0131k faaliyetini sonland\u0131rmas\u0131,</li>
+            <li>AperionX ile olan \u00e7al\u0131\u015fma ili\u015fkisinin sona ermesi</li>
+        </ul>
+        <p>daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklerin otomatik olarak yay\u0131ndan kald\u0131r\u0131lmas\u0131n\u0131 veya silinmesini gerektirmez.</p>
+        <p>AperionX, daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7erikleri bu S\u00f6zle\u015fme kapsam\u0131nda verilen kullan\u0131m lisans\u0131 do\u011frultusunda;</p>
+        <ul>
+            <li>Platformun internet sitesinde,</li>
+            <li>Dijital ar\u015fivlerinde,</li>
+            <li>Resm\u00ee sosyal medya hesaplar\u0131nda,</li>
+            <li>E-posta b\u00fcltenlerinde,</li>
+            <li>Ge\u00e7mi\u015f yay\u0131n kay\u0131tlar\u0131nda,</li>
+            <li>Platformun tan\u0131t\u0131m ve ileti\u015fim faaliyetlerinde</li>
+        </ul>
+        <p>yay\u0131nlamaya, eri\u015fime sunmaya, ar\u015fivlemeye ve yeniden payla\u015fmaya devam edebilir.</p>
+        <p><strong>Yazar\u0131n Platformdan ayr\u0131lmas\u0131, daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7erikler i\u00e7in AperionX\u2019e verilmi\u015f kullan\u0131m lisans\u0131n\u0131 geriye d\u00f6n\u00fck olarak ortadan kald\u0131rmaz.</strong></p>
+        <p>Yazar, ciddi ve hakl\u0131 bir gerek\u00e7enin bulunmas\u0131 halinde daha \u00f6nce yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fin kald\u0131r\u0131lmas\u0131 veya kullan\u0131m\u0131n\u0131n s\u0131n\u0131rland\u0131r\u0131lmas\u0131 i\u00e7in AperionX\u2019e yaz\u0131l\u0131 olarak ba\u015fvurabilir.</p>
+        <p>AperionX, bu t\u00fcr talepleri ilgili i\u00e7eri\u011fin hukuki durumu, yay\u0131n politikalar\u0131 ve di\u011fer ko\u015fullar \u00e7er\u00e7evesinde de\u011ferlendirir.</p>
 
-        <div class="contract-article">
-            <h3>12. Yazar Ad\u0131 ve Tan\u0131t\u0131m Bilgileri</h3>
-            <p>AperionX, yay\u0131nlanan i\u00e7eriklerde Yazar\u0131n ad\u0131n\u0131 veya Platformda kulland\u0131\u011f\u0131 yazar ad\u0131n\u0131, i\u00e7eri\u011fin yazar\u0131 olarak g\u00f6sterebilir.</p>
-            <p>AperionX ayr\u0131ca i\u00e7eriklerin tan\u0131t\u0131m\u0131 amac\u0131yla Yazar taraf\u0131ndan Platforma sa\u011flanan isim, k\u0131sa biyografi, uzmanl\u0131k alan\u0131 veya benzeri tan\u0131t\u0131m bilgilerini kullanabilir.</p>
-        </div>
+        <h3>12. Yazar Ad\u0131 ve Tan\u0131t\u0131m Bilgileri</h3>
+        <p>AperionX, yay\u0131nlanan i\u00e7eriklerde Yazar\u0131n ad\u0131n\u0131 veya Platformda kulland\u0131\u011f\u0131 yazar ad\u0131n\u0131, i\u00e7eri\u011fin yazar\u0131 olarak g\u00f6sterebilir.</p>
+        <p>AperionX ayr\u0131ca i\u00e7eriklerin tan\u0131t\u0131m\u0131 amac\u0131yla Yazar taraf\u0131ndan Platforma sa\u011flanan isim, k\u0131sa biyografi, uzmanl\u0131k alan\u0131 veya benzeri tan\u0131t\u0131m bilgilerini kullanabilir.</p>
 
-        <div class="contract-article">
-            <h3>13. \u00dccret ve Telif</h3>
-            <p>AperionX ile Yazar aras\u0131nda ayr\u0131ca yaz\u0131l\u0131 bir \u00fccretlendirme, telif veya proje s\u00f6zle\u015fmesi bulunmad\u0131\u011f\u0131 s\u00fcrece, g\u00f6n\u00fcll\u00fcl\u00fck esas\u0131na g\u00f6re g\u00f6nderilen i\u00e7eriklerin yay\u0131nlanmas\u0131 kar\u015f\u0131l\u0131\u011f\u0131nda Yazar herhangi bir \u00fccret, telif, hak edi\u015f veya benzeri maddi \u00f6deme talep etmez.</p>
-            <p>Bu h\u00fck\u00fcm, Yazar ile AperionX aras\u0131nda gelecekte ayr\u0131ca yap\u0131labilecek \u00fccretli \u00e7al\u0131\u015fma, proje, sponsorluk, telif veya di\u011fer ticari anla\u015fmalara engel de\u011fildir.</p>
-            <p>Taraflar aras\u0131nda ayr\u0131ca yaz\u0131l\u0131 bir mali anla\u015fma yap\u0131lmas\u0131 halinde, ilgili anla\u015fman\u0131n h\u00fck\u00fcmleri uygulan\u0131r.</p>
-        </div>
+        <h3>13. \u00dccret ve Telif</h3>
+        <p>AperionX ile Yazar aras\u0131nda ayr\u0131ca yaz\u0131l\u0131 bir \u00fccretlendirme, telif veya proje s\u00f6zle\u015fmesi bulunmad\u0131\u011f\u0131 s\u00fcrece, g\u00f6n\u00fcll\u00fcl\u00fck esas\u0131na g\u00f6re g\u00f6nderilen i\u00e7eriklerin yay\u0131nlanmas\u0131 kar\u015f\u0131l\u0131\u011f\u0131nda Yazar herhangi bir \u00fccret, telif, hak edi\u015f veya benzeri maddi \u00f6deme talep etmez.</p>
+        <p>Bu h\u00fck\u00fcm, Yazar ile AperionX aras\u0131nda gelecekte ayr\u0131ca yap\u0131labilecek \u00fccretli \u00e7al\u0131\u015fma, proje, sponsorluk, telif veya di\u011fer ticari anla\u015fmalara engel de\u011fildir.</p>
+        <p>Taraflar aras\u0131nda ayr\u0131ca yaz\u0131l\u0131 bir mali anla\u015fma yap\u0131lmas\u0131 halinde, ilgili anla\u015fman\u0131n h\u00fck\u00fcmleri uygulan\u0131r.</p>
 
-        <div class="contract-article">
-            <h3>14. \u0130\u00e7eri\u011fin Geri \u00c7ekilmesi ve \u00d6zel Durumlar</h3>
-            <p>Yazar, yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fin kald\u0131r\u0131lmas\u0131 veya kullan\u0131m\u0131n\u0131n s\u0131n\u0131rland\u0131r\u0131lmas\u0131 konusunda AperionX'e yaz\u0131l\u0131 talepte bulunabilir.</p>
-            <p>\u00d6zellikle;</p>
-            <ul>
-                <li>Ciddi bir hukuki sorun,</li>
-                <li>Ki\u015filik hakk\u0131 ihlali,</li>
-                <li>\u00d6nemli \u00f6l\u00e7\u00fcde yanl\u0131\u015f veya yan\u0131lt\u0131c\u0131 bilgi,</li>
-                <li>\u0130\u00e7eri\u011fin g\u00fcvenilirli\u011fini ciddi \u015fekilde etkleyen yeni geli\u015fmeler,</li>
-                <li>Yazar\u0131n g\u00fcvenli\u011fini veya mesleki durumunu ciddi bi\u00e7imde etkileyebilecek \u00f6zel ko\u015fullar</li>
-            </ul>
-            <p>gibi durumlarda yap\u0131lan talepler ayr\u0131ca de\u011ferlendirilir.</p>
-            <p>AperionX, bu talepleri makul \u015fekilde de\u011ferlendirir ve y\u00fcr\u00fcrl\u00fckteki mevzuat ile Platformun yay\u0131n politikalar\u0131 do\u011frultusunda karar verir.</p>
-        </div>
+        <h3>14. \u0130\u00e7eri\u011fin Geri \u00c7ekilmesi ve \u00d6zel Durumlar</h3>
+        <p>Yazar, yay\u0131nlanm\u0131\u015f bir i\u00e7eri\u011fin kald\u0131r\u0131lmas\u0131 veya kullan\u0131m\u0131n\u0131n s\u0131n\u0131rland\u0131r\u0131lmas\u0131 konusunda AperionX'e yaz\u0131l\u0131 talepte bulunabilir.</p>
+        <p>\u00d6zellikle;</p>
+        <ul>
+            <li>Ciddi bir hukuki sorun,</li>
+            <li>Ki\u015filik hakk\u0131 ihlali,</li>
+            <li>\u00d6nemli \u00f6l\u00e7\u00fcde yanl\u0131\u015f veya yan\u0131lt\u0131c\u0131 bilgi,</li>
+            <li>\u0130\u00e7eri\u011fin g\u00fcvenilirli\u011fini ciddi \u015fekilde etkleyen yeni geli\u015fmeler,</li>
+            <li>Yazar\u0131n g\u00fcvenli\u011fini veya mesleki durumunu ciddi bi\u00e7imde etkileyebilecek \u00f6zel ko\u015fullar</li>
+        </ul>
+        <p>gibi durumlarda yap\u0131lan talepler ayr\u0131ca de\u011ferlendirilir.</p>
+        <p>AperionX, bu talepleri makul \u015fekilde de\u011ferlendirir ve y\u00fcr\u00fcrl\u00fckteki mevzuat ile Platformun yay\u0131n politikalar\u0131 do\u011frultusunda karar verir.</p>
 
-        <div class="contract-article">
-            <h3>15. \u0130\u00e7erik Sorumlulu\u011fu</h3>
-            <p>Yazar, Platforma g\u00f6nderdi\u011fi i\u00e7eri\u011fin kendi beyanlar\u0131 ve kulland\u0131\u011f\u0131 materyaller bak\u0131m\u0131ndan do\u011frulu\u011fundan ve hukuka uygunlu\u011fundan sorumludur.</p>
-            <p>AperionX'in i\u00e7erik \u00fczerinde edit\u00f6ryal d\u00fczenleme yapmas\u0131, Yazar\u0131n i\u00e7eri\u011fe ili\u015fkin asli sorumlulu\u011funu ortadan kald\u0131rmaz.</p>
-            <p>Bununla birlikte AperionX, kendi edit\u00f6ryal i\u015flemleri veya kendi faaliyetlerinden kaynaklanan y\u00fck\u00fcml\u00fcl\u00fcklerden y\u00fcr\u00fcrl\u00fckteki mevzuat \u00e7er\u00e7evesinde sorumludur.</p>
-        </div>
+        <h3>15. \u0130\u00e7erik Sorumlulu\u011fu</h3>
+        <p>Yazar, Platforma g\u00f6nderdi\u011fi i\u00e7eri\u011fin kendi beyanlar\u0131 ve kulland\u0131\u011f\u0131 materyaller bak\u0131m\u0131ndan do\u011frulu\u011fundan ve hukuka uygunlu\u011fundan sorumludur.</p>
+        <p>AperionX'in i\u00e7erik \u00fczerinde edit\u00f6ryal d\u00fczenleme yapmas\u0131, Yazar\u0131n i\u00e7eri\u011fe ili\u015fkin asli sorumlulu\u011funu ortadan kald\u0131rmaz.</p>
+        <p>Bununla birlikte AperionX, kendi edit\u00f6ryal i\u015flemleri veya kendi faaliyetlerinden kaynaklanan y\u00fck\u00fcml\u00fcl\u00fcklerden y\u00fcr\u00fcrl\u00fckteki mevzuat \u00e7er\u00e7evesinde sorumludur.</p>
 
-        <div class="contract-article">
-            <h3>16. Yay\u0131nlanmam\u0131\u015f \u0130\u00e7erikler ve Gizlilik</h3>
-            <p>Yazar taraf\u0131ndan AperionX'e g\u00f6nderilen ancak hen\u00fcz yay\u0131nlanmam\u0131\u015f i\u00e7erikler, Platformun edit\u00f6ryal de\u011ferlendirme s\u00fcreci kapsam\u0131nda ele al\u0131n\u0131r.</p>
-            <p>\u00d6zel olarak gizli oldu\u011fu belirtilen veya taraflar aras\u0131nda ayr\u0131ca gizlilik anla\u015fmas\u0131na konu edilen i\u00e7erikler i\u00e7in ilgili gizlilik h\u00fck\u00fcmleri uygulan\u0131r.</p>
-        </div>
+        <h3>16. Yay\u0131nlanmam\u0131\u015f \u0130\u00e7erikler ve Gizlilik</h3>
+        <p>Yazar taraf\u0131ndan AperionX'e g\u00f6nderilen ancak hen\u00fcz yay\u0131nlanmam\u0131\u015f i\u00e7erikler, Platformun edit\u00f6ryal de\u011ferlendirme s\u00fcreci kapsam\u0131nda ele al\u0131n\u0131r.</p>
+        <p>\u00d6zel olarak gizli oldu\u011fu belirtilen veya taraflar aras\u0131nda ayr\u0131ca gizlilik anla\u015fmas\u0131na konu edilen i\u00e7erikler i\u00e7in ilgili gizlilik h\u00fck\u00fcmleri uygulan\u0131r.</p>
 
-        <div class="contract-article">
-            <h3>17. Ki\u015fisel Veriler</h3>
-            <p>Yazar\u0131n Platforma \u00fcyelik, i\u00e7erik g\u00f6nderimi ve s\u00f6zle\u015fme onay\u0131 s\u0131ras\u0131nda sa\u011flad\u0131\u011f\u0131 ki\u015fisel veriler, y\u00fcr\u00fcrl\u00fckteki mevzuata uygun \u015fekilde i\u015flenir.</p>
-            <p>Ki\u015fisel verilerin i\u015flenmesine ili\u015fkin ayr\u0131nt\u0131l\u0131 bilgiler, AperionX taraf\u0131ndan ayr\u0131ca sunulan KVKK Ayd\u0131nlatma Metni ve ilgili gizlilik politikalar\u0131nda a\u00e7\u0131klan\u0131r.</p>
-        </div>
+        <h3>17. Ki\u015fisel Veriler</h3>
+        <p>Yazar\u0131n Platforma \u00fcyelik, i\u00e7erik g\u00f6nderimi ve s\u00f6zle\u015fme onay\u0131 s\u0131ras\u0131nda sa\u011flad\u0131\u011f\u0131 ki\u015fisel veriler, y\u00fcr\u00fcrl\u00fckteki mevzuata uygun \u015fekilde i\u015flenir.</p>
+        <p>Ki\u015fisel verilerin i\u015flenmesine ili\u015fkin ayr\u0131nt\u0131l\u0131 bilgiler, AperionX taraf\u0131ndan ayr\u0131ca sunulan KVKK Ayd\u0131nlatma Metni ve ilgili gizlilik politikalar\u0131nda a\u00e7\u0131klan\u0131r.</p>
 
-        <div class="contract-article">
-            <h3>18. Elektronik Onay ve Kay\u0131t</h3>
-            <p>Yazar, bu S\u00f6zle\u015fmeyi Platform \u00fczerindeki elektronik onay kutusu veya AperionX taraf\u0131ndan belirlenen di\u011fer elektronik onay y\u00f6ntemleri arac\u0131l\u0131\u011f\u0131yla kabul edebilir.</p>
-            <p>Yazar\u0131n onay i\u015flemi s\u0131ras\u0131nda a\u015fa\u011f\u0131daki bilgiler sistem taraf\u0131ndan kay\u0131t alt\u0131na al\u0131nabilir:</p>
-            <ul>
-                <li>Yazar\u0131n ad\u0131 ve soyad\u0131,</li>
-                <li>Kullan\u0131c\u0131 hesab\u0131,</li>
-                <li>Kay\u0131tl\u0131 e-posta adresi,</li>
-                <li>Onay tarihi ve saati,</li>
-                <li>\u0130\u015flem yap\u0131lan IP adresi,</li>
-                <li>Kullan\u0131lan S\u00f6zle\u015fme versiyonu,</li>
-                <li>Onay durumu,</li>
-                <li>Teknik olarak gerekli olabilecek i\u015flem ve g\u00fcvenlik kay\u0131tlar\u0131.</li>
-            </ul>
-            <p>Bu kay\u0131tlar, Yazar\u0131n hangi S\u00f6zle\u015fme versiyonunu hangi tarihte kabul etti\u011finin tespit edilmesi ve Platformun g\u00fcvenli\u011finin sa\u011flanmas\u0131 amac\u0131yla saklanabilir.</p>
-        </div>
+        <h3>18. Elektronik Onay ve Kay\u0131t</h3>
+        <p>Yazar, bu S\u00f6zle\u015fmeyi Platform \u00fczerindeki elektronik onay kutusu veya AperionX taraf\u0131ndan belirlenen di\u011fer elektronik onay y\u00f6ntemleri arac\u0131l\u0131\u011f\u0131yla kabul edebilir.</p>
+        <p>Yazar\u0131n onay i\u015flemi s\u0131ras\u0131nda a\u015fa\u011f\u0131daki bilgiler sistem taraf\u0131ndan kay\u0131t alt\u0131na al\u0131nabilir:</p>
+        <ul>
+            <li>Yazar\u0131n ad\u0131 ve soyad\u0131,</li>
+            <li>Kullan\u0131c\u0131 hesab\u0131,</li>
+            <li>Kay\u0131tl\u0131 e-posta adresi,</li>
+            <li>Onay tarihi ve saati,</li>
+            <li>\u0130\u015flem yap\u0131lan IP adresi,</li>
+            <li>Kullan\u0131lan S\u00f6zle\u015fme versiyonu,</li>
+            <li>Onay durumu,</li>
+            <li>Teknik olarak gerekli olabilecek i\u015flem ve g\u00fcvenlik kay\u0131tlar\u0131.</li>
+        </ul>
+        <p>Bu kay\u0131tlar, Yazar\u0131n hangi S\u00f6zle\u015fme versiyonunu hangi tarihte kabul etti\u011finin tespit edilmesi ve Platformun g\u00fcvenli\u011finin sa\u011flanmas\u0131 amac\u0131yla saklanabilir.</p>
 
-        <div class="contract-article">
-            <h3>19. S\u00f6zle\u015fme Versiyonu ve De\u011fi\u015fiklikler</h3>
-            <p>Bu S\u00f6zle\u015fmenin her g\u00fcncel versiyonu bir versiyon numaras\u0131 ve y\u00fcr\u00fcrl\u00fck tarihi ile yay\u0131nlan\u0131r.</p>
-            <p>AperionX, Platformun i\u015fleyi\u015fi, yay\u0131n politikalar\u0131 veya yasal y\u00fck\u00fcml\u00fcl\u00fcklerindeki de\u011fi\u015fiklikler nedeniyle S\u00f6zle\u015fmede g\u00fcncelleme yapabilir.</p>
-            <p>Yazar\u0131n hak ve y\u00fck\u00fcml\u00fcl\u00fcklerini \u00f6nemli \u00f6l\u00e7\u00fcde etkleyen de\u011fi\u015fiklikler, m\u00fcmk\u00fcn oldu\u011fu \u00f6l\u00e7\u00fcde Yazarlar\u0131n eri\u015febilece\u011fi \u015fekilde duyurulur.</p>
-            <p>Yeni h\u00fck\u00fcmlerin Yazar taraf\u0131ndan ayr\u0131ca kabul edilmesinin gerekti\u011fi durumlarda, Platform yeni onay talep edebilir.</p>
-        </div>
+        <h3>19. S\u00f6zle\u015fme Versiyonu ve De\u011fi\u015fiklikler</h3>
+        <p>Bu S\u00f6zle\u015fmenin her g\u00fcncel versiyonu bir versiyon numaras\u0131 ve y\u00fcr\u00fcrl\u00fck tarihi ile yay\u0131nlan\u0131r.</p>
+        <p>AperionX, Platformun i\u015fleyi\u015fi, yay\u0131n politikalar\u0131 veya yasal y\u00fck\u00fcml\u00fcl\u00fcklerindeki de\u011fi\u015fiklikler nedeniyle S\u00f6zle\u015fmede g\u00fcncelleme yapabilir.</p>
+        <p>Yazar\u0131n hak ve y\u00fck\u00fcml\u00fcl\u00fcklerini \u00f6nemli \u00f6l\u00e7\u00fcde etkleyen de\u011fi\u015fiklikler, m\u00fcmk\u00fcn oldu\u011fu \u00f6l\u00e7\u00fcde Yazarlar\u0131n eri\u015febilece\u011fi \u015fekilde duyurulur.</p>
+        <p>Yeni h\u00fck\u00fcmlerin Yazar taraf\u0131ndan ayr\u0131ca kabul edilmesinin gerekti\u011fi durumlarda, Platform yeni onay talep edebilir.</p>
 
-        <div class="contract-article">
-            <h3>20. S\u00f6zle\u015fmenin Kabul\u00fc</h3>
-            <p>Yazar, bu S\u00f6zle\u015fmeyi elektronik ortamda onaylayarak;</p>
-            <ol>
-                <li>S\u00f6zle\u015fmeyi okudu\u011funu ve anlad\u0131\u011f\u0131n\u0131,</li>
-                <li>Platforma g\u00f6nderdi\u011fi i\u00e7eriklerin \u00f6zg\u00fcnl\u00fc\u011f\u00fcnden ve gerekli kullan\u0131m haklar\u0131na sahip olmas\u0131ndan sorumlu oldu\u011funu,</li>
-                <li>AperionX'e bu S\u00f6zle\u015fmede belirtilen kapsamda m\u00fcnhas\u0131r olmayan kullan\u0131m lisans\u0131 verdi\u011fini,</li>
-                <li>Eser sahibi olarak haklar\u0131n\u0131 korudu\u011funu,</li>
-                <li>AperionX'in i\u00e7erikler \u00fczerinde makul edit\u00f6ryal ve teknik d\u00fczenlemeler yapabilece\u011fini,</li>
-                <li>Platformdan ayr\u0131lmas\u0131n\u0131n daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklere ili\u015fkin AperionX'e verilmi\u015f kullan\u0131m lisans\u0131n\u0131 kendili\u011finden sona erdirmeyece\u011fini,</li>
-                <li>Daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklerin, bu S\u00f6zle\u015fme kapsam\u0131nda AperionX taraf\u0131ndan yay\u0131nlanmaya, eri\u015fime sunulmaya ve ar\u015fivlenmeye devam edebilece\u011fini,</li>
-                <li>Ayr\u0131ca yaz\u0131l\u0131 bir mali anla\u015fma bulunmad\u0131\u011f\u0131 s\u00fcrece g\u00f6n\u00fcll\u00fc olarak g\u00f6nderdi\u011fi i\u00e7erikler i\u00e7in \u00fccret veya telif talep etmeyece\u011fini,</li>
-                <li>\u0130\u00e7eriklerinin \u00fc\u00e7\u00fcnc\u00fc ki\u015filerin haklar\u0131n\u0131 ihlal etmemesi gerekti\u011fini</li>
-            </ol>
-            <p>kabul ve beyan eder.</p>
-        </div>
+        <h3>20. S\u00f6zle\u015fmenin Kabul\u00fc</h3>
+        <p>Yazar, bu S\u00f6zle\u015fmeyi elektronik ortamda onaylayarak;</p>
+        <ol>
+            <li>S\u00f6zle\u015fmeyi okudu\u011funu ve anlad\u0131\u011f\u0131n\u0131,</li>
+            <li>Platforma g\u00f6nderdi\u011fi i\u00e7eriklerin \u00f6zg\u00fcnl\u00fc\u011f\u00fcnden ve gerekli kullan\u0131m haklar\u0131na sahip olmas\u0131ndan sorumlu oldu\u011funu,</li>
+            <li>AperionX'e bu S\u00f6zle\u015fmede belirtilen kapsamda m\u00fcnhas\u0131r olmayan kullan\u0131m lisans\u0131 verdi\u011fini,</li>
+            <li>Eser sahibi olarak haklar\u0131n\u0131 korudu\u011funu,</li>
+            <li>AperionX'in i\u00e7erikler \u00fczerinde makul edit\u00f6ryal ve teknik d\u00fczenlemeler yapabilece\u011fini,</li>
+            <li>Platformdan ayr\u0131lmas\u0131n\u0131n daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklere ili\u015fkin AperionX'e verilmi\u015f kullan\u0131m lisans\u0131n\u0131 kendili\u011finden sona erdirmeyece\u011fini,</li>
+            <li>Daha \u00f6nce yay\u0131nlanm\u0131\u015f i\u00e7eriklerin, bu S\u00f6zle\u015fme kapsam\u0131nda AperionX taraf\u0131ndan yay\u0131nlanmaya, eri\u015fime sunulmaya ve ar\u015fivlenmeye devam edebilece\u011fini,</li>
+            <li>Ayr\u0131ca yaz\u0131l\u0131 bir mali anla\u015fma bulunmad\u0131\u011f\u0131 s\u00fcrece g\u00f6n\u00fcll\u00fc olarak g\u00f6nderdi\u011fi i\u00e7erikler i\u00e7in \u00fccret veya telif talep etmeyece\u011fini,</li>
+            <li>\u0130\u00e7eriklerinin \u00fc\u00e7\u00fcnc\u00fc ki\u015filerin haklar\u0131n\u0131 ihlal etmemesi gerekti\u011fini</li>
+        </ol>
+        <p>kabul ve beyan eder.</p>
 
-        <div class="contract-article">
-            <h3>21. Y\u00fcr\u00fcrl\u00fck</h3>
-            <p>Bu S\u00f6zle\u015fme, Yazar\u0131n elektronik onay verdi\u011fi tarihte y\u00fcr\u00fcrl\u00fc\u011fe girer.</p>
-            <p>S\u00f6zle\u015fmede d\u00fczenlenmeyen konularda y\u00fcr\u00fcrl\u00fckteki ilgili mevzuat h\u00fck\u00fcmleri uygulan\u0131r.</p>
-        </div>
+        <h3>21. Y\u00fcr\u00fcrl\u00fck</h3>
+        <p>Bu S\u00f6zle\u015fme, Yazar\u0131n elektronik onay verdi\u011fi tarihte y\u00fcr\u00fcrl\u00fc\u011fe girer.</p>
+        <p>S\u00f6zle\u015fmede d\u00fczenlenmeyen konularda y\u00fcr\u00fcrl\u00fckteki ilgili mevzuat h\u00fck\u00fcmleri uygulan\u0131r.</p>
     </div>
 
     <div class="bottom-block">
