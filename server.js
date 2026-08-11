@@ -6850,6 +6850,160 @@ app.get('/makale/:slug', async (req, res) => {
     });
 });
 
+// === AUTHOR CONSENT (SÖZLEŞME ONAY) SYSTEM ===
+
+// Check if author has consented
+app.get('/api/author/consent-status', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT id, consented_at FROM author_consents WHERE user_id = ?', [req.user.id]);
+        if (rows.length > 0) {
+            res.json({ consented: true, consentedAt: rows[0].consented_at });
+        } else {
+            res.json({ consented: false });
+        }
+    } catch (error) {
+        console.error('Consent status error:', error);
+        res.status(500).json({ message: 'Sunucu hatası' });
+    }
+});
+
+// Submit author consent
+app.post('/api/author/consent', authenticateToken, async (req, res) => {
+    try {
+        const { consent_text } = req.body;
+        if (!consent_text) return res.status(400).json({ message: 'Sözleşme metni gerekli.' });
+
+        const [users] = await pool.query('SELECT fullname, email FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+
+        const userData = users[0];
+        const ipAddress = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+        const consentedAt = new Date();
+
+        await pool.query(
+            `INSERT INTO author_consents (user_id, full_name, email, ip_address, consent_text, consented_at)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), email = VALUES(email), ip_address = VALUES(ip_address), consent_text = VALUES(consent_text), consented_at = VALUES(consented_at)`,
+            [req.user.id, userData.fullname, userData.email, ipAddress, consent_text, consentedAt]
+        );
+
+        console.log(`[CONSENT] Author ${userData.fullname} (ID: ${req.user.id}) consented from IP: ${ipAddress}`);
+        res.json({ success: true, consentedAt });
+    } catch (error) {
+        console.error('Consent submit error:', error);
+        res.status(500).json({ message: 'Sunucu hatası' });
+    }
+});
+
+// Admin: List all author consents
+app.get('/api/admin/author-consents', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query('SELECT id, user_id, full_name, email, ip_address, consented_at FROM author_consents ORDER BY consented_at DESC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Admin consents list error:', error);
+        res.status(500).json({ message: 'Sunucu hatası' });
+    }
+});
+
+// Admin: Download consent as PDF
+app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query('SELECT * FROM author_consents WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Sözleşme bulunamadı.' });
+
+        const consent = rows[0];
+        const consentDate = new Date(consent.consented_at);
+        const formattedDate = consentDate.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '.') + ' - ' + consentDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+        // Read logo as base64
+        let logoBase64 = '';
+        try {
+            const logoPath = path.join(__dirname, 'uploads', 'logo.png');
+            if (fs.existsSync(logoPath)) {
+                logoBase64 = fs.readFileSync(logoPath).toString('base64');
+            } else {
+                // Try alternative logo paths
+                const altLogoPath = path.join(__dirname, 'Aper\u0131onx.png');
+                if (fs.existsSync(altLogoPath)) {
+                    logoBase64 = fs.readFileSync(altLogoPath).toString('base64');
+                }
+            }
+        } catch (logoErr) {
+            console.warn('Logo read failed:', logoErr.message);
+        }
+
+        const consentTextHtml = (consent.consent_text || '').replace(/\n/g, '<br>');
+
+        const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 50px; line-height: 1.7; background: #fff; }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 3px solid #6366f1; }
+        .header img { height: 60px; margin-bottom: 15px; }
+        .header h1 { font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: 1px; }
+        .header p { font-size: 12px; color: #64748b; margin-top: 6px; }
+        .contract-body { margin-bottom: 35px; font-size: 13px; color: #334155; text-align: justify; }
+        .contract-body p { margin-bottom: 10px; }
+        .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 12px; padding: 28px 32px; margin: 35px 0; }
+        .fingerprint-section h2 { font-size: 16px; font-weight: 700; color: #4338ca; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+        .fingerprint-section h2::before { content: '\1F512'; font-size: 18px; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: 600; color: #475569; min-width: 180px; }
+        .info-value { color: #1e293b; font-weight: 500; text-align: right; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
+        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 4px 14px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        ${logoBase64 ? '<img src="data:image/png;base64,' + logoBase64 + '" alt="AperionX Logo">' : '<h2 style="color: #6366f1;">AperionX</h2>'}
+        <h1>YAZAR YAYIN VE KULLANIM \u0130ZN\u0130 BEYANI</h1>
+        <p>Dijital S\u00f6zle\u015fme Belgesi</p>
+    </div>
+    <div class="contract-body">${consentTextHtml}</div>
+    <div class="fingerprint-section">
+        <h2>D\u0130J\u0130TAL PARMAK \u0130Z\u0130 B\u0130LG\u0130LER\u0130</h2>
+        <div class="info-row"><span class="info-label">Yazar Ad\u0131 Soyad\u0131:</span><span class="info-value">${consent.full_name}</span></div>
+        <div class="info-row"><span class="info-label">Kay\u0131tl\u0131 E-posta:</span><span class="info-value">${consent.email}</span></div>
+        <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
+        <div class="info-row"><span class="info-label">\u0130\u015flem Yap\u0131lan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
+    </div>
+    <div class="footer">
+        <div class="badge">D\u0130J\u0130TAL OLARAK ONAYLANMI\u015eTIR</div>
+        <p>Bu belge, yazar\u0131n dijital ortamda onaylad\u0131\u011f\u0131 s\u00f6zle\u015fmenin resmi kopyas\u0131d\u0131r.</p>
+        <p>AperionX &copy; ${new Date().getFullYear()} &mdash; T\u00fcm haklar\u0131 sakl\u0131d\u0131r.</p>
+    </div>
+</body>
+</html>`;
+
+        const puppeteer = require('puppeteer');
+        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' } });
+        await browser.close();
+
+        const safeFileName = consent.full_name.replace(/[^a-zA-Z0-9\u00e7\u011f\u0131\u00f6\u015f\u00fc\u00c7\u011e\u0130\u00d6\u015e\u00dc\s]/g, '').replace(/\s+/g, '_');
+        const dateStr = consentDate.toISOString().split('T')[0];
+        const fileName = `sozlesme_${safeFileName}_${dateStr}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        res.status(500).json({ message: 'PDF oluşturma hatası: ' + error.message });
+    }
+});
+
 
 app.use((req, res) => {
     // Check if it looks like an API call first
@@ -6905,6 +7059,25 @@ app.listen(PORT, async () => {
         console.log('[MIGRATION] User activity tracking columns ready.');
     } catch(migErr) {
         console.error('[MIGRATION] User activity error:', migErr.message);
+    }
+
+    // === AUTO MIGRATION: Author Consents Table ===
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS author_consents (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            full_name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            consent_text TEXT NOT NULL,
+            consented_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_consent (user_id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+        console.log('[MIGRATION] Author consents table ready.');
+    } catch(consentMigErr) {
+        console.error('[MIGRATION] Author consents error:', consentMigErr.message);
     }
 
     // Check and Send Latest Article Notification if missed

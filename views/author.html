@@ -1040,6 +1040,148 @@
             height: auto;
             border-radius: 8px;
         }
+
+        /* === CONSENT MODAL STYLES === */
+        .consent-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            animation: consentFadeIn 0.4s ease forwards;
+        }
+        @keyframes consentFadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes consentSlideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .consent-modal {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: consentSlideUp 0.5s ease 0.2s both;
+            overflow: hidden;
+        }
+        .consent-modal-header {
+            background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+            padding: 28px 32px;
+            color: white;
+            text-align: center;
+        }
+        .consent-modal-header .consent-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .consent-modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.3px;
+        }
+        .consent-modal-header p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 6px;
+        }
+        .consent-modal-body {
+            padding: 28px 32px;
+            overflow-y: auto;
+            flex: 1;
+            font-size: 0.92rem;
+            line-height: 1.75;
+            color: #334155;
+        }
+        .consent-modal-body h3 {
+            color: #0f172a;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .consent-modal-body ol {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        .consent-modal-body ol li {
+            margin-bottom: 12px;
+            padding-left: 6px;
+        }
+        .consent-modal-footer {
+            padding: 20px 32px 28px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .consent-checkbox-wrap {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .consent-checkbox-wrap input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: #6366f1;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .consent-checkbox-wrap label {
+            font-size: 0.88rem;
+            color: #475569;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+        .consent-submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .consent-submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .consent-submit-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+        .consent-submit-btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .consent-submit-btn.loading .spinner { display: block; }
+        .consent-submit-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
@@ -1966,7 +2108,7 @@
         // =============================================
         // === UNIFIED INIT — Single DOMContentLoaded ===
         // =============================================
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             if (!token || !user || (user.role !== 'author' && user.role !== 'editor' && user.role !== 'admin')) {
                 window.location.href = '/?login=true';
                 return;
@@ -1994,6 +2136,25 @@
                 console.error('Failed to refresh user profile:', err);
                 // If token is invalid, redirect will happen in other fetch calls or here
             });
+
+            // --- CONSENT CHECK: Block panel until author consents ---
+            if (user && (user.role === 'author')) {
+                try {
+                    const consentRes = await fetch(`${window.API_URL || '/api'}/author/consent-status`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (consentRes.ok) {
+                        const consentData = await consentRes.json();
+                        if (!consentData.consented) {
+                            showConsentModal();
+                            return; // Block all panel loading until consent
+                        }
+                    }
+                } catch (consentErr) {
+                    console.error('Consent check failed:', consentErr);
+                    // Don't block on network error, let panel load
+                }
+            }
             
             // --- Core Data Loading ---
             loadSettings();
@@ -4641,6 +4802,94 @@
 
     </script>
     <!-- [CLEANED] Duplicate toast-container removed — using one at line 1799 -->
+
+    <!-- === CONSENT MODAL HTML === -->
+    <div class="consent-overlay" id="consent-overlay" style="display: none;">
+        <div class="consent-modal">
+            <div class="consent-modal-header">
+                <span class="consent-icon">📋</span>
+                <h2>Yazar Yayın ve Kullanım İzni Beyanı</h2>
+                <p>Lütfen aşağıdaki beyanı dikkatlice okuyunuz</p>
+            </div>
+            <div class="consent-modal-body">
+                <h3>İşbu beyan ile AperionX platformunda yazar olarak yer alan ben, aşağıdaki koşulları kabul ettiğimi beyan ederim:</h3>
+                <ol>
+                    <li>Yayınladığım tüm içeriklerin özgün olduğunu ve herhangi bir telif hakkı ihlali içermediğini taahhüt ederim.</li>
+                    <li>AperionX platformuna gönderdiğim içeriklerin, platform üzerinde yayınlanması, düzenlenmesi ve paylaşılması için izin verdiğimi kabul ederim.</li>
+                    <li>İçeriklerimin AperionX’in editöryal standartlarına uygun olarak düzenlenebileceğini kabul ederim.</li>
+                    <li>Yayınladığım içeriklerdeki bilgilerin doğruluğundan şahsen sorumlu olduğumu kabul ederim.</li>
+                    <li>AperionX platformunun kullanım koşullarına ve topluluk kurallarına uyacağımı taahhüt ederim.</li>
+                    <li>Bu beyanı dijital olarak onayladığımda, imza yerine geçen dijital parmak izimin (ad-soyad, e-posta, IP adresi, tarih-saat) kaydedileceğini biliyorum ve kabul ediyorum.</li>
+                </ol>
+            </div>
+            <div class="consent-modal-footer">
+                <div class="consent-checkbox-wrap" onclick="document.getElementById('consent-checkbox').click()">
+                    <input type="checkbox" id="consent-checkbox" onclick="event.stopPropagation(); document.getElementById('consent-submit-btn').disabled = !this.checked;">
+                    <label for="consent-checkbox" onclick="event.stopPropagation();">Yukarıdaki beyanı okudum, anladım ve kabul ediyorum.</label>
+                </div>
+                <button class="consent-submit-btn" id="consent-submit-btn" disabled onclick="submitConsent()">
+                    <span class="spinner"></span>
+                    <span class="btn-text"><i class="ph ph-check-circle"></i> Onayla ve Devam Et</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONSENT MODAL LOGIC ===
+        const CONSENT_TEXT = `İşbu beyan ile AperionX platformunda yazar olarak yer alan ben, aşağıdaki koşulları kabul ettiğimi beyan ederim:\n\n1. Yayınladığım tüm içeriklerin özgün olduğunu ve herhangi bir telif hakkı ihlali içermediğini taahhüt ederim.\n\n2. AperionX platformuna gönderdiğim içeriklerin, platform üzerinde yayınlanması, düzenlenmesi ve paylaşılması için izin verdiğimi kabul ederim.\n\n3. İçeriklerimin AperionX’in editöryal standartlarına uygun olarak düzenlenebileceğini kabul ederim.\n\n4. Yayınladığım içeriklerdeki bilgilerin doğruluğundan şahsen sorumlu olduğumu kabul ederim.\n\n5. AperionX platformunun kullanım koşullarına ve topluluk kurallarına uyacağımı taahhüt ederim.\n\n6. Bu beyanı dijital olarak onayladığımda, imza yerine geçen dijital parmak izimin (ad-soyad, e-posta, IP adresi, tarih-saat) kaydedileceğini biliyorum ve kabul ediyorum.`;
+
+        function showConsentModal() {
+            const overlay = document.getElementById('consent-overlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        async function submitConsent() {
+            const btn = document.getElementById('consent-submit-btn');
+            const checkbox = document.getElementById('consent-checkbox');
+            if (!checkbox.checked) return;
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${window.API_URL || '/api'}/author/consent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ consent_text: CONSENT_TEXT })
+                });
+
+                if (!res.ok) throw new Error('Consent submission failed');
+
+                const data = await res.json();
+                if (data.success) {
+                    // Hide modal with animation
+                    const overlay = document.getElementById('consent-overlay');
+                    overlay.style.animation = 'consentFadeIn 0.3s ease reverse forwards';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        // Now load the panel
+                        loadSettings();
+                        loadMyArticles();
+                        loadDashboardStats();
+                        loadAnalytics();
+                        loadCategories();
+                        loadNotifications();
+                        renderDashboardChart();
+                    }, 300);
+                }
+            } catch (err) {
+                console.error('Consent submission error:', err);
+                alert('Sözleşme onayı gönderilemedi. Lütfen tekrar deneyin.');
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+    </script>
+
     <script defer src="/script_v105.js?v=223"></script>
 </body>
 

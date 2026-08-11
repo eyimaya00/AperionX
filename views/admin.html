@@ -831,6 +831,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('team-activity', this); loadTeamActivity();">
                 <i class="ph ph-pulse"></i> <span>Ekip Aktivitesi</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('author-consents', this); loadAuthorConsents();">
+                <i class="ph ph-file-text"></i> <span>Yazar Sözleşmeleri</span>
+            </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn">
@@ -2458,6 +2461,177 @@
                         </tr>
                     </thead>
                     <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Author Consents Section -->
+        <div id="author-consents" class="section">
+            <style>
+                .consents-hero {
+                    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 70%, #6366f1 100%);
+                    border-radius: 20px;
+                    padding: 32px 36px;
+                    margin-bottom: 24px;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .consents-hero::before {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -20%;
+                    width: 400px;
+                    height: 400px;
+                    background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+                    border-radius: 50%;
+                }
+                .consents-hero h2 {
+                    color: white;
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                    position: relative;
+                    z-index: 1;
+                }
+                .consents-hero p {
+                    color: rgba(255,255,255,0.7);
+                    font-size: 0.95rem;
+                    position: relative;
+                    z-index: 1;
+                }
+                .consents-stats {
+                    display: flex;
+                    gap: 16px;
+                    margin-top: 18px;
+                    position: relative;
+                    z-index: 1;
+                }
+                .consents-stat-card {
+                    background: rgba(255,255,255,0.1);
+                    backdrop-filter: blur(10px);
+                    border-radius: 12px;
+                    padding: 14px 22px;
+                    color: white;
+                }
+                .consents-stat-card .stat-num {
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                }
+                .consents-stat-card .stat-label {
+                    font-size: 0.8rem;
+                    opacity: 0.8;
+                }
+                .consents-table-wrap {
+                    background: var(--card-bg, #fff);
+                    border-radius: 16px;
+                    padding: 24px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+                }
+                .consents-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .consents-table th {
+                    text-align: left;
+                    padding: 12px 16px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    border-bottom: 2px solid #e2e8f0;
+                }
+                .consents-table td {
+                    padding: 14px 16px;
+                    font-size: 0.9rem;
+                    color: #1e293b;
+                    border-bottom: 1px solid #f1f5f9;
+                    vertical-align: middle;
+                }
+                .consents-table tr:hover td {
+                    background: #f8fafc;
+                }
+                .consents-table .author-name {
+                    font-weight: 600;
+                    color: #0f172a;
+                }
+                .consents-table .author-email {
+                    color: #64748b;
+                    font-size: 0.82rem;
+                }
+                .consents-table .consent-date {
+                    color: #475569;
+                    font-size: 0.85rem;
+                }
+                .consents-table .consent-ip {
+                    font-family: 'Courier New', monospace;
+                    color: #6366f1;
+                    font-size: 0.82rem;
+                    background: #eef2ff;
+                    padding: 3px 8px;
+                    border-radius: 6px;
+                }
+                .consent-download-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 16px;
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    transition: all 0.2s ease;
+                    text-decoration: none;
+                }
+                .consent-download-btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+                }
+                .consent-download-btn i {
+                    font-size: 1rem;
+                }
+                .consents-empty {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #94a3b8;
+                }
+                .consents-empty i {
+                    font-size: 3rem;
+                    margin-bottom: 12px;
+                    display: block;
+                }
+            </style>
+
+            <div class="consents-hero">
+                <h2><i class="ph ph-file-text" style="margin-right: 10px;"></i>Yazar Sözleşmeleri</h2>
+                <p>Yayın ve kullanım izni beyanını onaylayan yazarların listesi</p>
+                <div class="consents-stats">
+                    <div class="consents-stat-card">
+                        <div class="stat-num" id="total-consents-count">0</div>
+                        <div class="stat-label">Toplam Onay</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="consents-table-wrap">
+                <table class="consents-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Onay Tarihi</th>
+                            <th>IP Adresi</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="consents-table-body">
+                        <tr><td colspan="6" class="consents-empty"><i class="ph ph-spinner"></i>Yükleniyor...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -4777,6 +4951,7 @@
                 if (sectionId === 'team-management') loadTeamMembers();
                 if (sectionId === 'tool-analytics-section') loadToolStats();
                 if (sectionId === 'team-activity') loadTeamActivity();
+                if (sectionId === 'author-consents') loadAuthorConsents();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -5945,6 +6120,76 @@
             </div>
         </div>
     </div>
+    <script>
+        // === AUTHOR CONSENTS MANAGEMENT ===
+        async function loadAuthorConsents() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/admin/author-consents', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Fetch failed');
+                const consents = await res.json();
+
+                document.getElementById('total-consents-count').textContent = consents.length;
+
+                const tbody = document.getElementById('consents-table-body');
+                if (consents.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="consents-empty"><i class="ph ph-file-dashed"></i>Henüz onaylanmış sözleşme bulunmuyor.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = consents.map((c, i) => {
+                    const d = new Date(c.consented_at);
+                    const dateStr = d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' - ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    return `<tr>
+                        <td>${i + 1}</td>
+                        <td class="author-name">${c.full_name}</td>
+                        <td class="author-email">${c.email}</td>
+                        <td class="consent-date">${dateStr}</td>
+                        <td><span class="consent-ip">${c.ip_address}</span></td>
+                        <td><button class="consent-download-btn" onclick="downloadConsentPdf(${c.id}, '${c.full_name.replace(/'/g, "\\'")}')"><i class="ph ph-download-simple"></i> İndir</button></td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error('Load consents error:', err);
+                document.getElementById('consents-table-body').innerHTML = '<tr><td colspan="6" class="consents-empty" style="color: #ef4444;"><i class="ph ph-warning"></i>Sözleşmeler yüklenirken hata oluştu.</td></tr>';
+            }
+        }
+
+        async function downloadConsentPdf(id, authorName) {
+            const token = localStorage.getItem('token');
+            try {
+                const btn = event.target.closest('.consent-download-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner" style="animation: spin 1s linear infinite;"></i> Hazırlanıyor...';
+                btn.disabled = true;
+
+                const res = await fetch(`/api/admin/author-consents/${id}/pdf`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('PDF fetch failed');
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sozlesme_${authorName.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            } catch (err) {
+                console.error('PDF download error:', err);
+                alert('PDF indirme hatası: ' + err.message);
+                const btn = event.target.closest('.consent-download-btn');
+                if (btn) { btn.innerHTML = '<i class="ph ph-download-simple"></i> İndir'; btn.disabled = false; }
+            }
+        }
+    </script>
 </body>
 
 </html>
