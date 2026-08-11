@@ -7243,7 +7243,7 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         await browser.close();
 
         const safeFileName = consent.full_name.replace(/[^a-zA-Z0-9\u00e7\u011f\u0131\u00f6\u015f\u00fc\u00c7\u011e\u0130\u00d6\u015e\u00dc\s]/g, '').replace(/\s+/g, '_');
-        const dateStr = consentDate.toISOString().split('T')[0];
+        const dateStr = new Date(consent.consented_at).toISOString().split('T')[0];
         const fileName = `sozlesme_${safeFileName}_${dateStr}.pdf`;
 
         res.setHeader('Content-Type', 'application/pdf');
