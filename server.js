@@ -6953,7 +6953,7 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         .contract-body p { margin-bottom: 10px; }
         .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 12px; padding: 28px 32px; margin: 35px 0; }
         .fingerprint-section h2 { font-size: 16px; font-weight: 700; color: #4338ca; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-        .fingerprint-section h2::before { content: '\1F512'; font-size: 18px; }
+        .fingerprint-section h2::before { content: '🔒'; font-size: 18px; }
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-weight: 600; color: #475569; min-width: 180px; }
