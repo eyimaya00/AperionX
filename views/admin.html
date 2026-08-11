@@ -6148,7 +6148,10 @@
                         <td class="author-email">${c.email}</td>
                         <td class="consent-date">${dateStr}</td>
                         <td><span class="consent-ip">${c.ip_address}</span></td>
-                        <td><button class="consent-download-btn" onclick="downloadConsentPdf(${c.id}, '${c.full_name.replace(/'/g, "\\'")}')"><i class="ph ph-download-simple"></i> İndir</button></td>
+                        <td>
+                            <button class="consent-download-btn" onclick="downloadConsentPdf(${c.id}, '${c.full_name.replace(/'/g, "\\'")}')"><i class="ph ph-download-simple"></i> İndir</button>
+                            <button class="consent-download-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626); margin-left: 6px;" onclick="deleteConsent(${c.id}, '${c.full_name.replace(/'/g, "\\'")}')"><i class="ph ph-trash"></i> Sil</button>
+                        </td>
                     </tr>`;
                 }).join('');
             } catch (err) {
@@ -6187,6 +6190,22 @@
                 alert('PDF indirme hatası: ' + err.message);
                 const btn = event.target.closest('.consent-download-btn');
                 if (btn) { btn.innerHTML = '<i class="ph ph-download-simple"></i> İndir'; btn.disabled = false; }
+            }
+        }
+
+        async function deleteConsent(id, authorName) {
+            if (!confirm(`"${authorName}" adlı yazarın sözleşme kaydını silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz ve yazar bir sonraki girişinde sözleşmeyi tekrar onaylamak zorunda kalacaktır.`)) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/admin/author-consents/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Delete failed');
+                loadAuthorConsents();
+            } catch (err) {
+                console.error('Delete consent error:', err);
+                alert('Silme hatası: ' + err.message);
             }
         }
     </script>
