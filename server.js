@@ -6982,9 +6982,18 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         .info-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 8.5px; }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-weight: 600; color: #475569; min-width: 150px; }
-        .info-value { color: #1e293b; font-weight: 500; text-align: right; max-width: 320px; word-break: break-all; }
-        .footer { text-align: center; margin-top: 14px; padding-top: 10px; border-top: 2px solid #e2e8f0; font-size: 7.5px; color: #94a3b8; page-break-inside: avoid; }
-        .footer .badge { display: inline-block; background:    <div class="contract-section">
+        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 2px 10px; border-radius: 20px; font-size: 7.5px; font-weight: 600; margin-bottom: 4px; }
+        .bottom-block { page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        ${logoBase64 ? '<img src="data:image/png;base64,' + logoBase64 + '" alt="AperionX Logo">' : '<h2 style="color: #6366f1;">AperionX</h2>'}
+        <h1>APERIONX YAZAR BEYAN VE \u0130\u00c7ER\u0130K KULLANIM S\u00d6ZLE\u015eMES\u0130</h1>
+        <div class="version">S\u00f6zle\u015fme Versiyonu: v1.0 | Y\u00fcr\u00fcrl\u00fck Tarihi: 12.08.2026</div>
+    </div>
+
+    <div class="contract-section">
         <p>Bu S\u00f6zle\u015fme, AperionX platformunda (\u201cPlatform\u201d) i\u00e7erik \u00fcreten veya Platforma i\u00e7erik g\u00f6nderen yazarlar\u0131n (\u201cYazar\u201d), Platforma g\u00f6nderdikleri i\u00e7eriklerin yay\u0131nlanmas\u0131, kullan\u0131lmas\u0131, d\u00fczenlenmesi, ar\u015fivlenmesi ve da\u011f\u0131t\u0131lmas\u0131na ili\u015fkin hak ve sorumluluklar\u0131n\u0131 belirlemek amac\u0131yla haz\u0131rlanm\u0131\u015ft\u0131r.</p>
         <p>Platforma i\u00e7erik g\u00f6nderen Yazar, bu S\u00f6zle\u015fmeyi elektronik ortamda onaylayarak a\u015fa\u011f\u0131daki h\u00fck\u00fcmleri kabul etmi\u015f olur.</p>
 
