@@ -5107,13 +5107,14 @@
             btn.disabled = true;
 
             try {
+                const consentTextToSend = getConsentTextFromModal();
                 const res = await fetch(`${window.API_URL || '/api'}/author/consent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
-                    body: JSON.stringify({ consent_text: CONSENT_TEXT })
+                    body: JSON.stringify({ consent_text: consentTextToSend })
                 });
 
                 if (!res.ok) throw new Error('Consent submission failed');
