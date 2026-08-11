@@ -6929,14 +6929,21 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         if (rows.length === 0) return res.status(404).json({ message: 'Sözleşme bulunamadı.' });
 
         const consent = rows[0];
-        const consentDate = new Date(consent.consented_at);
-        const dd = String(consentDate.getDate()).padStart(2, '0');
-        const mm = String(consentDate.getMonth() + 1).padStart(2, '0');
-        const yyyy = consentDate.getFullYear();
-        const hh = String(consentDate.getHours()).padStart(2, '0');
-        const mi = String(consentDate.getMinutes()).padStart(2, '0');
-        const ss = String(consentDate.getSeconds()).padStart(2, '0');
-        const formattedDate = `${dd}.${mm}.${yyyy} - ${hh}:${mi}:${ss}`;
+        
+        // Format date in Europe/Istanbul (Turkey UTC+3) timezone
+        const dateParts = new Intl.DateTimeFormat('tr-TR', {
+            timeZone: 'Europe/Istanbul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).formatToParts(new Date(consent.consented_at));
+
+        const getPart = (type) => dateParts.find(p => p.type === type)?.value || '00';
+        const formattedDate = `${getPart('day')}.${getPart('month')}.${getPart('year')} - ${getPart('hour')}:${getPart('minute')}:${getPart('second')}`;
 
         // SHA-256 Hash of consent text
         const crypto = require('crypto');
@@ -6970,20 +6977,22 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         .header h1 { font-size: 13px; font-weight: 700; color: #0f172a; letter-spacing: 0.6px; text-transform: uppercase; }
         .header .version { font-size: 8px; color: #64748b; margin-top: 2px; }
         .contract-section { margin-bottom: 12px; }
-        .contract-section h3 { font-size: 9px; font-weight: 700; color: #1e1b4b; margin: 8px 0 3px 0; }
+        .contract-section h3 { font-size: 9px; font-weight: 700; color: #1e1b4b; margin: 10px 0 4px 0; page-break-after: avoid; break-after: avoid; }
         .contract-section p { font-size: 8px; color: #334155; margin-bottom: 4px; text-align: justify; line-height: 1.45; }
-        .contract-section ul, .contract-section ol { font-size: 8px; color: #334155; padding-left: 16px; margin: 3px 0 4px 0; }
+        .contract-section ul, .contract-section ol { font-size: 8px; color: #334155; padding-left: 16px; margin: 3px 0 4px 0; page-break-inside: avoid; break-inside: avoid; }
         .contract-section li { margin-bottom: 2px; line-height: 1.4; }
         .contract-section strong { font-weight: 700; }
-        .record-section { background: #f8fafc; border: 2px solid #6366f1; border-radius: 8px; padding: 12px 16px; margin: 16px 0; page-break-inside: avoid; }
-        .record-section h2 { font-size: 10px; font-weight: 700; color: #4338ca; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .bottom-block { page-break-inside: avoid; break-inside: avoid; margin-top: 20px; text-align: center; width: 100%; }
+        .record-section { background: #f8fafc; border: 2px solid #6366f1; border-radius: 8px; padding: 14px 18px; margin: 16px auto; width: 92%; max-width: 650px; text-align: left; page-break-inside: avoid; break-inside: avoid; }
+        .record-section h2 { font-size: 10px; font-weight: 700; color: #4338ca; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .record-desc { font-size: 8px; color: #64748b; margin-bottom: 8px; }
         .lock-icon { width: 14px; height: 14px; fill: #4338ca; flex-shrink: 0; }
         .info-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 8.5px; }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-weight: 600; color: #475569; min-width: 150px; }
-        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 2px 10px; border-radius: 20px; font-size: 7.5px; font-weight: 600; margin-bottom: 4px; }
-        .bottom-block { page-break-inside: avoid; }
+        .info-value { color: #1e293b; font-weight: 500; text-align: right; max-width: 340px; word-break: break-all; }
+        .footer { text-align: center; margin: 14px auto 0 auto; padding-top: 10px; border-top: 2px solid #e2e8f0; font-size: 7.5px; color: #94a3b8; page-break-inside: avoid; break-inside: avoid; width: 100%; }
+        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 3px 12px; border-radius: 20px; font-size: 7.5px; font-weight: 600; margin-bottom: 6px; }
     </style>
 </head>
 <body>
