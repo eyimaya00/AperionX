@@ -7165,7 +7165,7 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
             <li>Onay durumu,</li>
             <li>Teknik olarak gerekli olabilecek i\u015flem ve g\u00fcvenlik kay\u0131tlar\u0131.</li>
         </ul>
-        <p>Bu kay\u0131tlar, Yazar\u0131n hangi S\u00f6zle\u015fme versiyonunu hangi tarihte kabul etti\u011finin tespit edilmesi ve Platformun g\u00fvcenli\u011finin sa\u011flanmas\u0131 amac\u0131yla saklanabilir.</p>
+        <p>Bu kay\u0131tlar, Yazar\u0131n hangi S\u00f6zle\u015fme versiyonunu hangi tarihte kabul etti\u011finin tespit edilmesi ve Platformun g\u00fcvenli\u011finin sa\u011flanmas\u0131 amac\u0131yla saklanabilir.</p>
 
         <h3>19. S\u00f6zle\u015fme Versiyonu ve De\u011fi\u015fiklikler</h3>
         <p>Bu S\u00f6zle\u015fmenin her g\u00fcncel versiyonu bir versiyon numaras\u0131 ve y\u00fcr\u00fcrl\u00fck tarihi ile yay\u0131nlan\u0131r.</p>
