@@ -6930,7 +6930,14 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
 
         const consent = rows[0];
         const consentDate = new Date(consent.consented_at);
-        const formattedDate = consentDate.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '.') + ' - ' + consentDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        // Manual date formatting for consistent output in Puppeteer
+        const dd = String(consentDate.getDate()).padStart(2, '0');
+        const mm = String(consentDate.getMonth() + 1).padStart(2, '0');
+        const yyyy = consentDate.getFullYear();
+        const hh = String(consentDate.getHours()).padStart(2, '0');
+        const mi = String(consentDate.getMinutes()).padStart(2, '0');
+        const ss = String(consentDate.getSeconds()).padStart(2, '0');
+        const formattedDate = `${dd}.${mm}.${yyyy} - ${hh}:${mi}:${ss}`;
 
         // Read logo as base64
         let logoBase64 = '';
@@ -6958,21 +6965,23 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 40px 50px; line-height: 1.7; background: #fff; font-size: 11px; }
-        .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #6366f1; }
-        .header img { height: 50px; margin-bottom: 12px; }
-        .header h1 { font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: 0.8px; text-transform: uppercase; }
-        .header .version { font-size: 10px; color: #64748b; margin-top: 4px; }
-        .contract-body { margin-bottom: 25px; font-size: 10.5px; color: #334155; text-align: justify; }
-        .contract-body p, .contract-body div { margin-bottom: 6px; }
-        .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 10px; padding: 20px 24px; margin: 25px 0; }
-        .fingerprint-section h2 { font-size: 13px; font-weight: 700; color: #4338ca; margin-bottom: 14px; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1e293b; padding: 30px 40px; line-height: 1.6; background: #fff; font-size: 9.5px; }
+        .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #6366f1; }
+        .header img { height: 45px; margin-bottom: 8px; }
+        .header h1 { font-size: 14px; font-weight: 700; color: #0f172a; letter-spacing: 0.8px; text-transform: uppercase; }
+        .header .version { font-size: 9px; color: #64748b; margin-top: 3px; }
+        .contract-body { margin-bottom: 15px; font-size: 9px; color: #334155; text-align: justify; line-height: 1.5; }
+        .contract-body br { line-height: 1.2; }
+        .fingerprint-section { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 2px solid #6366f1; border-radius: 10px; padding: 16px 20px; margin: 15px 0; page-break-inside: avoid; }
+        .fingerprint-section h2 { font-size: 12px; font-weight: 700; color: #4338ca; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .lock-icon { width: 16px; height: 16px; fill: #4338ca; flex-shrink: 0; }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; }
         .info-row:last-child { border-bottom: none; }
-        .info-label { font-weight: 600; color: #475569; min-width: 170px; }
+        .info-label { font-weight: 600; color: #475569; min-width: 160px; }
         .info-value { color: #1e293b; font-weight: 500; text-align: right; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 2px solid #e2e8f0; font-size: 9px; color: #94a3b8; }
-        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 3px 12px; border-radius: 20px; font-size: 9px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .footer { text-align: center; margin-top: 20px; padding-top: 12px; border-top: 2px solid #e2e8f0; font-size: 8px; color: #94a3b8; page-break-inside: avoid; }
+        .footer .badge { display: inline-block; background: #6366f1; color: white; padding: 3px 12px; border-radius: 20px; font-size: 8px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .bottom-block { page-break-inside: avoid; }
     </style>
 </head>
 <body>
@@ -6982,18 +6991,20 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         <div class="version">Sözleşme Versiyonu: v1.0 | Yürürlük Tarihi: 12.08.2026</div>
     </div>
     <div class="contract-body">${consentTextHtml}</div>
-    <div class="fingerprint-section">
-        <h2>🔒 DİJİTAL PARMAK İZİ BİLGİLERİ</h2>
-        <div class="info-row"><span class="info-label">Yazar Adı Soyadı:</span><span class="info-value">${consent.full_name}</span></div>
-        <div class="info-row"><span class="info-label">Kayıtlı E-posta:</span><span class="info-value">${consent.email}</span></div>
-        <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
-        <div class="info-row"><span class="info-label">İşlem Yapılan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
-        <div class="info-row"><span class="info-label">Sözleşme Versiyonu:</span><span class="info-value">v1.0</span></div>
-    </div>
-    <div class="footer">
-        <div class="badge">DİJİTAL OLARAK ONAYLANMIŞTIR</div>
-        <p>Bu belge, yazarın dijital ortamda onayladığı sözleşmenin resmi kopyasıdır.</p>
-        <p>AperionX &copy; ${new Date().getFullYear()} &mdash; Tüm hakları saklıdır.</p>
+    <div class="bottom-block">
+        <div class="fingerprint-section">
+            <h2><svg class="lock-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> DİJİTAL PARMAK İZİ BİLGİLERİ</h2>
+            <div class="info-row"><span class="info-label">Yazar Adı Soyadı:</span><span class="info-value">${consent.full_name}</span></div>
+            <div class="info-row"><span class="info-label">Kayıtlı E-posta:</span><span class="info-value">${consent.email}</span></div>
+            <div class="info-row"><span class="info-label">Onay Tarihi ve Saati:</span><span class="info-value">${formattedDate}</span></div>
+            <div class="info-row"><span class="info-label">İşlem Yapılan IP Adresi:</span><span class="info-value">${consent.ip_address}</span></div>
+            <div class="info-row"><span class="info-label">Sözleşme Versiyonu:</span><span class="info-value">v1.0</span></div>
+        </div>
+        <div class="footer">
+            <div class="badge">DİJİTAL OLARAK ONAYLANMIŞTIR</div>
+            <p>Bu belge, yazarın dijital ortamda onayladığı sözleşmenin resmi kopyasıdır.</p>
+            <p>AperionX &copy; ${new Date().getFullYear()} &mdash; Tüm hakları saklıdır.</p>
+        </div>
     </div>
 </body>
 </html>`;
