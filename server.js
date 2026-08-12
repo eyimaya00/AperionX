@@ -6878,7 +6878,8 @@ app.post('/api/author/consent', authenticateToken, async (req, res) => {
 
         const userData = users[0];
         const fullName = userData.fullname || userData.email?.split('@')[0] || 'İsimsiz Yazar';
-        const ipAddress = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+        const rawIp = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+        const ipAddress = rawIp.split(',')[0].trim().substring(0, 45);
         const consentedAt = new Date();
 
         await pool.query(
