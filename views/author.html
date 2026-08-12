@@ -5090,7 +5090,11 @@
         // === CONSENT MODAL LOGIC ===
         function getConsentTextFromModal() {
             const bodyElem = document.querySelector('.consent-modal-body');
-            return bodyElem ? bodyElem.innerText.trim() : '';
+            if (!bodyElem) {
+                console.warn('Consent modal body element not found');
+                return '';
+            }
+            return bodyElem.innerText.trim();
         }
 
         function showConsentModal() {
@@ -5108,6 +5112,11 @@
 
             try {
                 const consentTextToSend = getConsentTextFromModal();
+                
+                if (!consentTextToSend || consentTextToSend.length < 10) {
+                    throw new Error('Sözleşme metni yüklenemedi. Sayfayı yenileyip tekrar deneyin.');
+                }
+
                 const res = await fetch(`${window.API_URL || '/api'}/author/consent`, {
                     method: 'POST',
                     headers: {
@@ -5117,9 +5126,17 @@
                     body: JSON.stringify({ consent_text: consentTextToSend })
                 });
 
-                if (!res.ok) throw new Error('Consent submission failed');
+                let data;
+                try {
+                    data = await res.json();
+                } catch (parseErr) {
+                    throw new Error('Sunucudan geçersiz yanıt alındı. Lütfen tekrar deneyin.');
+                }
 
-                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.message || `Sunucu hatası (${res.status})`);
+                }
+
                 if (data.success) {
                     // Hide modal with animation
                     const overlay = document.getElementById('consent-overlay');
@@ -5135,15 +5152,19 @@
                         loadNotifications();
                         renderDashboardChart();
                     }, 300);
+                } else {
+                    throw new Error(data.message || 'Sözleşme onayı işlenemedi.');
                 }
             } catch (err) {
                 console.error('Consent submission error:', err);
-                alert('Sözleşme onayı gönderilemedi. Lütfen tekrar deneyin.');
+                const errorMsg = err.message || 'Sözleşme onayı gönderilemedi. Lütfen tekrar deneyin.';
+                alert(errorMsg);
                 btn.classList.remove('loading');
                 btn.disabled = false;
             }
         }
     </script>
+
 
     <script defer src="/script_v105.js?v=223"></script>
 </body>

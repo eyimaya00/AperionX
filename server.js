@@ -6871,12 +6871,13 @@ app.get('/api/author/consent-status', authenticateToken, async (req, res) => {
 app.post('/api/author/consent', authenticateToken, async (req, res) => {
     try {
         const { consent_text } = req.body;
-        if (!consent_text) return res.status(400).json({ message: 'Sözleşme metni gerekli.' });
+        if (!consent_text) return res.status(400).json({ success: false, message: 'Sözleşme metni gerekli.' });
 
         const [users] = await pool.query('SELECT fullname, email FROM users WHERE id = ?', [req.user.id]);
-        if (users.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+        if (users.length === 0) return res.status(404).json({ success: false, message: 'Kullanıcı bulunamadı.' });
 
         const userData = users[0];
+        const fullName = userData.fullname || userData.email?.split('@')[0] || 'İsimsiz Yazar';
         const ipAddress = req.headers['x-forwarded-for'] || req.ip || 'unknown';
         const consentedAt = new Date();
 
@@ -6884,14 +6885,15 @@ app.post('/api/author/consent', authenticateToken, async (req, res) => {
             `INSERT INTO author_consents (user_id, full_name, email, ip_address, consent_text, consented_at)
              VALUES (?, ?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), email = VALUES(email), ip_address = VALUES(ip_address), consent_text = VALUES(consent_text), consented_at = VALUES(consented_at)`,
-            [req.user.id, userData.fullname, userData.email, ipAddress, consent_text, consentedAt]
+            [req.user.id, fullName, userData.email, ipAddress, consent_text, consentedAt]
         );
 
-        console.log(`[CONSENT] Author ${userData.fullname} (ID: ${req.user.id}) consented from IP: ${ipAddress}`);
+        console.log(`[CONSENT] Author ${fullName} (ID: ${req.user.id}) consented from IP: ${ipAddress}`);
         res.json({ success: true, consentedAt });
     } catch (error) {
         console.error('Consent submit error:', error);
-        res.status(500).json({ message: 'Sunucu hatası' });
+        console.error('Consent submit error details:', error.message, error.code, error.sqlMessage);
+        res.status(500).json({ success: false, message: 'Sunucu hatası: ' + (error.sqlMessage || error.message || 'Bilinmeyen hata') });
     }
 });
 
@@ -7317,15 +7319,24 @@ app.listen(PORT, async () => {
         await pool.query(`CREATE TABLE IF NOT EXISTS author_consents (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
-            full_name VARCHAR(255) NOT NULL,
+            full_name VARCHAR(255) NOT NULL DEFAULT 'İsimsiz Yazar',
             email VARCHAR(255) NOT NULL,
-            ip_address VARCHAR(45) NOT NULL,
-            consent_text TEXT NOT NULL,
+            ip_address VARCHAR(45) NOT NULL DEFAULT 'unknown',
+            consent_text LONGTEXT NOT NULL,
             consented_at DATETIME NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY unique_user_consent (user_id),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+        
+        // Migrate consent_text from TEXT to LONGTEXT if table already exists
+        try {
+            await pool.query(`ALTER TABLE author_consents MODIFY COLUMN consent_text LONGTEXT NOT NULL`);
+            await pool.query(`ALTER TABLE author_consents MODIFY COLUMN full_name VARCHAR(255) NOT NULL DEFAULT 'İsimsiz Yazar'`);
+            await pool.query(`ALTER TABLE author_consents MODIFY COLUMN ip_address VARCHAR(45) NOT NULL DEFAULT 'unknown'`);
+        } catch(alterErr) {
+            // Ignore if already the right type
+        }
         console.log('[MIGRATION] Author consents table ready.');
     } catch(consentMigErr) {
         console.error('[MIGRATION] Author consents error:', consentMigErr.message);
