@@ -974,6 +974,95 @@
             color: #94a3b8;
         }
 
+        /* Dynamic Table & Author Box Dark Mode Fixes */
+        .selected-authors-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 50px;
+            padding: 15px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        body.dark-mode .selected-authors-box {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+
+        .exp-author-tag {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+            border-radius: 20px;
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        body.dark-mode .exp-author-tag {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* Generic Author Table Styles for Dark Mode Compatibility */
+        .author-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .author-table-head {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .author-table-head th {
+            padding: 16px 30px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .author-table-row {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+        .author-table-row:hover {
+            background: #f8fafc;
+        }
+        .author-table-title {
+            padding: 15px 30px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .author-table-sub {
+            padding: 15px 30px;
+            color: #475569;
+        }
+
+        body.dark-mode .author-table-head {
+            background: #1e293b !important;
+            border-bottom-color: #334155 !important;
+        }
+        body.dark-mode .author-table-head th {
+            color: #94a3b8 !important;
+            border-bottom-color: #334155 !important;
+        }
+        body.dark-mode .author-table-row {
+            border-bottom-color: #334155 !important;
+            background: #0f172a !important;
+        }
+        body.dark-mode .author-table-row:hover {
+            background: #1e293b !important;
+        }
+        body.dark-mode .author-table-title {
+            color: #f8fafc !important;
+        }
+        body.dark-mode .author-table-sub {
+            color: #cbd5e1 !important;
+        }
+
         /* ZEN MODE */
         body.zen-mode .sidebar {
             display: none !important;
@@ -1694,7 +1783,7 @@
                             <div id="exp-author-search-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px;"></div>
                             
                             <label style="font-weight: 600; font-size: 0.9rem; color: #64748b;">Seçilen Hazırlayanlar:</label>
-                            <div id="exp-selected-authors" style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 50px; padding: 15px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                            <div id="exp-selected-authors" class="selected-authors-box">
                                 <p style="color: #94a3b8; margin: 0; width: 100%; text-align: center; font-size: 0.9rem;" id="exp-no-authors-text">Henüz kimse eklenmedi. (Kendiniz otomatik olarak ekleneceksiniz)</p>
                             </div>
                         </div>
@@ -2362,8 +2451,8 @@
                     const date = new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 
                     const row = `
-                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                            <td style="padding: 20px 30px; font-weight: 600; color: #0f172a; display:flex; align-items:center; gap:12px;">
+                        <tr class="author-table-row">
+                            <td class="author-table-title" style="display:flex; align-items:center; gap:12px;">
                                 <img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
                                 ${escapeHtml(like.liker_name)}
                             </td>
@@ -2403,9 +2492,9 @@
             articles.forEach(art => {
                 const date = new Date(art.created_at).toLocaleDateString('tr-TR');
                 const row = `
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding: 20px 30px; font-weight: 500; color: #0f172a;">${escapeHtml(art.title)}</td>
-                        <td style="padding: 20px 30px; color: #64748b;">${date}</td>
+                    <tr class="author-table-row">
+                        <td class="author-table-title">${escapeHtml(art.title)}</td>
+                        <td class="author-table-sub">${date}</td>
                         <td style="padding: 20px 30px; text-align: center;">
                             <span style="background: #eff6ff; color: #1e40af; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">${art.views}</span>
                         </td>
@@ -2443,11 +2532,11 @@
             comments.forEach(c => {
                 const date = new Date(c.created_at).toLocaleDateString('tr-TR');
                 const row = `
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding: 20px 30px; font-weight: 600; color: #0f172a;">${escapeHtml(c.user_name)}</td>
-                        <td style="padding: 20px 30px; color: #475569; max-width: 300px;">${escapeHtml(c.content)}</td>
-                        <td style="padding: 20px 30px; color: #3b82f6;">${escapeHtml(c.article_title)}</td>
-                        <td style="padding: 20px 30px; color: #94a3b8; font-size: 0.9rem;">${date}</td>
+                    <tr class="author-table-row">
+                        <td class="author-table-title">${escapeHtml(c.user_name)}</td>
+                        <td class="author-table-sub" style="max-width: 300px;">${escapeHtml(c.content)}</td>
+                        <td class="author-table-link">${escapeHtml(c.article_title)}</td>
+                        <td class="author-table-sub">${date}</td>
                     </tr>
                  `;
                 tbody.innerHTML += row;
@@ -3781,7 +3870,6 @@
                 expSelectedAuthors.forEach(a => {
                     const tag = document.createElement('div');
                     tag.className = 'exp-author-tag';
-                    tag.style.cssText = 'background: #fff; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500;';
                     tag.innerHTML = `
                         ${a.fullname} (@${a.username})
                         <button type="button" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; display: flex; align-items: center;" onclick="removeExpAuthor(${a.id})"><i class="ph ph-x"></i></button>
@@ -3902,14 +3990,14 @@
 
             let html = `
                 <div class="card" style="padding:0; overflow-x:auto; border-radius:16px;">
-                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <table class="author-table">
                         <thead>
-                            <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Görsel</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Deney Başlığı</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Kategori</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Durum</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">İşlem</th>
+                            <tr class="author-table-head">
+                                <th>Görsel</th>
+                                <th>Deney Başlığı</th>
+                                <th>Kategori</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -3926,10 +4014,10 @@
                 else statusBadge = '<span class="badge badge-secondary">Taslak</span>';
 
                 html += `
-                    <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                    <tr class="author-table-row">
                         <td style="padding:15px 30px;"><img src="${image}" style="width:60px; height:40px; object-fit:cover; border-radius:6px;"></td>
-                        <td style="padding:15px 30px; font-weight:600; color:#0f172a;">${escapeHtml(exp.title)}</td>
-                        <td style="padding:15px 30px; color:#475569;">${escapeHtml(exp.category || 'Genel')}</td>
+                        <td class="author-table-title">${escapeHtml(exp.title)}</td>
+                        <td class="author-table-sub">${escapeHtml(exp.category || 'Genel')}</td>
                         <td style="padding:15px 30px;">${statusBadge}</td>
                         <td style="padding:15px 30px; display:flex; gap:10px; align-items:center;">
                             <button class="btn btn-secondary-soft" onclick="editExperiment(${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-note-pencil"></i> Düzenle</button>
@@ -4091,12 +4179,12 @@
 
             let html = `
                 <div class="card" style="padding:0; overflow-x:auto; border-radius:16px;">
-                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <table class="author-table">
                         <thead>
-                            <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Deney Başlığı</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">Silinme Tarihi</th>
-                                <th style="padding:16px 30px; font-weight:600; color:#475569;">İşlem</th>
+                            <tr class="author-table-head">
+                                <th>Deney Başlığı</th>
+                                <th>Silinme Tarihi</th>
+                                <th>İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -4105,9 +4193,9 @@
             myTrash.forEach(exp => {
                 const deletedDate = exp.deleted_at ? new Date(exp.deleted_at).toLocaleString('tr-TR') : '-';
                 html += `
-                    <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        <td style="padding:15px 30px; font-weight:600; color:#0f172a;">${escapeHtml(exp.title)}</td>
-                        <td style="padding:15px 30px; color:#475569;">${deletedDate}</td>
+                    <tr class="author-table-row">
+                        <td class="author-table-title">${escapeHtml(exp.title)}</td>
+                        <td class="author-table-sub">${deletedDate}</td>
                         <td style="padding:15px 30px; display:flex; gap:10px; align-items:center;">
                             <button class="btn btn-secondary-soft" onclick="restoreExperiment(${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-arrow-counter-clockwise"></i> Geri Al</button>
                             <button class="btn btn-danger-soft" onclick="forceDeleteExperiment(${exp.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="ph ph-trash"></i> Kalıcı Sil</button>
@@ -4664,26 +4752,27 @@
                 data.notifications.forEach(n => {
                     const icon = n.type === 'success' ? 'ph-check-circle' : (n.type === 'error' ? 'ph-warning-circle' : 'ph-info');
                     const color = n.type === 'success' ? '#10b981' : (n.type === 'error' ? '#ef4444' : '#3b82f6');
-                    const bg = n.is_read ? 'white' : '#f0f9ff';
+                    const isDark = document.body.classList.contains('dark-mode');
+                    const bg = n.is_read ? (isDark ? '#1e293b' : 'white') : (isDark ? '#0f172a' : '#f0f9ff');
 
                     const item = document.createElement('div');
                     item.className = 'notif-item';
                     item.style.padding = '16px';
-                    item.style.borderBottom = '1px solid #f1f5f9';
+                    item.style.borderBottom = isDark ? '1px solid #334155' : '1px solid #f1f5f9';
                     item.style.display = 'flex';
                     item.style.gap = '12px';
                     item.style.background = bg;
                     item.style.cursor = 'pointer';
                     item.style.transition = 'background 0.2s';
 
-                    item.onmouseover = () => { if (n.is_read) item.style.background = '#f8fafc'; };
-                    item.onmouseout = () => { if (n.is_read) item.style.background = 'white'; };
+                    item.onmouseover = () => { if (n.is_read) item.style.background = isDark ? '#334155' : '#f8fafc'; };
+                    item.onmouseout = () => { if (n.is_read) item.style.background = isDark ? '#1e293b' : 'white'; };
                     item.onclick = async () => { await markRead(n.id); };
 
                     item.innerHTML = `
                         <div style="color: ${color}; font-size: 24px; display: flex; align-items: flex-start; margin-top: 2px;"><i class="ph-fill ${icon}"></i></div>
                         <div style="flex: 1;">
-                            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #334155; line-height: 1.4;">${n.message}</p>
+                            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: ${isDark ? '#f1f5f9' : '#334155'}; line-height: 1.4;">${n.message}</p>
                             <span style="font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px;">
                                 <i class="ph ph-clock"></i> ${new Date(n.created_at).toLocaleString('tr-TR')}
                             </span>
