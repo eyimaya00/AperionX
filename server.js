@@ -3242,7 +3242,7 @@ app.get('/api/author/experiments', authenticateToken, async (req, res) => {
 // 2. Create Experiment (POST)
 app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const body = req.body || {};
-    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, coAuthors } = body;
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, visual_references_list, coAuthors } = body;
     let author_id = req.user.id;
 
     let image_url = null;
@@ -3268,6 +3268,7 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const cleanConclusion = conclusion ? DOMPurify.sanitize(conclusion) : null;
         const cleanSafety = safety_notes ? DOMPurify.sanitize(safety_notes) : null;
         const cleanReferences = references_list ? DOMPurify.sanitize(references_list) : null;
+        const cleanVisualReferences = visual_references_list ? DOMPurify.sanitize(visual_references_list) : null;
 
         const publishedAt = finalStatus === 'published' ? new Date() : null;
         const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
@@ -3275,11 +3276,11 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const [insertResult] = await pool.query(
             `INSERT INTO experiments (
                 title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
-                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, published_at, was_published
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, visual_references_list, published_at, was_published
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
-                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, publishedAt, wasPublishedVal
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, cleanVisualReferences, publishedAt, wasPublishedVal
             ]
         );
 
@@ -3336,7 +3337,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
 
-    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, coAuthors } = req.body;
+    const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, visual_references_list, coAuthors } = req.body;
 
     let finalStatus = status;
     if (status === 'published' && req.user.role === 'author') {
@@ -3369,6 +3370,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     if (tags !== undefined) { updates.push('tags = ?'); params.push(tags); }
     if (youtube_url !== undefined) { updates.push('youtube_url = ?'); params.push(youtube_url); }
     if (references_list !== undefined) { updates.push('references_list = ?'); params.push(DOMPurify.sanitize(references_list)); }
+    if (visual_references_list !== undefined) { updates.push('visual_references_list = ?'); params.push(DOMPurify.sanitize(visual_references_list)); }
 
     if (objective !== undefined) { updates.push('objective = ?'); params.push(DOMPurify.sanitize(objective)); }
     if (materials !== undefined) { updates.push('materials = ?'); params.push(DOMPurify.sanitize(materials)); }

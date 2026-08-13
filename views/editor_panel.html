@@ -2626,8 +2626,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Kaynaklar (References)</label>
-                        <textarea id="edit-exp-references" class="form-control" rows="3"></textarea>
+                        <div style="height: 40px; width: 100%; display: block; clear: both;"></div>
+                        <label style="display:block; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Metindeki Kaynaklar</label>
+                        <textarea id="edit-exp-references" class="form-control" rows="4" placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın..."></textarea>
+
+                        <label style="display:block; margin-top: 15px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Görseldeki Kaynaklar</label>
+                        <textarea id="edit-exp-image-references" class="form-control" rows="4" placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın..."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -3603,7 +3607,15 @@
                 document.getElementById('edit-exp-materials').value = exp.materials || '';
                 document.getElementById('edit-exp-safety').value = exp.safety_notes || '';
                 document.getElementById('edit-exp-conclusion').value = exp.conclusion || '';
-                document.getElementById('edit-exp-references').value = exp.references_list || '';
+                let allExpRefsEdit = exp.references_list || '';
+                let visExpRefsEdit = exp.visual_references_list || '';
+                if (!visExpRefsEdit.trim() && allExpRefsEdit.includes('[IMAGES]')) {
+                    const parts = allExpRefsEdit.split('[IMAGES]');
+                    allExpRefsEdit = parts[0];
+                    visExpRefsEdit = parts[1];
+                }
+                if (document.getElementById('edit-exp-references')) document.getElementById('edit-exp-references').value = allExpRefsEdit.trim();
+                if (document.getElementById('edit-exp-image-references')) document.getElementById('edit-exp-image-references').value = visExpRefsEdit.trim();
                 document.getElementById('edit-exp-youtube').value = exp.youtube_url || '';
                 
                 document.getElementById('edit-exp-imageInput').value = '';
@@ -3652,7 +3664,8 @@
             const materials = document.getElementById('edit-exp-materials').value;
             const safety = document.getElementById('edit-exp-safety').value;
             const conclusion = document.getElementById('edit-exp-conclusion').value;
-            const references = document.getElementById('edit-exp-references').value;
+            const references = document.getElementById('edit-exp-references') ? document.getElementById('edit-exp-references').value : '';
+            const visualReferences = document.getElementById('edit-exp-image-references') ? document.getElementById('edit-exp-image-references').value : '';
             const youtube = document.getElementById('edit-exp-youtube').value;
 
             const procedure_steps = expQuillProcedureEdit ? expQuillProcedureEdit.root.innerHTML : '';
@@ -3668,6 +3681,7 @@
             formData.append('safety_notes', safety);
             formData.append('conclusion', conclusion);
             formData.append('references_list', references);
+            formData.append('visual_references_list', visualReferences);
             formData.append('youtube_url', youtube);
             formData.append('procedure_steps', procedure_steps);
             formData.append('results', results);

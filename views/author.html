@@ -1651,9 +1651,14 @@
                         </div>
 
                         <div class="form-group full-width">
-                            <label>Kaynaklar (References)</label>
-                            <textarea id="exp-references" class="form-control" rows="3"
-                                placeholder="Kullanılan makaleler, kitaplar veya bağlantılar..."></textarea>
+                            <div style="height: 60px; width: 100%; display: block; clear: both;"></div>
+                            <label style="display:block; margin-top: 0; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Metindeki Kaynaklar</label>
+                            <textarea id="exp-references" class="form-control" rows="4"
+                                placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın.&#10;Örn:&#10;Yazar Adı, Kitap Adı, Yıl...&#10;Diğer Yazar, Makale Adı, Yıl..."></textarea>
+
+                            <label style="display:block; margin-top: 20px; margin-bottom:8px; color:#64748b; font-size:0.95rem; font-weight: 600;">Görseldeki Kaynaklar</label>
+                            <textarea id="exp-image-references" class="form-control" rows="4"
+                                placeholder="Numara eklemeyin, her satıra bir kaynak gelecek şekilde yazın.&#10;Örn:&#10;Unsplash - Fotoğrafçı Adı&#10;WikiMedia Commons"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -3818,7 +3823,9 @@
 
                 // New fields: References & Co-authors
                 const expReferences = document.getElementById('exp-references') ? document.getElementById('exp-references').value : '';
+                const expImageReferences = document.getElementById('exp-image-references') ? document.getElementById('exp-image-references').value : '';
                 formData.append('references_list', expReferences);
+                formData.append('visual_references_list', expImageReferences);
 
                 const coAuthorIds = expSelectedAuthors.map(a => a.id);
                 formData.append('coAuthors', JSON.stringify(coAuthorIds));
@@ -3989,8 +3996,18 @@
                 }
 
                 // Restore references
+                let allExpRefs = data.references_list || '';
+                let visExpRefs = data.visual_references_list || '';
+                if (!visExpRefs.trim() && allExpRefs.includes('[IMAGES]')) {
+                    const parts = allExpRefs.split('[IMAGES]');
+                    allExpRefs = parts[0];
+                    visExpRefs = parts[1];
+                }
                 if (document.getElementById('exp-references')) {
-                    document.getElementById('exp-references').value = data.references_list || '';
+                    document.getElementById('exp-references').value = allExpRefs.trim();
+                }
+                if (document.getElementById('exp-image-references')) {
+                    document.getElementById('exp-image-references').value = visExpRefs.trim();
                 }
 
                 // Restore co-authors
@@ -4188,6 +4205,8 @@
             document.getElementById('exp-form-title').innerText = 'Deney Stüdyosu';
             document.getElementById('exp-reset-form-btn').style.display = 'none';
             document.getElementById('exp-custom-category-group').style.display = 'none';
+            if (document.getElementById('exp-references')) document.getElementById('exp-references').value = '';
+            if (document.getElementById('exp-image-references')) document.getElementById('exp-image-references').value = '';
 
             const previewZone = document.getElementById('exp-preview-zone');
             previewZone.classList.remove('has-file');
