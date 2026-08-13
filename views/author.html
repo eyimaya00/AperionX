@@ -1063,6 +1063,46 @@
             color: #cbd5e1 !important;
         }
 
+        /* Analytics Dark Mode Fixes */
+        .analytics-card-label {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        body.dark-mode .analytics-card-label {
+            color: #94a3b8 !important;
+        }
+
+        .analytics-stat-value {
+            margin: 5px 0 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        body.dark-mode .analytics-stat-value {
+            color: #f8fafc !important;
+        }
+
+        .analytics-card-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .analytics-card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #334155;
+        }
+        body.dark-mode .analytics-card-header {
+            background: #1e293b !important;
+            border-bottom-color: #334155 !important;
+        }
+        body.dark-mode .analytics-card-header h3 {
+            color: #f8fafc !important;
+        }
+
         /* ZEN MODE */
         body.zen-mode .sidebar {
             display: none !important;
@@ -2015,11 +2055,8 @@
                         <i class="ph-fill ph-heart"></i>
                     </div>
                     <div>
-                        <h3
-                            style="margin: 0; color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">
-                            Toplam Beğeni</h3>
-                        <p id="analytics-total-likes"
-                            style="margin: 5px 0 0; font-size: 2.5rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="analytics-card-label">Toplam Beğeni</h3>
+                        <p id="analytics-total-likes" class="analytics-stat-value">-</p>
                     </div>
                 </div>
 
@@ -2033,11 +2070,8 @@
                         <i class="ph-fill ph-eye"></i>
                     </div>
                     <div>
-                        <h3
-                            style="margin: 0; color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">
-                            Toplam Okunma</h3>
-                        <p id="analytics-total-views"
-                            style="margin: 5px 0 0; font-size: 2.5rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="analytics-card-label">Toplam Okunma</h3>
+                        <p id="analytics-total-views" class="analytics-stat-value">-</p>
                     </div>
                 </div>
 
@@ -2051,38 +2085,25 @@
                         <i class="ph-bold ph-chat-circle"></i>
                     </div>
                     <div>
-                        <h3
-                            style="margin: 0; color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">
-                            Toplam Yorum</h3>
-                        <p id="analytics-total-comments"
-                            style="margin: 5px 0 0; font-size: 2.5rem; font-weight: 800; color: #0f172a;">-</p>
+                        <h3 class="analytics-card-label">Toplam Yorum</h3>
+                        <p id="analytics-total-comments" class="analytics-stat-value">-</p>
                     </div>
                 </div>
             </div>
 
             <div class="card" style="padding: 0; overflow: hidden;">
-                <div style="padding: 20px 30px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-                    <h3 style="margin: 0; font-size: 1.1rem; color: #334155;">Makale Performansı</h3>
+                <div class="analytics-card-header">
+                    <h3 id="analytics-section-title">Makale Performansı</h3>
                 </div>
                 <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table class="author-table">
                         <thead>
-                            <tr style="background: #f1f5f9; text-align: left;">
-                                <th
-                                    style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">
-                                    Makale Başlığı</th>
-                                <th
-                                    style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">
-                                    Yayın Tarihi</th>
-                                <th
-                                    style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                    Okunma</th>
-                                <th
-                                    style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                    Beğeni</th>
-                                <th
-                                    style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                    Yorum</th>
+                            <tr class="author-table-head">
+                                <th>Makale Başlığı</th>
+                                <th>Yayın Tarihi</th>
+                                <th style="text-align: center;">Okunma</th>
+                                <th style="text-align: center;">Beğeni</th>
+                                <th style="text-align: center;">Yorum</th>
                             </tr>
                         </thead>
                         <tbody id="analytics-table-body">
@@ -2426,9 +2447,9 @@
             const thead = document.querySelector('#analytics table thead tr');
             if (thead) {
                 thead.innerHTML = `
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Kullanıcı</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Makale</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Tarih</th>
+                    <th>Kullanıcı</th>
+                    <th>Makale</th>
+                    <th>Tarih</th>
                 `;
             }
 
@@ -2473,12 +2494,12 @@
             const thead = document.querySelector('#analytics table thead tr');
             if (thead) {
                 thead.innerHTML = `
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Makale Başlığı</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Yayın Tarihi</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">Okunma</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">Beğeni</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; text-align: center;">Yorum</th>
-                 `;
+                    <th>Makale Başlığı</th>
+                    <th>Yayın Tarihi</th>
+                    <th style="text-align: center;">Okunma</th>
+                    <th style="text-align: center;">Beğeni</th>
+                    <th style="text-align: center;">Yorum</th>
+                `;
             }
 
             const tbody = document.getElementById('analytics-table-body');
@@ -2514,11 +2535,11 @@
             const thead = document.querySelector('#analytics table thead tr');
             if (thead) {
                 thead.innerHTML = `
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Kullanıcı</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Yorum</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Makale</th>
-                    <th style="padding: 16px 30px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;">Tarih</th>
-                 `;
+                    <th>Kullanıcı</th>
+                    <th>Yorum</th>
+                    <th>Makale</th>
+                    <th>Tarih</th>
+                `;
             }
 
             const tbody = document.getElementById('analytics-table-body');
