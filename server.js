@@ -4014,12 +4014,31 @@ app.get('/api/editor/authors', authenticateToken, async (req, res) => {
 
 // === YAZAR TAKİP (TRACKED AUTHORS) ROUTES ===
 
+// Helper to parse YYYY-MM-DD string as local midnight Date
+function parseYazarLocalDateStr(str) {
+    if (!str) return new Date();
+    const parts = str.toString().split('T')[0].split('-');
+    if (parts.length < 3) return new Date(str);
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
+// Helper to format Date object as YYYY-MM-DD string
+function formatYazarLocalDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 // GET all tracked authors with their articles
 app.get('/api/tracked-authors', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [authors] = await pool.query(`
-            SELECT ta.*, u.fullname as created_by_name
+            SELECT ta.id, ta.first_name, ta.last_name, ta.phone, ta.university, ta.frequency,
+                   DATE_FORMAT(ta.conversation_date, '%Y-%m-%d') as conversation_date,
+                   ta.notes, ta.created_by, ta.violations, ta.user_id, ta.created_at, ta.updated_at,
+                   u.fullname as created_by_name
             FROM tracked_authors ta
             LEFT JOIN users u ON ta.created_by = u.id
             ORDER BY ta.created_at DESC
@@ -4028,7 +4047,10 @@ app.get('/api/tracked-authors', authenticateToken, async (req, res) => {
         // Fetch articles for each author
         for (let author of authors) {
             const [articles] = await pool.query(
-                'SELECT * FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC',
+                `SELECT id, author_id, title, DATE_FORMAT(article_date, '%Y-%m-%d') as article_date
+                 FROM tracked_author_articles
+                 WHERE author_id = ?
+                 ORDER BY article_date DESC`,
                 [author.id]
             );
             author.articles = articles;
@@ -4123,7 +4145,14 @@ app.get('/api/users/authors', authenticateToken, async (req, res) => {
 // GET author tracking status (for the logged in author)
 app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM tracked_authors WHERE user_id = ?', [req.user.id]);
+        const [rows] = await pool.query(`
+            SELECT id, first_name, last_name, phone, university, frequency,
+                   DATE_FORMAT(conversation_date, '%Y-%m-%d') as conversation_date,
+                   notes, created_by, violations, user_id
+            FROM tracked_authors
+            WHERE user_id = ?
+        `, [req.user.id]);
+
         if (rows.length === 0) {
             return res.json({ tracked: false });
         }
@@ -4131,19 +4160,21 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
         
         // Fetch their most recent article date
         const [articles] = await pool.query(
-            'SELECT article_date FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC LIMIT 1',
+            `SELECT DATE_FORMAT(article_date, '%Y-%m-%d') as article_date
+             FROM tracked_author_articles
+             WHERE author_id = ?
+             ORDER BY article_date DESC LIMIT 1`,
             [tracking.id]
         );
 
         // Determine reference date (MAX of conversation_date and last article date)
-        let referenceDate = new Date(tracking.conversation_date);
-        if (articles.length > 0) {
-            const lastArticleDate = new Date(articles[0].article_date);
+        let referenceDate = parseYazarLocalDateStr(tracking.conversation_date);
+        if (articles.length > 0 && articles[0].article_date) {
+            const lastArticleDate = parseYazarLocalDateStr(articles[0].article_date);
             if (lastArticleDate > referenceDate) {
                 referenceDate = lastArticleDate;
             }
         }
-        referenceDate.setHours(0, 0, 0, 0);
 
         // Calculate days left
         const today = new Date();
@@ -4161,8 +4192,8 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
             tracked: true,
             university: tracking.university,
             frequency: tracking.frequency,
-            last_conversation: referenceDate.toISOString(),
-            next_deadline: nextDate.toISOString(),
+            last_conversation: formatYazarLocalDateStr(referenceDate),
+            next_deadline: formatYazarLocalDateStr(nextDate),
             days_left: diffDays,
             violations: tracking.violations
         });
@@ -4183,7 +4214,11 @@ app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res
         }
 
         // Verify author exists and fetch their details
-        const [authors] = await pool.query('SELECT * FROM tracked_authors WHERE id = ?', [authorId]);
+        const [authors] = await pool.query(
+            `SELECT id, first_name, last_name, frequency, DATE_FORMAT(conversation_date, '%Y-%m-%d') as conversation_date
+             FROM tracked_authors WHERE id = ?`,
+            [authorId]
+        );
         if (authors.length === 0) {
             return res.status(404).json({ error: 'Yazar bulunamadı.' });
         }
@@ -4191,19 +4226,21 @@ app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res
 
         // Fetch their most recent article date before this new one
         const [articles] = await pool.query(
-            'SELECT article_date FROM tracked_author_articles WHERE author_id = ? ORDER BY article_date DESC LIMIT 1',
+            `SELECT DATE_FORMAT(article_date, '%Y-%m-%d') as article_date
+             FROM tracked_author_articles
+             WHERE author_id = ?
+             ORDER BY article_date DESC LIMIT 1`,
             [authorId]
         );
 
         // Determine reference date (MAX of conversation_date and last article date)
-        let referenceDate = new Date(author.conversation_date);
-        if (articles.length > 0) {
-            const lastArticleDate = new Date(articles[0].article_date);
+        let referenceDate = parseYazarLocalDateStr(author.conversation_date);
+        if (articles.length > 0 && articles[0].article_date) {
+            const lastArticleDate = parseYazarLocalDateStr(articles[0].article_date);
             if (lastArticleDate > referenceDate) {
                 referenceDate = lastArticleDate;
             }
         }
-        referenceDate.setHours(0, 0, 0, 0);
 
         // Calculate deadline
         const deadlineDays = parseInt(author.frequency);
@@ -4212,8 +4249,7 @@ app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res
         deadlineDate.setHours(0, 0, 0, 0);
 
         // Compare new article date with deadline
-        const newArticleDate = new Date(article_date);
-        newArticleDate.setHours(0, 0, 0, 0);
+        const newArticleDate = parseYazarLocalDateStr(article_date);
 
         let violation = false;
         if (newArticleDate > deadlineDate) {
@@ -4235,6 +4271,22 @@ app.post('/api/tracked-authors/:id/articles', authenticateToken, async (req, res
         });
     } catch (e) {
         console.error('Tracked author article create error:', e);
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// DELETE article recorded for tracked author
+app.delete('/api/tracked-authors/:authorId/articles/:articleId', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const { authorId, articleId } = req.params;
+        const [result] = await pool.query('DELETE FROM tracked_author_articles WHERE id = ? AND author_id = ?', [articleId, authorId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Makale kaydı bulunamadı.' });
+        }
+        res.json({ message: 'Makale kaydı başarıyla silindi.' });
+    } catch (e) {
+        console.error('Tracked author article delete error:', e);
         res.status(500).json({ error: e.toString() });
     }
 });

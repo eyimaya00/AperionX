@@ -3182,7 +3182,10 @@
                                                 <i class="ph ph-calendar-blank" style="font-size: 1.1rem;"></i>
                                                 <span>Son Tarih</span>
                                             </div>
-                                            <span style="font-weight: 700; color: var(--text-main);">${new Date(data.next_deadline).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                            <span style="font-weight: 700; color: var(--text-main);">${(() => {
+                                                const parts = (data.next_deadline || '').split('T')[0].split('-').map(Number);
+                                                return parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+                                            })()}</span>
                                         </div>
                                     </div>
                                     

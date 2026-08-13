@@ -4839,16 +4839,25 @@
             }
         }
 
+        function parseYazarDateString(dateStr) {
+            if (!dateStr) return new Date();
+            const parts = dateStr.toString().split('T')[0].split('-');
+            if (parts.length >= 3) {
+                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+            const d = new Date(dateStr);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
         function getYazarLastReferenceDate(author) {
-            let convDate = new Date(author.conversation_date);
-            convDate.setHours(0, 0, 0, 0);
+            let convDate = parseYazarDateString(author.conversation_date);
 
             if (author.articles && author.articles.length > 0) {
                 const lastArticleDate = author.articles.reduce((latest, article) => {
-                    const d = new Date(article.article_date);
+                    const d = parseYazarDateString(article.article_date);
                     return d > latest ? d : latest;
-                }, new Date(author.articles[0].article_date));
-                lastArticleDate.setHours(0, 0, 0, 0);
+                }, parseYazarDateString(author.articles[0].article_date));
 
                 if (lastArticleDate > convDate) {
                     return lastArticleDate;
@@ -4872,7 +4881,7 @@
             let status;
             if (daysPassed > deadlineDays) {
                 status = 'red';
-            } else if (daysPassed >= deadlineDays - 2) {
+            } else if (daysRemaining <= 3) {
                 status = 'yellow';
             } else {
                 status = 'green';
@@ -5005,8 +5014,7 @@
             }
 
             const refDate = getYazarLastReferenceDate(author);
-            const convDateObj = new Date(author.conversation_date);
-            convDateObj.setHours(0, 0, 0, 0);
+            const convDateObj = parseYazarDateString(author.conversation_date);
             const refLabel = (refDate.getTime() === convDateObj.getTime()) ? 'Son Görüşme / Başlangıç' : 'Son Makale Tarihi';
 
             const deadlineDate = new Date(refDate);
@@ -5014,7 +5022,7 @@
 
             let articleHistoryHTML = '';
             if (author.articles && author.articles.length > 0) {
-                const sortedArticles = [...author.articles].sort((a, b) => new Date(b.article_date) - new Date(a.article_date));
+                const sortedArticles = [...author.articles].sort((a, b) => parseYazarDateString(b.article_date) - parseYazarDateString(a.article_date));
                 articleHistoryHTML = `
                     <div class="yazar-article-history">
                         <div class="yazar-article-history-header">
@@ -5022,12 +5030,19 @@
                             <span class="yazar-article-count-badge">${author.articles.length} makale</span>
                         </div>
                         ${sortedArticles.map(a => `
-                            <div class="yazar-article-item">
-                                <div class="yazar-article-dot"></div>
-                                <div class="yazar-article-info">
-                                    <div class="yazar-article-title-text">${escapeYazarHtml(a.title)}</div>
+                            <div class="yazar-article-item" style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                                    <div class="yazar-article-dot"></div>
+                                    <div class="yazar-article-info" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <div class="yazar-article-title-text">${escapeYazarHtml(a.title)}</div>
+                                    </div>
                                 </div>
-                                <div class="yazar-article-date">${formatYazarDate(a.article_date)}</div>
+                                <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+                                    <div class="yazar-article-date">${formatYazarDate(a.article_date)}</div>
+                                    <button class="yazar-btn-delete-article" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; cursor: pointer; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;" title="Makale Kaydını Sil" onclick="event.stopPropagation(); deleteYazarArticle('${author.id}', '${a.id}', '${escapeYazarHtml(a.title).replace(/'/g, "\\'")}')">
+                                        🗑️ Sil
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -5278,6 +5293,22 @@
             }
         }
 
+        async function deleteYazarArticle(authorId, articleId, articleTitle) {
+            if (!confirm(`"${articleTitle || 'Bu makale'}" kaydını silmek istediğinize emin misiniz?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/tracked-authors/${authorId}/articles/${articleId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Makale kaydı silinirken bir hata oluştu');
+                showToast('Makale kaydı silindi.', 'success');
+                await loadYazarTakip();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
+        }
+
         function formatYazarPhone(phone) {
             if (!phone) return '—';
             const cleaned = phone.replace(/\D/g, '');
@@ -5289,6 +5320,12 @@
 
         function formatYazarDate(dateStr) {
             if (!dateStr) return '—';
+            const cleanStr = dateStr.toString().split('T')[0];
+            const parts = cleanStr.split('-');
+            if (parts.length === 3) {
+                const [y, m, d] = parts;
+                return `${d.padStart(2, '0')}.${m.padStart(2, '0')}.${y}`;
+            }
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return '—';
             const day = String(date.getDate()).padStart(2, '0');
