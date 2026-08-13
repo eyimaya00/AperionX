@@ -4201,7 +4201,7 @@
                         <li style="border-bottom:1px solid #eee; padding:15px 0; display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <strong>${art.title}</strong><br>
-                                <span style="font-size:0.9rem; color:#666;">Yazar: ${art.author_name} - ${new Date(art.created_at).toLocaleDateString()}</span>
+                                <span style="font-size:0.9rem; color:#666;">Yazar: ${art.author_name} - ${new Date(art.submitted_at || art.updated_at || art.created_at).toLocaleDateString('tr-TR')}</span>
                             </div>
                             <div>
                                 <a href="/editor" class="btn btn-primary" style="text-decoration:none; font-size:0.9rem;">İncele</a>

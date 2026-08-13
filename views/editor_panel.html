@@ -3874,7 +3874,8 @@
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; height:300px; vertical-align:middle; color:#94a3b8;"><div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><i class="ph-duotone ph-folder-open" style="font-size:3rem; opacity:0.5;"></i><span>Makale bulunamadı.</span></div></td></tr>';
                 } else {
                     displayArticles.forEach(article => {
-                        const date = new Date(article.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                        const articleDate = article.status === 'pending' ? (article.submitted_at || article.updated_at || article.created_at) : article.created_at;
+                        const date = new Date(articleDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
                         let statusBadge = '';
                         let actions = '';
 
@@ -3979,13 +3980,22 @@
                 return a.status === status;
             });
 
+            if (status === 'pending') {
+                filtered.sort((a, b) => {
+                    const tA = new Date(a.submitted_at || a.updated_at || a.created_at).getTime();
+                    const tB = new Date(b.submitted_at || b.updated_at || b.created_at).getTime();
+                    return tB - tA;
+                });
+            }
+
             if (filtered.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; height:300px; vertical-align:middle; color:#94a3b8;"><div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><i class="ph-duotone ph-folder-open" style="font-size:3rem; opacity:0.5;"></i><span>Kayıt bulunamadı.</span></div></td></tr>';
                 return;
             }
 
             filtered.forEach(article => {
-                const date = new Date(article.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+                const articleDate = article.status === 'pending' ? (article.submitted_at || article.updated_at || article.created_at) : article.created_at;
+                const date = new Date(articleDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
                 let statusBadge = '';
                 let actions = '';
 

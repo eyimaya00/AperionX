@@ -1643,6 +1643,7 @@ async function ensureSchema() {
         // Add published_at to existing tables if missing
         try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
         // Add linkedin_url, public_email, show_email to users table if missing
         try { await pool.query('ALTER TABLE users ADD COLUMN linkedin_url VARCHAR(255) NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE users ADD COLUMN public_email VARCHAR(255) NULL'); } catch(e) {}
@@ -1650,6 +1651,7 @@ async function ensureSchema() {
         // Backfill published_at from created_at for existing published records
         try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 1:', e); }
         try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
+        try { await pool.query("UPDATE articles SET submitted_at = created_at WHERE status = 'pending' AND submitted_at IS NULL"); } catch(e) { console.error('Migration Error 3:', e); }
 
         // Fix the experiment dates to match exact publication order (oldest to newest):
         // 1. Bakır Sülfatın Kristallendirme Yöntemi ile Saflaştırılması
@@ -3059,11 +3061,12 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         const slug = await getUniqueSlug(pool, title);
 
         const publishedAt = finalStatus === 'published' ? new Date() : null;
+        const submittedAt = finalStatus === 'pending' ? new Date() : null;
         const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
 
         const [insertResult] = await pool.query(
-            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url, published_at, was_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url, publishedAt, wasPublishedVal]
+            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url, published_at, was_published, submitted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url, publishedAt, wasPublishedVal, submittedAt]
         );
 
         const newArticleId = insertResult.insertId;
@@ -3173,6 +3176,9 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     } else if (finalStatus) {
         updates.push('status = ?');
         params.push(finalStatus);
+        if (finalStatus === 'pending') {
+            updates.push('submitted_at = NOW()');
+        }
     }
     if (tags) { updates.push('tags = ?'); params.push(tags); }
     if (references_list !== undefined) { updates.push('references_list = ?'); params.push(references_list); }
@@ -3871,11 +3877,11 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'pending' 
-            ORDER BY a.created_at ASC
+            ORDER BY COALESCE(a.submitted_at, a.created_at) DESC
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
