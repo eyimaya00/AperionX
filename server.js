@@ -1623,6 +1623,7 @@ async function ensureSchema() {
                 safety_notes TEXT,
                 tags TEXT,
                 references_list TEXT,
+                visual_references_list TEXT,
                 pdf_url VARCHAR(255),
                 author_id INT,
                 status VARCHAR(50) DEFAULT 'pending',
@@ -1642,6 +1643,7 @@ async function ensureSchema() {
 
         // Add published_at to existing tables if missing
         try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE experiments ADD COLUMN visual_references_list TEXT'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
         // Add linkedin_url, public_email, show_email to users table if missing
@@ -3326,7 +3328,7 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         res.status(201).json({ message: 'Experiment created', status: finalStatus });
     } catch (e) {
         console.error('Create Experiment DB Error:', e);
-        res.status(500).send(e.toString());
+        res.status(500).json({ message: e.message || 'Deney oluşturulurken bir hata oluştu.' });
     }
 });
 
