@@ -3417,9 +3417,8 @@
         async function editArticle(id) {
             currentArticleId = id;
             try {
-                // Fetch article details
-                // Use key lookup if possible or ID. The endpoint supports both but usually ID for editing.
-                const res = await fetch(`${API_URL}/articles/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                // Fetch full article details via editor endpoint (works for pending/rejected/drafts too)
+                const res = await fetch(`${API_URL}/editor/articles/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) throw new Error('Makale detayları alınamadı');
                 const article = await res.json();
 
@@ -4084,9 +4083,15 @@
             }
         }
 
-        function openReview(id) {
+        async function openReview(id) {
             try {
-                const article = allArticles.find(a => a.id == id);
+                let article = allArticles.find(a => a.id == id);
+                if (!article || !article.content) {
+                    const res = await fetch(`${API_URL}/editor/articles/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        article = await res.json();
+                    }
+                }
                 if (!article) {
                     showToast('Makale verisi bulunamadı!', 'error');
                     return;
@@ -4462,9 +4467,17 @@
             });
         }
 
-        function openExperimentReview(id) {
+        async function openExperimentReview(id) {
             try {
-                const exp = allExperiments.find(e => e.id == id);
+                let exp = allExperiments.find(e => e.id == id);
+                if (!exp || !exp.procedure_steps) {
+                    const res = await fetch(`${API_URL}/experiments/by-id/${id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        exp = await res.json();
+                    }
+                }
                 if (!exp) {
                     showToast('Deney verisi bulunamadı!', 'error');
                     return;

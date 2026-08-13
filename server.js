@@ -615,7 +615,9 @@ app.get('/preview-article/:id', async (req, res, next) => {
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
                 let authorHtml = authors.map(a => `<a href="#" style="margin-right: 10px; text-decoration: none; color: inherit;"><i class="ph ph-user"></i> ${a.fullname}</a>`).join('');
-                html = html.replace(/<span\s+id="detail-author">.*?<\/span>/s, `<span id="detail-author">${authorHtml}</span>`);
+                // Disable AdSense and Analytics scripts in editor preview mode for instant loading
+                html = html.replace(/<script[^>]*adsbygoogle[^>]*><\/script>/gi, '');
+                html = html.replace(/<script[^>]*googletagmanager[^>]*><\/script>/gi, '');
 
                 res.send(html);
 
@@ -3515,19 +3517,36 @@ app.get('/api/experiments/by-id/:id', authenticateToken, async (req, res) => {
 
 // === EXPERIMENT EDITOR API'S ===
 
-// 1. Pending Experiments
+// 1. Pending Experiments (Optimized query with batched co-authors)
 app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT e.*, u.fullname as author_name 
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
             WHERE e.status = 'pending' AND e.deleted_at IS NULL
             ORDER BY e.created_at ASC
         `);
+
+        const expIds = rows.map(r => r.id);
+        let coAuthorsMap = {};
+        if (expIds.length > 0) {
+            const [coRows] = await pool.query(`
+                SELECT ea.experiment_id, u.id, u.fullname, u.username
+                FROM experiment_authors ea
+                JOIN users u ON ea.user_id = u.id
+                WHERE ea.experiment_id IN (?)
+                ORDER BY ea.order_index ASC
+            `, [expIds]);
+            coRows.forEach(c => {
+                if (!coAuthorsMap[c.experiment_id]) coAuthorsMap[c.experiment_id] = [];
+                coAuthorsMap[c.experiment_id].push(c);
+            });
+        }
+
         for (let row of rows) {
-            row.co_authors = await getExperimentAuthors(pool, row.id);
+            row.co_authors = coAuthorsMap[row.id] || [];
         }
         res.json(rows);
     } catch (e) {
@@ -3535,12 +3554,12 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
     }
 });
 
-// 2. History of Experiments (Published or Rejected)
+// 2. History of Experiments (Published or Rejected - Summary fields)
 app.get('/api/editor/experiments/history', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT e.*, u.fullname as author_name 
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
             WHERE e.status IN ('published', 'rejected') AND e.deleted_at IS NULL
@@ -3919,6 +3938,27 @@ app.get('/api/editor/trash', authenticateToken, async (req, res) => {
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Editor endpoint to get full article details by ID regardless of status
+app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.id = ?
+        `, [req.params.id]);
+
+        if (rows.length === 0) return res.status(404).json({ message: 'Makale bulunamadı.' });
+
+        const article = rows[0];
+        article.authors = await getArticleAuthors(pool, article.id);
+        res.json(article);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 
