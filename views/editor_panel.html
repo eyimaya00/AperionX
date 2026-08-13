@@ -4085,6 +4085,7 @@
 
         async function openReview(id) {
             try {
+                const token = localStorage.getItem('token');
                 let article = allArticles.find(a => a.id == id);
                 if (!article || !article.content) {
                     const res = await fetch(`${API_URL}/editor/articles/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -4125,7 +4126,6 @@
                     `;
                 }
 
-                const token = localStorage.getItem('token');
                 let html = `
                     ${rejectionHtml}
                     ${pdfBannerHtml}
