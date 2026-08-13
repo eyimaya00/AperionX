@@ -2397,12 +2397,14 @@
 
         async function loadAnalytics(silent = false) {
             try {
-                // Fetch stats
-                const res = await fetch(`${API_URL}/author/analytics`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (res.ok) {
-                    const data = await res.json();
+                // Fetch stats and comments in parallel
+                const [resAnalytics, resComments] = await Promise.all([
+                    fetch(`${API_URL}/author/analytics`, { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch(`${API_URL}/author/comments`, { headers: { 'Authorization': 'Bearer ' + token } })
+                ]);
+
+                if (resAnalytics.ok) {
+                    const data = await resAnalytics.json();
                     analyticsData = data.articles;
                     document.getElementById('analytics-total-likes').textContent = data.totalLikes;
                     document.getElementById('analytics-total-views').textContent = data.totalViews;
@@ -2411,17 +2413,13 @@
                     if (commentsEl) commentsEl.textContent = data.totalComments;
 
                     if (!silent) renderAnalyticsTable(analyticsData);
-                } else if (res.status === 401 || res.status === 403) {
+                } else if (resAnalytics.status === 401 || resAnalytics.status === 403) {
                     localStorage.removeItem('token');
                     window.location.href = '/?login=true';
                 }
 
-                // Fetch recent comments
-                const resC = await fetch(`${API_URL}/author/comments`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (resC.ok) {
-                    commentsData = await resC.json();
+                if (resComments.ok) {
+                    commentsData = await resComments.json();
                 }
 
             } catch (e) { console.error('Analytics load error', e); }

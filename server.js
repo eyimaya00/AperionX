@@ -3228,11 +3228,12 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
 });
 
 // === EXPERIMENTS AUTHOR API'S ===
-// 1. Get Author's Experiments
+// 1. Get Author's Experiments (Summary fields for fast loading)
 app.get('/api/author/experiments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT DISTINCT e.* FROM experiments e
+            SELECT DISTINCT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt
+            FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.deleted_at IS NULL
             ORDER BY e.created_at DESC
@@ -3769,50 +3770,30 @@ app.put('/api/articles/restore/:id', authenticateToken, async (req, res) => {
 
 
 
-// Author Stats Endpoint
+// Author Stats Endpoint (Optimized with parallel SQL execution)
 app.get('/api/author/stats', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        const [published] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]);
-        const [pending] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending'", [userId]);
 
-        // Sum views
-        const [views] = await pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]);
-
-        // Sum likes
-        const [likes] = await pool.query(`
-            SELECT COUNT(l.id) as count 
-            FROM likes l 
-            JOIN articles a ON l.article_id = a.id 
-            WHERE a.author_id = ?
-        `, [userId]);
-
-        // Sum comments
-        const [comments] = await pool.query(`
-            SELECT COUNT(c.id) as count 
-            FROM comments c 
-            JOIN articles a ON c.article_id = a.id 
-            WHERE a.author_id = ?
-        `, [userId]);
-
-        // Experiment stats
-        const [expPublishedRes] = await pool.query(`
-            SELECT COUNT(DISTINCT e.id) as count FROM experiments e
-            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
-        `, [userId, userId]);
-        const [expPendingRes] = await pool.query(`
-            SELECT COUNT(DISTINCT e.id) as count FROM experiments e
-            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-            WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'pending' AND e.deleted_at IS NULL
-        `, [userId, userId]);
-        const [expViewsRes] = await pool.query(`
-            SELECT SUM(views) as count FROM (
-                SELECT DISTINCT e.id, e.views FROM experiments e
-                LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
-                WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
-            ) t
-        `, [userId, userId]);
+        const [
+            [published],
+            [pending],
+            [views],
+            [likes],
+            [comments],
+            [expPublishedRes],
+            [expPendingRes],
+            [expViewsRes]
+        ] = await Promise.all([
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending'", [userId]),
+            pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
+            pool.query("SELECT COUNT(l.id) as count FROM likes l JOIN articles a ON l.article_id = a.id WHERE a.author_id = ?", [userId]),
+            pool.query("SELECT COUNT(c.id) as count FROM comments c JOIN articles a ON c.article_id = a.id WHERE a.author_id = ?", [userId]),
+            pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL", [userId, userId]),
+            pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'pending' AND e.deleted_at IS NULL", [userId, userId]),
+            pool.query("SELECT SUM(views) as count FROM (SELECT DISTINCT e.id, e.views FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL) t", [userId, userId])
+        ]);
 
         res.json({
             published: published[0].count,
