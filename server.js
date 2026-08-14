@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '.env') });
 const pool = require('./config/db');
+const { stampPdfFile } = require('./utils/stamp_pdf');
 
 
 
@@ -1037,6 +1038,11 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 replaceMeta('image', safeImg);
                 replaceMeta('og:url', safeUrl);
 
+                // Add Preload for Hero Image
+                if (experiment.image_url) {
+                    html = html.replace('</head>', `<link rel="preload" as="image" href="${safeImg}" fetchpriority="high">\n</head>`);
+                }
+
                 // Add Experiment Published Date Meta
                 if (!html.includes('article:published_time')) {
                     html = html.replace('</head>', `<meta property="article:published_time" content="${isoDate}">\n</head>`);
@@ -1155,9 +1161,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     html = html.replace('<div id="video-container" style="display: none; margin-bottom: 30px;">', '<div id="video-container" style="margin-bottom: 30px;">');
                 }
 
-                res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-                res.set('Pragma', 'no-cache');
-                res.set('Expires', '0');
+                res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=86400');
                 res.send(html);
 
             } catch (innerErr) {
@@ -2026,7 +2030,9 @@ const optimizeImageMiddleware = async (req, res, next) => {
         }
 
         for (const file of filesToOptimize) {
-            if (file.mimetype && file.mimetype.startsWith('image/') && file.mimetype !== 'image/gif') {
+            if (file.mimetype === 'application/pdf' || (file.path && file.path.toLowerCase().endsWith('.pdf'))) {
+                await stampPdfFile(file.path);
+            } else if (file.mimetype && file.mimetype.startsWith('image/') && file.mimetype !== 'image/gif') {
                 const filePath = file.path;
                 const tempPath = filePath + '.tmp';
                 const metadata = await sharp(filePath).metadata();
