@@ -796,6 +796,10 @@
                 <i class="ph ph-users"></i>
                 <span>Kullanıcı Yönetimi</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('change-author-password-section', this); loadAuthorsForPasswordReset();">
+                <i class="ph ph-key"></i>
+                <span>Yazar Şifre Değiştir</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
                 <i class="ph ph-envelope-simple"></i>
                 <span>E-posta Şablonları</span>
@@ -2462,6 +2466,98 @@
                     </thead>
                     <tbody id="users-table-body"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Yazar Şifre Değiştirme Sekmesi -->
+        <div id="change-author-password-section" class="section">
+            <div class="header-row" style="margin-bottom: 24px;">
+                <div>
+                    <h1 class="page-title" style="margin-bottom: 6px;"><i class="ph ph-key" style="color: var(--primary-color, #6366f1);"></i> Yazar Şifre Değiştirme</h1>
+                    <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Yazarların ve panel kullanıcılarının hesap şifrelerini doğrudan ve güvenli bir şekilde güncelleyin.</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; align-items: start;">
+                <!-- Form Kartı -->
+                <div class="card" style="padding: 24px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                        <i class="ph ph-lock-key" style="font-size: 1.5rem; color: #6366f1;"></i>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b;">Şifre Yenileme Formu</h3>
+                    </div>
+
+                    <form id="authorPasswordResetForm" onsubmit="submitAuthorPasswordReset(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                Yazar / Kullanıcı E-postası <span style="color: #ef4444;">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <i class="ph ph-envelope" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="email" id="reset_author_email" class="form-control" list="authors-email-datalist" placeholder="yazar@example.com" required style="padding-left: 40px;">
+                            </div>
+                            <datalist id="authors-email-datalist"></datalist>
+                            <small style="color: #94a3b8; font-size: 0.78rem; display: block; margin-top: 4px;">Sistemde kayıtlı yazarın e-posta adresini girin veya listeden seçin.</small>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label style="font-size: 0.88rem; font-weight: 600; color: #475569; margin: 0;">
+                                    Yeni Şifre <span style="color: #ef4444;">*</span>
+                                </label>
+                                <button type="button" onclick="generateRandomPassword()" style="background: none; border: none; color: #6366f1; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                    <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
+                                </button>
+                            </div>
+                            <div style="position: relative;">
+                                <i class="ph ph-lock" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="password" id="reset_author_password" class="form-control" placeholder="Yeni şifreyi girin (en az 6 karakter)" minlength="6" required style="padding-left: 40px; padding-right: 40px;">
+                                <button type="button" onclick="togglePasswordVisibility('reset_author_password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem;">
+                                    <i class="ph ph-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="reset-pw-status-msg" style="display: none; padding: 12px; border-radius: 8px; font-size: 0.88rem;"></div>
+
+                        <button type="submit" id="btn-submit-author-pw" class="btn btn-primary" style="padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
+                            <i class="ph ph-check-circle" style="font-size: 1.2rem;"></i>
+                            <span>Şifreyi Değiştir</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Hızlı Seçim Listesi Kartı -->
+                <div class="card" style="padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="ph ph-users-three" style="font-size: 1.5rem; color: #10b981;"></i>
+                            <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b;">Yazarlar Listesi</h3>
+                        </div>
+                        <span id="authors-count-badge" class="badge" style="background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">0 Yazar</span>
+                    </div>
+
+                    <div style="margin-bottom: 14px; position: relative;">
+                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        <input type="text" id="search-author-reset-input" onkeyup="filterAuthorResetList()" class="form-control" placeholder="Yazar veya e-posta ara..." style="padding-left: 34px; font-size: 0.88rem;">
+                    </div>
+
+                    <div style="max-height: 380px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                            <thead style="position: sticky; top: 0; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                <tr style="text-align: left; color: #64748b;">
+                                    <th style="padding: 10px 12px;">Yazar</th>
+                                    <th style="padding: 10px 12px;">Rol</th>
+                                    <th style="padding: 10px 12px; text-align: right;">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="authors-reset-table-body">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 20px; color: #94a3b8;">Yazarlar yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -4952,6 +5048,7 @@
                 if (sectionId === 'tool-analytics-section') loadToolStats();
                 if (sectionId === 'team-activity') loadTeamActivity();
                 if (sectionId === 'author-consents') loadAuthorConsents();
+                if (sectionId === 'change-author-password-section') loadAuthorsForPasswordReset();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -4962,6 +5059,200 @@
                 document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
                 linkEl.classList.add('active');
             }
+        };
+
+        // --- YAZAR ŞİFRE DEĞİŞTİRME MANTIĞI ---
+        let authorsResetList = [];
+
+        async function loadAuthorsForPasswordReset() {
+            const tbody = document.getElementById('authors-reset-table-body');
+            const datalist = document.getElementById('authors-email-datalist');
+            const countBadge = document.getElementById('authors-count-badge');
+            
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 16px; color: #94a3b8;"><i class="ph ph-spinner spinner"></i> Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const users = await res.json();
+                
+                // Filter authors, editors, admins (and user accounts)
+                authorsResetList = users.filter(u => u.role === 'author' || u.role === 'editor' || u.role === 'admin' || u.role === 'user');
+                
+                if (countBadge) countBadge.innerText = `${authorsResetList.length} Kullanıcı / Yazar`;
+
+                // Update datalist for auto-complete
+                if (datalist) {
+                    datalist.innerHTML = users.map(u => `<option value="${escapeHtml(u.email)}">${escapeHtml(u.fullname)} (${u.role || 'üye'})</option>`).join('');
+                }
+
+                renderAuthorResetList(authorsResetList);
+            } catch (e) {
+                console.error('[LOAD-AUTHORS-RESET-ERROR]', e);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 16px; color: #ef4444;">Yüklenemedi: ${escapeHtml(e.message)}</td></tr>`;
+            }
+        }
+
+        function renderAuthorResetList(list) {
+            const tbody = document.getElementById('authors-reset-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 16px; color: #94a3b8;">Yazar bulunamadı.</td></tr>';
+                return;
+            }
+
+            list.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #f1f5f9';
+
+                let roleBadgeColor = '#64748b';
+                let roleName = 'Üye';
+                if (u.role === 'author') { roleBadgeColor = '#f43f5e'; roleName = 'Yazar'; }
+                else if (u.role === 'editor') { roleBadgeColor = '#10b981'; roleName = 'Editör'; }
+                else if (u.role === 'admin') { roleBadgeColor = '#6366f1'; roleName = 'Admin'; }
+
+                tr.innerHTML = `
+                    <td style="padding: 10px 12px;">
+                        <div style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">${escapeHtml(u.fullname || 'İsimsiz')}</div>
+                        <div style="color: #64748b; font-size: 0.78rem;">${escapeHtml(u.email)}</div>
+                    </td>
+                    <td style="padding: 10px 12px;">
+                        <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: ${roleBadgeColor}15; color: ${roleBadgeColor}; border: 1px solid ${roleBadgeColor}30;">
+                            ${roleName}
+                        </span>
+                    </td>
+                    <td style="padding: 10px 12px; text-align: right;">
+                        <button type="button" onclick="selectAuthorForReset('${escapeHtml(u.email)}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-radius: 6px;">
+                            <i class="ph ph-arrow-left"></i> Seç
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAuthorResetList() {
+            const searchInput = document.getElementById('search-author-reset-input');
+            if (!searchInput) return;
+            const query = searchInput.value.toLowerCase().trim();
+            const filtered = authorsResetList.filter(u => 
+                (u.fullname && u.fullname.toLowerCase().includes(query)) || 
+                (u.email && u.email.toLowerCase().includes(query))
+            );
+            renderAuthorResetList(filtered);
+        }
+
+        function selectAuthorForReset(email) {
+            const emailInput = document.getElementById('reset_author_email');
+            const pwInput = document.getElementById('reset_author_password');
+            if (emailInput) {
+                emailInput.value = email;
+                emailInput.focus();
+            }
+            if (pwInput) pwInput.focus();
+            showToast(`${email} e-posta adresi forma yüklendi.`, 'info');
+        }
+
+        function generateRandomPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$%';
+            let randomPw = '';
+            for (let i = 0; i < 10; i++) {
+                randomPw += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const pwInput = document.getElementById('reset_author_password');
+            if (pwInput) {
+                pwInput.type = 'text';
+                pwInput.value = randomPw;
+                pwInput.focus();
+            }
+            showToast(`Güçlü şifre üretildi: ${randomPw}`, 'success');
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'ph ph-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'ph ph-eye';
+            }
+        }
+
+        async function submitAuthorPasswordReset(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('reset_author_email');
+            const pwInput = document.getElementById('reset_author_password');
+            const submitBtn = document.getElementById('btn-submit-author-pw');
+            const statusMsg = document.getElementById('reset-pw-status-msg');
+
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = pwInput ? pwInput.value : '';
+
+            if (!email || !password) {
+                return showToast('Lütfen e-posta adresi ve yeni şifreyi giriniz.', 'error');
+            }
+
+            if (password.length < 6) {
+                return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ph ph-spinner spinner"></i> Güncelleniyor...';
+            }
+
+            if (statusMsg) {
+                statusMsg.style.display = 'none';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Şifre başarıyla güncellendi.', 'success');
+                    if (statusMsg) {
+                        statusMsg.style.display = 'block';
+                        statusMsg.style.background = '#dcfce7';
+                        statusMsg.style.color = '#166534';
+                        statusMsg.style.border = '1px solid #bbf7d0';
+                        statusMsg.innerHTML = `<i class="ph ph-check-circle" style="font-size: 1.1rem; vertical-align: middle;"></i> <strong>Başarılı:</strong> ${escapeHtml(data.message)}`;
+                    }
+                    if (pwInput) pwInput.value = '';
+                } else {
+                    const errorMsg = data.error || 'Şifre güncellenemedi.';
+                    showToast(errorMsg, 'error');
+                    if (statusMsg) {
+                        statusMsg.style.display = 'block';
+                        statusMsg.style.background = '#fee2e2';
+                        statusMsg.style.color = '#991b1b';
+                        statusMsg.style.border = '1px solid #fecaca';
+                        statusMsg.innerHTML = `<i class="ph ph-warning-circle" style="font-size: 1.1rem; vertical-align: middle;"></i> <strong>Hata:</strong> ${escapeHtml(errorMsg)}`;
+                    }
+                }
+            } catch (e) {
+                console.error('[SUBMIT-AUTHOR-PW-ERROR]', e);
+                showToast('Sunucu bağlantı hatası: ' + e.message, 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ph ph-check-circle" style="font-size: 1.2rem;"></i> <span>Şifreyi Değiştir</span>';
+                }
+            }
+        }
         }
 
         // === MAINTENANCE MODE LOGIC ===

@@ -2496,6 +2496,52 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'User deleted' });
 });
 
+// Admin: Change / Reset Author or User Password
+app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { email, password } = req.body;
+
+    if (!email || !email.trim() || !password) {
+        return res.status(400).json({ error: 'Lütfen e-posta adresi ve yeni şifreyi giriniz.' });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Yeni şifre en az 6 karakter olmalıdır.' });
+    }
+
+    try {
+        const trimmedEmail = email.trim();
+        const [users] = await pool.query(
+            'SELECT id, fullname, email, role FROM users WHERE LOWER(email) = LOWER(?)',
+            [trimmedEmail]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'Bu e-posta adresine ait yazar/kullanıcı bulunamadı.' });
+        }
+
+        const targetUser = users[0];
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, targetUser.id]);
+
+        return res.json({
+            success: true,
+            message: `${targetUser.fullname} (${targetUser.email}) kullanıcısının şifresi başarıyla güncellendi.`,
+            user: {
+                id: targetUser.id,
+                fullname: targetUser.fullname,
+                email: targetUser.email,
+                role: targetUser.role
+            }
+        });
+    } catch (e) {
+        console.error('[ADMIN-CHANGE-PASSWORD-ERROR]', e);
+        return res.status(500).json({ error: 'Şifre güncellenirken sunucu hatası oluştu: ' + e.message });
+    }
+});
+
+
 
 
 app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
