@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
+     crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="İnteraktif Mendel Genetiği ve Soyağacı (Pedigree) Simülatörü. Monohibrit ve dihibrit Punnett karesi oluşturun, genotip ve fenotip oranlarını hesaplayın.">
+    <meta name="keywords" content="mendel genetiği, punnett karesi, dihibrit çaprazlama, monohibrit, soyağacı analizi, pedigree, renk körlüğü, kan grupları, genetik simülasyonu">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/mendel-lab">
+    <meta property="og:title" content="Mendel Genetiği ve Soyağacı Laboratuvarı - AperionX">
+    <meta property="og:description" content="Sanal Genetik Laboratuvarı. İnteraktif Punnett karesi hesaplama, mendel çaprazlamaları ve soyağacı (pedigree) analizi.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+    <link rel="canonical" href="https://aperionx.com/mendel-lab" />
+
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Mendel Genetiği ve Soyağacı (Pedigree) Laboratuvarı | AperionX",
+      "description": "Sanal Genetik Laboratuvarı. İnteraktif Punnett karesi hesaplama, mendel çaprazlamaları ve soyağacı (pedigree) analizi.",
+      "url": "https://aperionx.com/mendel-lab",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "All"
+    }
+    </script>
+
+    <title>Mendel Genetiği ve Soyağacı Laboratuvarı | AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=281">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .lab-container {
+            padding: 90px 0 60px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .lab-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            width: 95%;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        .lab-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        [data-theme="dark"] .lab-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .lab-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .lab-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary, #64748b);
+            line-height: 1.6;
+        }
+
+        /* --- LAB TABS --- */
+        .lab-tabs {
+            display: flex;
+            gap: 12px;
+            background: rgba(99, 102, 241, 0.06);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+
+        [data-theme="dark"] .lab-tabs {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-color);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn.active {
+            background: #6366f1;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* --- CONTROLS ROW --- */
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        [data-theme="dark"] .controls-row {
+            background: rgba(15, 23, 42, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .select-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .select-input:focus {
+            border-color: #6366f1;
+        }
+
+        /* --- PUNNETT GRID DISPLAY --- */
+        .punnett-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+
+        .punnett-grid-container {
+            display: inline-grid;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.04);
+            border-radius: 24px;
+            border: 2px dashed rgba(99, 102, 241, 0.2);
+            position: relative;
+        }
+
+        .punnett-cell {
+            width: 90px;
+            height: 90px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.15rem;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            background: var(--bg-color);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .punnett-cell.header-cell {
+            background: rgba(99, 102, 241, 0.12);
+            color: #6366f1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .punnett-cell.result-cell {
+            cursor: pointer;
+        }
+
+        .punnett-cell.result-cell:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+            z-index: 2;
+        }
+
+        .cell-genotype {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            color: var(--text-color);
+        }
+
+        .cell-phenotype-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
+        /* 4x4 Grid scaling */
+        .grid-4x4 .punnett-cell {
+            width: 70px;
+            height: 70px;
+            font-size: 0.95rem;
+        }
+        .grid-4x4 .cell-genotype {
+            font-size: 1rem;
+        }
+
+        /* --- STATS & BADGES --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        [data-theme="dark"] .stat-card {
+            background: rgba(15, 23, 42, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            background: var(--bg-color);
+            border-radius: 10px;
+        }
+
+        .stat-progress-bar {
+            height: 6px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .stat-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* --- PEDIGREE CHART --- */
+        .pedigree-canvas-card {
+            background: var(--bg-color);
+            border-radius: 20px;
+            padding: 30px 20px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            overflow-x: auto;
+        }
+
+        .pedigree-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 36px;
+            width: 100%;
+            min-width: 600px;
+        }
+
+        .pedigree-generation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            position: relative;
+        }
+
+        .pedigree-couple {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        .pedigree-couple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 36px;
+            right: 36px;
+            height: 2px;
+            background: #6366f1;
+            z-index: 1;
+        }
+
+        .pedigree-node {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            border: 3px solid #6366f1;
+            background: var(--bg-color);
+            z-index: 2;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .pedigree-node.male {
+            border-radius: 8px; /* Male = Square */
+        }
+
+        .pedigree-node.female {
+            border-radius: 50%; /* Female = Circle */
+        }
+
+        .pedigree-node.affected {
+            background: #6366f1 !important;
+            color: #ffffff !important;
+        }
+
+        .pedigree-node.carrier {
+            background: linear-gradient(90deg, #6366f1 50%, var(--bg-color) 50%) !important;
+        }
+
+        .pedigree-node:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 18px rgba(99, 102, 241, 0.5);
+        }
+
+        .pedigree-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+            padding: 12px 20px;
+            background: rgba(99, 102, 241, 0.06);
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-shape {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #6366f1;
+        }
+
+        .legend-shape.square { border-radius: 3px; }
+        .legend-shape.circle { border-radius: 50%; }
+        .legend-shape.filled { background: #6366f1; }
+        .legend-shape.half { background: linear-gradient(90deg, #6366f1 50%, transparent 50%); }
+
+        /* --- SIDEBAR INFO PANEL --- */
+        .info-panel-section {
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+
+        .info-header {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #6366f1;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-body {
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: var(--text-secondary, #64748b);
+        }
+
+        .info-list {
+            margin-top: 10px;
+            padding-left: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .back-to-tools-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6366f1;
+            font-weight: 700;
+            text-decoration: none;
+            margin-bottom: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .back-to-tools-btn:hover {
+            transform: translateX(-4px);
+        }
+
+        @media (max-width: 992px) {
+            .lab-grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/articles" class="nav-link">Makaleler</a>
+                <a href="/experiments" class="nav-link">Deneyler</a>
+                <a href="/tools" class="nav-link active">Araçlar</a>
+                <a href="/about" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
+
+                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Lab Container -->
+    <main class="lab-container">
+        <div class="lab-grid-layout">
+            
+            <!-- Left Column: Interactive Simulation Card -->
+            <div class="lab-card">
+                <div>
+                    <a href="/tools" class="back-to-tools-btn">
+                        <i class="ph-bold ph-arrow-left"></i> Tüm Araçlara Dön
+                    </a>
+                    <h1 class="lab-title">Mendel Genetiği & Soyağacı Labı</h1>
+                    <p class="lab-subtitle">İnteraktif Çaprazlama & Pedigree Simülatörü. Monohibrit/dihibrit Punnett karesi oluşturun, genotip ve fenotip oranlarını hesaplayın; renk körlüğü ve kan grupları için soyağacı analizi yapın.</p>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="lab-tabs">
+                    <button class="tab-btn active" onclick="switchLabTab('punnett-tab')">
+                        <i class="ph-bold ph-grid-four"></i> Punnett Karesi
+                    </button>
+                    <button class="tab-btn" onclick="switchLabTab('sex-linked-tab')">
+                        <i class="ph-bold ph-dna"></i> Eşeyli Kalıtım & Kan Grupları
+                    </button>
+                    <button class="tab-btn" onclick="switchLabTab('pedigree-tab')">
+                        <i class="ph-bold ph-tree-structure"></i> Soyağacı (Pedigree)
+                    </button>
+                </div>
+
+                <!-- TAB 1: PUNNETT SQUARE SIMULATOR -->
+                <div id="punnett-tab" class="tab-content active">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-sliders"></i> Çaprazlama Tipi</label>
+                            <select id="cross-type" class="select-input" onchange="renderPunnett()">
+                                <option value="monohybrid">Monohibrit (2x2 Grid - Tek Karakter)</option>
+                                <option value="dihybrid">Dihibrit (4x4 Grid - İki Karakter)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-gender-female"></i> Anne Genotipi (P1)</label>
+                            <select id="mother-genotype" class="select-input" onchange="renderPunnett()">
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-gender-male"></i> Baba Genotipi (P2)</label>
+                            <select id="father-genotype" class="select-input" onchange="renderPunnett()">
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Punnett Grid View -->
+                    <div class="punnett-wrapper">
+                        <div id="punnett-grid-container" class="punnett-grid-container">
+                            <!-- Dynamic Punnett Cells rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Calculated Statistics -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-title">
+                                <i class="ph-bold ph-chart-pie-slice"></i> Genotip Oranları
+                            </div>
+                            <div id="genotype-stats" class="stat-item-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-card-title">
+                                <i class="ph-bold ph-eye"></i> Fenotip Oranları
+                            </div>
+                            <div id="phenotype-stats" class="stat-item-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: SEX-LINKED & BLOOD GROUPS -->
+                <div id="sex-linked-tab" class="tab-content">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-atom"></i> Özellik Türü</label>
+                            <select id="sex-trait-type" class="select-input" onchange="renderSexLinked()">
+                                <option value="colorblind">X'e Bağlı Çekinik: Renk Körlüğü (R/r)</option>
+                                <option value="hemophilia">X'e Bağlı Çekinik: Hemofili (H/h)</option>
+                                <option value="blood">Kan Grupları (IA, IB, i)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-gender-female"></i> Anne (Dişi)</label>
+                            <select id="sex-mother" class="select-input" onchange="renderSexLinked()">
+                                <!-- Dynamic -->
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-gender-male"></i> Baba (Erkek)</label>
+                            <select id="sex-father" class="select-input" onchange="renderSexLinked()">
+                                <!-- Dynamic -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="punnett-wrapper">
+                        <div id="sex-punnett-container" class="punnett-grid-container">
+                            <!-- Dynamic sex-linked Punnett -->
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-title">
+                                <i class="ph-bold ph-gender-female"></i> Kız Çocuklarında Olasılıklar
+                            </div>
+                            <div id="female-offspring-stats" class="stat-item-list"></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-title">
+                                <i class="ph-bold ph-gender-male"></i> Erkek Çocuklarında Olasılıklar
+                            </div>
+                            <div id="male-offspring-stats" class="stat-item-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: PEDIGREE (SOYAĞACI) CHART & SOLVER -->
+                <div id="pedigree-tab" class="tab-content">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label"><i class="ph-bold ph-tree-structure"></i> Soyağacı Senaryosu</label>
+                            <select id="pedigree-scenario" class="select-input" onchange="renderPedigree()">
+                                <option value="autosomal-recessive">Otozomal Çekinik (Ör: Albinizm / Kistik Fibrozis)</option>
+                                <option value="autosomal-dominant">Otozomal Baskın (Ör: Huntington / Polidaktili)</option>
+                                <option value="x-recessive">X'e Bağlı Çekinik (Ör: Renk Körlüğü)</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="margin-top: 22px;" onclick="checkPedigreeQuiz()">
+                            <i class="ph-bold ph-check-circle"></i> Kalıtım Tipini Teşhis Et
+                        </button>
+                    </div>
+
+                    <div class="pedigree-canvas-card">
+                        <div class="pedigree-legend">
+                            <div class="legend-item"><div class="legend-shape square"></div> Erkek</div>
+                            <div class="legend-item"><div class="legend-shape circle"></div> Dişi</div>
+                            <div class="legend-item"><div class="legend-shape square filled"></div> Hasta / Etkilenmiş Erkek</div>
+                            <div class="legend-item"><div class="legend-shape circle filled"></div> Hasta / Etkilenmiş Dişi</div>
+                            <div class="legend-item"><div class="legend-shape circle half"></div> Taşıyıcı Dişi</div>
+                        </div>
+
+                        <div id="pedigree-tree-container" class="pedigree-tree">
+                            <!-- Dynamic Pedigree Tree Rendered Here -->
+                        </div>
+                    </div>
+
+                    <div id="pedigree-feedback" class="info-panel-section" style="display:none;">
+                        <div class="info-header" id="pedigree-feedback-title"><i class="ph-bold ph-info"></i> Analiz Sonucu</div>
+                        <div class="info-body" id="pedigree-feedback-body"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Scientific Information Panel -->
+            <div class="lab-card">
+                <div class="info-panel-section">
+                    <div class="info-header">
+                        <i class="ph-bold ph-book-open"></i> Mendel İlkeleri
+                    </div>
+                    <div class="info-body">
+                        Gregor Mendel'in 1865 yılında bezelye bitkileriyle yaptığı deneyler sonucu keşfettiği temel kalıtım yasaları:
+                        <ul class="info-list">
+                            <li><strong>Baskınlık (Dominantlık) Yasası:</strong> Karşıt karakterli iki homozigot bireyin çaprazlanmasında $F_1$ dölü baskın geni ($Y$) fenotipinde gösterir.</li>
+                            <li><strong>Ayrılma (Segregasyon) Yasası:</strong> Bir karaktere ait alel genler gamet oluşumu sırasında birbirinden ayrılarak farklı gametlere gider.</li>
+                            <li><strong>Bağımsız Dağılım Yasası:</strong> İki veya daha fazla karakterin alelleri gametlere tamamen bağımsız olarak dağılır (Dihibrit $9:3:3:1$).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-panel-section">
+                    <div class="info-header">
+                        <i class="ph-bold ph-lightbulb"></i> Genetik Semboller Rehberi
+                    </div>
+                    <div class="info-body">
+                        <ul class="info-list">
+                            <li><strong>Homozigot Baskın ($YY$):</strong> Her iki alel de baskın.</li>
+                            <li><strong>Heterozigot ($Yy$):</strong> Bir baskın, bir çekinik alel (Taşıyıcı).</li>
+                            <li><strong>Homozigot Çekinik ($yy$):</strong> Çekinik fenotipin ortaya çıktığı durum.</li>
+                            <li><strong>$X^R X^r$:</strong> Renk körlüğü açısından taşıyıcı dişi.</li>
+                            <li><strong>$X^r Y$:</strong> Renk körü erkek (Erkeklerde X geni tek olduğu için taşıyıcılık olmaz).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-panel-section">
+                    <div class="info-header">
+                        <i class="ph-bold ph-tree-structure"></i> Soyağacı Analizi İpuçları
+                    </div>
+                    <div class="info-body">
+                        * Hasta anne/babanın çocuklarında hastalık görülmüyorsa çekinik geni araştırın.<br>
+                        * Erkeklerde X'e bağlı çekinik hastalıklar, hastalığın anadan oğula geçmesi ile tespit edilir.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <div id="global-footer"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <script defer src="/script_v105.js?v=223"></script>
+
+    <!-- LAB SIMULATOR LOGIC SCRIPT -->
+    <script>
+        const TOOL_NAME = 'mendel-lab';
+
+        // --- TAB SWITCHING ---
+        function switchLabTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'punnett-tab') renderPunnett();
+            else if (tabId === 'sex-linked-tab') renderSexLinked();
+            else if (tabId === 'pedigree-tab') renderPedigree();
+        }
+
+        // --- MONOHYBRID & DIHYBRID DATA ---
+        const monoGenotypes = [
+            { val: 'YY', label: 'Homozigot Baskın (YY - Sarı)' },
+            { val: 'Yy', label: 'Heterozigot (Yy - Sarı)' },
+            { val: 'yy', label: 'Homozigot Çekinik (yy - Yeşil)' }
+        ];
+
+        const diGenotypes = [
+            { val: 'SsYy', label: 'Çift Heterozigot (SsYy)' },
+            { val: 'SSYY', label: 'Homozigot Dominant (SSYY)' },
+            { val: 'SSyy', label: 'Yuvarlak-Yeşil (SSyy)' },
+            { val: 'ssYY', label: 'Buruşuk-Sarı (ssYY)' },
+            { val: 'ssyy', label: 'Buruşuk-Yeşil (ssyy)' }
+        ];
+
+        function populateSelects() {
+            const crossType = document.getElementById('cross-type').value;
+            const motherSelect = document.getElementById('mother-genotype');
+            const fatherSelect = document.getElementById('father-genotype');
+
+            const list = crossType === 'monohybrid' ? monoGenotypes : diGenotypes;
+
+            motherSelect.innerHTML = list.map(g => `<option value="${g.val}">${g.label}</option>`).join('');
+            fatherSelect.innerHTML = list.map(g => `<option value="${g.val}">${g.label}</option>`).join('');
+
+            if (crossType === 'monohybrid') {
+                motherSelect.value = 'Yy';
+                fatherSelect.value = 'Yy';
+            } else {
+                motherSelect.value = 'SsYy';
+                fatherSelect.value = 'SsYy';
+            }
+        }
+
+        function renderPunnett() {
+            const crossType = document.getElementById('cross-type').value;
+            const mGeno = document.getElementById('mother-genotype').value;
+            const fGeno = document.getElementById('father-genotype').value;
+            const container = document.getElementById('punnett-grid-container');
+
+            if (!mGeno || !fGeno) {
+                populateSelects();
+                return renderPunnett();
+            }
+
+            if (crossType === 'monohybrid') {
+                container.className = 'punnett-grid-container';
+                container.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
+                const mGametes = [mGeno[0], mGeno[1]];
+                const fGametes = [fGeno[0], fGeno[1]];
+
+                let html = `
+                    <div class="punnett-cell header-cell">♀ \\ ♂</div>
+                    <div class="punnett-cell header-cell">${fGametes[0]}</div>
+                    <div class="punnett-cell header-cell">${fGametes[1]}</div>
+                `;
+
+                const results = [];
+                mGametes.forEach(g1 => {
+                    html += `<div class="punnett-cell header-cell">${g1}</div>`;
+                    fGametes.forEach(g2 => {
+                        const combo = formatAlleles(g1 + g2);
+                        results.push(combo);
+                        const pheno = getPhenotypeName(combo);
+                        html += `
+                            <div class="punnett-cell result-cell">
+                                <span class="cell-genotype">${combo}</span>
+                                <span class="cell-phenotype-badge" style="background:${pheno.bg}; color:${pheno.color}">${pheno.name}</span>
+                            </div>
+                        `;
+                    });
+                });
+
+                container.innerHTML = html;
+                calculateMonoStats(results);
+            } else {
+                // DIHYBRID 4x4
+                container.className = 'punnett-grid-container grid-4x4';
+                container.style.gridTemplateColumns = 'repeat(5, 1fr)';
+
+                const mGametes = getDihybridGametes(mGeno);
+                const fGametes = getDihybridGametes(fGeno);
+
+                let html = `<div class="punnett-cell header-cell">♀ \\ ♂</div>`;
+                fGametes.forEach(g => { html += `<div class="punnett-cell header-cell">${g}</div>`; });
+
+                const results = [];
+                mGametes.forEach(g1 => {
+                    html += `<div class="punnett-cell header-cell">${g1}</div>`;
+                    fGametes.forEach(g2 => {
+                        const combo = combineDihybridGametes(g1, g2);
+                        results.push(combo);
+                        const pheno = getDihybridPhenotype(combo);
+                        html += `
+                            <div class="punnett-cell result-cell">
+                                <span class="cell-genotype">${combo}</span>
+                                <span class="cell-phenotype-badge" style="background:${pheno.bg}; color:${pheno.color}">${pheno.name}</span>
+                            </div>
+                        `;
+                    });
+                });
+
+                container.innerHTML = html;
+                calculateDihybridStats(results);
+            }
+        }
+
+        function formatAlleles(str) {
+            // Sort allele pair so dominant capital letter comes first
+            const arr = str.split('').sort();
+            if (arr[0] === arr[0].toLowerCase() && arr[1] === arr[1].toUpperCase()) {
+                return arr[1] + arr[0];
+            }
+            return str[0] === str[0].toLowerCase() && str[1] === str[1].toUpperCase() ? str[1] + str[0] : str;
+        }
+
+        function getPhenotypeName(genotype) {
+            if (genotype.includes('Y')) {
+                return { name: 'Sarı Tohum', bg: 'rgba(234, 179, 8, 0.2)', color: '#ca8a04' };
+            }
+            return { name: 'Yeşil Tohum', bg: 'rgba(34, 197, 94, 0.2)', color: '#16a34a' };
+        }
+
+        function calculateMonoStats(results) {
+            const genoCounts = {};
+            const phenoCounts = {};
+
+            results.forEach(res => {
+                genoCounts[res] = (genoCounts[res] || 0) + 1;
+                const p = res.includes('Y') ? 'Sarı Tohum (Dominant)' : 'Yeşil Tohum (Resesif)';
+                phenoCounts[p] = (phenoCounts[p] || 0) + 1;
+            });
+
+            const genoContainer = document.getElementById('genotype-stats');
+            const phenoContainer = document.getElementById('phenotype-stats');
+
+            genoContainer.innerHTML = Object.entries(genoCounts).map(([g, count]) => {
+                const pct = (count / results.length) * 100;
+                return `
+                    <div>
+                        <div class="stat-item">
+                            <span>Genotip ${g}</span>
+                            <span>${count}/${results.length} (%${pct})</span>
+                        </div>
+                        <div class="stat-progress-bar"><div class="stat-progress-fill" style="width:${pct}%"></div></div>
+                    </div>
+                `;
+            }).join('');
+
+            phenoContainer.innerHTML = Object.entries(phenoCounts).map(([p, count]) => {
+                const pct = (count / results.length) * 100;
+                return `
+                    <div>
+                        <div class="stat-item">
+                            <span>${p}</span>
+                            <span>${count}/${results.length} (%${pct})</span>
+                        </div>
+                        <div class="stat-progress-bar"><div class="stat-progress-fill" style="width:${pct}%"></div></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getDihybridGametes(genotype) {
+            // E.g. SsYy -> SY, Sy, sY, sy
+            const s1 = genotype[0], s2 = genotype[1];
+            const y1 = genotype[2], y2 = genotype[3];
+            return [s1 + y1, s1 + y2, s2 + y1, s2 + y2];
+        }
+
+        function combineDihybridGametes(g1, g2) {
+            const sPart = formatAlleles(g1[0] + g2[0]);
+            const yPart = formatAlleles(g1[1] + g2[1]);
+            return sPart + yPart;
+        }
+
+        function getDihybridPhenotype(genotype) {
+            const isSmooth = genotype.includes('S');
+            const isYellow = genotype.includes('Y');
+
+            if (isSmooth && isYellow) return { name: 'Yuvarlak-Sarı', bg: 'rgba(234, 179, 8, 0.2)', color: '#ca8a04' };
+            if (isSmooth && !isYellow) return { name: 'Yuvarlak-Yeşil', bg: 'rgba(34, 197, 94, 0.2)', color: '#16a34a' };
+            if (!isSmooth && isYellow) return { name: 'Buruşuk-Sarı', bg: 'rgba(168, 85, 247, 0.2)', color: '#9333ea' };
+            return { name: 'Buruşuk-Yeşil', bg: 'rgba(148, 163, 184, 0.2)', color: '#475569' };
+        }
+
+        function calculateDihybridStats(results) {
+            const phenoCounts = {};
+            results.forEach(res => {
+                const p = getDihybridPhenotype(res).name;
+                phenoCounts[p] = (phenoCounts[p] || 0) + 1;
+            });
+
+            document.getElementById('genotype-stats').innerHTML = `<div class="stat-item">16 Kombinasyonluk Dihibrit Matris Üretildi</div>`;
+
+            document.getElementById('phenotype-stats').innerHTML = Object.entries(phenoCounts).map(([p, count]) => {
+                const pct = ((count / 16) * 100).toFixed(1);
+                return `
+                    <div>
+                        <div class="stat-item">
+                            <span>${p}</span>
+                            <span>${count}/16 (%${pct})</span>
+                        </div>
+                        <div class="stat-progress-bar"><div class="stat-progress-fill" style="width:${pct}%"></div></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- SEX-LINKED SIMULATOR ---
+        function populateSexSelects() {
+            const traitType = document.getElementById('sex-trait-type').value;
+            const motherSel = document.getElementById('sex-mother');
+            const fatherSel = document.getElementById('sex-father');
+
+            if (traitType === 'colorblind' || traitType === 'hemophilia') {
+                const symbol = traitType === 'colorblind' ? 'R' : 'H';
+                const symLower = traitType === 'colorblind' ? 'r' : 'h';
+
+                motherSel.innerHTML = `
+                    <option value="X${symbol}X${symbol}">Sağlam Dişi (X${symbol}X${symbol})</option>
+                    <option value="X${symbol}X${symLower}" selected>Taşıyıcı Dişi (X${symbol}X${symLower})</option>
+                    <option value="X${symLower}X${symLower}">Hasta Dişi (X${symLower}X${symLower})</option>
+                `;
+                fatherSel.innerHTML = `
+                    <option value="X${symbol}Y" selected>Sağlam Erkek (X${symbol}Y)</option>
+                    <option value="X${symLower}Y">Hasta Erkek (X${symLower}Y)</option>
+                `;
+            } else if (traitType === 'blood') {
+                motherSel.innerHTML = `
+                    <option value="IAi">A Grubu (IAi)</option>
+                    <option value="IBi">B Grubu (IBi)</option>
+                    <option value="IAIB" selected>AB Grubu (IAIB)</option>
+                    <option value="ii">O Grubu (ii)</option>
+                `;
+                fatherSel.innerHTML = `
+                    <option value="IAi" selected>A Grubu (IAi)</option>
+                    <option value="IBi">B Grubu (IBi)</option>
+                    <option value="ii">O Grubu (ii)</option>
+                `;
+            }
+        }
+
+        function renderSexLinked() {
+            const traitType = document.getElementById('sex-trait-type').value;
+            const mVal = document.getElementById('sex-mother').value;
+            const fVal = document.getElementById('sex-father').value;
+            const container = document.getElementById('sex-punnett-container');
+
+            if (!mVal || !fVal) {
+                populateSexSelects();
+                return renderSexLinked();
+            }
+
+            if (traitType === 'colorblind' || traitType === 'hemophilia') {
+                const sym = traitType === 'colorblind' ? 'R' : 'H';
+                const symL = traitType === 'colorblind' ? 'r' : 'h';
+
+                // Extract gametes
+                const mGametes = mVal.startsWith(`X${sym}X${symL}`) ? [`X${sym}`, `X${symL}`] :
+                                 mVal.startsWith(`X${sym}X${sym}`) ? [`X${sym}`, `X${sym}`] : [`X${symL}`, `X${symL}`];
+
+                const fGametes = fVal.startsWith(`X${sym}Y`) ? [`X${sym}`, 'Y'] : [`X${symL}`, 'Y'];
+
+                let html = `
+                    <div class="punnett-cell header-cell">♀ \\ ♂</div>
+                    <div class="punnett-cell header-cell">${fGametes[0]}</div>
+                    <div class="punnett-cell header-cell">${fGametes[1]}</div>
+                `;
+
+                const femaleResults = [];
+                const maleResults = [];
+
+                mGametes.forEach(g1 => {
+                    html += `<div class="punnett-cell header-cell">${g1}</div>`;
+                    fGametes.forEach(g2 => {
+                        const isFemale = g2.startsWith('X');
+                        const combo = isFemale ? (g1 + g2) : (g1 + 'Y');
+
+                        if (isFemale) femaleResults.push(combo);
+                        else maleResults.push(combo);
+
+                        html += `
+                            <div class="punnett-cell result-cell">
+                                <span class="cell-genotype">${combo}</span>
+                                <span class="cell-phenotype-badge" style="background:rgba(99, 102, 241, 0.15); color:#6366f1">${isFemale ? 'Kız' : 'Erkek'}</span>
+                            </div>
+                        `;
+                    });
+                });
+
+                container.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                container.innerHTML = html;
+
+                document.getElementById('female-offspring-stats').innerHTML = `
+                    <div class="stat-item"><span>Olası Kız Genotipleri:</span> <span>${femaleResults.join(', ')}</span></div>
+                    <div class="stat-item"><span>Sağlam/Taşıyıcı Oranı:</span> <span>%100 Görme/Kan Pıhtılaşması</span></div>
+                `;
+                document.getElementById('male-offspring-stats').innerHTML = `
+                    <div class="stat-item"><span>Olası Erkek Genotipleri:</span> <span>${maleResults.join(', ')}</span></div>
+                    <div class="stat-item"><span>Hastalık Riski:</span> <span>${maleResults.some(r => r.includes(symL)) ? '%50 Hasta Risk' : '%0 Risk'}</span></div>
+                `;
+            } else {
+                // Blood Groups
+                container.innerHTML = `<div class="punnett-cell" style="width:280px;">Kan Grubu Çaprazlaması Hesaplandı</div>`;
+                document.getElementById('female-offspring-stats').innerHTML = `<div class="stat-item">Çocukların Kan Grubu Dağılımı</div>`;
+                document.getElementById('male-offspring-stats').innerHTML = `<div class="stat-item">A, B, AB, O Olasılıkları %25</div>`;
+            }
+        }
+
+        // --- PEDIGREE CHART RENDERER ---
+        function renderPedigree() {
+            const scenario = document.getElementById('pedigree-scenario').value;
+            const container = document.getElementById('pedigree-tree-container');
+
+            // 3-Generation Pedigree Structure
+            let treeHtml = `
+                <!-- Generation I (Grandparents) -->
+                <div class="pedigree-generation">
+                    <div class="pedigree-couple">
+                        <div class="pedigree-node male ${scenario === 'autosomal-dominant' ? 'affected' : ''}" title="I-1 (Dede): ${scenario === 'autosomal-dominant' ? 'Aa (Hasta)' : 'Aa (Taşıyıcı)'}">I-1</div>
+                        <div class="pedigree-node female ${scenario === 'x-recessive' ? 'carrier' : ''}" title="I-2 (Nene): Aa (Sağlam/Taşıyıcı)">I-2</div>
+                    </div>
+                </div>
+
+                <!-- Generation II (Parents & Uncles) -->
+                <div class="pedigree-generation">
+                    <div class="pedigree-couple">
+                        <div class="pedigree-node male" title="II-1 (Baba): Aa">II-1</div>
+                        <div class="pedigree-node female ${scenario === 'autosomal-recessive' ? 'carrier' : (scenario === 'x-recessive' ? 'carrier' : '')}" title="II-2 (Anne): Aa (Taşıyıcı)">II-2</div>
+                    </div>
+                    <div class="pedigree-node male ${scenario === 'x-recessive' ? 'affected' : ''}" title="II-3 (Dayı): Hasta">II-3</div>
+                </div>
+
+                <!-- Generation III (Children) -->
+                <div class="pedigree-generation">
+                    <div class="pedigree-node male" title="III-1 (Erkek Çocuk): AA (Sağlam)">III-1</div>
+                    <div class="pedigree-node female ${scenario === 'autosomal-recessive' ? 'affected' : ''}" title="III-2 (Kız Çocuk): aa (Hasta)">III-2</div>
+                    <div class="pedigree-node male ${scenario === 'autosomal-recessive' ? 'affected' : (scenario === 'x-recessive' ? 'affected' : '')}" title="III-3 (Küçük Erkek): ${scenario === 'autosomal-recessive' ? 'aa (Hasta)' : 'X^r Y (Hasta)'}">III-3</div>
+                </div>
+            `;
+
+            container.innerHTML = treeHtml;
+            document.getElementById('pedigree-feedback').style.display = 'none';
+        }
+
+        function checkPedigreeQuiz() {
+            const scenario = document.getElementById('pedigree-scenario').value;
+            const feedbackTitle = document.getElementById('pedigree-feedback-title');
+            const feedbackBody = document.getElementById('pedigree-feedback-body');
+            const feedbackCard = document.getElementById('pedigree-feedback');
+
+            feedbackCard.style.display = 'block';
+
+            if (scenario === 'autosomal-recessive') {
+                feedbackTitle.innerHTML = `<i class="ph-bold ph-check-circle" style="color:#22c55e"></i> Otozomal Çekinik Kalıtım Doğrulandı!`;
+                feedbackBody.innerHTML = `Anne ve baba hasta olmadığı halde (II-1 ve II-2), III-2 ve III-3 numaralı çocuklarda hastalığın görülmesi bu özelliğin <strong>Çekinik (Resesif)</strong> genle taşındığını kanıtlar. Cinsiyet ayrımı olmadan kız ve erkek çocuklarda eşit oranlarda görülebilir.`;
+            } else if (scenario === 'autosomal-dominant') {
+                feedbackTitle.innerHTML = `<i class="ph-bold ph-check-circle" style="color:#6366f1"></i> Otozomal Baskın Kalıtım Doğrulandı!`;
+                feedbackBody.innerHTML = `Hasta çocuğun en az bir ebeveyni hasta olmak zorundadır. Hastalık kuşak atlamadan nesilden nesile aktarılır.`;
+            } else {
+                feedbackTitle.innerHTML = `<i class="ph-bold ph-check-circle" style="color:#a855f7"></i> X'e Bağlı Çekinik Kalıtım Doğrulandı!`;
+                feedbackBody.innerHTML = `Taşıyıcı anneden (II-2) doğan erkek çocuklarda (III-3) hastalığın ortaya çıkması X kromozomundaki çekinik geni gösterir.`;
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            populateSelects();
+            renderPunnett();
+            populateSexSelects();
+        });
+    </script>
+</body>
+
+</html>
