@@ -1276,6 +1276,7 @@ app.get('/sitemap.xml', async (req, res) => {
             { path: '/dna-lab', priority: '0.9', freq: 'daily' },
             { path: '/periodic-table', priority: '0.9', freq: 'daily' },
             { path: '/blood-lab', priority: '0.9', freq: 'daily' },
+            { path: '/mendel-lab', priority: '0.9', freq: 'daily' },
             { path: '/about', priority: '0.7', freq: 'monthly' },
             { path: '/gizlilik-politikasi', priority: '0.5', freq: 'monthly' },
             { path: '/kullanim-sartlari', priority: '0.5', freq: 'monthly' },
@@ -4604,7 +4605,7 @@ app.get('/api/admin/tool-stats', async (req, res) => {
         const [totalFromTools] = await pool.query(`SELECT COUNT(*) AS total FROM users WHERE source IS NOT NULL AND source != ''`);
 
         // Combined data
-        const toolNames = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab'];
+        const toolNames = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab', 'mendel-lab'];
         const combined = toolNames.map(name => {
             const usage = usageStats.find(u => u.tool_name === name) || { total_views: 0, trial_ended: 0 };
             const src = sourceStats.find(s => s.source === name) || { member_count: 0 };
