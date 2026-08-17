@@ -508,16 +508,15 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 html = html.replace('<span class="article-badge" id="detail-category">Teknoloji</span>', `<span class="article-badge" id="detail-category">${article.category || 'Bilim'}</span>`);
                 html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(article.published_at || article.created_at).toLocaleDateString('tr-TR')}</span>`);
                 html = html.replace('<div class="summary-text" id="detail-excerpt"></div>', `<div class="summary-text" id="detail-excerpt">${article.excerpt || ''}</div>`);
-                html = html.replace('<div class="article-content" id="detail-content"></div>', `<div class="article-content" id="detail-content">${article.content}</div>`);
+                const lazyContent = (article.content || '').replace(/<img\s+/gi, '<img loading="lazy" ');
+                html = html.replace('<div class="article-content" id="detail-content"></div>', `<div class="article-content" id="detail-content">${lazyContent}</div>`);
                 if (article.image_url) {
                     html = html.replace('<img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">', `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image">`);
                 } else {
                     html = html.replace('<img src="" alt="Makale Görseli" class="detail-hero-image" id="detail-image">', '');
                 }
 
-                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-                res.setHeader('Pragma', 'no-cache');
-                res.setHeader('Expires', '0');
+                res.setHeader('Cache-Control', 'public, max-age=120, s-maxage=600, stale-while-revalidate=1200');
                 res.send(html);
 
             } catch (parseErr) {

@@ -42,8 +42,28 @@ function slugifyText(text) {
         .replace(/[^\w\-]+/g, '')
         .replace(/\-\-+/g, '-')
         .replace(/^-+/, '')
-        .replace(/-+$/, '');
 }
+
+function wrapArticleTables(target = '.article-content, .procedure-steps, .results-content, .ql-editor') {
+    const containers = typeof target === 'string' ? document.querySelectorAll(target) : (target ? [target] : []);
+    containers.forEach(container => {
+        if (!container) return;
+        const tables = container.tagName === 'TABLE' ? [container] : container.querySelectorAll('table');
+        tables.forEach(table => {
+            if (table && table.parentElement && 
+                !table.parentElement.classList.contains('table-responsive') && 
+                !table.parentElement.classList.contains('table-container') &&
+                !table.parentElement.classList.contains('article-table-wrapper')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive article-table-wrapper';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+        });
+    });
+}
+window.wrapArticleTables = wrapArticleTables;
+
 
 function getAuthorSlug(authorObj, fallbackId) {
     if (typeof authorObj === 'string') return slugifyText(authorObj) || fallbackId || '';
@@ -75,9 +95,19 @@ window.currentArticleId = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DEBUG: DOMContentLoaded started');
     
+    // Auto-wrap article tables for mobile responsiveness
+    if (typeof wrapArticleTables === 'function') {
+        wrapArticleTables();
+    }
+    
     // Loader aktifken scroll'u engelle
     if (document.getElementById('global-loader')) {
         document.body.classList.add('loader-active');
+    }
+
+    // Instant loader dismissal for SSR-rendered article detail pages
+    if (window.SERVER_ARTICLE || window.location.pathname.includes('/makale/') || window.location.pathname.includes('/article-detail')) {
+        hideLoader();
     }
     
     // YENİ: Kategori Kartlarını Yükle
@@ -235,6 +265,8 @@ async function loadHero() {
     const sliderContainer = document.getElementById('slider-container');
     const heroTitle = document.getElementById('hero-title') || document.getElementById('articles-hero-title') || document.getElementById('about-hero-title');
     const heroDesc = document.getElementById('hero-description') || document.getElementById('articles-hero-description') || document.getElementById('about-hero-description');
+
+    if (!sliderContainer && !heroTitle && !heroDesc) return;
 
     // --- PART 1: TEXT & SETTINGS ---
     try {
@@ -2829,6 +2861,7 @@ function renderArticleDetail(article) {
     let contentHtml = article.content || '';
     contentHtml = contentHtml.replace(/\\/g, '/'); // Fix all backslashes
     document.getElementById('detail-content').innerHTML = contentHtml;
+    wrapArticleTables('#detail-content');
 
     // Load Interactions
     const articleId = article.id;
@@ -3049,8 +3082,8 @@ async function loadArticleSlider(currentId) {
             if (titleEl) titleEl.innerText = settings.article_detail_slider_title;
         }
 
-        // Fetch Articles
-        const res = await fetch(`${API_URL}/articles`);
+        // Fetch Articles (limited to 8 for fast performance)
+        const res = await fetch(`${API_URL}/articles?limit=8`);
         if (!res.ok) return;
         const allArticles = await res.json();
 

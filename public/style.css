@@ -6157,20 +6157,47 @@ body.dark-mode .dropdown-menu {
 
 
 /* Beautiful and Premium Table Formatting for SSR detail pages */
+.table-responsive,
+.article-table-wrapper,
+.table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 24px 0;
+    border-radius: 12px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background: var(--card-bg, #ffffff);
+}
+
 .article-content table,
 .procedure-steps table,
 .results-content table,
 .ql-editor table {
-    width: 100% !important;
+    width: 100%;
     border-collapse: collapse;
-    margin: 24px 0;
+    margin: 0;
     font-size: 0.95rem;
     line-height: 1.5;
     background: var(--card-bg, #ffffff);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Fallback for direct tables without wrapper div */
+.article-content > table,
+.procedure-steps > table,
+.results-content > table,
+.ql-editor > table,
+.article-content table:not(.table-responsive table):not(.table-container table):not(.article-table-wrapper table) {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 24px 0;
     border-radius: 12px;
-    overflow: hidden;
     border: 1px solid var(--border-color, #e2e8f0);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .article-content table th,
@@ -6218,6 +6245,61 @@ body.dark-mode .dropdown-menu {
 .results-content table tr:hover,
 .ql-editor table tr:hover {
     background-color: rgba(99, 102, 241, 0.04);
+}
+
+/* Custom sleek scrollbar for mobile table containers */
+.table-responsive::-webkit-scrollbar,
+.article-table-wrapper::-webkit-scrollbar,
+.table-container::-webkit-scrollbar,
+.article-content table::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track,
+.article-table-wrapper::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track,
+.article-content table::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+[data-theme="dark"] .table-responsive::-webkit-scrollbar-track,
+[data-theme="dark"] .article-table-wrapper::-webkit-scrollbar-track,
+[data-theme="dark"] .table-container::-webkit-scrollbar-track,
+[data-theme="dark"] .article-content table::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.article-table-wrapper::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb,
+.article-content table::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #6366f1);
+    border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+    .article-content table,
+    .procedure-steps table,
+    .results-content table,
+    .ql-editor table {
+        font-size: 0.88rem;
+        min-width: 520px;
+    }
+
+    .article-content table th,
+    .article-content table td,
+    .procedure-steps table th,
+    .procedure-steps table td,
+    .results-content table th,
+    .results-content table td,
+    .ql-editor table th,
+    .ql-editor table td {
+        padding: 10px 12px;
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
 }
 
 /* =====================================================================
