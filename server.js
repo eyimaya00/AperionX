@@ -1252,7 +1252,7 @@ app.get('/feed.xml', async (req, res) => {
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, published_at, updated_at FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
+        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, published_at FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
         const [experiments] = await pool.query("SELECT title, slug, image_url, created_at, published_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC");
         
@@ -1652,6 +1652,7 @@ async function ensureSchema() {
         try { await pool.query('ALTER TABLE experiments ADD COLUMN visual_references_list TEXT'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'); } catch(e) {}
         // Add linkedin_url, public_email, show_email to users table if missing
         try { await pool.query('ALTER TABLE users ADD COLUMN linkedin_url VARCHAR(255) NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE users ADD COLUMN public_email VARCHAR(255) NULL'); } catch(e) {}
@@ -3933,7 +3934,7 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'pending' 
@@ -3947,12 +3948,11 @@ app.get('/api/editor/history', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.submitted_at, a.published_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status IN ('published', 'rejected')
             ORDER BY COALESCE(a.submitted_at, a.created_at) DESC, a.id DESC
-            LIMIT 100
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -3962,12 +3962,11 @@ app.get('/api/editor/trash', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'trash' 
-            ORDER BY a.updated_at DESC, a.created_at DESC
-            LIMIT 100
+            ORDER BY a.created_at DESC
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
