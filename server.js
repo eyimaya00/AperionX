@@ -952,18 +952,33 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
         return res.redirect(301, '/experiments.html');
     }
     try {
-        // Fetch experiment by slug
-        const [rows] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, objective, materials, safety_notes, procedure_steps, youtube_url, pdf_url, references_list FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [slug]);
+        // Fetch experiment by slug (including results and conclusion)
+        let [rows] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, objective, materials, safety_notes, procedure_steps, results, conclusion, youtube_url, pdf_url, references_list FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [slug]);
 
+        // Fallback: If not found by exact slug, attempt slugify matching or redirect
         if (rows.length === 0) {
+            const cleanSlug = slugify(slug);
+            const [fallbackRows] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, objective, materials, safety_notes, procedure_steps, results, conclusion, youtube_url, pdf_url, references_list FROM experiments WHERE slug = ? AND status = 'published' AND deleted_at IS NULL", [cleanSlug]);
+            if (fallbackRows.length > 0) {
+                return res.redirect(301, `/deney/${fallbackRows[0].slug}`);
+            }
+            // Secondary fallback: search all published titles
+            const [allPub] = await pool.query("SELECT id, title, slug FROM experiments WHERE status = 'published' AND deleted_at IS NULL");
+            const match = allPub.find(e => slugify(e.title) === cleanSlug);
+            if (match) {
+                return res.redirect(301, `/deney/${match.slug}`);
+            }
             return res.status(404).send('Deney bulunamadı (404)');
         }
 
         const experiment = rows[0];
 
-        // ============ VIEW COUNTING LOGIC (MOVED TO API) ============
-        // Views are now logged asynchronously by clients running JavaScript to avoid bot inflation.
-        // ============ END VIEW COUNTING ============
+        // Fetch recent experiments for recommendation slider preload
+        let recentExperiments = [];
+        try {
+            const [sliderRows] = await pool.query("SELECT id, title, slug, image_url, category, created_at, published_at, author_id FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC LIMIT 10");
+            recentExperiments = sliderRows;
+        } catch (e) { recentExperiments = []; }
 
         // Read Template
         const filePath = path.join(__dirname, 'views', 'experiment-detail.html');
@@ -1062,7 +1077,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 html = html.replace(/<link rel="canonical" href=".*?" \/>/i, `<link rel="canonical" href="${origin}/deney/${slug}" />\n    <link rel="alternate" hreflang="tr" href="${origin}/deney/${slug}">\n    <link rel="alternate" hreflang="en" href="${origin}/en/deney/${slug}">\n    <link rel="alternate" hreflang="x-default" href="${origin}/deney/${slug}">`);
 
                 // Inject Preloaded Data Script
-                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)};</script>`;
+                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)}; window.SERVER_EXPERIMENTS = ${JSON.stringify(recentExperiments)};</script>`;
 
                 // === JSON-LD STRUCTURED DATA INJECTION ===
                 const schemaData = {
@@ -1119,17 +1134,22 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 // Inject scripts right before </head>
                 html = html.replace('</head>', `${scriptTag}\n${jsonLdScript}\n${jsonLdBreadcrumb}\n</head>`);
 
-                // Send the generated HTML
-                // SSR: Render title, categories, materials, objective, procedure, safety, conclusion, results directly into HTML for search engines and instant load
+                // SSR HTML Injection & Clean Pre-rendering
+                // Hide loading spinner in initial HTML response
+                html = html.replace(/<div id="loading-indicator"[^>]*>/i, '<div id="loading-indicator" style="display: none; text-align: center; padding: 100px;">');
                 html = html.replace('<main id="article-wrapper" style="display: none;">', '<main id="article-wrapper">');
                 html = html.replace('<h1 class="article-title" id="detail-title">Deney Başlığı</h1>', `<h1 class="article-title" id="detail-title">${experiment.title}</h1>`);
                 html = html.replace('<span class="article-badge" id="detail-category">Deney</span>', `<span class="article-badge" id="detail-category">${experiment.category || 'Deney'}</span>`);
                 html = html.replace(/<span id="detail-date"><i class="ph ph-calendar"><\/i>.*?<\/span>/i, `<span id="detail-date"><i class="ph ph-calendar"></i> ${new Date(experiment.published_at || experiment.created_at).toLocaleDateString('tr-TR')}</span>`);
+                if (authorName) {
+                    html = html.replace(/<span id="detail-author"><i class="ph ph-user"><\/i>.*?<\/span>/i, `<span id="detail-author"><i class="ph ph-user"></i> ${authorName}</span>`);
+                }
 
+                // Hero Image regex match
                 if (experiment.image_url) {
-                    html = html.replace('<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">', `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image">`);
+                    html = html.replace(/<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image"[^>]*>/i, `<img src="${safeImg}" alt="${safeTitle}" class="detail-hero-image" id="detail-image" fetchpriority="high" decoding="async" loading="eager" width="1200" height="400">`);
                 } else {
-                    html = html.replace('<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image">', '');
+                    html = html.replace(/<img src="" alt="Deney Görseli" class="detail-hero-image" id="detail-image"[^>]*>/i, '');
                 }
 
                 if (experiment.objective) {
@@ -1140,13 +1160,13 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     html = html.replace('<div class="experiment-materials-box" id="materials-box" style="display: none;">', '<div class="experiment-materials-box" id="materials-box">');
                     html = html.replace('<div class="article-content" id="detail-materials" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-materials" style="margin-top: 10px;">${experiment.materials}</div>`);
                 }
-                if (experiment.safety) {
+                if (experiment.safety_notes) {
                     html = html.replace('<div class="experiment-safety-box" id="safety-box" style="display: none;">', '<div class="experiment-safety-box" id="safety-box">');
-                    html = html.replace('<div class="article-content" id="detail-safety" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-safety" style="margin-top: 10px;">${experiment.safety}</div>`);
+                    html = html.replace('<div class="article-content" id="detail-safety" style="margin-top: 10px;"></div>', `<div class="article-content" id="detail-safety" style="margin-top: 10px;">${experiment.safety_notes}</div>`);
                 }
-                if (experiment.procedure) {
+                if (experiment.procedure_steps) {
                     html = html.replace('<div id="procedure-section" style="display: none; margin-bottom: 30px;">', '<div id="procedure-section" style="margin-bottom: 30px;">');
-                    html = html.replace('<div class="article-content" id="detail-procedure" style="margin-top: 5px;"></div>', `<div class="article-content" id="detail-procedure" style="margin-top: 5px;">${experiment.procedure}</div>`);
+                    html = html.replace('<div class="article-content" id="detail-procedure" style="margin-top: 5px;"></div>', `<div class="article-content" id="detail-procedure" style="margin-top: 5px;">${experiment.procedure_steps}</div>`);
                 }
                 if (experiment.results) {
                     html = html.replace('<div class="experiment-results-box" id="results-box" style="display: none;">', '<div class="experiment-results-box" id="results-box">');
@@ -1692,6 +1712,20 @@ async function ensureSchema() {
             console.log('[MIGRATION] Initial 6 experiments dates updated successfully.');
         } catch(e) {
             console.error('[MIGRATION] Error updating experiment dates:', e);
+        }
+
+        // Automatic slug repair for experiments
+        try {
+            const [expsToMigrate] = await pool.query("SELECT id, title, slug FROM experiments");
+            for (const exp of expsToMigrate) {
+                const cleanSlug = slugify(exp.title);
+                if (cleanSlug && exp.slug !== cleanSlug) {
+                    await pool.query("UPDATE experiments SET slug = ? WHERE id = ?", [cleanSlug, exp.id]);
+                    console.log(`[MIGRATION] Updated experiment slug ID ${exp.id}: ${cleanSlug}`);
+                }
+            }
+        } catch(e) {
+            console.error('[MIGRATION] Error repairing experiment slugs:', e);
         }
 
         await pool.query(`
@@ -3938,7 +3972,7 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'pending' 
-            ORDER BY COALESCE(a.submitted_at, a.created_at) DESC
+            ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -3952,7 +3986,7 @@ app.get('/api/editor/history', authenticateToken, async (req, res) => {
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status IN ('published', 'rejected')
-            ORDER BY COALESCE(a.submitted_at, a.created_at) DESC, a.id DESC
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC, a.id DESC
         `);
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
