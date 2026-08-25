@@ -4449,7 +4449,7 @@
             } else {
                 filtered = allArticlesData.filter(a => a.status === status);
             }
-            filtered.sort((a, b) => new Date(b.published_at || b.created_at || b.updated_at || 0) - new Date(a.published_at || a.created_at || a.updated_at || 0));
+            filtered.sort((a, b) => new Date(b.submitted_at || b.created_at || b.updated_at || 0) - new Date(a.submitted_at || a.created_at || a.updated_at || 0));
             renderArticles(filtered);
         }
 

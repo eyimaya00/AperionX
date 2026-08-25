@@ -3887,7 +3887,7 @@
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; height:300px; vertical-align:middle; color:#94a3b8;"><div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><i class="ph-duotone ph-folder-open" style="font-size:3rem; opacity:0.5;"></i><span>Makale bulunamadı.</span></div></td></tr>';
                 } else {
                     displayArticles.forEach(article => {
-                        const articleDate = article.status === 'pending' ? (article.submitted_at || article.updated_at || article.created_at) : (article.published_at || article.created_at || article.updated_at);
+                        const articleDate = article.submitted_at || article.created_at || article.updated_at;
                         const date = new Date(articleDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
                         let statusBadge = '';
                         let actions = '';
@@ -3993,15 +3993,13 @@
                 return a.status === status;
             });
 
-            // Sort articles by date (newest to oldest)
+            // Sort articles by initial submission date (newest to oldest)
             filtered.sort((a, b) => {
-                const getArticleTime = (art) => {
-                    const dateStr = art.status === 'pending'
-                        ? (art.submitted_at || art.updated_at || art.created_at)
-                        : (art.published_at || art.created_at || art.updated_at);
+                const getSubmissionTime = (art) => {
+                    const dateStr = art.submitted_at || art.created_at || art.updated_at;
                     return dateStr ? new Date(dateStr).getTime() : 0;
                 };
-                return getArticleTime(b) - getArticleTime(a);
+                return getSubmissionTime(b) - getSubmissionTime(a);
             });
 
             if (filtered.length === 0) {
@@ -4010,7 +4008,7 @@
             }
 
             filtered.forEach(article => {
-                const articleDate = article.status === 'pending' ? (article.submitted_at || article.updated_at || article.created_at) : (article.published_at || article.created_at || article.updated_at);
+                const articleDate = article.submitted_at || article.created_at || article.updated_at;
                 const date = new Date(articleDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
                 let statusBadge = '';
                 let actions = '';
