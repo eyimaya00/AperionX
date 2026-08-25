@@ -3947,11 +3947,11 @@ app.get('/api/editor/history', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.updated_at, a.published_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status IN ('published', 'rejected')
-            ORDER BY a.updated_at DESC, a.created_at DESC
+            ORDER BY COALESCE(a.published_at, a.created_at, a.updated_at) DESC, a.id DESC
             LIMIT 100
         `);
         res.json(rows);
