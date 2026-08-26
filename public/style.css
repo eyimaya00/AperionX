@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap');
 
 :root {
+    color-scheme: light;
     --primary-color: #6366f1;
     --primary-accent: #6366f1;
     /* Added for gradients */
@@ -26,6 +27,7 @@
 }
 
 [data-theme="dark"] {
+    color-scheme: dark;
     --primary-color: #818cf8;
     --primary-hover: #6366f1;
     --bg-color: #0f172a;
@@ -62,13 +64,14 @@ body {
     overscroll-behavior-y: auto;
     /* scroll-behavior: smooth; -- Removed to prevent scroll freeze/locking on Chrome/Safari */
     min-height: 100vh;
-    scrollbar-color: #cbd5e1 #ffffff;
+    scrollbar-color: #cbd5e1 var(--bg-color);
 }
 
 [data-theme="dark"] html,
 [data-theme="dark"] body,
 html[data-theme="dark"],
-body[data-theme="dark"] {
+body[data-theme="dark"],
+html[data-theme="dark"] body {
     scrollbar-color: #475569 #0f172a;
 }
 
@@ -4833,11 +4836,22 @@ i[class*=" ph"] {
 }
 
 /* Dark Mode Scrollbar */
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-    background: #475569;
+[data-theme="dark"] ::-webkit-scrollbar-track,
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+html[data-theme="dark"]::-webkit-scrollbar-track {
+    background: #0f172a;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+[data-theme="dark"] ::-webkit-scrollbar-thumb,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+html[data-theme="dark"]::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-color: #0f172a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
     background: #64748b;
 }
 
@@ -5212,7 +5226,9 @@ html[data-theme="light"] #global-loader {
     background-color: #ffffff;
 }
 
-body.loader-active {
+body.loader-active,
+html:has(#global-loader:not(.hidden)),
+body:has(#global-loader:not(.hidden)) {
     overflow: hidden !important;
 }
 
