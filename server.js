@@ -6144,9 +6144,11 @@ app.post('/api/experiments/:id/like', authenticateToken, async (req, res) => {
         const [exists] = await pool.query('SELECT * FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
         if (exists.length) {
             await pool.query('DELETE FROM likes WHERE experiment_id = ? AND user_id = ?', [experimentId, userId]);
+            clearCache('experiments');
             res.json({ liked: false });
         } else {
-            await pool.query('INSERT IGNORE INTO likes (experiment_id, user_id) VALUES (?, ?)', [experimentId, userId]);
+            await pool.query('INSERT IGNORE INTO likes (article_id, experiment_id, user_id) VALUES (NULL, ?, ?)', [experimentId, userId]);
+            clearCache('experiments');
             res.json({ liked: true });
         }
     } catch (e) { res.status(500).json({ error: e.message }); }
