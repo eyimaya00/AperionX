@@ -2133,6 +2133,20 @@
             }
             track.innerHTML = similarExperiments.map(exp => {
                 const bgUrl = exp.image_url ? exp.image_url.replace(/\\/g, '/') : 'https://via.placeholder.com/300x400';
+
+                let authorsHtml = '';
+                if (exp.authors && exp.authors.length > 0) {
+                    authorsHtml = exp.authors.map(a => {
+                        const authorSlug = (typeof getAuthorSlug === 'function' ? getAuthorSlug(a.fullname, a.id) : (typeof slugifyText === 'function' ? slugifyText(a.fullname) : a.username)) || a.id;
+                        return `<a href="/yazar/${authorSlug}" style="color: inherit; text-decoration: none;" onclick="event.stopPropagation();">${a.fullname}</a>`;
+                    }).join(' <span style="opacity:0.6">&amp;</span> ');
+                } else if (exp.author_name) {
+                    const authorSlug = (typeof getAuthorSlug === 'function' ? getAuthorSlug(exp.author_name, exp.author_id) : (typeof slugifyText === 'function' ? slugifyText(exp.author_name) : exp.author_username)) || '';
+                    authorsHtml = `<a href="/yazar/${authorSlug}" style="color: inherit; text-decoration: none;" onclick="event.stopPropagation();">${exp.author_name}</a>`;
+                } else {
+                    authorsHtml = `<span>AperionX Yazarı</span>`;
+                }
+
                 return `
                     <div class="similar-article-card" style="background-image: url('${bgUrl}');" onclick="window.location.href='${exp.slug ? '/deney/' + exp.slug : '/experiment-detail.html?id=' + exp.id}'">
                         <div class="similar-card-overlay">
@@ -2140,7 +2154,7 @@
                             <div class="content-bottom">
                                 <a href="${exp.slug ? '/deney/' + exp.slug : '/experiment-detail.html?id=' + exp.id}" class="similar-card-title">${exp.title}</a>
                                 <div class="similar-card-meta">
-                                    <span>${exp.author_name || 'Admin'}</span>
+                                    ${authorsHtml}
                                     <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
                                     <span>${new Date(exp.created_at).toLocaleDateString('tr-TR')}</span>
                                 </div>

@@ -976,9 +976,54 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
         // Fetch recent experiments for recommendation slider preload
         let recentExperiments = [];
         try {
-            const [sliderRows] = await pool.query("SELECT id, title, slug, image_url, category, created_at, published_at, author_id FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC LIMIT 10");
+            const [sliderRows] = await pool.query(`
+                SELECT 
+                    e.id, e.title, e.slug, e.image_url, e.category, e.created_at, e.published_at, e.author_id,
+                    COALESCE(
+                        (SELECT u.fullname FROM experiment_authors ea JOIN users u ON ea.user_id = u.id WHERE ea.experiment_id = e.id ORDER BY ea.order_index ASC LIMIT 1),
+                        u.fullname
+                    ) AS author_name,
+                    COALESCE(
+                        (SELECT u.username FROM experiment_authors ea JOIN users u ON ea.user_id = u.id WHERE ea.experiment_id = e.id ORDER BY ea.order_index ASC LIMIT 1),
+                        u.username
+                    ) AS author_username
+                FROM experiments e
+                LEFT JOIN users u ON e.author_id = u.id
+                WHERE e.status = 'published' AND e.deleted_at IS NULL
+                ORDER BY COALESCE(e.published_at, e.created_at) DESC
+                LIMIT 10
+            `);
+
+            if (sliderRows.length > 0) {
+                const sliderExpIds = sliderRows.map(e => e.id);
+                const [allAuthors] = await pool.query(`
+                    SELECT ea.experiment_id, u.id, u.fullname, u.username 
+                    FROM experiment_authors ea
+                    JOIN users u ON ea.user_id = u.id
+                    WHERE ea.experiment_id IN (?)
+                    ORDER BY ea.order_index ASC
+                `, [sliderExpIds]);
+
+                const authorMap = {};
+                allAuthors.forEach(row => {
+                    if (!authorMap[row.experiment_id]) authorMap[row.experiment_id] = [];
+                    authorMap[row.experiment_id].push({ id: row.id, fullname: row.fullname, username: row.username });
+                });
+
+                sliderRows.forEach(e => {
+                    e.authors = authorMap[e.id] || [];
+                    if (!e.author_name && e.authors.length > 0) {
+                        e.author_name = e.authors[0].fullname;
+                        e.author_username = e.authors[0].username;
+                    }
+                });
+            }
+
             recentExperiments = sliderRows;
-        } catch (e) { recentExperiments = []; }
+        } catch (e) {
+            console.error('Error fetching sliderRows for /deney/:slug:', e);
+            recentExperiments = [];
+        }
 
         // Read Template
         const filePath = path.join(__dirname, 'views', 'experiment-detail.html');

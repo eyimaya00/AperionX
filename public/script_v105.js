@@ -3121,8 +3121,8 @@ async function loadArticleSlider(currentId) {
                                     `).join(' <span style="opacity:0.6">&amp;</span> ')}
                                    </span>`
                     : (art.author_id
-                        ? `<a href="/yazar/${getAuthorSlug(art.author_name, art.author_id)}" style="color: inherit; text-decoration: none;">${art.author_name || 'Admin'}</a>`
-                        : `<span>${art.author_name || 'Admin'}</span>`)
+                        ? `<a href="/yazar/${getAuthorSlug(art.author_name, art.author_id)}" style="color: inherit; text-decoration: none;">${art.author_name || 'AperionX Yazarı'}</a>`
+                        : `<span>${art.author_name || 'AperionX Yazarı'}</span>`)
                 }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
                             <span>${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>
