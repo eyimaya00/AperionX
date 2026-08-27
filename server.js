@@ -2854,7 +2854,7 @@ app.get('/api/experiments', async (req, res) => {
         if (cached) return res.json(cached);
 
         // 1. Fetch Experiments (Newest first)
-        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC, id DESC");
+        const [experiments] = await pool.query("SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags, (SELECT COUNT(*) FROM likes WHERE experiment_id = experiments.id) as like_count, (SELECT COUNT(*) FROM comments WHERE experiment_id = experiments.id) as comment_count FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC, id DESC");
 
         if (experiments.length > 0) {
             const expIds = experiments.map(e => e.id);
@@ -3377,7 +3377,9 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
 app.get('/api/author/experiments', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT DISTINCT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt
+            SELECT DISTINCT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt,
+            (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count,
+            (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.deleted_at IS NULL
