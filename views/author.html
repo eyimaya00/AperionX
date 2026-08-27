@@ -2093,13 +2093,13 @@
 
             <div class="card" style="padding: 0; overflow: hidden;">
                 <div class="analytics-card-header">
-                    <h3 id="analytics-section-title">Makale Performansı</h3>
+                    <h3 id="analytics-section-title">İçerik Performansı</h3>
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="author-table">
                         <thead>
                             <tr class="author-table-head">
-                                <th>Makale Başlığı</th>
+                                <th>İçerik Başlığı</th>
                                 <th>Yayın Tarihi</th>
                                 <th style="text-align: center;">Okunma</th>
                                 <th style="text-align: center;">Beğeni</th>
@@ -2446,7 +2446,7 @@
             if (thead) {
                 thead.innerHTML = `
                     <th>Kullanıcı</th>
-                    <th>Makale</th>
+                    <th>İçerik</th>
                     <th>Tarih</th>
                 `;
             }
@@ -2492,7 +2492,7 @@
             const thead = document.querySelector('#analytics table thead tr');
             if (thead) {
                 thead.innerHTML = `
-                    <th>Makale Başlığı</th>
+                    <th>İçerik Başlığı</th>
                     <th>Yayın Tarihi</th>
                     <th style="text-align: center;">Okunma</th>
                     <th style="text-align: center;">Beğeni</th>
@@ -2504,7 +2504,7 @@
             tbody.innerHTML = '';
 
             if (articles.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #64748b;">Henüz yayınlanmış makaleniz yok.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #64748b;">Henüz yayınlanmış içeriğiniz yok.</td></tr>';
                 return;
             }
 

@@ -2025,6 +2025,7 @@ setTimeout(rotateShowcaseArticles, 5000);
 // === GET AUTHOR LIKES (New Feature) ===
 app.get('/api/author/likes', authenticateToken, async (req, res) => {
     try {
+        const userId = req.user.id;
         const query = `
             SELECT 
                 u.fullname AS liker_name, 
@@ -2033,11 +2034,23 @@ app.get('/api/author/likes', authenticateToken, async (req, res) => {
                 l.created_at
             FROM likes l
             JOIN articles a ON l.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON l.user_id = u.id
-            WHERE a.author_id = ?
-            ORDER BY l.created_at DESC
+            WHERE a.author_id = ? OR aa.user_id = ?
+            UNION ALL
+            SELECT 
+                u.fullname AS liker_name, 
+                u.avatar_url AS liker_avatar, 
+                e.title AS article_title, 
+                l.created_at
+            FROM likes l
+            JOIN experiments e ON l.experiment_id = e.id
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            JOIN users u ON l.user_id = u.id
+            WHERE e.author_id = ? OR ea.user_id = ?
+            ORDER BY created_at DESC
         `;
-        const [rows] = await pool.query(query, [req.user.id]);
+        const [rows] = await pool.query(query, [userId, userId, userId, userId]);
         res.json(rows);
     } catch (e) {
         console.error('Author Likes Error:', e);
@@ -3920,8 +3933,24 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
             pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending'", [userId]),
             pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
-            pool.query("SELECT COUNT(l.id) as count FROM likes l JOIN articles a ON l.article_id = a.id WHERE a.author_id = ?", [userId]),
-            pool.query("SELECT COUNT(c.id) as count FROM comments c JOIN articles a ON c.article_id = a.id WHERE a.author_id = ?", [userId]),
+            pool.query(`
+                SELECT COUNT(DISTINCT l.id) as count 
+                FROM likes l 
+                LEFT JOIN articles a ON l.article_id = a.id 
+                LEFT JOIN article_authors aa ON a.id = aa.article_id
+                LEFT JOIN experiments e ON l.experiment_id = e.id 
+                LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id 
+                WHERE a.author_id = ? OR aa.user_id = ? OR e.author_id = ? OR ea.user_id = ?
+            `, [userId, userId, userId, userId]),
+            pool.query(`
+                SELECT COUNT(DISTINCT c.id) as count 
+                FROM comments c 
+                LEFT JOIN articles a ON c.article_id = a.id 
+                LEFT JOIN article_authors aa ON a.id = aa.article_id
+                LEFT JOIN experiments e ON c.experiment_id = e.id 
+                LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id 
+                WHERE a.author_id = ? OR aa.user_id = ? OR e.author_id = ? OR ea.user_id = ?
+            `, [userId, userId, userId, userId]),
             pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL", [userId, userId]),
             pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'pending' AND e.deleted_at IS NULL", [userId, userId]),
             pool.query("SELECT SUM(views) as count FROM (SELECT DISTINCT e.id, e.views FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL) t", [userId, userId])
@@ -3949,22 +3978,23 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
 
         // Get all articles and experiments with their view counts, like counts AND COMMENT counts
         const [items] = await pool.query(`
-            SELECT 
+            SELECT DISTINCT
                 a.id, a.title, a.created_at, a.published_at, a.views, 'article' as type,
                 (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as likes,
                 (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comments
             FROM articles a
-            WHERE a.author_id = ? AND a.status = 'published'
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            WHERE (a.author_id = ? OR aa.user_id = ?) AND a.status = 'published'
             UNION ALL
             SELECT DISTINCT
                 e.id, e.title, e.created_at, e.published_at, e.views, 'experiment' as type,
-                0 as likes,
-                0 as comments
+                (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as likes,
+                (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comments
             FROM experiments e
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL
             ORDER BY COALESCE(published_at, created_at) DESC
-        `, [userId, userId, userId]);
+        `, [userId, userId, userId, userId]);
 
         // Calculate totals
         let totalViews = 0;
@@ -3972,9 +4002,9 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
         let totalComments = 0;
 
         items.forEach(item => {
-            totalViews += item.views;
-            totalLikes += item.likes;
-            totalComments += item.comments;
+            totalViews += (item.views || 0);
+            totalLikes += (item.likes || 0);
+            totalComments += (item.comments || 0);
         });
 
         res.json({
@@ -3988,19 +4018,22 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
     }
 });
 
-// Get recent comments for author's articles
+// Get recent comments for author's articles and experiments
 app.get('/api/author/comments', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const [comments] = await pool.query(`
-            SELECT c.*, u.fullname as user_name, a.title as article_title
+            SELECT DISTINCT c.*, u.fullname as user_name, COALESCE(a.title, e.title) as article_title
             FROM comments c
-            JOIN articles a ON c.article_id = a.id
+            LEFT JOIN articles a ON c.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            LEFT JOIN experiments e ON c.experiment_id = e.id
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             JOIN users u ON c.user_id = u.id
-            WHERE a.author_id = ?
+            WHERE a.author_id = ? OR aa.user_id = ? OR e.author_id = ? OR ea.user_id = ?
             ORDER BY c.created_at DESC
             LIMIT 20
-        `, [userId]);
+        `, [userId, userId, userId, userId]);
         res.json(comments);
     } catch (e) {
         res.status(500).send(e.toString());
