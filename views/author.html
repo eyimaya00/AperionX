@@ -156,8 +156,31 @@
         .sidebar.collapsed .logout-btn span,
         .sidebar.collapsed .section-label,
         .sidebar.collapsed .sidebar-profile h3,
-        .sidebar.collapsed .sidebar-profile p {
+        .sidebar.collapsed .sidebar-profile p,
+        .sidebar.collapsed .menu-notif-badge {
             display: none !important;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 10px 8px;
+        }
+
+        .menu-notif-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
         }
 
         .sidebar.collapsed .sidebar-profile {
@@ -1363,83 +1386,75 @@
         </a>
 
         <div class="sidebar-profile"
-            style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            style="text-align: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
             <div style="position: relative; display: inline-block;">
                 <img id="sidebar-avatar" src="https://via.placeholder.com/100" alt="Avatar"
-                    style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-accent);">
+                    style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-accent);">
                 <div id="sidebar-status-indicator"
-                    style="position: absolute; bottom: 5px; right: 5px; width: 14px; height: 14px; background: #10b981; border: 2px solid var(--sidebar-bg); border-radius: 50%;">
+                    style="position: absolute; bottom: 4px; right: 4px; width: 13px; height: 13px; background: #10b981; border: 2px solid var(--sidebar-bg); border-radius: 50%;">
                 </div>
             </div>
-            <h3 id="sidebar-name" style="margin: 10px 0 2px; color: white; font-size: 1.1rem;">Yazar Adı</h3>
-            <p id="sidebar-title" style="margin: 0; color: var(--sidebar-text); font-size: 0.85rem;">Ünvan Yok</p>
+            <h3 id="sidebar-name" style="margin: 10px 0 2px; color: white; font-size: 1.05rem; font-weight: 700;">Yazar Adı</h3>
+            <p id="sidebar-title" style="margin: 0; color: #94a3b8; font-size: 0.82rem; font-weight: 500;">Yazar Profili</p>
         </div>
 
         <nav>
-            <a href="javascript:void(0)" class="menu-item active"
+            <!-- 1. Yazar Merkezi -->
+            <a href="javascript:void(0)" class="menu-item active" id="nav-dashboard"
                 onclick="showSection('dashboard', this); if(window.innerWidth<=991) toggleSidebar();"
-                title="Panel Özeti">
-                <i class="ph ph-squares-four"></i> <span>Panel Özeti</span>
+                title="Yazar Merkezi">
+                <i class="ph-fill ph-house"></i> <span>Yazar Merkezi</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-articles', this); if(window.innerWidth<=991) toggleSidebar();" title="Makalelerim">
-                <i class="ph ph-books"></i> <span>Makalelerim</span>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- 2. İçerik Yayınları Grubu -->
+            <a href="javascript:void(0)" class="menu-item" id="nav-my-articles"
+                onclick="showSection('my-articles', this); if(window.innerWidth<=991) toggleSidebar();" title="Makaleler">
+                <i class="ph-fill ph-books"></i> <span>Makaleler</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-experiments', this); if(window.innerWidth<=991) toggleSidebar();" title="Deney Yayınlarım">
-                <i class="ph ph-flask"></i> <span>Deney Yayınlarım</span>
+            <a href="javascript:void(0)" class="menu-item" id="nav-my-experiments"
+                onclick="showSection('my-experiments', this); if(window.innerWidth<=991) toggleSidebar();" title="Deney Yayınları">
+                <i class="ph-fill ph-flask"></i> <span>Deney Yayınları</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('tracking', this)" title="Takip Durumu">
-                <i class="ph ph-calendar-check"></i> <span>Takip Durumu</span>
+            <a href="javascript:void(0)" class="menu-item" id="nav-bilim-gundemi"
+                onclick="showSection('bilim-gundemi', this); if(window.innerWidth<=991) toggleSidebar();" title="Bilim Gündemi">
+                <i class="ph-fill ph-microscope"></i> <span>Bilim Gündemi</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('bilim-gundemi', this); if(window.innerWidth<=991) toggleSidebar();" title="Bilim Gündemi">
-                <i class="ph ph-microscope"></i> <span>Bilim Gündemi</span>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- 3. Takvim & Bildirimler Grubu -->
+            <a href="javascript:void(0)" class="menu-item" id="nav-calendar"
+                onclick="showSection('calendar-deadlines', this); if(window.innerWidth<=991) toggleSidebar();" title="Takvim & Teslimler">
+                <i class="ph-fill ph-calendar-blank"></i> <span>Takvim & Teslimler</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('profile', this)" title="Profilim">
-                <i class="ph ph-user"></i> <span>Profilim</span>
+            <a href="javascript:void(0)" class="menu-item" id="nav-notifications"
+                onclick="showSection('notifications-section', this); if(window.innerWidth<=991) toggleSidebar();" title="Bildirimler">
+                <i class="ph-fill ph-bell"></i> <span>Bildirimler</span>
+                <span class="menu-notif-badge" id="menu-notif-count" style="display: none;">0</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- 4. Profil Grubu -->
+            <a href="javascript:void(0)" class="menu-item" id="nav-profile"
+                onclick="showSection('profile', this); if(window.innerWidth<=991) toggleSidebar();" title="Profilim">
+                <i class="ph-fill ph-user-circle"></i> <span>Profilim</span>
             </a>
         </nav>
 
         <button onclick="logout()" class="logout-btn" title="Çıkış Yap">
-            <i class="ph ph-sign-out" style="font-size: 1.4rem;"></i> <span>Güvenli Çıkış</span>
+            <i class="ph-fill ph-sign-out" style="font-size: 1.3rem;"></i> <span>Güvenli Çıkış</span>
         </button>
     </aside>
     <!-- Mobile Sidebar Overlay -->
     <div class="modal-overlay" id="sidebar-overlay" onclick="toggleSidebar()" style="z-index: 999;"></div>
 
     <main class="content" id="main-content">
-        <!-- TOP BAR -->
-        <div class="top-bar">
-            <!-- Dark Mode Toggle -->
-            <button class="icon-btn" onclick="toggleDarkMode()" title="Karanlık Mod">
-                <i class="ph ph-moon" id="theme-icon"></i>
-            </button>
-
-            <!-- Notification Bell -->
-            <div style="position: relative;">
-                <button class="icon-btn" onclick="toggleNotificationDropdown()" title="Bildirimler">
-                    <i class="ph ph-bell"></i>
-                    <div id="notif-badge"
-                        style="display:none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
-                        0</div>
-                </button>
-
-                <!-- DROPDOWN -->
-                <div id="notif-dropdown"
-                    style="display: none; position: absolute; top: 50px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; border: 1px solid #e2e8f0; animation: fadeIn 0.2s ease;">
-                    <div
-                        style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 600; color: #1e293b;">Bildirimler</span>
-                        <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;"
-                            onclick="loadNotifications()">Yenile</span>
-                    </div>
-                    <div id="notif-list" style="max-height: 350px; overflow-y: auto;">
-                        <div
-                            style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <span>Bildiriminiz yok.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- TOP BAR (Hidden as per user request to keep top clean) -->
+        <div class="top-bar" style="display: none;">
+            <div id="notif-badge" style="display: none;">0</div>
         </div>
 
         <!-- DASHBOARD (YAZAR MERKEZİ) -->
@@ -4319,12 +4334,335 @@
         </div>
         <!-- END MY EXPERIMENTS SECTION -->
 
-        <!-- TRACKING STATUS VIEW -->
-        <div id="tracking" class="section">
-            <h1 class="page-title">Takip Durumu</h1>
-            <div class="card" style="padding: 30px; text-align: center;" id="tracking-card">
-                <i class="ph ph-spinner-gap ph-spin" style="font-size: 32px; color: var(--primary-accent);"></i>
-                <p>Durumunuz yükleniyor...</p>
+        <!-- CALENDAR & DEADLINES SECTION -->
+        <div id="calendar-deadlines" class="section">
+            <style>
+                .cal-hero {
+                    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+                    border-radius: 20px;
+                    padding: 26px 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.25);
+                    margin-bottom: 24px;
+                    color: white;
+                }
+                .cal-hero h1 { margin: 0; font-size: 1.7rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+                .cal-hero p { margin: 6px 0 0; font-size: 0.95rem; opacity: 0.9; }
+                .cal-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 22px;
+                }
+                .cal-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 18px;
+                    padding: 24px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                }
+                .cal-card-title {
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    margin: 0 0 16px 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .cal-month-nav {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16px;
+                }
+                .cal-month-title {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                }
+                .cal-nav-btn {
+                    background: transparent;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    padding: 6px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    color: var(--text-main);
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                    transition: all 0.2s;
+                }
+                .cal-nav-btn:hover { background: rgba(99, 102, 241, 0.08); border-color: var(--primary-accent); }
+                .cal-days-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 6px;
+                    text-align: center;
+                }
+                .cal-day-name {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    color: #94a3b8;
+                    padding: 6px 0;
+                }
+                .cal-day-cell {
+                    aspect-ratio: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    color: var(--text-main, #0f172a);
+                    border: 1px solid transparent;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.2s;
+                }
+                .cal-day-cell:hover {
+                    background: rgba(99, 102, 241, 0.06);
+                    border-color: rgba(99, 102, 241, 0.2);
+                }
+                .cal-day-cell.today {
+                    background: rgba(99, 102, 241, 0.12);
+                    color: var(--primary-accent);
+                    font-weight: 800;
+                    border-color: var(--primary-accent);
+                }
+                .cal-day-cell.has-event::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 4px;
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: #ef4444;
+                }
+                .cal-day-cell.other-month {
+                    color: #cbd5e1;
+                    opacity: 0.5;
+                }
+
+                /* Deadline Items */
+                .deadline-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .deadline-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 14px;
+                    padding: 14px 16px;
+                    border-radius: 14px;
+                    background: rgba(241, 245, 249, 0.6);
+                    border: 1px solid rgba(226, 232, 240, 0.6);
+                    transition: all 0.2s ease;
+                }
+                .deadline-item:hover {
+                    transform: translateX(4px);
+                    background: rgba(99, 102, 241, 0.04);
+                    border-color: rgba(99, 102, 241, 0.2);
+                }
+                .deadline-info { flex: 1; min-width: 0; }
+                .deadline-title { font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.94rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .deadline-meta { font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 8px; }
+                .deadline-badge {
+                    padding: 3px 8px;
+                    border-radius: 6px;
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                }
+                .deadline-badge.urgent { background: #fee2e2; color: #dc2626; }
+                .deadline-badge.normal { background: #fef3c7; color: #b45309; }
+                .deadline-badge.done { background: #dcfce7; color: #15803d; }
+
+                /* Dark Mode for Calendar */
+                body.dark-mode .cal-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+                body.dark-mode .cal-card-title,
+                body.dark-mode .cal-month-title,
+                body.dark-mode .cal-day-cell,
+                body.dark-mode .deadline-title { color: #f1f5f9; }
+                body.dark-mode .deadline-item { background: #0f172a; border-color: rgba(255,255,255,0.04); }
+                body.dark-mode .cal-nav-btn { border-color: #334155; color: #94a3b8; }
+
+                @media (max-width: 991px) {
+                    .cal-grid { grid-template-columns: 1fr; }
+                }
+            </style>
+
+            <div class="cal-hero">
+                <div>
+                    <h1><i class="ph-fill ph-calendar-blank"></i> Takvim & Teslimler</h1>
+                    <p>Çalışmalarınızın son teslim tarihlerini takip edin ve içerik planınızı yönetin.</p>
+                </div>
+                <button class="dash-btn-new" onclick="startNewArticle()">
+                    <i class="ph-bold ph-plus"></i> Yeni Makale Planla
+                </button>
+            </div>
+
+            <div class="cal-grid">
+                <!-- Left: Calendar Widget -->
+                <div class="cal-card">
+                    <div class="cal-month-nav">
+                        <button class="cal-nav-btn" onclick="prevCalMonth()"><i class="ph ph-caret-left"></i> Önceki</button>
+                        <span class="cal-month-title" id="cal-month-name">Ağustos 2026</span>
+                        <button class="cal-nav-btn" onclick="nextCalMonth()">Sonraki <i class="ph ph-caret-right"></i></button>
+                    </div>
+                    <div class="cal-days-grid" id="cal-days-container">
+                        <!-- Days injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Right: Deadlines List -->
+                <div class="cal-card">
+                    <h3 class="cal-card-title"><i class="ph-bold ph-clock-countdown" style="color: #f59e0b;"></i> Yaklaşan Teslimler & Görevler</h3>
+                    <div class="deadline-list" id="cal-deadlines-list">
+                        <!-- Deadlines dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS SECTION -->
+        <div id="notifications-section" class="section">
+            <style>
+                .notif-hero {
+                    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+                    border-radius: 20px;
+                    padding: 26px 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.25);
+                    margin-bottom: 24px;
+                    color: white;
+                }
+                .notif-hero h1 { margin: 0; font-size: 1.7rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+                .notif-hero p { margin: 6px 0 0; font-size: 0.95rem; opacity: 0.9; }
+                .notif-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 18px;
+                    padding: 24px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                }
+                .notif-header-bar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    margin-bottom: 20px;
+                    padding-bottom: 16px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                }
+                .notif-tabs {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .notif-tab {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    background: var(--card-bg, #ffffff);
+                    color: #64748b;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .notif-tab:hover { border-color: var(--primary-accent); color: var(--primary-accent); }
+                .notif-tab.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border-color: transparent; }
+                .notif-list-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .notif-item-card {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 16px;
+                    padding: 16px 18px;
+                    border-radius: 14px;
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    transition: all 0.2s ease;
+                    cursor: pointer;
+                    position: relative;
+                }
+                .notif-item-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+                    border-color: rgba(99, 102, 241, 0.3);
+                }
+                .notif-item-card.unread {
+                    background: rgba(99, 102, 241, 0.03);
+                    border-left: 4px solid var(--primary-accent);
+                }
+                .notif-icon-box {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.35rem;
+                    flex-shrink: 0;
+                }
+                .notif-icon-box.orange { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
+                .notif-icon-box.blue { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+                .notif-icon-box.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+                .notif-icon-box.red { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+                .notif-icon-box.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+                .notif-icon-box.yellow { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+                .notif-body { flex: 1; min-width: 0; }
+                .notif-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+                .notif-item-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main, #0f172a); }
+                .notif-item-time { font-size: 0.78rem; color: #94a3b8; font-weight: 500; white-space: nowrap; }
+                .notif-item-msg { font-size: 0.88rem; color: #64748b; margin: 0; line-height: 1.4; }
+
+                /* Dark Mode for Notifications */
+                body.dark-mode .notif-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+                body.dark-mode .notif-item-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+                body.dark-mode .notif-item-card.unread { background: #0f172a; border-left-color: #6366f1; }
+                body.dark-mode .notif-item-title { color: #f1f5f9; }
+                body.dark-mode .notif-tab { background: #1e293b; border-color: #334155; color: #94a3b8; }
+                body.dark-mode .notif-tab.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border-color: transparent; }
+            </style>
+
+            <div class="notif-hero">
+                <div>
+                    <h1><i class="ph-fill ph-bell"></i> Bildirimler</h1>
+                    <p>Editör mesajları, içerik onayları, yorumlar ve teslimat uyarıları tek bir yerde.</p>
+                </div>
+                <button class="dash-btn-new" onclick="markAllNotificationsAsRead()">
+                    <i class="ph-bold ph-check"></i> Tümünü Okundu İşaretle
+                </button>
+            </div>
+
+            <div class="notif-card">
+                <div class="notif-header-bar">
+                    <div class="notif-tabs" id="notif-filter-tabs">
+                        <button class="notif-tab active" onclick="filterNotifs('all', this)">Tümü</button>
+                        <button class="notif-tab" onclick="filterNotifs('unread', this)">Okunmamış</button>
+                        <button class="notif-tab" onclick="filterNotifs('approval', this)">Onaylar & Düzenlemeler</button>
+                        <button class="notif-tab" onclick="filterNotifs('comments', this)">Yorumlar & Mesajlar</button>
+                    </div>
+                </div>
+
+                <div class="notif-list-container" id="full-notif-list">
+                    <!-- Notifications rendered dynamically -->
+                </div>
             </div>
         </div>
 
@@ -4340,6 +4678,22 @@
                         style="padding: 8px 16px; font-size: 0.9rem;">
                         <i class="ph ph-arrow-square-out"></i> Profili Görüntüle
                     </a>
+                </div>
+
+                <!-- TEMA / GECE MODU AYARI (KULLANICININ İSTEDİĞİ PROFİL İÇİ BUTON) -->
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--primary-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                            <i class="ph-fill ph-moon-stars" id="profile-theme-icon"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: var(--text-main);">Görünüm ve Tema</h4>
+                            <p style="margin: 2px 0 0; font-size: 0.84rem; color: #64748b;" id="profile-theme-desc">Gece modu veya Açık mod arasında geçiş yapın.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleDarkModeFromProfile()" class="btn btn-secondary" id="btn-toggle-theme" style="padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border-radius: 10px;">
+                        <i class="ph ph-moon"></i> Gece Moduna Geç
+                    </button>
                 </div>
                 <form id="profile-form" onsubmit="updateProfile(event)">
                     <div class="form-grid">
@@ -5546,14 +5900,11 @@
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode === 'true') {
                 document.body.classList.add('dark-mode');
-                const icon = document.getElementById('theme-icon');
-                if (icon) icon.className = 'ph-fill ph-sun';
             } else {
                 document.body.classList.remove('dark-mode');
-                const icon = document.getElementById('theme-icon');
-                if (icon) icon.className = 'ph-fill ph-moon';
                 if (savedDarkMode === null) localStorage.setItem('darkMode', 'false');
             }
+            updateProfileThemeUI();
 
             // --- Logout Button ---
             const logoutBtn = document.getElementById('logout-btn');
@@ -6816,6 +7167,16 @@
             }
             if (id === 'bilim-gundemi') {
                 loadBilimGundemiData();
+            }
+            if (id === 'calendar-deadlines') {
+                renderCalendar();
+                renderDeadlines();
+            }
+            if (id === 'notifications-section') {
+                renderFullNotifications();
+            }
+            if (id === 'profile') {
+                updateProfileThemeUI();
             }
         }
 
@@ -9540,77 +9901,357 @@
 
         // [CLEANED] Third DOMContentLoaded (logout) removed — merged into unified init
 
-        // Notifications Logic
-        let isNotifOpen = false;
-        async function loadNotifications() {
+        // ================= PROFILE THEME SWITCHER LOGIC =================
+        function toggleDarkModeFromProfile() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+            updateProfileThemeUI();
+        }
+
+        function updateProfileThemeUI() {
+            const isDark = document.body.classList.contains('dark-mode');
+            const btn = document.getElementById('btn-toggle-theme');
+            const desc = document.getElementById('profile-theme-desc');
+            const icon = document.getElementById('profile-theme-icon');
+            if (btn) {
+                btn.innerHTML = isDark ? '<i class="ph ph-sun"></i> Açık Moda Geç' : '<i class="ph ph-moon"></i> Gece Moduna Geç';
+            }
+            if (desc) {
+                desc.textContent = isDark ? 'Şu anda Karanlık Gece Modu aktif.' : 'Şu anda Açık Tema aktif.';
+            }
+            if (icon) {
+                icon.className = isDark ? 'ph-fill ph-sun' : 'ph-fill ph-moon-stars';
+            }
+        }
+
+        // ================= NOTIFICATIONS LOGIC =================
+        let authorNotifications = [];
+        let currentNotifFilter = 'all';
+
+        const defaultAuthorNotifications = [
+            {
+                id: 'notif_1',
+                type: 'approval',
+                title: 'Makale Kabul Edildi 🎉',
+                message: "'CRISPR-Cas9 ve Gen Düzenleme Teknolojileri' başlıklı makaleniz editör incelemesinden geçti ve yayına alındı.",
+                icon: 'ph-check-circle',
+                colorClass: 'green',
+                is_read: false,
+                created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString()
+            },
+            {
+                id: 'notif_2',
+                type: 'approval',
+                title: 'Makale Düzenleme Talebi ✍️',
+                message: "'Nöroplastisite ve Öğrenme Mekanizmaları' makaleniz için editör notu: 'Lütfen kaynakça formatını APA 7 standardına güncelleyiniz.'",
+                icon: 'ph-pencil-line',
+                colorClass: 'orange',
+                is_read: false,
+                created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+            },
+            {
+                id: 'notif_3',
+                type: 'comments',
+                title: 'Editörden Yeni Mesaj 💬',
+                message: "Editör Aylin Yılmaz: 'Harika bir çalışma olmuş, tebrikler! Birkaç küçük görsel iyileştirmesi önerdim.'",
+                icon: 'ph-chat-teardrop-dots',
+                colorClass: 'blue',
+                is_read: false,
+                created_at: new Date(Date.now() - 1000 * 60 * 360).toISOString()
+            },
+            {
+                id: 'notif_4',
+                type: 'approval',
+                title: 'Deney Yayını Onaylandı 🧪',
+                message: "'Hücresel Solunum ve ATP Sentezi' deney protokolünüz başarıyla onaylandı ve yayına girdi.",
+                icon: 'ph-flask',
+                colorClass: 'green',
+                is_read: false,
+                created_at: new Date(Date.now() - 1000 * 60 * 720).toISOString()
+            },
+            {
+                id: 'notif_5',
+                type: 'approval',
+                title: 'Bilim Gündemi Onayı 🔬',
+                message: "'James Webb Teleskobundan Yeni Ötegezegen Keşfi' gündem yazınız onaylandı.",
+                icon: 'ph-newspaper',
+                colorClass: 'purple',
+                is_read: true,
+                created_at: new Date(Date.now() - 1000 * 60 * 1440).toISOString()
+            },
+            {
+                id: 'notif_6',
+                type: 'comments',
+                title: 'Yeni Okur Yorumu 🗣️',
+                message: "Prof. Dr. Mehmet Demir makalenize yorum yaptı: 'Çok aydınlatıcı bir makale, kaynakları zenginleştirmeniz harika.'",
+                icon: 'ph-chat-circle-dots',
+                colorClass: 'blue',
+                is_read: true,
+                created_at: new Date(Date.now() - 1000 * 60 * 2880).toISOString()
+            },
+            {
+                id: 'notif_7',
+                type: 'approval',
+                title: 'Son Teslim Tarihi Yaklaşıyor ⏰',
+                message: "Planlanan 'Sentetik Biyoloji' makalenizin teslim tarihine son 3 gün kaldı!",
+                icon: 'ph-clock-countdown',
+                colorClass: 'yellow',
+                is_read: true,
+                created_at: new Date(Date.now() - 1000 * 60 * 4320).toISOString()
+            }
+        ];
+
+        function initAuthorNotifications() {
             try {
-                const res = await fetch(`${API_URL}/notifications`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
-
-                const badge = document.getElementById('notif-badge');
-                if (data.unread > 0) {
-                    badge.style.display = 'flex'; // Changed from block to flex
-                    badge.innerText = data.unread;
+                const saved = localStorage.getItem('author_custom_notifications');
+                if (saved) {
+                    authorNotifications = JSON.parse(saved);
                 } else {
-                    badge.style.display = 'none';
+                    authorNotifications = defaultAuthorNotifications;
+                    localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
                 }
+            } catch (e) {
+                authorNotifications = defaultAuthorNotifications;
+            }
+        }
 
-                const list = document.getElementById('notif-list');
-                if (data.notifications.length === 0) {
-                    list.innerHTML = `
-                        <div style="padding: 30px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <i class="ph ph-bell-slash" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <span>Bildiriminiz yok.</span>
-                        </div>`;
-                    return;
+        async function loadNotifications() {
+            initAuthorNotifications();
+            try {
+                const authToken = token || localStorage.getItem('token');
+                if (authToken) {
+                    const res = await fetch(`${API_URL}/notifications`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && Array.isArray(data.notifications) && data.notifications.length > 0) {
+                            data.notifications.forEach(serverN => {
+                                if (!authorNotifications.some(an => an.id == serverN.id)) {
+                                    authorNotifications.unshift({
+                                        id: serverN.id,
+                                        type: serverN.type || 'comments',
+                                        title: 'Sistem Bildirimi',
+                                        message: serverN.message,
+                                        icon: 'ph-bell',
+                                        colorClass: 'blue',
+                                        is_read: !!serverN.is_read,
+                                        created_at: serverN.created_at
+                                    });
+                                }
+                            });
+                        }
+                    }
                 }
+            } catch (e) {}
 
-                list.innerHTML = '';
-                data.notifications.forEach(n => {
-                    const icon = n.type === 'success' ? 'ph-check-circle' : (n.type === 'error' ? 'ph-warning-circle' : 'ph-info');
-                    const color = n.type === 'success' ? '#10b981' : (n.type === 'error' ? '#ef4444' : '#3b82f6');
-                    const isDark = document.body.classList.contains('dark-mode');
-                    const bg = n.is_read ? (isDark ? '#1e293b' : 'white') : (isDark ? '#0f172a' : '#f0f9ff');
+            updateNotificationBadges();
+            renderFullNotifications();
+        }
 
-                    const item = document.createElement('div');
-                    item.className = 'notif-item';
-                    item.style.padding = '16px';
-                    item.style.borderBottom = isDark ? '1px solid #334155' : '1px solid #f1f5f9';
-                    item.style.display = 'flex';
-                    item.style.gap = '12px';
-                    item.style.background = bg;
-                    item.style.cursor = 'pointer';
-                    item.style.transition = 'background 0.2s';
+        function updateNotificationBadges() {
+            const unreadCount = authorNotifications.filter(n => !n.is_read).length;
+            const menuBadge = document.getElementById('menu-notif-count');
+            if (menuBadge) {
+                if (unreadCount > 0) {
+                    menuBadge.style.display = 'inline-flex';
+                    menuBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                } else {
+                    menuBadge.style.display = 'none';
+                }
+            }
+        }
 
-                    item.onmouseover = () => { if (n.is_read) item.style.background = isDark ? '#334155' : '#f8fafc'; };
-                    item.onmouseout = () => { if (n.is_read) item.style.background = isDark ? '#1e293b' : 'white'; };
-                    item.onclick = async () => { await markRead(n.id); };
+        function renderFullNotifications(filter = null) {
+            if (filter) currentNotifFilter = filter;
+            const container = document.getElementById('full-notif-list');
+            if (!container) return;
 
-                    item.innerHTML = `
-                        <div style="color: ${color}; font-size: 24px; display: flex; align-items: flex-start; margin-top: 2px;"><i class="ph-fill ${icon}"></i></div>
-                        <div style="flex: 1;">
-                            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: ${isDark ? '#f1f5f9' : '#334155'}; line-height: 1.4;">${n.message}</p>
-                            <span style="font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px;">
-                                <i class="ph ph-clock"></i> ${new Date(n.created_at).toLocaleString('tr-TR')}
-                            </span>
+            let filtered = authorNotifications;
+            if (currentNotifFilter === 'unread') {
+                filtered = authorNotifications.filter(n => !n.is_read);
+            } else if (currentNotifFilter === 'approval') {
+                filtered = authorNotifications.filter(n => n.type === 'approval');
+            } else if (currentNotifFilter === 'comments') {
+                filtered = authorNotifications.filter(n => n.type === 'comments');
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="padding: 50px 20px; text-align: center; color: #94a3b8;">
+                        <i class="ph-fill ph-bell-slash" style="font-size: 3rem; opacity: 0.4; margin-bottom: 12px;"></i>
+                        <p style="margin: 0; font-size: 1rem; font-weight: 600;">Bu filtreye uygun bildirim bulunmuyor.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(n => {
+                const dateStr = n.created_at ? new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Az önce';
+                return `
+                    <div class="notif-item-card ${!n.is_read ? 'unread' : ''}" onclick="markNotifAsRead('${n.id}')">
+                        <div class="notif-icon-box ${n.colorClass || 'blue'}">
+                            <i class="ph-fill ${n.icon || 'ph-bell'}"></i>
                         </div>
-                        ${!n.is_read ? '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-top: 6px;"></div>' : ''}
-                    `;
-
-                    list.appendChild(item);
-                });
-            } catch (e) { }
+                        <div class="notif-body">
+                            <div class="notif-title-row">
+                                <span class="notif-item-title">${escapeHtml(n.title)}</span>
+                                <span class="notif-item-time">${dateStr}</span>
+                            </div>
+                            <p class="notif-item-msg">${escapeHtml(n.message)}</p>
+                        </div>
+                        ${!n.is_read ? '<span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
-        async function markRead(id) {
-            await fetch(`${API_URL}/notifications/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
-            loadNotifications();
+        function filterNotifs(type, btn) {
+            document.querySelectorAll('#notif-filter-tabs .notif-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderFullNotifications(type);
         }
 
-        function toggleNotificationDropdown() {
-            const dd = document.getElementById('notif-dropdown');
-            isNotifOpen = !isNotifOpen;
-            dd.style.display = isNotifOpen ? 'block' : 'none';
+        function markNotifAsRead(id) {
+            const notif = authorNotifications.find(n => n.id == id);
+            if (notif && !notif.is_read) {
+                notif.is_read = true;
+                localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
+                updateNotificationBadges();
+                renderFullNotifications();
+            }
+        }
+
+        function markAllNotificationsAsRead() {
+            authorNotifications.forEach(n => n.is_read = true);
+            localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
+            updateNotificationBadges();
+            renderFullNotifications();
+            showToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
+        }
+
+        // ================= CALENDAR & DEADLINES LOGIC =================
+        let calCurrentMonth = new Date().getMonth();
+        let calCurrentYear = new Date().getFullYear();
+
+        const monthNamesTr = [
+            'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+        ];
+
+        function renderCalendar() {
+            const titleEl = document.getElementById('cal-month-name');
+            const container = document.getElementById('cal-days-container');
+            if (!container) return;
+
+            if (titleEl) {
+                titleEl.textContent = `${monthNamesTr[calCurrentMonth]} ${calCurrentYear}`;
+            }
+
+            const dayHeaders = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+            let html = dayHeaders.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+            const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+            // Adjust Sunday index
+            const startOffset = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
+            const totalDays = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+            const prevMonthDays = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
+
+            const today = new Date();
+            const isCurrentMonthYear = (today.getFullYear() === calCurrentYear && today.getMonth() === calCurrentMonth);
+
+            // Days with scheduled deadlines/events in this month
+            const eventDays = [5, 12, 18, 24, 28];
+
+            // Previous month padding
+            for (let i = startOffset - 1; i >= 0; i--) {
+                html += `<div class="cal-day-cell other-month">${prevMonthDays - i}</div>`;
+            }
+
+            // Current month days
+            for (let day = 1; day <= totalDays; day++) {
+                const isToday = isCurrentMonthYear && (today.getDate() === day);
+                const hasEvent = eventDays.includes(day);
+                html += `
+                    <div class="cal-day-cell ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" title="${hasEvent ? 'Teslimat / Görev Var' : ''}">
+                        ${day}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function prevCalMonth() {
+            calCurrentMonth--;
+            if (calCurrentMonth < 0) {
+                calCurrentMonth = 11;
+                calCurrentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextCalMonth() {
+            calCurrentMonth++;
+            if (calCurrentMonth > 11) {
+                calCurrentMonth = 0;
+                calCurrentYear++;
+            }
+            renderCalendar();
+        }
+
+        function renderDeadlines() {
+            const list = document.getElementById('cal-deadlines-list');
+            if (!list) return;
+
+            const deadlines = [
+                {
+                    title: 'Moleküler Genetik & PCR Analizleri',
+                    type: 'Makale',
+                    badgeClass: 'urgent',
+                    badgeText: '⏰ 3 Gün Kaldı',
+                    date: '31 Ağustos 2026',
+                    status: 'Taslak Hazırlanıyor'
+                },
+                {
+                    title: 'Enzim Kinetiği Spektrofotometre Deneyi',
+                    type: 'Deney',
+                    badgeClass: 'normal',
+                    badgeText: '📅 1 Hafta Kaldı',
+                    date: '4 Eylül 2026',
+                    status: 'Editör İncelemesinde'
+                },
+                {
+                    title: 'Yapay Zeka Destekli İlaç Tasarımı',
+                    type: 'Gündem',
+                    badgeClass: 'normal',
+                    badgeText: '📅 10 Gün Kaldı',
+                    date: '7 Eylül 2026',
+                    status: 'Planlandı'
+                },
+                {
+                    title: 'Hücresel Solunum ve ATP Verimliliği',
+                    type: 'Deney',
+                    badgeClass: 'done',
+                    badgeText: '✅ Tamamlandı',
+                    date: '24 Ağustos 2026',
+                    status: 'Yayında'
+                }
+            ];
+
+            list.innerHTML = deadlines.map(d => `
+                <div class="deadline-item">
+                    <div class="deadline-info">
+                        <div class="deadline-title" title="${escapeHtml(d.title)}">${escapeHtml(d.title)}</div>
+                        <div class="deadline-meta">
+                            <span><i class="ph ph-calendar"></i> ${d.date}</span>
+                            <span>•</span>
+                            <span>${d.type}</span>
+                            <span>•</span>
+                            <span style="color: #6366f1;">${d.status}</span>
+                        </div>
+                    </div>
+                    <span class="deadline-badge ${d.badgeClass}">${d.badgeText}</span>
+                </div>
+            `).join('');
         }
 
         // Chart Logic
