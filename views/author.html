@@ -7733,22 +7733,29 @@
             }
         }
 
-        async function deleteExperiment(id) {
-            if (!confirm('Bu deneyi çöpe taşımak istediğinize emin misiniz?')) return;
-            try {
-                const res = await fetch(`${API_URL}/experiments/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showAuthorToast('Deney çöpe taşındı.', 'success');
-                    loadMyExperiments();
-                } else {
-                    showAuthorToast('Deney çöpe taşınamadı.', 'error');
+        function deleteExperiment(id) {
+            document.getElementById('confirm-modal').classList.add('show');
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.innerText = "Evet, Çöpe Taşı";
+            document.getElementById('modal-desc-text').innerText = "Bu deney çöp kutusuna taşınacak. Daha sonra geri yükleyebilirsiniz.";
+            btn.onclick = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/experiments/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    closeConfirmModal();
+                    if (res.ok) {
+                        showAuthorToast('Deney çöpe taşındı.', 'success');
+                        loadMyExperiments();
+                    } else {
+                        showAuthorToast('Deney çöpe taşınamadı.', 'error');
+                    }
+                } catch (e) {
+                    closeConfirmModal();
+                    showAuthorToast('Silme esnasında hata oluştu.', 'error');
                 }
-            } catch (e) {
-                showAuthorToast('Silme esnasında hata oluştu.', 'error');
-            }
+            };
         }
 
         let myTrash = [];
@@ -7766,41 +7773,55 @@
             }
         }
 
-        async function restoreExperiment(id) {
-            if (!confirm('Bu deneyi geri almak istediğinize emin misiniz?')) return;
-            try {
-                const res = await fetch(`${API_URL}/experiments/${id}/restore`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showAuthorToast('Deney başarıyla geri alındı.', 'success');
-                    loadMyTrash();
-                    loadMyExperiments();
-                } else {
-                    showAuthorToast('Geri alınamadı.', 'error');
+        function restoreExperiment(id) {
+            document.getElementById('confirm-modal').classList.add('show');
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.innerText = "Evet, Geri Al";
+            document.getElementById('modal-desc-text').innerText = "Bu deney çöp kutusundan geri yüklenecektir.";
+            btn.onclick = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/experiments/${id}/restore`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    closeConfirmModal();
+                    if (res.ok) {
+                        showAuthorToast('Deney başarıyla geri alındı.', 'success');
+                        loadMyTrash();
+                        loadMyExperiments();
+                    } else {
+                        showAuthorToast('Geri alınamadı.', 'error');
+                    }
+                } catch (e) {
+                    closeConfirmModal();
+                    showAuthorToast('Geri alma esnasında hata oluştu.', 'error');
                 }
-            } catch (e) {
-                showAuthorToast('Geri alma esnasında hata oluştu.', 'error');
-            }
+            };
         }
 
-        async function forceDeleteExperiment(id) {
-            if (!confirm('DİKKAT! Bu deneyi kalıcı olarak silmek istediğinize emin misiniz? Bu işlem asla geri alınamaz!')) return;
-            try {
-                const res = await fetch(`${API_URL}/experiments/${id}/force`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    showAuthorToast('Deney kalıcı olarak silindi.', 'success');
-                    loadMyTrash();
-                } else {
-                    showAuthorToast('Silinemedi.', 'error');
+        function forceDeleteExperiment(id) {
+            document.getElementById('confirm-modal').classList.add('show');
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.innerText = "Tamamen Sil";
+            document.getElementById('modal-desc-text').innerText = "Bu işlem geri alınamaz! Deney tamamen silinecektir.";
+            btn.onclick = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/experiments/${id}/force`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    closeConfirmModal();
+                    if (res.ok) {
+                        showAuthorToast('Deney kalıcı olarak silindi.', 'success');
+                        loadMyTrash();
+                    } else {
+                        showAuthorToast('Silinemedi.', 'error');
+                    }
+                } catch (e) {
+                    closeConfirmModal();
+                    showAuthorToast('Silme esnasında hata oluştu.', 'error');
                 }
-            } catch (e) {
-                showAuthorToast('Silme esnasında hata oluştu.', 'error');
-            }
+            };
         }
 
         function resetExperimentForm() {
@@ -9236,10 +9257,17 @@
         }
 
         function deleteBilimGundem(id) {
-            if (!confirm('Bu gündem yazısını silmek istediğinize emin misiniz?')) return;
-            bilimGundemData = bilimGundemData.filter(i => i.id !== id);
-            saveBilimGundemStorage(bilimGundemData);
-            loadBilimGundemiData();
+            document.getElementById('confirm-modal').classList.add('show');
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.innerText = "Evet, Sil";
+            document.getElementById('modal-desc-text').innerText = "Bu bilim gündemi yazısı silinecek. Emin misiniz?";
+            btn.onclick = () => {
+                bilimGundemData = bilimGundemData.filter(i => i.id !== id);
+                saveBilimGundemStorage(bilimGundemData);
+                closeConfirmModal();
+                loadBilimGundemiData();
+                showAuthorToast('Gündem yazısı silindi.', 'success');
+            };
         }
 
         function continueBilimGundem() {
