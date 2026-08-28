@@ -1708,6 +1708,9 @@
                     <p style="color: #64748b; margin: 8px 0 0 0; font-size: 1.1rem;">Yeni bir bilimsel deney girin ve editör onayına gönderin.</p>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" onclick="openExperimentPreview()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(124, 58, 237, 0.15)); border-color: rgba(99, 102, 241, 0.3); color: var(--primary-accent); font-weight: 600;">
+                        <i class="ph-bold ph-eye"></i> Canlı Önizleme
+                    </button>
                     <button class="btn btn-secondary" onclick="showSection('my-experiments', document.querySelector('a[title=\'Deney Yayınlarım\']'))">
                         <i class="ph ph-arrow-left"></i> Deney Yayınlarıma Dön
                     </button>
@@ -1854,7 +1857,10 @@
                         </div>
                     </div>
 
-                    <div class="action-bar">
+                    <div class="action-bar" style="display: flex; justify-content: flex-end; gap: 12px; align-items: center;">
+                        <button type="button" class="btn btn-secondary" onclick="openExperimentPreview()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(124, 58, 237, 0.15)); border-color: rgba(99, 102, 241, 0.3); color: var(--primary-accent); font-weight: 600;">
+                            <i class="ph-bold ph-eye"></i> Canlı Önizleme
+                        </button>
                         <button type="button" class="btn btn-secondary" onclick="submitExperiment('draft')" title="Taslağı Kaydet">
                             <i class="ph ph-floppy-disk"></i> Taslak Kaydet
                         </button>
@@ -2440,8 +2446,284 @@
                     .exp-stat-value { font-size: 1.3rem; }
                     .exp-stat-icon { font-size: 1.3rem; }
                     .exp-hero-title { font-size: 1.15rem; }
-                    .exp-btn-new { padding: 10px 16px; font-size: 0.88rem; }
+                /* Modal Overlays & Boxes */
+                .exp-modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(15, 23, 42, 0.7);
+                    backdrop-filter: blur(8px);
+                    z-index: 9999;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                    box-sizing: border-box;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
                 }
+                .exp-modal-overlay.active {
+                    display: flex;
+                    opacity: 1;
+                }
+                .exp-modal-box {
+                    background: var(--card-bg, #ffffff);
+                    border-radius: 24px;
+                    width: 100%;
+                    max-width: 600px;
+                    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    animation: expModalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .exp-modal-box.exp-preview-box {
+                    max-width: 900px;
+                    max-height: 90vh;
+                }
+                @keyframes expModalPop {
+                    from { transform: scale(0.92) translateY(20px); opacity: 0; }
+                    to { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                .exp-modal-header {
+                    padding: 18px 24px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: rgba(248, 250, 252, 0.5);
+                }
+                .exp-modal-close {
+                    background: none;
+                    border: none;
+                    font-size: 1.2rem;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease;
+                }
+                .exp-modal-close:hover {
+                    background: rgba(239, 68, 68, 0.1);
+                    color: #ef4444;
+                }
+                .exp-modal-body {
+                    padding: 24px;
+                    overflow-y: auto;
+                }
+                .exp-modal-footer {
+                    padding: 16px 24px;
+                    border-top: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    background: rgba(248, 250, 252, 0.5);
+                }
+
+                /* Reader Preview Specific */
+                .exp-prev-cover {
+                    width: 100%;
+                    max-height: 380px;
+                    object-fit: cover;
+                    border-radius: 16px;
+                    margin-bottom: 24px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                }
+                .exp-prev-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    background: rgba(99, 102, 241, 0.1);
+                    color: var(--primary-accent, #6366f1);
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .exp-prev-title {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    color: var(--text-main, #0f172a);
+                    line-height: 1.3;
+                    margin: 0 0 16px;
+                }
+                .exp-prev-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding-bottom: 20px;
+                    margin-bottom: 24px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                    flex-wrap: wrap;
+                }
+                .exp-prev-author-img {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 2px solid var(--primary-accent, #6366f1);
+                }
+                .exp-prev-author-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .exp-prev-author-name {
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.95rem;
+                }
+                .exp-prev-date {
+                    font-size: 0.8rem;
+                    color: #94a3b8;
+                }
+                .exp-prev-excerpt {
+                    font-size: 1.1rem;
+                    line-height: 1.6;
+                    color: #475569;
+                    font-style: italic;
+                    background: rgba(99, 102, 241, 0.04);
+                    border-left: 4px solid var(--primary-accent, #6366f1);
+                    padding: 16px 20px;
+                    border-radius: 0 12px 12px 0;
+                    margin-bottom: 28px;
+                }
+                .exp-prev-section {
+                    margin-bottom: 28px;
+                }
+                .exp-prev-sec-title {
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--text-main, #0f172a);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 14px;
+                    padding-bottom: 8px;
+                    border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+                }
+                .exp-prev-sec-title i {
+                    color: var(--primary-accent, #6366f1);
+                }
+                .exp-prev-box-card {
+                    background: #f8fafc;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 14px;
+                    padding: 18px 22px;
+                    font-size: 0.95rem;
+                    line-height: 1.6;
+                    color: var(--text-main, #334155);
+                    white-space: pre-line;
+                }
+                .exp-prev-safety-box {
+                    background: #fffbeb;
+                    border: 1px solid #fef3c7;
+                    border-left: 4px solid #f59e0b;
+                    border-radius: 12px;
+                    padding: 16px 20px;
+                    color: #92400e;
+                    font-size: 0.95rem;
+                    line-height: 1.6;
+                }
+                .exp-prev-prose {
+                    font-size: 1.02rem;
+                    line-height: 1.8;
+                    color: var(--text-main, #1e293b);
+                }
+                .exp-prev-prose img {
+                    max-width: 100%;
+                    border-radius: 12px;
+                    margin: 14px 0;
+                }
+
+                /* Likes & Comments Interactive List */
+                .exp-user-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding: 12px 14px;
+                    border-radius: 14px;
+                    transition: all 0.2s ease;
+                    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+                }
+                .exp-user-item:last-child { border-bottom: none; }
+                .exp-user-item:hover { background: rgba(99, 102, 241, 0.04); }
+                .exp-user-avatar {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    background: linear-gradient(135deg, #6366f1, #a855f7);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    flex-shrink: 0;
+                }
+                .exp-user-info {
+                    flex: 1;
+                    min-width: 0;
+                }
+                .exp-user-name {
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.93rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .exp-user-exp-title {
+                    font-size: 0.82rem;
+                    color: #64748b;
+                    margin-top: 2px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .exp-user-date {
+                    font-size: 0.78rem;
+                    color: #94a3b8;
+                    flex-shrink: 0;
+                }
+                .exp-comment-balloon {
+                    background: #f8fafc;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 12px;
+                    padding: 10px 14px;
+                    margin-top: 6px;
+                    font-size: 0.88rem;
+                    color: #334155;
+                    line-height: 1.5;
+                }
+
+                /* Dark Mode for Modals */
+                body.dark-mode .exp-modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+                body.dark-mode .exp-modal-header,
+                body.dark-mode .exp-modal-footer { background: #0f172a; border-color: rgba(255,255,255,0.06); }
+                body.dark-mode .exp-prev-title,
+                body.dark-mode .exp-prev-author-name,
+                body.dark-mode .exp-prev-sec-title,
+                body.dark-mode .exp-user-name { color: #f1f5f9; }
+                body.dark-mode .exp-prev-excerpt { background: rgba(99, 102, 241, 0.1); color: #cbd5e1; }
+                body.dark-mode .exp-prev-box-card { background: #0f172a; border-color: rgba(255,255,255,0.06); color: #cbd5e1; }
+                body.dark-mode .exp-prev-safety-box { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #fde68a; }
+                body.dark-mode .exp-prev-prose { color: #e2e8f0; }
+                body.dark-mode .exp-user-item { border-color: rgba(255,255,255,0.05); }
+                body.dark-mode .exp-user-item:hover { background: rgba(99, 102, 241, 0.1); }
+                body.dark-mode .exp-comment-balloon { background: #0f172a; border-color: rgba(255,255,255,0.06); color: #e2e8f0; }
+                body.dark-mode .exp-user-exp-title { color: #94a3b8; }
             </style>
 
             <!-- Hero Banner -->
@@ -2465,15 +2747,21 @@
                     <div class="exp-stat-value" id="exp-total-views">0</div>
                     <div class="exp-stat-label">Toplam Okunma</div>
                 </div>
-                <div class="exp-stat-card" onclick="setExperimentFilter('all')">
+                <div class="exp-stat-card" onclick="openExpLikesModal()" title="Beğenenleri gör">
                     <i class="ph-bold ph-heart exp-stat-icon"></i>
                     <div class="exp-stat-value" id="exp-total-likes">0</div>
                     <div class="exp-stat-label">Toplam Beğeni</div>
+                    <span style="font-size: 0.72rem; color: #ef4444; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Kimler Beğendi? <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
-                <div class="exp-stat-card" onclick="setExperimentFilter('all')">
+                <div class="exp-stat-card" onclick="openExpCommentsModal()" title="Yorumları gör">
                     <i class="ph-bold ph-chat-circle-text exp-stat-icon"></i>
                     <div class="exp-stat-value" id="exp-total-comments">0</div>
                     <div class="exp-stat-label">Toplam Yorum</div>
+                    <span style="font-size: 0.72rem; color: #8b5cf6; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Yorumları Oku <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
                 <div class="exp-stat-card" onclick="setExperimentFilter('published')">
                     <i class="ph-bold ph-flask exp-stat-icon"></i>
@@ -3497,6 +3785,75 @@
             </div>
         </div>
 
+        <!-- EXPERIMENT LIVE PREVIEW MODAL -->
+        <div class="exp-modal-overlay" id="exp-preview-modal-overlay" onclick="if(event.target===this) closeExperimentPreview()">
+            <div class="exp-modal-box exp-preview-box">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="exp-status-badge yayinda" style="font-size: 0.75rem;"><i class="ph-fill ph-eye"></i> Canlı Önizleme</span>
+                        <span style="font-size: 0.85rem; color: #94a3b8;">Okuyucu Görünümü</span>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeExperimentPreview()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body exp-preview-body" id="exp-preview-content">
+                    <!-- Dynamic content injected here by openExperimentPreview() -->
+                </div>
+                <div class="exp-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeExperimentPreview()">Kapat</button>
+                    <button type="button" class="btn btn-primary" onclick="closeExperimentPreview(); submitExperiment('pending');">
+                        <i class="ph-bold ph-paper-plane-tilt"></i> Onaya Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT LIKES MODAL -->
+        <div class="exp-modal-overlay" id="exp-likes-modal-overlay" onclick="if(event.target===this) closeExpLikesModal()">
+            <div class="exp-modal-box" style="max-width: 580px;">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="ph-fill ph-heart"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Deneylerimi Beğenenler</h3>
+                            <p style="margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8;">Çalışmalarınızı beğenen bilim severler</p>
+                        </div>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeExpLikesModal()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" id="exp-likes-list" style="max-height: 420px; overflow-y: auto; padding: 16px 20px;">
+                    <!-- Injected by loadExpLikes() -->
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPERIMENT COMMENTS MODAL -->
+        <div class="exp-modal-overlay" id="exp-comments-modal-overlay" onclick="if(event.target===this) closeExpCommentsModal()">
+            <div class="exp-modal-box" style="max-width: 680px;">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="ph-fill ph-chat-circle-text"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Deneylerime Gelen Yorumlar</h3>
+                            <p style="margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8;">Çalışmalarınız hakkında yapılan değerlendirmeler</p>
+                        </div>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeExpCommentsModal()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" id="exp-comments-list" style="max-height: 480px; overflow-y: auto; padding: 16px 20px;">
+                    <!-- Injected by loadExpComments() -->
+                </div>
+            </div>
+        </div>
 
     </main>
 
@@ -5975,6 +6332,303 @@
                     <p id="exp-pdf-name" style="margin-top: 5px; font-weight: 600; color: var(--primary-accent);"></p>
                 `;
             }
+        }
+
+        // ================= EXPERIMENT PREVIEW MODAL LOGIC =================
+        function openExperimentPreview() {
+            const title = (document.getElementById('exp-title')?.value || '').trim() || 'Başlıksız Deney';
+            const catSelect = document.getElementById('exp-category');
+            let category = catSelect ? catSelect.value : 'Biyoloji';
+            if (category === 'Diğer') {
+                const customCat = (document.getElementById('exp-custom-category')?.value || '').trim();
+                if (customCat) category = customCat;
+            }
+            const excerpt = (document.getElementById('exp-excerpt')?.value || '').trim();
+            const objective = (document.getElementById('exp-objective')?.value || '').trim();
+            const materials = (document.getElementById('exp-materials')?.value || '').trim();
+            const safety = (document.getElementById('exp-safety')?.value || '').trim();
+            const procedure = expProcedureQuill ? expProcedureQuill.root.innerHTML : '';
+            const conclusion = (document.getElementById('exp-conclusion')?.value || '').trim();
+            const results = expResultsQuill ? expResultsQuill.root.innerHTML : '';
+            const youtube = (document.getElementById('exp-youtube')?.value || '').trim();
+            const references = (document.getElementById('exp-references')?.value || '').trim();
+            const imgReferences = (document.getElementById('exp-image-references')?.value || '').trim();
+
+            // Author info from sidebar or token
+            const authorName = document.getElementById('sidebar-user-name')?.innerText || 'Yazar';
+            const authorAvatar = document.getElementById('sidebar-avatar')?.src || 'https://via.placeholder.com/150';
+
+            // Co-authors
+            let coAuthorsHtml = '';
+            if (Array.isArray(expSelectedAuthors) && expSelectedAuthors.length > 0) {
+                const names = expSelectedAuthors.map(a => `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,102,241,0.08); padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.85rem; color:var(--primary-accent);"><i class="ph ph-user"></i> ${escapeHtml(a.fullname || a.username)}</span>`).join(' ');
+                coAuthorsHtml = `<div style="margin-top: 10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><strong style="font-size:0.85rem; color:#64748b;">Katkıda Bulunanlar:</strong> ${names}</div>`;
+            }
+
+            // Image preview
+            const fileInput = document.getElementById('exp-imageInput');
+            let coverImgHtml = '';
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const fileUrl = URL.createObjectURL(fileInput.files[0]);
+                coverImgHtml = `<img src="${fileUrl}" alt="${escapeHtml(title)}" class="exp-prev-cover">`;
+            } else {
+                const existingImg = document.querySelector('#exp-preview-zone img');
+                if (existingImg && existingImg.src) {
+                    coverImgHtml = `<img src="${existingImg.src}" alt="${escapeHtml(title)}" class="exp-prev-cover">`;
+                }
+            }
+
+            let html = `
+                ${coverImgHtml}
+                <div>
+                    <span class="exp-prev-badge"><i class="ph-fill ph-tag"></i> ${escapeHtml(category)}</span>
+                    <h1 class="exp-prev-title">${escapeHtml(title)}</h1>
+                    
+                    <div class="exp-prev-meta">
+                        <img src="${authorAvatar}" class="exp-prev-author-img" alt="${escapeHtml(authorName)}">
+                        <div class="exp-prev-author-info">
+                            <span class="exp-prev-author-name">${escapeHtml(authorName)}</span>
+                            <span class="exp-prev-date"><i class="ph ph-calendar-blank"></i> ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} • Canlı Önizleme</span>
+                        </div>
+                    </div>
+                    ${coAuthorsHtml}
+                </div>
+            `;
+
+            if (excerpt) {
+                html += `<div class="exp-prev-excerpt">${escapeHtml(excerpt)}</div>`;
+            }
+
+            if (objective) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-target"></i> Deneyin Amacı</h2>
+                        <div class="exp-prev-box-card">${escapeHtml(objective)}</div>
+                    </div>`;
+            }
+
+            if (materials) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-flask"></i> Gerekli Malzemeler & Ekipmanlar</h2>
+                        <div class="exp-prev-box-card">${escapeHtml(materials)}</div>
+                    </div>`;
+            }
+
+            if (safety) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-warning"></i> Güvenlik Önlemleri & Uyarılar</h2>
+                        <div class="exp-prev-safety-box">
+                            <i class="ph-fill ph-shield-warning" style="font-size:1.2rem; vertical-align:middle; margin-right:6px;"></i>
+                            ${escapeHtml(safety)}
+                        </div>
+                    </div>`;
+            }
+
+            if (procedure && procedure !== '<p><br></p>') {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-list-numbers"></i> Deneyin Uygulanışı & Aşamalar</h2>
+                        <div class="exp-prev-prose ql-editor" style="padding:0;">${procedure}</div>
+                    </div>`;
+            }
+
+            if ((results && results !== '<p><br></p>') || conclusion) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-check-circle"></i> Sonuçlar ve Değerlendirme</h2>
+                        ${results && results !== '<p><br></p>' ? `<div class="exp-prev-prose ql-editor" style="padding:0; margin-bottom:12px;">${results}</div>` : ''}
+                        ${conclusion ? `<div class="exp-prev-box-card" style="margin-top:10px;">${escapeHtml(conclusion)}</div>` : ''}
+                    </div>`;
+            }
+
+            if (youtube) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-youtube-logo" style="color:#ef4444;"></i> Video Gösterimi</h2>
+                        <div class="exp-prev-box-card" style="display:flex; align-items:center; gap:10px;">
+                            <i class="ph-fill ph-play-circle" style="font-size:1.8rem; color:#ef4444;"></i>
+                            <div>
+                                <strong>Bağlantılı Video:</strong>
+                                <a href="${escapeHtml(youtube)}" target="_blank" style="color:var(--primary-accent); margin-left:6px; word-break:break-all;">${escapeHtml(youtube)}</a>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            if (references || imgReferences) {
+                html += `
+                    <div class="exp-prev-section">
+                        <h2 class="exp-prev-sec-title"><i class="ph-bold ph-books"></i> Kaynakça & Referanslar</h2>
+                        ${references ? `<div class="exp-prev-box-card" style="margin-bottom:10px;"><strong>Metin Kaynakları:</strong><br>${escapeHtml(references)}</div>` : ''}
+                        ${imgReferences ? `<div class="exp-prev-box-card"><strong>Görsel Kaynakları:</strong><br>${escapeHtml(imgReferences)}</div>` : ''}
+                    </div>`;
+            }
+
+            const previewContainer = document.getElementById('exp-preview-content');
+            if (previewContainer) previewContainer.innerHTML = html;
+
+            const modal = document.getElementById('exp-preview-modal-overlay');
+            if (modal) modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExperimentPreview() {
+            const modal = document.getElementById('exp-preview-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================= EXPERIMENT LIKES MODAL LOGIC =================
+        async function openExpLikesModal() {
+            const modal = document.getElementById('exp-likes-modal-overlay');
+            const listEl = document.getElementById('exp-likes-list');
+            if (!modal || !listEl) return;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            listEl.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 0.95rem;">Beğeniler yükleniyor...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_URL}/author/likes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Yüklenemedi');
+                const likes = await res.json();
+
+                if (!Array.isArray(likes) || likes.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239,68,68,0.08); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-heart-break"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Beğeni Yok</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız deneyler beğenildiğinde burada listelenecektir.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = likes.map(like => {
+                    const avatarHtml = like.liker_avatar 
+                        ? `<img src="/${like.liker_avatar}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                        : `<div class="exp-user-avatar">${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>`;
+                    
+                    const dateStr = like.created_at ? new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                    const expTitle = like.article_title || 'Deney Çalışması';
+
+                    return `
+                        <div class="exp-user-item">
+                            ${avatarHtml}
+                            <div class="exp-user-info">
+                                <div class="exp-user-name">
+                                    ${escapeHtml(like.liker_name || 'Gizli Kullanıcı')}
+                                    <i class="ph-fill ph-heart" style="color: #ef4444; font-size: 0.85rem;"></i>
+                                </div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(expTitle)}">${escapeHtml(expTitle)}</div>
+                            </div>
+                            <div class="exp-user-date">${dateStr}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('openExpLikesModal error:', e);
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #ef4444;">
+                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                        <p style="margin:0;">Beğeni listesi alınırken bir hata oluştu.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeExpLikesModal() {
+            const modal = document.getElementById('exp-likes-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================= EXPERIMENT COMMENTS MODAL LOGIC =================
+        async function openExpCommentsModal() {
+            const modal = document.getElementById('exp-comments-modal-overlay');
+            const listEl = document.getElementById('exp-comments-list');
+            if (!modal || !listEl) return;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            listEl.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 0.95rem;">Yorumlar yükleniyor...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_URL}/author/comments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Yüklenemedi');
+                const comments = await res.json();
+
+                if (!Array.isArray(comments) || comments.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-chat-circle-dots"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Yorum Yok</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız deneylere yorum yapıldığında burada listelenecektir.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = comments.map(comm => {
+                    const avatarHtml = comm.user_avatar 
+                        ? `<img src="/${comm.user_avatar}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                        : `<div class="exp-user-avatar">${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>`;
+                    
+                    const dateStr = comm.created_at ? new Date(comm.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                    const expTitle = comm.article_title || 'Deney Çalışması';
+                    const commentText = comm.content || comm.comment || comm.text || '';
+
+                    return `
+                        <div class="exp-user-item" style="align-items: flex-start;">
+                            ${avatarHtml}
+                            <div class="exp-user-info">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <div class="exp-user-name">
+                                        ${escapeHtml(comm.user_name || 'Kullanıcı')}
+                                    </div>
+                                    <div class="exp-user-date">${dateStr}</div>
+                                </div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(expTitle)}"><i class="ph-bold ph-flask" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(expTitle)}</div>
+                                <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('openExpCommentsModal error:', e);
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #ef4444;">
+                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                        <p style="margin:0;">Yorumlar listesi alınırken bir hata oluştu.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeExpCommentsModal() {
+            const modal = document.getElementById('exp-comments-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         function showAuthorToast(msg, type) {
