@@ -2033,9 +2033,9 @@
                 <p class="dash-welcome-desc">AperionX'taki çalışmalarına buradan devam edebilirsin.</p>
             </div>
 
-            <!-- 3. HIZLI BAŞLAT -->
+            <!-- 3. YENİ İÇERİK -->
             <div class="dash-section-divider">
-                <span class="dash-section-label"><i class="ph-bold ph-lightning"></i> HIZLI BAŞLAT</span>
+                <span class="dash-section-label"><i class="ph-bold ph-plus-circle"></i> YENİ İÇERİK</span>
             </div>
             <div class="dash-quick-grid">
                 <!-- Yeni Makale -->
@@ -2069,7 +2069,55 @@
                 </div>
             </div>
 
-            <!-- 4. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
+            <!-- 4. PERFORMANSIM -->
+            <div class="dash-section-divider">
+                <span class="dash-section-label"><i class="ph-bold ph-chart-bar"></i> PERFORMANSIM</span>
+            </div>
+            <div class="dash-stats-grid">
+                <div class="dash-stat-card" onclick="goToMyArticles('all')">
+                    <i class="ph-bold ph-eye dash-stat-icon"></i>
+                    <div class="dash-stat-value" id="dash-total-views">0</div>
+                    <div class="dash-stat-label">Toplam Okunma</div>
+                </div>
+                <div class="dash-stat-card" onclick="openArtLikesModal()" title="Beğenenleri gör">
+                    <i class="ph-bold ph-heart dash-stat-icon" style="color: #ef4444;"></i>
+                    <div class="dash-stat-value" id="dash-total-likes">0</div>
+                    <div class="dash-stat-label">Toplam Beğeni</div>
+                </div>
+                <div class="dash-stat-card" onclick="openArtCommentsModal()" title="Yorumları gör">
+                    <i class="ph-bold ph-chat-circle-text dash-stat-icon" style="color: #8b5cf6;"></i>
+                    <div class="dash-stat-value" id="dash-total-comments">0</div>
+                    <div class="dash-stat-label">Toplam Yorum</div>
+                </div>
+                <div class="dash-stat-card" onclick="goToMyArticles('published')">
+                    <i class="ph-bold ph-books dash-stat-icon"></i>
+                    <div class="dash-stat-value" id="dash-total-published">0</div>
+                    <div class="dash-stat-label">Yayındaki Makale</div>
+                </div>
+            </div>
+
+            <!-- Performans Grafiği -->
+            <div class="dash-perf-card">
+                <div class="dash-perf-card-header">
+                    <div>
+                        <h3 class="dash-perf-title"><i class="ph-bold ph-chart-line-up"></i> İçerik Performansı</h3>
+                        <span class="dash-perf-period">Son 30 gün</span>
+                    </div>
+                    <div class="dash-chart-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background:#6366f1;"></span> Görüntülenme</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Beğeni</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Yorum</span>
+                    </div>
+                </div>
+                <div class="dash-chart-wrap">
+                    <canvas id="dashMainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 5. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
+            <div class="dash-section-divider">
+                <span class="dash-section-label"><i class="ph-bold ph-arrows-clockwise"></i> DEVAM ET & YAPILACAKLAR</span>
+            </div>
             <div class="dash-twin-grid">
                 <!-- Devam Et Kartı -->
                 <div class="dash-card" id="dash-continue-card">
@@ -2117,51 +2165,6 @@
                     <button class="dash-btn-view" onclick="goToMyArticles('all')">
                         Görüntüle →
                     </button>
-                </div>
-            </div>
-
-            <!-- 5. PERFORMANSIM -->
-            <div class="dash-section-divider">
-                <span class="dash-section-label"><i class="ph-bold ph-chart-bar"></i> PERFORMANSIM</span>
-            </div>
-            <div class="dash-stats-grid">
-                <div class="dash-stat-card" onclick="goToMyArticles('all')">
-                    <i class="ph-bold ph-eye dash-stat-icon"></i>
-                    <div class="dash-stat-value" id="dash-total-views">0</div>
-                    <div class="dash-stat-label">Toplam Okunma</div>
-                </div>
-                <div class="dash-stat-card" onclick="openArtLikesModal()" title="Beğenenleri gör">
-                    <i class="ph-bold ph-heart dash-stat-icon" style="color: #ef4444;"></i>
-                    <div class="dash-stat-value" id="dash-total-likes">0</div>
-                    <div class="dash-stat-label">Toplam Beğeni</div>
-                </div>
-                <div class="dash-stat-card" onclick="openArtCommentsModal()" title="Yorumları gör">
-                    <i class="ph-bold ph-chat-circle-text dash-stat-icon" style="color: #8b5cf6;"></i>
-                    <div class="dash-stat-value" id="dash-total-comments">0</div>
-                    <div class="dash-stat-label">Toplam Yorum</div>
-                </div>
-                <div class="dash-stat-card" onclick="goToMyArticles('published')">
-                    <i class="ph-bold ph-books dash-stat-icon"></i>
-                    <div class="dash-stat-value" id="dash-total-published">0</div>
-                    <div class="dash-stat-label">Yayındaki Makale</div>
-                </div>
-            </div>
-
-            <!-- Performans Grafiği -->
-            <div class="dash-perf-card">
-                <div class="dash-perf-card-header">
-                    <div>
-                        <h3 class="dash-perf-title"><i class="ph-bold ph-chart-line-up"></i> İçerik Performansı</h3>
-                        <span class="dash-perf-period">Son 30 gün</span>
-                    </div>
-                    <div class="dash-chart-legend">
-                        <span class="legend-item"><span class="legend-dot" style="background:#6366f1;"></span> Görüntülenme</span>
-                        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Beğeni</span>
-                        <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Yorum</span>
-                    </div>
-                </div>
-                <div class="dash-chart-wrap">
-                    <canvas id="dashMainChart"></canvas>
                 </div>
             </div>
 
@@ -10141,124 +10144,235 @@
             }
         }
 
-        // ================= NOTIFICATIONS LOGIC =================
+        // ================= NOTIFICATIONS LOGIC (AUTHOR CONTENT ONLY) =================
         let authorNotifications = [];
         let currentNotifFilter = 'all';
 
-        const defaultAuthorNotifications = [
-            {
-                id: 'notif_1',
-                type: 'approval',
-                title: 'Makale Kabul Edildi 🎉',
-                message: "'CRISPR-Cas9 ve Gen Düzenleme Teknolojileri' başlıklı makaleniz editör incelemesinden geçti ve yayına alındı.",
-                icon: 'ph-check-circle',
-                colorClass: 'green',
-                is_read: false,
-                created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString()
-            },
-            {
-                id: 'notif_2',
-                type: 'approval',
-                title: 'Makale Düzenleme Talebi ✍️',
-                message: "'Nöroplastisite ve Öğrenme Mekanizmaları' makaleniz için editör notu: 'Lütfen kaynakça formatını APA 7 standardına güncelleyiniz.'",
-                icon: 'ph-pencil-line',
-                colorClass: 'orange',
-                is_read: false,
-                created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString()
-            },
-            {
-                id: 'notif_3',
-                type: 'comments',
-                title: 'Editörden Yeni Mesaj 💬',
-                message: "Editör Aylin Yılmaz: 'Harika bir çalışma olmuş, tebrikler! Birkaç küçük görsel iyileştirmesi önerdim.'",
-                icon: 'ph-chat-teardrop-dots',
-                colorClass: 'blue',
-                is_read: false,
-                created_at: new Date(Date.now() - 1000 * 60 * 360).toISOString()
-            },
-            {
-                id: 'notif_4',
-                type: 'approval',
-                title: 'Deney Yayını Onaylandı 🧪',
-                message: "'Hücresel Solunum ve ATP Sentezi' deney protokolünüz başarıyla onaylandı ve yayına girdi.",
-                icon: 'ph-flask',
-                colorClass: 'green',
-                is_read: false,
-                created_at: new Date(Date.now() - 1000 * 60 * 720).toISOString()
-            },
-            {
-                id: 'notif_5',
-                type: 'approval',
-                title: 'Bilim Gündemi Onayı 🔬',
-                message: "'James Webb Teleskobundan Yeni Ötegezegen Keşfi' gündem yazınız onaylandı.",
-                icon: 'ph-newspaper',
-                colorClass: 'purple',
-                is_read: true,
-                created_at: new Date(Date.now() - 1000 * 60 * 1440).toISOString()
-            },
-            {
-                id: 'notif_6',
-                type: 'comments',
-                title: 'Yeni Okur Yorumu 🗣️',
-                message: "Prof. Dr. Mehmet Demir makalenize yorum yaptı: 'Çok aydınlatıcı bir makale, kaynakları zenginleştirmeniz harika.'",
-                icon: 'ph-chat-circle-dots',
-                colorClass: 'blue',
-                is_read: true,
-                created_at: new Date(Date.now() - 1000 * 60 * 2880).toISOString()
-            },
-            {
-                id: 'notif_7',
-                type: 'approval',
-                title: 'Son Teslim Tarihi Yaklaşıyor ⏰',
-                message: "Planlanan 'Sentetik Biyoloji' makalenizin teslim tarihine son 3 gün kaldı!",
-                icon: 'ph-clock-countdown',
-                colorClass: 'yellow',
-                is_read: true,
-                created_at: new Date(Date.now() - 1000 * 60 * 4320).toISOString()
-            }
-        ];
-
-        function initAuthorNotifications() {
+        function getReadNotifIds() {
             try {
-                const saved = localStorage.getItem('author_custom_notifications');
-                if (saved) {
-                    authorNotifications = JSON.parse(saved);
-                } else {
-                    authorNotifications = defaultAuthorNotifications;
-                    localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
-                }
+                return JSON.parse(localStorage.getItem('author_read_notif_ids') || '[]');
             } catch (e) {
-                authorNotifications = defaultAuthorNotifications;
+                return [];
             }
         }
 
+        function saveReadNotifIds(ids) {
+            localStorage.setItem('author_read_notif_ids', JSON.stringify(ids));
+        }
+
         async function loadNotifications() {
-            initAuthorNotifications();
+            const authToken = token || localStorage.getItem('token');
+            const readIds = getReadNotifIds();
+            const notifs = [];
+
             try {
-                const authToken = token || localStorage.getItem('token');
+                // 1. Fetch Author Articles
                 if (authToken) {
-                    const res = await fetch(`${API_URL}/notifications`, { headers: { 'Authorization': `Bearer ${authToken}` } });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data && Array.isArray(data.notifications) && data.notifications.length > 0) {
-                            data.notifications.forEach(serverN => {
-                                if (!authorNotifications.some(an => an.id == serverN.id)) {
-                                    authorNotifications.unshift({
-                                        id: serverN.id,
-                                        type: serverN.type || 'comments',
-                                        title: 'Sistem Bildirimi',
-                                        message: serverN.message,
-                                        icon: 'ph-bell',
+                    const resArticles = await fetch(`${API_URL}/author/articles?t=${Date.now()}`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }).catch(() => null);
+
+                    if (resArticles && resArticles.ok) {
+                        const articles = await resArticles.json().catch(() => []);
+                        if (Array.isArray(articles)) {
+                            articles.forEach(art => {
+                                if (art.status === 'trash') return;
+
+                                const title = art.title || 'Başlıksız Makale';
+
+                                // Düzenleme / Revizyon Talebi
+                                if (art.status === 'rejected' || art.status === 'draft_revision') {
+                                    notifs.push({
+                                        id: `art_rev_${art.id}`,
+                                        type: 'approval',
+                                        title: 'Makale Düzenleme Talebi ✍️',
+                                        message: `"${title}" başlıklı makaleniz için editör düzenleme talep etti.${art.rejection_reason ? ' Not: ' + art.rejection_reason : ''}`,
+                                        icon: 'ph-pencil-line',
+                                        colorClass: 'orange',
+                                        created_at: art.updated_at || art.created_at || new Date().toISOString()
+                                    });
+                                }
+                                // Yayında / Kabul Edildi
+                                else if (art.status === 'published') {
+                                    notifs.push({
+                                        id: `art_pub_${art.id}`,
+                                        type: 'approval',
+                                        title: 'Makale Yayında 🎉',
+                                        message: `"${title}" başlıklı makaleniz kabul edildi ve AperionX'te yayına alındı.`,
+                                        icon: 'ph-check-circle',
+                                        colorClass: 'green',
+                                        created_at: art.created_at || new Date().toISOString()
+                                    });
+                                }
+                                // Editör İncelemesinde
+                                else if (art.status === 'pending') {
+                                    notifs.push({
+                                        id: `art_pend_${art.id}`,
+                                        type: 'approval',
+                                        title: 'Makale Editör İncelemesinde ⏳',
+                                        message: `"${title}" başlıklı makaleniz editör onayına sunuldu.`,
+                                        icon: 'ph-hourglass-medium',
                                         colorClass: 'blue',
-                                        is_read: !!serverN.is_read,
-                                        created_at: serverN.created_at
+                                        created_at: art.created_at || new Date().toISOString()
+                                    });
+                                }
+
+                                // Yorum Bildirimi
+                                if (art.comments_count && Number(art.comments_count) > 0) {
+                                    notifs.push({
+                                        id: `art_comm_${art.id}_${art.comments_count}`,
+                                        type: 'comments',
+                                        title: 'Yeni Makale Yorumu 💬',
+                                        message: `"${title}" makalenize toplam ${art.comments_count} adet okur yorumu yapıldı.`,
+                                        icon: 'ph-chat-circle-text',
+                                        colorClass: 'purple',
+                                        created_at: art.updated_at || art.created_at || new Date().toISOString()
                                     });
                                 }
                             });
                         }
                     }
                 }
-            } catch (e) {}
+
+                // 2. Fetch Author Experiments
+                if (authToken) {
+                    const resExp = await fetch(`${API_URL}/author/experiments`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }).catch(() => null);
+
+                    if (resExp && resExp.ok) {
+                        const exps = await resExp.json().catch(() => []);
+                        if (Array.isArray(exps)) {
+                            exps.forEach(exp => {
+                                const title = exp.title || 'Başlıksız Deney';
+
+                                if (exp.status === 'approved' || exp.status === 'published') {
+                                    notifs.push({
+                                        id: `exp_pub_${exp.id}`,
+                                        type: 'approval',
+                                        title: 'Deney Yayını Onaylandı 🧪',
+                                        message: `"${title}" deney protokolünüz editör tarafından onaylandı ve yayına girdi.`,
+                                        icon: 'ph-flask',
+                                        colorClass: 'green',
+                                        created_at: exp.created_at || new Date().toISOString()
+                                    });
+                                } else if (exp.status === 'rejected') {
+                                    notifs.push({
+                                        id: `exp_rej_${exp.id}`,
+                                        type: 'approval',
+                                        title: 'Deney Yayını Düzenleme Talebi ⚠️',
+                                        message: `"${title}" deney yayınınız için editör düzenleme talep etti.${exp.rejection_reason ? ' Not: ' + exp.rejection_reason : ''}`,
+                                        icon: 'ph-warning-circle',
+                                        colorClass: 'orange',
+                                        created_at: exp.updated_at || exp.created_at || new Date().toISOString()
+                                    });
+                                } else if (exp.status === 'pending') {
+                                    notifs.push({
+                                        id: `exp_pend_${exp.id}`,
+                                        type: 'approval',
+                                        title: 'Deney Yayını İncelemede ⏳',
+                                        message: `"${title}" deney protokolünüz editör kontrolünde.`,
+                                        icon: 'ph-hourglass-medium',
+                                        colorClass: 'blue',
+                                        created_at: exp.created_at || new Date().toISOString()
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+
+                // 3. Author Bilim Gündemi Items
+                try {
+                    const bgData = typeof getBilimGundemStorage === 'function' ? getBilimGundemStorage() : [];
+                    if (Array.isArray(bgData)) {
+                        bgData.forEach(bg => {
+                            const title = bg.title || 'Bilim Gündemi Yazısı';
+                            if (bg.status === 'yayinda') {
+                                notifs.push({
+                                    id: `bg_pub_${bg.id}`,
+                                    type: 'approval',
+                                    title: 'Bilim Gündemi Yayında 🔬',
+                                    message: `"${title}" bilim gündemi içeriğiniz başarıyla yayınlandı.`,
+                                    icon: 'ph-microscope',
+                                    colorClass: 'green',
+                                    created_at: bg.date || new Date().toISOString()
+                                });
+                            } else if (bg.status === 'incelemede' || bg.status === 'pending') {
+                                notifs.push({
+                                    id: `bg_pend_${bg.id}`,
+                                    type: 'approval',
+                                    title: 'Bilim Gündemi İncelemede ⏳',
+                                    message: `"${title}" bilim gündemi yazınız editör onayında bekliyor.`,
+                                    icon: 'ph-hourglass-medium',
+                                    colorClass: 'blue',
+                                    created_at: bg.date || new Date().toISOString()
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {}
+
+                // 4. Tracked Deadlines
+                if (authToken) {
+                    const resTrack = await fetch(`${API_URL}/author/tracking-status`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }).catch(() => null);
+
+                    if (resTrack && resTrack.ok) {
+                        const track = await resTrack.json().catch(() => null);
+                        if (track && track.tracked && track.days_left !== undefined) {
+                            if (track.days_left <= 7) {
+                                notifs.push({
+                                    id: `track_deadline_${track.next_deadline}`,
+                                    type: 'approval',
+                                    title: 'Son Makale Teslim Tarihi ⏰',
+                                    message: `Yazar takip sistemindeki sonraki makale teslim tarihinize ${track.days_left <= 0 ? 'gecikti!' : track.days_left + ' gün kaldı (' + track.next_deadline + ')'}`,
+                                    icon: 'ph-clock-countdown',
+                                    colorClass: 'yellow',
+                                    created_at: new Date().toISOString()
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // 5. System Notifications
+                if (authToken) {
+                    const resSys = await fetch(`${API_URL}/notifications`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }).catch(() => null);
+
+                    if (resSys && resSys.ok) {
+                        const data = await resSys.json().catch(() => null);
+                        if (data && Array.isArray(data.notifications)) {
+                            data.notifications.forEach(sn => {
+                                notifs.push({
+                                    id: `sys_${sn.id}`,
+                                    type: sn.type || 'comments',
+                                    title: sn.title || 'Editör Mesajı 📩',
+                                    message: sn.message,
+                                    icon: 'ph-bell',
+                                    colorClass: 'blue',
+                                    created_at: sn.created_at || new Date().toISOString()
+                                });
+                            });
+                        }
+                    }
+                }
+
+            } catch (e) {
+                console.error('Error loading author notifications:', e);
+            }
+
+            // Assign is_read based on stored read IDs
+            authorNotifications = notifs.map(n => ({
+                ...n,
+                is_read: readIds.includes(n.id)
+            }));
+
+            // Sort by created_at descending
+            authorNotifications.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
             updateNotificationBadges();
             renderFullNotifications();
@@ -10293,9 +10407,10 @@
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="padding: 50px 20px; text-align: center; color: #94a3b8;">
-                        <i class="ph-fill ph-bell-slash" style="font-size: 3rem; opacity: 0.4; margin-bottom: 12px;"></i>
-                        <p style="margin: 0; font-size: 1rem; font-weight: 600;">Bu filtreye uygun bildirim bulunmuyor.</p>
+                    <div style="padding: 60px 20px; text-align: center; color: #94a3b8;">
+                        <i class="ph-fill ph-bell-slash" style="font-size: 3.5rem; opacity: 0.35; margin-bottom: 14px;"></i>
+                        <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-main);">Henüz Bildiriminiz Yok</h4>
+                        <p style="margin: 0; font-size: 0.9rem;">Makaleleriniz, deneyleriniz ve bilim gündemi içeriklerinizle ilgili editör düzenleme talepleri, onaylar ve okur yorumları burada listelenecektir.</p>
                     </div>
                 `;
                 return;
@@ -10315,7 +10430,7 @@
                             </div>
                             <p class="notif-item-msg">${escapeHtml(n.message)}</p>
                         </div>
-                        ${!n.is_read ? '<span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+                        ${!n.is_read ? '<span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; flex-shrink: 0; margin-top: 6px;" title="Okunmadı"></span>' : ''}
                     </div>
                 `;
             }).join('');
@@ -10331,18 +10446,26 @@
             const notif = authorNotifications.find(n => n.id == id);
             if (notif && !notif.is_read) {
                 notif.is_read = true;
-                localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
+                const readIds = getReadNotifIds();
+                if (!readIds.includes(id)) {
+                    readIds.push(id);
+                    saveReadNotifIds(readIds);
+                }
                 updateNotificationBadges();
                 renderFullNotifications();
             }
         }
 
         function markAllNotificationsAsRead() {
-            authorNotifications.forEach(n => n.is_read = true);
-            localStorage.setItem('author_custom_notifications', JSON.stringify(authorNotifications));
+            const readIds = getReadNotifIds();
+            authorNotifications.forEach(n => {
+                n.is_read = true;
+                if (!readIds.includes(n.id)) readIds.push(n.id);
+            });
+            saveReadNotifIds(readIds);
             updateNotificationBadges();
             renderFullNotifications();
-            showToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
+            showAuthorToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
         }
 
         // ================= CALENDAR & DEADLINES LOGIC =================
