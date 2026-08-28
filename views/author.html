@@ -57,26 +57,37 @@
         .mobile-toggle-btn {
             display: none;
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 16px;
+            left: 16px;
             z-index: 2000;
-            background: white;
-            color: #0f172a;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1px solid #e2e8f0;
+            background: rgba(15, 23, 42, 0.9);
+            color: #818cf8;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .mobile-toggle-btn:hover, .mobile-toggle-btn:active {
+            transform: scale(1.05);
+            background: rgba(30, 41, 59, 0.98);
+            color: #ffffff;
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
         }
 
         body.dark-mode .mobile-toggle-btn {
-            background: #1e293b;
-            color: white;
-            border-color: #334155;
+            background: rgba(15, 23, 42, 0.95);
+            color: #818cf8;
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         html {
@@ -194,6 +205,24 @@
             justify-content: center;
             padding: 8px;
             gap: 0;
+        }
+
+        .sidebar.collapsed .sidebar-toggle {
+            position: static !important;
+            margin: 0 auto 12px auto !important;
+            width: 36px !important;
+            height: 36px !important;
+            background: rgba(99, 102, 241, 0.25) !important;
+            color: #818cf8 !important;
+            border: 1.5px solid rgba(99, 102, 241, 0.4) !important;
+            border-radius: 10px !important;
+            display: flex !important;
+        }
+
+        .sidebar.collapsed .sidebar-toggle:hover {
+            transform: scale(1.1) !important;
+            background: rgba(99, 102, 241, 0.4) !important;
+            color: white !important;
         }
 
         /* LOGO */
@@ -1338,8 +1367,8 @@
 
     <aside class="sidebar" id="sidebar">
         <!-- TOGGLE BUTTON ADDED -->
-        <button class="sidebar-toggle" onclick="toggleSidebar()">
-            <i class="ph-bold ph-caret-left"></i>
+        <button class="sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Menüyü Daralt / Genişlet">
+            <i class="ph-bold ph-caret-left" id="toggle-icon"></i>
         </button>
 
 
@@ -2069,52 +2098,7 @@
                 </div>
             </div>
 
-            <!-- 4. PERFORMANSIM -->
-            <div class="dash-section-divider">
-                <span class="dash-section-label"><i class="ph-bold ph-chart-bar"></i> PERFORMANSIM</span>
-            </div>
-            <div class="dash-stats-grid">
-                <div class="dash-stat-card" onclick="goToMyArticles('all')">
-                    <i class="ph-bold ph-eye dash-stat-icon"></i>
-                    <div class="dash-stat-value" id="dash-total-views">0</div>
-                    <div class="dash-stat-label">Toplam Okunma</div>
-                </div>
-                <div class="dash-stat-card" onclick="openArtLikesModal()" title="Beğenenleri gör">
-                    <i class="ph-bold ph-heart dash-stat-icon" style="color: #ef4444;"></i>
-                    <div class="dash-stat-value" id="dash-total-likes">0</div>
-                    <div class="dash-stat-label">Toplam Beğeni</div>
-                </div>
-                <div class="dash-stat-card" onclick="openArtCommentsModal()" title="Yorumları gör">
-                    <i class="ph-bold ph-chat-circle-text dash-stat-icon" style="color: #8b5cf6;"></i>
-                    <div class="dash-stat-value" id="dash-total-comments">0</div>
-                    <div class="dash-stat-label">Toplam Yorum</div>
-                </div>
-                <div class="dash-stat-card" onclick="goToMyArticles('published')">
-                    <i class="ph-bold ph-books dash-stat-icon"></i>
-                    <div class="dash-stat-value" id="dash-total-published">0</div>
-                    <div class="dash-stat-label">Yayındaki Makale</div>
-                </div>
-            </div>
-
-            <!-- Performans Grafiği -->
-            <div class="dash-perf-card">
-                <div class="dash-perf-card-header">
-                    <div>
-                        <h3 class="dash-perf-title"><i class="ph-bold ph-chart-line-up"></i> İçerik Performansı</h3>
-                        <span class="dash-perf-period">Son 30 gün</span>
-                    </div>
-                    <div class="dash-chart-legend">
-                        <span class="legend-item"><span class="legend-dot" style="background:#6366f1;"></span> Görüntülenme</span>
-                        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Beğeni</span>
-                        <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Yorum</span>
-                    </div>
-                </div>
-                <div class="dash-chart-wrap">
-                    <canvas id="dashMainChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 5. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
+            <!-- 4. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
             <div class="dash-section-divider">
                 <span class="dash-section-label"><i class="ph-bold ph-arrows-clockwise"></i> DEVAM ET & YAPILACAKLAR</span>
             </div>
@@ -2165,6 +2149,51 @@
                     <button class="dash-btn-view" onclick="goToMyArticles('all')">
                         Görüntüle →
                     </button>
+                </div>
+            </div>
+
+            <!-- 5. PERFORMANSIM -->
+            <div class="dash-section-divider">
+                <span class="dash-section-label"><i class="ph-bold ph-chart-bar"></i> PERFORMANSIM</span>
+            </div>
+            <div class="dash-stats-grid">
+                <div class="dash-stat-card" onclick="goToMyArticles('all')">
+                    <i class="ph-bold ph-eye dash-stat-icon"></i>
+                    <div class="dash-stat-value" id="dash-total-views">0</div>
+                    <div class="dash-stat-label">Toplam Okunma</div>
+                </div>
+                <div class="dash-stat-card" onclick="openArtLikesModal()" title="Beğenenleri gör">
+                    <i class="ph-bold ph-heart dash-stat-icon" style="color: #ef4444;"></i>
+                    <div class="dash-stat-value" id="dash-total-likes">0</div>
+                    <div class="dash-stat-label">Toplam Beğeni</div>
+                </div>
+                <div class="dash-stat-card" onclick="openArtCommentsModal()" title="Yorumları gör">
+                    <i class="ph-bold ph-chat-circle-text dash-stat-icon" style="color: #8b5cf6;"></i>
+                    <div class="dash-stat-value" id="dash-total-comments">0</div>
+                    <div class="dash-stat-label">Toplam Yorum</div>
+                </div>
+                <div class="dash-stat-card" onclick="goToMyArticles('published')">
+                    <i class="ph-bold ph-books dash-stat-icon"></i>
+                    <div class="dash-stat-value" id="dash-total-published">0</div>
+                    <div class="dash-stat-label">Yayındaki Makale</div>
+                </div>
+            </div>
+
+            <!-- Performans Grafiği -->
+            <div class="dash-perf-card">
+                <div class="dash-perf-card-header">
+                    <div>
+                        <h3 class="dash-perf-title"><i class="ph-bold ph-chart-line-up"></i> İçerik Performansı</h3>
+                        <span class="dash-perf-period">Son 30 gün</span>
+                    </div>
+                    <div class="dash-chart-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background:#6366f1;"></span> Görüntülenme</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Beğeni</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Yorum</span>
+                    </div>
+                </div>
+                <div class="dash-chart-wrap">
+                    <canvas id="dashMainChart"></canvas>
                 </div>
             </div>
 
@@ -10042,11 +10071,12 @@
                     if (sidebar) sidebar.classList.toggle('active');
                     if (sidebar && sidebar.classList.contains('active')) {
                         if (overlay) overlay.classList.add('show');
-                        if (icon) icon.classList.remove('ph-caret-left');
-                        if (icon) icon.classList.add('ph-caret-right');
+                        if (icon) {
+                            icon.classList.remove('ph-caret-left');
+                            icon.classList.add('ph-caret-right');
+                        }
                     } else {
                         if (overlay) overlay.classList.remove('show');
-                        if (icon) icon.classList.remove('ph-caret-right');
                         if (icon) icon.classList.add('ph-caret-left');
                     }
                 } else {
@@ -10161,6 +10191,8 @@
         }
 
         async function loadNotifications() {
+            // Clean up any old mock notification cache
+            localStorage.removeItem('author_custom_notifications');
             const authToken = token || localStorage.getItem('token');
             const readIds = getReadNotifIds();
             const notifs = [];
