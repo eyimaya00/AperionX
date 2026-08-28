@@ -54,40 +54,67 @@
             --transition-speed: 0.3s;
         }
 
-        .mobile-toggle-btn {
+        /* MOBILE TOP NAV BAR */
+        .mobile-header-bar {
             display: none;
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 2000;
-            background: rgba(15, 23, 42, 0.9);
-            color: #818cf8;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-            transition: all 0.2s ease;
         }
 
-        .mobile-toggle-btn:hover, .mobile-toggle-btn:active {
-            transform: scale(1.05);
-            background: rgba(30, 41, 59, 0.98);
-            color: #ffffff;
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
-        }
+        @media (max-width: 991px) {
+            .mobile-header-bar {
+                display: flex;
+                position: sticky;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 56px;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                z-index: 1000;
+            }
 
-        body.dark-mode .mobile-toggle-btn {
-            background: rgba(15, 23, 42, 0.95);
-            color: #818cf8;
-            border-color: rgba(255, 255, 255, 0.15);
+            .mobile-header-btn {
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #f1f5f9;
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .mobile-header-btn:hover, .mobile-header-btn:active {
+                background: rgba(99, 102, 241, 0.25);
+                border-color: rgba(99, 102, 241, 0.4);
+                color: #818cf8;
+            }
+
+            .mobile-header-logo img {
+                height: 28px;
+                width: auto;
+                object-fit: contain;
+                display: block;
+            }
+
+            .mobile-notif-dot {
+                position: absolute;
+                top: 7px;
+                right: 7px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #ef4444;
+                border: 2px solid #0f172a;
+            }
         }
 
         html {
@@ -630,16 +657,12 @@
 
             .content {
                 margin-left: 0 !important;
-                padding: 20px;
-                width: 100%;
+                padding: 16px 14px !important;
+                width: 100% !important;
             }
 
             .sidebar-toggle {
                 display: none !important;
-            }
-
-            .mobile-toggle-btn {
-                display: flex;
             }
 
             .form-grid {
@@ -1360,10 +1383,19 @@
 </head>
 
 <body>
-    <!-- MOBILE MENU BTN -->
-    <button class="mobile-toggle-btn" onclick="toggleSidebar()">
-        <i class="ph ph-list"></i>
-    </button>
+    <!-- MOBILE TOP BAR -->
+    <header class="mobile-header-bar">
+        <button class="mobile-header-btn" onclick="toggleSidebar()" title="Menüyü Aç">
+            <i class="ph-bold ph-list"></i>
+        </button>
+        <a href="/" class="mobile-header-logo">
+            <img src="/uploads/logo.png" alt="AperionX">
+        </a>
+        <button class="mobile-header-btn" onclick="showSection('notifications-section', document.querySelector('a[title=\'Bildirimler\']'))" title="Bildirimler" style="position: relative;">
+            <i class="ph-fill ph-bell"></i>
+            <span class="mobile-notif-dot" id="mobile-notif-dot" style="display: none;"></span>
+        </button>
+    </header>
 
     <aside class="sidebar" id="sidebar">
         <!-- TOGGLE BUTTON ADDED -->
@@ -4863,9 +4895,14 @@
                     <h1><i class="ph-fill ph-bell"></i> Bildirimler</h1>
                     <p>Editör mesajları, içerik onayları, yorumlar ve teslimat uyarıları tek bir yerde.</p>
                 </div>
-                <button class="dash-btn-new" onclick="markAllNotificationsAsRead()">
-                    <i class="ph-bold ph-check"></i> Tümünü Okundu İşaretle
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="dash-btn-new" onclick="clearAllNotifications()" style="background: rgba(239, 68, 68, 0.2); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #fca5a5;" title="Tüm bildirimleri kalıcı olarak temizler">
+                        <i class="ph-bold ph-trash"></i> Bildirimleri Sıfırla
+                    </button>
+                    <button class="dash-btn-new" onclick="markAllNotificationsAsRead()">
+                        <i class="ph-bold ph-check"></i> Tümünü Okundu İşaretle
+                    </button>
+                </div>
             </div>
 
             <div class="notif-card">
@@ -10413,6 +10450,7 @@
         function updateNotificationBadges() {
             const unreadCount = authorNotifications.filter(n => !n.is_read).length;
             const menuBadge = document.getElementById('menu-notif-count');
+            const mobileDot = document.getElementById('mobile-notif-dot');
             if (menuBadge) {
                 if (unreadCount > 0) {
                     menuBadge.style.display = 'inline-flex';
@@ -10420,6 +10458,9 @@
                 } else {
                     menuBadge.style.display = 'none';
                 }
+            }
+            if (mobileDot) {
+                mobileDot.style.display = unreadCount > 0 ? 'block' : 'none';
             }
         }
 
@@ -10498,6 +10539,36 @@
             updateNotificationBadges();
             renderFullNotifications();
             showAuthorToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
+        }
+
+        async function clearAllNotifications() {
+            showCustomConfirm({
+                title: 'Bildirimleri Sıfırla',
+                message: 'Tüm sistem ve içerik bildirimleriniz sıfırlanacaktır. Devam etmek istiyor musunuz?',
+                confirmText: 'Evet, Sıfırla',
+                onConfirm: async () => {
+                    const authToken = token || localStorage.getItem('token');
+                    try {
+                        if (authToken) {
+                            await fetch(`${API_URL}/notifications`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${authToken}` }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('Notification clear error:', e);
+                    }
+
+                    // Save all current notification IDs to read set so they are cleared from view
+                    localStorage.removeItem('author_custom_notifications');
+                    const allIds = authorNotifications.map(n => n.id);
+                    saveReadNotifIds(allIds);
+                    authorNotifications = [];
+                    updateNotificationBadges();
+                    renderFullNotifications();
+                    showAuthorToast('Tüm bildirimler başarıyla sıfırlandı.', 'success');
+                }
+            });
         }
 
         // ================= CALENDAR & DEADLINES LOGIC =================

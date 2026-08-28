@@ -6567,6 +6567,20 @@ app.put('/api/notifications/:id/read', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.delete('/api/notifications', authenticateToken, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM notifications WHERE user_id = ?', [req.user.id]);
+        res.json({ message: 'Tüm bildirimler temizlendi.' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/notifications/:id', authenticateToken, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        res.json({ message: 'Bildirim silindi.' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // --- Admin Comment Moderation ---
 app.get('/api/admin/comments', authenticateToken, async (req, res) => {
     // Basic role check
