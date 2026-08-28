@@ -5442,6 +5442,7 @@
         if (typeof window.API_URL === 'undefined') {
             window.API_URL = '/api';
         }
+        const API_URL = window.API_URL || '/api';
 
         console.log('Author Scripts Starting...');
         const token = localStorage.getItem('token');
@@ -5495,11 +5496,10 @@
                     user = freshUser;
                     localStorage.setItem('user', JSON.stringify(user));
                     updateSidebarProfile(user);
-                    if (user.fullname) {
-                        const welcomeEl = document.getElementById('welcome-name');
-                        if (welcomeEl) welcomeEl.textContent = user.fullname;
-                    }
+                    const authorNameEl = document.getElementById('dash-author-name');
+                    if (authorNameEl) authorNameEl.textContent = user.fullname || user.name || user.username || 'Yazar';
                     populateProfileForm(user);
+                    loadDashboardStats();
                 }
             }).catch(err => {
                 console.error('Failed to refresh user profile:', err);
@@ -5675,10 +5675,14 @@
                 const authToken = token || localStorage.getItem('token');
                 if (!authToken) return;
 
-                // 1. Author Name
+                // 1. Author Name (Using global user object)
                 const authorNameEl = document.getElementById('dash-author-name');
-                if (authorNameEl && currentUser) {
-                    authorNameEl.textContent = currentUser.fullname || currentUser.name || currentUser.username || 'Yazar';
+                if (authorNameEl) {
+                    let displayName = 'Yazar';
+                    if (user && (user.fullname || user.name || user.username)) {
+                        displayName = user.fullname || user.name || user.username;
+                    }
+                    authorNameEl.textContent = displayName;
                 }
 
                 // 2. Fetch Articles, Experiments & Analytics in parallel
