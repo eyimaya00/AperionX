@@ -1,6 +1,6 @@
 /**
  * Ceyda ❤️ Yasin - Yüksek Performanslı Parçacık & Ses Motoru (Ultra Smooth 60-120 FPS)
- * Uzun Süre Süzülen Çilekler ve Kalpler 🍓💖
+ * Mobil Uyumlu iOS/Android Kesintisiz Rüya Melodisi & Çilek Efekti 🍓💖
  */
 
 (function () {
@@ -84,7 +84,7 @@
         this.vy = Math.sin(angle) * speed - random(1.5, 3.5);
         this.isBurst = true;
         this.life = 1;
-        this.decay = random(0.004, 0.007); // ~4-5 saniye ekranda kalır
+        this.decay = random(0.004, 0.007);
         this.swayOffset = random(0, Math.PI * 2);
         this.swaySpeed = random(0.02, 0.04);
       } else {
@@ -109,7 +109,7 @@
         this.y += this.vy;
         this.vx *= 0.97;
         this.vy *= 0.97;
-        this.vy -= 0.025; // Yukarıya doğru nazikçe süzülür
+        this.vy -= 0.025;
         this.swayOffset += this.swaySpeed;
         this.x += Math.sin(this.swayOffset) * 0.45;
         this.rotation += this.rotationSpeed;
@@ -146,7 +146,6 @@
       ctx.bezierCurveTo(s, s * 0.1, s * 0.5, -s * 0.3, 0, s * 0.3);
       ctx.fill();
 
-      // Hafif parıltı çekirdeği
       ctx.fillStyle = '#ffffff';
       ctx.globalAlpha = this.alpha * 0.45;
       ctx.beginPath();
@@ -171,7 +170,7 @@
       this.rotation = random(-0.5, 0.5);
       this.rotationSpeed = random(-0.025, 0.025);
       this.life = 1;
-      this.decay = random(0.0035, 0.0065); // ~5-6 saniye boyunca ekranda süzülür!
+      this.decay = random(0.0035, 0.0065);
       this.scale = random(0.75, 1.15);
       this.swayOffset = random(0, Math.PI * 2);
       this.swaySpeed = random(0.02, 0.045);
@@ -182,7 +181,7 @@
       this.y += this.vy;
       this.vx *= 0.97;
       this.vy *= 0.97;
-      this.vy -= 0.022; // Balon gibi yukarıya doğru tatlıca süzülme
+      this.vy -= 0.022;
       this.swayOffset += this.swaySpeed;
       this.x += Math.sin(this.swayOffset) * 0.6;
       this.rotation += this.rotationSpeed;
@@ -199,7 +198,6 @@
       const currentScale = this.scale * Math.min(1, this.life * 1.5);
       ctx.scale(currentScale, currentScale);
       ctx.globalAlpha = Math.min(1, this.life * 1.4);
-      // Hızlı GPU drawImage
       ctx.drawImage(strawberryCanvas, -40, -40, 80, 80);
       ctx.restore();
     }
@@ -280,7 +278,7 @@
       this.size = random(1.5, 4.0);
       this.color = randomChoice(STAR_COLORS);
       this.life = 1;
-      this.decay = random(0.009, 0.018); // Daha uzun süreli parlama
+      this.decay = random(0.009, 0.018);
     }
 
     update() {
@@ -353,7 +351,7 @@
   requestAnimationFrame(animate);
 
   // ==========================================================================
-  // Tıklama / Dokunma Olayı (Göz Alıcı ve Uzun Süreli Çilek Yağmuru 🍓💖)
+  // Tıklama / Dokunma Olayı (Çilek Patlaması & Ses Tetikleme)
   // ==========================================================================
   let lastClickTime = 0;
   function createHeartAndStrawberryBurst(x, y) {
@@ -361,25 +359,124 @@
     if (now - lastClickTime < 50) return;
     lastClickTime = now;
 
-    // Kalpler
     for (let i = 0; i < 14; i++) {
       hearts.push(new FloatingHeart(true, x, y));
     }
-    // Çilekler 🍓 (5 adet iri ve uzun süre süzülen çilek)
     for (let i = 0; i < 5; i++) {
       strawberries.push(new BurstStrawberry(x, y));
     }
-    // Işıltılar
     for (let i = 0; i < 18; i++) {
       sparkles.push(new SparkleParticle(x, y));
     }
   }
 
-  window.addEventListener('pointerdown', (e) => {
-    createHeartAndStrawberryBurst(e.clientX, e.clientY);
-    startMelody();
+  // ==========================================================================
+  // Mobil Uyumlu Güçlü Web Audio Motoru (iOS / Safari / Android Uyumlu)
+  // ==========================================================================
+  let audioCtx = null;
+  let isAudioPlaying = false;
+  let melodyInterval = null;
+
+  // Sıcak Romantik Melodi Gamı
+  const NOTES = [277.18, 329.63, 369.99, 440.00, 493.88, 554.37, 659.25, 739.99, 880.00];
+
+  function getOrCreateAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+      }
+    }
+    return audioCtx;
+  }
+
+  // Mobil cihazlarda ses kilidini açma (iOS Silent Unlock)
+  function unlockMobileAudio() {
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) return;
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(() => {
+        startMelody();
+      });
+    } else {
+      startMelody();
+    }
+
+    // iOS Safari için sessiz buffer tetikleme
+    try {
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+    } catch (e) {}
+  }
+
+  function playSoftNote(freq) {
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) return;
+
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    try {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      const noteFreq = freq || randomChoice(NOTES);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(noteFreq, ctx.currentTime);
+
+      // Telefonda net duyulması için sıcak çan/rüya filtresi
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, ctx.currentTime);
+
+      // Mobil hoparlörler için belirgin ve tatlı ses seviyesi
+      const now = ctx.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.18, now + 0.12);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
+
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 3.2);
+    } catch (err) {}
+  }
+
+  function startMelody() {
+    getOrCreateAudioContext();
+    if (!isAudioPlaying) {
+      isAudioPlaying = true;
+      playSoftNote();
+      melodyInterval = setInterval(() => {
+        if (!isAudioPlaying) return;
+        playSoftNote();
+        if (Math.random() > 0.35) {
+          setTimeout(() => playSoftNote(), 320);
+        }
+      }, 1500);
+    }
+  }
+
+  // Mobil Dokunma ve Tıklama Dinleyicileri (Touch + Pointer + Click)
+  function handleUserInteraction(e) {
+    const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : (e.clientX || width / 2);
+    const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : (e.clientY || height / 2);
+
+    createHeartAndStrawberryBurst(clientX, clientY);
+    unlockMobileAudio();
     playSoftNote();
-  });
+  }
+
+  window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+  window.addEventListener('pointerdown', handleUserInteraction);
+  window.addEventListener('click', handleUserInteraction);
 
   let lastMove = 0;
   window.addEventListener('pointermove', (e) => {
@@ -389,77 +486,5 @@
       lastMove = now;
     }
   });
-
-  // Web Audio API
-  let audioCtx = null;
-  let isAudioPlaying = false;
-  let melodyInterval = null;
-
-  const NOTES = [277.18, 329.63, 369.99, 440.00, 493.88, 554.37, 659.25, 739.99, 880.00];
-
-  function initAudio() {
-    if (!audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioContext();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-  }
-
-  function playSoftNote(freq) {
-    if (!audioCtx || audioCtx.state !== 'running') return;
-
-    try {
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-
-      const noteFreq = freq || randomChoice(NOTES);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1100, audioCtx.currentTime);
-
-      const now = audioCtx.currentTime;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.07, now + 0.15);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
-
-      osc.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      osc.start(now);
-      osc.stop(now + 3.0);
-    } catch (err) {}
-  }
-
-  function startMelody() {
-    initAudio();
-    if (!isAudioPlaying) {
-      isAudioPlaying = true;
-      playSoftNote();
-      melodyInterval = setInterval(() => {
-        if (!isAudioPlaying) return;
-        playSoftNote();
-        if (Math.random() > 0.4) {
-          setTimeout(() => playSoftNote(), 300);
-        }
-      }, 1600);
-    }
-  }
-
-  const autoStartEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
-  function autoStartAudio() {
-    startMelody();
-    autoStartEvents.forEach(evt => window.removeEventListener(evt, autoStartAudio));
-  }
-  autoStartEvents.forEach(evt => window.addEventListener(evt, autoStartAudio, { once: true }));
-
-  try {
-    startMelody();
-  } catch(e) {}
 
 })();
