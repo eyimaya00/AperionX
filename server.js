@@ -1863,11 +1863,12 @@ async function ensureSchema() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 title VARCHAR(255) NOT NULL,
-                content_type ENUM('Makale', 'Deney', 'Gündem') NOT NULL DEFAULT 'Makale',
+                content_type VARCHAR(50) NOT NULL DEFAULT 'Makale',
                 planned_date DATE NOT NULL,
-                status ENUM('Planlandı', 'Devam Ediyor', 'Tamamlandı') NOT NULL DEFAULT 'Planlandı',
+                status VARCHAR(50) NOT NULL DEFAULT 'Planlandı',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                INDEX idx_cp_user (user_id),
+                INDEX idx_cp_date (planned_date)
             )
         `);
 
@@ -4575,9 +4576,26 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
 
 // ================= CONTENT PLANS API =================
 
+async function ensureContentPlansTable() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS content_plans (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            content_type VARCHAR(50) NOT NULL DEFAULT 'Makale',
+            planned_date DATE NOT NULL,
+            status VARCHAR(50) NOT NULL DEFAULT 'Planlandı',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_cp_user (user_id),
+            INDEX idx_cp_date (planned_date)
+        )
+    `);
+}
+
 // GET all content plans for the logged-in author
 app.get('/api/author/content-plans', authenticateToken, async (req, res) => {
     try {
+        await ensureContentPlansTable();
         const [rows] = await pool.query(
             `SELECT id, title, content_type, DATE_FORMAT(planned_date, '%Y-%m-%d') as planned_date, status, created_at
              FROM content_plans WHERE user_id = ? ORDER BY planned_date ASC`,
@@ -4585,6 +4603,7 @@ app.get('/api/author/content-plans', authenticateToken, async (req, res) => {
         );
         res.json(rows);
     } catch (e) {
+        console.error('GET content-plans error:', e);
         res.status(500).json({ error: e.toString() });
     }
 });
@@ -4592,16 +4611,18 @@ app.get('/api/author/content-plans', authenticateToken, async (req, res) => {
 // POST create a new content plan
 app.post('/api/author/content-plans', authenticateToken, async (req, res) => {
     try {
+        await ensureContentPlansTable();
         const { title, content_type, planned_date } = req.body;
         if (!title || !content_type || !planned_date) {
             return res.status(400).json({ error: 'Başlık, tür ve tarih zorunludur.' });
         }
         const [result] = await pool.query(
-            `INSERT INTO content_plans (user_id, title, content_type, planned_date) VALUES (?, ?, ?, ?)`,
+            `INSERT INTO content_plans (user_id, title, content_type, planned_date, status) VALUES (?, ?, ?, ?, 'Planlandı')`,
             [req.user.id, title, content_type, planned_date]
         );
         res.json({ id: result.insertId, title, content_type, planned_date, status: 'Planlandı' });
     } catch (e) {
+        console.error('POST content-plans error:', e);
         res.status(500).json({ error: e.toString() });
     }
 });

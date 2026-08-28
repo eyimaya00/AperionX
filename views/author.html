@@ -4667,7 +4667,7 @@
                         <div class="cal-new-dropdown-item" onclick="openPlanModal('Deney')">
                             <i class="ph-fill ph-flask" style="color: #f59e0b;"></i> Deney Yayını
                         </div>
-                        <div class="cal-new-dropdown-item" onclick="openPlanModal('Gündem')">
+                        <div class="cal-new-dropdown-item" onclick="openPlanModal('Gundem')">
                             <i class="ph-fill ph-microscope" style="color: #7c3aed;"></i> Bilim Gündemi
                         </div>
                     </div>
@@ -9738,6 +9738,13 @@
         }
 
         function showAuthorToast(msg, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+                const c = document.createElement('div');
+                c.id = 'toast-container';
+                c.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;';
+                document.body.appendChild(c);
+            }
             const div = document.createElement('div');
             // Neutral dark for info, green for success, red for error
             const bgColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#0f172a');
@@ -9746,16 +9753,16 @@
                 color: white;
                 padding: 12px 24px;
                 border-radius: 10px;
-                margin-top: 10px;
                 font-size: 0.95rem;
                 font-weight: 500;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 transition: opacity 0.3s ease;
             `;
             div.innerText = msg;
-            document.getElementById('toast-container').appendChild(div);
+            (document.getElementById('toast-container') || document.body).appendChild(div);
             setTimeout(() => div.remove(), 3000);
         }
+        window.showToast = showAuthorToast;
 
         async function loadCategories() {
             try {
@@ -10352,7 +10359,7 @@
             const typeMap = {
                 'Makale': { icon: 'ph-books', color: '#2563eb', bg: '#dbeafe', label: '📚 Makale' },
                 'Deney': { icon: 'ph-flask', color: '#b45309', bg: '#fef3c7', label: '🧪 Deney Yayını' },
-                'Gündem': { icon: 'ph-microscope', color: '#7c3aed', bg: '#ede9fe', label: '🔬 Bilim Gündemi' }
+                'Gundem': { icon: 'ph-microscope', color: '#7c3aed', bg: '#ede9fe', label: '🔬 Bilim Gündemi' }
             };
             const t = typeMap[type] || typeMap['Makale'];
             badge.innerHTML = t.label;
@@ -10380,11 +10387,11 @@
             const title = document.getElementById('plan-title-input').value.trim();
             const planned_date = document.getElementById('plan-date-input').value;
             if (!title) {
-                alert('Lütfen bir başlık giriniz.');
+                showAuthorToast('Lütfen bir başlık giriniz.', 'error');
                 return;
             }
             if (!planned_date) {
-                alert('Lütfen bir tarih seçiniz.');
+                showAuthorToast('Lütfen bir tarih seçiniz.', 'error');
                 return;
             }
             try {
@@ -10402,14 +10409,14 @@
                     await loadContentPlans();
                     renderCalendar();
                     renderDeadlines();
-                    showToast('İçerik planı başarıyla eklendi!', 'success');
+                    showAuthorToast('İçerik planı başarıyla eklendi!', 'success');
                 } else {
-                    const data = await res.json();
-                    alert(data.error || 'Bir hata oluştu.');
+                    const data = await res.json().catch(() => ({}));
+                    showAuthorToast(data.error || 'İçerik planı kaydedilemedi.', 'error');
                 }
             } catch (e) {
                 console.error('Save plan error:', e);
-                alert('Bir hata oluştu.');
+                showAuthorToast('Bağlantı hatası: ' + e.message, 'error');
             }
         }
 
@@ -10417,16 +10424,21 @@
         async function deleteContentPlan(planId) {
             if (!confirm('Bu içerik planını silmek istediğinize emin misiniz?')) return;
             try {
-                await fetch(`${API_URL}/author/content-plans/${planId}`, {
+                const res = await fetch(`${API_URL}/author/content-plans/${planId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                await loadContentPlans();
-                renderCalendar();
-                renderDeadlines();
-                showToast('Plan silindi.', 'info');
+                if (res.ok) {
+                    await loadContentPlans();
+                    renderCalendar();
+                    renderDeadlines();
+                    showAuthorToast('Plan başarıyla silindi.', 'info');
+                } else {
+                    showAuthorToast('Plan silinemedi.', 'error');
+                }
             } catch (e) {
                 console.error('Delete plan error:', e);
+                showAuthorToast('Bağlantı hatası oluştu.', 'error');
             }
         }
 
