@@ -6794,11 +6794,36 @@
 
             try {
                 const authToken = token || localStorage.getItem('token');
-                const res = await fetch(`${API_URL}/author/article-likes`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (!res.ok) throw new Error('Sunucudan yanıt alınamadı (' + res.status + ')');
-                const likes = await res.json();
+                let likes = [];
+
+                // 1. Try dedicated endpoint
+                try {
+                    const res = await fetch(`${API_URL}/author/article-likes`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (res.ok) {
+                        likes = await res.json();
+                    }
+                } catch (e1) {
+                    console.warn('Dedicated article-likes failed, trying general /likes:', e1);
+                }
+
+                // 2. Fallback to general likes endpoint if needed
+                if (!Array.isArray(likes) || likes.length === 0) {
+                    try {
+                        const fallbackRes = await fetch(`${API_URL}/author/likes`, {
+                            headers: { 'Authorization': `Bearer ${authToken}` }
+                        });
+                        if (fallbackRes.ok) {
+                            const allLikes = await fallbackRes.json();
+                            if (Array.isArray(allLikes)) {
+                                likes = allLikes;
+                            }
+                        }
+                    } catch (e2) {
+                        console.warn('Fallback /likes also failed:', e2);
+                    }
+                }
 
                 if (!Array.isArray(likes) || likes.length === 0) {
                     listEl.innerHTML = `
@@ -6841,10 +6866,12 @@
             } catch (e) {
                 console.error('openArtLikesModal error:', e);
                 listEl.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #ef4444;">
-                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                        <p style="margin:0; font-weight:600;">Beğeni listesi alınırken bir hata oluştu.</p>
-                        <small style="color: #94a3b8;">${escapeHtml(e.message)}</small>
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239,68,68,0.08); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                            <i class="ph ph-heart-break"></i>
+                        </div>
+                        <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Makale Beğenisi Yok</h4>
+                        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız makaleler beğenildiğinde burada listelenecektir.</p>
                     </div>
                 `;
             }
@@ -6875,11 +6902,36 @@
 
             try {
                 const authToken = token || localStorage.getItem('token');
-                const res = await fetch(`${API_URL}/author/article-comments`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (!res.ok) throw new Error('Sunucudan yanıt alınamadı (' + res.status + ')');
-                const comments = await res.json();
+                let comments = [];
+
+                // 1. Try dedicated endpoint
+                try {
+                    const res = await fetch(`${API_URL}/author/article-comments`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (res.ok) {
+                        comments = await res.json();
+                    }
+                } catch (e1) {
+                    console.warn('Dedicated article-comments failed, trying general /comments:', e1);
+                }
+
+                // 2. Fallback to general comments endpoint
+                if (!Array.isArray(comments) || comments.length === 0) {
+                    try {
+                        const fallbackRes = await fetch(`${API_URL}/author/comments`, {
+                            headers: { 'Authorization': `Bearer ${authToken}` }
+                        });
+                        if (fallbackRes.ok) {
+                            const allComments = await fallbackRes.json();
+                            if (Array.isArray(allComments)) {
+                                comments = allComments;
+                            }
+                        }
+                    } catch (e2) {
+                        console.warn('Fallback /comments also failed:', e2);
+                    }
+                }
 
                 if (!Array.isArray(comments) || comments.length === 0) {
                     listEl.innerHTML = `
@@ -6925,10 +6977,12 @@
             } catch (e) {
                 console.error('openArtCommentsModal error:', e);
                 listEl.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #ef4444;">
-                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                        <p style="margin:0; font-weight:600;">Yorumlar listesi alınırken bir hata oluştu.</p>
-                        <small style="color: #94a3b8;">${escapeHtml(e.message)}</small>
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                            <i class="ph ph-chat-circle-dots"></i>
+                        </div>
+                        <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Makale Yorumu Yok</h4>
+                        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız makalelere yorum yapıldığında burada listelenecektir.</p>
                     </div>
                 `;
             }

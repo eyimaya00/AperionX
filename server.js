@@ -2063,8 +2063,8 @@ app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const query = `
-            SELECT DISTINCT
-                l.id,
+            SELECT 
+                l.user_id,
                 l.article_id,
                 l.created_at,
                 COALESCE(u.fullname, u.name, u.username, 'Okur') AS liker_name, 
@@ -2074,14 +2074,35 @@ app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
             JOIN articles a ON l.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON l.user_id = u.id
-            WHERE l.article_id IS NOT NULL AND (a.author_id = ? OR aa.user_id = ?)
+            WHERE a.author_id = ? OR aa.user_id = ?
             ORDER BY l.created_at DESC
         `;
         const [rows] = await pool.query(query, [userId, userId]);
         res.json(rows);
     } catch (e) {
         console.error('Author Article Likes Error:', e);
-        res.status(500).json({ message: 'Makale beğeni verileri alınamadı.' });
+        // Fallback query if article_authors table doesn't exist
+        try {
+            const fallbackQuery = `
+                SELECT 
+                    l.user_id,
+                    l.article_id,
+                    l.created_at,
+                    COALESCE(u.fullname, u.name, u.username, 'Okur') AS liker_name, 
+                    u.avatar_url AS liker_avatar, 
+                    a.title AS article_title
+                FROM likes l
+                JOIN articles a ON l.article_id = a.id
+                JOIN users u ON l.user_id = u.id
+                WHERE a.author_id = ?
+                ORDER BY l.created_at DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Article Likes Fallback Error:', e2);
+            res.status(500).json({ message: 'Makale beğeni verileri alınamadı.' });
+        }
     }
 });
 
@@ -2090,7 +2111,7 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const query = `
-            SELECT DISTINCT
+            SELECT 
                 c.id,
                 c.article_id,
                 c.content,
@@ -2102,14 +2123,35 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
             JOIN articles a ON c.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON c.user_id = u.id
-            WHERE c.article_id IS NOT NULL AND (a.author_id = ? OR aa.user_id = ?)
+            WHERE a.author_id = ? OR aa.user_id = ?
             ORDER BY c.created_at DESC
         `;
         const [rows] = await pool.query(query, [userId, userId]);
         res.json(rows);
     } catch (e) {
         console.error('Author Article Comments Error:', e);
-        res.status(500).json({ message: 'Makale yorum verileri alınamadı.' });
+        try {
+            const fallbackQuery = `
+                SELECT 
+                    c.id,
+                    c.article_id,
+                    c.content,
+                    c.created_at,
+                    COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                    u.avatar_url as user_avatar,
+                    a.title as article_title
+                FROM comments c
+                JOIN articles a ON c.article_id = a.id
+                JOIN users u ON c.user_id = u.id
+                WHERE a.author_id = ?
+                ORDER BY c.created_at DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Article Comments Fallback Error:', e2);
+            res.status(500).json({ message: 'Makale yorum verileri alınamadı.' });
+        }
     }
 });
 
@@ -2118,8 +2160,8 @@ app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const query = `
-            SELECT DISTINCT
-                l.id,
+            SELECT 
+                l.user_id,
                 l.experiment_id,
                 l.created_at,
                 COALESCE(u.fullname, u.name, u.username, 'Bilim Sever') AS liker_name, 
@@ -2129,14 +2171,34 @@ app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
             JOIN experiments e ON l.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             JOIN users u ON l.user_id = u.id
-            WHERE l.experiment_id IS NOT NULL AND (e.author_id = ? OR ea.user_id = ?)
+            WHERE e.author_id = ? OR ea.user_id = ?
             ORDER BY l.created_at DESC
         `;
         const [rows] = await pool.query(query, [userId, userId]);
         res.json(rows);
     } catch (e) {
         console.error('Author Experiment Likes Error:', e);
-        res.status(500).json({ message: 'Deney beğeni verileri alınamadı.' });
+        try {
+            const fallbackQuery = `
+                SELECT 
+                    l.user_id,
+                    l.experiment_id,
+                    l.created_at,
+                    COALESCE(u.fullname, u.name, u.username, 'Bilim Sever') AS liker_name, 
+                    u.avatar_url AS liker_avatar, 
+                    e.title AS experiment_title
+                FROM likes l
+                JOIN experiments e ON l.experiment_id = e.id
+                JOIN users u ON l.user_id = u.id
+                WHERE e.author_id = ?
+                ORDER BY l.created_at DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Experiment Likes Fallback Error:', e2);
+            res.status(500).json({ message: 'Deney beğeni verileri alınamadı.' });
+        }
     }
 });
 
@@ -2145,7 +2207,7 @@ app.get('/api/author/experiment-comments', authenticateToken, async (req, res) =
     try {
         const userId = req.user.id;
         const query = `
-            SELECT DISTINCT
+            SELECT 
                 c.id,
                 c.experiment_id,
                 c.content,
@@ -2157,14 +2219,35 @@ app.get('/api/author/experiment-comments', authenticateToken, async (req, res) =
             JOIN experiments e ON c.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             JOIN users u ON c.user_id = u.id
-            WHERE c.experiment_id IS NOT NULL AND (e.author_id = ? OR ea.user_id = ?)
+            WHERE e.author_id = ? OR ea.user_id = ?
             ORDER BY c.created_at DESC
         `;
         const [rows] = await pool.query(query, [userId, userId]);
         res.json(rows);
     } catch (e) {
         console.error('Author Experiment Comments Error:', e);
-        res.status(500).json({ message: 'Deney yorum verileri alınamadı.' });
+        try {
+            const fallbackQuery = `
+                SELECT 
+                    c.id,
+                    c.experiment_id,
+                    c.content,
+                    c.created_at,
+                    COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                    u.avatar_url as user_avatar,
+                    e.title as experiment_title
+                FROM comments c
+                JOIN experiments e ON c.experiment_id = e.id
+                JOIN users u ON c.user_id = u.id
+                WHERE e.author_id = ?
+                ORDER BY c.created_at DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Experiment Comments Fallback Error:', e2);
+            res.status(500).json({ message: 'Deney yorum verileri alınamadı.' });
+        }
     }
 });
 
