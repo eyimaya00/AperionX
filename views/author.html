@@ -2033,7 +2033,43 @@
                 <p class="dash-welcome-desc">AperionX'taki çalışmalarına buradan devam edebilirsin.</p>
             </div>
 
-            <!-- 3. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
+            <!-- 3. HIZLI BAŞLAT -->
+            <div class="dash-section-divider">
+                <span class="dash-section-label"><i class="ph-bold ph-lightning"></i> HIZLI BAŞLAT</span>
+            </div>
+            <div class="dash-quick-grid">
+                <!-- Yeni Makale -->
+                <div class="dash-quick-card" onclick="startNewArticle()">
+                    <div class="dash-quick-icon-wrap violet">
+                        <i class="ph-fill ph-books"></i>
+                    </div>
+                    <h4 class="dash-quick-title">Yeni Makale</h4>
+                    <p class="dash-quick-desc">Detaylı bilimsel içerik oluştur</p>
+                    <span class="dash-quick-link">Oluştur →</span>
+                </div>
+
+                <!-- Yeni Bilim Gündemi -->
+                <div class="dash-quick-card" onclick="startNewBilimGundem()">
+                    <div class="dash-quick-icon-wrap purple">
+                        <i class="ph-fill ph-newspaper"></i>
+                    </div>
+                    <h4 class="dash-quick-title">Yeni Bilim Gündemi</h4>
+                    <p class="dash-quick-desc">Güncel bilimsel gelişmeleri paylaş</p>
+                    <span class="dash-quick-link">Oluştur →</span>
+                </div>
+
+                <!-- Yeni Deney Yayını -->
+                <div class="dash-quick-card" onclick="startNewExperiment()">
+                    <div class="dash-quick-icon-wrap emerald">
+                        <i class="ph-fill ph-flask"></i>
+                    </div>
+                    <h4 class="dash-quick-title">Yeni Deney Yayını</h4>
+                    <p class="dash-quick-desc">Deneylerini ve bulgularını paylaş</p>
+                    <span class="dash-quick-link">Oluştur →</span>
+                </div>
+            </div>
+
+            <!-- 4. İkili Kart Alanı: DEVAM ET & YAPILACAKLAR -->
             <div class="dash-twin-grid">
                 <!-- Devam Et Kartı -->
                 <div class="dash-card" id="dash-continue-card">
@@ -2081,42 +2117,6 @@
                     <button class="dash-btn-view" onclick="goToMyArticles('all')">
                         Görüntüle →
                     </button>
-                </div>
-            </div>
-
-            <!-- 4. HIZLI BAŞLAT -->
-            <div class="dash-section-divider">
-                <span class="dash-section-label"><i class="ph-bold ph-lightning"></i> HIZLI BAŞLAT</span>
-            </div>
-            <div class="dash-quick-grid">
-                <!-- Yeni Makale -->
-                <div class="dash-quick-card" onclick="startNewArticle()">
-                    <div class="dash-quick-icon-wrap violet">
-                        <i class="ph-fill ph-books"></i>
-                    </div>
-                    <h4 class="dash-quick-title">Yeni Makale</h4>
-                    <p class="dash-quick-desc">Detaylı bilimsel içerik oluştur</p>
-                    <span class="dash-quick-link">Oluştur →</span>
-                </div>
-
-                <!-- Yeni Bilim Gündemi -->
-                <div class="dash-quick-card" onclick="startNewBilimGundem()">
-                    <div class="dash-quick-icon-wrap purple">
-                        <i class="ph-fill ph-newspaper"></i>
-                    </div>
-                    <h4 class="dash-quick-title">Yeni Bilim Gündemi</h4>
-                    <p class="dash-quick-desc">Güncel bilimsel gelişmeleri paylaş</p>
-                    <span class="dash-quick-link">Oluştur →</span>
-                </div>
-
-                <!-- Yeni Deney Yayını -->
-                <div class="dash-quick-card" onclick="startNewExperiment()">
-                    <div class="dash-quick-icon-wrap emerald">
-                        <i class="ph-fill ph-flask"></i>
-                    </div>
-                    <h4 class="dash-quick-title">Yeni Deney Yayını</h4>
-                    <p class="dash-quick-desc">Deneylerini ve bulgularını paylaş</p>
-                    <span class="dash-quick-link">Oluştur →</span>
                 </div>
             </div>
 
@@ -8025,6 +8025,27 @@
         // --- CUSTOM MODAL LOGIC ---
         let deleteId = null;
 
+        function showCustomConfirm(options) {
+            const modal = document.getElementById('confirm-modal');
+            if (!modal) return;
+            const titleEl = modal.querySelector('.modal-title');
+            const descEl = document.getElementById('modal-desc-text');
+            const btn = document.getElementById('modal-confirm-btn');
+            
+            if (titleEl) titleEl.innerText = options.title || "Emin misiniz?";
+            if (descEl) descEl.innerText = options.message || "Bu işlem geri alınamaz.";
+            if (btn) {
+                btn.innerText = options.confirmText || "Evet, Sil";
+                btn.onclick = async () => {
+                    closeConfirmModal();
+                    if (typeof options.onConfirm === 'function') {
+                        await options.onConfirm();
+                    }
+                };
+            }
+            modal.classList.add('show');
+        }
+
         function confirmDelete(id) {
             deleteId = id;
             document.getElementById('confirm-modal').classList.add('show');
@@ -10421,25 +10442,31 @@
         }
 
         // Delete a content plan
-        async function deleteContentPlan(planId) {
-            if (!confirm('Bu içerik planını silmek istediğinize emin misiniz?')) return;
-            try {
-                const res = await fetch(`${API_URL}/author/content-plans/${planId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    await loadContentPlans();
-                    renderCalendar();
-                    renderDeadlines();
-                    showAuthorToast('Plan başarıyla silindi.', 'info');
-                } else {
-                    showAuthorToast('Plan silinemedi.', 'error');
+        function deleteContentPlan(planId) {
+            showCustomConfirm({
+                title: 'Planı Sil',
+                message: 'Bu içerik planını silmek istediğinize emin misiniz?',
+                confirmText: 'Evet, Sil',
+                onConfirm: async () => {
+                    try {
+                        const res = await fetch(`${API_URL}/author/content-plans/${planId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            await loadContentPlans();
+                            renderCalendar();
+                            renderDeadlines();
+                            showAuthorToast('Plan başarıyla silindi.', 'info');
+                        } else {
+                            showAuthorToast('Plan silinemedi.', 'error');
+                        }
+                    } catch (e) {
+                        console.error('Delete plan error:', e);
+                        showAuthorToast('Bağlantı hatası oluştu.', 'error');
+                    }
                 }
-            } catch (e) {
-                console.error('Delete plan error:', e);
-                showAuthorToast('Bağlantı hatası oluştu.', 'error');
-            }
+            });
         }
 
         // Load content plans from API
