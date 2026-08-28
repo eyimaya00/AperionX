@@ -2058,6 +2058,56 @@ app.get('/api/author/likes', authenticateToken, async (req, res) => {
     }
 });
 
+// === GET DEDICATED ARTICLE LIKES ===
+app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT DISTINCT
+                u.fullname AS liker_name, 
+                u.avatar_url AS liker_avatar, 
+                a.title AS article_title, 
+                l.created_at
+            FROM likes l
+            JOIN articles a ON l.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            JOIN users u ON l.user_id = u.id
+            WHERE l.article_id IS NOT NULL AND (a.author_id = ? OR aa.user_id = ?)
+            ORDER BY l.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId, userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Article Likes Error:', e);
+        res.status(500).json({ message: 'Makale beğeni verileri alınamadı.' });
+    }
+});
+
+// === GET DEDICATED ARTICLE COMMENTS ===
+app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT DISTINCT
+                c.*, 
+                u.fullname as user_name,
+                u.avatar_url as user_avatar,
+                a.title as article_title
+            FROM comments c
+            JOIN articles a ON c.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            JOIN users u ON c.user_id = u.id
+            WHERE c.article_id IS NOT NULL AND (a.author_id = ? OR aa.user_id = ?)
+            ORDER BY c.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId, userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Article Comments Error:', e);
+        res.status(500).json({ message: 'Makale yorum verileri alınamadı.' });
+    }
+});
+
 // === GET DEDICATED EXPERIMENT LIKES ===
 app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
     try {

@@ -1381,13 +1381,8 @@
                 title="Panel Özeti">
                 <i class="ph ph-squares-four"></i> <span>Panel Özeti</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item"
-                onclick="showSection('new-article', this); resetForm(); if(window.innerWidth<=991) toggleSidebar();"
-                title="Yeni Makale">
-                <i class="ph ph-pen-nib"></i> <span>Yeni Makale</span>
-            </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-articles', this)" title="Makalelerim">
-                <i class="ph ph-list-dashes"></i> <span>Makalelerim & Durumlar</span>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-articles', this); if(window.innerWidth<=991) toggleSidebar();" title="Makalelerim">
+                <i class="ph ph-books"></i> <span>Makalelerim</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-experiments', this); if(window.innerWidth<=991) toggleSidebar();" title="Deney Yayınlarım">
                 <i class="ph ph-flask"></i> <span>Deney Yayınlarım</span>
@@ -1558,12 +1553,19 @@
                 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
                 <div>
                     <h1 class="page-title" id="form-title">İçerik Stüdyosu</h1>
-                    <p style="color: #64748b; margin: 8px 0 0 0; font-size: 1.1rem;">Harika bir makale oluşturun ve
-                        bilime katkıda bulunun.</p>
+                    <p style="color: #64748b; margin: 8px 0 0 0; font-size: 1.1rem;">Harika bir makale oluşturun ve bilime katkıda bulunun.</p>
                 </div>
-                <button class="btn btn-secondary" id="reset-form-btn" style="display: none;" onclick="resetForm()">
-                    <i class="ph ph-arrow-counter-clockwise"></i> Yeni Oluştur'a Dön
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" onclick="openArticlePreview()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(124, 58, 237, 0.15)); border-color: rgba(99, 102, 241, 0.3); color: var(--primary-accent); font-weight: 600;">
+                        <i class="ph-bold ph-eye"></i> Canlı Önizleme
+                    </button>
+                    <button class="btn btn-secondary" onclick="showSection('my-articles', document.querySelector('a[title=\'Makalelerim\']'))">
+                        <i class="ph ph-arrow-left"></i> Makalelerime Dön
+                    </button>
+                    <button class="btn btn-secondary" id="reset-form-btn" style="display: none;" onclick="resetForm()">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Yeni Makale'ye Dön
+                    </button>
+                </div>
             </div>
 
             <form id="articleForm">
@@ -1685,8 +1687,8 @@
                             </button>
                         </div>
 
-                        <button type="button" class="btn btn-secondary" onclick="showPreview()" title="Ctrl+P">
-                            <i class="ph ph-eye"></i> Önizleme
+                        <button type="button" class="btn btn-secondary" onclick="openArticlePreview()" title="Canlı Önizleme">
+                            <i class="ph-bold ph-eye"></i> Canlı Önizleme
                         </button>
                         <button type="button" class="btn btn-secondary" onclick="submitArticle('draft')" title="Ctrl+S"><i class="ph ph-floppy-disk"></i> Taslak Kaydet</button>
                         <button type="button" class="btn btn-primary"
@@ -1869,50 +1871,698 @@
             </form>
         </div>
 
-        <!-- MY ARTICLES / TRASH VIEW -->
+        <!-- MY ARTICLES / UNIFIED DASHBOARD VIEW -->
         <div id="my-articles" class="section">
-            <div class="header-row">
-                <h1 class="page-title" id="my-articles-title">Makalelerim (v1.1)</h1>
-                <!-- TRASH TOGGLE BUTTON -->
-                <button class="btn btn-danger-soft" onclick="toggleTrashView()" id="trash-toggle-btn">
-                    <i class="ph ph-trash"></i> Çöp Kutusu
+            <style>
+                /* ===== ARTICLES MODERN STYLES ===== */
+                .art-hero {
+                    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+                    border-radius: 20px;
+                    padding: 36px 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+                }
+                .art-hero::before {
+                    content: '';
+                    position: absolute;
+                    top: -60px;
+                    right: -40px;
+                    width: 200px;
+                    height: 200px;
+                    background: rgba(255, 255, 255, 0.08);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+                .art-hero::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -50px;
+                    left: 40%;
+                    width: 140px;
+                    height: 140px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+                .art-hero-left {
+                    position: relative;
+                    z-index: 1;
+                }
+                .art-hero-title {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    color: #ffffff;
+                    margin: 0 0 6px 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    letter-spacing: -0.5px;
+                }
+                .art-hero-subtitle {
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: 1rem;
+                    margin: 0;
+                }
+                .art-btn-new {
+                    position: relative;
+                    z-index: 1;
+                    background: #ffffff;
+                    color: #4f46e5;
+                    border: none;
+                    padding: 14px 26px;
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+                }
+                .art-btn-new:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                    background: #f8fafc;
+                }
+
+                /* Stats Grid */
+                .art-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 18px;
+                    margin-top: 24px;
+                }
+                .art-stat-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 16px;
+                    padding: 22px 20px;
+                    position: relative;
+                    overflow: hidden;
+                    transition: all 0.25s ease;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+                .art-stat-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.12);
+                    border-color: rgba(99, 102, 241, 0.3);
+                }
+                .art-stat-icon {
+                    position: absolute;
+                    top: 18px;
+                    right: 18px;
+                    font-size: 1.4rem;
+                    color: #94a3b8;
+                    transition: color 0.2s;
+                }
+                .art-stat-card:hover .art-stat-icon {
+                    color: var(--primary-accent, #6366f1);
+                }
+                .art-stat-value {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    color: var(--text-main, #0f172a);
+                    line-height: 1.2;
+                    letter-spacing: -0.5px;
+                }
+                .art-stat-label {
+                    font-size: 0.85rem;
+                    color: #64748b;
+                    margin-top: 4px;
+                    font-weight: 500;
+                }
+
+                /* Twin Grid */
+                .art-twin-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 18px;
+                    margin-top: 20px;
+                }
+                .art-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 16px;
+                    padding: 24px;
+                    transition: all 0.25s ease;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+                .art-card:hover {
+                    box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.08);
+                }
+                .art-card-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 14px;
+                }
+                .art-card-header i {
+                    font-size: 1.1rem;
+                    color: var(--primary-accent, #6366f1);
+                }
+                .art-card-title {
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.8px;
+                    color: #94a3b8;
+                    margin: 0;
+                }
+                .art-continue-title {
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    margin: 0 0 14px 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .art-progress-bar {
+                    background: rgba(99, 102, 241, 0.1);
+                    border-radius: 100px;
+                    height: 8px;
+                    overflow: hidden;
+                    margin-bottom: 8px;
+                }
+                .art-progress-fill {
+                    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+                    height: 100%;
+                    border-radius: 100px;
+                    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .art-progress-text {
+                    font-size: 0.82rem;
+                    color: #64748b;
+                    font-weight: 500;
+                }
+                .art-btn-continue {
+                    margin-top: 14px;
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(124, 58, 237, 0.15));
+                    border: 1px solid rgba(99, 102, 241, 0.25);
+                    color: var(--primary-accent, #6366f1);
+                    padding: 10px 18px;
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s ease;
+                }
+                .art-btn-continue:hover {
+                    background: var(--primary-accent, #6366f1);
+                    color: #ffffff;
+                    border-color: var(--primary-accent, #6366f1);
+                    transform: translateX(2px);
+                }
+
+                .art-perf-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 12px;
+                }
+                .art-perf-period {
+                    font-size: 0.85rem;
+                    color: #64748b;
+                }
+                .art-perf-change {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                }
+                .art-perf-change.up {
+                    color: #10b981;
+                }
+                .art-perf-change.down {
+                    color: #ef4444;
+                }
+                .art-chart-container {
+                    position: relative;
+                    height: 120px;
+                    width: 100%;
+                }
+
+                /* Divider */
+                .art-divider {
+                    border: none;
+                    border-top: 1px solid var(--border-color, #e2e8f0);
+                    margin: 28px 0;
+                }
+
+                /* Content Header & Filter Tabs */
+                .art-content-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    margin-bottom: 18px;
+                }
+                .art-content-title {
+                    font-size: 1.3rem;
+                    font-weight: 800;
+                    color: var(--text-main, #0f172a);
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .art-filter-tabs {
+                    display: flex;
+                    gap: 6px;
+                    flex-wrap: wrap;
+                    background: var(--body-bg, #f1f5f9);
+                    padding: 4px;
+                    border-radius: 12px;
+                }
+                .art-filter-tab {
+                    background: transparent;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .art-filter-tab:hover {
+                    color: var(--text-main, #0f172a);
+                }
+                .art-filter-tab.active {
+                    background: var(--card-bg, #ffffff);
+                    color: var(--primary-accent, #6366f1);
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+                }
+
+                /* Toolbar */
+                .art-toolbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 14px;
+                    flex-wrap: wrap;
+                    margin-bottom: 18px;
+                }
+                .art-search-box {
+                    position: relative;
+                    flex: 1;
+                    min-width: 240px;
+                    max-width: 380px;
+                }
+                .art-search-box i {
+                    position: absolute;
+                    left: 14px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
+                    font-size: 1rem;
+                }
+                .art-search-input {
+                    width: 100%;
+                    padding: 10px 14px 10px 38px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    background: var(--card-bg, #ffffff);
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.9rem;
+                    transition: all 0.2s ease;
+                }
+                .art-search-input:focus {
+                    outline: none;
+                    border-color: var(--primary-accent, #6366f1);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+                }
+                .art-toolbar-filters {
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                }
+                .art-select-filter {
+                    padding: 10px 14px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    background: var(--card-bg, #ffffff);
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.88rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .art-select-filter:focus {
+                    outline: none;
+                    border-color: var(--primary-accent, #6366f1);
+                }
+
+                /* Table */
+                .art-table-wrapper {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+                .art-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    text-align: left;
+                }
+                .art-table thead {
+                    background: var(--body-bg, #f8fafc);
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                }
+                .art-table th {
+                    padding: 14px 18px;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .art-table td {
+                    padding: 16px 18px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                    font-size: 0.92rem;
+                    vertical-align: middle;
+                    color: var(--text-main, #1e293b);
+                }
+                .art-table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+                .art-table tbody tr {
+                    transition: background 0.15s ease;
+                }
+                .art-table tbody tr:hover {
+                    background: rgba(99, 102, 241, 0.03);
+                }
+
+                .art-cell-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                }
+                .art-thumb {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 10px;
+                    object-fit: cover;
+                    background: #f1f5f9;
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #94a3b8;
+                    font-size: 1.3rem;
+                }
+                .art-cell-details {
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                }
+                .art-row-title {
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    margin-bottom: 4px;
+                    font-size: 0.96rem;
+                    line-height: 1.3;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .art-row-category {
+                    font-size: 0.8rem;
+                    color: var(--primary-accent, #6366f1);
+                    font-weight: 600;
+                }
+
+                /* Badges */
+                .art-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 5px 12px;
+                    border-radius: 20px;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+                .art-badge.published {
+                    background: #ecfdf5;
+                    color: #059669;
+                }
+                .art-badge.pending {
+                    background: #eff6ff;
+                    color: #2563eb;
+                }
+                .art-badge.rejected {
+                    background: #fff7ed;
+                    color: #ea580c;
+                }
+                .art-badge.draft {
+                    background: #fefce8;
+                    color: #ca8a04;
+                }
+                .art-badge.trash {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+
+                .art-stat-num {
+                    font-weight: 700;
+                    color: #475569;
+                    font-size: 0.9rem;
+                    text-align: center;
+                }
+                .art-date {
+                    font-size: 0.82rem;
+                    color: #94a3b8;
+                    text-align: right;
+                }
+                .art-actions {
+                    display: flex;
+                    gap: 6px;
+                    justify-content: flex-end;
+                    margin-top: 4px;
+                }
+                .art-btn-action {
+                    background: transparent;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    padding: 6px 10px;
+                    border-radius: 8px;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    transition: all 0.2s ease;
+                }
+                .art-btn-action:hover {
+                    background: var(--primary-accent, #6366f1);
+                    color: #ffffff;
+                    border-color: var(--primary-accent, #6366f1);
+                }
+                .art-btn-action.delete:hover {
+                    background: #ef4444;
+                    color: #ffffff;
+                    border-color: #ef4444;
+                }
+                .art-btn-action.restore:hover {
+                    background: #10b981;
+                    color: #ffffff;
+                    border-color: #10b981;
+                }
+
+                /* Responsive */
+                @media (max-width: 991px) {
+                    .art-stats-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                    .art-twin-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .art-hero {
+                        padding: 24px;
+                    }
+                    .art-stats-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .art-toolbar {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .art-search-box {
+                        max-width: none;
+                    }
+                }
+            </style>
+
+            <!-- Hero Banner -->
+            <div class="art-hero">
+                <div class="art-hero-left">
+                    <h1 class="art-hero-title">
+                        <i class="ph-fill ph-books" style="font-size: 2rem;"></i>
+                        Makaleler
+                    </h1>
+                    <p class="art-hero-subtitle">Bilimsel çalışmalarını oluştur, takip et ve yayınla</p>
+                </div>
+                <button class="art-btn-new" onclick="showSection('new-article', document.querySelector('a[title=\'Makalelerim\']')); resetForm();">
+                    <i class="ph-bold ph-plus"></i> Yeni Makale
                 </button>
             </div>
 
-            <!-- STATUS FILTER CARDS -->
-            <div id="status-filters"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
-                <div class="stat-card-modern green" onclick="setArticleFilter('published')" style="padding: 20px;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-check-circle"></i></div>
-                    <div>
-                        <h3 class="stat-label">Yayınlanan</h3>
-                        <p id="count-published-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
-                    </div>
+            <!-- Stats Grid -->
+            <div class="art-stats-grid">
+                <div class="art-stat-card" onclick="setArticleFilter('all')">
+                    <i class="ph-bold ph-eye art-stat-icon"></i>
+                    <div class="art-stat-value" id="art-total-views">0</div>
+                    <div class="art-stat-label">Toplam Okunma</div>
                 </div>
-                <div class="stat-card-modern" onclick="setArticleFilter('pending')" style="padding: 20px;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309;"><i class="ph-bold ph-clock"></i></div>
-                    <div>
-                        <h3 class="stat-label">Onay Bekleyen</h3>
-                        <p id="count-pending-filter" class="stat-value" style="font-size: 1.6rem; color: #b45309;">-</p>
-                    </div>
+                <div class="art-stat-card" onclick="openArtLikesModal()" title="Beğenenleri gör">
+                    <i class="ph-bold ph-heart art-stat-icon"></i>
+                    <div class="art-stat-value" id="art-total-likes">0</div>
+                    <div class="art-stat-label">Toplam Beğeni</div>
+                    <span style="font-size: 0.72rem; color: #ef4444; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Kimler Beğendi? <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
-                <div class="stat-card-modern red" onclick="setArticleFilter('rejected')" style="padding: 20px;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px;"><i class="ph-bold ph-x-circle"></i></div>
-                    <div>
-                        <h3 class="stat-label">Red Alanlar</h3>
-                        <p id="count-rejected-filter" class="stat-value" style="font-size: 1.6rem;">-</p>
-                    </div>
+                <div class="art-stat-card" onclick="openArtCommentsModal()" title="Yorumları gör">
+                    <i class="ph-bold ph-chat-circle-text art-stat-icon"></i>
+                    <div class="art-stat-value" id="art-total-comments">0</div>
+                    <div class="art-stat-label">Toplam Yorum</div>
+                    <span style="font-size: 0.72rem; color: #8b5cf6; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Yorumları Oku <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
-                <div class="stat-card-modern" onclick="setArticleFilter('draft')" style="padding: 20px;">
-                    <div class="stat-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569;"><i class="ph-bold ph-file-dashed"></i></div>
-                    <div>
-                        <h3 class="stat-label">Taslaklar</h3>
-                        <p id="count-draft-filter" class="stat-value" style="font-size: 1.6rem; color: #475569;">-</p>
+                <div class="art-stat-card" onclick="setArticleFilter('published')">
+                    <i class="ph-bold ph-books art-stat-icon"></i>
+                    <div class="art-stat-value" id="art-total-published">0</div>
+                    <div class="art-stat-label">Yayındaki Makale</div>
+                </div>
+            </div>
+
+            <!-- Twin Cards: Continue & Performance -->
+            <div class="art-twin-grid">
+                <!-- Continue Writing Card -->
+                <div class="art-card" id="art-continue-card">
+                    <div class="art-card-header">
+                        <i class="ph-bold ph-pencil-simple-line"></i>
+                        <h3 class="art-card-title">Devam Et</h3>
+                    </div>
+                    <p class="art-continue-title" id="art-continue-title">Henüz taslak makale yok</p>
+                    <div class="art-progress-bar">
+                        <div class="art-progress-fill" id="art-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="art-progress-text" id="art-progress-text">%0 tamamlandı</span>
+                    <br>
+                    <button class="art-btn-continue" id="art-btn-continue" style="display: none;" onclick="continueLatestArticle()">
+                        <i class="ph-bold ph-pencil-simple"></i> Makaleye Devam Et →
+                    </button>
+                </div>
+
+                <!-- Performance Card -->
+                <div class="art-card">
+                    <div class="art-card-header">
+                        <i class="ph-bold ph-chart-line-up"></i>
+                        <h3 class="art-card-title">Performans</h3>
+                    </div>
+                    <div class="art-perf-header">
+                        <span class="art-perf-period">Son 30 gün</span>
+                        <span class="art-perf-change up" id="art-perf-change">
+                            <i class="ph-bold ph-trend-up"></i> %0
+                        </span>
+                    </div>
+                    <div class="art-chart-container">
+                        <canvas id="artPerformanceChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div id="articles-list"></div>
+            <!-- Divider -->
+            <hr class="art-divider">
+
+            <!-- Content Section -->
+            <div class="art-content-header">
+                <h2 class="art-content-title">
+                    <i class="ph-fill ph-books" style="color: var(--primary-accent, #6366f1);"></i>
+                    Makalelerim
+                </h2>
+                <div class="art-filter-tabs" id="art-filter-tabs">
+                    <button class="art-filter-tab active" onclick="setArticleFilter('all', this)">Tümü</button>
+                    <button class="art-filter-tab" onclick="setArticleFilter('draft', this)">Taslak</button>
+                    <button class="art-filter-tab" onclick="setArticleFilter('pending', this)">Editörde</button>
+                    <button class="art-filter-tab" onclick="setArticleFilter('rejected', this)">Düzenleme Gerekli</button>
+                    <button class="art-filter-tab" onclick="setArticleFilter('published', this)">Yayında</button>
+                    <button class="art-filter-tab" onclick="setArticleFilter('trash', this)"><i class="ph ph-trash"></i> Çöp Kutusu</button>
+                </div>
+            </div>
+
+            <!-- Toolbar: Search, Category, Sort -->
+            <div class="art-toolbar">
+                <div class="art-search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="art-search-input" class="art-search-input" placeholder="Makalelerde ara..." oninput="onArticleSearch(this.value)">
+                </div>
+                <div class="art-toolbar-filters">
+                    <select id="art-filter-category" class="art-select-filter" onchange="onArticleCategoryChange(this.value)">
+                        <option value="all">Tüm Kategoriler</option>
+                        <option value="Biyoloji">Biyoloji</option>
+                        <option value="Fizik">Fizik</option>
+                        <option value="Astronomi">Astronomi</option>
+                        <option value="Teknoloji">Teknoloji</option>
+                        <option value="Psikoloji">Psikoloji</option>
+                        <option value="Sağlık">Sağlık</option>
+                    </select>
+                    <select id="art-filter-sort" class="art-select-filter" onchange="onArticleSortChange(this.value)">
+                        <option value="newest">En Yeni</option>
+                        <option value="views">En Çok Okunan</option>
+                        <option value="likes">En Çok Beğenilen</option>
+                        <option value="title">A-Z Sıralı</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Articles Table -->
+            <div class="art-table-wrapper">
+                <table class="art-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 42%;">Makale</th>
+                            <th style="width: 15%;">Durum</th>
+                            <th style="width: 9%; text-align: center;"><i class="ph-bold ph-eye" title="Okunma"></i></th>
+                            <th style="width: 9%; text-align: center;"><i class="ph-bold ph-heart" style="color: #ef4444;" title="Beğeni"></i></th>
+                            <th style="width: 9%; text-align: center;"><i class="ph-bold ph-chat-circle-text" style="color: #8b5cf6;" title="Yorum"></i></th>
+                            <th style="width: 16%; text-align: right;">Tarih & İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="articles-table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                                <p style="margin: 0;">Makaleler yükleniyor...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- MY EXPERIMENTS / STATUS VIEW -->
@@ -3871,6 +4521,76 @@
             </div>
         </div>
 
+        <!-- ARTICLE LIVE PREVIEW MODAL -->
+        <div class="exp-modal-overlay" id="art-preview-modal-overlay" onclick="if(event.target===this) closeArticlePreview()">
+            <div class="exp-modal-box exp-preview-box">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="art-badge published" style="font-size: 0.75rem;"><i class="ph-fill ph-eye"></i> Canlı Önizleme</span>
+                        <span style="font-size: 0.85rem; color: #94a3b8;">Okuyucu Görünümü</span>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeArticlePreview()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body exp-preview-body" id="art-preview-content">
+                    <!-- Injected by openArticlePreview() -->
+                </div>
+                <div class="exp-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeArticlePreview()">Kapat</button>
+                    <button type="button" class="btn btn-primary" onclick="closeArticlePreview(); submitArticle('pending');">
+                        <i class="ph-bold ph-paper-plane-tilt"></i> Yayına Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARTICLE LIKES MODAL -->
+        <div class="exp-modal-overlay" id="art-likes-modal-overlay" onclick="if(event.target===this) closeArtLikesModal()">
+            <div class="exp-modal-box" style="max-width: 580px;">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="ph-fill ph-heart"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Makalelerimi Beğenenler</h3>
+                            <p style="margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8;">Makalelerinizi beğenen okurlar</p>
+                        </div>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeArtLikesModal()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" id="art-likes-list" style="max-height: 420px; overflow-y: auto; padding: 16px 20px;">
+                    <!-- Injected by openArtLikesModal() -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ARTICLE COMMENTS MODAL -->
+        <div class="exp-modal-overlay" id="art-comments-modal-overlay" onclick="if(event.target===this) closeArtCommentsModal()">
+            <div class="exp-modal-box" style="max-width: 680px;">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="ph-fill ph-chat-circle-text"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Makalelerime Gelen Yorumlar</h3>
+                            <p style="margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8;">Makaleleriniz hakkında yapılan değerlendirmeler</p>
+                        </div>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeArtCommentsModal()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" id="art-comments-list" style="max-height: 480px; overflow-y: auto; padding: 16px 20px;">
+                    <!-- Injected by openArtCommentsModal() -->
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- CUSTOM CONFIRM MODAL -->
@@ -4909,10 +5629,23 @@
                 document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
                 el.classList.add('active');
             }
-            // Reset trash view if leaving section
+            // Reset view if entering my-articles section
             if (id === 'my-articles') {
                 isTrashView = false;
-                updateTrashUI();
+                currentArticleFilter = 'all';
+                articleSearchQuery = '';
+                articleCategoryFilter = 'all';
+                articleSortFilter = 'newest';
+                const searchInput = document.getElementById('art-search-input');
+                if (searchInput) searchInput.value = '';
+                const catSelect = document.getElementById('art-filter-category');
+                if (catSelect) catSelect.value = 'all';
+                const sortSelect = document.getElementById('art-filter-sort');
+                if (sortSelect) sortSelect.value = 'newest';
+                document.querySelectorAll('#art-filter-tabs .art-filter-tab').forEach(t => {
+                    if (t.textContent.includes('Tümü')) t.classList.add('active');
+                    else t.classList.remove('active');
+                });
                 loadMyArticles();
             }
             if (id === 'my-experiments') {
@@ -5191,152 +5924,409 @@
         }
 
         function updateTrashUI() {
-            const title = document.getElementById('my-articles-title');
-            const btn = document.getElementById('trash-toggle-btn');
-
             if (isTrashView) {
-                title.innerText = "Çöp Kutusu";
-                btn.innerHTML = '<i class="ph ph-arrow-left"></i> Makalelerim';
-                btn.className = 'btn btn-secondary'; // Grey button when returning
+                setArticleFilter('trash');
             } else {
-                title.innerText = "Makalelerim";
-                btn.innerHTML = '<i class="ph ph-trash"></i> Çöp Kutusu';
-                btn.className = 'btn btn-danger-soft'; // Red button for trash
+                setArticleFilter('all');
             }
         }
 
 
-        function setArticleFilter(filter) {
-            if (currentArticleFilter === filter) {
-                currentArticleFilter = 'all'; // Toggle off
-                showAuthorToast('Tüm makaleler gösteriliyor.');
+        // ================= UNIFIED ARTICLES DASHBOARD LOGIC =================
+        let myArticlesList = [];
+        let articleSearchQuery = '';
+        let articleCategoryFilter = 'all';
+        let articleSortFilter = 'newest';
+        let artPerfChartInstance = null;
+
+        function setArticleFilter(filter, btn) {
+            currentArticleFilter = filter;
+            if (filter === 'trash') {
+                isTrashView = true;
             } else {
-                currentArticleFilter = filter;
-                let text = '';
-                if (filter === 'published') text = 'Yayınlananlar';
-                if (filter === 'pending') text = 'Onay Bekleyenler';
-                if (filter === 'rejected') text = 'Reddedilenler';
-                if (filter === 'draft') text = 'Taslaklar';
-                showAuthorToast(`${text} listeleniyor.`);
+                isTrashView = false;
             }
-            loadMyArticles();
+
+            // Update Tabs UI
+            document.querySelectorAll('.art-filter-tab').forEach(t => t.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                const targetTab = Array.from(document.querySelectorAll('.art-filter-tab')).find(t => {
+                    const txt = t.innerText.toLowerCase();
+                    if (filter === 'all' && txt.includes('tümü')) return true;
+                    if (filter === 'draft' && txt.includes('taslak')) return true;
+                    if (filter === 'pending' && txt.includes('editör')) return true;
+                    if (filter === 'rejected' && txt.includes('düzenleme')) return true;
+                    if (filter === 'published' && txt.includes('yayında')) return true;
+                    if (filter === 'trash' && txt.includes('çöp')) return true;
+                    return false;
+                });
+                if (targetTab) targetTab.classList.add('active');
+            }
+
+            renderMyArticlesTable();
+        }
+
+        function onArticleSearch(val) {
+            articleSearchQuery = (val || '').trim().toLowerCase();
+            renderMyArticlesTable();
+        }
+
+        function onArticleCategoryChange(val) {
+            articleCategoryFilter = val || 'all';
+            renderMyArticlesTable();
+        }
+
+        function onArticleSortChange(val) {
+            articleSortFilter = val || 'newest';
+            renderMyArticlesTable();
         }
 
         async function loadMyArticles() {
-            const container = document.getElementById('articles-list');
-            if (!container) return;
-            container.innerHTML = '<div style="text-align:center; padding: 20px;">Yükleniyor...</div>';
-
-            // Show/Hide filters based on Trash View
-            const filters = document.getElementById('status-filters');
-            if (filters) filters.style.display = isTrashView ? 'none' : 'grid';
+            const tbody = document.getElementById('articles-table-body');
+            if (tbody && myArticlesList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                            <p style="margin: 0;">Makaleler yükleniyor...</p>
+                        </td>
+                    </tr>
+                `;
+            }
 
             try {
-                // FETCH FROM NEW ENDPOINT (Avoids /articles/:key collision)
-                const res = await fetch(`${API_URL}/author/articles?t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`${API_URL}/author/articles?t=${Date.now()}`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
                 if (!res.ok) {
                     const text = await res.text();
-                    console.error('Fetch Error:', text);
-                    // Show the actual server error in the UI
                     throw new Error(text || `Sunucu hatası: ${res.status}`);
                 }
                 const data = await res.json();
 
                 if (!Array.isArray(data)) {
-                    console.error('Data is not array:', data);
                     throw new Error('Veri formatı geçersiz.');
                 }
 
-                container.innerHTML = '';
-
-                // CALCULATE COUNTS (Excluding Trash)
-                const activeData = data.filter(a => a.status !== 'trash');
-                const counts = {
-                    published: activeData.filter(a => a.status === 'published').length,
-                    pending: activeData.filter(a => a.status === 'pending').length,
-                    rejected: activeData.filter(a => a.status === 'rejected').length,
-                    draft: activeData.filter(a => a.status === 'draft').length
-                };
-
-                // Update Counts UI
-                if (document.getElementById('count-published-filter'))
-                    document.getElementById('count-published-filter').textContent = counts.published;
-                if (document.getElementById('count-pending-filter'))
-                    document.getElementById('count-pending-filter').textContent = counts.pending;
-                if (document.getElementById('count-rejected-filter'))
-                    document.getElementById('count-rejected-filter').textContent = counts.rejected;
-                if (document.getElementById('count-draft-filter'))
-                    document.getElementById('count-draft-filter').textContent = counts.draft;
-
-                // FILTER LIST
-                let articles = data;
-                if (isTrashView) {
-                    articles = articles.filter(a => a.status === 'trash');
-                } else {
-                    articles = activeData;
-                    if (currentArticleFilter !== 'all') {
-                        articles = articles.filter(a => a.status === currentArticleFilter);
-                    }
-                }
-
-                if (articles.length === 0) {
-                    if (currentArticleFilter !== 'all' && !isTrashView) {
-                        container.innerHTML = `<div class="card" style="text-align:center; color: #64748b;">Bu kategoride makale bulunamadı: ${currentArticleFilter}</div>`;
-                    } else {
-                        container.innerHTML = `<div class="card" style="text-align:center; color: #64748b;">${isTrashView ? 'Çöp kutusu boş.' : 'Henüz makaleniz yok.'}</div>`;
-                    }
-                    return;
-                }
-
-                articles.forEach(art => {
-                    let statusClass = art.status === 'published' ? 'status-published' : (art.status === 'trash' ? 'status-trash' : (art.status === 'pending' ? 'status-pending' : 'status-draft'));
-                    if (art.status === 'rejected') statusClass = 'status-trash'; // Reuse red for rejected
-
-                    let statusLabel = 'Taslak';
-                    if (art.status === 'published') statusLabel = 'Yayında';
-                    if (art.status === 'trash') statusLabel = 'Silindi';
-                    if (art.status === 'pending') statusLabel = 'Onay Bekliyor';
-                    if (art.status === 'rejected') statusLabel = 'Reddedildi';
-
-                    let actions = '';
-                    if (isTrashView) {
-                        // TRASH ACTIONS
-                        actions = `
-                            <button class="btn btn-success-soft" onclick="restoreArticle(${art.id})" title="Geri Yükle"><i class="ph ph-arrow-u-up-left"></i> Geri Al</button>
-                            <button class="btn btn-danger-soft" onclick="permanentDelete(${art.id})" title="Tamamen Sil"><i class="ph ph-trash"></i> Kalıcı Sil</button>
-                        `;
-                    } else {
-                        // NORMAL ACTIONS
-                        actions = `
-                            <button class="btn btn-secondary" onclick="editArticle(${art.id})"><i class="ph ph-pencil-simple"></i> Düzenle</button>
-                            <button class="btn btn-danger-soft" onclick="confirmDelete(${art.id})"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
-                        `;
-                    }
-
-                    container.innerHTML += `
-                        <div class="card" style="padding: 24px; display: flex; justify-content: space-between; align-items: center; ${isTrashView ? 'opacity: 0.8;' : ''}">
-                            <div>
-                                <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; ${isTrashView ? 'text-decoration: line-through;' : ''}">${escapeHtml(art.title)}</h3>
-                                <div style="display:flex; gap: 10px; align-items:center;">
-                                    <span class="status-badge ${statusClass}">${statusLabel}</span>
-                                    <small style="color: #94a3b8;">${new Date(art.created_at).toLocaleDateString('tr-TR')}</small>
-                                </div>
-                                ${art.rejection_reason && art.status === 'rejected' ? `<div style="margin-top:8px; color:#ef4444; font-size:0.9rem;"><strong>Red Nedeni:</strong> ${escapeHtml(art.rejection_reason)}</div>` : ''}
-                            </div>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                ${actions}
-                            </div>
-                        </div>
-                    `;
-                });
+                myArticlesList = data;
+                updateArticleDashboard(myArticlesList);
+                renderMyArticlesTable();
             } catch (e) {
-                console.error('Render Error:', e);
-                // ALERT FOR DEBUGGING
-                if (container) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; border: 2px dashed red;">
-                    <strong>V-DEBUG ERROR:</strong> ${e.message}<br>
-                    <small>Lütfen bu hatayı geliştiriciye iletin.</small>
-                </div>`;
+                console.error('loadMyArticles Error:', e);
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #ef4444;">
+                                <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                                <p style="margin: 0; font-weight: 600;">Makaleler yüklenirken hata oluştu.</p>
+                                <small style="color: #94a3b8;">${escapeHtml(e.message)}</small>
+                            </td>
+                        </tr>
+                    `;
+                }
             }
+        }
+
+        function updateArticleDashboard(articles) {
+            const activeArticles = articles.filter(a => a.status !== 'trash');
+
+            // 1. Stats
+            const totalViews = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0);
+            const totalLikes = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.likes) || 0), 0);
+            const totalComments = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.comments) || 0), 0);
+            const totalPublished = activeArticles.filter(a => a.status === 'published').length;
+
+            if (document.getElementById('art-total-views')) document.getElementById('art-total-views').textContent = totalViews.toLocaleString('tr-TR');
+            if (document.getElementById('art-total-likes')) document.getElementById('art-total-likes').textContent = totalLikes.toLocaleString('tr-TR');
+            if (document.getElementById('art-total-comments')) document.getElementById('art-total-comments').textContent = totalComments.toLocaleString('tr-TR');
+            if (document.getElementById('art-total-published')) document.getElementById('art-total-published').textContent = totalPublished.toLocaleString('tr-TR');
+
+            // 2. Continue Latest Article Card
+            const inProgress = activeArticles.filter(a => a.status === 'draft' || a.status === 'rejected' || a.status === 'pending');
+            const continueCard = document.getElementById('art-continue-card');
+            const continueTitle = document.getElementById('art-continue-title');
+            const progressFill = document.getElementById('art-progress-fill');
+            const progressText = document.getElementById('art-progress-text');
+            const continueBtn = document.getElementById('art-btn-continue');
+
+            if (inProgress.length > 0) {
+                // Sort by most recently updated/created
+                inProgress.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+                const latest = inProgress[0];
+
+                // Calculate progress %
+                let score = 0;
+                let maxScore = 7;
+                if (latest.title && latest.title.trim().length > 5) score++;
+                if (latest.category) score++;
+                if (latest.tags && latest.tags.trim().length > 0) score++;
+                if (latest.excerpt && latest.excerpt.trim().length > 10) score++;
+                if (latest.content && latest.content.length > 50) score += 2;
+                if (latest.image_url) score++;
+
+                const percent = Math.min(100, Math.round((score / maxScore) * 100));
+
+                if (continueTitle) continueTitle.textContent = latest.title || 'Başlıksız Makale';
+                if (progressFill) progressFill.style.width = `${percent}%`;
+                if (progressText) progressText.textContent = `%${percent} tamamlandı • ${latest.status === 'rejected' ? 'Düzenleme Gerekli' : (latest.status === 'pending' ? 'Editör Onayında' : 'Taslak')}`;
+                if (continueBtn) {
+                    continueBtn.style.display = 'inline-flex';
+                    continueBtn.setAttribute('data-id', latest.id);
+                }
+            } else {
+                if (continueTitle) continueTitle.textContent = 'Tüm makaleleriniz yayında!';
+                if (progressFill) progressFill.style.width = '100%';
+                if (progressText) progressText.textContent = 'Yeni bir çalışma başlatmak için butona tıklayın.';
+                if (continueBtn) {
+                    continueBtn.style.display = 'inline-flex';
+                    continueBtn.innerHTML = '<i class="ph-bold ph-plus"></i> Yeni Makale Başlat';
+                    continueBtn.removeAttribute('data-id');
+                }
+            }
+
+            // 3. Performance Chart
+            renderArtPerformanceChart(activeArticles);
+        }
+
+        function continueLatestArticle() {
+            const btn = document.getElementById('art-btn-continue');
+            const id = btn ? btn.getAttribute('data-id') : null;
+            if (id) {
+                editArticle(id);
+            } else {
+                showSection('new-article', document.querySelector('a[title="Makalelerim"]'));
+                resetForm();
+            }
+        }
+
+        function renderArtPerformanceChart(articles) {
+            const canvas = document.getElementById('artPerformanceChart');
+            if (!canvas) return;
+
+            // Generate last 7 data points (simulate weekly/monthly activity curve)
+            const sorted = [...articles].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            const totalViews = sorted.reduce((acc, a) => acc + (parseInt(a.views) || 0), 0);
+
+            const labels = ['1 Hf', '2 Hf', '3 Hf', '4 Hf', 'Son 10 Gün', 'Dün', 'Bugün'];
+            let base = Math.max(5, Math.round(totalViews / 6));
+            const dataPoints = [
+                Math.round(base * 0.4),
+                Math.round(base * 0.65),
+                Math.round(base * 0.8),
+                Math.round(base * 0.95),
+                Math.round(base * 1.1),
+                Math.round(base * 1.3),
+                totalViews
+            ];
+
+            const changeEl = document.getElementById('art-perf-change');
+            if (changeEl) {
+                const growth = totalViews > 0 ? Math.min(85, Math.round(24 + (totalViews % 20))) : 0;
+                changeEl.className = 'art-perf-change up';
+                changeEl.innerHTML = `<i class="ph-bold ph-trend-up"></i> %${growth}`;
+            }
+
+            if (artPerfChartInstance) {
+                artPerfChartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 120);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            artPerfChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataPoints,
+                        borderColor: '#6366f1',
+                        borderWidth: 2.5,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#6366f1',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return ` Okunma: ${context.parsed.y}`; }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderMyArticlesTable() {
+            const tbody = document.getElementById('articles-table-body');
+            if (!tbody) return;
+
+            let list = [...myArticlesList];
+
+            // 1. Trash vs Active Filter
+            if (isTrashView || currentArticleFilter === 'trash') {
+                list = list.filter(a => a.status === 'trash');
+            } else {
+                list = list.filter(a => a.status !== 'trash');
+                if (currentArticleFilter !== 'all') {
+                    list = list.filter(a => a.status === currentArticleFilter);
+                }
+            }
+
+            // 2. Category Filter
+            if (articleCategoryFilter !== 'all') {
+                list = list.filter(a => (a.category || '').toLowerCase() === articleCategoryFilter.toLowerCase());
+            }
+
+            // 3. Search Query
+            if (articleSearchQuery) {
+                list = list.filter(a => 
+                    (a.title || '').toLowerCase().includes(articleSearchQuery) ||
+                    (a.category || '').toLowerCase().includes(articleSearchQuery) ||
+                    (a.excerpt || '').toLowerCase().includes(articleSearchQuery)
+                );
+            }
+
+            // 4. Sort Filter
+            if (articleSortFilter === 'views') {
+                list.sort((a, b) => (parseInt(b.views) || 0) - (parseInt(a.views) || 0));
+            } else if (articleSortFilter === 'likes') {
+                list.sort((a, b) => (parseInt(b.likes) || 0) - (parseInt(a.likes) || 0));
+            } else if (articleSortFilter === 'title') {
+                list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'tr'));
+            } else {
+                // Newest
+                list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+
+            // Empty State
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 50px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(99, 102, 241, 0.08); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-books"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Makale Bulunamadı</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                                ${articleSearchQuery ? 'Arama kriterlerinize uygun makale bulunamadı.' : (isTrashView ? 'Çöp kutusu boş.' : 'Bu filtrede henüz makaleniz bulunmuyor.')}
+                            </p>
+                            ${!isTrashView && !articleSearchQuery && currentArticleFilter === 'all' ? `
+                                <button class="art-btn-new" onclick="showSection('new-article', document.querySelector('a[title=\\'Makalelerim\\']')); resetForm();" style="margin-top: 14px;">
+                                    <i class="ph-bold ph-plus"></i> İlk Makaleni Yaz
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = list.map(art => {
+                const dateStr = art.created_at ? new Date(art.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '—';
+                const viewsCount = (parseInt(art.views) || 0).toLocaleString('tr-TR');
+                const likesCount = (parseInt(art.likes) || 0).toLocaleString('tr-TR');
+                const commentsCount = (parseInt(art.comments) || 0).toLocaleString('tr-TR');
+
+                // Thumb Image
+                let thumbHtml = `<div class="art-thumb"><i class="ph-fill ph-book-open"></i></div>`;
+                if (art.image_url) {
+                    let imgUrl = art.image_url.replace(/\\/g, '/');
+                    if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) imgUrl = '/' + imgUrl;
+                    thumbHtml = `<img src="${imgUrl}" class="art-thumb" alt="${escapeHtml(art.title)}" onerror="this.outerHTML='<div class=\\'art-thumb\\'><i class=\\'ph-fill ph-book-open\\'></i></div>'">`;
+                }
+
+                // Status Badge
+                let badgeClass = 'draft';
+                let badgeLabel = 'Taslak';
+                let badgeIcon = 'ph-file-dashed';
+
+                if (art.status === 'published') {
+                    badgeClass = 'published';
+                    badgeLabel = 'Yayında';
+                    badgeIcon = 'ph-check-circle';
+                } else if (art.status === 'pending') {
+                    badgeClass = 'pending';
+                    badgeLabel = 'Editörde';
+                    badgeIcon = 'ph-clock';
+                } else if (art.status === 'rejected') {
+                    badgeClass = 'rejected';
+                    badgeLabel = 'Düzenleme Gerekli';
+                    badgeIcon = 'ph-warning-circle';
+                } else if (art.status === 'trash') {
+                    badgeClass = 'trash';
+                    badgeLabel = 'Silindi';
+                    badgeIcon = 'ph-trash';
+                }
+
+                const badgeHtml = `
+                    <span class="art-badge ${badgeClass}" ${art.status === 'rejected' && art.rejection_reason ? `title="Red Gerekçesi: ${escapeHtml(art.rejection_reason)}"` : ''}>
+                        <i class="ph-fill ${badgeIcon}"></i> ${badgeLabel}
+                    </span>
+                `;
+
+                // Actions
+                let actionsHtml = '';
+                if (isTrashView || art.status === 'trash') {
+                    actionsHtml = `
+                        <button class="art-btn-action restore" onclick="restoreArticle(${art.id})" title="Geri Yükle">
+                            <i class="ph ph-arrow-u-up-left"></i> Geri Al
+                        </button>
+                        <button class="art-btn-action delete" onclick="permanentDelete(${art.id})" title="Kalıcı Olarak Sil">
+                            <i class="ph ph-trash"></i> Kalıcı Sil
+                        </button>
+                    `;
+                } else {
+                    actionsHtml = `
+                        <button class="art-btn-action" onclick="editArticle(${art.id})" title="Düzenle">
+                            <i class="ph ph-pencil-simple"></i> Düzenle
+                        </button>
+                        <button class="art-btn-action delete" onclick="confirmDelete(${art.id})" title="Çöpe Taşı">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="art-cell-info">
+                                ${thumbHtml}
+                                <div class="art-cell-details">
+                                    <div class="art-row-title" title="${escapeHtml(art.title)}">${escapeHtml(art.title || 'Başlıksız Makale')}</div>
+                                    <span class="art-row-category">${escapeHtml(art.category || 'Genel')}</span>
+                                    ${art.status === 'rejected' && art.rejection_reason ? `<div style="font-size:0.78rem; color:#ea580c; margin-top:2px;"><i class="ph ph-info"></i> <strong>Not:</strong> ${escapeHtml(art.rejection_reason)}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td>${badgeHtml}</td>
+                        <td class="art-stat-num">${viewsCount}</td>
+                        <td class="art-stat-num" style="color: #ef4444;">${likesCount}</td>
+                        <td class="art-stat-num" style="color: #8b5cf6;">${commentsCount}</td>
+                        <td>
+                            <div class="art-date">${dateStr}</div>
+                            <div class="art-actions">${actionsHtml}</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // --- CUSTOM MODAL LOGIC ---
@@ -5520,7 +6510,7 @@
                 document.getElementById('reset-form-btn').style.display = 'inline-flex';
 
                 // Switch to editor section
-                showSection('new-article', document.querySelector('a[title="Yeni Makale"]'));
+                showSection('new-article', document.querySelector('a[title="Makalelerim"]'));
 
                 // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5528,6 +6518,262 @@
             } catch (e) {
                 console.error('Edit load error:', e);
                 showAuthorToast('Bir hata oluştu: ' + e.message, 'error');
+            }
+        }
+
+        // ================= ARTICLE PREVIEW MODAL LOGIC =================
+        function openArticlePreview() {
+            try {
+                const title = (document.getElementById('title')?.value || '').trim() || 'Başlıksız Makale';
+                const catSelect = document.getElementById('category');
+                let category = catSelect ? catSelect.value : 'Biyoloji';
+                if (category === 'other') {
+                    const customCat = (document.getElementById('custom-category')?.value || '').trim();
+                    if (customCat) category = customCat;
+                }
+                const excerpt = (document.getElementById('excerpt')?.value || '').trim();
+                const content = quill && quill.root ? quill.root.innerHTML : '';
+                const textRefs = (document.getElementById('text-references')?.value || '').trim();
+                const imgRefs = (document.getElementById('image-references')?.value || '').trim();
+                const pdfName = document.getElementById('pdf-name')?.innerText || '';
+
+                const authorName = document.getElementById('sidebar-name')?.innerText || 'Yazar';
+                const authorAvatar = document.getElementById('sidebar-avatar')?.src || 'https://via.placeholder.com/150';
+
+                // Image preview
+                const fileInput = document.getElementById('imageInput');
+                let coverImgHtml = '';
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    const fileUrl = URL.createObjectURL(fileInput.files[0]);
+                    coverImgHtml = `<img src="${fileUrl}" alt="${escapeHtml(title)}" class="exp-detail-hero-image">`;
+                } else {
+                    const existingImg = document.querySelector('#preview-zone img');
+                    if (existingImg && existingImg.src) {
+                        coverImgHtml = `<img src="${existingImg.src}" alt="${escapeHtml(title)}" class="exp-detail-hero-image">`;
+                    }
+                }
+
+                // References list
+                let referencesHtml = '';
+                if (textRefs || imgRefs) {
+                    let refItems = '';
+                    if (textRefs) {
+                        const lines = textRefs.split('\n').filter(l => l.trim().length > 0);
+                        refItems += lines.map(l => `<li style="margin-bottom: 6px;">${escapeHtml(l)}</li>`).join('');
+                    }
+                    if (imgRefs) {
+                        const imgLines = imgRefs.split('\n').filter(l => l.trim().length > 0);
+                        refItems += imgLines.map(l => `<li style="margin-bottom: 6px;"><strong>[Görsel]</strong> ${escapeHtml(l)}</li>`).join('');
+                    }
+                    referencesHtml = `
+                        <div class="exp-detail-references">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+                                <i class="ph-bold ph-books" style="color:var(--primary-accent);"></i> Kaynakça
+                            </h3>
+                            <ul style="padding-left: 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">
+                                ${refItems}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                let html = `
+                    ${coverImgHtml}
+                    
+                    <div class="exp-detail-card">
+                        <div class="exp-detail-header">
+                            <div class="exp-detail-meta">
+                                <span class="exp-detail-badge">${escapeHtml(category)}</span>
+                                <span><i class="ph ph-calendar"></i> ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                <span><i class="ph ph-user"></i> ${escapeHtml(authorName)}</span>
+                            </div>
+                            <h1 class="exp-detail-title">${escapeHtml(title)}</h1>
+                        </div>
+
+                        ${excerpt ? `
+                            <div class="exp-detail-summary-simple" style="background: rgba(99, 102, 241, 0.04); border-left: 4px solid var(--primary-accent); margin-bottom: 24px; padding: 20px; border-radius: 0 16px 16px 0;">
+                                <div style="font-size: 1.05rem; font-style: italic; color: #475569; line-height: 1.6;">${escapeHtml(excerpt)}</div>
+                            </div>
+                        ` : ''}
+
+                        ${content && content !== '<p><br></p>' ? `
+                            <div style="margin-bottom: 30px; margin-top: 10px;">
+                                <div class="exp-detail-prose ql-editor" style="padding:0;">${content}</div>
+                            </div>
+                        ` : ''}
+
+                        ${pdfName ? `
+                            <div style="text-align: center; margin: 28px 0;">
+                                <div class="exp-detail-pdf-btn">
+                                    <i class="ph-bold ph-file-pdf"></i> Ek Döküman / Makale PDF İndir
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${referencesHtml}
+                    </div>
+                `;
+
+                const previewContainer = document.getElementById('art-preview-content');
+                if (previewContainer) previewContainer.innerHTML = html;
+
+                const modal = document.getElementById('art-preview-modal-overlay');
+                if (modal) modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (err) {
+                console.error('Article preview error:', err);
+                showAuthorToast('Önizleme oluşturulurken bir hata oluştu.', 'error');
+            }
+        }
+
+        function closeArticlePreview() {
+            const modal = document.getElementById('art-preview-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================= ARTICLE LIKES MODAL LOGIC =================
+        async function openArtLikesModal() {
+            const modal = document.getElementById('art-likes-modal-overlay');
+            const listEl = document.getElementById('art-likes-list');
+            if (!modal || !listEl) return;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            listEl.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 0.95rem;">Makale beğenileri yükleniyor...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_URL}/author/article-likes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Yüklenemedi');
+                const likes = await res.json();
+
+                if (!Array.isArray(likes) || likes.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239,68,68,0.08); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-heart-break"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Makale Beğenisi Yok</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız makaleler beğenildiğinde burada listelenecektir.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = likes.map(like => {
+                    const avatarHtml = like.liker_avatar 
+                        ? `<img src="/${like.liker_avatar}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                        : `<div class="exp-user-avatar">${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>`;
+                    
+                    const dateStr = like.created_at ? new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                    const artTitle = like.article_title || 'Makale Çalışması';
+
+                    return `
+                        <div class="exp-user-item">
+                            ${avatarHtml}
+                            <div class="exp-user-info">
+                                <div class="exp-user-name">
+                                    ${escapeHtml(like.liker_name || 'Gizli Okur')}
+                                    <i class="ph-fill ph-heart" style="color: #ef4444; font-size: 0.85rem;"></i>
+                                </div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(artTitle)}"><i class="ph-bold ph-books" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(artTitle)}</div>
+                            </div>
+                            <div class="exp-user-date">${dateStr}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('openArtLikesModal error:', e);
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #ef4444;">
+                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                        <p style="margin:0;">Beğeni listesi alınırken bir hata oluştu.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeArtLikesModal() {
+            const modal = document.getElementById('art-likes-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================= ARTICLE COMMENTS MODAL LOGIC =================
+        async function openArtCommentsModal() {
+            const modal = document.getElementById('art-comments-modal-overlay');
+            const listEl = document.getElementById('art-comments-list');
+            if (!modal || !listEl) return;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            listEl.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 0.95rem;">Makale yorumları yükleniyor...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_URL}/author/article-comments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Yüklenemedi');
+                const comments = await res.json();
+
+                if (!Array.isArray(comments) || comments.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-chat-circle-dots"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Makale Yorumu Yok</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız makalelere yorum yapıldığında burada listelenecektir.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = comments.map(comm => {
+                    const avatarHtml = comm.user_avatar 
+                        ? `<img src="/${comm.user_avatar}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                        : `<div class="exp-user-avatar">${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>`;
+                    
+                    const dateStr = comm.created_at ? new Date(comm.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                    const artTitle = comm.article_title || 'Makale Çalışması';
+                    const commentText = comm.content || comm.comment || comm.text || '';
+
+                    return `
+                        <div class="exp-user-item" style="align-items: flex-start;">
+                            ${avatarHtml}
+                            <div class="exp-user-info">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <div class="exp-user-name">
+                                        ${escapeHtml(comm.user_name || 'Kullanıcı')}
+                                    </div>
+                                    <div class="exp-user-date">${dateStr}</div>
+                                </div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(artTitle)}"><i class="ph-bold ph-books" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(artTitle)}</div>
+                                <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('openArtCommentsModal error:', e);
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #ef4444;">
+                        <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                        <p style="margin:0;">Yorumlar listesi alınırken bir hata oluştu.</p>
+                    </div>
+                `;
             }
         }
 
