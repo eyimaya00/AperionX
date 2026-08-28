@@ -2064,10 +2064,12 @@ app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
         const userId = req.user.id;
         const query = `
             SELECT DISTINCT
-                u.fullname AS liker_name, 
+                l.id,
+                l.article_id,
+                l.created_at,
+                COALESCE(u.fullname, u.name, u.username, 'Okur') AS liker_name, 
                 u.avatar_url AS liker_avatar, 
-                a.title AS article_title, 
-                l.created_at
+                a.title AS article_title
             FROM likes l
             JOIN articles a ON l.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
@@ -2089,8 +2091,11 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
         const userId = req.user.id;
         const query = `
             SELECT DISTINCT
-                c.*, 
-                u.fullname as user_name,
+                c.id,
+                c.article_id,
+                c.content,
+                c.created_at,
+                COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
                 a.title as article_title
             FROM comments c
@@ -2114,10 +2119,12 @@ app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
         const userId = req.user.id;
         const query = `
             SELECT DISTINCT
-                u.fullname AS liker_name, 
+                l.id,
+                l.experiment_id,
+                l.created_at,
+                COALESCE(u.fullname, u.name, u.username, 'Bilim Sever') AS liker_name, 
                 u.avatar_url AS liker_avatar, 
-                e.title AS article_title, 
-                l.created_at
+                e.title AS experiment_title
             FROM likes l
             JOIN experiments e ON l.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
@@ -2139,10 +2146,13 @@ app.get('/api/author/experiment-comments', authenticateToken, async (req, res) =
         const userId = req.user.id;
         const query = `
             SELECT DISTINCT
-                c.*, 
-                u.fullname as user_name,
+                c.id,
+                c.experiment_id,
+                c.content,
+                c.created_at,
+                COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
-                e.title as article_title
+                e.title as experiment_title
             FROM comments c
             JOIN experiments e ON c.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id

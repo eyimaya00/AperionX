@@ -2389,6 +2389,151 @@
                     border-color: #10b981;
                 }
 
+                /* Modals & Popups for Articles */
+                .exp-modal-overlay {
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    background: rgba(15, 23, 42, 0.75) !important;
+                    backdrop-filter: blur(8px) !important;
+                    z-index: 99999 !important;
+                    display: none !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    padding: 20px !important;
+                    box-sizing: border-box !important;
+                }
+                .exp-modal-overlay.active {
+                    display: flex !important;
+                }
+                .exp-modal-box {
+                    background: var(--card-bg, #ffffff);
+                    border-radius: 20px;
+                    width: 100%;
+                    max-width: 600px;
+                    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    animation: expModalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .exp-modal-box.exp-preview-box {
+                    max-width: 900px;
+                    max-height: 90vh;
+                }
+                @keyframes expModalPop {
+                    from { transform: scale(0.92) translateY(20px); opacity: 0; }
+                    to { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                .exp-modal-header {
+                    padding: 18px 24px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: rgba(248, 250, 252, 0.5);
+                }
+                .exp-modal-close {
+                    background: none;
+                    border: none;
+                    font-size: 1.2rem;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease;
+                }
+                .exp-modal-close:hover {
+                    background: rgba(239, 68, 68, 0.1);
+                    color: #ef4444;
+                }
+                .exp-modal-body {
+                    padding: 24px;
+                    overflow-y: auto;
+                }
+                .exp-modal-footer {
+                    padding: 16px 24px;
+                    border-top: 1px solid var(--border-color, #e2e8f0);
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    background: rgba(248, 250, 252, 0.5);
+                }
+
+                /* Likes & Comments Interactive List */
+                .exp-user-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding: 12px 14px;
+                    border-radius: 14px;
+                    transition: all 0.2s ease;
+                    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+                }
+                .exp-user-item:last-child {
+                    border-bottom: none;
+                }
+                .exp-user-item:hover {
+                    background: rgba(99, 102, 241, 0.04);
+                }
+                .exp-user-avatar {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    background: linear-gradient(135deg, #6366f1, #a855f7);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    flex-shrink: 0;
+                }
+                .exp-user-info {
+                    flex: 1;
+                    min-width: 0;
+                }
+                .exp-user-name {
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.93rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .exp-user-exp-title {
+                    font-size: 0.82rem;
+                    color: #64748b;
+                    margin-top: 2px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .exp-user-date {
+                    font-size: 0.78rem;
+                    color: #94a3b8;
+                    flex-shrink: 0;
+                }
+                .exp-comment-balloon {
+                    background: #f8fafc;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 12px;
+                    padding: 10px 14px;
+                    margin-top: 6px;
+                    font-size: 0.88rem;
+                    color: #334155;
+                    line-height: 1.5;
+                }
+
                 /* Responsive */
                 @media (max-width: 991px) {
                     .art-stats-grid {
@@ -6648,10 +6793,11 @@
             `;
 
             try {
+                const authToken = token || localStorage.getItem('token');
                 const res = await fetch(`${API_URL}/author/article-likes`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
-                if (!res.ok) throw new Error('Yüklenemedi');
+                if (!res.ok) throw new Error('Sunucudan yanıt alınamadı (' + res.status + ')');
                 const likes = await res.json();
 
                 if (!Array.isArray(likes) || likes.length === 0) {
@@ -6668,8 +6814,11 @@
                 }
 
                 listEl.innerHTML = likes.map(like => {
-                    const avatarHtml = like.liker_avatar 
-                        ? `<img src="/${like.liker_avatar}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                    let avatarUrl = like.liker_avatar;
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+
+                    const avatarHtml = avatarUrl 
+                        ? `<img src="${avatarUrl}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
                         : `<div class="exp-user-avatar">${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>`;
                     
                     const dateStr = like.created_at ? new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -6694,17 +6843,20 @@
                 listEl.innerHTML = `
                     <div style="text-align: center; padding: 30px; color: #ef4444;">
                         <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                        <p style="margin:0;">Beğeni listesi alınırken bir hata oluştu.</p>
+                        <p style="margin:0; font-weight:600;">Beğeni listesi alınırken bir hata oluştu.</p>
+                        <small style="color: #94a3b8;">${escapeHtml(e.message)}</small>
                     </div>
                 `;
             }
         }
+        window.openArtLikesModal = openArtLikesModal;
 
         function closeArtLikesModal() {
             const modal = document.getElementById('art-likes-modal-overlay');
             if (modal) modal.classList.remove('active');
             document.body.style.overflow = '';
         }
+        window.closeArtLikesModal = closeArtLikesModal;
 
         // ================= ARTICLE COMMENTS MODAL LOGIC =================
         async function openArtCommentsModal() {
@@ -6722,10 +6874,11 @@
             `;
 
             try {
+                const authToken = token || localStorage.getItem('token');
                 const res = await fetch(`${API_URL}/author/article-comments`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
-                if (!res.ok) throw new Error('Yüklenemedi');
+                if (!res.ok) throw new Error('Sunucudan yanıt alınamadı (' + res.status + ')');
                 const comments = await res.json();
 
                 if (!Array.isArray(comments) || comments.length === 0) {
@@ -6742,8 +6895,11 @@
                 }
 
                 listEl.innerHTML = comments.map(comm => {
-                    const avatarHtml = comm.user_avatar 
-                        ? `<img src="/${comm.user_avatar}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                    let avatarUrl = comm.user_avatar;
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+
+                    const avatarHtml = avatarUrl 
+                        ? `<img src="${avatarUrl}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
                         : `<div class="exp-user-avatar">${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>`;
                     
                     const dateStr = comm.created_at ? new Date(comm.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -6771,11 +6927,20 @@
                 listEl.innerHTML = `
                     <div style="text-align: center; padding: 30px; color: #ef4444;">
                         <i class="ph ph-warning-circle" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                        <p style="margin:0;">Yorumlar listesi alınırken bir hata oluştu.</p>
+                        <p style="margin:0; font-weight:600;">Yorumlar listesi alınırken bir hata oluştu.</p>
+                        <small style="color: #94a3b8;">${escapeHtml(e.message)}</small>
                     </div>
                 `;
             }
         }
+        window.openArtCommentsModal = openArtCommentsModal;
+
+        function closeArtCommentsModal() {
+            const modal = document.getElementById('art-comments-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        window.closeArtCommentsModal = closeArtCommentsModal;
 
         function resetForm() {
             editingArticleId = null;
