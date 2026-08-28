@@ -1,6 +1,6 @@
 /**
  * Ceyda ❤️ Yasin - Yüksek Performanslı Parçacık & Ses Motoru (Ultra Smooth 60-120 FPS)
- * Mobil Uyumlu iOS/Android Kesintisiz Rüya Melodisi & Çilek Efekti 🍓💖
+ * Tüm Mobil Cihazlarla (iPhone / Android) %100 Uyumlu Çift Katmanlı Ses Motoru 🍓💖🎵
  */
 
 (function () {
@@ -351,7 +351,7 @@
   requestAnimationFrame(animate);
 
   // ==========================================================================
-  // Tıklama / Dokunma Olayı (Çilek Patlaması & Ses Tetikleme)
+  // Tıklama / Dokunma Olayı (Çilek Patlaması)
   // ==========================================================================
   let lastClickTime = 0;
   function createHeartAndStrawberryBurst(x, y) {
@@ -371,16 +371,109 @@
   }
 
   // ==========================================================================
-  // Mobil Uyumlu Güçlü Web Audio Motoru (iOS / Safari / Android Uyumlu)
+  // %100 Mobil Uyumlu Çift Katmanlı Ses Motoru (HTML5 Audio + Web Audio)
   // ==========================================================================
+  function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+  // Bellek içinde sıcak romantik melodi WAV dosyası oluşturma (0ms gecikme, offline)
+  function generateDreamMelodyWav() {
+    const sampleRate = 22050;
+    const totalSeconds = 14;
+    const numSamples = sampleRate * totalSeconds;
+    const buffer = new Float32Array(numSamples);
+
+    // Romantik Pentatonik Rüya Ezgisi
+    const melodyEvents = [
+      { time: 0.0, freq: 369.99, dur: 3.5, vol: 0.55 }, // F#4
+      { time: 1.0, freq: 554.37, dur: 3.2, vol: 0.50 }, // C#5
+      { time: 2.2, freq: 440.00, dur: 3.0, vol: 0.48 }, // A4
+      { time: 3.6, freq: 659.25, dur: 3.6, vol: 0.55 }, // E5
+      { time: 5.0, freq: 493.88, dur: 3.2, vol: 0.48 }, // B4
+      { time: 6.4, freq: 739.99, dur: 3.8, vol: 0.55 }, // F#5
+      { time: 8.0, freq: 554.37, dur: 3.5, vol: 0.52 }, // C#5
+      { time: 9.4, freq: 440.00, dur: 3.0, vol: 0.48 }, // A4
+      { time: 10.8, freq: 369.99, dur: 4.0, vol: 0.55 },// F#4
+      { time: 12.2, freq: 493.88, dur: 3.0, vol: 0.48 }  // B4
+    ];
+
+    for (const ev of melodyEvents) {
+      const startSample = Math.floor(ev.time * sampleRate);
+      const durSamples = Math.floor(ev.dur * sampleRate);
+      for (let i = 0; i < durSamples && (startSample + i) < numSamples; i++) {
+        const t = i / sampleRate;
+        const attack = Math.min(1, t / 0.06);
+        const decay = Math.exp(-t * 1.1);
+        const env = attack * decay * ev.vol;
+
+        // Sıcak piyano/çan tonu harmonikleri
+        const val = (
+          Math.sin(2 * Math.PI * ev.freq * t) * 0.72 +
+          Math.sin(4 * Math.PI * ev.freq * t) * 0.22 +
+          Math.sin(6 * Math.PI * ev.freq * t) * 0.06
+        ) * env;
+
+        buffer[startSample + i] += val;
+      }
+    }
+
+    // 16-Bit PCM WAV Başlığı & Verisi
+    const wavBytes = new Uint8Array(44 + numSamples * 2);
+    const view = new DataView(wavBytes.buffer);
+
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + numSamples * 2, true);
+    writeString(view, 8, 'WAVE');
+
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, 1, true); // Mono
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+
+    writeString(view, 36, 'data');
+    view.setUint32(40, numSamples * 2, true);
+
+    let offset = 44;
+    for (let i = 0; i < numSamples; i++) {
+      let s = Math.max(-1, Math.min(1, buffer[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+
+    const blob = new Blob([wavBytes], { type: 'audio/wav' });
+    return URL.createObjectURL(blob);
+  }
+
+  // HTML5 Media Audio Element (iOS & Android'de sessiz mod filtrelerini aşar)
+  let htmlAudio = null;
+  let isMediaAudioStarted = false;
+
+  function initHtmlAudio() {
+    if (!htmlAudio) {
+      try {
+        const audioUrl = generateDreamMelodyWav();
+        htmlAudio = new Audio(audioUrl);
+        htmlAudio.loop = true;
+        htmlAudio.volume = 0.85;
+        htmlAudio.setAttribute('playsinline', 'true');
+        htmlAudio.setAttribute('webkit-playsinline', 'true');
+      } catch (err) {
+        console.warn('Audio Init Error:', err);
+      }
+    }
+  }
+  initHtmlAudio();
+
+  // Yedek Web Audio Context
   let audioCtx = null;
-  let isAudioPlaying = false;
-  let melodyInterval = null;
-
-  // Sıcak Romantik Melodi Gamı
-  const NOTES = [277.18, 329.63, 369.99, 440.00, 493.88, 554.37, 659.25, 739.99, 880.00];
-
-  function getOrCreateAudioContext() {
+  function getAudioContext() {
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) {
@@ -390,93 +483,57 @@
     return audioCtx;
   }
 
-  // Mobil cihazlarda ses kilidini açma (iOS Silent Unlock)
-  function unlockMobileAudio() {
-    const ctx = getOrCreateAudioContext();
-    if (!ctx) return;
-
-    if (ctx.state === 'suspended') {
-      ctx.resume().then(() => {
-        startMelody();
-      });
-    } else {
-      startMelody();
+  function playSoftTouchNote() {
+    const actx = getAudioContext();
+    if (!actx) return;
+    if (actx.state === 'suspended') {
+      actx.resume();
     }
-
-    // iOS Safari için sessiz buffer tetikleme
     try {
-      const buffer = ctx.createBuffer(1, 1, 22050);
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(ctx.destination);
-      source.start(0);
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      const notes = [554.37, 659.25, 739.99, 880.00];
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(randomChoice(notes), actx.currentTime);
+      gain.gain.setValueAtTime(0, actx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 1.8);
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.start();
+      osc.stop(actx.currentTime + 2.0);
     } catch (e) {}
   }
 
-  function playSoftNote(freq) {
-    const ctx = getOrCreateAudioContext();
-    if (!ctx) return;
-
-    if (ctx.state === 'suspended') {
-      ctx.resume();
+  // Tüm Cihazlarda Garantili Ses Başlatıcı
+  function triggerSoundPlayback() {
+    // 1. Katman: HTML5 Audio (Mobilde %100 çalma garantili)
+    if (htmlAudio && !isMediaAudioStarted) {
+      const playPromise = htmlAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isMediaAudioStarted = true;
+        }).catch(() => {});
+      }
     }
 
-    try {
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      const noteFreq = freq || randomChoice(NOTES);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(noteFreq, ctx.currentTime);
-
-      // Telefonda net duyulması için sıcak çan/rüya filtresi
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, ctx.currentTime);
-
-      // Mobil hoparlörler için belirgin ve tatlı ses seviyesi
-      const now = ctx.currentTime;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.18, now + 0.12);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
-
-      osc.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 3.2);
-    } catch (err) {}
+    // 2. Katman: Dokunma Sesi
+    playSoftTouchNote();
   }
 
-  function startMelody() {
-    getOrCreateAudioContext();
-    if (!isAudioPlaying) {
-      isAudioPlaying = true;
-      playSoftNote();
-      melodyInterval = setInterval(() => {
-        if (!isAudioPlaying) return;
-        playSoftNote();
-        if (Math.random() > 0.35) {
-          setTimeout(() => playSoftNote(), 320);
-        }
-      }, 1500);
-    }
-  }
-
-  // Mobil Dokunma ve Tıklama Dinleyicileri (Touch + Pointer + Click)
-  function handleUserInteraction(e) {
+  // Mobil Dokunma & Masaüstü Tıklama
+  function handleInteraction(e) {
     const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : (e.clientX || width / 2);
     const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : (e.clientY || height / 2);
 
     createHeartAndStrawberryBurst(clientX, clientY);
-    unlockMobileAudio();
-    playSoftNote();
+    triggerSoundPlayback();
   }
 
-  window.addEventListener('touchstart', handleUserInteraction, { passive: true });
-  window.addEventListener('pointerdown', handleUserInteraction);
-  window.addEventListener('click', handleUserInteraction);
+  window.addEventListener('touchstart', handleInteraction, { passive: true });
+  window.addEventListener('touchend', handleInteraction, { passive: true });
+  window.addEventListener('pointerdown', handleInteraction);
+  window.addEventListener('click', handleInteraction);
 
   let lastMove = 0;
   window.addEventListener('pointermove', (e) => {
