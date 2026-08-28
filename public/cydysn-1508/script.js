@@ -1,6 +1,6 @@
 /**
  * Ceyda ❤️ Yasin - Yüksek Performanslı Parçacık & Ses Motoru (Ultra Smooth 60-120 FPS)
- * Donanım Hızlandırmalı Sprite Önbelleği (Sıfır Donma)
+ * Uzun Süre Süzülen Çilekler ve Kalpler 🍓💖
  */
 
 (function () {
@@ -23,15 +23,15 @@
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // 1. Çilek Sprite Önbelleği
+  // 1. Çilek Sprite Önbelleği (Büyük & Net)
   const strawberryCanvas = document.createElement('canvas');
-  strawberryCanvas.width = 64;
-  strawberryCanvas.height = 64;
+  strawberryCanvas.width = 80;
+  strawberryCanvas.height = 80;
   const sctx = strawberryCanvas.getContext('2d');
-  sctx.font = '40px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+  sctx.font = '52px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
   sctx.textAlign = 'center';
   sctx.textBaseline = 'middle';
-  sctx.fillText('🍓', 32, 32);
+  sctx.fillText('🍓', 40, 40);
 
   // 2. Renk Paletleri
   const HEART_COLORS = [
@@ -61,28 +61,32 @@
   const random = (min, max) => Math.random() * (max - min) + min;
   const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  // Kalp Sınıfı
+  // ==========================================================================
+  // Kalp Sınıfı (Uzun Ömürlü ve Zarifçe Yükselen Kalpler)
+  // ==========================================================================
   class FloatingHeart {
     constructor(isBurst = false, burstX, burstY) {
       this.reset(isBurst, burstX, burstY);
     }
 
     reset(isBurst = false, burstX, burstY) {
-      this.size = random(8, 24);
+      this.size = random(10, 26);
       this.color = randomChoice(HEART_COLORS);
-      this.alpha = random(0.3, 0.75);
+      this.alpha = random(0.35, 0.85);
       this.maxAlpha = this.alpha;
 
       if (isBurst) {
         this.x = burstX;
         this.y = burstY;
         const angle = random(0, Math.PI * 2);
-        const speed = random(2, 6);
+        const speed = random(1.8, 5.0);
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed - random(1.5, 3.5);
         this.isBurst = true;
         this.life = 1;
-        this.decay = random(0.012, 0.022);
+        this.decay = random(0.004, 0.007); // ~4-5 saniye ekranda kalır
+        this.swayOffset = random(0, Math.PI * 2);
+        this.swaySpeed = random(0.02, 0.04);
       } else {
         this.x = random(0, width);
         this.y = height + random(10, 80);
@@ -95,20 +99,22 @@
       }
 
       this.rotation = random(-0.5, 0.5);
-      this.rotationSpeed = random(-0.012, 0.012);
-      this.scale = random(0.75, 1.25);
+      this.rotationSpeed = random(-0.014, 0.014);
+      this.scale = random(0.8, 1.3);
     }
 
     update() {
       if (this.isBurst) {
         this.x += this.vx;
         this.y += this.vy;
-        this.vx *= 0.96;
-        this.vy *= 0.96;
-        this.vy -= 0.03;
+        this.vx *= 0.97;
+        this.vy *= 0.97;
+        this.vy -= 0.025; // Yukarıya doğru nazikçe süzülür
+        this.swayOffset += this.swaySpeed;
+        this.x += Math.sin(this.swayOffset) * 0.45;
         this.rotation += this.rotationSpeed;
         this.life -= this.decay;
-        this.alpha = this.maxAlpha * this.life;
+        this.alpha = this.maxAlpha * Math.min(1, this.life * 1.3);
         return this.life > 0;
       } else {
         this.y -= this.speedY;
@@ -140,6 +146,7 @@
       ctx.bezierCurveTo(s, s * 0.1, s * 0.5, -s * 0.3, 0, s * 0.3);
       ctx.fill();
 
+      // Hafif parıltı çekirdeği
       ctx.fillStyle = '#ffffff';
       ctx.globalAlpha = this.alpha * 0.45;
       ctx.beginPath();
@@ -150,28 +157,34 @@
     }
   }
 
-  // Çilek Sınıfı
+  // ==========================================================================
+  // Çilek Sınıfı (Uzun Süre Yavaşça Yükselen Tatlı Çilekler 🍓)
+  // ==========================================================================
   class BurstStrawberry {
     constructor(x, y) {
       this.x = x;
       this.y = y;
       const angle = random(0, Math.PI * 2);
-      const speed = random(2.5, 6.5);
+      const speed = random(1.8, 5.2);
       this.vx = Math.cos(angle) * speed;
-      this.vy = Math.sin(angle) * speed - random(1.5, 3.5);
+      this.vy = Math.sin(angle) * speed - random(1.5, 4.0);
       this.rotation = random(-0.5, 0.5);
-      this.rotationSpeed = random(-0.035, 0.035);
+      this.rotationSpeed = random(-0.025, 0.025);
       this.life = 1;
-      this.decay = random(0.014, 0.024);
-      this.scale = random(0.55, 0.95);
+      this.decay = random(0.0035, 0.0065); // ~5-6 saniye boyunca ekranda süzülür!
+      this.scale = random(0.75, 1.15);
+      this.swayOffset = random(0, Math.PI * 2);
+      this.swaySpeed = random(0.02, 0.045);
     }
 
     update() {
       this.x += this.vx;
       this.y += this.vy;
-      this.vx *= 0.96;
-      this.vy *= 0.96;
-      this.vy += 0.04;
+      this.vx *= 0.97;
+      this.vy *= 0.97;
+      this.vy -= 0.022; // Balon gibi yukarıya doğru tatlıca süzülme
+      this.swayOffset += this.swaySpeed;
+      this.x += Math.sin(this.swayOffset) * 0.6;
       this.rotation += this.rotationSpeed;
       this.life -= this.decay;
       return this.life > 0;
@@ -183,15 +196,18 @@
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.rotation);
-      const s = this.scale * this.life;
-      ctx.scale(s, s);
-      ctx.globalAlpha = Math.min(1, this.life * 1.25);
-      ctx.drawImage(strawberryCanvas, -32, -32, 64, 64);
+      const currentScale = this.scale * Math.min(1, this.life * 1.5);
+      ctx.scale(currentScale, currentScale);
+      ctx.globalAlpha = Math.min(1, this.life * 1.4);
+      // Hızlı GPU drawImage
+      ctx.drawImage(strawberryCanvas, -40, -40, 80, 80);
       ctx.restore();
     }
   }
 
+  // ==========================================================================
   // Yıldız Sınıfı
+  // ==========================================================================
   class FloatingStar {
     constructor() {
       this.reset();
@@ -252,29 +268,32 @@
     }
   }
 
+  // ==========================================================================
   // Işıltı Tozu
+  // ==========================================================================
   class SparkleParticle {
     constructor(x, y) {
-      this.x = x + random(-4, 4);
-      this.y = y + random(-4, 4);
+      this.x = x + random(-6, 6);
+      this.y = y + random(-6, 6);
       this.vx = random(-1.2, 1.2);
-      this.vy = random(-1.5, 0.6);
-      this.size = random(1.5, 3.5);
+      this.vy = random(-1.6, 0.6);
+      this.size = random(1.5, 4.0);
       this.color = randomChoice(STAR_COLORS);
       this.life = 1;
-      this.decay = random(0.025, 0.05);
+      this.decay = random(0.009, 0.018); // Daha uzun süreli parlama
     }
 
     update() {
       this.x += this.vx;
       this.y += this.vy;
+      this.vy -= 0.015;
       this.life -= this.decay;
       return this.life > 0;
     }
 
     draw() {
       ctx.save();
-      ctx.globalAlpha = this.life;
+      ctx.globalAlpha = Math.min(1, this.life * 1.2);
       ctx.fillStyle = this.color;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -333,20 +352,25 @@
 
   requestAnimationFrame(animate);
 
-  // Tıklama Olayı (Donma Önleyici Debounce)
+  // ==========================================================================
+  // Tıklama / Dokunma Olayı (Göz Alıcı ve Uzun Süreli Çilek Yağmuru 🍓💖)
+  // ==========================================================================
   let lastClickTime = 0;
   function createHeartAndStrawberryBurst(x, y) {
     const now = performance.now();
-    if (now - lastClickTime < 60) return;
+    if (now - lastClickTime < 50) return;
     lastClickTime = now;
 
-    for (let i = 0; i < 10; i++) {
+    // Kalpler
+    for (let i = 0; i < 14; i++) {
       hearts.push(new FloatingHeart(true, x, y));
     }
-    for (let i = 0; i < 3; i++) {
+    // Çilekler 🍓 (5 adet iri ve uzun süre süzülen çilek)
+    for (let i = 0; i < 5; i++) {
       strawberries.push(new BurstStrawberry(x, y));
     }
-    for (let i = 0; i < 12; i++) {
+    // Işıltılar
+    for (let i = 0; i < 18; i++) {
       sparkles.push(new SparkleParticle(x, y));
     }
   }
@@ -360,7 +384,7 @@
   let lastMove = 0;
   window.addEventListener('pointermove', (e) => {
     const now = performance.now();
-    if (now - lastMove > 40) {
+    if (now - lastMove > 35) {
       sparkles.push(new SparkleParticle(e.clientX, e.clientY));
       lastMove = now;
     }
