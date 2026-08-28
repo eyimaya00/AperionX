@@ -371,7 +371,7 @@
   }
 
   // ==========================================================================
-  // %100 Mobil Uyumlu Çift Katmanlı Ses Motoru (HTML5 Audio + Web Audio)
+  // %100 Telefon Hoparlörü Uyumlu Kristal Melodi Sentezleyici (WAV Generator)
   // ==========================================================================
   function writeString(view, offset, string) {
     for (let i = 0; i < string.length; i++) {
@@ -379,25 +379,23 @@
     }
   }
 
-  // Bellek içinde sıcak romantik melodi WAV dosyası oluşturma (0ms gecikme, offline)
   function generateDreamMelodyWav() {
     const sampleRate = 22050;
-    const totalSeconds = 14;
+    const totalSeconds = 12;
     const numSamples = sampleRate * totalSeconds;
     const buffer = new Float32Array(numSamples);
 
-    // Romantik Pentatonik Rüya Ezgisi
+    // Telefon hoparlöründe pırıl pırıl duyulan frekanslar (554Hz - 1318Hz Müzik Kutusu Gamı)
     const melodyEvents = [
-      { time: 0.0, freq: 369.99, dur: 3.5, vol: 0.55 }, // F#4
-      { time: 1.0, freq: 554.37, dur: 3.2, vol: 0.50 }, // C#5
-      { time: 2.2, freq: 440.00, dur: 3.0, vol: 0.48 }, // A4
-      { time: 3.6, freq: 659.25, dur: 3.6, vol: 0.55 }, // E5
-      { time: 5.0, freq: 493.88, dur: 3.2, vol: 0.48 }, // B4
-      { time: 6.4, freq: 739.99, dur: 3.8, vol: 0.55 }, // F#5
-      { time: 8.0, freq: 554.37, dur: 3.5, vol: 0.52 }, // C#5
-      { time: 9.4, freq: 440.00, dur: 3.0, vol: 0.48 }, // A4
-      { time: 10.8, freq: 369.99, dur: 4.0, vol: 0.55 },// F#4
-      { time: 12.2, freq: 493.88, dur: 3.0, vol: 0.48 }  // B4
+      { time: 0.0, freq: 554.37, dur: 2.8, vol: 0.75 }, // C#5
+      { time: 0.9, freq: 739.99, dur: 2.8, vol: 0.70 }, // F#5
+      { time: 1.8, freq: 880.00, dur: 2.6, vol: 0.72 }, // A5
+      { time: 3.0, freq: 1108.73, dur: 3.2, vol: 0.80 },// C#6
+      { time: 4.2, freq: 987.77, dur: 2.8, vol: 0.70 }, // B5
+      { time: 5.5, freq: 1318.51, dur: 3.5, vol: 0.78 },// E6
+      { time: 7.0, freq: 880.00, dur: 3.0, vol: 0.75 },  // A5
+      { time: 8.5, freq: 739.99, dur: 2.8, vol: 0.70 },  // F#5
+      { time: 9.8, freq: 659.25, dur: 3.2, vol: 0.75 }   // E5
     ];
 
     for (const ev of melodyEvents) {
@@ -405,22 +403,21 @@
       const durSamples = Math.floor(ev.dur * sampleRate);
       for (let i = 0; i < durSamples && (startSample + i) < numSamples; i++) {
         const t = i / sampleRate;
-        const attack = Math.min(1, t / 0.06);
-        const decay = Math.exp(-t * 1.1);
+        const attack = Math.min(1, t / 0.04);
+        const decay = Math.exp(-t * 1.3);
         const env = attack * decay * ev.vol;
 
-        // Sıcak piyano/çan tonu harmonikleri
+        // Kristal Çan Tınısı Harmonikleri
         const val = (
-          Math.sin(2 * Math.PI * ev.freq * t) * 0.72 +
-          Math.sin(4 * Math.PI * ev.freq * t) * 0.22 +
-          Math.sin(6 * Math.PI * ev.freq * t) * 0.06
+          Math.sin(2 * Math.PI * ev.freq * t) * 0.70 +
+          Math.sin(4 * Math.PI * ev.freq * t) * 0.25 +
+          Math.sin(6 * Math.PI * ev.freq * t) * 0.05
         ) * env;
 
         buffer[startSample + i] += val;
       }
     }
 
-    // 16-Bit PCM WAV Başlığı & Verisi
     const wavBytes = new Uint8Array(44 + numSamples * 2);
     const view = new DataView(wavBytes.buffer);
 
@@ -430,8 +427,8 @@
 
     writeString(view, 12, 'fmt ');
     view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // Mono
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
     view.setUint32(24, sampleRate, true);
     view.setUint32(28, sampleRate * 2, true);
     view.setUint16(32, 2, true);
@@ -451,89 +448,106 @@
     return URL.createObjectURL(blob);
   }
 
-  // HTML5 Media Audio Element (iOS & Android'de sessiz mod filtrelerini aşar)
-  let htmlAudio = null;
-  let isMediaAudioStarted = false;
+  // HTML5 Media Audio Element
+  const audioElement = document.getElementById('bg-audio');
+  const musicBtn = document.getElementById('music-btn');
+  const musicText = musicBtn ? musicBtn.querySelector('.music-text') : null;
+  let isMusicPlaying = false;
 
-  function initHtmlAudio() {
-    if (!htmlAudio) {
-      try {
-        const audioUrl = generateDreamMelodyWav();
-        htmlAudio = new Audio(audioUrl);
-        htmlAudio.loop = true;
-        htmlAudio.volume = 0.85;
-        htmlAudio.setAttribute('playsinline', 'true');
-        htmlAudio.setAttribute('webkit-playsinline', 'true');
-      } catch (err) {
-        console.warn('Audio Init Error:', err);
-      }
+  function loadAudio() {
+    if (audioElement && !audioElement.src) {
+      audioElement.src = generateDreamMelodyWav();
+      audioElement.load();
     }
   }
-  initHtmlAudio();
+  loadAudio();
 
-  // Yedek Web Audio Context
-  let audioCtx = null;
-  function getAudioContext() {
-    if (!audioCtx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        audioCtx = new AudioContextClass();
-      }
+  // Web Audio Context Çan Sesi
+  let webAudioCtx = null;
+  function getWebAudioContext() {
+    if (!webAudioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) webAudioCtx = new AC();
     }
-    return audioCtx;
+    return webAudioCtx;
   }
 
-  function playSoftTouchNote() {
-    const actx = getAudioContext();
+  function playTouchBell() {
+    const actx = getWebAudioContext();
     if (!actx) return;
     if (actx.state === 'suspended') {
-      actx.resume();
+      actx.resume().catch(() => {});
     }
     try {
       const osc = actx.createOscillator();
       const gain = actx.createGain();
-      const notes = [554.37, 659.25, 739.99, 880.00];
-      osc.type = 'sine';
+      const notes = [659.25, 739.99, 880.00, 1108.73];
+      osc.type = 'triangle';
       osc.frequency.setValueAtTime(randomChoice(notes), actx.currentTime);
       gain.gain.setValueAtTime(0, actx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 1.8);
+      gain.gain.linearRampToValueAtTime(0.35, actx.currentTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 2.0);
       osc.connect(gain);
       gain.connect(actx.destination);
       osc.start();
-      osc.stop(actx.currentTime + 2.0);
+      osc.stop(actx.currentTime + 2.2);
     } catch (e) {}
   }
 
-  // Tüm Cihazlarda Garantili Ses Başlatıcı
-  function triggerSoundPlayback() {
-    // 1. Katman: HTML5 Audio (Mobilde %100 çalma garantili)
-    if (htmlAudio && !isMediaAudioStarted) {
-      const playPromise = htmlAudio.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          isMediaAudioStarted = true;
-        }).catch(() => {});
-      }
-    }
+  function toggleMusic(forcePlay = false) {
+    loadAudio();
+    if (!audioElement) return;
 
-    // 2. Katman: Dokunma Sesi
-    playSoftTouchNote();
+    if (isMusicPlaying && !forcePlay) {
+      audioElement.pause();
+      isMusicPlaying = false;
+      if (musicBtn) musicBtn.classList.remove('playing');
+      if (musicText) musicText.innerText = 'Melodi';
+    } else {
+      const actx = getWebAudioContext();
+      if (actx && actx.state === 'suspended') {
+        actx.resume().catch(() => {});
+      }
+
+      audioElement.play().then(() => {
+        isMusicPlaying = true;
+        if (musicBtn) musicBtn.classList.add('playing');
+        if (musicText) musicText.innerText = 'Çalıyor';
+      }).catch((e) => {
+        console.warn('Playback error:', e);
+      });
+    }
   }
 
-  // Mobil Dokunma & Masaüstü Tıklama
-  function handleInteraction(e) {
+  // Buton Tıklaması
+  if (musicBtn) {
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMusic();
+      playTouchBell();
+    });
+    musicBtn.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      toggleMusic();
+      playTouchBell();
+    });
+  }
+
+  // Ekrana Dokunma / Tıklama
+  function handleScreenTouch(e) {
     const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : (e.clientX || width / 2);
     const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : (e.clientY || height / 2);
 
     createHeartAndStrawberryBurst(clientX, clientY);
-    triggerSoundPlayback();
+    playTouchBell();
+
+    if (!isMusicPlaying) {
+      toggleMusic(true);
+    }
   }
 
-  window.addEventListener('touchstart', handleInteraction, { passive: true });
-  window.addEventListener('touchend', handleInteraction, { passive: true });
-  window.addEventListener('pointerdown', handleInteraction);
-  window.addEventListener('click', handleInteraction);
+  window.addEventListener('touchstart', handleScreenTouch, { passive: true });
+  window.addEventListener('click', handleScreenTouch);
 
   let lastMove = 0;
   window.addEventListener('pointermove', (e) => {
