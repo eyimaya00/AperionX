@@ -1858,7 +1858,20 @@ async function ensureSchema() {
             )
         `);
 
-        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users, Team Members & Yazar Takip (with Violations) ensured.');
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS content_plans (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                content_type ENUM('Makale', 'Deney', 'Gündem') NOT NULL DEFAULT 'Makale',
+                planned_date DATE NOT NULL,
+                status ENUM('Planlandı', 'Devam Ediyor', 'Tamamlandı') NOT NULL DEFAULT 'Planlandı',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+
+        console.log('Schema Check: Likes, Comments, Views, Settings, Experiments, Users, Team Members, Content Plans & Yazar Takip (with Violations) ensured.');
     } catch (e) {
         console.error('Schema Table Creation Error:', e);
     }
@@ -4555,6 +4568,66 @@ app.get('/api/author/tracking-status', authenticateToken, async (req, res) => {
             days_left: diffDays,
             violations: tracking.violations
         });
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// ================= CONTENT PLANS API =================
+
+// GET all content plans for the logged-in author
+app.get('/api/author/content-plans', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT id, title, content_type, DATE_FORMAT(planned_date, '%Y-%m-%d') as planned_date, status, created_at
+             FROM content_plans WHERE user_id = ? ORDER BY planned_date ASC`,
+            [req.user.id]
+        );
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// POST create a new content plan
+app.post('/api/author/content-plans', authenticateToken, async (req, res) => {
+    try {
+        const { title, content_type, planned_date } = req.body;
+        if (!title || !content_type || !planned_date) {
+            return res.status(400).json({ error: 'Başlık, tür ve tarih zorunludur.' });
+        }
+        const [result] = await pool.query(
+            `INSERT INTO content_plans (user_id, title, content_type, planned_date) VALUES (?, ?, ?, ?)`,
+            [req.user.id, title, content_type, planned_date]
+        );
+        res.json({ id: result.insertId, title, content_type, planned_date, status: 'Planlandı' });
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// PUT update content plan status
+app.put('/api/author/content-plans/:id', authenticateToken, async (req, res) => {
+    try {
+        const { status } = req.body;
+        await pool.query(
+            `UPDATE content_plans SET status = ? WHERE id = ? AND user_id = ?`,
+            [status, req.params.id, req.user.id]
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
+    }
+});
+
+// DELETE content plan
+app.delete('/api/author/content-plans/:id', authenticateToken, async (req, res) => {
+    try {
+        await pool.query(
+            `DELETE FROM content_plans WHERE id = ? AND user_id = ?`,
+            [req.params.id, req.user.id]
+        );
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.toString() });
     }

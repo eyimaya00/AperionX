@@ -4417,6 +4417,16 @@
                     color: #cbd5e1;
                     opacity: 0.5;
                 }
+                .cal-day-cell.selected {
+                    background: rgba(99, 102, 241, 0.18);
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    font-weight: 800;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+                }
+                .cal-day-cell.has-plan::after {
+                    background: #6366f1;
+                }
 
                 /* Deadline Items */
                 .deadline-list {
@@ -4442,16 +4452,182 @@
                 }
                 .deadline-info { flex: 1; min-width: 0; }
                 .deadline-title { font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.94rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                .deadline-meta { font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 8px; }
+                .deadline-meta { font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
                 .deadline-badge {
                     padding: 3px 8px;
                     border-radius: 6px;
                     font-size: 0.72rem;
                     font-weight: 700;
+                    white-space: nowrap;
+                    flex-shrink: 0;
                 }
                 .deadline-badge.urgent { background: #fee2e2; color: #dc2626; }
                 .deadline-badge.normal { background: #fef3c7; color: #b45309; }
                 .deadline-badge.done { background: #dcfce7; color: #15803d; }
+
+                /* Tracking Deadline Banner */
+                .cal-tracking-banner {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding: 14px 18px;
+                    border-radius: 14px;
+                    background: rgba(255, 255, 255, 0.12);
+                    backdrop-filter: blur(8px);
+                    margin-top: 12px;
+                }
+                .cal-tracking-banner i { font-size: 1.4rem; }
+                .cal-tracking-banner .tracking-days {
+                    font-size: 1.5rem;
+                    font-weight: 800;
+                    margin-right: 4px;
+                }
+
+                /* New Content Dropdown */
+                .cal-new-content-wrap { position: relative; }
+                .cal-new-dropdown {
+                    display: none;
+                    position: absolute;
+                    top: calc(100% + 8px);
+                    right: 0;
+                    background: white;
+                    border-radius: 14px;
+                    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+                    border: 1px solid #e2e8f0;
+                    min-width: 220px;
+                    z-index: 50;
+                    overflow: hidden;
+                }
+                .cal-new-dropdown.show { display: block; }
+                .cal-new-dropdown-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 14px 18px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 0.92rem;
+                    color: #1e293b;
+                    transition: all 0.15s;
+                    border-bottom: 1px solid #f1f5f9;
+                }
+                .cal-new-dropdown-item:last-child { border-bottom: none; }
+                .cal-new-dropdown-item:hover { background: #f8fafc; color: #6366f1; }
+                .cal-new-dropdown-item i { font-size: 1.2rem; }
+                body.dark-mode .cal-new-dropdown { background: #1e293b; border-color: #334155; }
+                body.dark-mode .cal-new-dropdown-item { color: #f1f5f9; border-color: #334155; }
+                body.dark-mode .cal-new-dropdown-item:hover { background: #334155; color: #818cf8; }
+
+                /* Plan Modal */
+                .plan-modal-overlay {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.5);
+                    backdrop-filter: blur(4px);
+                    z-index: 9999;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .plan-modal-overlay.show { display: flex; }
+                .plan-modal {
+                    background: white;
+                    border-radius: 20px;
+                    padding: 32px;
+                    width: 90%;
+                    max-width: 440px;
+                    box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+                }
+                body.dark-mode .plan-modal { background: #1e293b; color: #f1f5f9; }
+                .plan-modal h3 {
+                    margin: 0 0 20px;
+                    font-size: 1.3rem;
+                    font-weight: 800;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .plan-modal label {
+                    display: block;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    margin-bottom: 6px;
+                    margin-top: 14px;
+                }
+                .plan-modal input[type="text"],
+                .plan-modal input[type="date"] {
+                    width: 100%;
+                    padding: 12px 14px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    font-family: inherit;
+                    background: var(--card-bg, #f8fafc);
+                    color: var(--text-main);
+                    box-sizing: border-box;
+                }
+                .plan-modal-type-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    border-radius: 8px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                }
+                .plan-modal-actions {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 24px;
+                }
+                .plan-modal-actions button {
+                    flex: 1;
+                    padding: 12px;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    font-size: 0.92rem;
+                    cursor: pointer;
+                    border: none;
+                    font-family: inherit;
+                    transition: all 0.2s;
+                }
+                .plan-btn-save {
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                }
+                .plan-btn-save:hover { box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); transform: translateY(-1px); }
+                .plan-btn-cancel {
+                    background: #f1f5f9;
+                    color: #64748b;
+                }
+                body.dark-mode .plan-btn-cancel { background: #334155; color: #94a3b8; }
+                .plan-btn-cancel:hover { background: #e2e8f0; }
+
+                /* Deadline item delete button */
+                .deadline-delete-btn {
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    padding: 4px;
+                    border-radius: 6px;
+                    transition: all 0.2s;
+                    flex-shrink: 0;
+                }
+                .deadline-delete-btn:hover { color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+
+                /* Deadline type badge */
+                .deadline-type-badge {
+                    padding: 2px 8px;
+                    border-radius: 6px;
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                }
+                .deadline-type-badge.makale { background: #dbeafe; color: #2563eb; }
+                .deadline-type-badge.deney { background: #fef3c7; color: #b45309; }
+                .deadline-type-badge.gundem { background: #ede9fe; color: #7c3aed; }
 
                 /* Dark Mode for Calendar */
                 body.dark-mode .cal-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
@@ -4468,13 +4644,34 @@
             </style>
 
             <div class="cal-hero">
-                <div>
+                <div style="flex:1;">
                     <h1><i class="ph-fill ph-calendar-blank"></i> Takvim & Teslimler</h1>
                     <p>Çalışmalarınızın son teslim tarihlerini takip edin ve içerik planınızı yönetin.</p>
+                    <div class="cal-tracking-banner" id="cal-tracking-banner" style="display: none;">
+                        <i class="ph-fill ph-timer" style="color: #fbbf24;"></i>
+                        <div>
+                            <span style="font-size: 0.82rem; opacity: 0.9;">Sonraki Makale Yayın Tarihi:</span><br>
+                            <span class="tracking-days" id="cal-tracking-days">—</span>
+                            <span style="font-size: 0.9rem;" id="cal-tracking-label">gün kaldı</span>
+                        </div>
+                    </div>
                 </div>
-                <button class="dash-btn-new" onclick="startNewArticle()">
-                    <i class="ph-bold ph-plus"></i> Yeni Makale Planla
-                </button>
+                <div class="cal-new-content-wrap">
+                    <button class="dash-btn-new" onclick="toggleCalNewDropdown(event)">
+                        <i class="ph-bold ph-plus"></i> Yeni İçerik Planla
+                    </button>
+                    <div class="cal-new-dropdown" id="cal-new-dropdown">
+                        <div class="cal-new-dropdown-item" onclick="openPlanModal('Makale')">
+                            <i class="ph-fill ph-books" style="color: #2563eb;"></i> Makale
+                        </div>
+                        <div class="cal-new-dropdown-item" onclick="openPlanModal('Deney')">
+                            <i class="ph-fill ph-flask" style="color: #f59e0b;"></i> Deney Yayını
+                        </div>
+                        <div class="cal-new-dropdown-item" onclick="openPlanModal('Gündem')">
+                            <i class="ph-fill ph-microscope" style="color: #7c3aed;"></i> Bilim Gündemi
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="cal-grid">
@@ -4495,6 +4692,24 @@
                     <h3 class="cal-card-title"><i class="ph-bold ph-clock-countdown" style="color: #f59e0b;"></i> Yaklaşan Teslimler & Görevler</h3>
                     <div class="deadline-list" id="cal-deadlines-list">
                         <!-- Deadlines dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan Creation Modal -->
+            <div class="plan-modal-overlay" id="plan-modal-overlay" onclick="if(event.target===this) closePlanModal()">
+                <div class="plan-modal">
+                    <h3 id="plan-modal-title"><i class="ph-fill ph-calendar-plus" style="color: #6366f1;"></i> Yeni İçerik Planla</h3>
+                    <div>
+                        <span class="plan-modal-type-badge" id="plan-modal-type-badge"></span>
+                    </div>
+                    <label>İçerik Başlığı</label>
+                    <input type="text" id="plan-title-input" placeholder="Başlık giriniz...">
+                    <label>Planlanan Tarih</label>
+                    <input type="date" id="plan-date-input">
+                    <div class="plan-modal-actions">
+                        <button class="plan-btn-cancel" onclick="closePlanModal()">İptal</button>
+                        <button class="plan-btn-save" onclick="savePlan()"><i class="ph-bold ph-check"></i> Kaydet</button>
                     </div>
                 </div>
             </div>
@@ -7140,8 +7355,11 @@
                 loadBilimGundemiData();
             }
             if (id === 'calendar-deadlines') {
-                renderCalendar();
-                renderDeadlines();
+                loadContentPlans().then(() => {
+                    renderCalendar();
+                    renderDeadlines();
+                });
+                loadCalendarTrackingBanner();
             }
             if (id === 'notifications-section') {
                 renderFullNotifications();
@@ -10102,11 +10320,160 @@
         // ================= CALENDAR & DEADLINES LOGIC =================
         let calCurrentMonth = new Date().getMonth();
         let calCurrentYear = new Date().getFullYear();
+        let calContentPlans = []; // loaded from API
+        let calSelectedDate = null; // YYYY-MM-DD string
+        let calPlanType = 'Makale'; // current plan type being created
 
         const monthNamesTr = [
             'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
             'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
         ];
+
+        // Toggle "Yeni İçerik Planla" dropdown
+        function toggleCalNewDropdown(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('cal-new-dropdown');
+            dd.classList.toggle('show');
+            // Close on outside click
+            function closeDD(ev) {
+                if (!dd.contains(ev.target)) {
+                    dd.classList.remove('show');
+                    document.removeEventListener('click', closeDD);
+                }
+            }
+            setTimeout(() => document.addEventListener('click', closeDD), 10);
+        }
+
+        // Open plan creation modal with selected type
+        function openPlanModal(type) {
+            calPlanType = type;
+            document.getElementById('cal-new-dropdown').classList.remove('show');
+            const badge = document.getElementById('plan-modal-type-badge');
+            const typeMap = {
+                'Makale': { icon: 'ph-books', color: '#2563eb', bg: '#dbeafe', label: '📚 Makale' },
+                'Deney': { icon: 'ph-flask', color: '#b45309', bg: '#fef3c7', label: '🧪 Deney Yayını' },
+                'Gündem': { icon: 'ph-microscope', color: '#7c3aed', bg: '#ede9fe', label: '🔬 Bilim Gündemi' }
+            };
+            const t = typeMap[type] || typeMap['Makale'];
+            badge.innerHTML = t.label;
+            badge.style.background = t.bg;
+            badge.style.color = t.color;
+
+            // Pre-fill date if user selected a day on calendar
+            const dateInput = document.getElementById('plan-date-input');
+            if (calSelectedDate) {
+                dateInput.value = calSelectedDate;
+            } else {
+                dateInput.value = '';
+            }
+            document.getElementById('plan-title-input').value = '';
+            document.getElementById('plan-modal-overlay').classList.add('show');
+            setTimeout(() => document.getElementById('plan-title-input').focus(), 100);
+        }
+
+        function closePlanModal() {
+            document.getElementById('plan-modal-overlay').classList.remove('show');
+        }
+
+        // Save a new content plan via API
+        async function savePlan() {
+            const title = document.getElementById('plan-title-input').value.trim();
+            const planned_date = document.getElementById('plan-date-input').value;
+            if (!title) {
+                alert('Lütfen bir başlık giriniz.');
+                return;
+            }
+            if (!planned_date) {
+                alert('Lütfen bir tarih seçiniz.');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/author/content-plans`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ title, content_type: calPlanType, planned_date })
+                });
+                if (res.ok) {
+                    closePlanModal();
+                    calSelectedDate = null;
+                    await loadContentPlans();
+                    renderCalendar();
+                    renderDeadlines();
+                    showToast('İçerik planı başarıyla eklendi!', 'success');
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Bir hata oluştu.');
+                }
+            } catch (e) {
+                console.error('Save plan error:', e);
+                alert('Bir hata oluştu.');
+            }
+        }
+
+        // Delete a content plan
+        async function deleteContentPlan(planId) {
+            if (!confirm('Bu içerik planını silmek istediğinize emin misiniz?')) return;
+            try {
+                await fetch(`${API_URL}/author/content-plans/${planId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                await loadContentPlans();
+                renderCalendar();
+                renderDeadlines();
+                showToast('Plan silindi.', 'info');
+            } catch (e) {
+                console.error('Delete plan error:', e);
+            }
+        }
+
+        // Load content plans from API
+        async function loadContentPlans() {
+            try {
+                const res = await fetch(`${API_URL}/author/content-plans`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    calContentPlans = await res.json();
+                } else {
+                    calContentPlans = [];
+                }
+            } catch (e) {
+                calContentPlans = [];
+            }
+        }
+
+        // Load tracking status and show deadline countdown in calendar hero
+        async function loadCalendarTrackingBanner() {
+            try {
+                const res = await fetch(`${API_URL}/author/tracking-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const banner = document.getElementById('cal-tracking-banner');
+                    if (data.tracked && banner) {
+                        const daysEl = document.getElementById('cal-tracking-days');
+                        const labelEl = document.getElementById('cal-tracking-label');
+                        if (data.days_left <= 0) {
+                            daysEl.textContent = 'Gecikmiş!';
+                            daysEl.style.color = '#ef4444';
+                            labelEl.textContent = `(${Math.abs(data.days_left)} gün geçti)`;
+                        } else {
+                            daysEl.textContent = data.days_left;
+                            daysEl.style.color = data.days_left <= 3 ? '#ef4444' : data.days_left <= 7 ? '#f59e0b' : '#10b981';
+                            labelEl.textContent = `gün kaldı — ${data.next_deadline}`;
+                        }
+                        banner.style.display = 'flex';
+                    }
+                }
+            } catch (e) {
+                console.log('Tracking banner load error:', e);
+            }
+        }
 
         function renderCalendar() {
             const titleEl = document.getElementById('cal-month-name');
@@ -10121,7 +10488,6 @@
             let html = dayHeaders.map(d => `<div class="cal-day-name">${d}</div>`).join('');
 
             const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
-            // Adjust Sunday index
             const startOffset = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
             const totalDays = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
             const prevMonthDays = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
@@ -10129,8 +10495,14 @@
             const today = new Date();
             const isCurrentMonthYear = (today.getFullYear() === calCurrentYear && today.getMonth() === calCurrentMonth);
 
-            // Days with scheduled deadlines/events in this month
-            const eventDays = [5, 12, 18, 24, 28];
+            // Get event days from content plans
+            const eventDaysSet = new Set();
+            calContentPlans.forEach(p => {
+                const d = new Date(p.planned_date);
+                if (d.getFullYear() === calCurrentYear && d.getMonth() === calCurrentMonth) {
+                    eventDaysSet.add(d.getDate());
+                }
+            });
 
             // Previous month padding
             for (let i = startOffset - 1; i >= 0; i--) {
@@ -10140,9 +10512,13 @@
             // Current month days
             for (let day = 1; day <= totalDays; day++) {
                 const isToday = isCurrentMonthYear && (today.getDate() === day);
-                const hasEvent = eventDays.includes(day);
+                const hasEvent = eventDaysSet.has(day);
+                const dateStr = `${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isSelected = calSelectedDate === dateStr;
                 html += `
-                    <div class="cal-day-cell ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" title="${hasEvent ? 'Teslimat / Görev Var' : ''}">
+                    <div class="cal-day-cell ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''}"
+                         onclick="selectCalDay('${dateStr}', ${day})"
+                         title="${hasEvent ? 'Planlı İçerik Var' : 'Tarih seçmek için tıklayın'}">
                         ${day}
                     </div>
                 `;
@@ -10151,12 +10527,27 @@
             container.innerHTML = html;
         }
 
+        function selectCalDay(dateStr, day) {
+            if (calSelectedDate === dateStr) {
+                calSelectedDate = null; // deselect
+            } else {
+                calSelectedDate = dateStr;
+            }
+            renderCalendar();
+            // Pre-fill date input if modal is open
+            const dateInput = document.getElementById('plan-date-input');
+            if (dateInput && calSelectedDate) {
+                dateInput.value = calSelectedDate;
+            }
+        }
+
         function prevCalMonth() {
             calCurrentMonth--;
             if (calCurrentMonth < 0) {
                 calCurrentMonth = 11;
                 calCurrentYear--;
             }
+            calSelectedDate = null;
             renderCalendar();
         }
 
@@ -10166,6 +10557,7 @@
                 calCurrentMonth = 0;
                 calCurrentYear++;
             }
+            calSelectedDate = null;
             renderCalendar();
         }
 
@@ -10173,56 +10565,72 @@
             const list = document.getElementById('cal-deadlines-list');
             if (!list) return;
 
-            const deadlines = [
-                {
-                    title: 'Moleküler Genetik & PCR Analizleri',
-                    type: 'Makale',
-                    badgeClass: 'urgent',
-                    badgeText: '⏰ 3 Gün Kaldı',
-                    date: '31 Ağustos 2026',
-                    status: 'Taslak Hazırlanıyor'
-                },
-                {
-                    title: 'Enzim Kinetiği Spektrofotometre Deneyi',
-                    type: 'Deney',
-                    badgeClass: 'normal',
-                    badgeText: '📅 1 Hafta Kaldı',
-                    date: '4 Eylül 2026',
-                    status: 'Editör İncelemesinde'
-                },
-                {
-                    title: 'Yapay Zeka Destekli İlaç Tasarımı',
-                    type: 'Gündem',
-                    badgeClass: 'normal',
-                    badgeText: '📅 10 Gün Kaldı',
-                    date: '7 Eylül 2026',
-                    status: 'Planlandı'
-                },
-                {
-                    title: 'Hücresel Solunum ve ATP Verimliliği',
-                    type: 'Deney',
-                    badgeClass: 'done',
-                    badgeText: '✅ Tamamlandı',
-                    date: '24 Ağustos 2026',
-                    status: 'Yayında'
-                }
-            ];
-
-            list.innerHTML = deadlines.map(d => `
-                <div class="deadline-item">
-                    <div class="deadline-info">
-                        <div class="deadline-title" title="${escapeHtml(d.title)}">${escapeHtml(d.title)}</div>
-                        <div class="deadline-meta">
-                            <span><i class="ph ph-calendar"></i> ${d.date}</span>
-                            <span>•</span>
-                            <span>${d.type}</span>
-                            <span>•</span>
-                            <span style="color: #6366f1;">${d.status}</span>
-                        </div>
+            if (calContentPlans.length === 0) {
+                list.innerHTML = `
+                    <div style="padding: 40px 20px; text-align: center; color: #94a3b8;">
+                        <i class="ph-fill ph-calendar-blank" style="font-size: 2.5rem; opacity: 0.4; margin-bottom: 10px;"></i>
+                        <p style="margin: 0; font-size: 0.95rem; font-weight: 600;">Henüz içerik planı eklenmemiş.</p>
+                        <p style="margin: 6px 0 0; font-size: 0.82rem;">Yukarıdaki "Yeni İçerik Planla" butonu ile başlayın.</p>
                     </div>
-                    <span class="deadline-badge ${d.badgeClass}">${d.badgeText}</span>
-                </div>
-            `).join('');
+                `;
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            list.innerHTML = calContentPlans.map(p => {
+                const pDate = new Date(p.planned_date + 'T00:00:00');
+                const diffMs = pDate - today;
+                const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+                let badgeClass = 'normal';
+                let badgeText = '';
+                if (p.status === 'Tamamlandı') {
+                    badgeClass = 'done';
+                    badgeText = '✅ Tamamlandı';
+                } else if (diffDays < 0) {
+                    badgeClass = 'urgent';
+                    badgeText = `⚠️ ${Math.abs(diffDays)} Gün Gecikmiş`;
+                } else if (diffDays === 0) {
+                    badgeClass = 'urgent';
+                    badgeText = '⏰ Bugün!';
+                } else if (diffDays <= 3) {
+                    badgeClass = 'urgent';
+                    badgeText = `⏰ ${diffDays} Gün Kaldı`;
+                } else if (diffDays <= 7) {
+                    badgeClass = 'normal';
+                    badgeText = `📅 ${diffDays} Gün Kaldı`;
+                } else {
+                    badgeClass = 'normal';
+                    badgeText = `📅 ${diffDays} Gün Kaldı`;
+                }
+
+                // Format date in Turkish
+                const dateFormatted = pDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                // Type badge
+                const typeLower = p.content_type === 'Gündem' ? 'gundem' : p.content_type.toLowerCase();
+
+                return `
+                    <div class="deadline-item">
+                        <div class="deadline-info">
+                            <div class="deadline-title" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div>
+                            <div class="deadline-meta">
+                                <span><i class="ph ph-calendar"></i> ${dateFormatted}</span>
+                                <span>•</span>
+                                <span class="deadline-type-badge ${typeLower}">${p.content_type}</span>
+                                <span>•</span>
+                                <span style="color: #6366f1;">${p.status}</span>
+                            </div>
+                        </div>
+                        <span class="deadline-badge ${badgeClass}">${badgeText}</span>
+                        <button class="deadline-delete-btn" onclick="deleteContentPlan(${p.id})" title="Planı Sil">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
         }
 
         // Chart Logic
