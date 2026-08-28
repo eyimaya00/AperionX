@@ -6177,10 +6177,10 @@
         function updateArticleDashboard(articles) {
             const activeArticles = articles.filter(a => a.status !== 'trash');
 
-            // 1. Stats
+            // 1. Stats (Correctly support like_count & comment_count returned by API)
             const totalViews = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0);
-            const totalLikes = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.likes) || 0), 0);
-            const totalComments = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.comments) || 0), 0);
+            const totalLikes = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0);
+            const totalComments = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0);
             const totalPublished = activeArticles.filter(a => a.status === 'published').length;
 
             if (document.getElementById('art-total-views')) document.getElementById('art-total-views').textContent = totalViews.toLocaleString('tr-TR');
@@ -6353,7 +6353,7 @@
             if (articleSortFilter === 'views') {
                 list.sort((a, b) => (parseInt(b.views) || 0) - (parseInt(a.views) || 0));
             } else if (articleSortFilter === 'likes') {
-                list.sort((a, b) => (parseInt(b.likes) || 0) - (parseInt(a.likes) || 0));
+                list.sort((a, b) => (parseInt(b.like_count !== undefined ? b.like_count : b.likes) || 0) - (parseInt(a.like_count !== undefined ? a.like_count : a.likes) || 0));
             } else if (articleSortFilter === 'title') {
                 list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'tr'));
             } else {
@@ -6387,8 +6387,8 @@
             tbody.innerHTML = list.map(art => {
                 const dateStr = art.created_at ? new Date(art.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '—';
                 const viewsCount = (parseInt(art.views) || 0).toLocaleString('tr-TR');
-                const likesCount = (parseInt(art.likes) || 0).toLocaleString('tr-TR');
-                const commentsCount = (parseInt(art.comments) || 0).toLocaleString('tr-TR');
+                const likesCount = (parseInt(art.like_count !== undefined ? art.like_count : art.likes) || 0).toLocaleString('tr-TR');
+                const commentsCount = (parseInt(art.comment_count !== undefined ? art.comment_count : art.comments) || 0).toLocaleString('tr-TR');
 
                 // Thumb Image
                 let thumbHtml = `<div class="art-thumb"><i class="ph-fill ph-book-open"></i></div>`;
@@ -6808,7 +6808,7 @@
                     console.warn('Dedicated article-likes failed, trying general /likes:', e1);
                 }
 
-                // 2. Fallback to general likes endpoint if needed
+                // 2. Fallback to general likes endpoint if needed (Strictly filter article-only)
                 if (!Array.isArray(likes) || likes.length === 0) {
                     try {
                         const fallbackRes = await fetch(`${API_URL}/author/likes`, {
@@ -6823,6 +6823,18 @@
                     } catch (e2) {
                         console.warn('Fallback /likes also failed:', e2);
                     }
+                }
+
+                // STRICT FILTER: Keep ONLY likes belonging to articles (exclude experiments)
+                if (Array.isArray(likes)) {
+                    likes = likes.filter(l => {
+                        if (l.article_id) return true;
+                        if (l.experiment_id) return false;
+                        if (myArticlesList && myArticlesList.length > 0) {
+                            return myArticlesList.some(a => a.id === l.article_id || a.title === l.article_title);
+                        }
+                        return !l.experiment_title;
+                    });
                 }
 
                 if (!Array.isArray(likes) || likes.length === 0) {
@@ -6931,6 +6943,18 @@
                     } catch (e2) {
                         console.warn('Fallback /comments also failed:', e2);
                     }
+                }
+
+                // STRICT FILTER: Keep ONLY comments belonging to articles (exclude experiments)
+                if (Array.isArray(comments)) {
+                    comments = comments.filter(c => {
+                        if (c.article_id) return true;
+                        if (c.experiment_id) return false;
+                        if (myArticlesList && myArticlesList.length > 0) {
+                            return myArticlesList.some(a => a.id === c.article_id || a.title === c.article_title);
+                        }
+                        return !c.experiment_title;
+                    });
                 }
 
                 if (!Array.isArray(comments) || comments.length === 0) {
