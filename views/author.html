@@ -1392,9 +1392,6 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('my-experiments', this); if(window.innerWidth<=991) toggleSidebar();" title="Deney Yayınlarım">
                 <i class="ph ph-flask"></i> <span>Deney Yayınlarım</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('analytics', this)" title="İçerik Detayı">
-                <i class="ph ph-chart-line-up"></i> <span>İçerik Detayı</span>
-            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('tracking', this)" title="Takip Durumu">
                 <i class="ph ph-calendar-check"></i> <span>Takip Durumu</span>
             </a>
@@ -4124,7 +4121,7 @@
         }
 
         function goToAnalytics() {
-            showSection('analytics', document.querySelector('a[title="İçerik Detayı"]'));
+            showSection('analytics');
         }
 
         async function loadDashboardStats() {
@@ -4185,12 +4182,9 @@
         // --- LIKER TABLE LOGIC ---
         function goToLikers() {
             // 1. Switch to Analytics Section
-            // Find the menu item for analytics to highlight it
-            const analyticsBtn = document.querySelector('a[title="İçerik Detayı"]');
-            showSection('analytics', analyticsBtn);
+            showSection('analytics');
 
             // 2. Load Likers Table
-            // Small delay to ensure section is active/visible if needed
             setTimeout(() => filterAnalytics('likers_list'), 50);
         }
 
