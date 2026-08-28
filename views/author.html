@@ -2531,122 +2531,138 @@
                     background: rgba(248, 250, 252, 0.5);
                 }
 
-                /* Reader Preview Specific */
-                .exp-prev-cover {
+                /* Reader Preview Specific - Matches experiment-detail.html Exactly */
+                .exp-detail-hero-image {
                     width: 100%;
                     max-height: 380px;
                     object-fit: cover;
-                    border-radius: 16px;
+                    border-radius: 20px;
                     margin-bottom: 24px;
+                    display: block;
+                    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
                     border: 1px solid var(--border-color, #e2e8f0);
                 }
-                .exp-prev-badge {
-                    display: inline-flex;
+                .exp-detail-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 24px;
+                    padding: 36px 40px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                }
+                .exp-detail-header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .exp-detail-meta {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    margin-bottom: 16px;
+                    flex-wrap: wrap;
                     align-items: center;
-                    gap: 6px;
-                    padding: 6px 14px;
-                    border-radius: 20px;
-                    background: rgba(99, 102, 241, 0.1);
+                    font-weight: 500;
+                }
+                .exp-detail-badge {
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
                     color: var(--primary-accent, #6366f1);
+                    padding: 6px 14px;
+                    border-radius: 50px;
                     font-size: 0.85rem;
                     font-weight: 700;
-                    margin-bottom: 12px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
+                    border: 1px solid rgba(99, 102, 241, 0.1);
                 }
-                .exp-prev-title {
-                    font-size: 2rem;
+                .exp-detail-title {
+                    font-size: 2.2rem;
                     font-weight: 800;
                     color: var(--text-main, #0f172a);
-                    line-height: 1.3;
+                    line-height: 1.25;
                     margin: 0 0 16px;
+                    letter-spacing: -0.5px;
                 }
-                .exp-prev-meta {
-                    display: flex;
-                    align-items: center;
-                    gap: 14px;
-                    padding-bottom: 20px;
-                    margin-bottom: 24px;
-                    border-bottom: 1px solid var(--border-color, #e2e8f0);
-                    flex-wrap: wrap;
-                }
-                .exp-prev-author-img {
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    border: 2px solid var(--primary-accent, #6366f1);
-                }
-                .exp-prev-author-info {
-                    display: flex;
-                    flex-direction: column;
-                }
-                .exp-prev-author-name {
-                    font-weight: 700;
-                    color: var(--text-main, #0f172a);
-                    font-size: 0.95rem;
-                }
-                .exp-prev-date {
-                    font-size: 0.8rem;
-                    color: #94a3b8;
-                }
-                .exp-prev-excerpt {
-                    font-size: 1.1rem;
-                    line-height: 1.6;
-                    color: #475569;
-                    font-style: italic;
+                .exp-detail-summary-simple {
+                    margin-bottom: 28px;
+                    padding: 24px;
                     background: rgba(99, 102, 241, 0.04);
-                    border-left: 4px solid var(--primary-accent, #6366f1);
-                    padding: 16px 20px;
-                    border-radius: 0 12px 12px 0;
-                    margin-bottom: 28px;
+                    border-radius: 20px;
+                    border: 1px solid rgba(99, 102, 241, 0.1);
                 }
-                .exp-prev-section {
-                    margin-bottom: 28px;
-                }
-                .exp-prev-sec-title {
-                    font-size: 1.25rem;
-                    font-weight: 800;
-                    color: var(--text-main, #0f172a);
+                .exp-detail-summary-title {
+                    font-weight: 700;
+                    color: var(--primary-accent, #6366f1);
+                    margin-bottom: 10px;
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    margin-bottom: 14px;
-                    padding-bottom: 8px;
-                    border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+                    gap: 8px;
+                    font-size: 1.1rem;
                 }
-                .exp-prev-sec-title i {
-                    color: var(--primary-accent, #6366f1);
-                }
-                .exp-prev-box-card {
+                .exp-detail-materials-box {
+                    margin-bottom: 24px;
+                    padding: 24px;
                     background: #f8fafc;
+                    border-radius: 18px;
                     border: 1px solid var(--border-color, #e2e8f0);
-                    border-radius: 14px;
-                    padding: 18px 22px;
-                    font-size: 0.95rem;
-                    line-height: 1.6;
+                    border-left: 5px solid #6366f1;
+                }
+                .exp-detail-safety-box {
+                    margin-bottom: 24px;
+                    padding: 24px;
+                    background: #fffbeb;
+                    border-radius: 18px;
+                    border: 1px solid #fef3c7;
+                    border-left: 5px solid #ef4444;
+                    color: #92400e;
+                }
+                .exp-detail-results-box {
+                    margin-bottom: 24px;
+                    padding: 24px;
+                    background: #f0fdf4;
+                    border-radius: 18px;
+                    border: 1px solid #dcfce7;
+                    border-left: 5px solid #10b981;
+                    color: #166534;
+                }
+                .exp-detail-section-header {
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .exp-detail-content-text {
+                    font-size: 1.05rem;
+                    line-height: 1.75;
                     color: var(--text-main, #334155);
                     white-space: pre-line;
                 }
-                .exp-prev-safety-box {
-                    background: #fffbeb;
-                    border: 1px solid #fef3c7;
-                    border-left: 4px solid #f59e0b;
-                    border-radius: 12px;
-                    padding: 16px 20px;
-                    color: #92400e;
-                    font-size: 0.95rem;
-                    line-height: 1.6;
-                }
-                .exp-prev-prose {
-                    font-size: 1.02rem;
+                .exp-detail-prose {
+                    font-size: 1.05rem;
                     line-height: 1.8;
                     color: var(--text-main, #1e293b);
                 }
-                .exp-prev-prose img {
+                .exp-detail-prose img {
                     max-width: 100%;
                     border-radius: 12px;
-                    margin: 14px 0;
+                    margin: 16px 0;
+                }
+                .exp-detail-references {
+                    margin-top: 30px;
+                    padding-top: 24px;
+                    border-top: 1px dashed var(--border-color, #e2e8f0);
+                }
+                .exp-detail-pdf-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 14px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
                 }
 
                 /* Likes & Comments Interactive List */
@@ -6355,6 +6371,7 @@
                 const conclusion = (document.getElementById('exp-conclusion')?.value || '').trim();
                 const results = expResultsQuill ? expResultsQuill.root.innerHTML : '';
                 const youtube = (document.getElementById('exp-youtube')?.value || '').trim();
+                const pdfName = document.getElementById('exp-pdf-name')?.innerText || '';
                 const references = (document.getElementById('exp-references')?.value || '').trim();
                 const imgReferences = (document.getElementById('exp-image-references')?.value || '').trim();
 
@@ -6366,7 +6383,7 @@
                 let coAuthorsHtml = '';
                 if (Array.isArray(expSelectedAuthors) && expSelectedAuthors.length > 0) {
                     const names = expSelectedAuthors.map(a => `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,102,241,0.08); padding:3px 10px; border-radius:12px; font-weight:600; font-size:0.85rem; color:var(--primary-accent);"><i class="ph ph-user"></i> ${escapeHtml(a.fullname || a.username)}</span>`).join(' ');
-                    coAuthorsHtml = `<div style="margin-top: 10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><strong style="font-size:0.85rem; color:#64748b;">Katkıda Bulunanlar:</strong> ${names}</div>`;
+                    coAuthorsHtml = `<div style="margin-top: 12px; display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;"><strong style="font-size:0.85rem; color:#64748b;">Katkıda Bulunanlar:</strong> ${names}</div>`;
                 }
 
                 // Image preview
@@ -6374,101 +6391,130 @@
                 let coverImgHtml = '';
                 if (fileInput && fileInput.files && fileInput.files[0]) {
                     const fileUrl = URL.createObjectURL(fileInput.files[0]);
-                    coverImgHtml = `<img src="${fileUrl}" alt="${escapeHtml(title)}" class="exp-prev-cover">`;
+                    coverImgHtml = `<img src="${fileUrl}" alt="${escapeHtml(title)}" class="exp-detail-hero-image">`;
                 } else {
                     const existingImg = document.querySelector('#exp-preview-zone img');
                     if (existingImg && existingImg.src) {
-                        coverImgHtml = `<img src="${existingImg.src}" alt="${escapeHtml(title)}" class="exp-prev-cover">`;
+                        coverImgHtml = `<img src="${existingImg.src}" alt="${escapeHtml(title)}" class="exp-detail-hero-image">`;
                     }
+                }
+
+                // Format references list
+                let referencesHtml = '';
+                if (references || imgReferences) {
+                    let refItems = '';
+                    if (references) {
+                        const lines = references.split('\n').filter(l => l.trim().length > 0);
+                        refItems += lines.map(l => `<li style="margin-bottom: 6px;">${escapeHtml(l)}</li>`).join('');
+                    }
+                    if (imgReferences) {
+                        const imgLines = imgReferences.split('\n').filter(l => l.trim().length > 0);
+                        refItems += imgLines.map(l => `<li style="margin-bottom: 6px;"><strong>[Görsel]</strong> ${escapeHtml(l)}</li>`).join('');
+                    }
+                    referencesHtml = `
+                        <div class="exp-detail-references">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+                                <i class="ph-bold ph-books" style="color:var(--primary-accent);"></i> Kaynakça
+                            </h3>
+                            <ul style="padding-left: 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">
+                                ${refItems}
+                            </ul>
+                        </div>
+                    `;
                 }
 
                 let html = `
                     ${coverImgHtml}
-                    <div>
-                        <span class="exp-prev-badge"><i class="ph-fill ph-tag"></i> ${escapeHtml(category)}</span>
-                        <h1 class="exp-prev-title">${escapeHtml(title)}</h1>
-                        
-                        <div class="exp-prev-meta">
-                            <img src="${authorAvatar}" class="exp-prev-author-img" alt="${escapeHtml(authorName)}">
-                            <div class="exp-prev-author-info">
-                                <span class="exp-prev-author-name">${escapeHtml(authorName)}</span>
-                                <span class="exp-prev-date"><i class="ph ph-calendar-blank"></i> ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} • Canlı Önizleme</span>
+                    
+                    <div class="exp-detail-card">
+                        <div class="exp-detail-header">
+                            <div class="exp-detail-meta">
+                                <span class="exp-detail-badge">${escapeHtml(category)}</span>
+                                <span><i class="ph ph-calendar"></i> ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                <span><i class="ph ph-user"></i> ${escapeHtml(authorName)}</span>
                             </div>
+                            <h1 class="exp-detail-title">${escapeHtml(title)}</h1>
+                            ${coAuthorsHtml}
                         </div>
-                        ${coAuthorsHtml}
-                    </div>
-                `;
 
-                if (excerpt) {
-                    html += `<div class="exp-prev-excerpt">${escapeHtml(excerpt)}</div>`;
-                }
-
-                if (objective) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-target"></i> Deneyin Amacı</h2>
-                            <div class="exp-prev-box-card">${escapeHtml(objective)}</div>
-                        </div>`;
-                }
-
-                if (materials) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-flask"></i> Gerekli Malzemeler & Ekipmanlar</h2>
-                            <div class="exp-prev-box-card">${escapeHtml(materials)}</div>
-                        </div>`;
-                }
-
-                if (safety) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-warning"></i> Güvenlik Önlemleri & Uyarılar</h2>
-                            <div class="exp-prev-safety-box">
-                                <i class="ph-fill ph-shield-warning" style="font-size:1.2rem; vertical-align:middle; margin-right:6px;"></i>
-                                ${escapeHtml(safety)}
+                        ${excerpt ? `
+                            <div class="exp-detail-summary-simple" style="background: rgba(99, 102, 241, 0.04); border-left: 4px solid var(--primary-accent); margin-bottom: 24px; padding: 20px; border-radius: 0 16px 16px 0;">
+                                <div style="font-size: 1.05rem; font-style: italic; color: #475569; line-height: 1.6;">${escapeHtml(excerpt)}</div>
                             </div>
-                        </div>`;
-                }
+                        ` : ''}
 
-                if (procedure && procedure !== '<p><br></p>') {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-list-numbers"></i> Deneyin Uygulanışı & Aşamalar</h2>
-                            <div class="exp-prev-prose ql-editor" style="padding:0;">${procedure}</div>
-                        </div>`;
-                }
+                        ${objective ? `
+                            <div class="exp-detail-summary-simple">
+                                <div class="exp-detail-summary-title">
+                                    <i class="ph-fill ph-sparkle"></i> Bu Deneyde Neler Öğreneceğiz? (Amaç)
+                                </div>
+                                <div class="exp-detail-content-text">${escapeHtml(objective)}</div>
+                            </div>
+                        ` : ''}
 
-                if ((results && results !== '<p><br></p>') || conclusion) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-check-circle"></i> Sonuçlar ve Değerlendirme</h2>
-                            ${results && results !== '<p><br></p>' ? `<div class="exp-prev-prose ql-editor" style="padding:0; margin-bottom:12px;">${results}</div>` : ''}
-                            ${conclusion ? `<div class="exp-prev-box-card" style="margin-top:10px;">${escapeHtml(conclusion)}</div>` : ''}
-                        </div>`;
-                }
+                        ${materials ? `
+                            <div class="exp-detail-materials-box">
+                                <div class="exp-detail-section-header" style="color: #4338ca;">
+                                    <i class="ph-bold ph-flask"></i> Gerekli Malzemeler
+                                </div>
+                                <div class="exp-detail-content-text">${escapeHtml(materials)}</div>
+                            </div>
+                        ` : ''}
 
-                if (youtube) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-youtube-logo" style="color:#ef4444;"></i> Video Gösterimi</h2>
-                            <div class="exp-prev-box-card" style="display:flex; align-items:center; gap:10px;">
-                                <i class="ph-fill ph-play-circle" style="font-size:1.8rem; color:#ef4444;"></i>
-                                <div>
-                                    <strong>Bağlantılı Video:</strong>
-                                    <a href="${escapeHtml(youtube)}" target="_blank" style="color:var(--primary-accent); margin-left:6px; word-break:break-all;">${escapeHtml(youtube)}</a>
+                        ${safety ? `
+                            <div class="exp-detail-safety-box">
+                                <div class="exp-detail-section-header" style="color: #b91c1c;">
+                                    <i class="ph-bold ph-warning-octagon"></i> Güvenlik Önlemleri
+                                </div>
+                                <div class="exp-detail-content-text" style="color: #92400e;">${escapeHtml(safety)}</div>
+                            </div>
+                        ` : ''}
+
+                        ${procedure && procedure !== '<p><br></p>' ? `
+                            <div style="margin-bottom: 30px; margin-top: 10px;">
+                                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+                                    <i class="ph-bold ph-list-numbers" style="color:var(--primary-accent);"></i> Metot ve Adımlar
+                                </h2>
+                                <div class="exp-detail-prose ql-editor" style="padding:0;">${procedure}</div>
+                            </div>
+                        ` : ''}
+
+                        ${((results && results !== '<p><br></p>') || conclusion) ? `
+                            <div class="exp-detail-results-box">
+                                <div class="exp-detail-section-header" style="color: #15803d;">
+                                    <i class="ph-bold ph-check-circle"></i> Sonuçlar ve Bulgular
+                                </div>
+                                ${results && results !== '<p><br></p>' ? `<div class="exp-detail-prose ql-editor" style="padding:0; margin-bottom:10px; color:#166534;">${results}</div>` : ''}
+                                ${conclusion ? `<div class="exp-detail-content-text" style="color: #166534;">${escapeHtml(conclusion)}</div>` : ''}
+                            </div>
+                        ` : ''}
+
+                        ${youtube ? `
+                            <div style="margin-bottom: 24px;">
+                                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+                                    <i class="ph-bold ph-youtube-logo" style="color:#ef4444;"></i> Deney Videosu
+                                </h2>
+                                <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; gap: 12px;">
+                                    <i class="ph-fill ph-play-circle" style="font-size: 2.2rem; color: #ef4444;"></i>
+                                    <div>
+                                        <strong>Video Bağlantısı:</strong>
+                                        <a href="${escapeHtml(youtube)}" target="_blank" style="color: var(--primary-accent); word-break: break-all; margin-left: 6px; font-weight: 500;">${escapeHtml(youtube)}</a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>`;
-                }
+                        ` : ''}
 
-                if (references || imgReferences) {
-                    html += `
-                        <div class="exp-prev-section">
-                            <h2 class="exp-prev-sec-title"><i class="ph-bold ph-books"></i> Kaynakça & Referanslar</h2>
-                            ${references ? `<div class="exp-prev-box-card" style="margin-bottom:10px;"><strong>Metin Kaynakları:</strong><br>${escapeHtml(references)}</div>` : ''}
-                            ${imgReferences ? `<div class="exp-prev-box-card"><strong>Görsel Kaynakları:</strong><br>${escapeHtml(imgReferences)}</div>` : ''}
-                        </div>`;
-                }
+                        ${pdfName ? `
+                            <div style="text-align: center; margin: 28px 0;">
+                                <div class="exp-detail-pdf-btn">
+                                    <i class="ph-bold ph-file-pdf"></i> Deney Kılavuzunu İndir (PDF)
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${referencesHtml}
+                    </div>
+                `;
 
                 const previewContainer = document.getElementById('exp-preview-content');
                 if (previewContainer) previewContainer.innerHTML = html;
@@ -6499,12 +6545,12 @@
             listEl.innerHTML = `
                 <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
                     <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
-                    <p style="margin: 0; font-size: 0.95rem;">Beğeniler yükleniyor...</p>
+                    <p style="margin: 0; font-size: 0.95rem;">Deney beğenileri yükleniyor...</p>
                 </div>
             `;
 
             try {
-                const res = await fetch(`${API_URL}/author/likes`, {
+                const res = await fetch(`${API_URL}/author/experiment-likes`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Yüklenemedi');
@@ -6516,7 +6562,7 @@
                             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239,68,68,0.08); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
                                 <i class="ph ph-heart-break"></i>
                             </div>
-                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Beğeni Yok</h4>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Deney Beğenisi Yok</h4>
                             <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız deneyler beğenildiğinde burada listelenecektir.</p>
                         </div>
                     `;
@@ -6539,7 +6585,7 @@
                                     ${escapeHtml(like.liker_name || 'Gizli Kullanıcı')}
                                     <i class="ph-fill ph-heart" style="color: #ef4444; font-size: 0.85rem;"></i>
                                 </div>
-                                <div class="exp-user-exp-title" title="${escapeHtml(expTitle)}">${escapeHtml(expTitle)}</div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(expTitle)}"><i class="ph-bold ph-flask" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(expTitle)}</div>
                             </div>
                             <div class="exp-user-date">${dateStr}</div>
                         </div>
@@ -6573,12 +6619,12 @@
             listEl.innerHTML = `
                 <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
                     <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary-accent); margin-bottom: 10px;"></i>
-                    <p style="margin: 0; font-size: 0.95rem;">Yorumlar yükleniyor...</p>
+                    <p style="margin: 0; font-size: 0.95rem;">Deney yorumları yükleniyor...</p>
                 </div>
             `;
 
             try {
-                const res = await fetch(`${API_URL}/author/comments`, {
+                const res = await fetch(`${API_URL}/author/experiment-comments`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Yüklenemedi');
@@ -6590,7 +6636,7 @@
                             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
                                 <i class="ph ph-chat-circle-dots"></i>
                             </div>
-                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Yorum Yok</h4>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Deney Yorumu Yok</h4>
                             <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız deneylere yorum yapıldığında burada listelenecektir.</p>
                         </div>
                     `;

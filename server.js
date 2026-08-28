@@ -2058,6 +2058,56 @@ app.get('/api/author/likes', authenticateToken, async (req, res) => {
     }
 });
 
+// === GET DEDICATED EXPERIMENT LIKES ===
+app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT DISTINCT
+                u.fullname AS liker_name, 
+                u.avatar_url AS liker_avatar, 
+                e.title AS article_title, 
+                l.created_at
+            FROM likes l
+            JOIN experiments e ON l.experiment_id = e.id
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            JOIN users u ON l.user_id = u.id
+            WHERE l.experiment_id IS NOT NULL AND (e.author_id = ? OR ea.user_id = ?)
+            ORDER BY l.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId, userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Experiment Likes Error:', e);
+        res.status(500).json({ message: 'Deney beğeni verileri alınamadı.' });
+    }
+});
+
+// === GET DEDICATED EXPERIMENT COMMENTS ===
+app.get('/api/author/experiment-comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT DISTINCT
+                c.*, 
+                u.fullname as user_name,
+                u.avatar_url as user_avatar,
+                e.title as article_title
+            FROM comments c
+            JOIN experiments e ON c.experiment_id = e.id
+            LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
+            JOIN users u ON c.user_id = u.id
+            WHERE c.experiment_id IS NOT NULL AND (e.author_id = ? OR ea.user_id = ?)
+            ORDER BY c.created_at DESC
+        `;
+        const [rows] = await pool.query(query, [userId, userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Experiment Comments Error:', e);
+        res.status(500).json({ message: 'Deney yorum verileri alınamadı.' });
+    }
+});
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = 'uploads/';
