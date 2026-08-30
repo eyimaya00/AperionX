@@ -638,27 +638,54 @@ body.dark-mode #notif-dropdown {
 }
 
 
-/* === SCROLLBAR LIGHT MODE === */
+/* === APERIONX UNIFIED MODERN SCROLLBAR === */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+}
+
+body.dark-mode *,
+html[data-theme="dark"] * {
+    scrollbar-color: rgba(99, 102, 241, 0.45) #0b0f19;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-color, #f8fafc);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-track,
-body.dark-mode ::-webkit-scrollbar-track {
-    background: #0f172a;
+    background: #0b0f19;
+    border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(129, 140, 248, 0.5));
+    border-radius: 10px;
+    border: 2px solid #0b0f19; /* Creates a clean floating pill effect */
+    background-clip: padding-box;
+    transition: all 0.25s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: linear-gradient(180deg, #6366f1, #818cf8);
+    border: 1.5px solid #0b0f19;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+body:not(.dark-mode) ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+body:not(.dark-mode) ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border: 2px solid #f1f5f9;
+}
+body:not(.dark-mode) ::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
 }
 
 
