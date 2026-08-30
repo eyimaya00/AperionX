@@ -3567,7 +3567,19 @@
                     <tbody id="articles-table-body">
                         <tr>
                             <td colspan="7">
-                                <!-- MY EXPERIMENTS / STATUS VIEW -->
+                                <div class="exp-empty-state">
+                                    <i class="ph ph-books"></i>
+                                    <p>Makaleler yükleniyor...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END MY ARTICLES SECTION -->
+
+        <!-- MY EXPERIMENTS / STATUS VIEW -->
         <div id="my-experiments" class="section">
             <!-- Hero Banner -->
             <div class="art-hero">
@@ -3621,13 +3633,13 @@
                         <i class="ph-bold ph-pencil-simple-line"></i>
                         <h3 class="art-card-title">Devam Et</h3>
                     </div>
-                    <p class="art-continue-title" id="art-continue-title">Henüz taslak deney yok</p>
+                    <p class="art-continue-title" id="exp-continue-title">Henüz taslak deney yok</p>
                     <div class="art-progress-bar">
                         <div class="art-progress-fill" id="exp-progress-fill" style="width: 0%"></div>
                     </div>
-                    <span class="art-progress-text" id="art-progress-text">%0 tamamlandı</span>
+                    <span class="art-progress-text" id="exp-progress-text">%0 tamamlandı</span>
                     <br>
-                    <button class="art-btn-continue" id="art-btn-continue" style="display: none;" onclick="continueLatestExperiment()">
+                    <button class="art-btn-continue" id="exp-btn-continue" style="display: none;" onclick="continueLatestExperiment()">
                         <i class="ph-bold ph-pencil-simple"></i> Deneye Devam Et →
                     </button>
                 </div>
@@ -3723,12 +3735,6 @@
             </div>
         </div>
         <!-- END MY EXPERIMENTS SECTION -->
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
         <!-- CALENDAR & DEADLINES SECTION -->
         <div id="calendar-deadlines" class="section">
