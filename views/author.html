@@ -1379,10 +1379,56 @@
         .consent-submit-btn.loading .spinner { display: block; }
         .consent-submit-btn.loading .btn-text { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Global Loader (Site-wide AperionX pulsing loader) */
+        #global-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        body.dark-mode #global-loader,
+        html[data-theme="dark"] #global-loader {
+            background: #0b0f19;
+        }
+        #global-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .loader-logo-container img {
+            animation: pulse-loader 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-loader {
+            0%, 100% { transform: scale(1); opacity: 0.85; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.2)); }
+            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.6)); }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE TOP BAR -->
     <header class="mobile-header-bar">
         <button class="mobile-header-btn" onclick="toggleSidebar()" title="Menüyü Aç">
@@ -6599,14 +6645,29 @@
             renderDashboardChart();
 
 
-            // --- User Profile ---
+            // --- User Profile & Dashboard Pre-hydration ---
             if (user) {
                 updateSidebarProfile(user);
-                if (user.fullname) document.getElementById('welcome-name').textContent = user.fullname;
+                const displayName = user.fullname || user.name || user.username || 'Yazar';
+                const welcomeEl = document.getElementById('welcome-name');
+                if (welcomeEl) welcomeEl.textContent = displayName;
+                const dashName = document.getElementById('dash-author-name');
+                if (dashName) dashName.textContent = displayName;
                 populateProfileForm(user);
             }
 
-            // --- Light Mode Restore (Default to Light) ---
+            // --- Hide Global Loader Smoothly ---
+            setTimeout(() => {
+                const loader = document.getElementById('global-loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 300);
+                }
+            }, 350);
+
+            // --- Light / Dark Mode Restore ---
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode === 'true') {
                 document.body.classList.add('dark-mode');
