@@ -5075,6 +5075,16 @@
                     color: #818cf8;
                     border-color: rgba(99, 102, 241, 0.35);
                 }
+                .tag-badge.skill-badge {
+                    background: rgba(16, 185, 129, 0.1);
+                    color: #059669;
+                    border: 1px solid rgba(16, 185, 129, 0.3);
+                }
+                body.dark-mode .tag-badge.skill-badge {
+                    background: rgba(16, 185, 129, 0.15);
+                    color: #34d399;
+                    border-color: rgba(16, 185, 129, 0.35);
+                }
                 .tag-badge-remove {
                     cursor: pointer;
                     opacity: 0.65;
@@ -5112,6 +5122,9 @@
                 .tag-add-input:focus {
                     border-color: #6366f1;
                 }
+                .tag-add-input.skill-input:focus {
+                    border-color: #10b981;
+                }
                 .tag-add-btn {
                     padding: 8px 16px;
                     border-radius: 10px;
@@ -5132,6 +5145,19 @@
                 }
                 .tag-add-btn:hover {
                     background: #6366f1;
+                    color: white;
+                }
+                .tag-add-btn.skill-btn {
+                    background: rgba(16, 185, 129, 0.12);
+                    color: #059669;
+                    border-color: rgba(16, 185, 129, 0.3);
+                }
+                body.dark-mode .tag-add-btn.skill-btn {
+                    background: rgba(16, 185, 129, 0.2);
+                    color: #34d399;
+                }
+                .tag-add-btn.skill-btn:hover {
+                    background: #10b981;
                     color: white;
                 }
                 .session-device-card {
@@ -5306,7 +5332,7 @@
                     <div class="profile-card">
                         <div class="profile-card-header">
                             <h3 class="profile-card-title">
-                                <i class="ph-fill ph-wrench" style="color: #f59e0b; font-size: 1.25rem;"></i>
+                                <i class="ph-fill ph-flask" style="color: #10b981; font-size: 1.25rem;"></i>
                                 TEKNİK / LABORATUVAR YETKİNLİKLERİ
                             </h3>
                         </div>
@@ -5316,8 +5342,8 @@
                         </div>
 
                         <div class="tag-add-box">
-                            <input type="text" id="skill-new-input" class="tag-add-input" placeholder="Yetkinlik yazın (örn: PCR, Mikroskopi)..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addSkillTag();}">
-                            <button type="button" class="tag-add-btn" onclick="addSkillTag()">
+                            <input type="text" id="skill-new-input" class="tag-add-input skill-input" placeholder="Yetkinlik yazın (örn: PCR, Mikroskopi)..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addSkillTag();}">
+                            <button type="button" class="tag-add-btn skill-btn" onclick="addSkillTag()">
                                 <i class="ph-bold ph-plus"></i> Ekle
                             </button>
                         </div>
@@ -10399,6 +10425,7 @@
                 } else {
                     intContainer.innerHTML = profileInterests.map((tag, idx) => `
                         <span class="tag-badge">
+                            <i class="ph-fill ph-dna" style="font-size: 0.85rem; opacity: 0.85;"></i>
                             ${escapeHtml(tag)}
                             <span class="tag-badge-remove" onclick="removeInterestTag(${idx})" title="Kaldır">×</span>
                         </span>
@@ -10406,14 +10433,15 @@
                 }
             }
 
-            // Render Skills
+            // Render Skills (Emerald Laboratory Theme)
             const skillContainer = document.getElementById('skills-tag-container');
             if (skillContainer) {
                 if (profileSkills.length === 0) {
                     skillContainer.innerHTML = '<span style="color: #94a3b8; font-size: 0.86rem; font-style: italic;">Henüz teknik yetkinlik eklenmedi.</span>';
                 } else {
                     skillContainer.innerHTML = profileSkills.map((tag, idx) => `
-                        <span class="tag-badge">
+                        <span class="tag-badge skill-badge">
+                            <i class="ph-fill ph-flask" style="font-size: 0.85rem; opacity: 0.85;"></i>
                             ${escapeHtml(tag)}
                             <span class="tag-badge-remove" onclick="removeSkillTag(${idx})" title="Kaldır">×</span>
                         </span>
