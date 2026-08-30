@@ -641,12 +641,7 @@ body.dark-mode #notif-dropdown {
 /* === APERIONX UNIFIED MODERN SCROLLBAR === */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
-}
-
-body.dark-mode *,
-html[data-theme="dark"] * {
-    scrollbar-color: rgba(99, 102, 241, 0.45) #0b0f19;
+    scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
 ::-webkit-scrollbar {
@@ -655,37 +650,67 @@ html[data-theme="dark"] * {
 }
 
 ::-webkit-scrollbar-track {
-    background: #0b0f19;
-    border-radius: 10px;
+    background: #f1f5f9;
+    border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(129, 140, 248, 0.5));
-    border-radius: 10px;
-    border: 2px solid #0b0f19; /* Creates a clean floating pill effect */
+    background: #cbd5e1;
+    border-radius: 8px;
+    border: 2px solid #f1f5f9;
     background-clip: padding-box;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #6366f1, #818cf8);
-    border: 1.5px solid #0b0f19;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    background: #94a3b8;
 }
 
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-body:not(.dark-mode) ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+/* Dark Mode Scrollbar */
+body.dark-mode *,
+html[data-theme="dark"] * {
+    scrollbar-color: rgba(99, 102, 241, 0.5) #0b0f19;
 }
-body:not(.dark-mode) ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border: 2px solid #f1f5f9;
+
+body.dark-mode ::-webkit-scrollbar-track,
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+body.dark-mode::-webkit-scrollbar-track,
+html[data-theme="dark"]::-webkit-scrollbar-track {
+    background: #0b0f19;
 }
-body:not(.dark-mode) ::-webkit-scrollbar-thumb:hover {
-    background: #6366f1;
+
+body.dark-mode ::-webkit-scrollbar-thumb,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+body.dark-mode::-webkit-scrollbar-thumb,
+html[data-theme="dark"]::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(129, 140, 248, 0.5));
+    border: 2px solid #0b0f19;
+    border-radius: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+body.dark-mode::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6366f1, #818cf8);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Hide scrollbar on swipable filter tabs */
+.art-filter-tabs,
+.exp-filter-tabs {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+.art-filter-tabs::-webkit-scrollbar,
+.exp-filter-tabs::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 
