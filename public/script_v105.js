@@ -1892,7 +1892,7 @@ function checkAuthStatus() {
             if (container.classList.contains('mobile-auth')) {
                 container.innerHTML = `
                     <div class="mobile-user-profile" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                        <img src="${safeAvatar}" alt="User" onerror="this.src='${defaultAvatarFallback}'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
+                        <img src="${safeAvatar}" alt="User" onerror="this.onerror=null; this.src='${defaultAvatarFallback}'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
                         <div class="mobile-user-info">
                             <span class="name">${escapeHtml(user.fullname || user.username)}</span>
                             <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
@@ -1910,7 +1910,7 @@ function checkAuthStatus() {
                 container.innerHTML = `
                     <div class="user-dropdown" style="position:relative;">
                         <button class="user-btn" onclick="toggleUserDropdown(event)">
-                            <img src="${safeAvatar}" alt="User" onerror="this.src='${defaultAvatarFallback}'" class="user-avatar-small" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border: 1.5px solid rgba(99, 102, 241, 0.4);">
+                            <img src="${safeAvatar}" alt="User" onerror="this.onerror=null; this.src='${defaultAvatarFallback}'" class="user-avatar-small" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border: 1.5px solid rgba(99, 102, 241, 0.4);">
                             <span>${escapeHtml((user.fullname || user.username || '').split(' ')[0] || 'Üye')}</span>
                             <i class="ph-bold ph-caret-down"></i>
                         </button>

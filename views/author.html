@@ -5076,14 +5076,14 @@
                     border-color: rgba(99, 102, 241, 0.35);
                 }
                 .tag-badge.skill-badge {
-                    background: rgba(16, 185, 129, 0.1);
-                    color: #059669;
-                    border: 1px solid rgba(16, 185, 129, 0.3);
+                    background: rgba(6, 182, 212, 0.1);
+                    color: #0891b2;
+                    border: 1px solid rgba(6, 182, 212, 0.3);
                 }
                 body.dark-mode .tag-badge.skill-badge {
-                    background: rgba(16, 185, 129, 0.15);
-                    color: #34d399;
-                    border-color: rgba(16, 185, 129, 0.35);
+                    background: rgba(6, 182, 212, 0.15);
+                    color: #22d3ee;
+                    border-color: rgba(6, 182, 212, 0.35);
                 }
                 .tag-badge-remove {
                     cursor: pointer;
@@ -5123,7 +5123,7 @@
                     border-color: #6366f1;
                 }
                 .tag-add-input.skill-input:focus {
-                    border-color: #10b981;
+                    border-color: #06b6d4;
                 }
                 .tag-add-btn {
                     padding: 8px 16px;
@@ -5148,16 +5148,16 @@
                     color: white;
                 }
                 .tag-add-btn.skill-btn {
-                    background: rgba(16, 185, 129, 0.12);
-                    color: #059669;
-                    border-color: rgba(16, 185, 129, 0.3);
+                    background: rgba(6, 182, 212, 0.12);
+                    color: #0891b2;
+                    border-color: rgba(6, 182, 212, 0.3);
                 }
                 body.dark-mode .tag-add-btn.skill-btn {
-                    background: rgba(16, 185, 129, 0.2);
-                    color: #34d399;
+                    background: rgba(6, 182, 212, 0.2);
+                    color: #22d3ee;
                 }
                 .tag-add-btn.skill-btn:hover {
-                    background: #10b981;
+                    background: #06b6d4;
                     color: white;
                 }
                 .session-device-card {
@@ -5332,7 +5332,7 @@
                     <div class="profile-card">
                         <div class="profile-card-header">
                             <h3 class="profile-card-title">
-                                <i class="ph-fill ph-flask" style="color: #10b981; font-size: 1.25rem;"></i>
+                                <i class="ph-fill ph-atom" style="color: #06b6d4; font-size: 1.25rem;"></i>
                                 TEKNİK / LABORATUVAR YETKİNLİKLERİ
                             </h3>
                         </div>
@@ -10433,7 +10433,7 @@
                 }
             }
 
-            // Render Skills (Emerald Laboratory Theme)
+            // Render Skills (Cyan Science & Tech Theme)
             const skillContainer = document.getElementById('skills-tag-container');
             if (skillContainer) {
                 if (profileSkills.length === 0) {
@@ -10441,7 +10441,7 @@
                 } else {
                     skillContainer.innerHTML = profileSkills.map((tag, idx) => `
                         <span class="tag-badge skill-badge">
-                            <i class="ph-fill ph-flask" style="font-size: 0.85rem; opacity: 0.85;"></i>
+                            <i class="ph-fill ph-atom" style="font-size: 0.85rem; opacity: 0.85;"></i>
                             ${escapeHtml(tag)}
                             <span class="tag-badge-remove" onclick="removeSkillTag(${idx})" title="Kaldır">×</span>
                         </span>
@@ -12374,7 +12374,7 @@
     </script>
 
 
-    <script defer src="/script_v105.js?v=226"></script>
+    <script defer src="/script_v105.js?v=301"></script>
 </body>
 
 </html>

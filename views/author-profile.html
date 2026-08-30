@@ -629,7 +629,7 @@
 
 
     <!-- SHARED SCRIPTS -->
-    <script src="/script_v105.js?v=226"></script>
+    <script src="/script_v105.js?v=301"></script>
     <script>
         // Overwrite hideLoader to defer until author profile is fully loaded
         let isProfileLoadingFinished = false;
@@ -759,8 +759,8 @@
 
                     if (Array.isArray(skills) && skills.length > 0) {
                         tagsHtml += skills.map(skTag => `
-                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
-                                <i class="ph-fill ph-flask" style="font-size: 0.9rem;"></i> ${escapeHtml(skTag)}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
+                                <i class="ph-fill ph-atom" style="font-size: 0.9rem;"></i> ${escapeHtml(skTag)}
                             </span>
                         `).join('');
                     }
