@@ -4922,97 +4922,544 @@
         </div>
 
         <div id="profile" class="section">
-            <h1 class="page-title">Profilim</h1>
-            <div class="card">
-                <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; gap: 10px;">
+            <style>
+                /* ===== PROFILE & SECURITY STYLES ===== */
+                .profile-header-strip {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 24px;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                }
+                .profile-tabs {
+                    display: inline-flex;
+                    background: rgba(15, 23, 42, 0.05);
+                    padding: 4px;
+                    border-radius: 14px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    gap: 6px;
+                }
+                body.dark-mode .profile-tabs {
+                    background: rgba(30, 41, 59, 0.7);
+                    border-color: rgba(255, 255, 255, 0.08);
+                }
+                .profile-tab-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-size: 0.92rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .profile-tab-btn:hover {
+                    color: var(--primary-accent);
+                }
+                .profile-tab-btn.active {
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+                }
+                .profile-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 20px;
+                    padding: 28px;
+                    margin-bottom: 24px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+                    transition: all 0.2s ease;
+                }
+                body.dark-mode .profile-card {
+                    background: #1e293b;
+                    border-color: rgba(255, 255, 255, 0.06);
+                    box-shadow: none;
+                }
+                .profile-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 22px;
+                    padding-bottom: 14px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                }
+                body.dark-mode .profile-card-header {
+                    border-bottom-color: rgba(255, 255, 255, 0.06);
+                }
+                .profile-card-title {
+                    margin: 0;
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: var(--text-main, #0f172a);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    letter-spacing: -0.2px;
+                }
+                body.dark-mode .profile-card-title {
+                    color: #f8fafc;
+                }
+                .profile-avatar-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 24px;
+                    flex-wrap: wrap;
+                    padding-bottom: 20px;
+                    margin-bottom: 20px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
+                }
+                body.dark-mode .profile-avatar-row {
+                    border-bottom-color: rgba(255, 255, 255, 0.06);
+                }
+                .profile-avatar-wrap {
+                    position: relative;
+                    width: 96px;
+                    height: 96px;
+                    flex-shrink: 0;
+                }
+                .profile-avatar-img {
+                    width: 96px;
+                    height: 96px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 3px solid #6366f1;
+                    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+                }
+                .profile-avatar-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                    padding: 9px 18px;
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                }
+                .profile-avatar-btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+                }
+                .tag-badge-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 14px;
+                    min-height: 38px;
+                    align-items: center;
+                }
+                .tag-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    background: rgba(99, 102, 241, 0.1);
+                    color: #6366f1;
+                    border: 1px solid rgba(99, 102, 241, 0.25);
+                    border-radius: 20px;
+                    font-size: 0.86rem;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                }
+                body.dark-mode .tag-badge {
+                    background: rgba(99, 102, 241, 0.15);
+                    color: #818cf8;
+                    border-color: rgba(99, 102, 241, 0.35);
+                }
+                .tag-badge-remove {
+                    cursor: pointer;
+                    opacity: 0.65;
+                    font-size: 1rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: opacity 0.2s;
+                }
+                .tag-badge-remove:hover {
+                    opacity: 1;
+                    color: #ef4444;
+                }
+                .tag-add-box {
+                    display: flex;
+                    gap: 8px;
+                    max-width: 420px;
+                }
+                .tag-add-input {
+                    flex: 1;
+                    padding: 8px 14px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    background: var(--bg-main, #ffffff);
+                    color: var(--text-main, #0f172a);
+                    font-size: 0.88rem;
+                    outline: none;
+                    transition: border-color 0.2s;
+                }
+                body.dark-mode .tag-add-input {
+                    background: #0f172a;
+                    border-color: rgba(255, 255, 255, 0.1);
+                    color: #f8fafc;
+                }
+                .tag-add-input:focus {
+                    border-color: #6366f1;
+                }
+                .tag-add-btn {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    background: rgba(99, 102, 241, 0.12);
+                    color: #6366f1;
+                    border: 1px solid rgba(99, 102, 241, 0.3);
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s;
+                }
+                body.dark-mode .tag-add-btn {
+                    background: rgba(99, 102, 241, 0.2);
+                    color: #818cf8;
+                }
+                .tag-add-btn:hover {
+                    background: #6366f1;
+                    color: white;
+                }
+                .session-device-card {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 16px 20px;
+                    background: rgba(99, 102, 241, 0.04);
+                    border: 1px solid rgba(99, 102, 241, 0.15);
+                    border-radius: 14px;
+                    gap: 16px;
+                    flex-wrap: wrap;
+                }
+                body.dark-mode .session-device-card {
+                    background: rgba(15, 23, 42, 0.6);
+                    border-color: rgba(255, 255, 255, 0.08);
+                }
+                .session-badge-active {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    background: #dcfce7;
+                    color: #166534;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                }
+                body.dark-mode .session-badge-active {
+                    background: rgba(16, 185, 129, 0.2);
+                    color: #34d399;
+                }
+            </style>
+
+            <!-- Profil Üst Başlık & Sekmeler -->
+            <div class="profile-header-strip">
+                <div>
+                    <h1 class="page-title" style="margin: 0 0 6px 0;">👤 Profilim</h1>
+                    <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Yazar kimliğinizi, akademik bilgilerinizi ve hesap güvenliğinizi yönetin.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
                     <button type="button" onclick="clearSystemCacheAndReload()" class="btn btn-secondary"
-                        style="padding: 8px 14px; font-size: 0.85rem; opacity: 0.8; background: transparent; border: 1px solid rgba(255,255,255,0.15);" title="Olası önbellek ve veri hatalarını çözmek için yerel verileri sıfırlar">
+                        style="padding: 9px 15px; font-size: 0.86rem; background: transparent; border: 1px solid rgba(255,255,255,0.15);" title="Önbelleği Temizle">
                         <i class="ph ph-arrows-counter-clockwise"></i> Önbelleği Temizle
                     </button>
                     <a href="javascript:void(0)" id="view-public-profile-btn" target="_blank" class="btn btn-secondary"
-                        style="padding: 8px 16px; font-size: 0.9rem;">
-                        <i class="ph ph-arrow-square-out"></i> Profili Görüntüle
+                        style="padding: 9px 18px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>Profili Gör</span> <i class="ph-bold ph-arrow-right"></i>
                     </a>
                 </div>
+            </div>
 
-                <!-- TEMA / GECE MODU AYARI (KULLANICININ İSTEDİĞİ PROFİL İÇİ BUTON) -->
-                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--primary-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-                            <i class="ph-fill ph-moon-stars" id="profile-theme-icon"></i>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: var(--text-main);">Görünüm ve Tema</h4>
-                            <p style="margin: 2px 0 0; font-size: 0.84rem; color: #64748b;" id="profile-theme-desc">Gece modu veya Açık mod arasında geçiş yapın.</p>
-                        </div>
-                    </div>
-                    <button type="button" onclick="toggleDarkModeFromProfile()" class="btn btn-secondary" id="btn-toggle-theme" style="padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border-radius: 10px;">
-                        <i class="ph ph-moon"></i> Gece Moduna Geç
+            <!-- Sekme Seçici -->
+            <div style="margin-bottom: 24px;">
+                <div class="profile-tabs">
+                    <button class="profile-tab-btn active" id="tab-btn-author" onclick="switchProfileTab('author')">
+                        <i class="ph-fill ph-user"></i> Yazar Profilim
+                    </button>
+                    <button class="profile-tab-btn" id="tab-btn-security" onclick="switchProfileTab('security')">
+                        <i class="ph-fill ph-lock-key"></i> Hesap & Güvenlik
                     </button>
                 </div>
-                <form id="profile-form" onsubmit="updateProfile(event)">
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <div style="display: flex; gap: 20px; align-items: center;">
-                                <img id="profile-avatar-preview" src="https://via.placeholder.com/100"
-                                    style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
-                                <div>
-                                    <label for="profile-avatar"
-                                        style="cursor: pointer; background: var(--primary-accent); color: white; padding: 8px 16px; border-radius: 6px; display: inline-block;">Fotoğraf
-                                        Yükle</label>
-                                    <input type="file" id="profile-avatar" accept="image/*" style="display: none;"
-                                        onchange="previewAvatar(this)">
-                                    <p style="margin: 5px 0 0; font-size: 0.8rem; color: #94a3b8;">Önerilen: 200x200px
-                                    </p>
+            </div>
+
+            <!-- ================= TAB 1: YAZAR PROFİLİ ================= -->
+            <div id="profile-tab-author">
+                <form id="profile-form-author" onsubmit="updateProfileAuthor(event)">
+                    <!-- 1. YAZAR PROFİLİ & FOTOĞRAF -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-user-circle" style="color: #6366f1; font-size: 1.25rem;"></i>
+                                YAZAR PROFİLİ
+                            </h3>
+                            <span style="font-size: 0.84rem; color: #94a3b8;">Profil Önizleme</span>
+                        </div>
+
+                        <!-- Fotoğraf Değiştirme -->
+                        <div class="profile-avatar-row">
+                            <div class="profile-avatar-wrap">
+                                <img id="profile-avatar-preview" class="profile-avatar-img" src="https://via.placeholder.com/100" alt="Avatar">
+                            </div>
+                            <div>
+                                <label for="profile-avatar" class="profile-avatar-btn">
+                                    <i class="ph-bold ph-camera"></i> Fotoğrafını Güncelle
+                                </label>
+                                <input type="file" id="profile-avatar" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+                                <p style="margin: 8px 0 0; font-size: 0.8rem; color: #94a3b8;">Önerilen format: Kare 200x200px (JPG, PNG veya WEBP)</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label style="font-weight: 600;">Ad Soyad</label>
+                                <input type="text" id="profile-name" class="form-control" placeholder="Adınız ve Soyadınız" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label style="font-weight: 600;">Kısa Biyografi</label>
+                                <textarea id="profile-bio" class="form-control" rows="3" placeholder="Okurlarınıza kendinizden, bilimsel meraklarınızdan ve uzmanlıklarınızdan bahsedin..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. EĞİTİM & AKADEMİK BİLGİLER -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-graduation-cap" style="color: #8b5cf6; font-size: 1.25rem;"></i>
+                                EĞİTİM & AKADEMİK BİLGİLER
+                            </h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label style="font-weight: 600;">Üniversite</label>
+                                <input type="text" id="profile-university" class="form-control" placeholder="Örn: Bartın Üniversitesi">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600;">Bölüm</label>
+                                <input type="text" id="profile-department" class="form-control" placeholder="Örn: Moleküler Biyoloji ve Genetik">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600;">Akademik Seviye</label>
+                                <select id="profile-academic-level" class="form-control" style="cursor: pointer;">
+                                    <option value="Lisans Öğrencisi">Lisans Öğrencisi</option>
+                                    <option value="Lisans">Lisans</option>
+                                    <option value="Yüksek Lisans Öğrencisi">Yüksek Lisans Öğrencisi</option>
+                                    <option value="Yüksek Lisans">Yüksek Lisans</option>
+                                    <option value="Doktora Öğrencisi">Doktora Öğrencisi</option>
+                                    <option value="Doktora / Dr.">Doktora / Dr.</option>
+                                    <option value="Doç. Dr.">Doç. Dr.</option>
+                                    <option value="Prof. Dr.">Prof. Dr.</option>
+                                    <option value="Bağımsız Araştırmacı">Bağımsız Araştırmacı</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600;">LinkedIn</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-linkedin-logo" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #0077b5; font-size: 1.2rem;"></i>
+                                    <input type="url" id="profile-linkedin" class="form-control" style="padding-left: 42px;" placeholder="https://www.linkedin.com/in/kullaniciadi">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Ad Soyad</label>
-                            <input type="text" id="profile-name" class="form-control">
+                    <!-- 3. BİLİMSEL İLGİ ALANLARI -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-dna" style="color: #06b6d4; font-size: 1.25rem;"></i>
+                                BİLİMSEL İLGİ ALANLARI
+                            </h3>
                         </div>
-                        <div class="form-group">
-                            <label>E-posta</label>
-                            <input type="email" id="profile-email" class="form-control">
+
+                        <div class="tag-badge-container" id="interests-tag-container">
+                            <!-- Interest badges rendered dynamically -->
                         </div>
-                        <div class="form-group">
-                            <label>Kısa Biyografi</label>
-                            <textarea id="profile-bio" class="form-control" rows="3"
-                                placeholder="Kendinizden bahsedin..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Ünvan / Okul / Bölüm</label>
-                            <input type="text" id="profile-job" class="form-control" placeholder="Örn: Kıdemli Editör">
-                        </div>
-                        <div class="form-group">
-                            <label>LinkedIn Profil Linki</label>
-                            <div style="position: relative;">
-                                <i class="ph-fill ph-linkedin-logo" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #0077b5; font-size: 1.2rem;"></i>
-                                <input type="url" id="profile-linkedin" class="form-control" style="padding-left: 40px;" placeholder="https://www.linkedin.com/in/kullaniciadi">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>İletişim E-posta Adresi (Profilde Gösterilecek)</label>
-                            <div style="position: relative;">
-                                <i class="ph-fill ph-envelope" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6366f1; font-size: 1.2rem;"></i>
-                                <input type="email" id="profile-public-email" class="form-control" style="padding-left: 40px;" placeholder="ornek@domain.com">
-                            </div>
-                        </div>
-                        <div class="form-group full-width" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                            <input type="checkbox" id="profile-show-email" style="width: 18px; height: 18px; cursor: pointer;" checked>
-                            <label for="profile-show-email" style="margin: 0; cursor: pointer; font-weight: 500;">E-posta adresim yazar profilimde iletişim ikonu olarak görünsün</label>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
-                            <input type="password" id="profile-password" class="form-control">
+
+                        <div class="tag-add-box">
+                            <input type="text" id="interest-new-input" class="tag-add-input" placeholder="İlgi alanı yazın (örn: Genetik)..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addInterestTag();}">
+                            <button type="button" class="tag-add-btn" onclick="addInterestTag()">
+                                <i class="ph-bold ph-plus"></i> Ekle
+                            </button>
                         </div>
                     </div>
-                    <div class="action-bar">
-                        <button type="submit" class="btn btn-primary">
+
+                    <!-- 4. TEKNİK / LABORATUVAR YETKİNLİKLERİ -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-wrench" style="color: #f59e0b; font-size: 1.25rem;"></i>
+                                TEKNİK / LABORATUVAR YETKİNLİKLERİ
+                            </h3>
+                        </div>
+
+                        <div class="tag-badge-container" id="skills-tag-container">
+                            <!-- Skill badges rendered dynamically -->
+                        </div>
+
+                        <div class="tag-add-box">
+                            <input type="text" id="skill-new-input" class="tag-add-input" placeholder="Yetkinlik yazın (örn: PCR, Mikroskopi)..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addSkillTag();}">
+                            <button type="button" class="tag-add-btn" onclick="addSkillTag()">
+                                <i class="ph-bold ph-plus"></i> Ekle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5. İLETİŞİM -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-envelope" style="color: #10b981; font-size: 1.25rem;"></i>
+                                İLETİŞİM
+                            </h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label style="font-weight: 600;">İletişim E-postası</label>
+                                <div style="position: relative; max-width: 480px;">
+                                    <i class="ph-fill ph-envelope-simple" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #10b981; font-size: 1.2rem;"></i>
+                                    <input type="email" id="profile-public-email" class="form-control" style="padding-left: 42px;" placeholder="iletisim@domain.com">
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                                <input type="checkbox" id="profile-show-email" style="width: 18px; height: 18px; cursor: pointer;" checked>
+                                <label for="profile-show-email" style="margin: 0; cursor: pointer; font-weight: 500;">Profilimde iletişim e-postam gösterilsin</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. TEMA & GÖRÜNÜM AYARI -->
+                    <div class="profile-card" style="padding: 20px 28px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 42px; height: 42px; border-radius: 12px; background: var(--primary-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                    <i class="ph-fill ph-moon-stars" id="profile-theme-icon"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: var(--text-main);">Görünüm ve Gece Modu</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.84rem; color: #64748b;" id="profile-theme-desc">Gece modu veya Açık mod arasında geçiş yapın.</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="toggleDarkModeFromProfile()" class="btn btn-secondary" id="btn-toggle-theme" style="padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border-radius: 10px;">
+                                <i class="ph ph-moon"></i> Gece Moduna Geç
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kaydet Butonu -->
+                    <div class="action-bar" style="margin-top: 28px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.98rem; font-weight: 600; box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);">
                             <i class="ph ph-floppy-disk"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ================= TAB 2: HESAP & GÜVENLİK ================= -->
+            <div id="profile-tab-security" style="display: none;">
+                <form id="profile-form-security" onsubmit="updateProfileSecurity(event)">
+                    <!-- 1. HESAP BİLGİLERİ -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-shield-check" style="color: #10b981; font-size: 1.25rem;"></i>
+                                HESAP BİLGİLERİ
+                            </h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full-width" style="max-width: 480px;">
+                                <label style="font-weight: 600;">Hesap E-postası</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-lock" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
+                                    <input type="email" id="profile-account-email" class="form-control" style="padding-left: 42px; background: rgba(0,0,0,0.03); opacity: 0.85;" readonly>
+                                </div>
+                                <p style="margin: 6px 0 0; font-size: 0.8rem; color: #94a3b8;">Sisteme giriş için kullandığınız birincil e-posta adresi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. ŞİFRE DEĞİŞTİR -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-key" style="color: #6366f1; font-size: 1.25rem;"></i>
+                                ŞİFRE & GÜVENLİK
+                            </h3>
+                        </div>
+
+                        <div class="form-grid" style="max-width: 540px;">
+                            <div class="form-group full-width">
+                                <label style="font-weight: 600;">Mevcut Şifre Durumu</label>
+                                <input type="text" class="form-control" value="••••••••••••" disabled style="background: rgba(0,0,0,0.03); opacity: 0.7;">
+                            </div>
+                            <div class="form-group full-width">
+                                <label style="font-weight: 600;">Yeni Şifre</label>
+                                <div style="position: relative;">
+                                    <input type="password" id="profile-new-password" class="form-control" placeholder="En az 6 karakterli yeni şifre" style="padding-right: 42px;">
+                                    <button type="button" onclick="togglePasswordVisibility('profile-new-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">
+                                        <i class="ph ph-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label style="font-weight: 600;">Yeni Şifre (Tekrar)</label>
+                                <div style="position: relative;">
+                                    <input type="password" id="profile-new-password-confirm" class="form-control" placeholder="Yeni şifrenizi tekrar giriniz" style="padding-right: 42px;">
+                                    <button type="button" onclick="togglePasswordVisibility('profile-new-password-confirm', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">
+                                        <i class="ph ph-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. OTURUMLAR -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3 class="profile-card-title">
+                                <i class="ph-fill ph-devices" style="color: #8b5cf6; font-size: 1.25rem;"></i>
+                                OTURUMLAR
+                            </h3>
+                            <span style="font-size: 0.84rem; color: #94a3b8;">Giriş Yapılan Cihazlar</span>
+                        </div>
+
+                        <div class="session-device-card">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    <i class="ph-fill ph-laptop"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);">Bu Cihaz · Web Tarayıcısı</h4>
+                                    <p style="margin: 3px 0 0; font-size: 0.82rem; color: #64748b;" id="session-device-info">Windows · Chrome / Edge · Son Aktivite: Şimdi</p>
+                                </div>
+                            </div>
+                            <span class="session-badge-active">
+                                <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span> Aktif Oturum
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Güvenlik Kaydet Butonu -->
+                    <div class="action-bar" style="margin-top: 28px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.98rem; font-weight: 600; box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);">
+                            <i class="ph ph-shield-check"></i> Kaydet
                         </button>
                     </div>
                 </form>
@@ -9917,20 +10364,146 @@
 
 
 
-        async function updateProfile(e) {
+        // ================= PROFILE & SECURITY LOGIC =================
+        let profileInterests = ['Genetik', 'Moleküler Biyoloji'];
+        let profileSkills = ['PCR', 'Mikroskopi'];
+
+        function switchProfileTab(tab) {
+            const authorTab = document.getElementById('profile-tab-author');
+            const securityTab = document.getElementById('profile-tab-security');
+            const btnAuthor = document.getElementById('tab-btn-author');
+            const btnSecurity = document.getElementById('tab-btn-security');
+
+            if (tab === 'security') {
+                if (authorTab) authorTab.style.display = 'none';
+                if (securityTab) securityTab.style.display = 'block';
+                if (btnAuthor) btnAuthor.classList.remove('active');
+                if (btnSecurity) btnSecurity.classList.add('active');
+            } else {
+                if (authorTab) authorTab.style.display = 'block';
+                if (securityTab) securityTab.style.display = 'none';
+                if (btnAuthor) btnAuthor.classList.add('active');
+                if (btnSecurity) btnSecurity.classList.remove('active');
+            }
+        }
+
+        function renderProfileTags() {
+            // Render Interests
+            const intContainer = document.getElementById('interests-tag-container');
+            if (intContainer) {
+                if (profileInterests.length === 0) {
+                    intContainer.innerHTML = '<span style="color: #94a3b8; font-size: 0.86rem; font-style: italic;">Henüz bilimsel ilgi alanı eklenmedi.</span>';
+                } else {
+                    intContainer.innerHTML = profileInterests.map((tag, idx) => `
+                        <span class="tag-badge">
+                            ${escapeHtml(tag)}
+                            <span class="tag-badge-remove" onclick="removeInterestTag(${idx})" title="Kaldır">×</span>
+                        </span>
+                    `).join('');
+                }
+            }
+
+            // Render Skills
+            const skillContainer = document.getElementById('skills-tag-container');
+            if (skillContainer) {
+                if (profileSkills.length === 0) {
+                    skillContainer.innerHTML = '<span style="color: #94a3b8; font-size: 0.86rem; font-style: italic;">Henüz teknik yetkinlik eklenmedi.</span>';
+                } else {
+                    skillContainer.innerHTML = profileSkills.map((tag, idx) => `
+                        <span class="tag-badge">
+                            ${escapeHtml(tag)}
+                            <span class="tag-badge-remove" onclick="removeSkillTag(${idx})" title="Kaldır">×</span>
+                        </span>
+                    `).join('');
+                }
+            }
+        }
+
+        function addInterestTag() {
+            const input = document.getElementById('interest-new-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (val && !profileInterests.includes(val)) {
+                profileInterests.push(val);
+                input.value = '';
+                renderProfileTags();
+            }
+        }
+
+        function removeInterestTag(index) {
+            if (index >= 0 && index < profileInterests.length) {
+                profileInterests.splice(index, 1);
+                renderProfileTags();
+            }
+        }
+
+        function addSkillTag() {
+            const input = document.getElementById('skill-new-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (val && !profileSkills.includes(val)) {
+                profileSkills.push(val);
+                input.value = '';
+                renderProfileTags();
+            }
+        }
+
+        function removeSkillTag(index) {
+            if (index >= 0 && index < profileSkills.length) {
+                profileSkills.splice(index, 1);
+                renderProfileTags();
+            }
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = isPassword ? 'ph ph-eye-slash' : 'ph ph-eye';
+                }
+            }
+        }
+
+        async function updateProfileAuthor(e) {
             e.preventDefault();
             const formData = new FormData();
-            formData.append('fullname', document.getElementById('profile-name').value);
-            formData.append('email', document.getElementById('profile-email').value);
-            formData.append('password', document.getElementById('profile-password').value);
-            formData.append('bio', document.getElementById('profile-bio').value);
-            formData.append('job_title', document.getElementById('profile-job').value);
-            formData.append('linkedin_url', document.getElementById('profile-linkedin') ? document.getElementById('profile-linkedin').value : '');
-            formData.append('public_email', document.getElementById('profile-public-email') ? document.getElementById('profile-public-email').value : '');
-            formData.append('show_email', (document.getElementById('profile-show-email') && document.getElementById('profile-show-email').checked) ? '1' : '0');
+            const fullname = document.getElementById('profile-name') ? document.getElementById('profile-name').value.trim() : '';
+            const bio = document.getElementById('profile-bio') ? document.getElementById('profile-bio').value : '';
+            const university = document.getElementById('profile-university') ? document.getElementById('profile-university').value.trim() : '';
+            const department = document.getElementById('profile-department') ? document.getElementById('profile-department').value.trim() : '';
+            const academicLevel = document.getElementById('profile-academic-level') ? document.getElementById('profile-academic-level').value : '';
+            const linkedinUrl = document.getElementById('profile-linkedin') ? document.getElementById('profile-linkedin').value.trim() : '';
+            const publicEmail = document.getElementById('profile-public-email') ? document.getElementById('profile-public-email').value.trim() : '';
+            const showEmail = (document.getElementById('profile-show-email') && document.getElementById('profile-show-email').checked) ? '1' : '0';
+
+            // Construct job_title for sidebar & badge presentation
+            let combinedJob = '';
+            if (university || department || academicLevel) {
+                const parts = [];
+                if (university) parts.push(university);
+                if (department) parts.push(department);
+                if (academicLevel) parts.push(academicLevel);
+                combinedJob = parts.join(' / ');
+            }
+
+            formData.append('fullname', fullname);
+            formData.append('bio', bio);
+            formData.append('university', university);
+            formData.append('department', department);
+            formData.append('academic_level', academicLevel);
+            formData.append('job_title', combinedJob);
+            formData.append('scientific_interests', JSON.stringify(profileInterests));
+            formData.append('technical_skills', JSON.stringify(profileSkills));
+            formData.append('linkedin_url', linkedinUrl);
+            formData.append('public_email', publicEmail);
+            formData.append('show_email', showEmail);
 
             const fileInput = document.getElementById('profile-avatar');
-            if (fileInput.files[0]) {
+            if (fileInput && fileInput.files[0]) {
                 formData.append('avatar', fileInput.files[0]);
             }
 
@@ -9943,13 +10516,57 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    showAuthorToast('Profil güncellendi!', 'success');
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    document.getElementById('profile-password').value = '';
-                    updateSidebarProfile(data.user);
-                    populateProfileForm(data.user);
+                    showAuthorToast('Yazar profiliniz başarıyla güncellendi!', 'success');
+                    if (data.user) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        updateSidebarProfile(data.user);
+                        populateProfileForm(data.user);
+                    }
                 } else {
-                    showAuthorToast(data.message, 'error');
+                    showAuthorToast(data.message || 'Profil güncellenemedi.', 'error');
+                }
+            } catch (e) {
+                showAuthorToast('Hata oluştu: ' + e.message, 'error');
+            }
+        }
+
+        async function updateProfileSecurity(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('profile-new-password') ? document.getElementById('profile-new-password').value : '';
+            const newPassConfirm = document.getElementById('profile-new-password-confirm') ? document.getElementById('profile-new-password-confirm').value : '';
+
+            if (!newPass || newPass.trim() === '') {
+                showAuthorToast('Lütfen yeni bir şifre giriniz.', 'error');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                showAuthorToast('Yeni şifreniz en az 6 karakter olmalıdır.', 'error');
+                return;
+            }
+
+            if (newPass !== newPassConfirm) {
+                showAuthorToast('Girdiğiniz yeni şifreler birbiriyle eşleşmiyor.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('password', newPass);
+
+            try {
+                const res = await fetch(`${API_URL}/profile`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showAuthorToast('Şifreniz ve güvenlik ayarlarınız başarıyla güncellendi!', 'success');
+                    if (document.getElementById('profile-new-password')) document.getElementById('profile-new-password').value = '';
+                    if (document.getElementById('profile-new-password-confirm')) document.getElementById('profile-new-password-confirm').value = '';
+                } else {
+                    showAuthorToast(data.message || 'Şifre güncellenemedi.', 'error');
                 }
             } catch (e) {
                 showAuthorToast('Hata oluştu: ' + e.message, 'error');
@@ -9959,11 +10576,16 @@
         function updateSidebarProfile(u) {
             if (!u) return;
             const displayName = u.fullname || u.username || 'Yazar';
-            document.getElementById('sidebar-name').innerText = displayName;
-            document.getElementById('sidebar-title').innerText = u.job_title || 'Ünvan Yok';
+            const sidebarName = document.getElementById('sidebar-name');
+            const sidebarTitle = document.getElementById('sidebar-title');
+            if (sidebarName) sidebarName.innerText = displayName;
+            if (sidebarTitle) sidebarTitle.innerText = u.job_title || 'Yazar Profili';
             
             const welcomeEl = document.getElementById('welcome-name');
             if (welcomeEl) welcomeEl.innerText = displayName;
+
+            const dashAuthorName = document.getElementById('dash-author-name');
+            if (dashAuthorName) dashAuthorName.innerText = displayName;
 
             if (u.avatar_url) {
                 let avatarSrc = u.avatar_url;
@@ -9981,20 +10603,66 @@
         function populateProfileForm(u) {
             if (!u) return;
             const profileName = document.getElementById('profile-name');
-            const profileEmail = document.getElementById('profile-email');
-            const profileJob = document.getElementById('profile-job');
+            const profileAccountEmail = document.getElementById('profile-account-email');
             const profileBio = document.getElementById('profile-bio');
+            const profileUniversity = document.getElementById('profile-university');
+            const profileDepartment = document.getElementById('profile-department');
+            const profileAcademicLevel = document.getElementById('profile-academic-level');
             const profileLinkedin = document.getElementById('profile-linkedin');
             const profilePublicEmail = document.getElementById('profile-public-email');
             const profileShowEmail = document.getElementById('profile-show-email');
 
             if (profileName) profileName.value = u.fullname || '';
-            if (profileEmail) profileEmail.value = u.email || '';
-            if (profileJob) profileJob.value = u.job_title || '';
+            if (profileAccountEmail) profileAccountEmail.value = u.email || '';
             if (profileBio) profileBio.value = u.bio || '';
             if (profileLinkedin) profileLinkedin.value = u.linkedin_url || '';
             if (profilePublicEmail) profilePublicEmail.value = u.public_email || '';
             if (profileShowEmail) profileShowEmail.checked = (u.show_email === undefined || u.show_email == 1 || u.show_email === true);
+
+            // Academic fields (parse from specific columns or fallback to job_title)
+            if (profileUniversity) {
+                profileUniversity.value = u.university || '';
+            }
+            if (profileDepartment) {
+                profileDepartment.value = u.department || '';
+            }
+            if (profileAcademicLevel && u.academic_level) {
+                profileAcademicLevel.value = u.academic_level;
+            }
+
+            // Fallback: If university/department are empty but job_title has "Univ / Dept / Level" format
+            if (u.job_title && (!u.university || !u.department)) {
+                const parts = u.job_title.split('/').map(p => p.trim());
+                if (parts.length >= 1 && profileUniversity && !profileUniversity.value) profileUniversity.value = parts[0];
+                if (parts.length >= 2 && profileDepartment && !profileDepartment.value) profileDepartment.value = parts[1];
+                if (parts.length >= 3 && profileAcademicLevel && (!u.academic_level)) profileAcademicLevel.value = parts[2];
+            }
+
+            // Scientific Interests tags
+            if (u.scientific_interests) {
+                try {
+                    const parsed = JSON.parse(u.scientific_interests);
+                    if (Array.isArray(parsed)) profileInterests = parsed;
+                } catch (e) {
+                    profileInterests = u.scientific_interests.split(',').map(s => s.trim()).filter(Boolean);
+                }
+            } else {
+                profileInterests = ['Genetik', 'Moleküler Biyoloji'];
+            }
+
+            // Technical Skills tags
+            if (u.technical_skills) {
+                try {
+                    const parsed = JSON.parse(u.technical_skills);
+                    if (Array.isArray(parsed)) profileSkills = parsed;
+                } catch (e) {
+                    profileSkills = u.technical_skills.split(',').map(s => s.trim()).filter(Boolean);
+                }
+            } else {
+                profileSkills = ['PCR', 'Mikroskopi'];
+            }
+
+            renderProfileTags();
 
             // Public profile link
             const profileBtn = document.getElementById('view-public-profile-btn');

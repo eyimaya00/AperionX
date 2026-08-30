@@ -1947,6 +1947,28 @@ async function ensureSchema() {
         }
         // --------------------------------------------------
 
+        // --- Ensure users table academic, interests & skills columns exist ---
+        const userCols = [
+            { name: 'university', def: "VARCHAR(255) DEFAULT NULL" },
+            { name: 'department', def: "VARCHAR(255) DEFAULT NULL" },
+            { name: 'academic_level', def: "VARCHAR(100) DEFAULT NULL" },
+            { name: 'scientific_interests', def: "TEXT DEFAULT NULL" },
+            { name: 'technical_skills', def: "TEXT DEFAULT NULL" },
+            { name: 'linkedin_url', def: "VARCHAR(255) DEFAULT NULL" },
+            { name: 'public_email', def: "VARCHAR(255) DEFAULT NULL" },
+            { name: 'show_email', def: "TINYINT(1) DEFAULT 1" }
+        ];
+        for (const col of userCols) {
+            try {
+                await pool.query(`SELECT ${col.name} FROM users LIMIT 1`);
+            } catch (err) {
+                if (err.code === 'ER_BAD_FIELD_ERROR') {
+                    console.log(`Migrating: Adding ${col.name} to users...`);
+                    await pool.query(`ALTER TABLE users ADD COLUMN ${col.name} ${col.def}`);
+                }
+            }
+        }
+
         // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /tools ---
         // --- Performance Optimization: DB Indexes ---
         try { await pool.query("CREATE INDEX idx_articles_status ON articles(status)"); } catch (e) {}
@@ -5511,7 +5533,7 @@ app.put('/api/categories/:id', authenticateToken, async (req, res) => {
 
 // === USER PROFILE UPDATE ===
 app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImageMiddleware, async (req, res) => {
-    const { fullname, email, password, bio, job_title, linkedin_url, public_email, show_email } = req.body;
+    const { fullname, email, password, bio, job_title, linkedin_url, public_email, show_email, university, department, academic_level, scientific_interests, technical_skills } = req.body;
     const userId = req.user.id;
 
     try {
@@ -5532,6 +5554,31 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
         if (job_title !== undefined) {
             query += ', job_title = ?';
             params.push(job_title);
+        }
+
+        if (university !== undefined) {
+            query += ', university = ?';
+            params.push(university);
+        }
+
+        if (department !== undefined) {
+            query += ', department = ?';
+            params.push(department);
+        }
+
+        if (academic_level !== undefined) {
+            query += ', academic_level = ?';
+            params.push(academic_level);
+        }
+
+        if (scientific_interests !== undefined) {
+            query += ', scientific_interests = ?';
+            params.push(scientific_interests);
+        }
+
+        if (technical_skills !== undefined) {
+            query += ', technical_skills = ?';
+            params.push(technical_skills);
         }
 
         if (linkedin_url !== undefined) {
@@ -5561,7 +5608,7 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
         await pool.query(query, params);
 
         // Fetch updated user to update local storage on client
-        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, linkedin_url, public_email, show_email FROM users WHERE id = ?', [userId]);
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, university, department, academic_level, scientific_interests, technical_skills, linkedin_url, public_email, show_email FROM users WHERE id = ?', [userId]);
 
         res.json({ message: 'Profil güncellendi', user: rows[0] });
     } catch (e) {
