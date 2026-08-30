@@ -24,6 +24,16 @@
         window.addEventListener('unhandledrejection', function (event) {
             console.error("Bağlantı Hatası (Promise):", event.reason);
         });
+
+        // Instant Dark Mode Initialization (Prevents flash of light theme on reload)
+        (function () {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const savedTheme = localStorage.getItem('theme');
+            if (savedDarkMode !== 'false' && savedTheme !== 'light') {
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex">
@@ -1380,19 +1390,22 @@
         .consent-submit-btn.loading .btn-text { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Global Loader (Site-wide AperionX pulsing loader) */
+        /* Global Loader (Site-wide AperionX pulsing loader - Gece Modu Uyumlu) */
         #global-loader {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #ffffff;
+            background: #0b0f19;
             z-index: 99999;
             display: flex;
             justify-content: center;
             align-items: center;
             transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        body:not(.dark-mode) #global-loader {
+            background: #0b0f19;
         }
         body.dark-mode #global-loader,
         html[data-theme="dark"] #global-loader {
@@ -6667,13 +6680,19 @@
                 }
             }, 350);
 
-            // --- Light / Dark Mode Restore ---
+            // --- Dark Mode Default / Restore (Gece Modu Varsayılan) ---
             const savedDarkMode = localStorage.getItem('darkMode');
-            if (savedDarkMode === 'true') {
+            const savedTheme = localStorage.getItem('theme');
+            const isDark = (savedDarkMode !== 'false' && savedTheme !== 'light');
+            if (isDark) {
                 document.body.classList.add('dark-mode');
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (savedDarkMode === null) localStorage.setItem('darkMode', 'true');
             } else {
                 document.body.classList.remove('dark-mode');
-                if (savedDarkMode === null) localStorage.setItem('darkMode', 'false');
+                document.documentElement.classList.remove('dark-mode');
+                document.documentElement.removeAttribute('data-theme');
             }
             updateProfileThemeUI();
 
