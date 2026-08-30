@@ -727,12 +727,11 @@
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
 
-                // Render Scientific Interests & Skills Tags
+                // Render Scientific Interests Tags
                 const tagsContainer = document.getElementById('p-academic-tags');
                 if (tagsContainer) {
                     let tagsHtml = '';
                     let interests = [];
-                    let skills = [];
 
                     if (profile.scientific_interests) {
                         try {
@@ -741,26 +740,11 @@
                             interests = profile.scientific_interests.split(',').map(s => s.trim()).filter(Boolean);
                         }
                     }
-                    if (profile.technical_skills) {
-                        try {
-                            skills = JSON.parse(profile.technical_skills);
-                        } catch(e) {
-                            skills = profile.technical_skills.split(',').map(s => s.trim()).filter(Boolean);
-                        }
-                    }
 
                     if (Array.isArray(interests) && interests.length > 0) {
                         tagsHtml += interests.map(intTag => `
                             <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
                                 <i class="ph-fill ph-dna" style="font-size: 0.9rem;"></i> ${escapeHtml(intTag)}
-                            </span>
-                        `).join('');
-                    }
-
-                    if (Array.isArray(skills) && skills.length > 0) {
-                        tagsHtml += skills.map(skTag => `
-                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
-                                <i class="ph-fill ph-atom" style="font-size: 0.9rem;"></i> ${escapeHtml(skTag)}
                             </span>
                         `).join('');
                     }

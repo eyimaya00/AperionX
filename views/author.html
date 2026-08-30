@@ -5328,28 +5328,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. TEKNİK / LABORATUVAR YETKİNLİKLERİ -->
-                    <div class="profile-card">
-                        <div class="profile-card-header">
-                            <h3 class="profile-card-title">
-                                <i class="ph-fill ph-atom" style="color: #06b6d4; font-size: 1.25rem;"></i>
-                                TEKNİK / LABORATUVAR YETKİNLİKLERİ
-                            </h3>
-                        </div>
-
-                        <div class="tag-badge-container" id="skills-tag-container">
-                            <!-- Skill badges rendered dynamically -->
-                        </div>
-
-                        <div class="tag-add-box">
-                            <input type="text" id="skill-new-input" class="tag-add-input skill-input" placeholder="Yetkinlik yazın (örn: PCR, Mikroskopi)..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addSkillTag();}">
-                            <button type="button" class="tag-add-btn skill-btn" onclick="addSkillTag()">
-                                <i class="ph-bold ph-plus"></i> Ekle
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 5. İLETİŞİM -->
+                    <!-- 4. İLETİŞİM -->
                     <div class="profile-card">
                         <div class="profile-card-header">
                             <h3 class="profile-card-title">
@@ -10433,21 +10412,6 @@
                 }
             }
 
-            // Render Skills (Cyan Science & Tech Theme)
-            const skillContainer = document.getElementById('skills-tag-container');
-            if (skillContainer) {
-                if (profileSkills.length === 0) {
-                    skillContainer.innerHTML = '<span style="color: #94a3b8; font-size: 0.86rem; font-style: italic;">Henüz teknik yetkinlik eklenmedi.</span>';
-                } else {
-                    skillContainer.innerHTML = profileSkills.map((tag, idx) => `
-                        <span class="tag-badge skill-badge">
-                            <i class="ph-fill ph-atom" style="font-size: 0.85rem; opacity: 0.85;"></i>
-                            ${escapeHtml(tag)}
-                            <span class="tag-badge-remove" onclick="removeSkillTag(${idx})" title="Kaldır">×</span>
-                        </span>
-                    `).join('');
-                }
-            }
         }
 
         function addInterestTag() {
@@ -10464,24 +10428,6 @@
         function removeInterestTag(index) {
             if (index >= 0 && index < profileInterests.length) {
                 profileInterests.splice(index, 1);
-                renderProfileTags();
-            }
-        }
-
-        function addSkillTag() {
-            const input = document.getElementById('skill-new-input');
-            if (!input) return;
-            const val = input.value.trim();
-            if (val && !profileSkills.includes(val)) {
-                profileSkills.push(val);
-                input.value = '';
-                renderProfileTags();
-            }
-        }
-
-        function removeSkillTag(index) {
-            if (index >= 0 && index < profileSkills.length) {
-                profileSkills.splice(index, 1);
                 renderProfileTags();
             }
         }
