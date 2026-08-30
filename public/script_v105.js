@@ -988,14 +988,20 @@ async function loadSettings() {
             });
         }
 
-        if (settings.site_favicon) {
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) {
-                link = document.createElement('link');
-                link.rel = 'icon';
-                document.head.appendChild(link);
+        if (settings.site_favicon && settings.site_favicon.trim() !== '') {
+            let favSrc = settings.site_favicon.trim();
+            if (!favSrc.startsWith('http://') && !favSrc.startsWith('https://') && !favSrc.startsWith('/')) {
+                favSrc = '/' + favSrc;
             }
-            link.href = settings.site_favicon;
+            let links = document.querySelectorAll("link[rel*='icon']");
+            if (links.length === 0) {
+                let link = document.createElement('link');
+                link.rel = 'icon';
+                link.href = favSrc;
+                document.head.appendChild(link);
+            } else {
+                links.forEach(l => l.href = favSrc);
+            }
         }
 
         // --- GLOBAL SEO / SOCIAL SHARE UPDATE ---
@@ -1865,11 +1871,28 @@ function checkAuthStatus() {
     }
 
     if (user && token) {
+        const safeAvatar = (() => {
+            const raw = user.avatar || user.avatar_url;
+            if (!raw || raw.trim() === '') {
+                return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || user.username || 'User')}&background=6366f1&color=fff`;
+            }
+            const trimmed = raw.trim();
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+            if (trimmed.startsWith('/')) return trimmed;
+            return '/' + trimmed;
+        })();
+
+        const defaultAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || user.username || 'User')}&background=6366f1&color=fff`;
+
+        const profileLink = user.role === 'author' 
+            ? (user.username ? `/yazar/${encodeURIComponent(user.username)}` : '/author')
+            : '/profile.html';
+
         authButtons.forEach(container => {
             if (container.classList.contains('mobile-auth')) {
                 container.innerHTML = `
                     <div class="mobile-user-profile" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                        <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #333;">
+                        <img src="${safeAvatar}" alt="User" onerror="this.src='${defaultAvatarFallback}'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
                         <div class="mobile-user-info">
                             <span class="name">${escapeHtml(user.fullname || user.username)}</span>
                             <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
@@ -1879,7 +1902,7 @@ function checkAuthStatus() {
                         ${user.role === 'admin' ? '<a href="/admin" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
                         ${user.role === 'author' || user.role === 'admin' ? '<a href="/author" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
                         ${user.role === 'editor' ? '<a href="/editor" class="btn btn-outline"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
-                        <a href="/profile.html" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profil</a>
+                        <a href="${profileLink}" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profilim</a>
                         <button onclick="window.logout()" class="btn btn-primary" style="width:100%">Çıkış Yap</button>
                     </div>
                 `;
@@ -1887,7 +1910,7 @@ function checkAuthStatus() {
                 container.innerHTML = `
                     <div class="user-dropdown" style="position:relative;">
                         <button class="user-btn" onclick="toggleUserDropdown(event)">
-                            <img src="${user.avatar || user.avatar_url || 'https://ui-avatars.com/api/?name=' + escapeHtml(user.fullname || user.username || 'U')}" alt="User" class="user-avatar-small">
+                            <img src="${safeAvatar}" alt="User" onerror="this.src='${defaultAvatarFallback}'" class="user-avatar-small" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border: 1.5px solid rgba(99, 102, 241, 0.4);">
                             <span>${escapeHtml((user.fullname || user.username || '').split(' ')[0] || 'Üye')}</span>
                             <i class="ph-bold ph-caret-down"></i>
                         </button>
@@ -1895,7 +1918,7 @@ function checkAuthStatus() {
                             ${user.role === 'admin' ? '<a href="/admin"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
                             ${(user.role === 'author' || user.role === 'admin') ? '<a href="/author"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
                             ${user.role === 'editor' ? '<a href="/editor"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
-                            <a href="/profile.html"><i class="ph-bold ph-user"></i> Profilim</a>
+                            <a href="${profileLink}"><i class="ph-bold ph-user"></i> Profilim</a>
                             <a href="#" onclick="window.logout(); return false;"><i class="ph-bold ph-sign-out"></i> Çıkış Yap</a>
                         </div>
                     </div>

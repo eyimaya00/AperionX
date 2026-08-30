@@ -171,7 +171,15 @@ app.get('/maintenance-access', async (req, res) => {
 // === SECRET ROMANTIC ROUTE (ISOLATED STATIC MOUNT) ===
 app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-1508')));
 
-// === ROOT REDIRECT ===
+// === ROOT REDIRECT & FAVICON ===
+app.get('/favicon.ico', (req, res) => {
+    const p1 = path.join(__dirname, 'uploads', 'favicon-32x32.png');
+    const p2 = path.join(__dirname, 'uploads', 'favicon.png');
+    if (fs.existsSync(p1)) return res.sendFile(p1);
+    if (fs.existsSync(p2)) return res.sendFile(p2);
+    res.status(404).end();
+});
+
 // Redirect direct /index.html access to root
 app.get('/index.html', (req, res) => {
     res.redirect(301, '/');
