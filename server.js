@@ -3294,7 +3294,7 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         const key = decodeURIComponent(req.params.identifier).trim();
         console.log('[API] Fetching author profile for:', key);
 
-        const [allUsers] = await pool.query('SELECT id, fullname, username, email, bio, job_title, avatar_url, linkedin_url, public_email, show_email, created_at FROM users');
+        const [allUsers] = await pool.query('SELECT id, fullname, username, email, bio, job_title, avatar_url, linkedin_url, public_email, show_email, university, department, academic_level, scientific_interests, technical_skills, created_at FROM users');
         const targetSlug = slugify(key);
 
         // 1. Find ALL matching user accounts for this author identifier
@@ -5537,8 +5537,18 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
     const userId = req.user.id;
 
     try {
-        let query = 'UPDATE users SET fullname = ?, email = ?';
-        let params = [fullname, email];
+        let query = 'UPDATE users SET id = id';
+        let params = [];
+
+        if (fullname !== undefined && fullname.trim() !== '') {
+            query += ', fullname = ?';
+            params.push(fullname.trim());
+        }
+
+        if (email !== undefined && email.trim() !== '') {
+            query += ', email = ?';
+            params.push(email.trim());
+        }
 
         if (password && password.trim() !== '') {
             const hashedPassword = await bcrypt.hash(password, 10);

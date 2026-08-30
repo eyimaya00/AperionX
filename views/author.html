@@ -5229,8 +5229,11 @@
                                 <input type="text" id="profile-name" class="form-control" placeholder="Adınız ve Soyadınız" required>
                             </div>
                             <div class="form-group full-width">
-                                <label style="font-weight: 600;">Kısa Biyografi</label>
-                                <textarea id="profile-bio" class="form-control" rows="3" placeholder="Okurlarınıza kendinizden, bilimsel meraklarınızdan ve uzmanlıklarınızdan bahsedin..."></textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="font-weight: 600; margin: 0;">Kısa Biyografi</label>
+                                    <span id="bio-char-count" style="font-size: 0.8rem; color: #94a3b8;">0 / 500 karakter (Önerilen)</span>
+                                </div>
+                                <textarea id="profile-bio" class="form-control" rows="3" maxlength="1000" oninput="updateBioCounter()" placeholder="Okurlarınıza kendinizden, bilimsel meraklarınızdan ve uzmanlıklarınızdan bahsedin..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -10490,6 +10493,9 @@
                 combinedJob = parts.join(' / ');
             }
 
+            const accountEmail = (document.getElementById('profile-account-email') ? document.getElementById('profile-account-email').value.trim() : '') || (user ? user.email : '');
+            if (accountEmail) formData.append('email', accountEmail);
+
             formData.append('fullname', fullname);
             formData.append('bio', bio);
             formData.append('university', university);
@@ -10527,6 +10533,20 @@
                 }
             } catch (e) {
                 showAuthorToast('Hata oluştu: ' + e.message, 'error');
+            }
+        }
+
+        function updateBioCounter() {
+            const bio = document.getElementById('profile-bio');
+            const countEl = document.getElementById('bio-char-count');
+            if (bio && countEl) {
+                const len = bio.value.length;
+                countEl.textContent = `${len} / 500 karakter (Önerilen)`;
+                if (len > 500) {
+                    countEl.style.color = '#f59e0b';
+                } else {
+                    countEl.style.color = '#94a3b8';
+                }
             }
         }
 
@@ -10663,6 +10683,7 @@
             }
 
             renderProfileTags();
+            updateBioCounter();
 
             // Public profile link
             const profileBtn = document.getElementById('view-public-profile-btn');

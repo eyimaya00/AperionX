@@ -458,6 +458,7 @@
                             style="text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; margin-top: 8px; opacity: 0.9; line-height: 1.5; max-width: 600px; margin-left: auto; margin-right: auto; font-weight: 500;">
                         </div>
                         <p class="profile-bio" id="p-bio"></p>
+                        <div id="p-academic-tags" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap;"></div>
                         <div id="profile-social-links" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap;"></div>
                     </div>
                 </div>
@@ -720,6 +721,48 @@
                 }
 
                 document.getElementById('p-bio').innerHTML = (profile.bio || '').replace(/\n/g, '<br>');
+
+                // Render Scientific Interests & Skills Tags
+                const tagsContainer = document.getElementById('p-academic-tags');
+                if (tagsContainer) {
+                    let tagsHtml = '';
+                    let interests = [];
+                    let skills = [];
+
+                    if (profile.scientific_interests) {
+                        try {
+                            interests = JSON.parse(profile.scientific_interests);
+                        } catch(e) {
+                            interests = profile.scientific_interests.split(',').map(s => s.trim()).filter(Boolean);
+                        }
+                    }
+                    if (profile.technical_skills) {
+                        try {
+                            skills = JSON.parse(profile.technical_skills);
+                        } catch(e) {
+                            skills = profile.technical_skills.split(',').map(s => s.trim()).filter(Boolean);
+                        }
+                    }
+
+                    if (Array.isArray(interests) && interests.length > 0) {
+                        tagsHtml += interests.map(intTag => `
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
+                                <i class="ph-fill ph-dna" style="font-size: 0.9rem;"></i> ${escapeHtml(intTag)}
+                            </span>
+                        `).join('');
+                    }
+
+                    if (Array.isArray(skills) && skills.length > 0) {
+                        tagsHtml += skills.map(skTag => `
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
+                                <i class="ph-fill ph-wrench" style="font-size: 0.9rem;"></i> ${escapeHtml(skTag)}
+                            </span>
+                        `).join('');
+                    }
+
+                    tagsContainer.innerHTML = tagsHtml;
+                    tagsContainer.style.display = tagsHtml ? 'flex' : 'none';
+                }
 
                 // Render Social & Contact Icon Buttons (Circular style matching screenshot)
                 const socialContainer = document.getElementById('profile-social-links');
