@@ -5587,6 +5587,7 @@
                         <tr>
                             <th>Başlık</th>
                             <th>Durum</th>
+                            <th>Tarih</th>
                             <th style="text-align: center;"><i class="ph ph-eye"></i> Okunma</th>
                             <th style="text-align: center;"><i class="ph ph-heart"></i> Beğeni</th>
                             <th style="text-align: center;"><i class="ph ph-chat-circle-text"></i> Yorum</th>
@@ -5595,7 +5596,7 @@
                     </thead>
                     <tbody id="bg-table-body">
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="bg-empty-state">
                                     <i class="ph ph-microscope"></i>
                                     <p>Henüz bilim gündemi içeriği oluşturulmamış.</p>
@@ -5701,6 +5702,47 @@
                     opacity: 0.6;
                     cursor: not-allowed;
                     transform: none;
+                }
+                .bge-btn-preview {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    padding: 11px 20px;
+                    border-radius: 12px;
+                    border: 1.5px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: #64748b;
+                    font-weight: 600;
+                    font-size: 0.92rem;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .bge-btn-preview:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.05);
+                    transform: translateY(-2px);
+                }
+                .bge-btn-publish {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    padding: 11px 22px;
+                    border-radius: 12px;
+                    border: none;
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: white;
+                    font-weight: 600;
+                    font-size: 0.92rem;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    font-family: 'Outfit', sans-serif;
+                    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+                }
+                .bge-btn-publish:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
                 }
 
                 /* Section Card */
@@ -6301,6 +6343,16 @@
                     color: #818cf8;
                     background: rgba(99, 102, 241, 0.08);
                 }
+                body.dark-mode .bge-btn-preview {
+                    background: #1e293b;
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-btn-preview:hover {
+                    border-color: #818cf8;
+                    color: #818cf8;
+                    background: rgba(99, 102, 241, 0.1);
+                }
                 body.dark-mode .bge-label { color: #e2e8f0; }
                 body.dark-mode .bge-input,
                 body.dark-mode .bge-textarea,
@@ -6453,14 +6505,20 @@
                         <button class="bge-back-btn" onclick="backToBilimGundemi()">
                             <i class="ph-bold ph-arrow-left"></i> Geri Dön
                         </button>
-                        <h1 class="bge-page-title">
+                        <h1 class="bge-page-title" id="bge-page-title">
                             <i class="ph-fill ph-newspaper"></i>
                             Yeni Bilim Gündemi
                         </h1>
                     </div>
                     <div class="bge-topbar-right">
+                        <button class="bge-btn-preview" onclick="bgePreviewComingSoon()" title="Önizle">
+                            <i class="ph-bold ph-eye"></i> Önizle
+                        </button>
                         <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
                             <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
+                        </button>
+                        <button class="bge-btn-publish" onclick="bgeSubmitComingSoon()" title="Editöre Gönder">
+                            <i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder
                         </button>
                     </div>
                 </div>
@@ -6494,7 +6552,7 @@
                     <!-- Kategori -->
                     <div class="bge-form-group">
                         <label class="bge-label">Kategori</label>
-                        <select class="bge-select" id="bge-category">
+                        <select class="bge-select" id="bge-category" onchange="bgeToggleCustomCategory(this.value)">
                             <option value="">Kategori Seçin</option>
                             <option value="Genetik">Genetik</option>
                             <option value="Biyoloji">Biyoloji</option>
@@ -6505,8 +6563,11 @@
                             <option value="Çevre ve İklim">Çevre & İklim</option>
                             <option value="Tıp ve Sağlık">Tıp & Sağlık</option>
                             <option value="Bilim ve Teknoloji">Bilim & Teknoloji</option>
-                            <option value="Diğer">Diğer</option>
+                            <option value="Diğer">Diğer (Manuel Ekle)</option>
                         </select>
+                        <div id="bge-custom-category-wrap" style="display: none; margin-top: 10px;">
+                            <input type="text" class="bge-input" id="bge-custom-category" placeholder="Kategori adını manuel olarak yazın...">
+                        </div>
                     </div>
 
                     <!-- Etiketler -->
@@ -6614,12 +6675,18 @@
                 </div>
 
                 <!-- Bottom Actions (Sticky) -->
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px;">
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px; flex-wrap: wrap;">
                     <button class="bge-back-btn" onclick="backToBilimGundemi()">
                         <i class="ph-bold ph-arrow-left"></i> Geri Dön
                     </button>
+                    <button class="bge-btn-preview" onclick="bgePreviewComingSoon()" title="Önizle">
+                        <i class="ph-bold ph-eye"></i> Önizle
+                    </button>
                     <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
                         <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
+                    </button>
+                    <button class="bge-btn-publish" onclick="bgeSubmitComingSoon()" title="Editöre Gönder">
+                        <i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder
                     </button>
                 </div>
             </div>
@@ -12520,7 +12587,7 @@
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="6">
+                    <tr><td colspan="7">
                         <div class="bg-empty-state">
                             <i class="ph ph-microscope"></i>
                             <p>${bilimGundemFilter === 'all' ? 'Henüz bilim gündemi içeriği oluşturulmamış.' : 'Bu kategoride içerik bulunamadı.'}</p>
@@ -12541,17 +12608,26 @@
 
             tbody.innerHTML = filtered.map(item => {
                 const st = statusMap[item.status] || statusMap['taslak'];
+                const formattedDate = item.createdAt 
+                    ? new Date(item.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : '-';
                 return `
                     <tr>
                         <td class="bg-title-cell" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</td>
                         <td><span class="bg-status-badge ${item.status}"><i class="ph ${st.icon}"></i> ${st.label}</span></td>
+                        <td style="color: #64748b; font-size: 0.88rem; white-space: nowrap;">${formattedDate}</td>
                         <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-eye"></i> ${(item.views || 0).toLocaleString('tr-TR')}</span></td>
                         <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-heart"></i> ${(item.likes || 0).toLocaleString('tr-TR')}</span></td>
                         <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-chat-circle-text"></i> ${(item.comments || 0).toLocaleString('tr-TR')}</span></td>
                         <td style="text-align: center;">
-                            <button class="bg-action-dots" onclick="deleteBilimGundem('${item.id}')" title="Sil">
-                                <i class="ph ph-trash"></i>
-                            </button>
+                            <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
+                                <button class="bg-action-dots" onclick="editBilimGundem('${item.id}')" title="Düzenle">
+                                    <i class="ph ph-pencil-simple"></i>
+                                </button>
+                                <button class="bg-action-dots" onclick="deleteBilimGundem('${item.id}')" title="Sil">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>`;
             }).join('');
@@ -12628,14 +12704,7 @@
         function continueBilimGundem() {
             const btn = document.getElementById('bg-btn-continue');
             if (btn && btn.dataset.id) {
-                const item = bilimGundemData.find(i => i.id === btn.dataset.id);
-                if (item) {
-                    document.getElementById('bg-form-title').value = item.title || '';
-                    document.getElementById('bg-form-category').value = item.category || '';
-                    document.getElementById('bg-form-summary').value = item.summary || '';
-                    document.getElementById('bg-form-source').value = item.source || '';
-                    document.getElementById('bg-modal-overlay').classList.add('show');
-                }
+                editBilimGundem(btn.dataset.id);
             }
         }
 
@@ -12644,6 +12713,7 @@
            =================================================================== */
         
         // Editor State
+        let editingBilimGundemId = null;
         let bgeTags = [];
         let bgeSections = [];
         let bgeSources = [];
@@ -12652,7 +12722,38 @@
         let bgeSectionIdCounter = 0;
         let bgeSourceIdCounter = 0;
 
-        function openBilimGundemEditor() {
+        function bgeToggleCustomCategory(val) {
+            const wrap = document.getElementById('bge-custom-category-wrap');
+            if (!wrap) return;
+            if (val === 'Diğer') {
+                wrap.style.display = 'block';
+                document.getElementById('bge-custom-category')?.focus();
+            } else {
+                wrap.style.display = 'none';
+                const customInput = document.getElementById('bge-custom-category');
+                if (customInput) customInput.value = '';
+            }
+        }
+
+        function bgePreviewComingSoon() {
+            if (typeof showAuthorToast === 'function') {
+                showAuthorToast('Önizleme özelliği yakında aktif edilecektir.', 'info');
+            } else {
+                alert('Önizleme özelliği yakında aktif edilecektir.');
+            }
+        }
+
+        function bgeSubmitComingSoon() {
+            if (typeof showAuthorToast === 'function') {
+                showAuthorToast('Editöre gönderme özelliği yakında aktif edilecektir.', 'info');
+            } else {
+                alert('Editöre gönderme özelliği yakında aktif edilecektir.');
+            }
+        }
+
+        function openBilimGundemEditor(editId = null) {
+            editingBilimGundemId = editId;
+
             // Reset editor state
             bgeTags = [];
             bgeSections = [];
@@ -12662,23 +12763,97 @@
             bgeSectionIdCounter = 0;
             bgeSourceIdCounter = 0;
 
-            // Clear form fields
             const el = id => document.getElementById(id);
-            if (el('bge-title')) el('bge-title').value = '';
-            if (el('bge-description')) el('bge-description').value = '';
-            if (el('bge-category')) el('bge-category').value = '';
-            if (el('bge-summary')) el('bge-summary').value = '';
-            if (el('bge-alt-text')) el('bge-alt-text').value = '';
-
-            // Reset counters
-            bgeUpdateCharCount('bge-title', 'bge-title-count', 50, 80);
-            bgeUpdateCharCount('bge-description', 'bge-desc-count', 120, 160);
-            bgeUpdateCharCount('bge-summary', 'bge-summary-count', 120, 160);
+            const titleEl = el('bge-page-title');
 
             // Reset image zone
             bgeRemoveImage();
 
-            // Render empty lists
+            const customWrap = el('bge-custom-category-wrap');
+            if (customWrap) customWrap.style.display = 'none';
+            if (el('bge-custom-category')) el('bge-custom-category').value = '';
+
+            if (editId) {
+                const item = (bilimGundemData || []).find(i => i.id === editId);
+                if (item) {
+                    if (titleEl) titleEl.innerHTML = '<i class="ph-fill ph-pencil-simple"></i> Bilim Gündemini Düzenle';
+                    if (el('bge-title')) el('bge-title').value = item.title || '';
+                    if (el('bge-description')) el('bge-description').value = item.description || item.summary || '';
+                    
+                    // Category check
+                    const predefined = ['Genetik', 'Biyoloji', 'Fizik', 'Kimya', 'Astronomi ve Uzay Bilimleri', 'Nörobilim', 'Çevre ve İklim', 'Tıp ve Sağlık', 'Bilim ve Teknoloji'];
+                    if (item.category && predefined.includes(item.category)) {
+                        if (el('bge-category')) el('bge-category').value = item.category;
+                    } else if (item.category) {
+                        if (el('bge-category')) el('bge-category').value = 'Diğer';
+                        if (customWrap) customWrap.style.display = 'block';
+                        if (el('bge-custom-category')) el('bge-custom-category').value = item.category;
+                    } else {
+                        if (el('bge-category')) el('bge-category').value = '';
+                    }
+
+                    if (el('bge-summary')) el('bge-summary').value = item.summary || '';
+                    if (el('bge-alt-text')) el('bge-alt-text').value = item.altText || '';
+
+                    // Image restoration
+                    if (item.imageDataUrl) {
+                        bgeImageDataUrl = item.imageDataUrl;
+                        const zone = el('bge-upload-zone');
+                        const placeholder = el('bge-upload-placeholder');
+                        const previewWrap = el('bge-upload-preview-wrap');
+                        const previewImg = el('bge-upload-preview');
+
+                        if (zone) zone.classList.add('has-image');
+                        if (placeholder) placeholder.style.display = 'none';
+                        if (previewWrap) previewWrap.style.display = 'block';
+                        if (previewImg) previewImg.src = item.imageDataUrl;
+                    }
+
+                    // Tags
+                    if (Array.isArray(item.tags)) {
+                        bgeTags = [...item.tags];
+                    } else if (typeof item.tags === 'string' && item.tags.trim()) {
+                        bgeTags = item.tags.split(',').map(t => t.trim()).filter(Boolean);
+                    }
+
+                    // Sections
+                    if (Array.isArray(item.sections)) {
+                        bgeSections = item.sections.map((s) => ({
+                            id: 'sec_' + (++bgeSectionIdCounter),
+                            title: s.title || '',
+                            content: s.content || ''
+                        }));
+                    }
+
+                    // Sources
+                    if (Array.isArray(item.sources)) {
+                        bgeSources = item.sources.map((s) => ({
+                            id: 'src_' + (++bgeSourceIdCounter),
+                            type: s.type || 'bilimsel_makale',
+                            url: s.url || '',
+                            articleTitle: s.articleTitle || '',
+                            authors: s.authors || '',
+                            journal: s.journal || '',
+                            pubDate: s.pubDate || '',
+                            doi: s.doi || ''
+                        }));
+                    }
+                }
+            } else {
+                if (titleEl) titleEl.innerHTML = '<i class="ph-fill ph-newspaper"></i> Yeni Bilim Gündemi';
+                if (el('bge-title')) el('bge-title').value = '';
+                if (el('bge-description')) el('bge-description').value = '';
+                if (el('bge-category')) el('bge-category').value = '';
+                if (el('bge-summary')) el('bge-summary').value = '';
+                if (el('bge-alt-text')) el('bge-alt-text').value = '';
+            }
+
+            // Update counters
+            bgeUpdateCharCount('bge-title', 'bge-title-count', 50, 80);
+            bgeUpdateCharCount('bge-description', 'bge-desc-count', 120, 160);
+            bgeUpdateCharCount('bge-summary', 'bge-summary-count', 120, 160);
+
+            // Render lists
             bgeRenderTags();
             bgeRenderSections();
             bgeRenderSources();
@@ -12687,6 +12862,10 @@
             // Navigate to editor section
             showSection('bilim-gundemi-editor', document.querySelector('#nav-bilim-gundemi'));
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function editBilimGundem(id) {
+            openBilimGundemEditor(id);
         }
 
         function backToBilimGundemi() {
@@ -13047,7 +13226,11 @@
         function saveBilimGundemFromEditor() {
             const title = (document.getElementById('bge-title')?.value || '').trim();
             const description = (document.getElementById('bge-description')?.value || '').trim();
-            const category = document.getElementById('bge-category')?.value || '';
+            let category = document.getElementById('bge-category')?.value || '';
+            if (category === 'Diğer') {
+                const custom = (document.getElementById('bge-custom-category')?.value || '').trim();
+                if (custom) category = custom;
+            }
             const summary = (document.getElementById('bge-summary')?.value || '').trim();
             const altText = (document.getElementById('bge-alt-text')?.value || '').trim();
 
@@ -13062,37 +13245,68 @@
             bgeSaveSectionValues();
             bgeSaveSourceValues();
 
-            const newItem = {
-                id: 'bg_' + Date.now(),
-                title: title,
-                description: description,
-                category: category,
-                tags: [...bgeTags],
-                summary: summary,
-                altText: altText,
-                imageDataUrl: bgeImageDataUrl || null,
-                sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
-                sources: bgeSources.map(s => ({
-                    type: s.type,
-                    url: s.url,
-                    articleTitle: s.articleTitle || '',
-                    authors: s.authors || '',
-                    journal: s.journal || '',
-                    pubDate: s.pubDate || '',
-                    doi: s.doi || ''
-                })),
-                status: 'taslak',
-                views: 0,
-                likes: 0,
-                comments: 0,
-                createdAt: new Date().toISOString()
-            };
+            if (editingBilimGundemId) {
+                const idx = (bilimGundemData || []).findIndex(i => i.id === editingBilimGundemId);
+                if (idx !== -1) {
+                    bilimGundemData[idx] = {
+                        ...bilimGundemData[idx],
+                        title: title,
+                        description: description,
+                        category: category,
+                        tags: [...bgeTags],
+                        summary: summary,
+                        altText: altText,
+                        imageDataUrl: bgeImageDataUrl || null,
+                        sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
+                        sources: bgeSources.map(s => ({
+                            type: s.type,
+                            url: s.url,
+                            articleTitle: s.articleTitle || '',
+                            authors: s.authors || '',
+                            journal: s.journal || '',
+                            pubDate: s.pubDate || '',
+                            doi: s.doi || ''
+                        })),
+                        updatedAt: new Date().toISOString()
+                    };
+                    saveBilimGundemStorage(bilimGundemData);
+                    if (typeof showAuthorToast === 'function') {
+                        showAuthorToast('Bilim gündemi yazısı güncellendi!', 'success');
+                    }
+                }
+            } else {
+                const newItem = {
+                    id: 'bg_' + Date.now(),
+                    title: title,
+                    description: description,
+                    category: category,
+                    tags: [...bgeTags],
+                    summary: summary,
+                    altText: altText,
+                    imageDataUrl: bgeImageDataUrl || null,
+                    sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
+                    sources: bgeSources.map(s => ({
+                        type: s.type,
+                        url: s.url,
+                        articleTitle: s.articleTitle || '',
+                        authors: s.authors || '',
+                        journal: s.journal || '',
+                        pubDate: s.pubDate || '',
+                        doi: s.doi || ''
+                    })),
+                    status: 'taslak',
+                    views: 0,
+                    likes: 0,
+                    comments: 0,
+                    createdAt: new Date().toISOString()
+                };
 
-            bilimGundemData.push(newItem);
-            saveBilimGundemStorage(bilimGundemData);
+                bilimGundemData.push(newItem);
+                saveBilimGundemStorage(bilimGundemData);
 
-            if (typeof showAuthorToast === 'function') {
-                showAuthorToast('Bilim gündemi taslağı başarıyla kaydedildi!', 'success');
+                if (typeof showAuthorToast === 'function') {
+                    showAuthorToast('Bilim gündemi taslağı başarıyla kaydedildi!', 'success');
+                }
             }
 
             // Navigate back to bilim gundemi list
