@@ -96,82 +96,394 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        .gundem-hero-section {
+        /* === BİLİM GÜNDEMİ HERO & SLIDER STYLES === */
+        .gundem-hero-slider {
             position: relative;
-            padding: 140px 0 60px 0;
-            background: radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.15), transparent 70%), var(--bg-color);
-            text-align: center;
-        }
-
-        .gundem-hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 18px;
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-color, #6366f1);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .gundem-hero-title {
-            font-size: clamp(2.2rem, 5vw, 3.4rem);
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 16px;
-            color: var(--text-color);
-        }
-
-        .gundem-hero-description {
-            font-size: 1.15rem;
-            max-width: 680px;
-            margin: 0 auto 30px auto;
-            color: var(--text-secondary, #94a3b8);
-            line-height: 1.7;
-        }
-
-        .gundem-content-area {
-            min-height: 400px;
-            padding: 40px 0 100px 0;
-            background: var(--bg-color);
-        }
-
-        .gundem-placeholder-card {
-            background: var(--card-bg, #ffffff);
-            border: 1px dashed rgba(99, 102, 241, 0.3);
-            border-radius: 20px;
-            padding: 60px 24px;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-        }
-
-        [data-theme="dark"] .gundem-placeholder-card {
-            background: #151828;
-            border-color: rgba(99, 102, 241, 0.25);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .gundem-icon-box {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 24px auto;
-            border-radius: 24px;
-            background: rgba(99, 102, 241, 0.12);
-            color: #6366f1;
+            min-height: 82vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            overflow: hidden;
+            background: #090b10;
+            padding-top: 90px;
+            padding-bottom: 50px;
+        }
+
+        /* %40 Şeffaf Blur Arka Plan Katmanı */
+        .gundem-bg-layer {
+            position: absolute;
+            inset: -40px;
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.40; /* Kullanıcı isteği: %40 şeffaflık */
+            filter: blur(28px);
+            transform: scale(1.1);
+            transition: background-image 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        /* Arka Plan Koyu Degradeler (Metin okunurluğu ve derinlik için) */
+        .gundem-dark-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: radial-gradient(circle at 65% 50%, rgba(9, 11, 16, 0.4) 0%, rgba(9, 11, 16, 0.88) 80%),
+                        linear-gradient(to top, #090b10 0%, transparent 60%),
+                        linear-gradient(to bottom, rgba(9, 11, 16, 0.8) 0%, transparent 30%);
+            pointer-events: none;
+        }
+
+        /* Slider Ana Konteyner */
+        .gundem-slider-wrapper {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .gundem-slide-content {
+            display: grid;
+            grid-template-columns: 1.15fr 0.95fr;
+            gap: 50px;
+            align-items: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .gundem-slide-content.fade-out {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .gundem-slide-content.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Sol Taraf: Metinler */
+        .gundem-text-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .gundem-tag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            color: #ffffff;
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding: 7px 18px;
+            border-radius: 999px;
+            margin-bottom: 22px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35);
+        }
+
+        .gundem-main-title {
+            font-size: clamp(2rem, 3.4vw, 3.1rem);
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.22;
+            letter-spacing: -0.8px;
+            margin: 0 0 16px 0;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .gundem-sub-category {
+            font-size: 1.22rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.92);
+            margin: 0 0 14px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gundem-sub-category::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            background: #e11d48;
+            border-radius: 2px;
+        }
+
+        .gundem-description-text {
+            font-size: 1.08rem;
+            line-height: 1.72;
+            color: rgba(255, 255, 255, 0.78);
+            max-width: 580px;
+            margin: 0 0 28px 0;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+        }
+
+        .gundem-action-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .gundem-primary-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+            transition: all 0.25s ease;
+        }
+
+        .gundem-primary-btn:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.25);
+            color: #000000;
+        }
+
+        /* Sağ Taraf: Net Ana Görsel Kartı */
+        .gundem-image-col {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gundem-image-card {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            aspect-ratio: 16 / 10.5;
+            border-radius: 22px;
+            overflow: hidden;
+            background: #111420;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s ease;
+        }
+
+        .gundem-image-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 30px 75px rgba(0, 0, 0, 0.75), 0 0 25px rgba(99, 102, 241, 0.25);
+        }
+
+        .gundem-image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .gundem-image-card:hover img {
+            transform: scale(1.03);
+        }
+
+        /* Slider Ok Butonları (Sol & Sağ) */
+        .gundem-arrow-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .gundem-arrow-btn:hover {
+            background: rgba(225, 29, 72, 0.85);
+            border-color: #e11d48;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+        }
+
+        .gundem-arrow-btn.prev-btn {
+            left: 20px;
+        }
+
+        .gundem-arrow-btn.next-btn {
+            right: 20px;
+        }
+
+        /* Slider Noktaları (Indicators) */
+        .gundem-dots-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 36px;
+            position: relative;
+            z-index: 4;
+        }
+
+        .gundem-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gundem-dot.active {
+            width: 32px;
+            background: #e11d48;
+            box-shadow: 0 0 12px rgba(225, 29, 72, 0.6);
+        }
+
+        /* Alt Alan / Diğer Gelişmeler Başlığı */
+        .gundem-feed-section {
+            padding: 80px 0 120px 0;
+            background: var(--bg-color, #0b0f19);
+        }
+
+        .gundem-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 20px;
+        }
+
+        .gundem-section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-color, #ffffff);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gundem-section-title i {
+            color: #e11d48;
+        }
+
+        .gundem-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        .gundem-card {
+            background: var(--card-bg, #141926);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+        }
+
+        .gundem-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(225, 29, 72, 0.4);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+        }
+
+        .gundem-card-img-wrap {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .gundem-card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .gundem-card:hover .gundem-card-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .gundem-card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .gundem-card-tag {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #e11d48;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .gundem-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color, #ffffff);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .gundem-card-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary, #94a3b8);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .gundem-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary, #64748b);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 14px;
+        }
+
+        /* Responsive Kuralları */
+        @media (max-width: 992px) {
+            .gundem-hero-slider {
+                min-height: auto;
+                padding-top: 110px;
+                padding-bottom: 40px;
+            }
+            .gundem-slide-content {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+            .gundem-image-col {
+                order: -1;
+            }
+            .gundem-arrow-btn {
+                display: none; /* Mobilde gizle veya dokunmatik kaydırma */
+            }
         }
     </style>
 </head>
@@ -232,35 +544,123 @@
         </div>
     </header>
 
-    <!-- Bilim Gündemi Hero Header -->
-    <section class="gundem-hero-section">
-        <div class="container">
-            <span class="gundem-hero-badge">
-                <i class="ph-fill ph-newspaper-clipping"></i> Güncel Gelişmeler & Keşifler
-            </span>
-            <h1 class="gundem-hero-title">Bilim <span class="text-gradient">Gündemi</span></h1>
-            <p class="gundem-hero-description">
-                Bilim, uzay ve teknoloji dünyasında yaşanan en son gelişmeler, haftalık analizler ve öne çıkan başlıklar.
-            </p>
+    <!-- === BİLİM GÜNDEMİ HERO MANŞET BÖLÜMÜ === -->
+    <section class="gundem-hero-slider" id="gundemHero">
+        <!-- Arka Plan Katmanı (%40 şeffaf ve bulanık görsel) -->
+        <div class="gundem-bg-layer" id="gundemBgLayer"></div>
+        <div class="gundem-dark-overlay"></div>
+
+        <!-- Slider Okları -->
+        <button class="gundem-arrow-btn prev-btn" id="gundemPrevBtn" aria-label="Önceki Haber">
+            <i class="ph-bold ph-caret-left"></i>
+        </button>
+        <button class="gundem-arrow-btn next-btn" id="gundemNextBtn" aria-label="Sonraki Haber">
+            <i class="ph-bold ph-caret-right"></i>
+        </button>
+
+        <!-- Slider İçerik Alanı -->
+        <div class="gundem-slider-wrapper">
+            <div class="gundem-slide-content" id="gundemSlideContent">
+                <!-- Sol Kolon: Metinler -->
+                <div class="gundem-text-col">
+                    <span class="gundem-tag-badge" id="gundemBadge">
+                        <i class="ph-fill ph-newspaper"></i> <span id="gundemBadgeText">Gündem</span>
+                    </span>
+                    <h1 class="gundem-main-title" id="gundemTitle">
+                        James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti
+                    </h1>
+                    <h2 class="gundem-sub-category" id="gundemSubtitle">
+                        Uzay ve Astrofizik
+                    </h2>
+                    <p class="gundem-description-text" id="gundemDesc">
+                        Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.
+                    </p>
+                    <div class="gundem-action-row">
+                        <a href="javascript:void(0)" class="gundem-primary-btn" id="gundemActionBtn">
+                            <span>Detayları İncele</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sağ Kolon: Net Ana Görsel -->
+                <div class="gundem-image-col">
+                    <div class="gundem-image-card">
+                        <img id="gundemMainImg" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" alt="Bilim Gündemi Ana Görsel">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slider Noktaları (Indicators) -->
+            <div class="gundem-dots-wrapper" id="gundemDotsWrapper"></div>
         </div>
     </section>
 
-    <!-- Bilim Gündemi Content Area (İleride tasarlanacak içerik alanı) -->
-    <main class="gundem-content-area">
+    <!-- === DİĞER GÜNDEM GELİŞMELERİ GRID BÖLÜMÜ === -->
+    <section class="gundem-feed-section">
         <div class="container">
-            <div class="gundem-placeholder-card">
-                <div class="gundem-icon-box">
-                    <i class="ph-duotone ph-broadcast"></i>
+            <div class="gundem-section-header">
+                <div>
+                    <h2 class="gundem-section-title">
+                        <i class="ph-fill ph-sparkle"></i> Öne Çıkan Bilim Başlıkları
+                    </h2>
+                    <p style="color: var(--text-secondary, #94a3b8); margin-top: 6px; font-size: 0.98rem;">
+                        Dünya genelindeki araştırma merkezlerinden en son haberler ve duyurular
+                    </p>
                 </div>
-                <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; color: var(--text-color);">
-                    Bilim Gündemi Hazırlanıyor
-                </h2>
-                <p style="color: var(--text-secondary, #94a3b8); font-size: 1.05rem; max-width: 540px; margin: 0 auto 24px auto; line-height: 1.6;">
-                    Bu sayfanın tasarımı ve içerik modülleri yakında burada yer alacak. En güncel bilimsel gelişmeleri bu bölümden takip edebileceksiniz.
-                </p>
+            </div>
+
+            <div class="gundem-cards-grid" id="gundemGridContainer">
+                <!-- Haber Kartı 1 -->
+                <article class="gundem-card">
+                    <div class="gundem-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Kuantum Hesaplama">
+                    </div>
+                    <div class="gundem-card-body">
+                        <span class="gundem-card-tag">Kuantum Teknolojileri</span>
+                        <h3 class="gundem-card-title">1000 Kubitlik Yeni Kuantum Çipi Laboratuvar Testlerini Geçti</h3>
+                        <p class="gundem-card-desc">Oda sıcaklığına yakın koşullarda çalışabilen yeni mimari, süperiletken kuantum bilgisayarlar için dönüm noktası oldu.</p>
+                        <div class="gundem-card-footer">
+                            <span><i class="ph ph-calendar"></i> Bugün</span>
+                            <span><i class="ph ph-clock"></i> 4 dk okuma</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Haber Kartı 2 -->
+                <article class="gundem-card">
+                    <div class="gundem-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=800&auto=format&fit=crop" alt="CRISPR Gen Tedavisi">
+                    </div>
+                    <div class="gundem-card-body">
+                        <span class="gundem-card-tag">Genetik & Biyoteknoloji</span>
+                        <h3 class="gundem-card-title">CRISPR 3.0 ile Hedefe Yönelik Gen Susturma Başarısı</h3>
+                        <p class="gundem-card-desc">DNA dizilimini kesmeden epigenetik modifikasyon sağlayan yeni teknik, kalıtsal hastalıkların tedavisinde yeni bir çığır açıyor.</p>
+                        <div class="gundem-card-footer">
+                            <span><i class="ph ph-calendar"></i> Dün</span>
+                            <span><i class="ph ph-clock"></i> 3 dk okuma</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Haber Kartı 3 -->
+                <article class="gundem-card">
+                    <div class="gundem-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?q=80&w=800&auto=format&fit=crop" alt="Nükleer Füzyon Enerjisi">
+                    </div>
+                    <div class="gundem-card-body">
+                        <span class="gundem-card-tag">Temiz Enerji & Fizik</span>
+                        <h3 class="gundem-card-title">Nükleer Füzyonda Net Enerji Kazancı Rekoru Kırıldı</h3>
+                        <p class="gundem-card-desc">Manyetik hapsetme reaktöründe plazma sıcaklığı 100 milyon dereceye ulaştırılarak rekor süre boyunca kararlı tutuldu.</p>
+                        <div class="gundem-card-footer">
+                            <span><i class="ph ph-calendar"></i> 2 Gün Önce</span>
+                            <span><i class="ph ph-clock"></i> 5 dk okuma</span>
+                        </div>
+                    </div>
+                </article>
             </div>
         </div>
-    </main>
+    </section>
 
     <!-- Global Footer -->
     <div id="global-footer"></div>
@@ -411,6 +811,145 @@
     </div>
 
     <script defer src="/script_v105.js?v=226"></script>
+
+    <!-- Bilim Gündemi Slider JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Yazar panelinden veya API'den gelecek örnek veriler (Fallback / Demo)
+            const gundemSlides = [
+                {
+                    badge: 'Gündem',
+                    title: "James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti",
+                    subtitle: "Uzay ve Astrofizik",
+                    desc: "Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.",
+                    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+                    link: "#"
+                },
+                {
+                    badge: 'Gündem',
+                    title: "Kuantum Süper Bilgisayarları Klasik Şifreleme Sistemlerini Geride Bırakıyor",
+                    subtitle: "Yapay Zeka ve Kuantum",
+                    desc: "Yeni nesil 1000 kubitlik kuantum işlemciler, geleneksel süper bilgisayarların 10.000 yılda tamamlayabileceği karmaşık moleküler simülasyonları saniyeler içinde hesapladı.",
+                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
+                    link: "#"
+                },
+                {
+                    badge: 'Gündem',
+                    title: "CRISPR 3.0 ile Kalıtsal Hastalıklara Yönelik İlk Klinik Başarı",
+                    subtitle: "Genetik ve Biyoteknoloji",
+                    desc: "DNA dizilimini kesmeden epigenetik modifikasyon sağlayan yeni nesil gen cerrahisi tekniği, ilk insanlı faz-1 klinik deneylerinde tam hedefe ulaşarak yüzde 98 başarı sağladı.",
+                    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
+                    link: "#"
+                }
+            ];
+
+            let currentIndex = 0;
+            let slideInterval = null;
+
+            const bgLayer = document.getElementById('gundemBgLayer');
+            const slideContent = document.getElementById('gundemSlideContent');
+            const badgeText = document.getElementById('gundemBadgeText');
+            const titleEl = document.getElementById('gundemTitle');
+            const subtitleEl = document.getElementById('gundemSubtitle');
+            const descEl = document.getElementById('gundemDesc');
+            const mainImg = document.getElementById('gundemMainImg');
+            const actionBtn = document.getElementById('gundemActionBtn');
+            const dotsWrapper = document.getElementById('gundemDotsWrapper');
+            const prevBtn = document.getElementById('gundemPrevBtn');
+            const nextBtn = document.getElementById('gundemNextBtn');
+
+            // İndikatör noktalarını oluştur
+            function renderDots() {
+                if (!dotsWrapper) return;
+                dotsWrapper.innerHTML = '';
+                gundemSlides.forEach((_, idx) => {
+                    const dot = document.createElement('div');
+                    dot.className = `gundem-dot ${idx === currentIndex ? 'active' : ''}`;
+                    dot.addEventListener('click', () => {
+                        goToSlide(idx);
+                        resetAutoplay();
+                    });
+                    dotsWrapper.appendChild(dot);
+                });
+            }
+
+            // Slaytı Güncelle
+            function renderSlide(index) {
+                const item = gundemSlides[index];
+                if (!item) return;
+
+                // Animasyon çıkışı
+                if (slideContent) slideContent.classList.add('fade-out');
+
+                setTimeout(() => {
+                    // Arka plan görseli (%40 şeffaf katman)
+                    if (bgLayer) {
+                        bgLayer.style.backgroundImage = `url('${item.image}')`;
+                    }
+
+                    // Ön plan içerikleri
+                    if (badgeText) badgeText.innerText = item.badge || 'Gündem';
+                    if (titleEl) titleEl.innerText = item.title;
+                    if (subtitleEl) subtitleEl.innerText = item.subtitle;
+                    if (descEl) descEl.innerText = item.desc;
+                    if (mainImg) mainImg.src = item.image;
+                    if (actionBtn) actionBtn.href = item.link || '#';
+
+                    // Noktaları güncelle
+                    document.querySelectorAll('.gundem-dot').forEach((d, i) => {
+                        d.classList.toggle('active', i === index);
+                    });
+
+                    // Animasyon girişi
+                    if (slideContent) {
+                        slideContent.classList.remove('fade-out');
+                        slideContent.classList.add('fade-in');
+                    }
+                }, 200);
+            }
+
+            function goToSlide(index) {
+                if (index < 0) {
+                    currentIndex = gundemSlides.length - 1;
+                } else if (index >= gundemSlides.length) {
+                    currentIndex = 0;
+                } else {
+                    currentIndex = index;
+                }
+                renderSlide(currentIndex);
+            }
+
+            function startAutoplay() {
+                slideInterval = setInterval(() => {
+                    goToSlide(currentIndex + 1);
+                }, 6000);
+            }
+
+            function resetAutoplay() {
+                clearInterval(slideInterval);
+                startAutoplay();
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    goToSlide(currentIndex - 1);
+                    resetAutoplay();
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    goToSlide(currentIndex + 1);
+                    resetAutoplay();
+                });
+            }
+
+            // Başlat
+            renderDots();
+            renderSlide(0);
+            startAutoplay();
+        });
+    </script>
 </body>
 
 </html>
