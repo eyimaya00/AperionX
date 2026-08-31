@@ -6126,25 +6126,73 @@
                     color: #ef4444;
                     background: rgba(239, 68, 68, 0.05);
                 }
-                .bge-section-textarea {
-                    width: 100%;
-                    min-height: 140px;
-                    padding: 14px 16px;
+                .bge-editor-wrap {
                     border: 1.5px solid var(--border-color);
-                    border-radius: 12px;
-                    font-size: 0.93rem;
-                    font-family: 'Outfit', sans-serif;
+                    border-radius: 14px;
+                    overflow: hidden;
                     background: var(--card-bg);
-                    color: var(--text-main);
-                    resize: vertical;
-                    line-height: 1.7;
-                    transition: border-color 0.2s;
-                    box-sizing: border-box;
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease;
                 }
-                .bge-section-textarea:focus {
-                    outline: none;
+                .bge-editor-wrap:focus-within {
                     border-color: var(--primary-accent);
                     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-quill-toolbar {
+                    border: none !important;
+                    border-bottom: 1px solid var(--border-color) !important;
+                    background: rgba(248, 250, 252, 0.9);
+                    padding: 8px 12px !important;
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 4px;
+                }
+                .bge-quill-editor {
+                    border: none !important;
+                    min-height: 180px;
+                    font-size: 1rem;
+                    font-family: 'Outfit', sans-serif;
+                    color: var(--text-main);
+                    background: var(--card-bg);
+                }
+                .bge-quill-editor .ql-editor {
+                    min-height: 180px;
+                    padding: 16px 20px;
+                    line-height: 1.75;
+                    font-size: 1rem;
+                }
+                .bge-quill-editor .ql-editor p {
+                    margin-bottom: 0.8em;
+                }
+                .bge-quill-editor .ql-editor h2 {
+                    font-size: 1.45rem;
+                    font-weight: 700;
+                    margin: 1em 0 0.5em;
+                    color: var(--text-main);
+                }
+                .bge-quill-editor .ql-editor h3 {
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    margin: 0.9em 0 0.4em;
+                    color: var(--text-main);
+                }
+                .bge-quill-editor .ql-editor h4 {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    margin: 0.8em 0 0.3em;
+                    color: var(--text-main);
+                }
+                .bge-quill-editor .ql-editor img {
+                    max-width: 100%;
+                    border-radius: 12px;
+                    margin: 14px auto;
+                    display: block;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                }
+                .bge-quill-editor .ql-editor.ql-blank::before {
+                    color: #94a3b8;
+                    font-style: normal;
+                    font-family: 'Outfit', sans-serif;
                 }
                 .bge-add-section-btn {
                     display: flex;
@@ -6450,10 +6498,58 @@
                     border-color: #f87171;
                     color: #f87171;
                 }
-                body.dark-mode .bge-section-textarea {
-                    background: #0f172a;
+                body.dark-mode .bge-editor-wrap {
                     border-color: #334155;
+                    background: #0f172a;
+                }
+                body.dark-mode .bge-editor-wrap:focus-within {
+                    border-color: #818cf8;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+                }
+                body.dark-mode .bge-quill-toolbar {
+                    background: #1e293b;
+                    border-bottom-color: #334155 !important;
+                }
+                body.dark-mode .bge-quill-toolbar .ql-stroke {
+                    stroke: #94a3b8;
+                }
+                body.dark-mode .bge-quill-toolbar .ql-fill {
+                    fill: #94a3b8;
+                }
+                body.dark-mode .bge-quill-toolbar .ql-picker {
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-quill-toolbar .ql-picker-options {
+                    background-color: #1e293b;
+                    border-color: #334155;
+                }
+                body.dark-mode .bge-quill-toolbar .ql-picker-item {
                     color: #e2e8f0;
+                }
+                body.dark-mode .bge-quill-toolbar button:hover .ql-stroke,
+                body.dark-mode .bge-quill-toolbar .ql-picker-label:hover .ql-stroke,
+                body.dark-mode .bge-quill-toolbar .ql-picker-item:hover .ql-stroke,
+                body.dark-mode .bge-quill-toolbar .ql-picker-item.ql-selected .ql-stroke {
+                    stroke: #818cf8;
+                }
+                body.dark-mode .bge-quill-toolbar button:hover .ql-fill,
+                body.dark-mode .bge-quill-toolbar .ql-picker-label:hover .ql-fill,
+                body.dark-mode .bge-quill-toolbar .ql-picker-item:hover .ql-fill,
+                body.dark-mode .bge-quill-toolbar .ql-picker-item.ql-selected .ql-fill {
+                    fill: #818cf8;
+                }
+                body.dark-mode .bge-quill-toolbar button:hover,
+                body.dark-mode .bge-quill-toolbar .ql-picker-label:hover {
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-quill-editor {
+                    background: #0f172a;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .bge-quill-editor .ql-editor h2,
+                body.dark-mode .bge-quill-editor .ql-editor h3,
+                body.dark-mode .bge-quill-editor .ql-editor h4 {
+                    color: #f1f5f9;
                 }
                 body.dark-mode .bge-add-section-btn {
                     border-color: #334155;
@@ -12855,6 +12951,7 @@
         let bgeImageDataUrl = null;
         let bgeSectionIdCounter = 0;
         let bgeSourceIdCounter = 0;
+        let bgeQuillInstances = {};
 
         function bgeToggleCustomCategory(val) {
             const wrap = document.getElementById('bge-custom-category-wrap');
@@ -12885,6 +12982,35 @@
             }
         }
 
+        function bgeSetupQuillImageHandler(quillInstance) {
+            if (!quillInstance) return;
+            const toolbar = quillInstance.getModule('toolbar');
+            if (!toolbar) return;
+            toolbar.addHandler('image', function() {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/jpeg, image/png, image/webp');
+                input.click();
+
+                input.onchange = () => {
+                    const file = input.files[0];
+                    if (file && /^image\//.test(file.type)) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            if (typeof showAuthorToast === 'function') showAuthorToast('Görsel boyutu 10MB\'dan küçük olmalıdır.', 'error');
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const range = quillInstance.getSelection(true);
+                            quillInstance.insertEmbed(range.index, 'image', e.target.result);
+                            quillInstance.setSelection(range.index + 1);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+            });
+        }
+
         function openBilimGundemEditor(editId = null) {
             editingBilimGundemId = editId;
 
@@ -12896,6 +13022,7 @@
             bgeImageDataUrl = null;
             bgeSectionIdCounter = 0;
             bgeSourceIdCounter = 0;
+            bgeQuillInstances = {};
 
             const el = id => document.getElementById(id);
             const titleEl = el('bge-page-title');
@@ -13070,6 +13197,7 @@
 
         // ─── Sections (Bölümler) ───
         function bgeAddSection() {
+            bgeSaveSectionValues();
             bgeSectionIdCounter++;
             bgeSections.push({
                 id: 'sec_' + bgeSectionIdCounter,
@@ -13087,7 +13215,9 @@
         }
 
         function bgeRemoveSection(id) {
+            bgeSaveSectionValues();
             bgeSections = bgeSections.filter(s => s.id !== id);
+            delete bgeQuillInstances[id];
             bgeRenderSections();
             bgeUpdateTOC();
         }
@@ -13096,7 +13226,6 @@
             const idx = bgeSections.findIndex(s => s.id === id);
             if (idx < 0) return;
 
-            // Save current values before re-render
             bgeSaveSectionValues();
 
             const newIdx = idx + direction;
@@ -13112,9 +13241,10 @@
         function bgeSaveSectionValues() {
             bgeSections.forEach((sec) => {
                 const titleInput = document.getElementById('sec-title-' + sec.id);
-                const contentInput = document.getElementById('sec-content-' + sec.id);
                 if (titleInput) sec.title = titleInput.value;
-                if (contentInput) sec.content = contentInput.value;
+                if (bgeQuillInstances[sec.id] && bgeQuillInstances[sec.id].root) {
+                    sec.content = bgeQuillInstances[sec.id].root.innerHTML;
+                }
             });
         }
 
@@ -13124,6 +13254,7 @@
 
             if (bgeSections.length === 0) {
                 container.innerHTML = '';
+                bgeQuillInstances = {};
                 return;
             }
 
@@ -13133,7 +13264,7 @@
                         <div class="bge-section-num">${i + 1}</div>
                         <input type="text" class="bge-section-title-input" id="sec-title-${sec.id}"
                                value="${escapeHtml(sec.title)}"
-                               placeholder="Bölüm başlığı yazın..."
+                               placeholder="Bölüm başlığı yazın (örn: Keşfin Detayları)..."
                                oninput="bgeOnSectionTitleChange('${sec.id}', this.value)">
                         <div class="bge-section-actions">
                             <button class="bge-section-action-btn" onclick="bgeMoveSection('${sec.id}', -1)" title="Yukarı Taşı" ${i === 0 ? 'disabled style="opacity:0.3;pointer-events:none;"' : ''}>
@@ -13147,11 +13278,79 @@
                             </button>
                         </div>
                     </div>
-                    <textarea class="bge-section-textarea" id="sec-content-${sec.id}"
-                              placeholder="Bu bölümün metnini yazın..."
-                              oninput="bgeSections.find(s=>s.id==='${sec.id}').content=this.value">${escapeHtml(sec.content)}</textarea>
+                    <!-- Word-like Rich Text Editor Container -->
+                    <div class="bge-editor-wrap">
+                        <div id="bge-toolbar-${sec.id}" class="bge-quill-toolbar">
+                            <span class="ql-formats">
+                                <select class="ql-header" title="Başlık Seviyesi">
+                                    <option value="2">Büyük Başlık (H2)</option>
+                                    <option value="3">Orta Başlık (H3)</option>
+                                    <option value="4">Küçük Başlık (H4)</option>
+                                    <option selected>Normal Metin</option>
+                                </select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-bold" title="Kalın (Ctrl+B)"></button>
+                                <button class="ql-italic" title="İtalik (Ctrl+I)"></button>
+                                <button class="ql-underline" title="Altı Çizili (Ctrl+U)"></button>
+                                <button class="ql-strike" title="Üstü Çizili"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-color" title="Metin Rengi"></select>
+                                <select class="ql-background" title="Vurgu Rengi"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="ordered" title="Numaralı Liste"></button>
+                                <button class="ql-list" value="bullet" title="Maddeli Liste"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-align" title="Hizalama"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-blockquote" title="Alıntı Ekle"></button>
+                                <button class="ql-code-block" title="Kod Bloğu"></button>
+                                <button class="ql-link" title="Bağlantı Ekle"></button>
+                                <button class="ql-image" title="Fotoğraf / Görsel Ekle"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-clean" title="Biçimlendirmeyi Temizle"></button>
+                            </span>
+                        </div>
+                        <div id="bge-editor-${sec.id}" class="bge-quill-editor"></div>
+                    </div>
                 </div>
             `).join('');
+
+            // Initialize Quill for each section
+            bgeQuillInstances = {};
+            bgeSections.forEach(sec => {
+                const toolbarEl = document.getElementById('bge-toolbar-' + sec.id);
+                const editorEl = document.getElementById('bge-editor-' + sec.id);
+                if (toolbarEl && editorEl) {
+                    const q = new Quill(editorEl, {
+                        modules: {
+                            toolbar: toolbarEl
+                        },
+                        theme: 'snow',
+                        placeholder: 'Bu bölümün içeriğini Word gibi yazın; ara başlıklar, kalın/italik metinler veya fotoğraflar ekleyin...'
+                    });
+
+                    if (sec.content) {
+                        q.root.innerHTML = sec.content;
+                    }
+
+                    bgeSetupQuillImageHandler(q);
+                    if (typeof attachImageResizeHelper === 'function') {
+                        attachImageResizeHelper(q);
+                    }
+
+                    q.on('text-change', () => {
+                        sec.content = q.root.innerHTML;
+                    });
+
+                    bgeQuillInstances[sec.id] = q;
+                }
+            });
         }
 
         function bgeOnSectionTitleChange(id, value) {
