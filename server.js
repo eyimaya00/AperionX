@@ -191,6 +191,11 @@ app.get(['/en', '/en/'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+// Bilim Gündemi Page Route
+app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/7bilimgundemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi', '/en/7bilimgundemi'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
+});
+
 // Serve static HTML pages on /en path
 app.get('/en/:page', (req, res, next) => {
     const page = req.params.page;
