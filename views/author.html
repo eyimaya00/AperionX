@@ -1008,20 +1008,21 @@
 
         /* Dark Mode Scrollbar */
         body.dark-mode ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         body.dark-mode ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: transparent;
         }
 
         body.dark-mode ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 9999px;
         }
 
         body.dark-mode ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            background: rgba(129, 140, 248, 0.5);
         }
 
         /* Editor Counter */
