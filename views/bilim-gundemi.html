@@ -25,7 +25,7 @@
         gtag('config', 'G-Z5WGJ7ME86');
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description"
         content="AperionX Bilim Gündemi: Dünyadan ve Türkiye'den en güncel bilim haberleri, son dakika teknolojik keşifler ve gelişmeler.">
     <meta name="keywords"
@@ -101,41 +101,69 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        /* === BİLİM GÜNDEMİ HERO & SLIDER STYLES === */
+        /* === BİLİM GÜNDEMİ ŞEFFAF HEADER (MENÜ) === */
+        header.header {
+            background: rgba(9, 11, 16, 0.45) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: background 0.3s ease;
+        }
+
+        body {
+            background: #090b10;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* === BİLİM GÜNDEMİ TAM EKRAN HERO SLIDER === */
         .gundem-hero-slider {
             position: relative;
-            min-height: 82vh;
+            width: 100%;
+            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             background: #090b10;
-            padding-top: 90px;
-            padding-bottom: 50px;
+            padding-top: 80px;
+            padding-bottom: 20px;
+            box-sizing: border-box;
         }
 
         /* %40 Şeffaf Blur Arka Plan Katmanı */
         .gundem-bg-layer {
             position: absolute;
-            inset: -40px;
+            inset: -50px;
             z-index: 1;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.40; /* Kullanıcı isteği: %40 şeffaflık */
-            filter: blur(28px);
-            transform: scale(1.1);
+            opacity: 0.40; /* %40 şeffaflık */
+            filter: blur(32px);
+            transform: scale(1.12);
             transition: background-image 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
         }
 
-        /* Arka Plan Koyu Degradeler (Metin okunurluğu ve derinlik için) */
+        /* Arka Plan Koyu Degradeler (AperionX Mor/Indigo derinliği ile) */
         .gundem-dark-overlay {
             position: absolute;
             inset: 0;
             z-index: 2;
-            background: radial-gradient(circle at 65% 50%, rgba(9, 11, 16, 0.4) 0%, rgba(9, 11, 16, 0.88) 80%),
+            background: radial-gradient(circle at 65% 50%, rgba(99, 102, 241, 0.08) 0%, rgba(9, 11, 16, 0.85) 75%),
                         linear-gradient(to top, #090b10 0%, transparent 60%),
-                        linear-gradient(to bottom, rgba(9, 11, 16, 0.8) 0%, transparent 30%);
+                        linear-gradient(to bottom, rgba(9, 11, 16, 0.75) 0%, transparent 35%);
             pointer-events: none;
         }
 
@@ -144,9 +172,13 @@
             position: relative;
             z-index: 3;
             width: 100%;
-            max-width: 1320px;
-            margin: 0 auto;
-            padding: 0 32px;
+            max-width: 1340px;
+            margin: auto 0;
+            padding: 0 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .gundem-slide-content {
@@ -154,12 +186,12 @@
             grid-template-columns: 1.15fr 0.95fr;
             gap: 50px;
             align-items: center;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
         .gundem-slide-content.fade-out {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(6px);
         }
 
         .gundem-slide-content.fade-in {
@@ -175,23 +207,25 @@
             text-align: left;
         }
 
+        /* AperionX Site Uyumlu Mor-Indigo Rozet */
         .gundem-tag-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #e11d48, #be123c);
+            gap: 7px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: #ffffff;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             font-weight: 700;
             padding: 7px 18px;
             border-radius: 999px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             letter-spacing: 0.3px;
-            box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35);
+            box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .gundem-main-title {
-            font-size: clamp(2rem, 3.4vw, 3.1rem);
+            font-size: clamp(2.1rem, 3.4vw, 3.2rem);
             font-weight: 900;
             color: #ffffff;
             line-height: 1.22;
@@ -201,9 +235,9 @@
         }
 
         .gundem-sub-category {
-            font-size: 1.22rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.92);
+            color: rgba(255, 255, 255, 0.9);
             margin: 0 0 14px 0;
             display: flex;
             align-items: center;
@@ -215,16 +249,16 @@
             display: inline-block;
             width: 14px;
             height: 3px;
-            background: #e11d48;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
             border-radius: 2px;
         }
 
         .gundem-description-text {
-            font-size: 1.08rem;
+            font-size: 1.06rem;
             line-height: 1.72;
             color: rgba(255, 255, 255, 0.78);
             max-width: 580px;
-            margin: 0 0 28px 0;
+            margin: 0 0 26px 0;
             font-family: 'Roboto', sans-serif;
             font-weight: 400;
         }
@@ -235,26 +269,28 @@
             gap: 16px;
         }
 
+        /* AperionX Buton Tasarımı */
         .gundem-primary-btn {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: #ffffff;
-            color: #0f172a;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #ffffff;
             padding: 13px 28px;
             border-radius: 12px;
             font-weight: 700;
             font-size: 1rem;
             text-decoration: none;
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+            box-shadow: 0 6px 22px rgba(99, 102, 241, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.25s ease;
         }
 
         .gundem-primary-btn:hover {
-            background: #f1f5f9;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.25);
-            color: #000000;
+            box-shadow: 0 10px 28px rgba(99, 102, 241, 0.5);
+            color: #ffffff;
         }
 
         /* Sağ Taraf: Net Ana Görsel Kartı */
@@ -267,19 +303,19 @@
         .gundem-image-card {
             position: relative;
             width: 100%;
-            max-width: 560px;
+            max-width: 580px;
             aspect-ratio: 16 / 10.5;
             border-radius: 22px;
             overflow: hidden;
             background: #111420;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(99, 102, 241, 0.15);
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s ease;
         }
 
         .gundem-image-card:hover {
             transform: translateY(-4px) scale(1.01);
-            box-shadow: 0 30px 75px rgba(0, 0, 0, 0.75), 0 0 25px rgba(99, 102, 241, 0.25);
+            box-shadow: 0 30px 75px rgba(0, 0, 0, 0.75), 0 0 35px rgba(99, 102, 241, 0.3);
         }
 
         .gundem-image-card img {
@@ -303,9 +339,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             color: #ffffff;
             display: flex;
             align-items: center;
@@ -316,27 +352,27 @@
         }
 
         .gundem-arrow-btn:hover {
-            background: rgba(225, 29, 72, 0.85);
-            border-color: #e11d48;
+            background: #6366f1;
+            border-color: #6366f1;
             transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+            box-shadow: 0 0 22px rgba(99, 102, 241, 0.6);
         }
 
         .gundem-arrow-btn.prev-btn {
-            left: 20px;
+            left: 24px;
         }
 
         .gundem-arrow-btn.next-btn {
-            right: 20px;
+            right: 24px;
         }
 
-        /* Slider Noktaları (Indicators) */
+        /* Slider Noktaları (Indicators) - AperionX Mor/Indigo */
         .gundem-dots-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
-            margin-top: 36px;
+            margin-top: 30px;
             position: relative;
             z-index: 4;
         }
@@ -351,12 +387,12 @@
         }
 
         .gundem-dot.active {
-            width: 32px;
-            background: #e11d48;
-            box-shadow: 0 0 12px rgba(225, 29, 72, 0.6);
+            width: 34px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.7);
         }
 
-        /* Alt Alan / Diğer Gelişmeler Başlığı */
+        /* === DİĞER GÜNDEM GELİŞMELERİ GRID BÖLÜMÜ === */
         .gundem-feed-section {
             padding: 80px 0 120px 0;
             background: var(--bg-color, #0b0f19);
@@ -381,7 +417,7 @@
         }
 
         .gundem-section-title i {
-            color: #e11d48;
+            color: #6366f1;
         }
 
         .gundem-cards-grid {
@@ -403,7 +439,7 @@
 
         .gundem-card:hover {
             transform: translateY(-6px);
-            border-color: rgba(225, 29, 72, 0.4);
+            border-color: rgba(99, 102, 241, 0.4);
             box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
         }
 
@@ -435,7 +471,7 @@
         .gundem-card-tag {
             font-size: 0.8rem;
             font-weight: 700;
-            color: #e11d48;
+            color: #818cf8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
@@ -467,22 +503,71 @@
             padding-top: 14px;
         }
 
-        /* Responsive Kuralları */
-        @media (max-width: 992px) {
+        /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
+        @media (max-width: 1024px) {
+            .gundem-slider-wrapper {
+                padding: 0 24px;
+            }
+            .gundem-slide-content {
+                gap: 32px;
+            }
+            .gundem-arrow-btn.prev-btn {
+                left: 10px;
+            }
+            .gundem-arrow-btn.next-btn {
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 868px) {
             .gundem-hero-slider {
-                min-height: auto;
-                padding-top: 110px;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                padding-top: 95px;
                 padding-bottom: 40px;
+                justify-content: flex-start;
+            }
+            .gundem-slider-wrapper {
+                margin: 0;
+                padding: 0 18px;
             }
             .gundem-slide-content {
                 grid-template-columns: 1fr;
-                gap: 36px;
+                gap: 24px;
             }
             .gundem-image-col {
-                order: -1;
+                order: -1; /* Mobilde görsel üstte */
+                width: 100%;
+            }
+            .gundem-image-card {
+                max-width: 100%;
+                aspect-ratio: 16 / 9;
+                border-radius: 16px;
+            }
+            .gundem-main-title {
+                font-size: 1.65rem;
+                margin-bottom: 12px;
+            }
+            .gundem-sub-category {
+                font-size: 1.05rem;
+                margin-bottom: 10px;
+            }
+            .gundem-description-text {
+                font-size: 0.95rem;
+                margin-bottom: 20px;
+                line-height: 1.6;
+            }
+            .gundem-primary-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
             }
             .gundem-arrow-btn {
                 display: none;
+            }
+            .gundem-dots-wrapper {
+                margin-top: 24px;
             }
         }
     </style>
@@ -499,7 +584,7 @@
         </div>
     </div>
 
-    <!-- Header -->
+    <!-- Header (Yarı Şeffaf Glassmorphic) -->
     <header class="header">
         <div class="container header-content">
             <a href="/" class="logo">
@@ -544,9 +629,9 @@
         </div>
     </header>
 
-    <!-- === BİLİM GÜNDEMİ HERO MANŞET BÖLÜMÜ === -->
+    <!-- === BİLİM GÜNDEMİ TAM EKRAN HERO MANŞET BÖLÜMÜ === -->
     <section class="gundem-hero-slider" id="gundemHero">
-        <!-- Arka Plan Katmanı (%40 şeffaf ve bulanık görsel) -->
+        <!-- Arka Plan Katmanı (%40 şeffaf ve derin blur) -->
         <div class="gundem-bg-layer" id="gundemBgLayer"></div>
         <div class="gundem-dark-overlay"></div>
 
@@ -897,7 +982,7 @@
                         slideContent.classList.remove('fade-out');
                         slideContent.classList.add('fade-in');
                     }
-                }, 200);
+                }, 180);
             }
 
             function goToSlide(index) {
@@ -934,6 +1019,32 @@
                     goToSlide(currentIndex + 1);
                     resetAutoplay();
                 });
+            }
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const heroSlider = document.getElementById('gundemHero');
+
+            if (heroSlider) {
+                heroSlider.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                heroSlider.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+            }
+
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    goToSlide(currentIndex + 1);
+                    resetAutoplay();
+                } else if (touchEndX > touchStartX + swipeThreshold) {
+                    goToSlide(currentIndex - 1);
+                    resetAutoplay();
+                }
             }
 
             renderDots();
