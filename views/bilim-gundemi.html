@@ -123,7 +123,7 @@
             overflow-x: hidden;
         }
 
-        /* === BİLİM GÜNDEMİ SABİT VE TAM EKRAN HERO SLIDER === */
+        /* === BİLİM GÜNDEMİ TAM EKRAN HERO SLIDER === */
         .gundem-hero-slider {
             position: relative;
             width: 100%;
@@ -136,7 +136,7 @@
             justify-content: center;
             overflow: hidden;
             background: #090b10;
-            padding-top: 75px;
+            padding-top: 80px;
             padding-bottom: 25px;
             box-sizing: border-box;
         }
@@ -167,14 +167,14 @@
             pointer-events: none;
         }
 
-        /* Slider Ana Konteyner - Sabit ve Orantılı */
+        /* Slider Ana Konteyner */
         .gundem-slider-wrapper {
             position: relative;
             z-index: 3;
             width: 100%;
-            max-width: 1180px;
+            max-width: 1240px;
             margin: auto 0;
-            padding: 0 36px;
+            padding: 0 40px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -183,8 +183,8 @@
 
         .gundem-slide-content {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 40px;
+            grid-template-columns: 1fr 1.05fr;
+            gap: 48px;
             align-items: center;
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
@@ -199,41 +199,41 @@
             transform: translateY(0);
         }
 
-        /* Sol Taraf: Metinler (Kibar, orantılı ve sabit) */
+        /* Sol Taraf: Metinler (Kibar ve Küçültülmüş) */
         .gundem-text-col {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             text-align: left;
-            max-width: 580px;
+            max-width: 520px;
         }
 
-        /* AperionX Rozet */
+        /* Yeni Renkli Gündem Rozeti (Zarif Neon Cyan / AperionX Mavi Degradeli) */
         .gundem-tag-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
             color: #ffffff;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
             padding: 5px 14px;
             border-radius: 999px;
             margin-bottom: 14px;
-            letter-spacing: 0.3px;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.4px;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Küçültülmüş ve Sabitlenmiş Ana Başlık */
+        /* Küçültülmüş Başlık */
         .gundem-main-title {
-            font-size: 1.85rem;
+            font-size: 1.55rem;
             font-weight: 800;
             color: #ffffff;
-            line-height: 1.3;
-            letter-spacing: -0.5px;
-            margin: 0 0 12px 0;
-            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+            line-height: 1.35;
+            letter-spacing: -0.4px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -242,9 +242,9 @@
 
         /* Küçültülmüş Alt Başlık */
         .gundem-sub-category {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.88);
             margin: 0 0 10px 0;
             display: flex;
             align-items: center;
@@ -255,79 +255,50 @@
             content: '';
             display: inline-block;
             width: 12px;
-            height: 3px;
-            background: linear-gradient(90deg, #6366f1, #a855f7);
+            height: 2.5px;
+            background: linear-gradient(90deg, #0ea5e9, #6366f1);
             border-radius: 2px;
         }
 
-        /* Küçültülmüş ve Sabitlenmiş Açıklama */
+        /* Küçültülmüş Kısa Açıklama */
         .gundem-description-text {
-            font-size: 0.96rem;
+            font-size: 0.88rem;
             line-height: 1.65;
-            color: rgba(255, 255, 255, 0.78);
-            max-width: 520px;
-            margin: 0 0 22px 0;
+            color: rgba(255, 255, 255, 0.72);
+            max-width: 480px;
+            margin: 0;
             font-family: 'Roboto', sans-serif;
             font-weight: 400;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .gundem-action-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        /* Küçültülmüş Buton */
-        .gundem-primary-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: #ffffff;
-            padding: 10px 22px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.92rem;
-            text-decoration: none;
-            box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.25s ease;
-        }
-
-        .gundem-primary-btn:hover {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
-            color: #ffffff;
-        }
-
-        /* Sağ Taraf: Küçültülmüş ve Sabitlenmiş Net Ana Görsel Kartı */
+        /* Sağ Taraf: Büyütülmüş Net Ana Görsel Kartı */
         .gundem-image-col {
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
         }
 
         .gundem-image-card {
             position: relative;
             width: 100%;
-            max-width: 440px;
-            height: 275px;
-            border-radius: 18px;
+            max-width: 550px;
+            height: 330px;
+            border-radius: 20px;
             overflow: hidden;
             background: #111420;
             border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(99, 102, 241, 0.15);
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.65), 0 0 30px rgba(99, 102, 241, 0.18);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .gundem-image-card:hover {
             transform: translateY(-3px) scale(1.01);
-            box-shadow: 0 24px 55px rgba(0, 0, 0, 0.7), 0 0 30px rgba(99, 102, 241, 0.28);
+            box-shadow: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 35px rgba(14, 165, 233, 0.3);
         }
 
         .gundem-image-card img {
@@ -348,8 +319,8 @@
             top: 50%;
             transform: translateY(-50%);
             z-index: 5;
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
@@ -358,16 +329,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             cursor: pointer;
             transition: all 0.25s ease;
         }
 
         .gundem-arrow-btn:hover {
-            background: #6366f1;
-            border-color: #6366f1;
+            background: #0ea5e9;
+            border-color: #0ea5e9;
             transform: translateY(-50%) scale(1.08);
-            box-shadow: 0 0 18px rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 18px rgba(14, 165, 233, 0.6);
         }
 
         .gundem-arrow-btn.prev-btn {
@@ -384,7 +355,7 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 24px;
+            margin-top: 26px;
             position: relative;
             z-index: 4;
         }
@@ -399,9 +370,9 @@
         }
 
         .gundem-dot.active {
-            width: 28px;
-            background: linear-gradient(90deg, #6366f1, #a855f7);
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.7);
+            width: 30px;
+            background: linear-gradient(90deg, #0ea5e9, #6366f1);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.7);
         }
 
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
@@ -427,32 +398,26 @@
             }
             .gundem-image-card {
                 max-width: 100%;
-                height: 200px;
-                border-radius: 14px;
+                height: 220px;
+                border-radius: 16px;
             }
             .gundem-main-title {
-                font-size: 1.45rem;
-                margin-bottom: 10px;
+                font-size: 1.35rem;
+                margin-bottom: 8px;
             }
             .gundem-sub-category {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
                 margin-bottom: 8px;
             }
             .gundem-description-text {
-                font-size: 0.9rem;
-                margin-bottom: 16px;
+                font-size: 0.85rem;
                 line-height: 1.55;
-            }
-            .gundem-primary-btn {
-                width: 100%;
-                justify-content: center;
-                padding: 11px 18px;
             }
             .gundem-arrow-btn {
                 display: none;
             }
             .gundem-dots-wrapper {
-                margin-top: 18px;
+                margin-top: 20px;
             }
         }
     </style>
@@ -514,7 +479,7 @@
         </div>
     </header>
 
-    <!-- === BİLİM GÜNDEMİ TAM EKRAN VE SABİT HERO BÖLÜMÜ === -->
+    <!-- === BİLİM GÜNDEMİ TAM EKRAN HERO BÖLÜMÜ === -->
     <section class="gundem-hero-slider" id="gundemHero">
         <!-- Arka Plan Katmanı (%40 şeffaf ve derin blur) -->
         <div class="gundem-bg-layer" id="gundemBgLayer"></div>
@@ -531,7 +496,7 @@
         <!-- Slider İçerik Alanı -->
         <div class="gundem-slider-wrapper">
             <div class="gundem-slide-content" id="gundemSlideContent">
-                <!-- Sol Kolon: Metinler -->
+                <!-- Sol Kolon: Küçültülmüş Metinler -->
                 <div class="gundem-text-col">
                     <span class="gundem-tag-badge" id="gundemBadge">
                         <i class="ph-fill ph-newspaper"></i> <span id="gundemBadgeText">Gündem</span>
@@ -545,15 +510,9 @@
                     <p class="gundem-description-text" id="gundemDesc">
                         Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.
                     </p>
-                    <div class="gundem-action-row">
-                        <a href="javascript:void(0)" class="gundem-primary-btn" id="gundemActionBtn">
-                            <span>Detayları İncele</span>
-                            <i class="ph-bold ph-arrow-right"></i>
-                        </a>
-                    </div>
                 </div>
 
-                <!-- Sağ Kolon: Kompakt Net Ana Görsel -->
+                <!-- Sağ Kolon: Büyütülmüş Net Ana Görsel -->
                 <div class="gundem-image-col">
                     <div class="gundem-image-card">
                         <img id="gundemMainImg" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" alt="Bilim Gündemi Ana Görsel">
@@ -603,6 +562,58 @@
                     <a href="javascript:void(0)" onclick="switchModal('loginModal', 'forgotPasswordModal')" class="forgot-password-link" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Şifremi Unuttum?</a>
                 </div>
                 <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Giriş Yap
+                </button>
+            </div>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required aria-label="Ad Soyad">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required aria-label="Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required aria-label="Şifre Tekrar">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
             </form>
             <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
                 <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
@@ -673,24 +684,21 @@
                     title: "James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti",
                     subtitle: "Uzay ve Astrofizik",
                     desc: "Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.",
-                    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
-                    link: "#"
+                    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop"
                 },
                 {
                     badge: 'Gündem',
                     title: "Kuantum Süper Bilgisayarları Klasik Şifreleme Sistemlerini Geride Bırakıyor",
                     subtitle: "Yapay Zeka ve Kuantum",
                     desc: "Yeni nesil 1000 kubitlik kuantum işlemciler, geleneksel süper bilgisayarların 10.000 yılda tamamlayabileceği karmaşık moleküler simülasyonları saniyeler içinde hesapladı.",
-                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
-                    link: "#"
+                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop"
                 },
                 {
                     badge: 'Gündem',
                     title: "CRISPR 3.0 ile Kalıtsal Hastalıklara Yönelik İlk Klinik Başarı",
                     subtitle: "Genetik ve Biyoteknoloji",
                     desc: "DNA dizilimini kesmeden epigenetik modifikasyon sağlayan yeni nesil gen cerrahisi tekniği, ilk insanlı faz-1 klinik deneylerinde tam hedefe ulaşarak yüzde 98 başarı sağladı.",
-                    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
-                    link: "#"
+                    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop"
                 }
             ];
 
@@ -704,7 +712,6 @@
             const subtitleEl = document.getElementById('gundemSubtitle');
             const descEl = document.getElementById('gundemDesc');
             const mainImg = document.getElementById('gundemMainImg');
-            const actionBtn = document.getElementById('gundemActionBtn');
             const dotsWrapper = document.getElementById('gundemDotsWrapper');
             const prevBtn = document.getElementById('gundemPrevBtn');
             const nextBtn = document.getElementById('gundemNextBtn');
@@ -739,7 +746,6 @@
                     if (subtitleEl) subtitleEl.innerText = item.subtitle;
                     if (descEl) descEl.innerText = item.desc;
                     if (mainImg) mainImg.src = item.image;
-                    if (actionBtn) actionBtn.href = item.link || '#';
 
                     document.querySelectorAll('.gundem-dot').forEach((d, i) => {
                         d.classList.toggle('active', i === index);
