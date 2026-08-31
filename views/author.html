@@ -5497,8 +5497,8 @@
                     </h1>
                     <p class="bg-hero-subtitle">Bilimsel gelişmeleri herkes için anlaşılır hale getir</p>
                 </div>
-                <button class="bg-btn-new" onclick="openBilimGundemModal()">
-                    <i class="ph-bold ph-plus"></i> Yeni Gündem
+                <button class="bg-btn-new" onclick="openBilimGundemEditor()">
+                    <i class="ph-bold ph-plus"></i> Yeni Bilim Gündemi Yaz
                 </button>
             </div>
 
@@ -5599,7 +5599,7 @@
                                 <div class="bg-empty-state">
                                     <i class="ph ph-microscope"></i>
                                     <p>Henüz bilim gündemi içeriği oluşturulmamış.</p>
-                                    <button class="bg-btn-continue" onclick="openBilimGundemModal()" style="margin-top: 12px;">
+                                    <button class="bg-btn-continue" onclick="openBilimGundemEditor()" style="margin-top: 12px;">
                                         <i class="ph-bold ph-plus"></i> İlk Gündem Yazını Oluştur
                                     </button>
                                 </div>
@@ -5610,6 +5610,1021 @@
             </div>
         </div>
         <!-- END BILIM GUNDEMI SECTION -->
+
+        <!-- ============================== -->
+        <!-- BILIM GUNDEMI EDITOR SECTION   -->
+        <!-- ============================== -->
+        <div id="bilim-gundemi-editor" class="section">
+            <style>
+                /* ===== BILIM GUNDEMI EDITOR — FULL PAGE STYLES ===== */
+                .bge-wrapper {
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding-bottom: 60px;
+                }
+
+                /* Top Bar */
+                .bge-topbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    margin-bottom: 32px;
+                    padding-bottom: 20px;
+                    border-bottom: 1px solid var(--border-color);
+                }
+                .bge-topbar-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                }
+                .bge-back-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: none;
+                    border: 1px solid var(--border-color);
+                    color: #64748b;
+                    padding: 10px 18px;
+                    border-radius: 12px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .bge-back-btn:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.04);
+                }
+                .bge-page-title {
+                    font-size: 1.5rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .bge-page-title i {
+                    color: var(--primary-accent);
+                    font-size: 1.6rem;
+                }
+                .bge-topbar-right {
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+                .bge-btn-draft {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    padding: 11px 24px;
+                    border-radius: 12px;
+                    border: none;
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                    font-weight: 600;
+                    font-size: 0.92rem;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    font-family: 'Outfit', sans-serif;
+                    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+                }
+                .bge-btn-draft:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+                }
+                .bge-btn-draft:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+                /* Section Card */
+                .bge-card {
+                    background: var(--card-bg);
+                    border-radius: 20px;
+                    padding: 32px;
+                    border: 1px solid var(--border-color);
+                    margin-bottom: 24px;
+                    transition: box-shadow 0.3s ease;
+                }
+                .bge-card:hover {
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+                }
+                .bge-card-icon {
+                    font-size: 1.4rem;
+                    margin-right: 10px;
+                }
+                .bge-card-title {
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: var(--text-main);
+                    margin: 0 0 24px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                /* Form Elements */
+                .bge-form-group {
+                    margin-bottom: 22px;
+                }
+                .bge-form-group:last-child {
+                    margin-bottom: 0;
+                }
+                .bge-label {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-weight: 600;
+                    color: var(--text-main);
+                    margin-bottom: 8px;
+                    font-size: 0.9rem;
+                }
+                .bge-label-hint {
+                    font-weight: 400;
+                    font-size: 0.8rem;
+                    color: #94a3b8;
+                }
+                .bge-char-count {
+                    font-weight: 500;
+                    font-size: 0.78rem;
+                    color: #94a3b8;
+                    transition: color 0.2s;
+                }
+                .bge-char-count.warn { color: #f59e0b; }
+                .bge-char-count.over { color: #ef4444; font-weight: 600; }
+                .bge-char-count.good { color: #10b981; }
+                .bge-input {
+                    width: 100%;
+                    padding: 13px 16px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    transition: all 0.2s ease;
+                    box-sizing: border-box;
+                }
+                .bge-input:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-textarea {
+                    width: 100%;
+                    padding: 13px 16px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    resize: vertical;
+                    min-height: 90px;
+                    transition: all 0.2s ease;
+                    box-sizing: border-box;
+                    line-height: 1.6;
+                }
+                .bge-textarea:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-select {
+                    width: 100%;
+                    padding: 13px 16px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    transition: border-color 0.2s;
+                    box-sizing: border-box;
+                    cursor: pointer;
+                    appearance: none;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8.825a.5.5 0 0 1-.354-.146L2.146 5.18a.5.5 0 0 1 .708-.708L6 7.618l3.146-3.146a.5.5 0 0 1 .708.708L6.354 8.68a.5.5 0 0 1-.354.146Z'/%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 16px center;
+                    padding-right: 40px;
+                }
+                .bge-select:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+
+                /* Tags */
+                .bge-tags-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .bge-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.15));
+                    color: #4f46e5;
+                    padding: 7px 14px;
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    animation: slideUp 0.2s ease;
+                }
+                .bge-tag-remove {
+                    background: none;
+                    border: none;
+                    color: #6366f1;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    padding: 0;
+                    line-height: 1;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                }
+                .bge-tag-remove:hover { opacity: 1; }
+                .bge-tag-add-wrap {
+                    display: flex;
+                    gap: 6px;
+                    align-items: center;
+                }
+                .bge-tag-input {
+                    padding: 7px 12px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    width: 140px;
+                    transition: all 0.2s;
+                    box-sizing: border-box;
+                }
+                .bge-tag-input:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                    width: 180px;
+                }
+                .bge-tag-add-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: rgba(99, 102, 241, 0.08);
+                    color: var(--primary-accent);
+                    border: 1.5px dashed rgba(99, 102, 241, 0.3);
+                    padding: 7px 14px;
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .bge-tag-add-btn:hover {
+                    background: rgba(99, 102, 241, 0.15);
+                    border-color: var(--primary-accent);
+                }
+
+                /* Upload Zone */
+                .bge-upload-zone {
+                    border: 2px dashed var(--border-color);
+                    border-radius: 16px;
+                    padding: 48px 24px;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                    background: rgba(248, 250, 252, 0.5);
+                }
+                .bge-upload-zone:hover {
+                    border-color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.03);
+                }
+                .bge-upload-zone.dragover {
+                    border-color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.06);
+                    transform: scale(1.01);
+                }
+                .bge-upload-zone.has-image {
+                    border-style: solid;
+                    border-color: #10b981;
+                    padding: 16px;
+                    background: rgba(16, 185, 129, 0.03);
+                }
+                .bge-upload-icon {
+                    font-size: 3rem;
+                    color: #cbd5e1;
+                    margin-bottom: 12px;
+                    transition: color 0.2s;
+                }
+                .bge-upload-zone:hover .bge-upload-icon {
+                    color: var(--primary-accent);
+                }
+                .bge-upload-text {
+                    color: #64748b;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    margin: 0 0 6px;
+                }
+                .bge-upload-hint {
+                    color: #94a3b8;
+                    font-size: 0.85rem;
+                    margin: 0;
+                }
+                .bge-upload-preview {
+                    max-width: 100%;
+                    max-height: 320px;
+                    border-radius: 12px;
+                    object-fit: contain;
+                }
+                .bge-upload-remove {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: rgba(239, 68, 68, 0.9);
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.1rem;
+                    transition: all 0.2s;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                }
+                .bge-upload-remove:hover {
+                    background: #ef4444;
+                    transform: scale(1.1);
+                }
+
+                /* Sections (Bölümler) */
+                .bge-sections-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                .bge-section-item {
+                    background: rgba(248, 250, 252, 0.6);
+                    border: 1px solid var(--border-color);
+                    border-radius: 16px;
+                    padding: 24px;
+                    position: relative;
+                    transition: all 0.25s ease;
+                    animation: slideUp 0.3s ease;
+                }
+                .bge-section-item:hover {
+                    border-color: rgba(99, 102, 241, 0.2);
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+                }
+                .bge-section-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16px;
+                    gap: 12px;
+                }
+                .bge-section-num {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 10px;
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: white;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    flex-shrink: 0;
+                }
+                .bge-section-title-input {
+                    flex: 1;
+                    padding: 10px 14px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 10px;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    transition: border-color 0.2s;
+                    box-sizing: border-box;
+                }
+                .bge-section-title-input:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-section-actions {
+                    display: flex;
+                    gap: 4px;
+                    flex-shrink: 0;
+                }
+                .bge-section-action-btn {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: #64748b;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.95rem;
+                    transition: all 0.2s;
+                }
+                .bge-section-action-btn:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.05);
+                }
+                .bge-section-action-btn.delete:hover {
+                    border-color: #ef4444;
+                    color: #ef4444;
+                    background: rgba(239, 68, 68, 0.05);
+                }
+                .bge-section-textarea {
+                    width: 100%;
+                    min-height: 140px;
+                    padding: 14px 16px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 12px;
+                    font-size: 0.93rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    resize: vertical;
+                    line-height: 1.7;
+                    transition: border-color 0.2s;
+                    box-sizing: border-box;
+                }
+                .bge-section-textarea:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-add-section-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 16px;
+                    border: 2px dashed var(--border-color);
+                    border-radius: 14px;
+                    background: transparent;
+                    color: #64748b;
+                    font-size: 0.92rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    font-family: 'Outfit', sans-serif;
+                    margin-top: 12px;
+                }
+                .bge-add-section-btn:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.03);
+                }
+
+                /* Table of Contents */
+                .bge-toc {
+                    background: rgba(99, 102, 241, 0.04);
+                    border: 1px solid rgba(99, 102, 241, 0.12);
+                    border-radius: 14px;
+                    padding: 20px 24px;
+                    margin-bottom: 20px;
+                }
+                .bge-toc-title {
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: var(--primary-accent);
+                    margin: 0 0 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .bge-toc-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                .bge-toc-list li {
+                    padding: 6px 0;
+                    font-size: 0.9rem;
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    transition: color 0.2s;
+                }
+                .bge-toc-list li:hover { color: var(--primary-accent); }
+                .bge-toc-list li::before {
+                    content: '';
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: var(--primary-accent);
+                    opacity: 0.4;
+                    flex-shrink: 0;
+                }
+                .bge-toc-empty {
+                    color: #94a3b8;
+                    font-size: 0.85rem;
+                    font-style: italic;
+                }
+
+                /* Sources (Kaynaklar) */
+                .bge-sources-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                .bge-source-item {
+                    background: rgba(248, 250, 252, 0.6);
+                    border: 1px solid var(--border-color);
+                    border-radius: 14px;
+                    padding: 22px;
+                    position: relative;
+                    animation: slideUp 0.3s ease;
+                }
+                .bge-source-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16px;
+                }
+                .bge-source-num {
+                    font-size: 0.88rem;
+                    font-weight: 700;
+                    color: var(--primary-accent);
+                }
+                .bge-source-remove {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: #94a3b8;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.9rem;
+                    transition: all 0.2s;
+                }
+                .bge-source-remove:hover {
+                    border-color: #ef4444;
+                    color: #ef4444;
+                    background: rgba(239, 68, 68, 0.05);
+                }
+                .bge-source-type-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 16px;
+                }
+                .bge-source-type-radio {
+                    display: none;
+                }
+                .bge-source-type-label {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    border: 1.5px solid var(--border-color);
+                    font-size: 0.84rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .bge-source-type-radio:checked + .bge-source-type-label {
+                    border-color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.08);
+                    color: var(--primary-accent);
+                }
+                .bge-source-fields {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .bge-source-field-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                }
+                .bge-source-input {
+                    width: 100%;
+                    padding: 10px 14px;
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    font-family: 'Outfit', sans-serif;
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    transition: border-color 0.2s;
+                    box-sizing: border-box;
+                }
+                .bge-source-input:focus {
+                    outline: none;
+                    border-color: var(--primary-accent);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .bge-add-source-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 14px;
+                    border: 2px dashed var(--border-color);
+                    border-radius: 14px;
+                    background: transparent;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    font-family: 'Outfit', sans-serif;
+                    margin-top: 8px;
+                }
+                .bge-add-source-btn:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.03);
+                }
+
+                /* Divider line */
+                .bge-divider {
+                    border: none;
+                    height: 1px;
+                    background: var(--border-color);
+                    margin: 8px 0 20px;
+                }
+
+                /* ===== DARK MODE ===== */
+                body.dark-mode .bge-card {
+                    background: #1e293b;
+                    border-color: rgba(255, 255, 255, 0.06);
+                }
+                body.dark-mode .bge-card:hover {
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                }
+                body.dark-mode .bge-card-title { color: #f1f5f9; }
+                body.dark-mode .bge-page-title { color: #f1f5f9; }
+                body.dark-mode .bge-topbar { border-color: rgba(255, 255, 255, 0.06); }
+                body.dark-mode .bge-back-btn {
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-back-btn:hover {
+                    border-color: var(--primary-accent);
+                    color: #818cf8;
+                    background: rgba(99, 102, 241, 0.08);
+                }
+                body.dark-mode .bge-label { color: #e2e8f0; }
+                body.dark-mode .bge-input,
+                body.dark-mode .bge-textarea,
+                body.dark-mode .bge-select {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .bge-input:focus,
+                body.dark-mode .bge-textarea:focus,
+                body.dark-mode .bge-select:focus {
+                    border-color: #818cf8;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+                }
+                body.dark-mode .bge-tag {
+                    background: rgba(99, 102, 241, 0.15);
+                    color: #818cf8;
+                    border-color: rgba(99, 102, 241, 0.25);
+                }
+                body.dark-mode .bge-tag-remove { color: #818cf8; }
+                body.dark-mode .bge-tag-input {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .bge-tag-add-btn {
+                    background: rgba(99, 102, 241, 0.1);
+                    border-color: rgba(99, 102, 241, 0.25);
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-upload-zone {
+                    background: rgba(15, 23, 42, 0.5);
+                    border-color: #334155;
+                }
+                body.dark-mode .bge-upload-zone:hover {
+                    border-color: #818cf8;
+                    background: rgba(99, 102, 241, 0.05);
+                }
+                body.dark-mode .bge-upload-zone.has-image {
+                    border-color: #34d399;
+                    background: rgba(16, 185, 129, 0.05);
+                }
+                body.dark-mode .bge-upload-icon { color: #475569; }
+                body.dark-mode .bge-upload-text { color: #94a3b8; }
+                body.dark-mode .bge-section-item {
+                    background: rgba(15, 23, 42, 0.4);
+                    border-color: rgba(255, 255, 255, 0.06);
+                }
+                body.dark-mode .bge-section-item:hover {
+                    border-color: rgba(99, 102, 241, 0.2);
+                }
+                body.dark-mode .bge-section-title-input {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #f1f5f9;
+                }
+                body.dark-mode .bge-section-action-btn {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-section-action-btn:hover {
+                    border-color: #818cf8;
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-section-action-btn.delete:hover {
+                    border-color: #f87171;
+                    color: #f87171;
+                }
+                body.dark-mode .bge-section-textarea {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .bge-add-section-btn {
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-add-section-btn:hover {
+                    border-color: #818cf8;
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-toc {
+                    background: rgba(99, 102, 241, 0.06);
+                    border-color: rgba(99, 102, 241, 0.15);
+                }
+                body.dark-mode .bge-toc-list li { color: #94a3b8; }
+                body.dark-mode .bge-toc-list li:hover { color: #818cf8; }
+                body.dark-mode .bge-source-item {
+                    background: rgba(15, 23, 42, 0.4);
+                    border-color: rgba(255, 255, 255, 0.06);
+                }
+                body.dark-mode .bge-source-type-label {
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-source-type-radio:checked + .bge-source-type-label {
+                    border-color: #818cf8;
+                    background: rgba(99, 102, 241, 0.12);
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-source-input {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .bge-source-remove {
+                    background: #0f172a;
+                    border-color: #334155;
+                }
+                body.dark-mode .bge-add-source-btn {
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
+                body.dark-mode .bge-add-source-btn:hover {
+                    border-color: #818cf8;
+                    color: #818cf8;
+                }
+                body.dark-mode .bge-divider { background: rgba(255, 255, 255, 0.06); }
+
+                /* ===== RESPONSIVE ===== */
+                @media (max-width: 768px) {
+                    .bge-wrapper { padding-bottom: 40px; }
+                    .bge-card { padding: 22px 18px; border-radius: 16px; }
+                    .bge-topbar { flex-direction: column; align-items: flex-start; }
+                    .bge-topbar-right { width: 100%; }
+                    .bge-btn-draft { width: 100%; justify-content: center; }
+                    .bge-back-btn { padding: 8px 14px; font-size: 0.85rem; }
+                    .bge-page-title { font-size: 1.2rem; }
+                    .bge-section-header { flex-direction: column; align-items: stretch; }
+                    .bge-section-actions { justify-content: flex-end; }
+                    .bge-source-field-row { grid-template-columns: 1fr; }
+                    .bge-source-type-group { gap: 6px; }
+                    .bge-source-type-label { padding: 6px 12px; font-size: 0.8rem; }
+                    .bge-upload-zone { padding: 32px 16px; }
+                }
+                @media (max-width: 480px) {
+                    .bge-card { padding: 18px 14px; }
+                    .bge-card-title { font-size: 1rem; }
+                    .bge-page-title { font-size: 1.05rem; }
+                    .bge-tag-input { width: 110px; }
+                    .bge-section-num { width: 28px; height: 28px; font-size: 0.8rem; }
+                }
+            </style>
+
+            <div class="bge-wrapper">
+                <!-- Top Bar -->
+                <div class="bge-topbar">
+                    <div class="bge-topbar-left">
+                        <button class="bge-back-btn" onclick="backToBilimGundemi()">
+                            <i class="ph-bold ph-arrow-left"></i> Geri Dön
+                        </button>
+                        <h1 class="bge-page-title">
+                            <i class="ph-fill ph-newspaper"></i>
+                            Yeni Bilim Gündemi
+                        </h1>
+                    </div>
+                    <div class="bge-topbar-right">
+                        <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
+                            <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. İÇERİK BİLGİLERİ -->
+                <div class="bge-card">
+                    <h2 class="bge-card-title">
+                        <span class="bge-card-icon">📰</span> İÇERİK BİLGİLERİ
+                    </h2>
+
+                    <!-- Başlık -->
+                    <div class="bge-form-group">
+                        <label class="bge-label">
+                            Başlık
+                            <span class="bge-char-count" id="bge-title-count">0 / 80</span>
+                        </label>
+                        <span class="bge-label-hint">Önerilen uzunluk: 50–80 karakter</span>
+                        <input type="text" class="bge-input" id="bge-title" placeholder="Bilim gündemi başlığını yazın..." maxlength="120" oninput="bgeUpdateCharCount('bge-title', 'bge-title-count', 50, 80)">
+                    </div>
+
+                    <!-- Kısa Açıklama -->
+                    <div class="bge-form-group">
+                        <label class="bge-label">
+                            Kısa Açıklama
+                            <span class="bge-char-count" id="bge-desc-count">0 / 160</span>
+                        </label>
+                        <span class="bge-label-hint">Önerilen uzunluk: 120–160 karakter</span>
+                        <textarea class="bge-textarea" id="bge-description" placeholder="Bu gelişmede ne olduğunu birkaç cümlede anlatın..." maxlength="250" style="min-height: 80px;" oninput="bgeUpdateCharCount('bge-description', 'bge-desc-count', 120, 160)"></textarea>
+                    </div>
+
+                    <!-- Kategori -->
+                    <div class="bge-form-group">
+                        <label class="bge-label">Kategori</label>
+                        <select class="bge-select" id="bge-category">
+                            <option value="">Kategori Seçin</option>
+                            <option value="Genetik">Genetik</option>
+                            <option value="Biyoloji">Biyoloji</option>
+                            <option value="Fizik">Fizik</option>
+                            <option value="Kimya">Kimya</option>
+                            <option value="Astronomi ve Uzay Bilimleri">Astronomi & Uzay</option>
+                            <option value="Nörobilim">Nörobilim</option>
+                            <option value="Çevre ve İklim">Çevre & İklim</option>
+                            <option value="Tıp ve Sağlık">Tıp & Sağlık</option>
+                            <option value="Bilim ve Teknoloji">Bilim & Teknoloji</option>
+                            <option value="Diğer">Diğer</option>
+                        </select>
+                    </div>
+
+                    <!-- Etiketler -->
+                    <div class="bge-form-group">
+                        <label class="bge-label">Etiketler</label>
+                        <div class="bge-tags-container" id="bge-tags-container">
+                            <!-- Tags will be rendered here dynamically -->
+                            <div class="bge-tag-add-wrap">
+                                <input type="text" class="bge-tag-input" id="bge-tag-input" placeholder="Etiket yazın..." onkeydown="if(event.key==='Enter'){event.preventDefault();bgeAddTag();}">
+                                <button class="bge-tag-add-btn" onclick="bgeAddTag()">
+                                    <i class="ph-bold ph-plus" style="font-size: 0.8rem;"></i> Ekle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. ANA GÖRSEL -->
+                <div class="bge-card">
+                    <h2 class="bge-card-title">
+                        <span class="bge-card-icon">🖼️</span> ANA GÖRSEL
+                    </h2>
+
+                    <div class="bge-upload-zone" id="bge-upload-zone"
+                         onclick="document.getElementById('bge-image-input').click()"
+                         ondragover="event.preventDefault(); this.classList.add('dragover')"
+                         ondragleave="this.classList.remove('dragover')"
+                         ondrop="event.preventDefault(); this.classList.remove('dragover'); bgeHandleImageDrop(event)">
+                        <div id="bge-upload-placeholder">
+                            <i class="ph ph-image bge-upload-icon"></i>
+                            <p class="bge-upload-text">+ Görsel Yükle</p>
+                            <p class="bge-upload-hint">JPG, PNG veya WEBP — Sürükle bırak ya da tıkla</p>
+                        </div>
+                        <div id="bge-upload-preview-wrap" style="display: none;">
+                            <img id="bge-upload-preview" class="bge-upload-preview" src="" alt="Önizleme">
+                            <button class="bge-upload-remove" onclick="event.stopPropagation(); bgeRemoveImage()" title="Görseli Kaldır">
+                                <i class="ph-bold ph-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" id="bge-image-input" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="bgeHandleImageSelect(event)">
+
+                    <div class="bge-form-group" style="margin-top: 18px;">
+                        <label class="bge-label">Görsel Açıklaması (Alt Metin)</label>
+                        <input type="text" class="bge-input" id="bge-alt-text" placeholder="Görseli tanımlayan kısa bir açıklama yazın...">
+                    </div>
+                </div>
+
+                <!-- 3. BÖLÜMLER -->
+                <div class="bge-card">
+                    <h2 class="bge-card-title">
+                        <span class="bge-card-icon">📝</span> HABER METNİ — BÖLÜMLER
+                    </h2>
+
+                    <!-- Table of Contents -->
+                    <div class="bge-toc" id="bge-toc">
+                        <div class="bge-toc-title">
+                            <i class="ph-bold ph-list-bullets"></i> İÇİNDEKİLER
+                        </div>
+                        <ul class="bge-toc-list" id="bge-toc-list">
+                            <li class="bge-toc-empty">Bölüm eklendikçe içindekiler burada görünecek</li>
+                        </ul>
+                    </div>
+
+                    <hr class="bge-divider">
+
+                    <!-- Sections List -->
+                    <div class="bge-sections-list" id="bge-sections-list">
+                        <!-- Sections will be rendered dynamically -->
+                    </div>
+
+                    <button class="bge-add-section-btn" onclick="bgeAddSection()">
+                        <i class="ph-bold ph-plus"></i> Bölüm Ekle
+                    </button>
+                </div>
+
+                <!-- 4. ÖZET -->
+                <div class="bge-card">
+                    <h2 class="bge-card-title">
+                        <span class="bge-card-icon">📋</span> ÖZET
+                    </h2>
+                    <div class="bge-form-group">
+                        <label class="bge-label">
+                            Haberi kısaca özetleyin
+                            <span class="bge-char-count" id="bge-summary-count">0 / 160</span>
+                        </label>
+                        <span class="bge-label-hint">Önerilen uzunluk: 120–160 karakter</span>
+                        <textarea class="bge-textarea" id="bge-summary" placeholder="Haberin genel özetini yazın..." maxlength="250" style="min-height: 80px;" oninput="bgeUpdateCharCount('bge-summary', 'bge-summary-count', 120, 160)"></textarea>
+                    </div>
+                </div>
+
+                <!-- 5. KAYNAKLAR -->
+                <div class="bge-card">
+                    <h2 class="bge-card-title">
+                        <span class="bge-card-icon">📚</span> KAYNAKLAR
+                    </h2>
+
+                    <div class="bge-sources-list" id="bge-sources-list">
+                        <!-- Sources will be rendered dynamically -->
+                    </div>
+
+                    <button class="bge-add-source-btn" onclick="bgeAddSource()">
+                        <i class="ph-bold ph-plus"></i> Kaynak Ekle
+                    </button>
+                </div>
+
+                <!-- Bottom Actions (Sticky) -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px;">
+                    <button class="bge-back-btn" onclick="backToBilimGundemi()">
+                        <i class="ph-bold ph-arrow-left"></i> Geri Dön
+                    </button>
+                    <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
+                        <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- END BILIM GUNDEMI EDITOR SECTION -->
 
         <!-- NEW GUNDEM MODAL -->
         <div class="bg-modal-overlay" id="bg-modal-overlay">
@@ -11509,7 +12524,7 @@
                         <div class="bg-empty-state">
                             <i class="ph ph-microscope"></i>
                             <p>${bilimGundemFilter === 'all' ? 'Henüz bilim gündemi içeriği oluşturulmamış.' : 'Bu kategoride içerik bulunamadı.'}</p>
-                            <button class="bg-btn-continue" onclick="openBilimGundemModal()" style="margin-top: 12px;">
+                            <button class="bg-btn-continue" onclick="openBilimGundemEditor()" style="margin-top: 12px;">
                                 <i class="ph-bold ph-plus"></i> İlk Gündem Yazını Oluştur
                             </button>
                         </div>
@@ -11622,6 +12637,467 @@
                     document.getElementById('bg-modal-overlay').classList.add('show');
                 }
             }
+        }
+
+        /* ===================================================================
+           BILIM GUNDEMI EDITOR — FULL PAGE FUNCTIONS
+           =================================================================== */
+        
+        // Editor State
+        let bgeTags = [];
+        let bgeSections = [];
+        let bgeSources = [];
+        let bgeImageFile = null;
+        let bgeImageDataUrl = null;
+        let bgeSectionIdCounter = 0;
+        let bgeSourceIdCounter = 0;
+
+        function openBilimGundemEditor() {
+            // Reset editor state
+            bgeTags = [];
+            bgeSections = [];
+            bgeSources = [];
+            bgeImageFile = null;
+            bgeImageDataUrl = null;
+            bgeSectionIdCounter = 0;
+            bgeSourceIdCounter = 0;
+
+            // Clear form fields
+            const el = id => document.getElementById(id);
+            if (el('bge-title')) el('bge-title').value = '';
+            if (el('bge-description')) el('bge-description').value = '';
+            if (el('bge-category')) el('bge-category').value = '';
+            if (el('bge-summary')) el('bge-summary').value = '';
+            if (el('bge-alt-text')) el('bge-alt-text').value = '';
+
+            // Reset counters
+            bgeUpdateCharCount('bge-title', 'bge-title-count', 50, 80);
+            bgeUpdateCharCount('bge-description', 'bge-desc-count', 120, 160);
+            bgeUpdateCharCount('bge-summary', 'bge-summary-count', 120, 160);
+
+            // Reset image zone
+            bgeRemoveImage();
+
+            // Render empty lists
+            bgeRenderTags();
+            bgeRenderSections();
+            bgeRenderSources();
+            bgeUpdateTOC();
+
+            // Navigate to editor section
+            showSection('bilim-gundemi-editor', document.querySelector('#nav-bilim-gundemi'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function backToBilimGundemi() {
+            showSection('bilim-gundemi', document.querySelector('#nav-bilim-gundemi'));
+        }
+
+        // ─── Character Count ───
+        function bgeUpdateCharCount(inputId, countId, min, max) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(countId);
+            if (!input || !counter) return;
+
+            const len = input.value.length;
+            counter.textContent = len + ' / ' + max;
+            counter.classList.remove('warn', 'over', 'good');
+
+            if (len >= min && len <= max) {
+                counter.classList.add('good');
+            } else if (len > max) {
+                counter.classList.add('over');
+            } else if (len > 0 && len < min) {
+                counter.classList.add('warn');
+            }
+        }
+
+        // ─── Tags ───
+        function bgeAddTag() {
+            const input = document.getElementById('bge-tag-input');
+            if (!input) return;
+            const tag = input.value.trim();
+            if (!tag) return;
+            if (bgeTags.includes(tag)) {
+                input.value = '';
+                return;
+            }
+            bgeTags.push(tag);
+            input.value = '';
+            bgeRenderTags();
+        }
+
+        function bgeRemoveTag(index) {
+            bgeTags.splice(index, 1);
+            bgeRenderTags();
+        }
+
+        function bgeRenderTags() {
+            const container = document.getElementById('bge-tags-container');
+            if (!container) return;
+
+            let html = bgeTags.map((tag, i) => `
+                <span class="bge-tag">
+                    ${escapeHtml(tag)}
+                    <button class="bge-tag-remove" onclick="bgeRemoveTag(${i})" title="Kaldır">×</button>
+                </span>
+            `).join('');
+
+            html += `
+                <div class="bge-tag-add-wrap">
+                    <input type="text" class="bge-tag-input" id="bge-tag-input" placeholder="Etiket yazın..." onkeydown="if(event.key==='Enter'){event.preventDefault();bgeAddTag();}">
+                    <button class="bge-tag-add-btn" onclick="bgeAddTag()">
+                        <i class="ph-bold ph-plus" style="font-size: 0.8rem;"></i> Ekle
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ─── Sections (Bölümler) ───
+        function bgeAddSection() {
+            bgeSectionIdCounter++;
+            bgeSections.push({
+                id: 'sec_' + bgeSectionIdCounter,
+                title: '',
+                content: ''
+            });
+            bgeRenderSections();
+            bgeUpdateTOC();
+
+            // Focus new section title input
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.bge-section-title-input');
+                if (inputs.length > 0) inputs[inputs.length - 1].focus();
+            }, 100);
+        }
+
+        function bgeRemoveSection(id) {
+            bgeSections = bgeSections.filter(s => s.id !== id);
+            bgeRenderSections();
+            bgeUpdateTOC();
+        }
+
+        function bgeMoveSection(id, direction) {
+            const idx = bgeSections.findIndex(s => s.id === id);
+            if (idx < 0) return;
+
+            // Save current values before re-render
+            bgeSaveSectionValues();
+
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= bgeSections.length) return;
+
+            const temp = bgeSections[idx];
+            bgeSections[idx] = bgeSections[newIdx];
+            bgeSections[newIdx] = temp;
+            bgeRenderSections();
+            bgeUpdateTOC();
+        }
+
+        function bgeSaveSectionValues() {
+            bgeSections.forEach((sec) => {
+                const titleInput = document.getElementById('sec-title-' + sec.id);
+                const contentInput = document.getElementById('sec-content-' + sec.id);
+                if (titleInput) sec.title = titleInput.value;
+                if (contentInput) sec.content = contentInput.value;
+            });
+        }
+
+        function bgeRenderSections() {
+            const container = document.getElementById('bge-sections-list');
+            if (!container) return;
+
+            if (bgeSections.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = bgeSections.map((sec, i) => `
+                <div class="bge-section-item" data-id="${sec.id}">
+                    <div class="bge-section-header">
+                        <div class="bge-section-num">${i + 1}</div>
+                        <input type="text" class="bge-section-title-input" id="sec-title-${sec.id}"
+                               value="${escapeHtml(sec.title)}"
+                               placeholder="Bölüm başlığı yazın..."
+                               oninput="bgeOnSectionTitleChange('${sec.id}', this.value)">
+                        <div class="bge-section-actions">
+                            <button class="bge-section-action-btn" onclick="bgeMoveSection('${sec.id}', -1)" title="Yukarı Taşı" ${i === 0 ? 'disabled style="opacity:0.3;pointer-events:none;"' : ''}>
+                                <i class="ph-bold ph-arrow-up"></i>
+                            </button>
+                            <button class="bge-section-action-btn" onclick="bgeMoveSection('${sec.id}', 1)" title="Aşağı Taşı" ${i === bgeSections.length - 1 ? 'disabled style="opacity:0.3;pointer-events:none;"' : ''}>
+                                <i class="ph-bold ph-arrow-down"></i>
+                            </button>
+                            <button class="bge-section-action-btn delete" onclick="bgeRemoveSection('${sec.id}')" title="Bölümü Sil">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <textarea class="bge-section-textarea" id="sec-content-${sec.id}"
+                              placeholder="Bu bölümün metnini yazın..."
+                              oninput="bgeSections.find(s=>s.id==='${sec.id}').content=this.value">${escapeHtml(sec.content)}</textarea>
+                </div>
+            `).join('');
+        }
+
+        function bgeOnSectionTitleChange(id, value) {
+            const sec = bgeSections.find(s => s.id === id);
+            if (sec) sec.title = value;
+            bgeUpdateTOC();
+        }
+
+        function bgeUpdateTOC() {
+            const tocList = document.getElementById('bge-toc-list');
+            if (!tocList) return;
+
+            const titled = bgeSections.filter(s => s.title && s.title.trim());
+            if (titled.length === 0) {
+                tocList.innerHTML = '<li class="bge-toc-empty">Bölüm eklendikçe içindekiler burada görünecek</li>';
+                return;
+            }
+
+            tocList.innerHTML = titled.map((sec, i) => `
+                <li onclick="document.getElementById('sec-title-${sec.id}')?.scrollIntoView({behavior:'smooth',block:'center'})">
+                    ${escapeHtml(sec.title)}
+                </li>
+            `).join('');
+        }
+
+        // ─── Image Upload ───
+        function bgeHandleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) bgeProcessImage(file);
+        }
+
+        function bgeHandleImageDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (file) bgeProcessImage(file);
+        }
+
+        function bgeProcessImage(file) {
+            const valid = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!valid.includes(file.type)) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Sadece JPG, PNG veya WEBP formatları desteklenir.', 'error');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Dosya boyutu 10MB\'dan küçük olmalıdır.', 'error');
+                return;
+            }
+
+            bgeImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                bgeImageDataUrl = e.target.result;
+                const zone = document.getElementById('bge-upload-zone');
+                const placeholder = document.getElementById('bge-upload-placeholder');
+                const previewWrap = document.getElementById('bge-upload-preview-wrap');
+                const previewImg = document.getElementById('bge-upload-preview');
+
+                if (zone) zone.classList.add('has-image');
+                if (placeholder) placeholder.style.display = 'none';
+                if (previewWrap) previewWrap.style.display = 'block';
+                if (previewImg) previewImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function bgeRemoveImage() {
+            bgeImageFile = null;
+            bgeImageDataUrl = null;
+            const zone = document.getElementById('bge-upload-zone');
+            const placeholder = document.getElementById('bge-upload-placeholder');
+            const previewWrap = document.getElementById('bge-upload-preview-wrap');
+            const previewImg = document.getElementById('bge-upload-preview');
+            const fileInput = document.getElementById('bge-image-input');
+
+            if (zone) zone.classList.remove('has-image');
+            if (placeholder) placeholder.style.display = '';
+            if (previewWrap) previewWrap.style.display = 'none';
+            if (previewImg) previewImg.src = '';
+            if (fileInput) fileInput.value = '';
+        }
+
+        // ─── Sources (Kaynaklar) ───
+        function bgeAddSource() {
+            bgeSourceIdCounter++;
+            bgeSources.push({
+                id: 'src_' + bgeSourceIdCounter,
+                type: 'bilimsel_makale',
+                url: '',
+                // Bilimsel makale fields
+                articleTitle: '',
+                authors: '',
+                journal: '',
+                pubDate: '',
+                doi: ''
+            });
+            bgeRenderSources();
+
+            setTimeout(() => {
+                const container = document.getElementById('bge-sources-list');
+                if (container && container.lastElementChild) {
+                    container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        function bgeRemoveSource(id) {
+            bgeSources = bgeSources.filter(s => s.id !== id);
+            bgeRenderSources();
+        }
+
+        function bgeOnSourceTypeChange(id, type) {
+            const src = bgeSources.find(s => s.id === id);
+            if (src) {
+                // Save URL before type change
+                const urlInput = document.getElementById('src-url-' + id);
+                if (urlInput) src.url = urlInput.value;
+                src.type = type;
+            }
+            bgeRenderSources();
+        }
+
+        function bgeRenderSources() {
+            const container = document.getElementById('bge-sources-list');
+            if (!container) return;
+
+            if (bgeSources.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = bgeSources.map((src, i) => {
+                const types = [
+                    { value: 'bilimsel_makale', label: '📄 Bilimsel Makale', icon: 'ph-article' },
+                    { value: 'universite', label: '🏛️ Üniversite / Kurum', icon: 'ph-buildings' },
+                    { value: 'haber', label: '📰 Haber', icon: 'ph-newspaper' },
+                    { value: 'diger', label: '📎 Diğer', icon: 'ph-link' }
+                ];
+
+                const typeRadios = types.map(t => `
+                    <input type="radio" class="bge-source-type-radio" name="src-type-${src.id}" id="src-type-${src.id}-${t.value}" value="${t.value}" ${src.type === t.value ? 'checked' : ''} onchange="bgeOnSourceTypeChange('${src.id}', '${t.value}')">
+                    <label class="bge-source-type-label" for="src-type-${src.id}-${t.value}">${t.label}</label>
+                `).join('');
+
+                let fieldsHtml = '';
+
+                if (src.type === 'bilimsel_makale') {
+                    fieldsHtml = `
+                        <div class="bge-source-fields">
+                            <input type="text" class="bge-source-input" id="src-article-title-${src.id}" placeholder="Makale başlığı" value="${escapeHtml(src.articleTitle || '')}">
+                            <div class="bge-source-field-row">
+                                <input type="text" class="bge-source-input" id="src-authors-${src.id}" placeholder="Yazarlar" value="${escapeHtml(src.authors || '')}">
+                                <input type="text" class="bge-source-input" id="src-journal-${src.id}" placeholder="Dergi" value="${escapeHtml(src.journal || '')}">
+                            </div>
+                            <div class="bge-source-field-row">
+                                <input type="text" class="bge-source-input" id="src-pubdate-${src.id}" placeholder="Yayın tarihi (örn: 2026)" value="${escapeHtml(src.pubDate || '')}">
+                                <input type="text" class="bge-source-input" id="src-doi-${src.id}" placeholder="DOI (örn: 10.1234/...)" value="${escapeHtml(src.doi || '')}">
+                            </div>
+                            <input type="url" class="bge-source-input" id="src-url-${src.id}" placeholder="URL (https://...)" value="${escapeHtml(src.url || '')}">
+                        </div>
+                    `;
+                } else {
+                    fieldsHtml = `
+                        <div class="bge-source-fields">
+                            <input type="url" class="bge-source-input" id="src-url-${src.id}" placeholder="Kaynak URL (https://...)" value="${escapeHtml(src.url || '')}">
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="bge-source-item" data-id="${src.id}">
+                        <div class="bge-source-header">
+                            <span class="bge-source-num">Kaynak ${i + 1}</span>
+                            <button class="bge-source-remove" onclick="bgeRemoveSource('${src.id}')" title="Kaynağı Kaldır">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                        <div class="bge-source-type-group">
+                            ${typeRadios}
+                        </div>
+                        ${fieldsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function bgeSaveSourceValues() {
+            bgeSources.forEach(src => {
+                const urlInput = document.getElementById('src-url-' + src.id);
+                if (urlInput) src.url = urlInput.value;
+
+                if (src.type === 'bilimsel_makale') {
+                    const artTitle = document.getElementById('src-article-title-' + src.id);
+                    const authors = document.getElementById('src-authors-' + src.id);
+                    const journal = document.getElementById('src-journal-' + src.id);
+                    const pubDate = document.getElementById('src-pubdate-' + src.id);
+                    const doi = document.getElementById('src-doi-' + src.id);
+                    if (artTitle) src.articleTitle = artTitle.value;
+                    if (authors) src.authors = authors.value;
+                    if (journal) src.journal = journal.value;
+                    if (pubDate) src.pubDate = pubDate.value;
+                    if (doi) src.doi = doi.value;
+                }
+            });
+        }
+
+        // ─── Save from Editor ───
+        function saveBilimGundemFromEditor() {
+            const title = (document.getElementById('bge-title')?.value || '').trim();
+            const description = (document.getElementById('bge-description')?.value || '').trim();
+            const category = document.getElementById('bge-category')?.value || '';
+            const summary = (document.getElementById('bge-summary')?.value || '').trim();
+            const altText = (document.getElementById('bge-alt-text')?.value || '').trim();
+
+            if (!title) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Lütfen bir başlık giriniz.', 'error');
+                else alert('Lütfen bir başlık giriniz.');
+                document.getElementById('bge-title')?.focus();
+                return;
+            }
+
+            // Save current section and source values from DOM
+            bgeSaveSectionValues();
+            bgeSaveSourceValues();
+
+            const newItem = {
+                id: 'bg_' + Date.now(),
+                title: title,
+                description: description,
+                category: category,
+                tags: [...bgeTags],
+                summary: summary,
+                altText: altText,
+                imageDataUrl: bgeImageDataUrl || null,
+                sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
+                sources: bgeSources.map(s => ({
+                    type: s.type,
+                    url: s.url,
+                    articleTitle: s.articleTitle || '',
+                    authors: s.authors || '',
+                    journal: s.journal || '',
+                    pubDate: s.pubDate || '',
+                    doi: s.doi || ''
+                })),
+                status: 'taslak',
+                views: 0,
+                likes: 0,
+                comments: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            bilimGundemData.push(newItem);
+            saveBilimGundemStorage(bilimGundemData);
+
+            if (typeof showAuthorToast === 'function') {
+                showAuthorToast('Bilim gündemi taslağı başarıyla kaydedildi!', 'success');
+            }
+
+            // Navigate back to bilim gundemi list
+            backToBilimGundemi();
+            loadBilimGundemiData();
         }
 
         function renderBgPerformanceChart() {
