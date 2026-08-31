@@ -113,14 +113,20 @@
             right: 0;
             width: 100%;
             z-index: 1000;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        html[data-theme="light"] header.header {
+            background: rgba(255, 255, 255, 0.65) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
         }
 
         body {
-            background: #090b10;
+            background: var(--bg-color, #090b10);
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            transition: background-color 0.3s ease;
         }
 
         /* === BİLİM GÜNDEMİ TAM EKRAN HERO SLIDER === */
@@ -139,9 +145,14 @@
             padding-top: 80px;
             padding-bottom: 25px;
             box-sizing: border-box;
+            transition: background-color 0.3s ease;
         }
 
-        /* Arka Plan Görsel Katmanı - Şeffaflığı azaltılmış (daha belirgin) */
+        html[data-theme="light"] .gundem-hero-slider {
+            background: #f8fafc;
+        }
+
+        /* Arka Plan Görsel Katmanı - Ferah ve Canlı */
         .gundem-bg-layer {
             position: absolute;
             inset: -40px;
@@ -149,22 +160,34 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.55; /* Şeffaflık azaltıldı, görsel daha net */
-            filter: blur(28px);
+            opacity: 0.65; /* Şeffaflık artırıldı (daha aydınlık ve ferah görünüm) */
+            filter: blur(24px);
             transform: scale(1.1);
-            transition: background-image 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background-image 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             pointer-events: none;
         }
 
-        /* Arka Plan Koyu Degradeler */
+        html[data-theme="light"] .gundem-bg-layer {
+            opacity: 0.45;
+            filter: blur(28px);
+        }
+
+        /* Arka Plan Degradeleri (Aşırı karanlık hissi yumuşatıldı) */
         .gundem-dark-overlay {
             position: absolute;
             inset: 0;
             z-index: 2;
-            background: radial-gradient(circle at 65% 50%, rgba(99, 102, 241, 0.1) 0%, rgba(9, 11, 16, 0.8) 75%),
+            background: radial-gradient(circle at 65% 50%, rgba(99, 102, 241, 0.08) 0%, rgba(9, 11, 16, 0.65) 75%),
                         linear-gradient(to top, #090b10 0%, transparent 60%),
-                        linear-gradient(to bottom, rgba(9, 11, 16, 0.7) 0%, transparent 35%);
+                        linear-gradient(to bottom, rgba(9, 11, 16, 0.55) 0%, transparent 35%);
             pointer-events: none;
+            transition: background 0.3s ease;
+        }
+
+        html[data-theme="light"] .gundem-dark-overlay {
+            background: radial-gradient(circle at 65% 50%, rgba(99, 102, 241, 0.05) 0%, rgba(248, 250, 252, 0.75) 75%),
+                        linear-gradient(to top, #f8fafc 0%, transparent 60%),
+                        linear-gradient(to bottom, rgba(248, 250, 252, 0.65) 0%, transparent 35%);
         }
 
         /* Slider Ana Konteyner */
@@ -208,22 +231,29 @@
             max-width: 560px;
         }
 
-        /* #6366f1 Buton Rengi Gündem Rozeti */
+        /* Gündem Rozeti (Aşırı parlaklığı giderilmiş, zarif ve mat cam stili) */
         .gundem-tag-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #6366f1;
-            color: #ffffff;
+            background: rgba(99, 102, 241, 0.16);
+            color: #a5b4fc;
             font-size: 0.84rem;
             font-weight: 700;
-            padding: 6px 16px;
+            padding: 5px 15px;
             border-radius: 999px;
             margin-bottom: 16px;
-            letter-spacing: 0.4px;
-            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
             text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+        }
+
+        html[data-theme="light"] .gundem-tag-badge {
+            background: rgba(99, 102, 241, 0.12);
+            color: #4f46e5;
+            border-color: rgba(99, 102, 241, 0.25);
         }
 
         /* Tıklanabilir Başlık Linki */
@@ -232,7 +262,7 @@
             display: block;
         }
 
-        /* Büyütülmüş Başlık */
+        /* Başlık */
         .gundem-main-title {
             font-size: 1.75rem;
             font-weight: 800;
@@ -240,7 +270,7 @@
             line-height: 1.32;
             letter-spacing: -0.5px;
             margin: 0 0 12px 0;
-            text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -249,8 +279,17 @@
             cursor: pointer;
         }
 
+        html[data-theme="light"] .gundem-main-title {
+            color: #0f172a;
+            text-shadow: none;
+        }
+
         .gundem-title-link:hover .gundem-main-title {
-            color: #a5b4fc;
+            color: #818cf8;
+        }
+
+        html[data-theme="light"] .gundem-title-link:hover .gundem-main-title {
+            color: #4f46e5;
         }
 
         /* Alt Başlık */
@@ -264,6 +303,10 @@
             gap: 8px;
         }
 
+        html[data-theme="light"] .gundem-sub-category {
+            color: #475569;
+        }
+
         .gundem-sub-category::before {
             content: '';
             display: inline-block;
@@ -273,7 +316,7 @@
             border-radius: 2px;
         }
 
-        /* Büyütülmüş Kısa Açıklama */
+        /* Kısa Açıklama */
         .gundem-description-text {
             font-size: 1.02rem;
             line-height: 1.68;
@@ -286,6 +329,10 @@
             -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        html[data-theme="light"] .gundem-description-text {
+            color: #334155;
         }
 
         /* Sağ Taraf: Tıklanabilir Net Ana Görsel Kartı */
@@ -306,16 +353,26 @@
             overflow: hidden;
             background: #111420;
             border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.65), 0 0 30px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 25px rgba(99, 102, 241, 0.15);
             transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease, border-color 0.3s ease;
             text-decoration: none;
             cursor: pointer;
         }
 
+        html[data-theme="light"] .gundem-image-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.1);
+        }
+
         .gundem-image-card:hover {
             transform: translateY(-4px) scale(1.015);
             border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 38px rgba(99, 102, 241, 0.35);
+            box-shadow: 0 26px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(99, 102, 241, 0.3);
+        }
+
+        html[data-theme="light"] .gundem-image-card:hover {
+            box-shadow: 0 24px 50px rgba(99, 102, 241, 0.2);
         }
 
         .gundem-image-card img {
@@ -330,7 +387,7 @@
             transform: scale(1.035);
         }
 
-        /* Slider Ok Butonları - #6366f1 */
+        /* Slider Ok Butonları */
         .gundem-arrow-btn {
             position: absolute;
             top: 50%;
@@ -351,11 +408,19 @@
             transition: all 0.25s ease;
         }
 
+        html[data-theme="light"] .gundem-arrow-btn {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
         .gundem-arrow-btn:hover {
             background: #6366f1;
             border-color: #6366f1;
+            color: #ffffff;
             transform: translateY(-50%) scale(1.08);
-            box-shadow: 0 0 18px rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 18px rgba(99, 102, 241, 0.5);
         }
 
         .gundem-arrow-btn.prev-btn {
@@ -366,7 +431,7 @@
             right: 20px;
         }
 
-        /* Slider Noktaları - #6366f1 */
+        /* Slider Noktaları */
         .gundem-dots-wrapper {
             display: flex;
             justify-content: center;
@@ -386,10 +451,14 @@
             transition: all 0.3s ease;
         }
 
+        html[data-theme="light"] .gundem-dot {
+            background: rgba(0, 0, 0, 0.18);
+        }
+
         .gundem-dot.active {
             width: 30px;
             background: #6366f1;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.7);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
 
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
@@ -498,7 +567,7 @@
 
     <!-- === BİLİM GÜNDEMİ TAM EKRAN HERO BÖLÜMÜ === -->
     <section class="gundem-hero-slider" id="gundemHero">
-        <!-- Arka Plan Katmanı (%55 belirgin blur) -->
+        <!-- Arka Plan Katmanı (%65 ferah ve aydınlık blur) -->
         <div class="gundem-bg-layer" id="gundemBgLayer"></div>
         <div class="gundem-dark-overlay"></div>
 
