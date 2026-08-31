@@ -12546,6 +12546,9 @@
         // ====================================
         let bilimGundemData = [];
         let bilimGundemFilter = 'all';
+        let bilimGundemSearchTerm = '';
+        let bilimGundemCategoryFilter = 'all';
+        let bilimGundemSortBy = 'newest';
         let bgPerformanceChartInstance = null;
 
         function getBilimGundemStorage() {
@@ -12603,11 +12606,6 @@
                 btnEl.style.display = 'none';
             }
         }
-
-        let bilimGundemFilter = 'all';
-        let bilimGundemSearchTerm = '';
-        let bilimGundemCategoryFilter = 'all';
-        let bilimGundemSortBy = 'newest';
 
         function onBilimGundemSearch(val) {
             bilimGundemSearchTerm = (val || '').trim().toLowerCase();
