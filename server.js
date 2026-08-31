@@ -192,7 +192,7 @@ app.get(['/en', '/en/'], (req, res) => {
 });
 
 // Bilim Gündemi Page Route
-app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/7bilimgundemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi', '/en/7bilimgundemi'], (req, res) => {
+app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
 });
 
