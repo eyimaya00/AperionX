@@ -5568,42 +5568,69 @@
             <hr class="bg-divider">
 
             <!-- Content Section -->
-            <div class="bg-content-header">
-                <h2 class="bg-content-title">
-                    <i class="ph-fill ph-newspaper" style="color: var(--primary-accent);"></i>
-                    İçeriklerim
+            <div class="art-content-header">
+                <h2 class="art-content-title">
+                    <i class="ph-fill ph-newspaper" style="color: var(--primary-accent, #6366f1);"></i>
+                    Bilim Gündemi Yayınlarım
                 </h2>
-                <div class="bg-filter-tabs" id="bg-filter-tabs">
-                    <button class="bg-filter-tab active" onclick="filterBilimGundem('all', this)">Tümü</button>
-                    <button class="bg-filter-tab" onclick="filterBilimGundem('taslak', this)">Taslak</button>
-                    <button class="bg-filter-tab" onclick="filterBilimGundem('editorde', this)">Editörde</button>
-                    <button class="bg-filter-tab" onclick="filterBilimGundem('yayinda', this)">Yayında</button>
+                <div class="art-filter-tabs" id="bg-filter-tabs">
+                    <button class="art-filter-tab active" onclick="filterBilimGundem('all', this)">Tümü</button>
+                    <button class="art-filter-tab" onclick="filterBilimGundem('taslak', this)">Taslak</button>
+                    <button class="art-filter-tab" onclick="filterBilimGundem('editorde', this)">Editörde</button>
+                    <button class="art-filter-tab" onclick="filterBilimGundem('duzenleme', this)">Düzenleme Gerekli</button>
+                    <button class="art-filter-tab" onclick="filterBilimGundem('yayinda', this)">Yayında</button>
+                    <button class="art-filter-tab" onclick="filterBilimGundem('trash', this)"><i class="ph ph-trash"></i> Çöp Kutusu</button>
+                </div>
+            </div>
+
+            <!-- Toolbar: Search, Category, Sort -->
+            <div class="art-toolbar">
+                <div class="art-search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="bg-search-input" class="art-search-input" placeholder="Gündemlerde ara..." oninput="onBilimGundemSearch(this.value)">
+                </div>
+                <div class="art-toolbar-filters">
+                    <select id="bg-filter-cat" class="art-select-filter" onchange="onBilimGundemCategoryChange(this.value)">
+                        <option value="all">Tüm Kategoriler</option>
+                        <option value="Genetik">Genetik</option>
+                        <option value="Biyoloji">Biyoloji</option>
+                        <option value="Fizik">Fizik</option>
+                        <option value="Kimya">Kimya</option>
+                        <option value="Astronomi ve Uzay Bilimleri">Astronomi & Uzay</option>
+                        <option value="Nörobilim">Nörobilim</option>
+                        <option value="Çevre ve İklim">Çevre & İklim</option>
+                        <option value="Tıp ve Sağlık">Tıp & Sağlık</option>
+                        <option value="Bilim ve Teknoloji">Bilim & Teknoloji</option>
+                    </select>
+                    <select id="bg-filter-sort" class="art-select-filter" onchange="onBilimGundemSortChange(this.value)">
+                        <option value="newest">En Yeni</option>
+                        <option value="views">En Çok Okunan</option>
+                        <option value="likes">En Çok Beğenilen</option>
+                        <option value="title">A-Z Sıralı</option>
+                    </select>
                 </div>
             </div>
 
             <!-- Content Table -->
-            <div class="bg-table-wrap">
-                <table class="bg-table">
+            <div class="art-table-wrapper">
+                <table class="art-table">
                     <thead>
                         <tr>
-                            <th>Başlık</th>
+                            <th>Gündem / Haber</th>
                             <th>Durum</th>
-                            <th>Tarih</th>
                             <th style="text-align: center;"><i class="ph ph-eye"></i> Okunma</th>
                             <th style="text-align: center;"><i class="ph ph-heart"></i> Beğeni</th>
                             <th style="text-align: center;"><i class="ph ph-chat-circle-text"></i> Yorum</th>
+                            <th>Tarih</th>
                             <th style="text-align: center;">İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="bg-table-body">
                         <tr>
                             <td colspan="7">
-                                <div class="bg-empty-state">
-                                    <i class="ph ph-microscope"></i>
-                                    <p>Henüz bilim gündemi içeriği oluşturulmamış.</p>
-                                    <button class="bg-btn-continue" onclick="openBilimGundemEditor()" style="margin-top: 12px;">
-                                        <i class="ph-bold ph-plus"></i> İlk Gündem Yazını Oluştur
-                                    </button>
+                                <div class="exp-empty-state">
+                                    <i class="ph ph-newspaper"></i>
+                                    <p>Gündem yazıları yükleniyor...</p>
                                 </div>
                             </td>
                         </tr>
@@ -12577,56 +12604,184 @@
             }
         }
 
+        let bilimGundemFilter = 'all';
+        let bilimGundemSearchTerm = '';
+        let bilimGundemCategoryFilter = 'all';
+        let bilimGundemSortBy = 'newest';
+
+        function onBilimGundemSearch(val) {
+            bilimGundemSearchTerm = (val || '').trim().toLowerCase();
+            renderBilimGundemTable();
+        }
+
+        function onBilimGundemCategoryChange(val) {
+            bilimGundemCategoryFilter = val || 'all';
+            renderBilimGundemTable();
+        }
+
+        function onBilimGundemSortChange(val) {
+            bilimGundemSortBy = val || 'newest';
+            renderBilimGundemTable();
+        }
+
         function renderBilimGundemTable() {
             const tbody = document.getElementById('bg-table-body');
             if (!tbody) return;
 
-            let filtered = bilimGundemData;
+            if (!Array.isArray(bilimGundemData) || bilimGundemData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 50px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(99, 102, 241, 0.08); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-newspaper"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Gündem Yazısı Bulunamadı</h4>
+                            <p style="margin: 0 0 14px; color: #94a3b8; font-size: 0.9rem;">Henüz bir bilim gündemi yazısı oluşturmadınız.</p>
+                            <button class="art-btn-new" onclick="openBilimGundemEditor()" style="display: inline-flex; margin: 0 auto;">
+                                <i class="ph-bold ph-plus"></i> İlk Gündem Yazını Oluştur
+                            </button>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            let filtered = [...bilimGundemData];
+
+            // Status filter
             if (bilimGundemFilter !== 'all') {
-                filtered = bilimGundemData.filter(i => i.status === bilimGundemFilter);
+                if (bilimGundemFilter === 'trash') {
+                    filtered = filtered.filter(i => i.status === 'trash' || i.status === 'silindi');
+                } else if (bilimGundemFilter === 'duzenleme') {
+                    filtered = filtered.filter(i => i.status === 'duzenleme' || i.status === 'rejected');
+                } else {
+                    filtered = filtered.filter(i => i.status === bilimGundemFilter);
+                }
+            } else {
+                filtered = filtered.filter(i => i.status !== 'trash' && i.status !== 'silindi');
+            }
+
+            // Category filter
+            if (bilimGundemCategoryFilter !== 'all') {
+                filtered = filtered.filter(i => (i.category || '').toLowerCase() === bilimGundemCategoryFilter.toLowerCase());
+            }
+
+            // Search filter
+            if (bilimGundemSearchTerm) {
+                filtered = filtered.filter(i => 
+                    (i.title || '').toLowerCase().includes(bilimGundemSearchTerm) ||
+                    (i.category || '').toLowerCase().includes(bilimGundemSearchTerm) ||
+                    (i.description || i.summary || '').toLowerCase().includes(bilimGundemSearchTerm)
+                );
+            }
+
+            // Sort
+            if (bilimGundemSortBy === 'views') {
+                filtered.sort((a, b) => parseInt(b.views || 0, 10) - parseInt(a.views || 0, 10));
+            } else if (bilimGundemSortBy === 'likes') {
+                filtered.sort((a, b) => parseInt(b.likes || b.like_count || 0, 10) - parseInt(a.likes || a.like_count || 0, 10));
+            } else if (bilimGundemSortBy === 'title') {
+                filtered.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'tr'));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
             }
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="7">
-                        <div class="bg-empty-state">
-                            <i class="ph ph-microscope"></i>
-                            <p>${bilimGundemFilter === 'all' ? 'Henüz bilim gündemi içeriği oluşturulmamış.' : 'Bu kategoride içerik bulunamadı.'}</p>
-                            <button class="bg-btn-continue" onclick="openBilimGundemEditor()" style="margin-top: 12px;">
-                                <i class="ph-bold ph-plus"></i> İlk Gündem Yazını Oluştur
-                            </button>
-                        </div>
-                    </td></tr>`;
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 50px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(99, 102, 241, 0.08); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Sonuç Bulunamadı</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Aradığınız kriterlere uygun bilim gündemi bulunamadı.</p>
+                        </td>
+                    </tr>`;
                 return;
             }
 
             const statusMap = {
-                'yayinda': { label: 'Yayında', icon: 'ph-check-circle' },
-                'taslak': { label: 'Taslak', icon: 'ph-pencil-simple' },
-                'editorde': { label: 'Editörde', icon: 'ph-clock' },
-                'reddedildi': { label: 'Reddedildi', icon: 'ph-x-circle' }
+                'yayinda': { label: 'Yayında', badgeClass: 'published', icon: 'ph-check-circle' },
+                'published': { label: 'Yayında', badgeClass: 'published', icon: 'ph-check-circle' },
+                'taslak': { label: 'Taslak', badgeClass: 'draft', icon: 'ph-pencil-simple' },
+                'draft': { label: 'Taslak', badgeClass: 'draft', icon: 'ph-pencil-simple' },
+                'editorde': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
+                'pending': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
+                'duzenleme': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
+                'rejected': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
+                'trash': { label: 'Çöpte', badgeClass: 'trash', icon: 'ph-trash' },
+                'silindi': { label: 'Çöpte', badgeClass: 'trash', icon: 'ph-trash' }
             };
 
             tbody.innerHTML = filtered.map(item => {
                 const st = statusMap[item.status] || statusMap['taslak'];
-                const formattedDate = item.createdAt 
-                    ? new Date(item.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                    : '-';
+                
+                let thumbHtml = `<div class="art-thumb"><i class="ph-fill ph-newspaper"></i></div>`;
+                if (item.imageDataUrl) {
+                    thumbHtml = `<img src="${item.imageDataUrl}" class="art-thumb" alt="${escapeHtml(item.title)}" onerror="this.outerHTML='<div class=\\'art-thumb\\'><i class=\\'ph-fill ph-newspaper\\'></i></div>'">`;
+                }
+
+                const views = parseInt(item.views || 0, 10).toLocaleString('tr-TR');
+                const likes = parseInt(item.likes || item.like_count || 0, 10).toLocaleString('tr-TR');
+                const comments = parseInt(item.comments || item.comment_count || 0, 10).toLocaleString('tr-TR');
+                
+                const dateObj = item.createdAt || item.created_at;
+                const formattedDate = dateObj 
+                    ? new Date(dateObj).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) 
+                    : '—';
+
+                if (bilimGundemFilter === 'trash') {
+                    return `
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    ${thumbHtml}
+                                    <div class="art-cell-details">
+                                        <div class="art-row-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+                                        <div class="art-row-category">${escapeHtml(item.category || 'Genel')}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="art-badge trash"><i class="ph-fill ph-trash"></i> Çöpte</span></td>
+                            <td style="text-align: center;"><span class="art-metric">—</span></td>
+                            <td style="text-align: center;"><span class="art-metric">—</span></td>
+                            <td style="text-align: center;"><span class="art-metric">—</span></td>
+                            <td><span class="art-row-category">${formattedDate}</span></td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    <button class="art-action-btn restore" onclick="restoreBilimGundem('${item.id}')" title="Geri Al">
+                                        <i class="ph ph-arrow-counter-clockwise"></i> Geri Al
+                                    </button>
+                                    <button class="art-action-btn delete" onclick="forceDeleteBilimGundem('${item.id}')" title="Kalıcı Sil">
+                                        <i class="ph ph-trash"></i> Kalıcı Sil
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>`;
+                }
+
                 return `
                     <tr>
-                        <td class="bg-title-cell" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</td>
-                        <td><span class="bg-status-badge ${item.status}"><i class="ph ${st.icon}"></i> ${st.label}</span></td>
-                        <td style="color: #64748b; font-size: 0.88rem; white-space: nowrap;">${formattedDate}</td>
-                        <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-eye"></i> ${(item.views || 0).toLocaleString('tr-TR')}</span></td>
-                        <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-heart"></i> ${(item.likes || 0).toLocaleString('tr-TR')}</span></td>
-                        <td style="text-align: center;"><span class="bg-metric"><i class="ph ph-chat-circle-text"></i> ${(item.comments || 0).toLocaleString('tr-TR')}</span></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                ${thumbHtml}
+                                <div class="art-cell-details">
+                                    <div class="art-row-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+                                    <div class="art-row-category">${escapeHtml(item.category || 'Genel')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="art-badge ${st.badgeClass}"><i class="ph-fill ${st.icon}"></i> ${st.label}</span></td>
+                        <td style="text-align: center;"><span class="art-metric"><i class="ph ph-eye"></i> ${views}</span></td>
+                        <td style="text-align: center;"><span class="art-metric"><i class="ph ph-heart"></i> ${likes}</span></td>
+                        <td style="text-align: center;"><span class="art-metric"><i class="ph ph-chat-circle-text"></i> ${comments}</span></td>
+                        <td><span class="art-row-category">${formattedDate}</span></td>
                         <td style="text-align: center;">
-                            <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
-                                <button class="bg-action-dots" onclick="editBilimGundem('${item.id}')" title="Düzenle">
-                                    <i class="ph ph-pencil-simple"></i>
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button class="art-action-btn edit" onclick="editBilimGundem('${item.id}')" title="Düzenle">
+                                    <i class="ph ph-note-pencil"></i> Düzenle
                                 </button>
-                                <button class="bg-action-dots" onclick="deleteBilimGundem('${item.id}')" title="Sil">
-                                    <i class="ph ph-trash"></i>
+                                <button class="art-action-btn delete" onclick="deleteBilimGundem('${item.id}')" title="Sil">
+                                    <i class="ph ph-trash"></i> Sil
                                 </button>
                             </div>
                         </td>
@@ -12636,69 +12791,49 @@
 
         function filterBilimGundem(filter, el) {
             bilimGundemFilter = filter;
-            document.querySelectorAll('#bg-filter-tabs .bg-filter-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#bg-filter-tabs .art-filter-tab').forEach(t => t.classList.remove('active'));
             if (el) el.classList.add('active');
             renderBilimGundemTable();
-        }
-
-        function openBilimGundemModal() {
-            document.getElementById('bg-form-title').value = '';
-            document.getElementById('bg-form-category').value = '';
-            document.getElementById('bg-form-summary').value = '';
-            document.getElementById('bg-form-source').value = '';
-            document.getElementById('bg-modal-overlay').classList.add('show');
-        }
-
-        function closeBilimGundemModal() {
-            document.getElementById('bg-modal-overlay').classList.remove('show');
-        }
-
-        function saveBilimGundem() {
-            const title = document.getElementById('bg-form-title').value.trim();
-            const category = document.getElementById('bg-form-category').value;
-            const summary = document.getElementById('bg-form-summary').value.trim();
-            const source = document.getElementById('bg-form-source').value.trim();
-
-            if (!title) {
-                alert('Lütfen bir başlık giriniz.');
-                return;
-            }
-
-            const newItem = {
-                id: 'bg_' + Date.now(),
-                title: title,
-                category: category,
-                summary: summary,
-                source: source,
-                status: 'taslak',
-                views: 0,
-                likes: 0,
-                comments: 0,
-                createdAt: new Date().toISOString()
-            };
-
-            bilimGundemData.push(newItem);
-            saveBilimGundemStorage(bilimGundemData);
-            closeBilimGundemModal();
-            loadBilimGundemiData();
-
-            // Show success toast
-            if (typeof showToast === 'function') {
-                showToast('Bilim gündemi taslağı oluşturuldu!', 'success');
-            }
         }
 
         function deleteBilimGundem(id) {
             document.getElementById('confirm-modal').classList.add('show');
             const btn = document.getElementById('modal-confirm-btn');
-            btn.innerText = "Evet, Sil";
-            document.getElementById('modal-desc-text').innerText = "Bu bilim gündemi yazısı silinecek. Emin misiniz?";
+            btn.innerText = "Evet, Çöpe Taşı";
+            document.getElementById('modal-desc-text').innerText = "Bu bilim gündemi yazısı çöpe taşınacak. Emin misiniz?";
             btn.onclick = () => {
-                bilimGundemData = bilimGundemData.filter(i => i.id !== id);
+                const item = (bilimGundemData || []).find(i => i.id === id);
+                if (item) {
+                    item.status = 'trash';
+                    saveBilimGundemStorage(bilimGundemData);
+                }
+                closeConfirmModal();
+                loadBilimGundemiData();
+                showAuthorToast('Gündem yazısı çöpe taşındı.', 'success');
+            };
+        }
+
+        function restoreBilimGundem(id) {
+            const item = (bilimGundemData || []).find(i => i.id === id);
+            if (item) {
+                item.status = 'taslak';
+                saveBilimGundemStorage(bilimGundemData);
+                loadBilimGundemiData();
+                showAuthorToast('Gündem yazısı taslaklara geri alındı.', 'success');
+            }
+        }
+
+        function forceDeleteBilimGundem(id) {
+            document.getElementById('confirm-modal').classList.add('show');
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.innerText = "Evet, Kalıcı Olarak Sil";
+            document.getElementById('modal-desc-text').innerText = "Bu bilim gündemi yazısı kalıcı olarak silinecek. Emin misiniz?";
+            btn.onclick = () => {
+                bilimGundemData = (bilimGundemData || []).filter(i => i.id !== id);
                 saveBilimGundemStorage(bilimGundemData);
                 closeConfirmModal();
                 loadBilimGundemiData();
-                showAuthorToast('Gündem yazısı silindi.', 'success');
+                showAuthorToast('Gündem yazısı kalıcı olarak silindi.', 'success');
             };
         }
 
