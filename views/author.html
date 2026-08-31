@@ -1593,25 +1593,31 @@
                     z-index: 10;
                 }
                 .dash-btn-new {
-                    background: white;
-                    color: #4338ca;
-                    border: none;
+                    position: relative;
+                    z-index: 1;
+                    background: rgba(255, 255, 255, 0.18);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    color: #ffffff;
+                    border: 1px solid rgba(255, 255, 255, 0.35);
                     padding: 12px 24px;
-                    border-radius: 12px;
+                    border-radius: 14px;
                     font-size: 0.95rem;
-                    font-weight: 700;
+                    font-weight: 600;
                     cursor: pointer;
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
                     font-family: 'Outfit', sans-serif;
                 }
                 .dash-btn-new:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 14px 30px rgba(0,0,0,0.2);
-                    background: #f8fafc;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+                    background: rgba(255, 255, 255, 0.3);
+                    border-color: rgba(255, 255, 255, 0.5);
+                    color: #ffffff;
                 }
                 .dash-new-dropdown {
                     position: absolute;
@@ -2701,24 +2707,42 @@
                 .art-btn-new {
                     position: relative;
                     z-index: 1;
-                    background: #ffffff;
-                    color: #4f46e5;
-                    border: none;
-                    padding: 14px 26px;
-                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.18);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    color: #ffffff;
+                    border: 1px solid rgba(255, 255, 255, 0.35);
+                    padding: 12px 24px;
+                    border-radius: 14px;
                     font-size: 0.95rem;
-                    font-weight: 700;
+                    font-weight: 600;
                     cursor: pointer;
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    font-family: 'Outfit', sans-serif;
                 }
                 .art-btn-new:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-                    background: #f8fafc;
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+                    background: rgba(255, 255, 255, 0.3);
+                    border-color: rgba(255, 255, 255, 0.5);
+                    color: #ffffff;
+                }
+                .exp-empty-state .art-btn-new,
+                td .art-btn-new {
+                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                    color: #ffffff;
+                    border: none;
+                    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+                }
+                .exp-empty-state .art-btn-new:hover,
+                td .art-btn-new:hover {
+                    background: linear-gradient(135deg, #4f46e5, #4338ca);
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
                 }
 
                 /* Stats Grid */
