@@ -196,6 +196,161 @@ app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi'
     res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
 });
 
+// Bilim Gündemi Statik & Dinamik Haber Detay Rotası (SEO SSR)
+const STATIC_GUNDEM_NEWS = {
+    'akdeniz-derinliklerinde-yeni-bir-hidrotermal-ekosistem-kesfedildi': {
+        title: 'Akdeniz Derinliklerinde Yeni Bir Hidrotermal Ekosistem Keşfedildi',
+        excerpt: 'Denizaltı robotlarıyla 3000 metre derinlikte yapılan incelemelerde, sıfır ışıkta yaşayan gizemli mikrobiyal koloniler ve endemik canlı türleri tespit edildi.',
+        imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop',
+        date: '03 Eylül 2026',
+        readTime: 4,
+        views: 1420,
+        content: `
+            <p>Akdeniz'in derin çukurlarında uluslararası oşinografi ve deniz biyolojisi ekiplerinin ortak yürüttüğü kapsamlı keşif operasyonunda, bilim dünyasını şaşkına çeviren yeni bir hidrotermal ekosistem gün ışığına çıkarıldı. 3000 metreyi aşan derinlikte, tektonik tabaka kırıklarının çevresinde tespit edilen bu ekosistem, güneş ışığının sıfır olduğu ve basıncın yüzeyin 300 katına ulaştığı zorlu koşullarda yaşamın nasıl filizlenebileceğini yeniden tanımlıyor.</p>
+            
+            <h2>Kemosentez ile Beslenen Benzersiz Canlı Kolonileri</h2>
+            <p>Geleneksel deniz ekosistemlerinin aksine, bu hidrotermal bacaların etrafında yaşayan organizmalar enerjilerini güneş ışığından değil, yer altından fışkıran kükürt ve mineral zengini kimyasal bileşiklerden alıyor. Uzaktan kumandalı denizaltı robotları (ROV) tarafından toplanan numunelerde, daha önce literatürde hiç rastlanmamış mikrobiyal koloniler, dev tüp solucanları ve kabuklu deniz canlıları belgelendi.</p>
+            
+            <blockquote>
+                "Bu keşif, yalnızca gezegenimizdeki yaşam sınırlarını genişletmekle kalmıyor; aynı zamanda Jüpiter'in uydusu Europa ve Satürn'ün uydusu Enceladus gibi buzlu okyanus dünyalarında olası canlı formlarına dair en somut ipuçlarını sunuyor."
+            </blockquote>
+
+            <h2>Biyoteknoloji ve Tıp İçin Dev Potansiyel</h2>
+            <p>Ekosistemden alınan mikroorganizmaların aşırı basınca ve yüksek ısıya dayanıklı özel enzimler ürettiği belirlendi. Araştırmacılar, bu enzimlerin biyoteknoloji, endüstriyel atık arıtımı ve yeni nesil antibiyotik geliştirme çalışmalarında devrim yaratabilecek moleküler yapılara sahip olduğunu vurguluyor.</p>
+        `
+    },
+    'optik-kuantum-cipleriyle-super-iletken-hizinda-veri-isleme-basarisi': {
+        title: 'Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı',
+        excerpt: 'Işık fotonlarını kullanarak sıfıra yakın enerji kaybıyla saniyede trilyonlarca kuantum hesaplama gerçekleştiren yeni mikroçip mimarisi tanıtıldı.',
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
+        date: '02 Eylül 2026',
+        readTime: 3,
+        views: 2180,
+        content: `
+            <p>Kuantum bilişiminde uzun süredir aşılmaya çalışılan oda sıcaklığında kararlı fotonik işlemci problemi, geliştirilen yeni optik kuantum çip mimarisi ile çözüme kavuştu. Elektronlar yerine ışık parçacıklarını (fotonları) manipüle eden bu yeni nesil mikroçip, sıfıra yakın enerji sarfiyatıyla klasik süper bilgisayarların günler süren karmaşık hesaplamalarını mikrosaniyeler seviyesinde tamamlayabiliyor.</p>
+            <h2>Silikon Fotonik ve Kuantum Girişimi</h2>
+            <p>Mikroçip üzerinde entegre edilen yüzlerce mikroskobik dalga kılavuzu ve optik faz kaydırıcı, fotonların kuantum süperpozisyon durumlarını kaybetmeden birbirleriyle etkileşime girmesini sağlıyor. Bu başarı, yapay zeka modellerinin eğitimi, şifreleme sistemleri ve malzeme bilimi simülasyonlarında yepyeni bir çağın kapılarını aralıyor.</p>
+        `
+    },
+    'sentetik-biyolojide-donum-noktasi-yapay-hucre-zari-uretildi': {
+        title: 'Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi',
+        excerpt: 'Biyomedikal mühendisleri, doğal hücrelerle kusursuz etkileşime giren ve hedefe yönelik ilaç salınımı yapabilen sentetik hücre zarı geliştirdi.',
+        imageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop',
+        date: '01 Eylül 2026',
+        readTime: 4,
+        views: 1850,
+        content: `
+            <p>Sentetik biyoloji alanında yıllardır sürdürülen yapay hücre araştırmalarında tarihi bir eşik aşıldı. Biyomedikal mühendisleri ve moleküler biyologlar, doğal insan hücrelerinin seçici geçirgenliğini ve biyolojik sinyalleşmesini birebir taklit edebilen yapay hücre zarlarını laboratuvar ortamında sentezlemeyi başardı.</p>
+            <h2>Kansere ve Genetik Hastalıklara Karşı Akıllı Tedavi</h2>
+            <p>Geliştirilen bu yapay zarlar, vücut içinde sadece hedef tümör veya patojen hücreleri tespit edip doğrudan ilaç salınımı yapabilen mikroskobik akıllı kapsüller haline getirilebiliyor. Bu sayede kemoterapinin sağlıklı dokulara verdiği tahribatın tamamen sıfırlanması hedefleniyor.</p>
+        `
+    },
+    'gunes-firtinalarini-48-saat-onceden-tahmin-eden-erken-uyari-uydusu-firlatildi': {
+        title: 'Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı',
+        excerpt: 'Dünya manyetosferini ve küresel elektrik-iletişim altyapısını tehdit eden dev jeomanyetik fırtınaları günler öncesinden haber veren gözlem uydusu yörüngede.',
+        imageUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1200&auto=format&fit=crop',
+        date: '31 Ağustos 2026',
+        readTime: 3,
+        views: 1640,
+        content: `
+            <p>Güneş yüzeyinde meydana gelen şiddetli koronal kütle atımları (CME), modern uygarlığın dayandığı elektrik şebekeleri, GPS uyduları ve küresel internet kabloları için her an yıkıcı bir risk teşkil ediyor. Bu tehlikeyi bertaraf etmek üzere fırlatılan yeni nesil erken uyarı gözlem uydusu, Lagrange L1 noktasına başarıyla konuşlandırıldı.</p>
+            <h2>Yapay Zeka Destekli Spektral Analiz</h2>
+            <p>Güneş atmosferindeki manyetik kırılmaları ve plazma fışkırmalarını ultra-hassas spektrometrelerle anlık izleyen uydu, yapay zeka algoritmaları sayesinde bir jeomanyetik fırtınanın Dünya'ya ne zaman ve hangi şiddetle çarpacağını 48 saat önceden kesin olarak belirleyebilecek.</p>
+        `
+    },
+    'kuantum-sonrasi-kriptografi-algoritmalari-kuresel-standart-olarak-onaylandi': {
+        title: 'Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı',
+        excerpt: 'Kuantum süper bilgisayarlarının mevcut tüm bankacılık ve güvenlik şifrelerini kırma riskine karşı geliştirilen yeni nesil matematiksel algoritmalar onaylandı.',
+        imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop',
+        date: '30 Ağustos 2026',
+        readTime: 4,
+        views: 2930,
+        content: `
+            <p>Kuantum bilgisayarlarının işlem kapasiteleri geliştikçe, bugün kullandığımız RSA ve ECC temelli tüm şifreleme altyapılarının dakikalar içinde kırılabilme riski küresel güvenlik otoritelerini harekete geçirdi. Yıllardır süren küresel test ve değerlendirmelerin ardından, "Kuantum Sonrası Kriptografi" (PQC) standartları resmi olarak kabul edildi.</p>
+            <h2>Kafes Tabanlı Şifreleme Matematiği</h2>
+            <p>Yeni standart algoritmalar, klasik ve kuantum bilgisayarların çözmekte matematiksel olarak çaresiz kaldığı yüksek boyutlu kafes (lattice) problemlerine dayanıyor. Bankacılık, savunma sanayii ve küresel internet protokolleri önümüzdeki 2 yıl içinde bu yeni algoritmaları kademeli olarak devreye alacak.</p>
+        `
+    }
+};
+
+app.get(['/bilim-gundemi/:slug', '/gundem/:slug', '/en/bilim-gundemi/:slug', '/en/gundem/:slug'], async (req, res, next) => {
+    const slug = req.params.slug;
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const canonicalUrl = `${origin}/bilim-gundemi/${slug}`;
+
+    try {
+        let articleData = null;
+
+        // 1. Önce Veritabanında ara (Yazar/Editör Panelinden eklenenler)
+        try {
+            const [rows] = await pool.query('SELECT * FROM articles WHERE slug = ?', [slug]);
+            if (rows && rows.length > 0) {
+                const row = rows[0];
+                const dateObj = row.created_at ? new Date(row.created_at) : new Date();
+                const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                
+                articleData = {
+                    title: row.title,
+                    excerpt: row.excerpt || row.title,
+                    content: row.content,
+                    imageUrl: row.image_url ? (row.image_url.startsWith('http') ? row.image_url : `${origin}${row.image_url.startsWith('/') ? '' : '/'}${row.image_url}`) : `${origin}/uploads/logo.png`,
+                    date: formattedDate,
+                    dateIso: dateObj.toISOString(),
+                    readTime: Math.max(2, Math.ceil((row.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
+                    views: (row.views || 0) + 1
+                };
+
+                // Asenkron okunma artırımı
+                pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [row.id]).catch(() => {});
+            }
+        } catch (dbErr) {
+            console.error('DB fetch error for gundem slug:', dbErr.message);
+        }
+
+        // 2. Veritabanında yoksa statik gündem havuzuna bak
+        if (!articleData && STATIC_GUNDEM_NEWS[slug]) {
+            const item = STATIC_GUNDEM_NEWS[slug];
+            articleData = {
+                title: item.title,
+                excerpt: item.excerpt,
+                content: item.content,
+                imageUrl: item.imageUrl,
+                date: item.date,
+                dateIso: new Date().toISOString(),
+                readTime: item.readTime,
+                views: item.views
+            };
+        }
+
+        if (!articleData) {
+            return res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+        }
+
+        // Template'i oku ve yer tutucuları değiştir
+        const templatePath = path.join(__dirname, 'views', 'gundem-detail.html');
+        let html = await fs.promises.readFile(templatePath, 'utf8');
+
+        html = html
+            .replace(/\{\{TITLE\}\}/g, articleData.title)
+            .replace(/\{\{EXCERPT\}\}/g, articleData.excerpt)
+            .replace(/\{\{CONTENT\}\}/g, articleData.content)
+            .replace(/\{\{IMAGE_URL\}\}/g, articleData.imageUrl)
+            .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+            .replace(/\{\{DATE_FORMATTED\}\}/g, articleData.date)
+            .replace(/\{\{DATE_ISO\}\}/g, articleData.dateIso || new Date().toISOString())
+            .replace(/\{\{READ_TIME\}\}/g, articleData.readTime.toString())
+            .replace(/\{\{VIEWS\}\}/g, articleData.views.toString())
+            .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(articleData.title))
+            .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl));
+
+        return res.send(html);
+    } catch (err) {
+        console.error('Bilim Gundemi detail route error:', err);
+        return next(err);
+    }
+});
+
 // Serve static HTML pages on /en path
 app.get('/en/:page', (req, res, next) => {
     const page = req.params.page;

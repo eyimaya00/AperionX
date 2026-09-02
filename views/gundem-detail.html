@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && !window.location.pathname.includes('author'))) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - Bilim Gündemi | AperionX</title>
+    <meta name="description" content="{{EXCERPT}}">
+    
+    <!-- OpenGraph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AperionX">
+    <meta property="og:title" content="{{TITLE}}">
+    <meta property="og:description" content="{{EXCERPT}}">
+    <meta property="og:image" content="{{IMAGE_URL}}">
+    <meta property="og:url" content="{{CANONICAL_URL}}">
+    <meta property="og:locale" content="tr_TR">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@aperionx">
+    <meta name="twitter:title" content="{{TITLE}}">
+    <meta name="twitter:description" content="{{EXCERPT}}">
+    <meta name="twitter:image" content="{{IMAGE_URL}}">
+
+    <!-- Canonical & Favicon -->
+    <link rel="canonical" href="{{CANONICAL_URL}}">
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+
+    <!-- Styles & Fonts -->
+    <link rel="stylesheet" href="/style.css?v=290">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+
+    <!-- Schema.org NewsArticle JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": "{{TITLE}}",
+      "image": ["{{IMAGE_URL}}"],
+      "datePublished": "{{DATE_ISO}}",
+      "dateModified": "{{DATE_ISO}}",
+      "author": [{
+          "@type": "Organization",
+          "name": "AperionX Bilim Ekibi",
+          "url": "https://aperionx.com"
+      }],
+      "publisher": {
+          "@type": "Organization",
+          "name": "AperionX",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://aperionx.com/uploads/logo.png"
+          }
+      },
+      "description": "{{EXCERPT}}"
+    }
+    </script>
+
+    <style>
+        :root {
+            --gundem-accent: #6366f1;
+            --gundem-accent-glow: rgba(99, 102, 241, 0.35);
+        }
+
+        body {
+            background-color: #090b10;
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html[data-theme="light"] body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Standart Header Düzeni */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(9, 11, 16, 0.92) !important;
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        html[data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.94) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* Detay Kapsayıcı */
+        .gundem-detail-wrapper {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        /* Breadcrumb */
+        .gundem-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        html[data-theme="light"] .gundem-breadcrumb {
+            color: #64748b;
+        }
+
+        .gundem-breadcrumb a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .gundem-breadcrumb a:hover {
+            color: var(--gundem-accent);
+        }
+
+        .gundem-breadcrumb span.current {
+            color: var(--gundem-accent);
+            font-weight: 600;
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Üst Başlık Bloğu */
+        .gundem-detail-header {
+            margin-bottom: 28px;
+        }
+
+        .gundem-detail-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(99, 102, 241, 0.16);
+            color: #c7d2fe;
+            font-size: 0.80rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            backdrop-filter: blur(10px);
+            margin-bottom: 18px;
+        }
+
+        html[data-theme="light"] .gundem-detail-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #4338ca;
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+
+        .gundem-detail-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #818cf8;
+            box-shadow: 0 0 10px #818cf8;
+        }
+
+        .gundem-detail-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.35rem;
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin: 0 0 18px 0;
+        }
+
+        html[data-theme="light"] .gundem-detail-title {
+            color: #0f172a;
+        }
+
+        @media (max-width: 768px) {
+            .gundem-detail-title {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Yazar ve Tarih Meta Çubuğu */
+        .gundem-meta-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        html[data-theme="light"] .gundem-meta-bar {
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .gundem-meta-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gundem-meta-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(99, 102, 241, 0.4);
+            background: #1e1b4b;
+        }
+
+        .gundem-author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gundem-author-name-text {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #ffffff;
+        }
+
+        html[data-theme="light"] .gundem-author-name-text {
+            color: #0f172a;
+        }
+
+        .gundem-author-role-text {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        html[data-theme="light"] .gundem-author-role-text {
+            color: #64748b;
+        }
+
+        .gundem-meta-info-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        html[data-theme="light"] .gundem-meta-info-right {
+            color: #64748b;
+        }
+
+        .gundem-meta-info-right span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Kapak Görseli */
+        .gundem-detail-hero-img-wrap {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            margin-bottom: 34px;
+        }
+
+        html[data-theme="light"] .gundem-detail-hero-img-wrap {
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .gundem-detail-hero-img-wrap img {
+            width: 100%;
+            max-height: 480px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Özet Kutusu */
+        .gundem-summary-card {
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.12) 0%, rgba(30, 27, 75, 0.4) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-left: 4px solid var(--gundem-accent);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 34px;
+            backdrop-filter: blur(10px);
+        }
+
+        html[data-theme="light"] .gundem-summary-card {
+            background: linear-gradient(145deg, rgba(238, 242, 255, 0.9) 0%, rgba(224, 231, 255, 0.6) 100%);
+            border-color: rgba(99, 102, 241, 0.25);
+            border-left: 4px solid var(--gundem-accent);
+        }
+
+        .gundem-summary-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #c7d2fe;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        html[data-theme="light"] .gundem-summary-title {
+            color: #4338ca;
+        }
+
+        .gundem-summary-text {
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        html[data-theme="light"] .gundem-summary-text {
+            color: #334155;
+        }
+
+        /* İçerik Metni */
+        .gundem-body-content {
+            font-family: 'Roboto', sans-serif;
+            font-size: 1.12rem;
+            line-height: 1.85;
+            color: rgba(255, 255, 255, 0.88);
+            margin-bottom: 44px;
+        }
+
+        html[data-theme="light"] .gundem-body-content {
+            color: #1e293b;
+        }
+
+        .gundem-body-content p {
+            margin-bottom: 22px;
+        }
+
+        .gundem-body-content h2 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 36px 0 16px;
+            letter-spacing: -0.01em;
+        }
+
+        html[data-theme="light"] .gundem-body-content h2 {
+            color: #0f172a;
+        }
+
+        .gundem-body-content blockquote {
+            border-left: 4px solid var(--gundem-accent);
+            padding: 14px 20px;
+            margin: 24px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            color: #e2e8f0;
+        }
+
+        html[data-theme="light"] .gundem-body-content blockquote {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        /* Alt Aksiyon & Sosyal Paylaşım */
+        .gundem-share-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        html[data-theme="light"] .gundem-share-bar {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        .gundem-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        html[data-theme="light"] .gundem-back-link {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        .gundem-back-link:hover {
+            background: var(--gundem-accent);
+            color: #ffffff;
+            transform: translateX(-3px);
+        }
+
+        .gundem-social-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gundem-share-title {
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-right: 6px;
+        }
+
+        html[data-theme="light"] .gundem-share-title {
+            color: #64748b;
+        }
+
+        .gundem-share-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        html[data-theme="light"] .gundem-share-btn {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .gundem-share-btn:hover {
+            background: var(--gundem-accent);
+            color: #ffffff;
+            transform: translateY(-2px);
+            border-color: var(--gundem-accent);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header (Sitenin Orijinal Header'ı) -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/bilim-gundemi" class="nav-link active">Bilim Gündemi</a>
+                <a href="/articles" class="nav-link">Makaleler</a>
+                <a href="/experiments" class="nav-link">Deneyler</a>
+                <a href="/tools" class="nav-link">Araçlar</a>
+                <a href="/about" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
+
+                <!-- Language Switcher -->
+                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="gundem-detail-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="gundem-breadcrumb" aria-label="Breadcrumb">
+            <a href="/"><i class="ph ph-house"></i> Ana Sayfa</a>
+            <i class="ph ph-caret-right"></i>
+            <a href="/bilim-gundemi">Bilim Gündemi</a>
+            <i class="ph ph-caret-right"></i>
+            <span class="current">{{TITLE}}</span>
+        </nav>
+
+        <!-- Header Bölümü -->
+        <header class="gundem-detail-header">
+            <div class="gundem-detail-badge">
+                <span class="gundem-detail-dot"></span>
+                Öne Çıkan Gelişme
+            </div>
+            <h1 class="gundem-detail-title">{{TITLE}}</h1>
+
+            <div class="gundem-meta-bar">
+                <div class="gundem-meta-author">
+                    <img src="/uploads/favicon-48x48.png" class="gundem-meta-avatar" alt="AperionX Bilim Ekibi">
+                    <div class="gundem-author-info">
+                        <span class="gundem-author-name-text">AperionX Bilim Ekibi</span>
+                        <span class="gundem-author-role-text">Bilim ve Teknoloji Masası</span>
+                    </div>
+                </div>
+
+                <div class="gundem-meta-info-right">
+                    <span><i class="ph ph-calendar"></i> {{DATE_FORMATTED}}</span>
+                    <span><i class="ph ph-clock"></i> {{READ_TIME}} dk okuma</span>
+                    <span><i class="ph ph-eye"></i> {{VIEWS}} Okunma</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Kapak Görseli -->
+        <div class="gundem-detail-hero-img-wrap">
+            <img src="{{IMAGE_URL}}" alt="{{TITLE}}" fetchpriority="high">
+        </div>
+
+        <!-- Özet Kutusu -->
+        <div class="gundem-summary-card">
+            <div class="gundem-summary-title">
+                <i class="ph-fill ph-sparkle"></i> Gelişmenin Özeti
+            </div>
+            <p class="gundem-summary-text">
+                {{EXCERPT}}
+            </p>
+        </div>
+
+        <!-- Ana Gövde İçeriği -->
+        <article class="gundem-body-content">
+            {{CONTENT}}
+        </article>
+
+        <!-- Paylaşım & Geri Dön Çubuğu -->
+        <div class="gundem-share-bar">
+            <a href="/bilim-gundemi" class="gundem-back-link">
+                <i class="ph-bold ph-arrow-left"></i> Bilim Gündemine Dön
+            </a>
+
+            <div class="gundem-social-buttons">
+                <span class="gundem-share-title">Haberi Paylaş:</span>
+                <a href="https://twitter.com/intent/tweet?text={{ENCODED_TITLE}}&url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-share-btn" title="X'te Paylaş">
+                    <i class="ph-fill ph-x-logo"></i>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-share-btn" title="LinkedIn'de Paylaş">
+                    <i class="ph-fill ph-linkedin-logo"></i>
+                </a>
+                <a href="https://api.whatsapp.com/send?text={{ENCODED_TITLE}}%20{{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-share-btn" title="WhatsApp'ta Paylaş">
+                    <i class="ph-fill ph-whatsapp-logo"></i>
+                </a>
+                <button type="button" class="gundem-share-btn" onclick="copyCurrentLink()" title="Bağlantıyı Kopyala" style="cursor: pointer; border: none;">
+                    <i class="ph ph-link" id="copyIcon"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <div id="global-footer"></div>
+
+    <!-- Login Modal (Sitenin Orijinal Modalı) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/script.js?v=288"></script>
+    <script>
+        function copyCurrentLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const icon = document.getElementById('copyIcon');
+                if (icon) {
+                    icon.className = 'ph ph-check';
+                    setTimeout(() => {
+                        icon.className = 'ph ph-link';
+                    }, 2000);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
