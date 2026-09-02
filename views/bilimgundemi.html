@@ -174,7 +174,7 @@
             background: rgba(255, 255, 255, 0.28) !important;
         }
 
-        /* Hero bölümü geçildiğinde aktif olan .scrolled sınıfı (Orijinal site header haline dönüş) */
+        /* Hero bölümü geçildiğinde aktif olan .scrolled sınıfı */
         header.header.scrolled {
             padding: 10px 0;
             background: rgba(9, 11, 16, 0.88) !important;
@@ -499,12 +499,12 @@
         }
 
         /* ==========================================================
-           === YENİ BÖLÜM: APERIONX BİLİM GÜNDEMİ FEED & SON DAKİKA ===
+           === YENİ BÖLÜM: APERIONX BİLİM GÜNDEMİ FEED (MODERN & ZARİF) ===
            ========================================================== */
         .gundem-feed-section {
             width: 100%;
             background: #090b10;
-            padding: 70px 20px 100px;
+            padding: 60px 24px 100px;
             box-sizing: border-box;
             position: relative;
             transition: background-color 0.3s ease;
@@ -518,77 +518,108 @@
             max-width: 1280px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 420px 1fr;
+            grid-template-columns: 440px 1fr;
             gap: 36px;
             align-items: start;
         }
 
-        /* === SOL KOLON: ÖZEL SON DAKİKA KARTI (AperionX Mor/Indigo Degrade) === */
+        /* === SOL KOLON: ZARİF APERIONX ÖNE ÇIKAN KARTI (GLASSMORPHIC STİL) === */
         .gundem-featured-card {
-            background: linear-gradient(155deg, #4338ca 0%, #312e81 45%, #1e1b4b 100%);
-            border-radius: 26px;
-            padding: 24px;
-            color: #ffffff;
-            box-shadow: 0 20px 45px rgba(49, 46, 129, 0.28), 0 0 30px rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            position: relative;
-            overflow: visible;
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        html[data-theme="light"] .gundem-featured-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
         }
 
         .gundem-featured-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 26px 55px rgba(49, 46, 129, 0.38), 0 0 40px rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 25px rgba(99, 102, 241, 0.12);
         }
 
-        /* Son Dakika Başlık Şeridi */
+        html[data-theme="light"] .gundem-featured-card:hover {
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        /* Üst Canlı Rozet Şeridi (Kaba Son Dakika yerine kibar durum etiketi) */
         .gundem-card-badge-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 18px;
+            justify-content: space-between;
+            margin-bottom: 14px;
         }
 
-        .gundem-flash-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(8px);
+        .gundem-live-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(99, 102, 241, 0.12);
+            color: #a5b4fc;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        html[data-theme="light"] .gundem-live-tag {
+            background: rgba(99, 102, 241, 0.08);
+            color: #4f46e5;
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .gundem-live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #6366f1;
+            box-shadow: 0 0 8px #6366f1;
+            animation: gundemPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes gundemPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .gundem-read-time {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: #ffffff;
+            gap: 4px;
         }
 
-        .gundem-flash-title {
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin: 0;
-            letter-spacing: -0.3px;
+        html[data-theme="light"] .gundem-read-time {
+            color: #94a3b8;
         }
 
-        /* Sol Kart Görseli (Hafifçe sağa doğru taşan modern 3D kart stili) */
+        /* Sol Kart Görseli */
         .gundem-featured-img-wrap {
             display: block;
             width: 100%;
-            height: 250px;
-            border-radius: 18px;
+            height: 240px;
+            border-radius: 14px;
             overflow: hidden;
-            background: #0f172a;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            margin-bottom: 20px;
+            background: #111420;
+            margin-bottom: 16px;
             text-decoration: none;
-            transition: transform 0.3s ease;
-        }
-
-        .gundem-featured-img-wrap:hover {
-            transform: scale(1.02);
+            position: relative;
         }
 
         .gundem-featured-img-wrap img {
@@ -596,6 +627,11 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.45s ease;
+        }
+
+        .gundem-featured-card:hover .gundem-featured-img-wrap img {
+            transform: scale(1.035);
         }
 
         /* Sol Kart İçerik */
@@ -607,14 +643,13 @@
 
         .gundem-featured-title-link {
             text-decoration: none;
-            color: #ffffff;
-            transition: color 0.2s ease;
+            color: inherit;
         }
 
         .gundem-featured-title {
-            font-size: 1.15rem;
+            font-size: 1.18rem;
             font-weight: 700;
-            line-height: 1.45;
+            line-height: 1.42;
             color: #ffffff;
             margin: 0 0 10px 0;
             display: -webkit-box;
@@ -624,20 +659,32 @@
             transition: color 0.2s ease;
         }
 
+        html[data-theme="light"] .gundem-featured-title {
+            color: #0f172a;
+        }
+
         .gundem-featured-title-link:hover .gundem-featured-title {
-            color: #c7d2fe;
+            color: #818cf8;
+        }
+
+        html[data-theme="light"] .gundem-featured-title-link:hover .gundem-featured-title {
+            color: #4f46e5;
         }
 
         .gundem-featured-desc {
-            font-size: 0.88rem;
-            line-height: 1.55;
-            color: rgba(255, 255, 255, 0.82);
-            margin: 0 0 18px 0;
+            font-size: 0.89rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.72);
+            margin: 0 0 16px 0;
             font-family: 'Roboto', sans-serif;
             display: -webkit-box;
             -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        html[data-theme="light"] .gundem-featured-desc {
+            color: #475569;
         }
 
         /* Yazar Satırı */
@@ -646,8 +693,12 @@
             align-items: center;
             gap: 10px;
             margin-top: auto;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        html[data-theme="light"] .gundem-author-row {
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .gundem-author-avatar {
@@ -655,31 +706,35 @@
             height: 28px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             background: #1e1b4b;
         }
 
         .gundem-author-name {
-            font-size: 0.82rem;
+            font-size: 0.83rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.88);
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        html[data-theme="light"] .gundem-author-name {
+            color: #334155;
         }
 
         /* === SAĞ KOLON: AÇIKLAMA & 2x2 HABER GRID === */
         .gundem-grid-col {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
         .gundem-grid-header {
-            padding-bottom: 6px;
+            padding-bottom: 2px;
         }
 
         .gundem-grid-intro {
-            font-size: 0.96rem;
+            font-size: 0.95rem;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.72);
+            color: rgba(255, 255, 255, 0.68);
             margin: 0;
             font-family: 'Roboto', sans-serif;
             transition: color 0.3s ease;
@@ -693,7 +748,7 @@
         .gundem-cards-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 28px 24px;
+            gap: 26px 22px;
         }
 
         .gundem-item-card {
@@ -710,8 +765,8 @@
         .gundem-item-img-wrap {
             position: relative;
             width: 100%;
-            height: 190px;
-            border-radius: 16px;
+            height: 185px;
+            border-radius: 14px;
             overflow: hidden;
             background: #111420;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -799,7 +854,7 @@
         @media (max-width: 1024px) {
             .gundem-feed-container {
                 grid-template-columns: 1fr;
-                gap: 40px;
+                gap: 36px;
             }
             .gundem-featured-card {
                 max-width: 580px;
@@ -859,7 +914,7 @@
                 gap: 24px;
             }
             .gundem-feed-section {
-                padding: 40px 16px 60px;
+                padding: 35px 16px 60px;
             }
             .gundem-featured-img-wrap {
                 height: 200px;
@@ -975,16 +1030,19 @@
         </div>
     </section>
 
-    <!-- === 2. BÖLÜM: BİLİM GÜNDEMİ FEED & SON DAKİKA IZGARASI (YENİ TASARIM) === -->
+    <!-- === 2. BÖLÜM: BİLİM GÜNDEMİ FEED (PREMIUM GLASSMORPHIC TASARIM) === -->
     <section class="gundem-feed-section" id="gundemFeed">
         <div class="gundem-feed-container">
-            <!-- Sol Kolon: Büyük Son Dakika Kartı (AperionX Mor/Indigo Degrade) -->
+            <!-- Sol Kolon: Şık ve Zarif Öne Çıkan Gündem Kartı -->
             <article class="gundem-featured-card">
                 <div class="gundem-card-badge-row">
-                    <span class="gundem-flash-icon">
-                        <i class="ph-fill ph-lightning"></i>
+                    <span class="gundem-live-tag">
+                        <span class="gundem-live-dot"></span>
+                        Öne Çıkan Gelişme
                     </span>
-                    <h2 class="gundem-flash-title">Son Dakika</h2>
+                    <span class="gundem-read-time">
+                        <i class="ph ph-clock"></i> 4 dk okuma
+                    </span>
                 </div>
 
                 <a href="/articles" class="gundem-featured-img-wrap">
@@ -1120,11 +1178,11 @@
             <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
                 <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
                     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                    Google ile Giriş Yap
+                    Google ile Üye Ol
                 </button>
             </div>
             <div class="modal-footer">
-                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+                <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
             </div>
         </div>
     </div>
@@ -1233,8 +1291,6 @@
 
             function handleHeaderScroll() {
                 if (!mainHeader || !heroSliderEl) return;
-                const heroHeight = heroSliderEl.offsetHeight || 600;
-                // Hero bölümü geçildiğinde veya 150px aşağı inildiğinde
                 if (window.scrollY > 120) {
                     mainHeader.classList.add('scrolled');
                 } else {
@@ -1243,7 +1299,7 @@
             }
 
             window.addEventListener('scroll', handleHeaderScroll, { passive: true });
-            handleHeaderScroll(); // İlk yüklemede kontrol et
+            handleHeaderScroll();
 
             /* === SLIDER VERİLERİ VE MANTIĞI === */
             const gundemSlides = [
