@@ -101,7 +101,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        /* === GENEL SAYFA VE GİZLENMİŞ / GÖZE BATMAYAN SCROLLBAR === */
+        /* === GENEL SAYFA VE GÖZE BATMAYAN SCROLLBAR === */
         html, body {
             margin: 0;
             padding: 0;
@@ -111,6 +111,12 @@
             overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            transition: background-color 0.3s ease;
+        }
+
+        html[data-theme="light"],
+        html[data-theme="light"] body {
+            background: #f8fafc;
         }
 
         html::-webkit-scrollbar,
@@ -120,28 +126,28 @@
             height: 0;
         }
 
-        /* === SADECE BU SAYFAYA ÖZEL TAMAMEN ŞEFFAF HEADER === */
+        /* === DİNAMİK HEADER (BAŞLANGIÇTA ŞEFFAF, AŞAĞI KAYDIRINCA STANDART HEADER) === */
         header.header {
-            background: transparent !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: none !important;
-            box-shadow: none !important;
-            position: absolute !important;
+            position: fixed !important;
             top: 0;
             left: 0;
             right: 0;
             width: 100%;
             z-index: 1000;
             padding: 14px 0;
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            transition: background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, padding 0.3s ease;
         }
 
-        /* Menü linkleri */
         header.header .nav-link {
             color: rgba(255, 255, 255, 0.92) !important;
             font-weight: 600 !important;
             text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
-            transition: color 0.2s ease;
+            transition: color 0.25s ease, text-shadow 0.25s ease;
         }
 
         header.header .nav-link:hover,
@@ -150,10 +156,10 @@
             text-shadow: 0 0 14px rgba(255, 255, 255, 0.8);
         }
 
-        /* Header aksiyon butonları */
         header.header .icon-btn {
             color: #ffffff !important;
             text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+            transition: color 0.25s ease, text-shadow 0.25s ease;
         }
 
         header.header .btn-login {
@@ -161,10 +167,64 @@
             border: 1px solid rgba(255, 255, 255, 0.3) !important;
             color: #ffffff !important;
             backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
         }
 
         header.header .btn-login:hover {
-            background: rgba(255, 255, 255, 0.25) !important;
+            background: rgba(255, 255, 255, 0.28) !important;
+        }
+
+        /* Hero bölümü geçildiğinde aktif olan .scrolled sınıfı (Orijinal site header haline dönüş) */
+        header.header.scrolled {
+            padding: 10px 0;
+            background: rgba(9, 11, 16, 0.88) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        header.header.scrolled .nav-link {
+            color: rgba(255, 255, 255, 0.82) !important;
+            text-shadow: none !important;
+        }
+
+        header.header.scrolled .nav-link:hover,
+        header.header.scrolled .nav-link.active {
+            color: #818cf8 !important;
+        }
+
+        header.header.scrolled .btn-login {
+            background: #6366f1 !important;
+            border-color: #6366f1 !important;
+        }
+
+        /* Açık temada scrolled header görünümü */
+        html[data-theme="light"] header.header.scrolled {
+            background: rgba(255, 255, 255, 0.92) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        html[data-theme="light"] header.header.scrolled .nav-link {
+            color: #1e293b !important;
+            text-shadow: none !important;
+        }
+
+        html[data-theme="light"] header.header.scrolled .nav-link:hover,
+        html[data-theme="light"] header.header.scrolled .nav-link.active {
+            color: #4f46e5 !important;
+        }
+
+        html[data-theme="light"] header.header.scrolled .icon-btn {
+            color: #1e293b !important;
+            text-shadow: none !important;
+        }
+
+        html[data-theme="light"] header.header.scrolled .btn-login {
+            background: #4f46e5 !important;
+            border-color: #4f46e5 !important;
+            color: #ffffff !important;
         }
 
         /* === BİLİM GÜNDEMİ TAM EKRAN HERO SLIDER === */
@@ -438,7 +498,317 @@
             box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
         }
 
+        /* ==========================================================
+           === YENİ BÖLÜM: APERIONX BİLİM GÜNDEMİ FEED & SON DAKİKA ===
+           ========================================================== */
+        .gundem-feed-section {
+            width: 100%;
+            background: #090b10;
+            padding: 70px 20px 100px;
+            box-sizing: border-box;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        html[data-theme="light"] .gundem-feed-section {
+            background: #f8fafc;
+        }
+
+        .gundem-feed-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 36px;
+            align-items: start;
+        }
+
+        /* === SOL KOLON: ÖZEL SON DAKİKA KARTI (AperionX Mor/Indigo Degrade) === */
+        .gundem-featured-card {
+            background: linear-gradient(155deg, #4338ca 0%, #312e81 45%, #1e1b4b 100%);
+            border-radius: 26px;
+            padding: 24px;
+            color: #ffffff;
+            box-shadow: 0 20px 45px rgba(49, 46, 129, 0.28), 0 0 30px rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gundem-featured-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 26px 55px rgba(49, 46, 129, 0.38), 0 0 40px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Son Dakika Başlık Şeridi */
+        .gundem-card-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .gundem-flash-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #ffffff;
+        }
+
+        .gundem-flash-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        /* Sol Kart Görseli */
+        .gundem-featured-img-wrap {
+            display: block;
+            width: 100%;
+            height: 250px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #0f172a;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 20px;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .gundem-featured-img-wrap:hover {
+            transform: scale(1.02);
+        }
+
+        .gundem-featured-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Sol Kart İçerik */
+        .gundem-featured-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .gundem-featured-title-link {
+            text-decoration: none;
+            color: #ffffff;
+            transition: color 0.2s ease;
+        }
+
+        .gundem-featured-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1.45;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s ease;
+        }
+
+        .gundem-featured-title-link:hover .gundem-featured-title {
+            color: #c7d2fe;
+        }
+
+        .gundem-featured-desc {
+            font-size: 0.88rem;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.82);
+            margin: 0 0 18px 0;
+            font-family: 'Roboto', sans-serif;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Yazar Satırı */
+        .gundem-author-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .gundem-author-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            background: #1e1b4b;
+        }
+
+        .gundem-author-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        /* === SAĞ KOLON: AÇIKLAMA & 2x2 HABER GRID === */
+        .gundem-grid-col {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .gundem-grid-header {
+            padding-bottom: 6px;
+        }
+
+        .gundem-grid-intro {
+            font-size: 0.96rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.72);
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            transition: color 0.3s ease;
+        }
+
+        html[data-theme="light"] .gundem-grid-intro {
+            color: #475569;
+        }
+
+        /* 2x2 Kart Izgarası */
+        .gundem-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px 24px;
+        }
+
+        .gundem-item-card {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            transition: transform 0.25s ease;
+        }
+
+        .gundem-item-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .gundem-item-img-wrap {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111420;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+            margin-bottom: 12px;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        html[data-theme="light"] .gundem-item-img-wrap {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .gundem-item-card:hover .gundem-item-img-wrap {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.18);
+        }
+
+        .gundem-item-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .gundem-item-card:hover .gundem-item-img-wrap img {
+            transform: scale(1.04);
+        }
+
+        .gundem-item-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            line-height: 1.45;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s ease;
+        }
+
+        html[data-theme="light"] .gundem-item-title {
+            color: #0f172a;
+        }
+
+        .gundem-item-card:hover .gundem-item-title {
+            color: #818cf8;
+        }
+
+        html[data-theme="light"] .gundem-item-card:hover .gundem-item-title {
+            color: #4f46e5;
+        }
+
+        .gundem-item-author-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .gundem-item-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1e1b4b;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gundem-item-author-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease;
+        }
+
+        html[data-theme="light"] .gundem-item-author-name {
+            color: #64748b;
+        }
+
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
+        @media (max-width: 1024px) {
+            .gundem-feed-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .gundem-featured-card {
+                max-width: 580px;
+                margin: 0 auto;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
         @media (max-width: 868px) {
             .gundem-hero-slider {
                 height: auto;
@@ -482,6 +852,21 @@
             .gundem-dots-wrapper {
                 margin-top: 20px;
             }
+
+            /* Alt Grid Mobil Düzen */
+            .gundem-cards-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .gundem-feed-section {
+                padding: 40px 16px 60px;
+            }
+            .gundem-featured-img-wrap {
+                height: 200px;
+            }
+            .gundem-item-img-wrap {
+                height: 200px;
+            }
         }
     </style>
 </head>
@@ -497,8 +882,8 @@
         </div>
     </div>
 
-    <!-- Header (Bu Sayfada Tamamen Şeffaf) -->
-    <header class="header">
+    <!-- Header (Dinamik: Manşette Şeffaf, Kaydırıldığında Orijinal Sticky Header) -->
+    <header class="header" id="mainHeader">
         <div class="container header-content">
             <a href="/" class="logo">
                 <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
@@ -542,7 +927,7 @@
         </div>
     </header>
 
-    <!-- === BİLİM GÜNDEMİ TAM EKRAN HERO BÖLÜMÜ === -->
+    <!-- === 1. BÖLÜM: BİLİM GÜNDEMİ TAM EKRAN HERO BÖLÜMÜ === -->
     <section class="gundem-hero-slider" id="gundemHero">
         <!-- Arka Plan Katmanı (%80 belirgin ve şık blur) -->
         <div class="gundem-bg-layer" id="gundemBgLayer"></div>
@@ -590,7 +975,106 @@
         </div>
     </section>
 
-    <!-- Global Footer (Sayfa aşağı kaydırıldığında görünür) -->
+    <!-- === 2. BÖLÜM: BİLİM GÜNDEMİ FEED & SON DAKİKA IZGARASI (YENİ TASARIM) === -->
+    <section class="gundem-feed-section" id="gundemFeed">
+        <div class="gundem-feed-container">
+            <!-- Sol Kolon: Büyük Son Dakika Kartı (AperionX Mor/Indigo Degrade) -->
+            <article class="gundem-featured-card">
+                <div class="gundem-card-badge-row">
+                    <span class="gundem-flash-icon">
+                        <i class="ph-fill ph-lightning"></i>
+                    </span>
+                    <h2 class="gundem-flash-title">Son Dakika</h2>
+                </div>
+
+                <a href="/articles" class="gundem-featured-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1000&auto=format&fit=crop" alt="Deniz Araştırmaları ve Okyanus Bilimi">
+                </a>
+
+                <div class="gundem-featured-content">
+                    <a href="/articles" class="gundem-featured-title-link">
+                        <h3 class="gundem-featured-title">Akdeniz Derinliklerinde Yeni Bir Hidrotermal Ekosistem Keşfedildi</h3>
+                    </a>
+                    <p class="gundem-featured-desc">
+                        Denizaltı robotlarıyla yapılan 3000 metre derinlikteki incelemelerde, yüksek basınç ve sıfır ışık koşullarında fotosentez yapmadan yaşayan mikrobiyal koloniler ve endemik canlı türleri tespit edildi.
+                    </p>
+                    <div class="gundem-author-row">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop" class="gundem-author-avatar" alt="Edanur Karakoç">
+                        <span class="gundem-author-name">Edanur Karakoç</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Sağ Kolon: Açıklama ve 4'lü Haber Izgarası -->
+            <div class="gundem-grid-col">
+                <div class="gundem-grid-header">
+                    <p class="gundem-grid-intro">
+                        En güncel olaylar, sıcak gelişmeler ve gündeme damga vuran bilimsel keşifler burada! Güncel ve güvenilir bilgilerle bilim dünyasını adım adım takip edin.
+                    </p>
+                </div>
+
+                <div class="gundem-cards-grid">
+                    <!-- Kart 1 -->
+                    <a href="/articles" class="gundem-item-card">
+                        <div class="gundem-item-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" alt="Yapay Zeka ve Çipler">
+                        </div>
+                        <h4 class="gundem-item-title">
+                            Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı
+                        </h4>
+                        <div class="gundem-item-author-row">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop" class="gundem-item-avatar" alt="Zeynep Gül">
+                            <span class="gundem-item-author-name">Zeynep Gül</span>
+                        </div>
+                    </a>
+
+                    <!-- Kart 2 -->
+                    <a href="/articles" class="gundem-item-card">
+                        <div class="gundem-item-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop" alt="Laboratuvar ve Genetik">
+                        </div>
+                        <h4 class="gundem-item-title">
+                            Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi
+                        </h4>
+                        <div class="gundem-item-author-row">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop" class="gundem-item-avatar" alt="Zeynep Gül">
+                            <span class="gundem-item-author-name">Zeynep Gül</span>
+                        </div>
+                    </a>
+
+                    <!-- Kart 3 -->
+                    <a href="/articles" class="gundem-item-card">
+                        <div class="gundem-item-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=800&auto=format&fit=crop" alt="Uydu ve Uzay Keşifleri">
+                        </div>
+                        <h4 class="gundem-item-title">
+                            Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı
+                        </h4>
+                        <div class="gundem-item-author-row">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop" class="gundem-item-avatar" alt="Edanur Karakoç">
+                            <span class="gundem-item-author-name">Edanur Karakoç</span>
+                        </div>
+                    </a>
+
+                    <!-- Kart 4 -->
+                    <a href="/articles" class="gundem-item-card">
+                        <div class="gundem-item-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Siber Güvenlik ve Kodlama">
+                        </div>
+                        <h4 class="gundem-item-title">
+                            Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı
+                        </h4>
+                        <div class="gundem-item-author-row">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop" class="gundem-item-avatar" alt="Zeynep Gül">
+                            <span class="gundem-item-author-name">Zeynep Gül</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global Footer -->
     <div id="global-footer"></div>
 
     <!-- Mobile Menu -->
@@ -740,9 +1224,27 @@
 
     <script defer src="/script_v105.js?v=226"></script>
 
-    <!-- Bilim Gündemi Slider JS -->
+    <!-- Bilim Gündemi Slider & Scroll Header JS -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            /* === SCROLL DİNLENEREK HEADER DEĞİŞİMİ === */
+            const mainHeader = document.getElementById('mainHeader');
+            const heroSliderEl = document.getElementById('gundemHero');
+
+            function handleHeaderScroll() {
+                if (!mainHeader || !heroSliderEl) return;
+                const heroHeight = heroSliderEl.offsetHeight || 600;
+                if (window.scrollY > 120) {
+                    mainHeader.classList.add('scrolled');
+                } else {
+                    mainHeader.classList.remove('scrolled');
+                }
+            }
+
+            window.addEventListener('scroll', handleHeaderScroll, { passive: true });
+            handleHeaderScroll();
+
+            /* === SLIDER VERİLERİ VE MANTIĞI === */
             const gundemSlides = [
                 {
                     badge: 'Gündem',
