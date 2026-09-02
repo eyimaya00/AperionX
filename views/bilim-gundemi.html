@@ -520,7 +520,7 @@
             display: grid;
             grid-template-columns: 440px 1fr;
             gap: 36px;
-            align-items: start;
+            align-items: stretch; /* Sol ve sağ kolonların alt tabanını tam eşitler */
         }
 
         /* === SOL KOLON: LOGO RENGİYLE (%100 UYUMLU) SOFT VE ZARİF ÖNE ÇIKAN KARTI === */
@@ -529,11 +529,13 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: 22px;
-            padding: 22px;
+            padding: 20px 22px 18px;
             border: 1.5px solid rgba(99, 102, 241, 0.35);
             box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 30px rgba(99, 102, 241, 0.15);
             display: flex;
             flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
             transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
@@ -559,7 +561,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .gundem-live-tag {
@@ -620,15 +622,16 @@
         .gundem-featured-img-wrap {
             display: block;
             width: 100%;
-            height: 240px;
+            height: 200px;
             border-radius: 14px;
             overflow: hidden;
             background: #0f172a;
             border: 1px solid rgba(99, 102, 241, 0.25);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-            margin-bottom: 18px;
-            text-decoration: relative;
+            margin-bottom: 14px;
+            text-decoration: none;
             position: relative;
+            flex-shrink: 0;
         }
 
         html[data-theme="light"] .gundem-featured-img-wrap {
@@ -687,12 +690,12 @@
 
         .gundem-featured-desc {
             font-size: 0.89rem;
-            line-height: 1.6;
+            line-height: 1.58;
             color: rgba(255, 255, 255, 0.8) !important;
-            margin: 0 0 18px 0;
+            margin: 0 0 12px 0;
             font-family: 'Roboto', sans-serif;
             display: -webkit-box;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
