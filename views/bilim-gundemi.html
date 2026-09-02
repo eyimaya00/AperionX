@@ -523,35 +523,31 @@
             align-items: start;
         }
 
-        /* === SOL KOLON: ZARİF APERIONX ÖNE ÇIKAN KARTI (GLASSMORPHIC STİL) === */
+        /* === SOL KOLON: CANLI #6366F1 APERIONX ÖNE ÇIKAN KARTI === */
         .gundem-featured-card {
-            background: rgba(17, 24, 39, 0.65);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+            background: #6366f1;
+            border-radius: 22px;
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 16px 40px rgba(99, 102, 241, 0.35), 0 0 25px rgba(99, 102, 241, 0.2);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         html[data-theme="light"] .gundem-featured-card {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+            background: #6366f1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 16px 40px rgba(99, 102, 241, 0.28);
         }
 
         .gundem-featured-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.35);
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 25px rgba(99, 102, 241, 0.12);
+            box-shadow: 0 22px 50px rgba(99, 102, 241, 0.48), 0 0 35px rgba(99, 102, 241, 0.3);
         }
 
         html[data-theme="light"] .gundem-featured-card:hover {
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
-            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 22px 50px rgba(99, 102, 241, 0.38);
         }
 
         /* Üst Canlı Rozet Şeridi */
@@ -559,36 +555,37 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .gundem-live-tag {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            background: rgba(99, 102, 241, 0.12);
-            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
             font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.4px;
             text-transform: uppercase;
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 999px;
-            border: 1px solid rgba(99, 102, 241, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(8px);
         }
 
         html[data-theme="light"] .gundem-live-tag {
-            background: rgba(99, 102, 241, 0.08);
-            color: #4f46e5;
-            border-color: rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .gundem-live-dot {
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #6366f1;
-            box-shadow: 0 0 8px #6366f1;
+            background: #ffffff;
+            box-shadow: 0 0 8px #ffffff;
             animation: gundemPulse 2s infinite ease-in-out;
         }
 
@@ -616,8 +613,10 @@
             height: 240px;
             border-radius: 14px;
             overflow: hidden;
-            background: #111420;
-            margin-bottom: 16px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 18px;
             text-decoration: none;
             position: relative;
         }
@@ -647,44 +646,33 @@
         }
 
         .gundem-featured-title {
-            font-size: 1.18rem;
+            font-size: 1.22rem;
             font-weight: 700;
             line-height: 1.42;
-            color: #ffffff;
+            color: #ffffff !important;
             margin: 0 0 10px 0;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
             transition: color 0.2s ease;
         }
 
-        html[data-theme="light"] .gundem-featured-title {
-            color: #0f172a;
-        }
-
         .gundem-featured-title-link:hover .gundem-featured-title {
-            color: #818cf8;
-        }
-
-        html[data-theme="light"] .gundem-featured-title-link:hover .gundem-featured-title {
-            color: #4f46e5;
+            color: #e0e7ff !important;
         }
 
         .gundem-featured-desc {
-            font-size: 0.89rem;
+            font-size: 0.90rem;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.72);
-            margin: 0 0 16px 0;
+            color: rgba(255, 255, 255, 0.92) !important;
+            margin: 0 0 18px 0;
             font-family: 'Roboto', sans-serif;
             display: -webkit-box;
             -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
-        }
-
-        html[data-theme="light"] .gundem-featured-desc {
-            color: #475569;
         }
 
         /* Yazar Satırı */
@@ -694,11 +682,7 @@
             gap: 10px;
             margin-top: auto;
             padding-top: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        html[data-theme="light"] .gundem-author-row {
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
         }
 
         .gundem-author-avatar {
@@ -706,14 +690,14 @@
             height: 28px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: #1e1b4b;
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .gundem-author-name {
-            font-size: 0.83rem;
+            font-size: 0.84rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.85);
+            color: #ffffff !important;
         }
 
         html[data-theme="light"] .gundem-author-name {
