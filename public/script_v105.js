@@ -2060,14 +2060,9 @@ async function loadShowcase() {
 window.scrollToShowcase = function () {
     const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
     if (target) {
-        const header = document.querySelector('.header');
-        const headerOffset = header ? header.offsetHeight : 70;
-        const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
-        // Yukarıda hiçbir hero/arka plan kalıntısı kalmaması için tam header altına sıfır boşlukla kaydır:
-        const offsetPosition = Math.max(0, targetTop - headerOffset + 55);
-
+        // Tam olarak hero'nun bittiği ve kategorilerin başladığı sıfır noktasına kaydır:
         window.scrollTo({
-            top: offsetPosition,
+            top: target.offsetTop,
             behavior: 'smooth'
         });
     } else {

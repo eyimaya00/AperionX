@@ -186,6 +186,11 @@ app.get('/index.html', (req, res) => {
 });
 
 // === SEO & SLUG HELPERS ===
+// Ana Sayfa Rotası (Direct / Route)
+app.get(['/', ''], (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
 // Serve index.html for /en root
 app.get(['/en', '/en/'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
