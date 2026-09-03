@@ -191,8 +191,8 @@ app.get(['/en', '/en/'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// Bilim Gündemi Page Route
-app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
+// Gündem Page Route (Canonical: /gundem)
+app.get(['/gundem', '/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/gundem', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
 });
 
@@ -273,10 +273,10 @@ const STATIC_GUNDEM_NEWS = {
     }
 };
 
-app.get(['/bilim-gundemi/:slug', '/gundem/:slug', '/en/bilim-gundemi/:slug', '/en/gundem/:slug'], async (req, res, next) => {
+app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim-gundemi/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
     const origin = `${req.protocol}://${req.get('host')}`;
-    const canonicalUrl = `${origin}/bilim-gundemi/${slug}`;
+    const canonicalUrl = `${origin}/gundem/${slug}`;
 
     try {
         let articleData = null;
@@ -1758,8 +1758,8 @@ async function ensureSchema() {
                 INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
                 ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
                 ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
-                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/vsepr', 3),
-                ('Hakkımızda', 'Biz kimiz, vizyonumuz ne ve AperionX nasıl çalışır öğrenin.', 'ph-fill ph-users-three', '/about', 4);
+                ('Gündem', 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', 'ph-fill ph-newspaper', '/gundem', 3),
+                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 4);
             `);
             console.log('Migration Code: Kategori kartları varsayılan verileri eklendi.');
         }
