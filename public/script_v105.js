@@ -2058,11 +2058,14 @@ async function loadShowcase() {
 
 // Global Scroll Handler
 window.scrollToShowcase = function () {
-    const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
-    if (target) {
-        // Tam olarak hero'nun bittiği ve kategorilerin başladığı sıfır noktasına, hero kalıntısını tamamen yok edecek şekilde kaydır:
+    const badge = document.getElementById('categories-badge-header') || document.querySelector('.categories-section .section-header') || document.querySelector('.categories-section');
+    if (badge) {
+        const header = document.querySelector('.header');
+        const headerH = header ? header.offsetHeight : 70;
+        const bTop = badge.getBoundingClientRect().top + window.pageYOffset;
+        // Tam olarak rozetin 12px üstüne hizala, böylece yukarıdaki hero şeridi kesinlikle ekran dışında kalır:
         window.scrollTo({
-            top: target.offsetTop + 15,
+            top: bTop - headerH - 12,
             behavior: 'smooth'
         });
     } else {

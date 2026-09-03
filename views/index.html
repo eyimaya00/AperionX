@@ -254,7 +254,7 @@
             <p class="hero-description" id="hero-description">Bilim ve teknolojinin sınırlarını zorlayan en güncel
                 makaleler ve keşifler.</p>
             <div class="hero-buttons">
-                <a href="#categories" class="btn hero-btn" id="hero-main-btn" onclick="event.preventDefault(); const target = document.getElementById('categories'); if (target) { const tTop = target.getBoundingClientRect().top + window.pageYOffset; window.scrollTo({ top: tTop + 15, behavior: 'smooth' }); }">Keşfetmeye Başla</a>
+                <a href="#categories" class="btn hero-btn" id="hero-main-btn" onclick="event.preventDefault(); const badge = document.getElementById('categories-badge-header') || document.getElementById('categories'); if (badge) { const h = document.querySelector('.header'); const hH = h ? h.offsetHeight : 70; const bTop = badge.getBoundingClientRect().top + window.pageYOffset; window.scrollTo({ top: bTop - hH - 12, behavior: 'smooth' }); }">Keşfetmeye Başla</a>
             </div>
         </div>
     </section>
@@ -263,7 +263,7 @@
     <style>
         .categories-section {
             min-height: auto !important;
-            padding: 12px 20px 40px !important;
+            padding: 10px 16px 40px !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: flex-start !important;
@@ -271,7 +271,7 @@
             scroll-margin-top: 70px !important;
         }
         .categories-container {
-            max-width: 860px !important;
+            max-width: 820px !important;
             width: 100% !important;
             margin: 0 auto !important;
         }
@@ -285,17 +285,17 @@
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 18px !important;
             width: 100% !important;
-            max-width: 800px !important;
+            max-width: 780px !important;
             margin: 0 auto !important;
         }
         .category-card {
-            padding: 26px 20px 22px !important;
+            padding: 22px 18px 18px !important;
             border-radius: 18px !important;
         }
         .category-icon {
-            width: 64px !important;
-            height: 64px !important;
-            font-size: 1.8rem !important;
+            width: 58px !important;
+            height: 58px !important;
+            font-size: 1.65rem !important;
             margin-bottom: 12px !important;
         }
         .category-title {
@@ -314,14 +314,14 @@
                 max-width: 380px !important;
             }
             .categories-section {
-                padding: 15px 14px 25px !important;
+                padding: 10px 14px 25px !important;
             }
         }
     </style>
 
     <section class="categories-section" id="categories" style="min-height: auto !important; padding: 10px 16px 40px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; align-items: center !important;">
         <div class="categories-container" style="max-width: 820px !important; width: 100% !important; margin: 0 auto !important;">
-            <div class="section-header text-center" style="margin-top: 5px !important; margin-bottom: 18px !important;">
+            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 5px !important; margin-bottom: 18px !important;">
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
             <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; max-width: 780px !important; margin: 0 auto !important; gap: 18px !important;">
