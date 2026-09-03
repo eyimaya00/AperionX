@@ -5,13 +5,13 @@
 .categories-section {
     position: relative;
     z-index: 10;
-    min-height: calc(100vh - 70px);
+    min-height: auto;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    padding: 30px 24px 45px;
+    padding: 12px 20px 40px;
     background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #f1f5f9);
     background-size: 400% 400%;
     animation: categoriesGradient 15s ease infinite;
@@ -32,7 +32,8 @@
 }
 
 .categories-section .section-header {
-    margin-bottom: 26px;
+    margin-top: 5px;
+    margin-bottom: 18px;
     text-align: center;
 }
 
