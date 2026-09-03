@@ -192,8 +192,18 @@ app.get(['/en', '/en/'], (req, res) => {
 });
 
 // Gündem Page Route (Canonical: /gundem)
-app.get(['/gundem', '/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/gundem', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
+app.get(['/gundem', '/en/gundem'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
+});
+
+// Eski Bilim Gündemi linklerini kalıcı olarak /gundem'e 301 SEO Redirect et
+app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
+    res.redirect(301, '/gundem');
+});
+
+// Eski /bilim-gundemi/:slug linklerini kalıcı olarak /gundem/:slug'a 301 SEO Redirect et
+app.get(['/bilim-gundemi/:slug', '/en/bilim-gundemi/:slug'], (req, res) => {
+    res.redirect(301, `/gundem/${encodeURIComponent(req.params.slug)}`);
 });
 
 // Bilim Gündemi Statik & Dinamik Haber Detay Rotası (SEO SSR)
@@ -3103,11 +3113,32 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
 // Get all category cards (Public)
 app.get('/api/category_cards', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM category_cards ORDER BY order_index ASC');
+        let [rows] = await pool.query('SELECT * FROM category_cards ORDER BY order_index ASC');
+        const hasGundem = rows && rows.some(r => r.title === 'Gündem' || r.link_url === '/gundem');
+        if (!hasGundem || !rows || rows.length < 4) {
+            try {
+                await pool.query('DELETE FROM category_cards');
+                await pool.query(`
+                    INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
+                    ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
+                    ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
+                    ('Gündem', 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', 'ph-fill ph-newspaper', '/gundem', 3),
+                    ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 4);
+                `);
+                [rows] = await pool.query('SELECT * FROM category_cards ORDER BY order_index ASC');
+            } catch (innerErr) {
+                console.error('Error auto-syncing category cards:', innerErr);
+            }
+        }
         res.json(rows);
     } catch (error) {
         console.error('Error fetching categories:', error);
-        res.status(500).json({ message: 'Sunucu hatası.' });
+        res.json([
+            { id: 1, title: 'Makaleler', description: 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', icon_class: 'ph-fill ph-book-open-text', link_url: '/articles', order_index: 1 },
+            { id: 2, title: 'Deneyler', description: 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', icon_class: 'ph-fill ph-flask', link_url: '/experiments', order_index: 2 },
+            { id: 3, title: 'Gündem', description: 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', icon_class: 'ph-fill ph-newspaper', link_url: '/gundem', order_index: 3 },
+            { id: 4, title: 'Araçlar', description: 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', icon_class: 'ph-fill ph-calculator', link_url: '/tools', order_index: 4 }
+        ]);
     }
 });
 
