@@ -2058,15 +2058,13 @@ async function loadShowcase() {
 
 // Global Scroll Handler
 window.scrollToShowcase = function () {
-    console.log("Scroll triggered!");
     const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
     if (target) {
         const header = document.querySelector('.header');
         const headerOffset = header ? header.offsetHeight : 70;
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = target.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = Math.max(0, elementPosition - headerOffset);
+        const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
+        // Yukarıda hiçbir hero/arka plan kalıntısı kalmaması için tam header altına sıfır boşlukla kaydır:
+        const offsetPosition = Math.max(0, targetTop - headerOffset + 4);
 
         window.scrollTo({
             top: offsetPosition,

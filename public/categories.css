@@ -11,11 +11,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 60px 40px;
+    padding: 30px 24px 45px;
     background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #e2e8f0, #f1f5f9);
     background-size: 400% 400%;
     animation: categoriesGradient 15s ease infinite;
     overflow: hidden;
+    scroll-margin-top: 70px;
 }
 
 [data-theme="dark"] .categories-section {
@@ -25,22 +26,24 @@
 }
 
 .categories-container {
-    max-width: 1200px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
 }
 
 .categories-section .section-header {
-    margin-bottom: 50px;
+    margin-bottom: 26px;
     text-align: center;
 }
 
-/* Grid */
+/* 2x2 Ortalanmış Izgara */
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
     width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
 }
 
 /* === CARD === */
@@ -50,13 +53,13 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 50px 30px 42px;
+    padding: 32px 24px 28px;
     background: var(--card-bg);
-    border-radius: 24px;
+    border-radius: 20px;
     text-decoration: none;
     color: var(--text-color);
     border: 1px solid var(--header-border);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
     cursor: pointer;
 }
@@ -80,8 +83,8 @@
 
 /* === ICON - Large circle, dark slate bg === */
 .category-icon {
-    width: 90px;
-    height: 90px;
+    width: 72px;
+    height: 72px;
     background: #1e293b;
     color: #e2e8f0;
     border-radius: 50%;
@@ -89,19 +92,19 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    font-size: 2.4rem;
-    margin-bottom: 28px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 2rem;
+    margin-bottom: 16px;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     z-index: 1;
-    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .category-icon {
     background: #334155;
     color: #f1f5f9;
-    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -120,8 +123,8 @@
 .category-card:hover .category-icon {
     background: var(--primary-color);
     color: #ffffff;
-    transform: translateY(-6px) scale(1.08);
-    box-shadow: 0 16px 40px -8px rgba(99, 102, 241, 0.4);
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 14px 30px -6px rgba(99, 102, 241, 0.4);
     border-color: transparent;
 }
 
@@ -139,17 +142,17 @@
 }
 
 .category-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     letter-spacing: -0.01em;
 }
 
 .category-desc {
-    font-size: 0.9rem;
+    font-size: 0.86rem;
     color: #64748b;
-    line-height: 1.65;
-    max-width: 250px;
+    line-height: 1.55;
+    max-width: 290px;
 }
 
 [data-theme="dark"] .category-desc {
@@ -160,41 +163,31 @@
    RESPONSIVE
    ============================================= */
 
-@media (max-width: 1024px) {
-    .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 18px;
-    }
-    .categories-section {
-        padding: 80px 20px;
-    }
-}
-
-@media (max-width: 600px) {
+@media (max-width: 640px) {
     .categories-grid {
         grid-template-columns: 1fr;
         gap: 14px;
-        max-width: 360px;
+        max-width: 380px;
         margin: 0 auto;
     }
     .categories-section {
-        padding: 50px 16px;
+        padding: 30px 16px 40px;
         min-height: calc(100vh - 70px);
     }
     .category-card {
-        padding: 36px 24px 30px;
+        padding: 26px 20px 22px;
     }
     .category-icon {
-        width: 72px;
-        height: 72px;
-        font-size: 2rem;
-        margin-bottom: 20px;
+        width: 64px;
+        height: 64px;
+        font-size: 1.8rem;
+        margin-bottom: 14px;
     }
     .category-title {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
     }
     .categories-section .section-header {
-        margin-bottom: 36px;
+        margin-bottom: 22px;
     }
 }
 
