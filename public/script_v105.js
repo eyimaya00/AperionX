@@ -2060,9 +2060,9 @@ async function loadShowcase() {
 window.scrollToShowcase = function () {
     const target = document.querySelector('.categories-section') || document.querySelector('.showcase');
     if (target) {
-        // Tam olarak hero'nun bittiği ve kategorilerin başladığı sıfır noktasına kaydır:
+        // Tam olarak hero'nun bittiği ve kategorilerin başladığı sıfır noktasına, hero kalıntısını tamamen yok edecek şekilde kaydır:
         window.scrollTo({
-            top: target.offsetTop,
+            top: target.offsetTop + 15,
             behavior: 'smooth'
         });
     } else {
