@@ -193,7 +193,7 @@ app.get(['/en', '/en/'], (req, res) => {
 
 // Gündem Page Route (Canonical: /gundem)
 app.get(['/gundem', '/en/gundem'], (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'bilimgundemi.html'));
+    res.sendFile(path.join(__dirname, 'views', 'gundem.html'));
 });
 
 // Eski Bilim Gündemi linklerini kalıcı olarak /gundem'e 301 SEO Redirect et

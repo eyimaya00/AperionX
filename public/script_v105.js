@@ -3714,22 +3714,22 @@ async function loadPublicCategories() {
     try {
         const res = await fetch('/api/category_cards');
         let cards = await res.json();
-        if (!cards || cards.length === 0) {
-            return; // HTML'deki varsayılan 4 kart kalsın
+        
+        // Eğer API'den eksik veri dönerse veya Gündem yoksa 4 kartı zorla
+        if (!cards || !Array.isArray(cards) || cards.length < 4 || !cards.some(c => c.link_url === '/gundem' || c.title === 'Gündem')) {
+            // HTML'de zaten 4 kart başarıyla yerleşmişse dokunma!
+            if (grid.querySelectorAll('.category-card').length >= 4) {
+                return;
+            }
+            // Aksi halde doğru 4 kartı sırasıyla oluştur
+            cards = [
+                { title: 'Makaleler', description: 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', icon_class: 'ph-fill ph-book-open-text', link_url: '/articles', order_index: 1 },
+                { title: 'Deneyler', description: 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', icon_class: 'ph-fill ph-flask', link_url: '/experiments', order_index: 2 },
+                { title: 'Gündem', description: 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', icon_class: 'ph-fill ph-newspaper', link_url: '/gundem', order_index: 3 },
+                { title: 'Araçlar', description: 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', icon_class: 'ph-fill ph-calculator', link_url: '/tools', order_index: 4 }
+            ];
         }
 
-        // Gündem kartı eksikse otomatik ekle
-        const hasGundem = cards.some(c => c.link_url === '/gundem' || c.title === 'Gündem');
-        if (!hasGundem) {
-            // Eğer 4. sırada Hakkımızda varsa çıkar veya Gündemi 3. sıraya ekle
-            cards.splice(2, 0, {
-                title: 'Gündem',
-                description: 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.',
-                icon_class: 'ph-fill ph-newspaper',
-                link_url: '/gundem',
-                order_index: 3
-            });
-        }
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
             const href = isArticles ? '#showcase' : c.link_url;
