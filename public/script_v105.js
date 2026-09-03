@@ -2064,7 +2064,7 @@ window.scrollToShowcase = function () {
         const headerOffset = header ? header.offsetHeight : 70;
         const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
         // Yukarıda hiçbir hero/arka plan kalıntısı kalmaması için tam header altına sıfır boşlukla kaydır:
-        const offsetPosition = Math.max(0, targetTop - headerOffset + 4);
+        const offsetPosition = Math.max(0, targetTop - headerOffset + 55);
 
         window.scrollTo({
             top: offsetPosition,
