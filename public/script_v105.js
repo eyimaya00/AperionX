@@ -3726,11 +3726,11 @@ async function loadPublicCategories() {
             ];
         }
 
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        grid.style.maxWidth = '780px';
-        grid.style.margin = '0 auto';
-        grid.style.gap = '18px';
+        grid.style.setProperty('display', 'grid', 'important');
+        grid.style.setProperty('grid-template-columns', 'repeat(2, 1fr)', 'important');
+        grid.style.setProperty('max-width', '760px', 'important');
+        grid.style.setProperty('margin', '0 auto', 'important');
+        grid.style.setProperty('gap', '16px', 'important');
 
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
