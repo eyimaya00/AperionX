@@ -1751,17 +1751,22 @@ async function ensureSchema() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
-        // Tablo boşsa varsayılan verileri ekle
-        const [catRows] = await pool.query('SELECT COUNT(*) as cnt FROM category_cards');
-        if (catRows[0].cnt === 0) {
-            await pool.query(`
-                INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
-                ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
-                ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
-                ('Gündem', 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', 'ph-fill ph-newspaper', '/gundem', 3),
-                ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 4);
-            `);
-            console.log('Migration Code: Kategori kartları varsayılan verileri eklendi.');
+        // Kategori Kartları Tablosunu ve Gündem Kartını Garantiye Al
+        try {
+            const [gundemCheck] = await pool.query("SELECT id FROM category_cards WHERE title = 'Gündem' OR link_url = '/gundem'");
+            if (!gundemCheck || gundemCheck.length === 0) {
+                await pool.query('DELETE FROM category_cards');
+                await pool.query(`
+                    INSERT INTO category_cards (title, description, icon_class, link_url, order_index) VALUES 
+                    ('Makaleler', 'Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.', 'ph-fill ph-book-open-text', '/articles', 1),
+                    ('Deneyler', 'Geleceği şekillendiren araştırma ve laboratuvar sonuçları.', 'ph-fill ph-flask', '/experiments', 2),
+                    ('Gündem', 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.', 'ph-fill ph-newspaper', '/gundem', 3),
+                    ('Araçlar', 'Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.', 'ph-fill ph-calculator', '/tools', 4);
+                `);
+                console.log('Migration Code: Kategori kartları güncellendi (Makaleler, Deneyler, Gündem, Araçlar).');
+            }
+        } catch (catErr) {
+            console.error('Category cards migration error:', catErr.message);
         }
 
         await pool.query(`

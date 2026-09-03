@@ -265,7 +265,42 @@
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
             <div class="categories-grid" id="public-categories-grid">
-                <!-- JS tarafından doldurulacak -->
+                <a href="#showcase" onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }" class="category-card">
+                    <div class="category-icon">
+                        <i class="ph-fill ph-book-open-text"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Makaleler</h3>
+                        <p class="category-desc">Bilim ve teknolojinin derinliklerine inen kapsamlı analizler.</p>
+                    </div>
+                </a>
+                <a href="/experiments" class="category-card">
+                    <div class="category-icon">
+                        <i class="ph-fill ph-flask"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Deneyler</h3>
+                        <p class="category-desc">Geleceği şekillendiren araştırma ve laboratuvar sonuçları.</p>
+                    </div>
+                </a>
+                <a href="/gundem" class="category-card">
+                    <div class="category-icon">
+                        <i class="ph-fill ph-newspaper"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Gündem</h3>
+                        <p class="category-desc">Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.</p>
+                    </div>
+                </a>
+                <a href="/tools" class="category-card">
+                    <div class="category-icon">
+                        <i class="ph-fill ph-calculator"></i>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Araçlar</h3>
+                        <p class="category-desc">Araştırmalarınızda kullanabileceğiniz hesaplama ve analiz araçları.</p>
+                    </div>
+                </a>
             </div>
         </div>
     </section>

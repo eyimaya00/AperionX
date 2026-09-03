@@ -3713,10 +3713,22 @@ async function loadPublicCategories() {
     if (!grid) return;
     try {
         const res = await fetch('/api/category_cards');
-        const cards = await res.json();
+        let cards = await res.json();
         if (!cards || cards.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">Kart bulunamadı.</p>';
-            return;
+            return; // HTML'deki varsayılan 4 kart kalsın
+        }
+
+        // Gündem kartı eksikse otomatik ekle
+        const hasGundem = cards.some(c => c.link_url === '/gundem' || c.title === 'Gündem');
+        if (!hasGundem) {
+            // Eğer 4. sırada Hakkımızda varsa çıkar veya Gündemi 3. sıraya ekle
+            cards.splice(2, 0, {
+                title: 'Gündem',
+                description: 'Bilim ve teknoloji dünyasındaki en güncel gelişmeler ve sıcak keşifler.',
+                icon_class: 'ph-fill ph-newspaper',
+                link_url: '/gundem',
+                order_index: 3
+            });
         }
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
