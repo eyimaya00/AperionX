@@ -3726,12 +3726,6 @@ async function loadPublicCategories() {
             ];
         }
 
-        grid.style.setProperty('display', 'grid', 'important');
-        grid.style.setProperty('grid-template-columns', 'repeat(4, 1fr)', 'important');
-        grid.style.setProperty('max-width', '1200px', 'important');
-        grid.style.setProperty('margin', '0 auto', 'important');
-        grid.style.setProperty('gap', '24px', 'important');
-
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
             const href = isArticles ? '#showcase' : c.link_url;

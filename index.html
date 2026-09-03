@@ -150,7 +150,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
     <!-- CORE CSS -->
     <link rel="stylesheet" href="/style.css?v=288">
-    <link rel="stylesheet" href="/categories.css?v=290">
+    <link rel="stylesheet" href="/categories.css?v=300">
 
     <!-- HIDE GOOGLE TRANSLATE BANNER FORCEFULLY -->
     <style>
@@ -259,7 +259,7 @@
         </div>
     </section>
 
-    <!-- Tam Ekran Kategori Kartları ve Ferah Ortalama Stili -->
+    <!-- Tam Ekran Kategori Kartları ve Mobil 2x2 Stili -->
     <style>
         .categories-section {
             min-height: calc(100vh - 70px) !important;
@@ -311,31 +311,74 @@
             line-height: 1.55 !important;
             max-width: 250px !important;
         }
-        @media (max-width: 1024px) {
+        /* MOBİL VE DAR EKRANLAR: 2x2 VE BÜYÜK KUTULAR */
+        @media (max-width: 900px) {
+            .categories-section {
+                min-height: auto !important;
+                padding: 40px 16px 50px !important;
+            }
+            .categories-container {
+                max-width: 540px !important;
+            }
+            .categories-section .section-header {
+                margin-top: 10px !important;
+                margin-bottom: 24px !important;
+            }
             #public-categories-grid, .categories-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 16px !important;
-                max-width: 760px !important;
+                max-width: 100% !important;
+            }
+            .category-card {
+                padding: 28px 16px 24px !important;
+                border-radius: 18px !important;
+                min-height: 210px !important;
+            }
+            .category-icon {
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 1.75rem !important;
+                margin-bottom: 14px !important;
+            }
+            .category-title {
+                font-size: 1.15rem !important;
+                margin-bottom: 6px !important;
+            }
+            .category-desc {
+                font-size: 0.84rem !important;
+                line-height: 1.45 !important;
+                max-width: 100% !important;
             }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 480px) {
             #public-categories-grid, .categories-grid {
-                grid-template-columns: 1fr !important;
                 gap: 12px !important;
-                max-width: 380px !important;
             }
-            .categories-section {
-                padding: 25px 16px 35px !important;
+            .category-card {
+                padding: 22px 12px 18px !important;
+                min-height: 190px !important;
+            }
+            .category-icon {
+                width: 52px !important;
+                height: 52px !important;
+                font-size: 1.5rem !important;
+                margin-bottom: 10px !important;
+            }
+            .category-title {
+                font-size: 1.05rem !important;
+            }
+            .category-desc {
+                font-size: 0.8rem !important;
             }
         }
     </style>
 
-    <section class="categories-section" id="categories" style="min-height: calc(100vh - 70px) !important; padding: 35px 24px 45px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important;">
-        <div class="categories-container" style="max-width: 1240px !important; width: 100% !important; margin: 0 auto !important;">
-            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 0 !important; margin-bottom: 30px !important;">
+    <section class="categories-section" id="categories">
+        <div class="categories-container">
+            <div class="section-header text-center" id="categories-badge-header">
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
-            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; max-width: 1200px !important; margin: 0 auto !important; gap: 24px !important;">
+            <div class="categories-grid" id="public-categories-grid">
                 <a href="#showcase" onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }" class="category-card">
                     <div class="category-icon">
                         <i class="ph-fill ph-book-open-text"></i>
@@ -621,7 +664,7 @@
 
 
 
-    <script src="/script_v105.js?v=260" defer></script>
+    <script src="/script_v105.js?v=270" defer></script>
 </body>
 
 </html>

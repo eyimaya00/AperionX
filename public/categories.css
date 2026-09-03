@@ -163,31 +163,68 @@
    RESPONSIVE
    ============================================= */
 
-@media (max-width: 640px) {
-    .categories-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-        max-width: 380px;
-        margin: 0 auto;
-    }
+@media (max-width: 900px) {
     .categories-section {
-        padding: 30px 16px 40px;
-        min-height: calc(100vh - 70px);
+        min-height: auto;
+        padding: 40px 16px 50px;
     }
-    .category-card {
-        padding: 26px 20px 22px;
-    }
-    .category-icon {
-        width: 64px;
-        height: 64px;
-        font-size: 1.8rem;
-        margin-bottom: 14px;
-    }
-    .category-title {
-        font-size: 1.1rem;
+    .categories-container {
+        max-width: 540px;
     }
     .categories-section .section-header {
-        margin-bottom: 22px;
+        margin-top: 10px;
+        margin-bottom: 24px;
+    }
+    /* Mobilde 2x2 ve BÜYÜK KUTULAR */
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        max-width: 100% !important;
+    }
+    .category-card {
+        padding: 28px 16px 24px !important;
+        border-radius: 18px !important;
+        min-height: 210px !important;
+    }
+    .category-icon {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.75rem !important;
+        margin-bottom: 14px !important;
+    }
+    .category-title {
+        font-size: 1.15rem !important;
+        margin-bottom: 6px !important;
+    }
+    .category-desc {
+        font-size: 0.84rem !important;
+        line-height: 1.45 !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .categories-container {
+        max-width: 100%;
+    }
+    .categories-grid {
+        gap: 12px !important;
+    }
+    .category-card {
+        padding: 22px 12px 18px !important;
+        min-height: 190px !important;
+    }
+    .category-icon {
+        width: 52px !important;
+        height: 52px !important;
+        font-size: 1.5rem !important;
+        margin-bottom: 10px !important;
+    }
+    .category-title {
+        font-size: 1.05rem !important;
+    }
+    .category-desc {
+        font-size: 0.8rem !important;
     }
 }
 
