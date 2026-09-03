@@ -2058,14 +2058,14 @@ async function loadShowcase() {
 
 // Global Scroll Handler
 window.scrollToShowcase = function () {
-    const badge = document.getElementById('categories-badge-header') || document.querySelector('.categories-section .section-header') || document.querySelector('.categories-section');
-    if (badge) {
+    const target = document.getElementById('categories') || document.querySelector('.categories-section');
+    if (target) {
         const header = document.querySelector('.header');
         const headerH = header ? header.offsetHeight : 70;
-        const bTop = badge.getBoundingClientRect().top + window.pageYOffset;
-        // Az daha aşağıya atsın, yukarıda hiçbir mavi hero şeridi/boşluk kalmasın:
+        const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
+        // Tam olarak kategoriler bölümünün başladığı sınıra kaydır, böylece tüm ekran bu alanla dolar ve öne çıkanlar aşağıda kalır:
         window.scrollTo({
-            top: bTop - headerH + 15,
+            top: targetTop - headerH,
             behavior: 'smooth'
         });
     } else {
@@ -3730,7 +3730,7 @@ async function loadPublicCategories() {
         grid.style.setProperty('grid-template-columns', 'repeat(4, 1fr)', 'important');
         grid.style.setProperty('max-width', '1200px', 'important');
         grid.style.setProperty('margin', '0 auto', 'important');
-        grid.style.setProperty('gap', '20px', 'important');
+        grid.style.setProperty('gap', '24px', 'important');
 
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';

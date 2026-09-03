@@ -259,53 +259,57 @@
         </div>
     </section>
 
-    <!-- 4'lü Yan Yana Kategori Kartları ve Sıfır Boşluklu Scroll Stili -->
+    <!-- Tam Ekran Kategori Kartları ve Ferah Ortalama Stili -->
     <style>
         .categories-section {
-            min-height: auto !important;
-            padding: 8px 16px 36px !important;
+            min-height: calc(100vh - 70px) !important;
+            padding: 35px 24px 45px !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             align-items: center !important;
+            box-sizing: border-box !important;
             scroll-margin-top: 70px !important;
         }
         .categories-container {
-            max-width: 1200px !important;
+            max-width: 1240px !important;
             width: 100% !important;
             margin: 0 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
         }
         .categories-section .section-header {
-            margin-top: 4px !important;
-            margin-bottom: 16px !important;
+            margin-top: 0 !important;
+            margin-bottom: 30px !important;
             text-align: center !important;
         }
         #public-categories-grid, .categories-grid {
             display: grid !important;
             grid-template-columns: repeat(4, 1fr) !important;
-            gap: 20px !important;
+            gap: 24px !important;
             width: 100% !important;
             max-width: 1200px !important;
             margin: 0 auto !important;
         }
         .category-card {
-            padding: 24px 18px 20px !important;
-            border-radius: 18px !important;
+            padding: 32px 22px 28px !important;
+            border-radius: 20px !important;
         }
         .category-icon {
-            width: 58px !important;
-            height: 58px !important;
-            font-size: 1.65rem !important;
-            margin-bottom: 12px !important;
+            width: 66px !important;
+            height: 66px !important;
+            font-size: 1.85rem !important;
+            margin-bottom: 16px !important;
         }
         .category-title {
-            font-size: 1.15rem !important;
-            margin-bottom: 6px !important;
+            font-size: 1.25rem !important;
+            margin-bottom: 8px !important;
         }
         .category-desc {
-            font-size: 0.85rem !important;
-            line-height: 1.5 !important;
-            max-width: 260px !important;
+            font-size: 0.88rem !important;
+            line-height: 1.55 !important;
+            max-width: 250px !important;
         }
         @media (max-width: 1024px) {
             #public-categories-grid, .categories-grid {
@@ -321,17 +325,17 @@
                 max-width: 380px !important;
             }
             .categories-section {
-                padding: 8px 12px 24px !important;
+                padding: 25px 16px 35px !important;
             }
         }
     </style>
 
-    <section class="categories-section" id="categories" style="min-height: auto !important; padding: 8px 16px 36px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; align-items: center !important;">
-        <div class="categories-container" style="max-width: 1200px !important; width: 100% !important; margin: 0 auto !important;">
-            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 4px !important; margin-bottom: 16px !important;">
+    <section class="categories-section" id="categories" style="min-height: calc(100vh - 70px) !important; padding: 35px 24px 45px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important;">
+        <div class="categories-container" style="max-width: 1240px !important; width: 100% !important; margin: 0 auto !important;">
+            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 0 !important; margin-bottom: 30px !important;">
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
-            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; max-width: 1200px !important; margin: 0 auto !important; gap: 20px !important;">
+            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; max-width: 1200px !important; margin: 0 auto !important; gap: 24px !important;">
                 <a href="#showcase" onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }" class="category-card">
                     <div class="category-icon">
                         <i class="ph-fill ph-book-open-text"></i>
