@@ -2063,9 +2063,9 @@ window.scrollToShowcase = function () {
         const header = document.querySelector('.header');
         const headerH = header ? header.offsetHeight : 70;
         const bTop = badge.getBoundingClientRect().top + window.pageYOffset;
-        // Tam olarak rozetin 12px üstüne hizala, böylece yukarıdaki hero şeridi kesinlikle ekran dışında kalır:
+        // Az daha aşağıya atsın, yukarıda hiçbir mavi hero şeridi/boşluk kalmasın:
         window.scrollTo({
-            top: bTop - headerH - 12,
+            top: bTop - headerH + 15,
             behavior: 'smooth'
         });
     } else {
@@ -3727,10 +3727,10 @@ async function loadPublicCategories() {
         }
 
         grid.style.setProperty('display', 'grid', 'important');
-        grid.style.setProperty('grid-template-columns', 'repeat(2, 1fr)', 'important');
-        grid.style.setProperty('max-width', '760px', 'important');
+        grid.style.setProperty('grid-template-columns', 'repeat(4, 1fr)', 'important');
+        grid.style.setProperty('max-width', '1200px', 'important');
         grid.style.setProperty('margin', '0 auto', 'important');
-        grid.style.setProperty('gap', '16px', 'important');
+        grid.style.setProperty('gap', '20px', 'important');
 
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';

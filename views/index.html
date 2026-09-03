@@ -259,7 +259,7 @@
         </div>
     </section>
 
-    <!-- 2x2 Kategori Kartları ve Sıfır Boşluklu Scroll Stili -->
+    <!-- 4'lü Yan Yana Kategori Kartları ve Sıfır Boşluklu Scroll Stili -->
     <style>
         .categories-section {
             min-height: auto !important;
@@ -271,41 +271,48 @@
             scroll-margin-top: 70px !important;
         }
         .categories-container {
-            max-width: 780px !important;
+            max-width: 1200px !important;
             width: 100% !important;
             margin: 0 auto !important;
         }
         .categories-section .section-header {
             margin-top: 4px !important;
-            margin-bottom: 14px !important;
+            margin-bottom: 16px !important;
             text-align: center !important;
         }
         #public-categories-grid, .categories-grid {
             display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 16px !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 20px !important;
             width: 100% !important;
-            max-width: 760px !important;
+            max-width: 1200px !important;
             margin: 0 auto !important;
         }
         .category-card {
-            padding: 20px 16px 16px !important;
-            border-radius: 16px !important;
+            padding: 24px 18px 20px !important;
+            border-radius: 18px !important;
         }
         .category-icon {
-            width: 52px !important;
-            height: 52px !important;
-            font-size: 1.5rem !important;
-            margin-bottom: 10px !important;
+            width: 58px !important;
+            height: 58px !important;
+            font-size: 1.65rem !important;
+            margin-bottom: 12px !important;
         }
         .category-title {
-            font-size: 1.12rem !important;
-            margin-bottom: 4px !important;
+            font-size: 1.15rem !important;
+            margin-bottom: 6px !important;
         }
         .category-desc {
-            font-size: 0.84rem !important;
-            line-height: 1.45 !important;
-            max-width: 290px !important;
+            font-size: 0.85rem !important;
+            line-height: 1.5 !important;
+            max-width: 260px !important;
+        }
+        @media (max-width: 1024px) {
+            #public-categories-grid, .categories-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 16px !important;
+                max-width: 760px !important;
+            }
         }
         @media (max-width: 640px) {
             #public-categories-grid, .categories-grid {
@@ -320,11 +327,11 @@
     </style>
 
     <section class="categories-section" id="categories" style="min-height: auto !important; padding: 8px 16px 36px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; align-items: center !important;">
-        <div class="categories-container" style="max-width: 780px !important; width: 100% !important; margin: 0 auto !important;">
-            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 4px !important; margin-bottom: 14px !important;">
+        <div class="categories-container" style="max-width: 1200px !important; width: 100% !important; margin: 0 auto !important;">
+            <div class="section-header text-center" id="categories-badge-header" style="margin-top: 4px !important; margin-bottom: 16px !important;">
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
-            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; max-width: 760px !important; margin: 0 auto !important; gap: 16px !important;">
+            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; max-width: 1200px !important; margin: 0 auto !important; gap: 20px !important;">
                 <a href="#showcase" onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }" class="category-card">
                     <div class="category-icon">
                         <i class="ph-fill ph-book-open-text"></i>
