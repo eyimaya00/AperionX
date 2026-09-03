@@ -319,12 +319,12 @@
         }
     </style>
 
-    <section class="categories-section" id="categories">
-        <div class="categories-container" style="width: 100%;">
-            <div class="section-header text-center" style="margin-bottom: 24px;">
+    <section class="categories-section" id="categories" style="min-height: auto !important; padding: 10px 16px 40px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; align-items: center !important;">
+        <div class="categories-container" style="max-width: 820px !important; width: 100% !important; margin: 0 auto !important;">
+            <div class="section-header text-center" style="margin-top: 5px !important; margin-bottom: 18px !important;">
                 <span class="badge"><i class="ph-fill ph-compass" style="margin-right:6px;"></i>Neyi Keşfetmek İstersiniz?</span>
             </div>
-            <div class="categories-grid" id="public-categories-grid">
+            <div class="categories-grid" id="public-categories-grid" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; max-width: 780px !important; margin: 0 auto !important; gap: 18px !important;">
                 <a href="#showcase" onclick="event.preventDefault(); const target = document.getElementById('showcase'); if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset, behavior: 'smooth' }); }" class="category-card">
                     <div class="category-icon">
                         <i class="ph-fill ph-book-open-text"></i>

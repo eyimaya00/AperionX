@@ -3723,6 +3723,12 @@ async function loadPublicCategories() {
             ];
         }
 
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        grid.style.maxWidth = '780px';
+        grid.style.margin = '0 auto';
+        grid.style.gap = '18px';
+
         grid.innerHTML = cards.map(c => {
             const isArticles = c.link_url === '/articles' || c.title === 'Makaleler';
             const href = isArticles ? '#showcase' : c.link_url;
