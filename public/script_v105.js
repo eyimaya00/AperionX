@@ -560,8 +560,39 @@ function startHeroLoop(count) {
 
 // --- Theme Toggle ---
 function initTheme() {
+    const isGundemPage = window.location.pathname.includes('/gundem');
     const themeBtn = document.getElementById('themeToggle');
-    if (!themeBtn) return;
+    
+    // Gündem sayfasında tema butonu tamamen gizli tutulur
+    if (isGundemPage) {
+        if (themeBtn) themeBtn.style.display = 'none';
+        const mBtn = document.getElementById('mobileThemeToggle');
+        if (mBtn) mBtn.style.display = 'none';
+        return;
+    }
+
+    // Mobil Menü içine Gece Modu Butonunu Enjekte Et (Açılır menünün içinde gözüksün)
+    const mobileMenu = document.querySelector('.mobile-menu');
+    let mobileThemeBtn = document.getElementById('mobileThemeToggle');
+    if (mobileMenu && !mobileThemeBtn) {
+        mobileThemeBtn = document.createElement('a');
+        mobileThemeBtn.id = 'mobileThemeToggle';
+        mobileThemeBtn.className = 'mobile-theme-btn';
+        mobileThemeBtn.href = 'javascript:void(0)';
+        mobileThemeBtn.setAttribute('role', 'button');
+        mobileThemeBtn.setAttribute('aria-label', 'Tema değiştir');
+
+        // Mobil auth veya dil butonunun yanına yerleştir
+        const langBtn = document.getElementById('nuclear-mobile-btn');
+        const authSection = mobileMenu.querySelector('.mobile-auth');
+        if (authSection && authSection.parentNode === mobileMenu) {
+            mobileMenu.insertBefore(mobileThemeBtn, authSection);
+        } else if (langBtn && langBtn.parentNode === mobileMenu) {
+            mobileMenu.insertBefore(mobileThemeBtn, langBtn);
+        } else {
+            mobileMenu.appendChild(mobileThemeBtn);
+        }
+    }
 
     // Check saved theme (default to dark, except author panel defaults to light)
     let savedTheme = localStorage.getItem('theme');
@@ -572,26 +603,35 @@ function initTheme() {
         localStorage.setItem('theme', savedTheme);
     }
 
-    if (savedTheme === 'light') {
-        document.documentElement.removeAttribute('data-theme');
-        themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
-    } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
-    }
-
-    themeBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
-        } else {
+    const updateThemeUI = (theme) => {
+        const isDark = theme === 'dark';
+        if (isDark) {
             document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
+            if (themeBtn) themeBtn.innerHTML = '<i class="ph ph-sun"></i>';
+            if (mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="ph ph-sun"></i> <span>Aydınlık Mod</span>';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            if (themeBtn) themeBtn.innerHTML = '<i class="ph ph-moon"></i>';
+            if (mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="ph ph-moon"></i> <span>Karanlık Mod</span>';
         }
-    });
+    };
+
+    updateThemeUI(savedTheme);
+
+    const toggleTheme = (e) => {
+        if (e) e.preventDefault();
+        const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        updateThemeUI(newTheme);
+    };
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+    }
+    if (mobileThemeBtn) {
+        mobileThemeBtn.addEventListener('click', toggleTheme);
+    }
 }
 
 // --- Cookie Consent Banner & Settings Modal ---
