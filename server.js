@@ -215,6 +215,7 @@ app.get(['/bilim-gundemi/:slug', '/en/bilim-gundemi/:slug'], (req, res) => {
 const STATIC_GUNDEM_NEWS = {
     'akdeniz-derinliklerinde-yeni-bir-hidrotermal-ekosistem-kesfedildi': {
         title: 'Akdeniz Derinliklerinde Yeni Bir Hidrotermal Ekosistem Keşfedildi',
+        category: 'Okyanus ve Biyoloji',
         excerpt: 'Denizaltı robotlarıyla 3000 metre derinlikte yapılan incelemelerde, sıfır ışıkta yaşayan gizemli mikrobiyal koloniler ve endemik canlı türleri tespit edildi.',
         imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop',
         date: '03 Eylül 2026',
@@ -236,6 +237,7 @@ const STATIC_GUNDEM_NEWS = {
     },
     'optik-kuantum-cipleriyle-super-iletken-hizinda-veri-isleme-basarisi': {
         title: 'Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı',
+        category: 'Kuantum ve Çip Teknolojisi',
         excerpt: 'Işık fotonlarını kullanarak sıfıra yakın enerji kaybıyla saniyede trilyonlarca kuantum hesaplama gerçekleştiren yeni mikroçip mimarisi tanıtıldı.',
         imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
         date: '02 Eylül 2026',
@@ -249,6 +251,7 @@ const STATIC_GUNDEM_NEWS = {
     },
     'sentetik-biyolojide-donum-noktasi-yapay-hucre-zari-uretildi': {
         title: 'Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi',
+        category: 'Biyoloji ve Genetik',
         excerpt: 'Biyomedikal mühendisleri, doğal hücrelerle kusursuz etkileşime giren ve hedefe yönelik ilaç salınımı yapabilen sentetik hücre zarı geliştirdi.',
         imageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop',
         date: '01 Eylül 2026',
@@ -262,6 +265,7 @@ const STATIC_GUNDEM_NEWS = {
     },
     'gunes-firtinalarini-48-saat-onceden-tahmin-eden-erken-uyari-uydusu-firlatildi': {
         title: 'Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı',
+        category: 'Uzay ve Astrofizik',
         excerpt: 'Dünya manyetosferini ve küresel elektrik-iletişim altyapısını tehdit eden dev jeomanyetik fırtınaları günler öncesinden haber veren gözlem uydusu yörüngede.',
         imageUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1200&auto=format&fit=crop',
         date: '31 Ağustos 2026',
@@ -275,6 +279,7 @@ const STATIC_GUNDEM_NEWS = {
     },
     'kuantum-sonrasi-kriptografi-algoritmalari-kuresel-standart-olarak-onaylandi': {
         title: 'Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı',
+        category: 'Siber Güvenlik ve Kripto',
         excerpt: 'Kuantum süper bilgisayarlarının mevcut tüm bankacılık ve güvenlik şifrelerini kırma riskine karşı geliştirilen yeni nesil matematiksel algoritmalar onaylandı.',
         imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop',
         date: '30 Ağustos 2026',
@@ -284,6 +289,51 @@ const STATIC_GUNDEM_NEWS = {
             <p>Kuantum bilgisayarlarının işlem kapasiteleri geliştikçe, bugün kullandığımız RSA ve ECC temelli tüm şifreleme altyapılarının dakikalar içinde kırılabilme riski küresel güvenlik otoritelerini harekete geçirdi. Yıllardır süren küresel test ve değerlendirmelerin ardından, "Kuantum Sonrası Kriptografi" (PQC) standartları resmi olarak kabul edildi.</p>
             <h2>Kafes Tabanlı Şifreleme Matematiği</h2>
             <p>Yeni standart algoritmalar, klasik ve kuantum bilgisayarların çözmekte matematiksel olarak çaresiz kaldığı yüksek boyutlu kafes (lattice) problemlerine dayanıyor. Bankacılık, savunma sanayii ve küresel internet protokolleri önümüzdeki 2 yıl içinde bu yeni algoritmaları kademeli olarak devreye alacak.</p>
+        `
+    },
+    'james-webb-teleskobu-evrenin-en-yasli-galaksi-kumesini-kesfetti': {
+        title: 'James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti',
+        category: 'Uzay ve Astrofizik',
+        excerpt: 'Büyük Patlama\'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.',
+        imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
+        date: '04 Eylül 2026',
+        readTime: 5,
+        views: 3410,
+        content: `
+            <p>James Webb Uzay Teleskobu (JWST), evrenin şafağına yönelik gözlemlerinde astronomi dünyasında büyük heyecan yaratan bir keşfe imza attı. Kozmik Zaman Başlangıcı'ndan yalnızca 350 milyon yıl sonrasına tarihlenen devasa bir proto-galaksi kümesi tespit edildi.</p>
+            <h2>Kozmolojik Modeller Yeniden Yazılıyor</h2>
+            <p>Standart kozmolojik modeller, erken evrende bu ölçekte galaksi kümelerinin oluşmasının en az 1 milyar yıl sürmesi gerektiğini öngörüyordu. Ancak Webb'in derin kızılötesi NIRCam spektrografları, yüz milyarlarca güneş kütlesine eşdeğer kütleye sahip parlak ve yoğun yıldız kümelerinin çok daha hızlı organize olduğunu kanıtladı.</p>
+            <blockquote>
+                "Gözlemlediğimiz yapılar, ilk nesil Popülasyon III yıldızlarının evrende düşündüğümüzden katbekat daha hızlı doğup süpernovalarla erken element zenginleşmesini başlattığını gösteriyor."
+            </blockquote>
+        `
+    },
+    'kuantum-super-bilgisayarlari-klasik-sifreleme-sistemlerini-geride-birakiyor': {
+        title: 'Kuantum Süper Bilgisayarları Klasik Şifreleme Sistemlerini Geride Bırakıyor',
+        category: 'Yapay Zeka ve Kuantum',
+        excerpt: 'Yeni nesil 1000 kubitlik kuantum işlemciler, geleneksel süper bilgisayarların 10.000 yılda tamamlayabileceği karmaşık moleküler simülasyonları saniyeler içinde hesapladı.',
+        imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop',
+        date: '03 Eylül 2026',
+        readTime: 4,
+        views: 2650,
+        content: `
+            <p>Süper iletken kubit mimarisinde geliştirilen yeni kuantum işlemci ailesi, moleküler kimya simülasyonları ve karmaşık optimizasyon problemlerinde klasik süper bilgisayarların erişemeyeceği bir hesaplama üstünlüğüne ulaştı.</p>
+            <h2>Kuantum Hata Düzeltmede Kritik Eşik</h2>
+            <p>Yüzey kodu tabanlı mantıksal kubit mimarisi sayesinde, çevresel gürültünün yol açtığı kuantum dekoherans problemi ilk kez yüzde 99.9 oranında izole edildi. Bu başarı, oda sıcaklığında çalışan kriptografik algoritmaların test edilmesini hızlandırıyor.</p>
+        `
+    },
+    'crispr-30-ile-kalitsal-hastaliklara-yonelik-ilk-klinik-basari': {
+        title: 'CRISPR 3.0 ile Kalıtsal Hastalıklara Yönelik İlk Klinik Başarı',
+        category: 'Genetik ve Biyoteknoloji',
+        excerpt: 'DNA dizilimini kesmeden epigenetik modifikasyon sağlayan yeni nesil gen cerrahisi tekniği, ilk insanlı faz-1 klinik deneylerinde tam hedefe ulaşarak yüzde 98 başarı sağladı.',
+        imageUrl: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop',
+        date: '02 Eylül 2026',
+        readTime: 4,
+        views: 2890,
+        content: `
+            <p>Moleküler biyolojide devrim niteliğindeki CRISPR-Cas sistemlerinin en gelişmiş versiyonu olan 'Prime Editing 3.0' teknolojisi, çift sarmallı DNA kırığı oluşturmadan kalıtsal mutasyonları düzeltmeyi başardı.</p>
+            <h2>Sıfır Hedef Dışı Etki (Off-Target)</h2>
+            <p>Klinik deneylerde, hedef gen bölgesi dışındaki genom alanlarında sıfır mutasyon kaydedildi. Bu güvenilirlik seviyesi, orak hücre anemisi ve kistik fibrozis gibi genetik hastalıkların kalıcı tedavisinde tarihi bir dönüm noktası olarak değerlendiriliyor.</p>
         `
     }
 };
@@ -307,6 +357,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 
                 articleData = {
                     title: row.title,
+                    category: row.category || 'Gündem',
                     excerpt: row.excerpt || row.title,
                     content: row.content,
                     imageUrl: row.image_url ? (row.image_url.startsWith('http') ? row.image_url : `${origin}${row.image_url.startsWith('/') ? '' : '/'}${row.image_url}`) : `${origin}/uploads/logo.png`,
@@ -328,6 +379,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             const item = STATIC_GUNDEM_NEWS[slug];
             articleData = {
                 title: item.title,
+                category: item.category || 'Gündem',
                 excerpt: item.excerpt,
                 content: item.content,
                 imageUrl: item.imageUrl,
@@ -342,12 +394,34 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             return res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
         }
 
+        // Diğer Gündem Haberlerini (Related News) Dinamik Oluştur
+        const otherEntries = Object.entries(STATIC_GUNDEM_NEWS)
+            .filter(([s]) => s !== slug)
+            .slice(0, 3);
+
+        const relatedNewsHtml = otherEntries.map(([s, item]) => `
+            <a href="/gundem/${s}" class="gundem-related-card">
+                <div class="gundem-related-img-wrap">
+                    <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
+                    <span class="gundem-related-badge">${item.category || 'Gündem'}</span>
+                </div>
+                <div class="gundem-related-info">
+                    <h4 class="gundem-related-title">${item.title}</h4>
+                    <div class="gundem-related-meta">
+                        <span><i class="ph ph-calendar"></i> ${item.date}</span>
+                        <span><i class="ph ph-clock"></i> ${item.readTime} dk</span>
+                    </div>
+                </div>
+            </a>
+        `).join('');
+
         // Template'i oku ve yer tutucuları değiştir
         const templatePath = path.join(__dirname, 'views', 'gundem-detail.html');
         let html = await fs.promises.readFile(templatePath, 'utf8');
 
         html = html
             .replace(/\{\{TITLE\}\}/g, articleData.title)
+            .replace(/\{\{CATEGORY\}\}/g, articleData.category || 'Gündem')
             .replace(/\{\{EXCERPT\}\}/g, articleData.excerpt)
             .replace(/\{\{CONTENT\}\}/g, articleData.content)
             .replace(/\{\{IMAGE_URL\}\}/g, articleData.imageUrl)
@@ -357,7 +431,8 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             .replace(/\{\{READ_TIME\}\}/g, articleData.readTime.toString())
             .replace(/\{\{VIEWS\}\}/g, articleData.views.toString())
             .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(articleData.title))
-            .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl));
+            .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
+            .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml);
 
         return res.send(html);
     } catch (err) {
