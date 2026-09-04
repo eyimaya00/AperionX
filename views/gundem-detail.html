@@ -379,67 +379,50 @@
             justify-content: center;
         }
 
+        /* Sağ Kolon: Tamamen Şeffaf, Kartsız Açıklama Alanı */
+        .gundem-hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
         .gundem-hero-excerpt-wrap {
             position: relative;
             max-width: 440px;
             width: 100%;
-            padding: 24px 26px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(99, 102, 241, 0.04));
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-left: 3px solid #6366f1;
-            border-radius: 18px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-            transition: all 0.3s ease;
+            padding: 0;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
 
-        .gundem-hero-excerpt-wrap:hover {
-            border-color: rgba(99, 102, 241, 0.35);
-            border-left-color: #818cf8;
-            transform: translateY(-2px);
-            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
-        }
-
-        .gundem-excerpt-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .gundem-excerpt-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: #a5b4fc;
-        }
-
-        /* Hafif Dairesel Indigo/Mor Arka Işık */
+        /* Referans görseldeki gibi metnin arkasında hafif dairesel ambient ışıltı */
         .gundem-hero-excerpt-glow {
             position: absolute;
-            right: -30px;
-            bottom: -30px;
-            width: 160px;
-            height: 160px;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.30) 0%, rgba(79, 70, 229, 0.10) 60%, transparent 80%);
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(79, 70, 229, 0.12) 60%, transparent 80%);
             pointer-events: none;
-            filter: blur(24px);
+            filter: blur(28px);
+            z-index: 1;
         }
 
         .gundem-hero-excerpt-text {
             position: relative;
             z-index: 2;
             margin: 0;
-            font-size: 0.96rem;
-            line-height: 1.72;
-            color: rgba(255, 255, 255, 0.94);
+            font-size: 1.05rem;
+            line-height: 1.75;
+            color: rgba(255, 255, 255, 0.92);
             font-weight: 400;
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
         }
 
         /* Mobilde Başlığın Altına Gelecek Açıklama (Masaüstünde Gizli) */
@@ -897,20 +880,20 @@
                 color: #a5b4fc;
             }
 
-            /* Mobilde başlığın hemen altındaki şık açıklama */
+            /* Mobilde başlığın hemen altındaki şık, tamamen şeffaf açıklama */
             .gundem-hero-excerpt-mobile {
                 display: block;
-                font-size: 0.94rem;
-                line-height: 1.64;
-                color: rgba(255, 255, 255, 0.88);
-                margin: 4px 0 8px 0;
-                padding: 10px 14px;
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(14px);
-                -webkit-backdrop-filter: blur(14px);
-                border-left: 3px solid #6366f1;
-                border-radius: 0 12px 12px 0;
-                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+                font-size: 0.96rem;
+                line-height: 1.66;
+                color: rgba(255, 255, 255, 0.90);
+                margin: 6px 0 12px 0;
+                padding: 0;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                text-shadow: 0 2px 14px rgba(0, 0, 0, 0.90);
             }
 
             /* Mobilde sağdaki kolon gizlenir */
@@ -975,9 +958,11 @@
             }
 
             .gundem-hero-excerpt-mobile {
-                font-size: 0.88rem;
-                line-height: 1.58;
-                padding: 8px 12px;
+                font-size: 0.90rem;
+                line-height: 1.60;
+                padding: 0;
+                background: transparent !important;
+                border: none !important;
             }
 
             .gundem-hero-btn {
@@ -1082,15 +1067,10 @@
                 </div>
             </div>
 
-            <!-- Sağ Kolon: Minimalist & Sinematik Açıklama Alanı (Masaüstü) -->
+            <!-- Sağ Kolon: Tamamen Şeffaf Sinematik Açıklama (Masaüstü) -->
             <div class="gundem-hero-right">
                 <div class="gundem-hero-excerpt-wrap">
                     <div class="gundem-hero-excerpt-glow"></div>
-                    <div class="gundem-excerpt-header">
-                        <span class="gundem-excerpt-badge">
-                            <i class="ph-bold ph-sparkle"></i> HABER ÖZETİ
-                        </span>
-                    </div>
                     <p class="gundem-hero-excerpt-text">{{EXCERPT}}</p>
                 </div>
             </div>
