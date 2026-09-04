@@ -2060,11 +2060,11 @@ async function loadShowcase() {
 window.scrollToShowcase = function () {
     const target = document.getElementById('categories') || document.querySelector('.categories-section');
     if (target) {
-        // Header scrolled durumunda masaüstünde net 70px, mobilde net 65px'tir.
+        // Header scrolled durumunda: mobilde net 64px, masaüstünde net 70px
         const isMobile = window.innerWidth <= 900;
-        const headerH = isMobile ? 65 : 70;
+        const headerH = isMobile ? 64 : 70;
         const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
-        // Tam olarak kategoriler bölümünün başladığı sınıra kaydır, böylece üstte ve altta sıfır şerit kalır:
+        // Tam olarak kategoriler bölümünün başladığı sınıra kaydır, böylece hem mobilde hem masaüstünde üstte ve altta sıfır şerit kalır:
         window.scrollTo({
             top: Math.round(targetTop - headerH),
             behavior: 'smooth'
