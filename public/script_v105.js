@@ -941,39 +941,45 @@ async function loadSettings() {
             const logoSrc = (settings.site_logo.startsWith('/') || settings.site_logo.startsWith('http')) ? settings.site_logo : '/' + settings.site_logo;
             link.href = logoSrc;
 
-            // Update Header Logo
+            // Update Header Logo (Flicker-Free)
             const logoContainer = document.querySelector('.logo');
             if (logoContainer) {
-                logoContainer.innerHTML = '';
-
-                // 1. Image
-                const img = document.createElement('img');
-                img.src = logoSrc;
-                img.alt = settings.site_title || 'Logo';
-
-                // Height Logic
                 const height = settings.logo_height ? `${settings.logo_height}px` : (window.innerWidth <= 1024 ? '48px' : '60px');
-                img.style.setProperty('height', height, 'important');
-                img.style.width = 'auto';
-                img.style.borderRadius = '8px';
-
-                logoContainer.appendChild(img);
+                const existingImg = logoContainer.querySelector('img');
+                if (existingImg) {
+                    if (existingImg.getAttribute('src') !== logoSrc) {
+                        existingImg.src = logoSrc;
+                    }
+                    existingImg.alt = settings.site_title || 'Logo';
+                    existingImg.style.setProperty('height', height, 'important');
+                    existingImg.style.width = 'auto';
+                    existingImg.style.borderRadius = '8px';
+                } else {
+                    logoContainer.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = logoSrc;
+                    img.alt = settings.site_title || 'Logo';
+                    img.style.setProperty('height', height, 'important');
+                    img.style.width = 'auto';
+                    img.style.borderRadius = '8px';
+                    logoContainer.appendChild(img);
+                }
 
                 // 2. Text (Optional)
                 if (settings.site_title && settings.site_title.trim() !== "") {
-                    // Start with margin if image exists
-                    const span = document.createElement('span');
-                    span.className = 'logo-text';
-                    // span.style.marginLeft = '8px'; // Removed: Handled by CSS .logo gap:8px
-                    span.style.color = 'var(--logo-color)';
-
+                    let span = logoContainer.querySelector('.logo-text');
+                    if (!span) {
+                        span = document.createElement('span');
+                        span.className = 'logo-text';
+                        span.style.color = 'var(--logo-color)';
+                        logoContainer.appendChild(span);
+                    }
                     const title = settings.site_title;
                     if (title.endsWith('X')) {
                         span.innerHTML = title.slice(0, -1) + '<span style="color: var(--primary-color)">X</span>';
                     } else {
                         span.innerText = title;
                     }
-                    logoContainer.appendChild(span);
                 }
             }
         } else {
@@ -1265,9 +1271,6 @@ async function loadMenus() {
             currentPath = currentPath.split('/').pop();
         }
 
-        // Clear existing (except auth buttons in mobile)
-        if (navMenu) navMenu.innerHTML = '';
-
         // Fetch categories ONCE for both menus
         let categories = [];
         try {
@@ -1293,8 +1296,9 @@ async function loadMenus() {
             }
         });
 
-        // Rebuild Desktop
+        // Rebuild Desktop (Flicker-Free: Atomic replaceChildren)
         if (navMenu) {
+            const fragment = document.createDocumentFragment();
             rootMenus.forEach(menu => {
                 const isMakalelerMenu = menu.label.toLowerCase() === 'makaleler';
                 const isAraçlarMenu = menu.label.toLowerCase() === 'araçlar';
@@ -1382,7 +1386,7 @@ async function loadMenus() {
 
                     dropdownContainer.appendChild(mainLink);
                     dropdownContainer.appendChild(dropdownContent);
-                    navMenu.appendChild(dropdownContainer);
+                    fragment.appendChild(dropdownContainer);
                 } else {
                     // Standard Link
                     const a = document.createElement('a');
@@ -1396,9 +1400,10 @@ async function loadMenus() {
                     
                     a.addEventListener('click', (e) => handleHashLinkClick(e, menu.url));
                     
-                    navMenu.appendChild(a);
+                    fragment.appendChild(a);
                 }
             });
+            navMenu.replaceChildren(fragment);
         }
 
         // Rebuild Mobile (Safely)

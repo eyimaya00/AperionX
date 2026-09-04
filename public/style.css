@@ -95,30 +95,19 @@ a {
     top: 0;
     left: 0;
     width: 100%;
-    height: 80px;
-    /* Default Height */
-    /* Default Height */
-    background: rgba(255, 255, 255, 0.75);
-    /* More transparent for glass effect */
-    /* 25% Transparent */
-    backdrop-filter: blur(16px);
-    /* Stronger blur */
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--header-border);
+    height: 70px;
     z-index: 1000;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.85);
     will-change: background-color, backdrop-filter, box-shadow;
     transform: translateZ(0);
     padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 [data-theme="dark"] .header {
