@@ -260,7 +260,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, #e11d48, #be123c);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: #ffffff;
             font-size: 0.82rem;
             font-weight: 700;
@@ -268,7 +268,7 @@
             text-transform: uppercase;
             padding: 6px 16px;
             border-radius: 50px;
-            box-shadow: 0 4px 16px var(--gundem-badge-glow);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
         }
 
         .gundem-badge-dot {
@@ -357,17 +357,6 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .gundem-hero-btn.btn-share {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(79, 70, 229, 0.85));
-            border-color: rgba(165, 180, 252, 0.4);
-            box-shadow: 0 4px 18px rgba(99, 102, 241, 0.4);
-        }
-
-        .gundem-hero-btn.btn-share:hover {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6);
-        }
-
         .gundem-hero-btn.btn-save.saved {
             background: rgba(16, 185, 129, 0.25);
             border-color: rgba(16, 185, 129, 0.5);
@@ -396,7 +385,7 @@
             overflow: hidden;
         }
 
-        /* Referans Görseldeki Hafif Dairesel Kırmızı/Mor Arka Işık */
+        /* Hafif Dairesel Indigo/Mor Arka Işık */
         .gundem-hero-excerpt-glow {
             position: absolute;
             right: -40px;
@@ -404,7 +393,7 @@
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(99, 102, 241, 0.15) 60%, transparent 80%);
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(79, 70, 229, 0.15) 60%, transparent 80%);
             pointer-events: none;
             filter: blur(20px);
         }
@@ -944,15 +933,6 @@
                     <span class="gundem-hero-badge">
                         <span class="gundem-badge-dot"></span>
                         {{CATEGORY}}
-                    </span>
-                    <span class="gundem-meta-pill">
-                        <i class="ph ph-calendar"></i> {{DATE_FORMATTED}}
-                    </span>
-                    <span class="gundem-meta-pill">
-                        <i class="ph ph-eye"></i> {{VIEWS}} Okunma
-                    </span>
-                    <span class="gundem-meta-pill">
-                        <i class="ph ph-clock"></i> {{READ_TIME}} dk
                     </span>
                 </div>
 
