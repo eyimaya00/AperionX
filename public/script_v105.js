@@ -1643,9 +1643,11 @@ function setupMobileMenu() {
 
             if (mobileMenu.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
                 btn.innerHTML = '<i class="ph ph-x"></i>';
             } else {
                 document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
                 btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
@@ -1657,6 +1659,7 @@ function setupMobileMenu() {
                     mobileMenu.classList.remove('active');
                     btn.classList.remove('active');
                     document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
                     btn.innerHTML = '<i class="ph ph-list"></i>';
                 }
             });
@@ -1667,6 +1670,7 @@ function setupMobileMenu() {
                 mobileMenu.classList.remove('active');
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
                 btn.innerHTML = '<i class="ph ph-list"></i>';
             }
         });
@@ -1678,6 +1682,7 @@ function setupMobileMenu() {
                     mobileMenu.classList.remove('active');
                     btn.classList.remove('active');
                     document.body.style.overflow = '';
+                    document.documentElement.style.overflow = '';
                     btn.innerHTML = '<i class="ph ph-list"></i>';
                 }
             }
@@ -3643,11 +3648,12 @@ function initLanguageSwitcher() {
             if (mobileMenu) {
                 let mobileBtn = document.getElementById('nuclear-mobile-btn');
                 // Ensure it exists and is inside the menu
-                if (!mobileBtn || mobileBtn.parentNode !== mobileMenu) {
+                if (!mobileBtn || !mobileMenu.contains(mobileBtn)) {
                     if (mobileBtn) mobileBtn.remove();
                     mobileBtn = document.createElement('a');
                     mobileBtn.id = 'nuclear-mobile-btn';
-                    mobileBtn.href = "#";
+                    mobileBtn.className = 'mobile-lang-btn';
+                    mobileBtn.href = "javascript:void(0)";
                     mobileBtn.setAttribute('role', 'button');
                     // Static Styles
                     mobileBtn.style.cssText = `

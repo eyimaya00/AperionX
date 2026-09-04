@@ -728,11 +728,18 @@ i[class*=" ph"] {
     /* Increased from 80vh */
     /* Prevent overflowing screen if too many items */
     overflow-y: auto;
-    /* Scrollable */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     /* Add shadow since it floats */
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
+}
+
+.mobile-menu::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .mobile-menu.active {
@@ -790,6 +797,7 @@ i[class*=" ph"] {
 }
 
 .mobile-theme-btn,
+.mobile-lang-btn,
 #nuclear-mobile-btn {
     display: flex !important;
     align-items: center !important;
@@ -810,6 +818,7 @@ i[class*=" ph"] {
 }
 
 [data-theme="light"] .mobile-theme-btn,
+[data-theme="light"] .mobile-lang-btn,
 [data-theme="light"] #nuclear-mobile-btn {
     background-color: rgba(0, 0, 0, 0.05) !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
