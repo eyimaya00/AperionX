@@ -181,11 +181,12 @@
             min-height: 100dvh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: center;
+            align-items: center;
             background-color: #05070a;
             overflow: hidden;
             box-sizing: border-box;
-            padding: 100px 24px 48px;
+            padding: 100px 36px 70px;
         }
 
         /* Arka Plan Görsel Katmanı */
@@ -417,14 +418,15 @@
 
         /* Aşağı Kaydır İndikatörü */
         .gundem-scroll-down-bar {
-            position: relative;
-            z-index: 3;
-            max-width: 1320px;
-            width: 100%;
-            margin: 32px auto 0;
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
         }
 
         .gundem-scroll-btn {
@@ -825,16 +827,17 @@
             }
 
             .gundem-detail-hero {
-                padding: 75px 14px 22px;
+                padding: 85px 24px 75px;
                 min-height: 100vh;
                 min-height: 100dvh;
+                justify-content: center;
             }
 
-            /* Mobilde sol tarafta başlık ve butonlar, sağ tarafta kısa açıklama */
+            /* Mobilde sol tarafta başlık ve butonlar, sağ tarafta kısa açıklama (ortalanmış ve ferah boşluklar) */
             .gundem-hero-container {
-                grid-template-columns: 1.18fr 0.82fr;
-                gap: 12px;
-                align-items: flex-end;
+                grid-template-columns: 1.15fr 0.85fr;
+                gap: 14px;
+                align-items: center;
             }
 
             .gundem-hero-left {
@@ -848,7 +851,7 @@
             }
 
             .gundem-hero-title {
-                font-size: clamp(1.35rem, 4.2vw, 1.65rem);
+                font-size: clamp(1.25rem, 4vw, 1.55rem);
                 line-height: 1.22;
             }
 
@@ -862,18 +865,18 @@
             }
 
             .gundem-hero-btn {
-                padding: 5px 10px;
-                font-size: 0.72rem;
+                padding: 5px 9px;
+                font-size: 0.70rem;
                 gap: 4px;
             }
 
             .gundem-hero-btn i {
-                font-size: 0.82rem;
+                font-size: 0.80rem;
             }
 
             .gundem-hero-right {
-                align-items: flex-end;
-                justify-content: flex-end;
+                align-items: center;
+                justify-content: center;
                 width: 100%;
             }
 
@@ -885,12 +888,12 @@
             }
 
             .gundem-hero-excerpt-text {
-                font-size: 0.78rem;
+                font-size: 0.76rem;
                 line-height: 1.48;
             }
 
             .gundem-scroll-down-bar {
-                margin: 14px auto 0;
+                bottom: 18px;
             }
 
             .gundem-scroll-btn {
@@ -900,7 +903,7 @@
             }
 
             .gundem-content-section {
-                padding: 40px 14px 80px;
+                padding: 40px 18px 80px;
             }
 
             .gundem-article-prose {
@@ -920,17 +923,19 @@
 
         @media (max-width: 480px) {
             .gundem-detail-hero {
-                padding: 70px 10px 18px;
+                padding: 80px 20px 70px;
+                justify-content: center;
             }
 
             .gundem-hero-container {
                 grid-template-columns: 1.15fr 0.85fr;
-                gap: 8px;
+                gap: 10px;
+                align-items: center;
             }
 
             .gundem-hero-title {
-                font-size: 1.25rem;
-                line-height: 1.20;
+                font-size: 1.20rem;
+                line-height: 1.22;
             }
 
             .gundem-hero-btn {
@@ -945,7 +950,11 @@
 
             .gundem-hero-excerpt-text {
                 font-size: 0.72rem;
-                line-height: 1.42;
+                line-height: 1.40;
+            }
+
+            .gundem-scroll-down-bar {
+                bottom: 16px;
             }
         }
     </style>
