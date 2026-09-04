@@ -149,7 +149,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
     <!-- CORE CSS -->
-    <link rel="stylesheet" href="/style.css?v=300">
+    <link rel="stylesheet" href="/style.css?v=305">
     <link rel="stylesheet" href="/categories.css?v=330">
 
     <!-- HIDE GOOGLE TRANSLATE BANNER FORCEFULLY -->
@@ -528,10 +528,21 @@
     <div id="global-footer"></div>
 
     <!-- Mobile Menu -->
-        <div class="mobile-menu" id="mobileMenu">
-<!-- Links injected by JS -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- 1. En Üstte: Giriş Yap -->
         <div class="mobile-auth">
             <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+        </div>
+        <!-- 2. Ortada: Linkler -->
+        <div class="mobile-links-container"></div>
+        <!-- 3. En Altta: Aydınlık Mod ve Dil Butonu Yan Yana -->
+        <div class="mobile-bottom-row" id="mobileBottomRow">
+            <a href="javascript:void(0)" id="mobileThemeToggle" class="mobile-theme-btn" role="button" aria-label="Tema değiştir">
+                <i class="ph ph-sun"></i> <span>Aydınlık Mod</span>
+            </a>
+            <a href="javascript:void(0)" id="nuclear-mobile-btn" class="mobile-theme-btn" role="button">
+                <i class="ph-bold ph-globe"></i> <span>EN</span>
+            </a>
         </div>
     </div>
 
@@ -682,7 +693,7 @@
 
 
 
-    <script src="/script_v105.js?v=320" defer></script>
+    <script src="/script_v105.js?v=325" defer></script>
 </body>
 
 </html>

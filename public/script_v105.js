@@ -571,7 +571,7 @@ function initTheme() {
         return;
     }
 
-    // Mobil Menü içine Gece Modu Butonunu Enjekte Et (Açılır menünün içinde gözüksün)
+    // Mobil Menü içine Gece Modu Butonunu Al (En altta yer alsın)
     const mobileMenu = document.querySelector('.mobile-menu');
     let mobileThemeBtn = document.getElementById('mobileThemeToggle');
     if (mobileMenu && !mobileThemeBtn) {
@@ -582,13 +582,10 @@ function initTheme() {
         mobileThemeBtn.setAttribute('role', 'button');
         mobileThemeBtn.setAttribute('aria-label', 'Tema değiştir');
 
-        // Mobil auth veya dil butonunun yanına yerleştir
-        const langBtn = document.getElementById('nuclear-mobile-btn');
-        const authSection = mobileMenu.querySelector('.mobile-auth');
-        if (authSection && authSection.parentNode === mobileMenu) {
-            mobileMenu.insertBefore(mobileThemeBtn, authSection);
-        } else if (langBtn && langBtn.parentNode === mobileMenu) {
-            mobileMenu.insertBefore(mobileThemeBtn, langBtn);
+        // En alttaki row içine veya mobileMenu sonuna yerleştir
+        const bottomRow = document.getElementById('mobileBottomRow');
+        if (bottomRow) {
+            bottomRow.prepend(mobileThemeBtn);
         } else {
             mobileMenu.appendChild(mobileThemeBtn);
         }
@@ -1448,49 +1445,41 @@ async function loadMenus() {
 
         // Rebuild Mobile (Safely)
         if (mobileMenu) {
+            let mobileAuth = mobileMenu.querySelector('.mobile-auth');
+            if (!mobileAuth) {
+                mobileAuth = document.createElement('div');
+                mobileAuth.className = 'mobile-auth';
+                mobileAuth.innerHTML = `
+                    <button class="btn btn-login" onclick="openModal('loginModal')" style="width:100%;">Giriş Yap</button>
+                `;
+                mobileMenu.prepend(mobileAuth);
+                setTimeout(checkAuthStatus, 100);
+            } else {
+                if (mobileMenu.firstElementChild !== mobileAuth) {
+                    mobileMenu.prepend(mobileAuth);
+                }
+            }
+
             // Find or invoke container
             let linksContainer = mobileMenu.querySelector('.mobile-links-container');
-
             if (!linksContainer) {
-                // Determine insertion point: before auth buttons if they exist
-                let mobileAuth = mobileMenu.querySelector('.mobile-auth');
-
-                // 1. Ensure Auth Container Exists (Crucial for author-profile.html which starts empty)
-                if (!mobileAuth) {
-                    mobileAuth = document.createElement('div');
-                    mobileAuth.className = 'mobile-auth';
-                    mobileAuth.style.marginTop = 'auto'; // Push to bottom
-                    mobileAuth.style.padding = '20px';
-                    mobileAuth.style.display = 'flex';
-                    mobileAuth.style.flexDirection = 'column';
-                    mobileAuth.style.gap = '10px';
-                    mobileAuth.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-
-                    // Default Content (Login/Signup) - will be updated by checkAuthStatus
-                    mobileAuth.innerHTML = `
-                        <button class="btn btn-login" onclick="openModal('loginModal')" style="width:100%;">Giriş Yap</button>
-                    `;
-
-                    mobileMenu.appendChild(mobileAuth);
-
-                    // Trigger Re-check to populate if logged in
-                    setTimeout(checkAuthStatus, 100);
-                }
-
                 linksContainer = document.createElement('div');
                 linksContainer.className = 'mobile-links-container';
                 linksContainer.style.width = '100%';
                 linksContainer.style.display = 'flex';
                 linksContainer.style.flexDirection = 'column';
-                linksContainer.style.gap = '8px';
+                linksContainer.style.gap = '6px';
 
-                if (mobileAuth) {
-                    mobileMenu.insertBefore(linksContainer, mobileAuth);
+                if (mobileAuth.nextSibling) {
+                    mobileMenu.insertBefore(linksContainer, mobileAuth.nextSibling);
                 } else {
                     mobileMenu.appendChild(linksContainer);
                 }
             } else {
                 linksContainer.innerHTML = ''; // safely clear only links
+                if (mobileAuth.nextSibling && mobileAuth.nextSibling !== linksContainer) {
+                    mobileMenu.insertBefore(linksContainer, mobileAuth.nextSibling);
+                }
             }
 
             rootMenus.forEach(menu => {
@@ -3682,23 +3671,15 @@ function initLanguageSwitcher() {
                     `;
 
                     // --- POSITIONING FIX ---
-                    // Want it explicitly at the bottom, after auth buttons
-                    const authSection = mobileMenu.querySelector('.mobile-auth');
-
-                    if (authSection) {
-                        // Insert AFTER auth section
-                        if (mobileBtn.parentNode !== mobileMenu || mobileBtn.previousElementSibling !== authSection) {
-                            // Check if already after
-                            if (authSection.nextSibling !== mobileBtn) {
-                                authSection.parentNode.insertBefore(mobileBtn, authSection.nextSibling);
-                            }
-                        }
+                    // Want it explicitly at the bottom row with theme button
+                    const bottomRow = document.getElementById('mobileBottomRow');
+                    if (bottomRow) {
+                        bottomRow.appendChild(mobileBtn);
                     } else {
-                        // Fallback: Append to end
                         mobileMenu.appendChild(mobileBtn);
                     }
 
-                    mobileBtn.style.marginTop = '15px'; // Force separation
+                    mobileBtn.style.marginTop = '0';
                     mobileBtn.onclick = (e) => handleLangClick(e, mobileBtn);
                 }
                 // Update Content

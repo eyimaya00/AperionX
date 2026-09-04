@@ -760,17 +760,60 @@ i[class*=" ph"] {
 .mobile-auth {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--header-border);
+    gap: 8px;
+    margin-top: 0 !important;
+    margin-bottom: 10px;
+    padding-top: 0 !important;
+    padding-bottom: 12px;
+    border-top: none !important;
+    border-bottom: 1px solid var(--header-border);
     width: 100%;
     align-items: center;
 }
 
 .mobile-auth .btn {
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
+}
+
+/* Mobil Menü Alt Kısım: Tema ve Dil Butonları Yan Yana */
+.mobile-bottom-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid var(--header-border) !important;
+}
+
+.mobile-theme-btn,
+#nuclear-mobile-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 8px 16px !important;
+    border-radius: 50px !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: var(--text-color, #fff) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    width: auto !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .mobile-theme-btn,
+[data-theme="light"] #nuclear-mobile-btn {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-color, #1e293b) !important;
 }
 
 /* Mobile Links Container */
