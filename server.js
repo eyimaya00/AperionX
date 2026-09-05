@@ -400,6 +400,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 }], formattedDate);
 
                 articleData = {
+                    id: row.id,
                     title: row.title,
                     category: row.category || 'Gündem',
                     excerpt: row.excerpt || row.title,
@@ -435,6 +436,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             }], item.date || 'Bugün');
 
             articleData = {
+                id: 0,
                 title: item.title,
                 category: item.category || 'Gündem',
                 excerpt: item.excerpt,
@@ -459,12 +461,51 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
         }
 
         // Diğer Gündem Haberlerini (Related News) Dinamik Oluştur
-        const otherEntries = Object.entries(STATIC_GUNDEM_NEWS)
-            .filter(([s]) => s !== slug)
-            .slice(0, 3);
+        let relatedItems = [];
+        try {
+            const [relDb] = await pool.query(
+                "SELECT slug, title, category, image_url, created_at, published_at, content FROM articles WHERE is_gundem = 1 AND status = 'published' AND slug != ? ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3",
+                [slug]
+            );
+            if (relDb && relDb.length > 0) {
+                const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                relatedItems = relDb.map(r => {
+                    const d = r.published_at || r.created_at ? new Date(r.published_at || r.created_at) : new Date();
+                    let img = r.image_url || '/uploads/logo.png';
+                    if (img && !img.startsWith('http') && !img.startsWith('/')) img = '/' + img;
+                    const rTime = Math.max(2, Math.ceil((r.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200));
+                    return {
+                        slug: r.slug,
+                        title: r.title,
+                        category: r.category || 'Gündem',
+                        imageUrl: img,
+                        date: `${d.getDate()} ${trMonths[d.getMonth()]} ${d.getFullYear()}`,
+                        readTime: rTime
+                    };
+                });
+            }
+        } catch (e) {}
 
-        const relatedNewsHtml = otherEntries.map(([s, item]) => `
-            <a href="/gundem/${s}" class="gundem-related-card">
+        if (relatedItems.length < 3) {
+            const existingRelSlugs = new Set(relatedItems.map(r => r.slug));
+            existingRelSlugs.add(slug);
+            const needed = 3 - relatedItems.length;
+            const extraStatics = Object.entries(STATIC_GUNDEM_NEWS)
+                .filter(([s]) => !existingRelSlugs.has(s))
+                .slice(0, needed)
+                .map(([s, item]) => ({
+                    slug: s,
+                    title: item.title,
+                    category: item.category || 'Gündem',
+                    imageUrl: item.imageUrl,
+                    date: item.date,
+                    readTime: item.readTime
+                }));
+            relatedItems = [...relatedItems, ...extraStatics];
+        }
+
+        const relatedNewsHtml = relatedItems.map(item => `
+            <a href="/gundem/${item.slug}" class="gundem-related-card">
                 <div class="gundem-related-img-wrap">
                     <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
                     <span class="gundem-related-badge">${item.category || 'Gündem'}</span>
@@ -484,6 +525,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
         let html = await fs.promises.readFile(templatePath, 'utf8');
 
         html = html
+            .replace(/\{\{ARTICLE_ID\}\}/g, (articleData.id || 0).toString())
             .replace(/\{\{TITLE\}\}/g, articleData.title)
             .replace(/\{\{CATEGORY\}\}/g, articleData.category || 'Gündem')
             .replace(/\{\{EXCERPT\}\}/g, articleData.excerpt)
@@ -509,6 +551,125 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
     } catch (err) {
         console.error('Bilim Gundemi detail route error:', err);
         return next(err);
+    }
+});
+
+// === PUBLIC BILIM GUNDEMI FEED API ===
+app.get(['/api/public/gundem', '/api/gundem'], async (req, res) => {
+    try {
+        const cacheKey = 'articles_public_gundem_feed';
+        const cached = getCachedData(cacheKey);
+        if (cached) return res.json(cached);
+
+        await ensureGundemColumns();
+
+        const [rows] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.excerpt, a.image_url, a.created_at, a.published_at, a.views, a.author_id, a.tags,
+                   u.fullname as author_fullname, u.avatar_url as author_avatar, u.job_title as author_job_title,
+                   (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE article_id = a.id AND (is_approved = 1 OR is_approved IS NULL)) as comment_count
+            FROM articles a
+            LEFT JOIN users u ON a.author_id = u.id
+            WHERE a.is_gundem = 1 AND a.status = 'published'
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC, a.id DESC
+            LIMIT 20
+        `);
+
+        let dbArticles = [];
+        if (rows && rows.length > 0) {
+            const articleIds = rows.map(r => r.id);
+            let coAuthors = [];
+            try {
+                const [caRows] = await pool.query(`
+                    SELECT aa.article_id, u.fullname, u.avatar_url
+                    FROM article_authors aa
+                    JOIN users u ON aa.user_id = u.id
+                    WHERE aa.article_id IN (?)
+                    ORDER BY aa.order_index ASC
+                `, [articleIds]);
+                coAuthors = caRows || [];
+            } catch (e) {}
+
+            const coAuthorMap = {};
+            coAuthors.forEach(ca => {
+                if (!coAuthorMap[ca.article_id]) coAuthorMap[ca.article_id] = [];
+                coAuthorMap[ca.article_id].push(ca);
+            });
+
+            const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            
+            dbArticles = rows.map(r => {
+                const authorsList = coAuthorMap[r.id] || [];
+                let displayAuthor = r.author_fullname || 'AperionX Bilim Ekibi';
+                if (authorsList.length > 1) {
+                    displayAuthor = authorsList.map(a => a.fullname).join(', ');
+                }
+                const dateObj = r.published_at || r.created_at ? new Date(r.published_at || r.created_at) : new Date();
+                const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                
+                let img = r.image_url || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop';
+                if (img && !img.startsWith('http') && !img.startsWith('/')) img = '/' + img;
+
+                let authorAvatar = r.author_avatar || '/uploads/aperionx-a-transparent.png';
+                if (authorAvatar && !authorAvatar.startsWith('http') && !authorAvatar.startsWith('/')) authorAvatar = '/' + authorAvatar;
+
+                return {
+                    id: r.id,
+                    title: r.title,
+                    slug: r.slug,
+                    category: r.category || 'Gündem',
+                    subtitle: r.category || 'Gündem',
+                    desc: r.excerpt || r.title,
+                    excerpt: r.excerpt || r.title,
+                    badge: 'Gündem',
+                    image: img,
+                    link: `/gundem/${r.slug}`,
+                    date: formattedDate,
+                    views: r.views || 0,
+                    likes: r.like_count || 0,
+                    comments: r.comment_count || 0,
+                    authorName: displayAuthor,
+                    authorAvatar: authorAvatar,
+                    is_db: true
+                };
+            });
+        }
+
+        const staticList = Object.entries(STATIC_GUNDEM_NEWS).map(([s, item]) => ({
+            id: 0,
+            title: item.title,
+            slug: s,
+            category: item.category || 'Gündem',
+            subtitle: item.category || 'Gündem',
+            desc: item.excerpt,
+            excerpt: item.excerpt,
+            badge: 'Gündem',
+            image: item.imageUrl,
+            link: `/gundem/${s}`,
+            date: item.date || 'Bugün',
+            views: item.views || 0,
+            likes: 0,
+            comments: 0,
+            authorName: item.authorName || 'AperionX Bilim Ekibi',
+            authorAvatar: '/uploads/aperionx-a-transparent.png',
+            is_db: false
+        }));
+
+        const existingSlugs = new Set(dbArticles.map(a => a.slug));
+        const nonDuplicateStatics = staticList.filter(s => !existingSlugs.has(s.slug));
+        const merged = [...dbArticles, ...nonDuplicateStatics];
+
+        const responsePayload = {
+            success: true,
+            articles: merged,
+            total_db: dbArticles.length
+        };
+
+        setCachedData(cacheKey, responsePayload);
+        res.json(responsePayload);
+    } catch (err) {
+        console.error('Error fetching public gundem feed:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -5313,13 +5474,24 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
         await pool.query(updateQuery, queryParams);
         clearCache('articles');
 
-        if (authorId) {
-            try {
+        // Notify primary author and all co-authors
+        try {
+            const notifiedUserIds = new Set();
+            if (authorId) notifiedUserIds.add(Number(authorId));
+
+            const [coRows] = await pool.query('SELECT user_id FROM article_authors WHERE article_id = ?', [articleId]);
+            if (coRows && coRows.length > 0) {
+                coRows.forEach(r => { if (r.user_id) notifiedUserIds.add(Number(r.user_id)); });
+            }
+
+            for (const uid of notifiedUserIds) {
                 await pool.query(
                     "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
-                    [authorId, msg, type]
+                    [uid, msg, type]
                 );
-            } catch (ne) {}
+            }
+        } catch (ne) {
+            console.error('Error sending decide notifications to authors:', ne);
         }
 
         res.json({ message: 'İşlem başarılı.', status });

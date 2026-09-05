@@ -1068,7 +1068,7 @@
     <section class="gundem-feed-section" id="gundemFeed">
         <div class="gundem-feed-container">
             <!-- Sol Kolon: Sinematik Poster Vitrin Kartı -->
-            <a href="/gundem/akdeniz-derinliklerinde-yeni-bir-hidrotermal-ekosistem-kesfedildi" class="gundem-featured-card">
+            <a href="/gundem/akdeniz-derinliklerinde-yeni-bir-hidrotermal-ekosistem-kesfedildi" class="gundem-featured-card" id="gundemFeaturedCard">
                 <div class="gundem-poster-bg">
                     <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop" alt="Derin Okyanus Hidrotermal Ekosistem Keşfi">
                     <div class="gundem-poster-overlay"></div>
@@ -1100,7 +1100,7 @@
 
             <!-- Sağ Kolon: 4'lü Haber Izgarası (Tam Üst Hizadan Başlar) -->
             <div class="gundem-grid-col">
-                <div class="gundem-cards-grid">
+                <div class="gundem-cards-grid" id="gundemCardsGrid">
                     <!-- Kart 1 -->
                     <a href="/gundem/optik-kuantum-cipleriyle-super-iletken-hizinda-veri-isleme-basarisi" class="gundem-item-card">
                         <div class="gundem-item-img-wrap">
@@ -1340,7 +1340,7 @@
             handleHeaderScroll();
 
             /* === SLIDER VERİLERİ VE MANTIĞI === */
-            const gundemSlides = [
+            let gundemSlides = [
                 {
                     badge: 'Gündem',
                     title: "James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti",
@@ -1500,6 +1500,117 @@
             renderDots();
             renderSlide(0);
             startAutoplay();
+
+            /* === DİNAMİK BİLİM GÜNDEMİ VERİLERİNİ ÇEK VE RENDER ET === */
+            function escapeGundemHtml(str) {
+                const d = document.createElement('div');
+                d.textContent = str || '';
+                return d.innerHTML;
+            }
+
+            async function fetchAndRenderGundemFeed() {
+                try {
+                    const res = await fetch('/api/public/gundem');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (!data || !data.success || !Array.isArray(data.articles) || data.articles.length === 0) return;
+
+                    const articles = data.articles;
+
+                    // 1. Slider'ı Dinamik Güncelle (İlk 3-4 haber)
+                    if (articles.length > 0) {
+                        const sliderItems = articles.slice(0, 4);
+                        gundemSlides = sliderItems.map(item => ({
+                            badge: item.category || 'Gündem',
+                            title: item.title,
+                            subtitle: item.subtitle || item.category || 'Gündem',
+                            desc: item.desc || item.excerpt || item.title,
+                            image: item.image,
+                            link: item.link || `/gundem/${item.slug}`
+                        }));
+                        renderDots();
+                        renderSlide(0);
+                    }
+
+                    // 2. Sol Vitrin Kartı (Featured Card)
+                    const featuredEl = document.getElementById('gundemFeaturedCard');
+                    if (featuredEl && articles.length > 0) {
+                        const feat = articles[0];
+                        featuredEl.href = feat.link || `/gundem/${feat.slug}`;
+                        
+                        const posterImg = featuredEl.querySelector('.gundem-poster-bg img');
+                        if (posterImg) {
+                            posterImg.src = feat.image;
+                            posterImg.alt = feat.title;
+                        }
+
+                        const titleEl = featuredEl.querySelector('.gundem-featured-title');
+                        if (titleEl) titleEl.innerText = feat.title;
+
+                        const descEl = featuredEl.querySelector('.gundem-featured-desc');
+                        if (descEl) descEl.innerText = feat.desc || feat.excerpt || '';
+
+                        const authorImg = featuredEl.querySelector('.gundem-author-avatar');
+                        if (authorImg) {
+                            authorImg.src = feat.authorAvatar || '/uploads/favicon-48x48.png';
+                            authorImg.alt = feat.authorName || 'AperionX';
+                        }
+
+                        const authorNameEl = featuredEl.querySelector('.gundem-author-name');
+                        if (authorNameEl) {
+                            authorNameEl.innerText = feat.authorName || 'AperionX Bilim Ekibi';
+                        }
+                    }
+
+                    // 3. Sağ 4'lü Kart Izgarası (Cards Grid)
+                    const gridEl = document.getElementById('gundemCardsGrid');
+                    if (gridEl && articles.length > 1) {
+                        const gridArticles = articles.slice(1, 5);
+                        gridEl.innerHTML = gridArticles.map(item => `
+                            <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
+                                <div class="gundem-item-img-wrap">
+                                    <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                                </div>
+                                <h4 class="gundem-item-title">
+                                    ${escapeGundemHtml(item.title)}
+                                </h4>
+                                <div class="gundem-item-author-row">
+                                    <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
+                                    <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                                </div>
+                            </a>
+                        `).join('');
+                    }
+
+                    // 4. Schema.org ItemList SEO Entegrasyonu
+                    try {
+                        let schemaEl = document.getElementById('gundemItemListSchema');
+                        if (!schemaEl) {
+                            schemaEl = document.createElement('script');
+                            schemaEl.type = 'application/ld+json';
+                            schemaEl.id = 'gundemItemListSchema';
+                            document.head.appendChild(schemaEl);
+                        }
+                        const schemaData = {
+                            "@context": "https://schema.org",
+                            "@type": "ItemList",
+                            "name": "AperionX Bilim Gündemi",
+                            "description": "En son bilimsel keşifler, teknolojik kırılımlar ve analizler",
+                            "itemListElement": articles.slice(0, 10).map((item, idx) => ({
+                                "@type": "ListItem",
+                                "position": idx + 1,
+                                "name": item.title,
+                                "url": "https://aperionx.com" + (item.link || `/gundem/${item.slug}`)
+                            }))
+                        };
+                        schemaEl.textContent = JSON.stringify(schemaData);
+                    } catch (se) {}
+                } catch (err) {
+                    console.warn('Could not fetch dynamic gundem feed, fallback active:', err);
+                }
+            }
+
+            fetchAndRenderGundemFeed();
 
             /* === AŞAĞI KAYDIR BUTONU ETKİLEŞİMİ === */
             const scrollDownBtn = document.getElementById('scrollDownBtn');

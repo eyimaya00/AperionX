@@ -12875,6 +12875,7 @@
 
                     return {
                         id: row.id,
+                        slug: row.slug || '',
                         title: row.title || structured.title || '',
                         category: row.category || structured.category || 'Gündem',
                         description: structured.description || row.excerpt || '',
@@ -13147,15 +13148,20 @@
                             ${formattedTime ? `<div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">${formattedTime}</div>` : ''}
                         </td>
                         <td style="text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                ${(item.status === 'published' || item.status === 'yayinda') && item.slug ? `
+                                    <a href="/gundem/${item.slug}" target="_blank" class="art-action-btn view" title="Sitede Canlı Gör" style="color: #10b981; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                        <i class="ph-bold ph-arrow-square-out"></i>
+                                    </a>
+                                ` : ''}
                                 <button class="art-action-btn view" onclick="previewBilimGundem('${item.id}')" title="Önizle">
-                                    <i class="ph ph-eye"></i> Önizle
+                                    <i class="ph ph-eye"></i>
                                 </button>
                                 <button class="art-action-btn edit" onclick="editBilimGundem('${item.id}')" title="Düzenle">
-                                    <i class="ph ph-note-pencil"></i> Düzenle
+                                    <i class="ph ph-note-pencil"></i>
                                 </button>
                                 <button class="art-action-btn delete" onclick="deleteBilimGundem('${item.id}')" title="Sil">
-                                    <i class="ph ph-trash"></i> Sil
+                                    <i class="ph ph-trash"></i>
                                 </button>
                             </div>
                         </td>
