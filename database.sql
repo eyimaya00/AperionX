@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS articles (
     visual_references_list TEXT,
     pdf_url VARCHAR(255),
     rejection_reason TEXT,
+    is_gundem TINYINT(1) DEFAULT 0,
+    gundem_data LONGTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     submitted_at TIMESTAMP NULL DEFAULT NULL,

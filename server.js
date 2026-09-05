@@ -2062,6 +2062,8 @@ async function ensureSchema() {
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN is_gundem TINYINT(1) DEFAULT 0'); } catch(e) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN gundem_data LONGTEXT NULL'); } catch(e) {}
         // Add linkedin_url, public_email, show_email to users table if missing
         try { await pool.query('ALTER TABLE users ADD COLUMN linkedin_url VARCHAR(255) NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE users ADD COLUMN public_email VARCHAR(255) NULL'); } catch(e) {}
@@ -4637,10 +4639,22 @@ app.get('/api/author/comments', authenticateToken, async (req, res) => {
 });
 
 
+// Helper to ensure gundem columns exist in any database environment
+async function ensureGundemColumns() {
+    try {
+        await pool.query('ALTER TABLE articles ADD COLUMN IF NOT EXISTS is_gundem TINYINT(1) DEFAULT 0');
+        await pool.query('ALTER TABLE articles ADD COLUMN IF NOT EXISTS gundem_data LONGTEXT NULL');
+    } catch (e) {
+        try { await pool.query('ALTER TABLE articles ADD COLUMN is_gundem TINYINT(1) DEFAULT 0'); } catch (e2) {}
+        try { await pool.query('ALTER TABLE articles ADD COLUMN gundem_data LONGTEXT NULL'); } catch (e3) {}
+    }
+}
+
 // === EDITOR ROUTES (OPTIMIZED LIGHTWEIGHT METADATA) ===
 app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
+        await ensureGundemColumns();
         const [rows] = await pool.query(`
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
@@ -4705,6 +4719,7 @@ app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
 app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
+        await ensureGundemColumns();
         const [rows] = await pool.query(`
             SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.author_id, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
@@ -4719,6 +4734,7 @@ app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
 app.get('/api/editor/gundem/history', authenticateToken, async (req, res) => {
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
+        await ensureGundemColumns();
         const [rows] = await pool.query(`
             SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.published_at, a.author_id, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
@@ -4835,6 +4851,8 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
     }
 
     try {
+        await ensureGundemColumns();
+
         if (!title || !title.trim()) {
             return res.status(400).json({ error: 'Başlık zorunludur.' });
         }
@@ -8540,6 +8558,8 @@ app.listen(PORT, async () => {
         await addColumnIfMissing('users', 'last_heartbeat', 'DATETIME NULL');
         await addColumnIfMissing('users', 'total_work_seconds', 'INT DEFAULT 0');
         await addColumnIfMissing('users', 'current_session_start', 'DATETIME NULL');
+        await addColumnIfMissing('articles', 'is_gundem', 'TINYINT(1) DEFAULT 0');
+        await addColumnIfMissing('articles', 'gundem_data', 'LONGTEXT NULL');
         
         await pool.query(`CREATE TABLE IF NOT EXISTS user_activity_log (
             id INT AUTO_INCREMENT PRIMARY KEY,
