@@ -422,7 +422,7 @@ function startHeroLoop(count) {
         slides[currentIndex].classList.remove('active');
         currentIndex = (currentIndex + 1) % count;
         slides[currentIndex].classList.add('active');
-    }, 5000); // 5 Seconds
+    }, 3200); // 3.2 Seconds (hızlandırıldı)
 }
 
 // --- Theme Toggle ---

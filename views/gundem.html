@@ -271,7 +271,7 @@
             grid-template-columns: 1.05fr 0.95fr;
             gap: 48px;
             align-items: center;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.22s ease, transform 0.22s ease;
         }
 
         .gundem-slide-content.fade-out {
@@ -1322,7 +1322,7 @@
                         slideContent.classList.remove('fade-out');
                         slideContent.classList.add('fade-in');
                     }
-                }, 160);
+                }, 110);
             }
 
             function goToSlide(index) {
@@ -1337,9 +1337,10 @@
             }
 
             function startAutoplay() {
+                clearInterval(slideInterval);
                 slideInterval = setInterval(() => {
                     goToSlide(currentIndex + 1);
-                }, 6000);
+                }, 3000);
             }
 
             function resetAutoplay() {
@@ -1366,6 +1367,13 @@
             const heroSlider = document.getElementById('gundemHero');
 
             if (heroSlider) {
+                heroSlider.addEventListener('mouseenter', () => {
+                    clearInterval(slideInterval);
+                });
+                heroSlider.addEventListener('mouseleave', () => {
+                    resetAutoplay();
+                });
+
                 heroSlider.addEventListener('touchstart', (e) => {
                     touchStartX = e.changedTouches[0].screenX;
                 }, { passive: true });
