@@ -348,13 +348,37 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
 
         // 1. Önce Veritabanında ara (Yazar/Editör Panelinden eklenenler)
         try {
-            const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.slug = ?', [slug]);
+            const [rows] = await pool.query(`
+                SELECT a.*, 
+                       u.id as author_user_id,
+                       u.fullname as author_fullname, 
+                       u.username as author_username, 
+                       u.avatar_url as author_avatar, 
+                       u.job_title as author_job_title 
+                FROM articles a 
+                LEFT JOIN users u ON a.author_id = u.id 
+                WHERE a.slug = ?
+            `, [slug]);
             if (rows && rows.length > 0) {
                 const row = rows[0];
                 const dateObj = row.created_at ? new Date(row.created_at) : new Date();
                 const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
                 const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
                 
+                const authorName = row.author_fullname || 'AperionX Bilim Ekibi';
+                const authorTitle = row.author_job_title || 'Bilim, Teknoloji ve Analiz Masası';
+                let authorAvatar = '/uploads/aperionx-a-transparent.png';
+                let isDefaultAvatar = true;
+                if (row.author_avatar && row.author_avatar.trim() !== '') {
+                    authorAvatar = row.author_avatar.trim();
+                    if (!authorAvatar.startsWith('http') && !authorAvatar.startsWith('data:')) {
+                        authorAvatar = authorAvatar.startsWith('/') ? authorAvatar : '/' + authorAvatar;
+                    }
+                    isDefaultAvatar = false;
+                }
+                const authorSlug = slugify(row.author_fullname) || row.author_username || row.author_user_id || '';
+                const authorProfileUrl = authorSlug ? `/yazar/${authorSlug}` : '/articles';
+
                 articleData = {
                     title: row.title,
                     category: row.category || 'Gündem',
@@ -366,8 +390,11 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     readTime: Math.max(2, Math.ceil((row.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
                     views: (row.views || 0) + 1,
                     tags: row.tags || row.category || 'Gündem',
-                    authorName: row.author_fullname || 'AperionX Bilim Ekibi',
-                    authorTitle: 'Bilim, Teknoloji ve Analiz Masası'
+                    authorName: authorName,
+                    authorTitle: authorTitle,
+                    authorAvatar: authorAvatar,
+                    authorAvatarStyle: isDefaultAvatar ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;',
+                    authorProfileUrl: authorProfileUrl
                 };
 
                 // Asenkron okunma artırımı
@@ -392,7 +419,10 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 views: item.views,
                 tags: item.tags || item.category || 'Gündem',
                 authorName: item.authorName || 'AperionX Bilim Ekibi',
-                authorTitle: item.authorTitle || 'Bilim, Teknoloji ve Analiz Masası'
+                authorTitle: item.authorTitle || 'Bilim, Teknoloji ve Analiz Masası',
+                authorAvatar: '/uploads/aperionx-a-transparent.png',
+                authorAvatarStyle: 'padding: 4px; object-fit: contain;',
+                authorProfileUrl: '/articles'
             };
         }
 
@@ -441,7 +471,10 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml)
             .replace(/\{\{TAGS\}\}/g, articleData.tags || '')
             .replace(/\{\{AUTHOR_NAME\}\}/g, articleData.authorName || 'AperionX Bilim Ekibi')
-            .replace(/\{\{AUTHOR_TITLE\}\}/g, articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası');
+            .replace(/\{\{AUTHOR_TITLE\}\}/g, articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası')
+            .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, articleData.authorAvatar || '/uploads/aperionx-a-transparent.png')
+            .replace(/\{\{AUTHOR_AVATAR_STYLE\}\}/g, articleData.authorAvatarStyle || 'padding: 4px; object-fit: contain;')
+            .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, articleData.authorProfileUrl || '/articles');
 
         return res.send(html);
     } catch (err) {
@@ -928,7 +961,17 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
     const id = req.params.id;
 
     try {
-        const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = ? OR a.slug = ?', [id, id]);
+        const [rows] = await pool.query(`
+            SELECT a.*, 
+                   u.id as author_user_id,
+                   u.fullname as author_fullname, 
+                   u.username as author_username, 
+                   u.avatar_url as author_avatar, 
+                   u.job_title as author_job_title 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.id = ? OR a.slug = ?
+        `, [id, id]);
         if (rows.length === 0) return res.status(404).send('Bilim gündemi yazısı bulunamadı (404)');
 
         const article = rows[0];
@@ -972,6 +1015,20 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     } catch (e) {}
                 }
 
+                const authorName = article.author_fullname || 'AperionX Bilim Ekibi';
+                const authorTitle = article.author_job_title || 'Bilim, Teknoloji ve Analiz Masası';
+                let authorAvatar = '/uploads/aperionx-a-transparent.png';
+                let isDefaultAvatar = true;
+                if (article.author_avatar && article.author_avatar.trim() !== '') {
+                    authorAvatar = article.author_avatar.trim();
+                    if (!authorAvatar.startsWith('http') && !authorAvatar.startsWith('data:')) {
+                        authorAvatar = authorAvatar.startsWith('/') ? authorAvatar : '/' + authorAvatar;
+                    }
+                    isDefaultAvatar = false;
+                }
+                const authorSlug = slugify(article.author_fullname) || article.author_username || article.author_user_id || '';
+                const authorProfileUrl = authorSlug ? `/yazar/${authorSlug}` : '/articles';
+
                 let html = htmlData
                     .replace(/\{\{TITLE\}\}/g, article.title || '')
                     .replace(/\{\{CATEGORY\}\}/g, article.category || 'Gündem')
@@ -984,8 +1041,11 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     .replace(/\{\{READ_TIME\}\}/g, '3')
                     .replace(/\{\{VIEWS\}\}/g, String(article.views || 0))
                     .replace(/\{\{TAGS\}\}/g, article.tags || article.category || 'Gündem')
-                    .replace(/\{\{AUTHOR_NAME\}\}/g, article.author_fullname || 'AperionX Bilim Ekibi')
-                    .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                    .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
+                    .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
+                    .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
+                    .replace(/\{\{AUTHOR_AVATAR_STYLE\}\}/g, isDefaultAvatar ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;')
+                    .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, authorProfileUrl)
                     .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(article.title || ''))
                     .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
                     .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');
@@ -1065,6 +1125,35 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
         }
     }
 
+    let authorName = (session.user && session.user.fullname) || req.user.fullname || 'AperionX Yazarı';
+    let authorTitle = 'Bilim, Teknoloji ve Analiz Masası';
+    let authorAvatar = '/uploads/aperionx-a-transparent.png';
+    let isDefaultAvatar = true;
+    let authorProfileUrl = '/articles';
+
+    const targetUserId = (session.user && session.user.id) || req.user.id;
+    if (targetUserId) {
+        try {
+            const [uRows] = await pool.query('SELECT id, fullname, username, avatar_url, job_title FROM users WHERE id = ?', [targetUserId]);
+            if (uRows && uRows.length > 0) {
+                const u = uRows[0];
+                if (u.fullname) authorName = u.fullname;
+                if (u.job_title) authorTitle = u.job_title;
+                if (u.avatar_url && u.avatar_url.trim() !== '') {
+                    authorAvatar = u.avatar_url.trim();
+                    if (!authorAvatar.startsWith('http') && !authorAvatar.startsWith('data:')) {
+                        authorAvatar = authorAvatar.startsWith('/') ? authorAvatar : '/' + authorAvatar;
+                    }
+                    isDefaultAvatar = false;
+                }
+                const authorSlug = slugify(u.fullname) || u.username || u.id;
+                if (authorSlug) authorProfileUrl = `/yazar/${authorSlug}`;
+            }
+        } catch (e) {
+            console.error('Error fetching user for live preview:', e);
+        }
+    }
+
     const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
     fs.readFile(filePath, 'utf8', (err, htmlData) => {
         if (err) return next(err);
@@ -1089,8 +1178,11 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
                 .replace(/\{\{READ_TIME\}\}/g, '3')
                 .replace(/\{\{VIEWS\}\}/g, '0')
                 .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
-                .replace(/\{\{AUTHOR_NAME\}\}/g, (session.user && session.user.fullname) || req.user.fullname || 'AperionX Yazarı')
-                .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
+                .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
+                .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
+                .replace(/\{\{AUTHOR_AVATAR_STYLE\}\}/g, isDefaultAvatar ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;')
+                .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, authorProfileUrl)
                 .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(title || ''))
                 .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
                 .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');
@@ -1128,6 +1220,35 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
             }
         }
 
+        let authorName = req.user.fullname || 'AperionX Yazarı';
+        let authorTitle = 'Bilim, Teknoloji ve Analiz Masası';
+        let authorAvatar = '/uploads/aperionx-a-transparent.png';
+        let isDefaultAvatar = true;
+        let authorProfileUrl = '/articles';
+
+        const targetUserId = req.user && req.user.id;
+        if (targetUserId) {
+            try {
+                const [uRows] = await pool.query('SELECT id, fullname, username, avatar_url, job_title FROM users WHERE id = ?', [targetUserId]);
+                if (uRows && uRows.length > 0) {
+                    const u = uRows[0];
+                    if (u.fullname) authorName = u.fullname;
+                    if (u.job_title) authorTitle = u.job_title;
+                    if (u.avatar_url && u.avatar_url.trim() !== '') {
+                        authorAvatar = u.avatar_url.trim();
+                        if (!authorAvatar.startsWith('http') && !authorAvatar.startsWith('data:')) {
+                            authorAvatar = authorAvatar.startsWith('/') ? authorAvatar : '/' + authorAvatar;
+                        }
+                        isDefaultAvatar = false;
+                    }
+                    const authorSlug = slugify(u.fullname) || u.username || u.id;
+                    if (authorSlug) authorProfileUrl = `/yazar/${authorSlug}`;
+                }
+            } catch (e) {
+                console.error('Error fetching user for live preview:', e);
+            }
+        }
+
         const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
         fs.readFile(filePath, 'utf8', (err, htmlData) => {
             if (err) return next(err);
@@ -1152,8 +1273,11 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
                     .replace(/\{\{READ_TIME\}\}/g, '3')
                     .replace(/\{\{VIEWS\}\}/g, '0')
                     .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
-                    .replace(/\{\{AUTHOR_NAME\}\}/g, req.user.fullname || 'AperionX Yazarı')
-                    .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                    .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
+                    .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
+                    .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
+                    .replace(/\{\{AUTHOR_AVATAR_STYLE\}\}/g, isDefaultAvatar ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;')
+                    .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, authorProfileUrl)
                     .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(title || ''))
                     .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
                     .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');

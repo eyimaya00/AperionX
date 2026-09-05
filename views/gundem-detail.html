@@ -612,16 +612,35 @@
             gap: 12px;
         }
 
-        .sidebar-author-img {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            object-fit: contain;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 4px;
+        .sidebar-author-avatar-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-author-avatar-link:hover {
+            transform: scale(1.06);
+        }
+
+        .sidebar-author-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sidebar-author-avatar-link:hover .sidebar-author-img {
+            border-color: #818cf8;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
         }
 
         .sidebar-author-details {
@@ -641,6 +660,14 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .sidebar-author-name:hover {
+            color: #818cf8;
+            text-decoration: underline;
         }
 
         .sidebar-author-name i {
@@ -1507,12 +1534,14 @@
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-user-circle"></i> Yazar Bilgileri</h3>
                     </div>
                     <div class="sidebar-author-row">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-author-img" alt="{{AUTHOR_NAME}}">
+                        <a href="{{AUTHOR_PROFILE_URL}}" class="sidebar-author-avatar-link" title="{{AUTHOR_NAME}} Profilini Gör">
+                            <img src="{{AUTHOR_AVATAR_URL}}" class="sidebar-author-img" style="{{AUTHOR_AVATAR_STYLE}}" alt="{{AUTHOR_NAME}}" onerror="this.src='/uploads/aperionx-a-transparent.png'; this.style.padding='4px'; this.style.objectFit='contain';">
+                        </a>
                         <div class="sidebar-author-details">
-                            <span class="sidebar-author-name">
-                                {{AUTHOR_NAME}}
+                            <a href="{{AUTHOR_PROFILE_URL}}" class="sidebar-author-name" title="{{AUTHOR_NAME}} Profilini Gör">
+                                <span>{{AUTHOR_NAME}}</span>
                                 <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
-                            </span>
+                            </a>
                             <span class="sidebar-author-title">{{AUTHOR_TITLE}}</span>
                             <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> {{DATE_FORMATTED}} tarihinde yayınlandı</span>
                         </div>
