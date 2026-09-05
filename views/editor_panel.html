@@ -4984,6 +4984,7 @@
             }
 
             items.forEach(item => {
+                const isPending = item.status === 'pending';
                 const date = new Date(item.submitted_at || item.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
 
                 let statusBadge = '';
