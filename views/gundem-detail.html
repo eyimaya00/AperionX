@@ -510,16 +510,31 @@
             top: 86px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 14px;
             max-height: calc(100vh - 100px);
             overflow-y: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
             padding-left: 2px;
+            padding-right: 6px;
+            padding-bottom: 30px;
         }
 
         .gundem-sidebar::-webkit-scrollbar {
-            display: none;
+            width: 5px;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.35);
+            border-radius: 10px;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--gundem-primary);
         }
 
         /* Sidebar Kart Tasarımı */
@@ -527,7 +542,7 @@
             background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            padding: 16px 18px;
+            padding: 14px 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -627,16 +642,17 @@
             height: 44px;
             border-radius: 50%;
             border: 2px solid #6366f1;
-            object-fit: cover;
-            background: #1e1b4b;
+            object-fit: contain;
+            background: #0f172a;
+            padding: 3px;
             flex-shrink: 0;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
         }
 
         .sidebar-author-details {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             min-width: 0;
         }
 
@@ -662,6 +678,20 @@
             font-size: 0.76rem;
             color: rgba(255, 255, 255, 0.55);
             line-height: 1.35;
+        }
+
+        .sidebar-author-date {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.45);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 3px;
+        }
+
+        .sidebar-author-date i {
+            font-size: 0.80rem;
+            color: #818cf8;
         }
 
         /* 3. Etiketler (Tags) */
@@ -1461,25 +1491,6 @@
         <div class="gundem-article-container">
             <!-- SOL KOLON (Masaüstü: Sol / Mobil: İlk Sırada Haber Okuma Alanı) -->
             <div class="gundem-main-content">
-                <!-- Yazar ve Yayın Bilgisi Barı -->
-                <div class="gundem-author-bar">
-                    <div class="gundem-author-profile">
-                        <img src="/uploads/favicon-48x48.png" class="gundem-author-avatar-img" alt="{{AUTHOR_NAME}}">
-                        <div class="gundem-author-meta-texts">
-                            <span class="gundem-author-full-name">
-                                {{AUTHOR_NAME}}
-                                <i class="ph-fill ph-seal-check" title="Doğrulanmış Kaynak"></i>
-                            </span>
-                            <span class="gundem-author-dept">{{AUTHOR_TITLE}}</span>
-                        </div>
-                    </div>
-
-                    <div class="gundem-author-date-info">
-                        <i class="ph ph-calendar-blank"></i>
-                        <span>{{DATE_FORMATTED}} tarihinde yayınlandı</span>
-                    </div>
-                </div>
-
                 <!-- Makale Metni -->
                 <article class="gundem-article-prose" id="gundemArticleBody">
                     {{CONTENT}}
@@ -1532,11 +1543,11 @@
                         <span class="sidebar-rating-badge" id="ratingScoreBadge" style="font-size: 0.76rem; font-weight: 700; color: #a5b4fc;">5.0</span>
                     </div>
                     <div class="sidebar-rating-stars" id="ratingStars">
-                        <img src="/uploads/logo.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Yıldız">
-                        <img src="/uploads/logo.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Yıldız">
-                        <img src="/uploads/logo.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Yıldız">
-                        <img src="/uploads/logo.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Yıldız">
-                        <img src="/uploads/logo.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Yıldız">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Yıldız">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Yıldız">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Yıldız">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Yıldız">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Yıldız">
                     </div>
                     <div class="sidebar-rating-info">
                         <span id="ratingStatusText">Habere oy verin</span>
@@ -1550,13 +1561,14 @@
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-user-circle"></i> Yazar Bilgileri</h3>
                     </div>
                     <div class="sidebar-author-row">
-                        <img src="/uploads/logo.png" class="sidebar-author-img" alt="{{AUTHOR_NAME}}">
+                        <img src="/uploads/favicon-48x48.png" class="sidebar-author-img" alt="{{AUTHOR_NAME}}">
                         <div class="sidebar-author-details">
                             <span class="sidebar-author-name">
                                 {{AUTHOR_NAME}}
                                 <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
                             </span>
                             <span class="sidebar-author-title">{{AUTHOR_TITLE}}</span>
+                            <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> {{DATE_FORMATTED}} tarihinde yayınlandı</span>
                         </div>
                     </div>
                 </div>
