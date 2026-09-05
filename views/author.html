@@ -3143,6 +3143,7 @@
                     gap: 5px;
                     font-family: 'Outfit', sans-serif;
                 }
+                .art-action-btn.view:hover { background: rgba(16, 185, 129, 0.1); color: #10b981; }
                 .art-action-btn.edit:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary-accent, #6366f1); }
                 .art-action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
                 .art-action-btn.restore:hover { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
@@ -3181,6 +3182,12 @@
                 .exp-modal-box.exp-preview-box {
                     max-width: 900px;
                     max-height: 90vh;
+                }
+                .exp-modal-box.bg-preview-box {
+                    max-width: 1250px;
+                    width: 95%;
+                    height: 92vh;
+                    max-height: 92vh;
                 }
                 @keyframes expModalPop {
                     from { transform: scale(0.92) translateY(20px); opacity: 0; }
@@ -6659,7 +6666,7 @@
                         </h1>
                     </div>
                     <div class="bge-topbar-right">
-                        <button class="bge-btn-preview" onclick="bgePreviewComingSoon()" title="Önizle">
+                        <button class="bge-btn-preview" onclick="bgeOpenPreview()" title="Önizle">
                             <i class="ph-bold ph-eye"></i> Önizle
                         </button>
                         <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
@@ -6839,7 +6846,7 @@
                     <button class="bge-back-btn" onclick="backToBilimGundemi()">
                         <i class="ph-bold ph-arrow-left"></i> Geri Dön
                     </button>
-                    <button class="bge-btn-preview" onclick="bgePreviewComingSoon()" title="Önizle">
+                    <button class="bge-btn-preview" onclick="bgeOpenPreview()" title="Önizle">
                         <i class="ph-bold ph-eye"></i> Önizle
                     </button>
                     <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
@@ -6985,6 +6992,46 @@
                     <button type="button" class="btn btn-secondary" onclick="closeArticlePreview()">Kapat</button>
                     <button type="button" class="btn btn-primary" onclick="closeArticlePreview(); submitArticle('pending');">
                         <i class="ph-bold ph-paper-plane-tilt"></i> Yayına Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BILIM GUNDEMI LIVE PREVIEW MODAL (MATCHING EDITOR PANEL) -->
+        <div class="exp-modal-overlay" id="bg-preview-modal-overlay" onclick="if(event.target===this) closeBilimGundemPreview()" style="z-index: 2100;">
+            <div class="exp-modal-box bg-preview-box">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="art-badge published" style="font-size: 0.75rem; background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe;">
+                            <i class="ph-fill ph-newspaper"></i> Bilim Gündemi Önizleme
+                        </span>
+                        <span style="font-size: 0.85rem; color: #94a3b8;">Canlı Okuyucu Görünümü</span>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeBilimGundemPreview()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" style="padding: 16px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; height: 100%;">
+                    <!-- Top Bar inside preview (exactly matching editor panel) -->
+                    <div id="bg-preview-meta-bar" style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span id="bg-preview-title" style="font-weight: 600; color: #1e293b; font-size: 0.95rem;"></span>
+                            <span style="color: #cbd5e1;">|</span>
+                            <span style="font-size: 0.85rem; color: #64748b;">Kategori: <strong id="bg-preview-category" style="color: #475569;"></strong></span>
+                            <span style="color: #cbd5e1;">|</span>
+                            <span style="font-size: 0.85rem; color: #64748b;">Yazar: <strong id="bg-preview-author" style="color: #475569;"></strong></span>
+                        </div>
+                        <a href="javascript:void(0)" id="bg-preview-newtab-btn" target="_blank" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; color: #334155; font-weight: 500;">
+                            <i class="ph-bold ph-arrow-square-out"></i> Yeni Sekmede Aç
+                        </a>
+                    </div>
+                    <!-- Iframe container -->
+                    <iframe id="bg-preview-iframe" src="" style="width: 100%; flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; background: white;" frameborder="0"></iframe>
+                </div>
+                <div class="exp-modal-footer" style="padding: 14px 24px; border-top: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: flex-end; gap: 10px; background: rgba(248, 250, 252, 0.5); flex-shrink: 0;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBilimGundemPreview()" style="padding: 8px 18px; border-radius: 8px; font-weight: 600;">Kapat</button>
+                    <button type="button" id="bg-preview-submit-btn" class="btn btn-primary" onclick="closeBilimGundemPreview(); submitBilimGundemToEditor();" style="padding: 8px 20px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder
                     </button>
                 </div>
             </div>
@@ -13019,6 +13066,9 @@
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button class="art-action-btn view" onclick="previewBilimGundem('${item.id}')" title="Önizle">
+                                    <i class="ph ph-eye"></i> Önizle
+                                </button>
                                 <button class="art-action-btn edit" onclick="editBilimGundem('${item.id}')" title="Düzenle">
                                     <i class="ph ph-note-pencil"></i> Düzenle
                                 </button>
@@ -13143,12 +13193,241 @@
             }
         }
 
-        function bgePreviewComingSoon() {
-            if (typeof showAuthorToast === 'function') {
-                showAuthorToast('Önizleme özelliği yakında aktif edilecektir.', 'info');
-            } else {
-                alert('Önizleme özelliği yakında aktif edilecektir.');
+        // ─── BILIM GUNDEMI PREVIEW (CANLI OKUYUCU ÖNİZLEMESİ) ───
+        let bgPreviewBlobUrl = null;
+
+        function closeBilimGundemPreview() {
+            const overlay = document.getElementById('bg-preview-modal-overlay');
+            if (overlay) overlay.classList.remove('show');
+            const iframe = document.getElementById('bg-preview-iframe');
+            if (iframe) {
+                iframe.src = 'about:blank';
+                iframe.removeAttribute('srcdoc');
             }
+            if (bgPreviewBlobUrl) {
+                URL.revokeObjectURL(bgPreviewBlobUrl);
+                bgPreviewBlobUrl = null;
+            }
+        }
+
+        async function bgeOpenPreview() {
+            const title = (document.getElementById('bge-title')?.value || '').trim() || 'Başlıksız Bilim Gündemi';
+            let category = document.getElementById('bge-category')?.value || 'Genel';
+            if (category === 'Diğer') {
+                const custom = (document.getElementById('bge-custom-category')?.value || '').trim();
+                if (custom) category = custom;
+            }
+            const excerpt = (document.getElementById('bge-summary')?.value || document.getElementById('bge-description')?.value || '').trim();
+            const tags = (bgeTags && bgeTags.length > 0) ? bgeTags.join(', ') : (category || 'Gündem');
+            const authorName = (typeof currentUser !== 'undefined' && currentUser && (currentUser.fullname || currentUser.username)) 
+                ? (currentUser.fullname || currentUser.username) 
+                : 'AperionX Yazarı';
+
+            // Sync current editor inputs from DOM
+            if (typeof bgeSaveSectionValues === 'function') bgeSaveSectionValues();
+            if (typeof bgeSaveSourceValues === 'function') bgeSaveSourceValues();
+
+            // Build compiled content from sections
+            let compiledContent = '';
+            if (Array.isArray(bgeSections) && bgeSections.length > 0) {
+                bgeSections.forEach((sec, idx) => {
+                    const secTitle = sec.title ? sec.title.trim() : `Bölüm ${idx + 1}`;
+                    const secContent = sec.content || '';
+                    compiledContent += `
+                        <section class="gundem-article-section" id="bolum-${idx + 1}">
+                            <h2>${escapeHtml(secTitle)}</h2>
+                            <div class="gundem-section-content">${secContent}</div>
+                        </section>
+                    `;
+                });
+            } else {
+                compiledContent = '<p>İçerik henüz eklenmedi.</p>';
+            }
+
+            // Append sources
+            if (Array.isArray(bgeSources) && bgeSources.length > 0) {
+                let sourcesHtml = '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">';
+                bgeSources.forEach((src) => {
+                    let srcText = '';
+                    if (src.type === 'bilimsel_makale') {
+                        srcText = [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ');
+                    } else {
+                        srcText = src.url || 'Kaynak';
+                    }
+                    const link = src.url ? `<a href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(srcText || src.url)}</a>` : escapeHtml(srcText);
+                    sourcesHtml += `<li>${link}</li>`;
+                });
+                sourcesHtml += '</ul></section>';
+                compiledContent += sourcesHtml;
+            }
+
+            // Cover image
+            const coverImg = bgeImageDataUrl || (document.getElementById('bge-upload-preview')?.src) || '';
+
+            // Update meta bar in modal
+            const titleEl = document.getElementById('bg-preview-title');
+            if (titleEl) titleEl.innerText = title;
+            const catEl = document.getElementById('bg-preview-category');
+            if (catEl) catEl.innerText = category;
+            const authorEl = document.getElementById('bg-preview-author');
+            if (authorEl) authorEl.innerText = authorName;
+
+            const submitBtn = document.getElementById('bg-preview-submit-btn');
+            if (submitBtn) {
+                submitBtn.style.display = 'inline-flex';
+                submitBtn.onclick = () => {
+                    closeBilimGundemPreview();
+                    submitBilimGundemToEditor();
+                };
+                submitBtn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder';
+            }
+
+            const overlay = document.getElementById('bg-preview-modal-overlay');
+            if (overlay) overlay.classList.add('show');
+
+            const iframe = document.getElementById('bg-preview-iframe');
+            if (iframe) iframe.src = 'about:blank';
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/author/gundem/preview-live', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        category,
+                        content: compiledContent,
+                        excerpt,
+                        tags,
+                        image_url: coverImg
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Önizleme oluşturulamadı');
+                }
+
+                const html = await res.text();
+
+                if (bgPreviewBlobUrl) {
+                    URL.revokeObjectURL(bgPreviewBlobUrl);
+                }
+                const blob = new Blob([html], { type: 'text/html' });
+                bgPreviewBlobUrl = URL.createObjectURL(blob);
+
+                const newTabBtn = document.getElementById('bg-preview-newtab-btn');
+                if (newTabBtn) {
+                    newTabBtn.href = bgPreviewBlobUrl;
+                }
+
+                if (iframe) {
+                    iframe.removeAttribute('src');
+                    iframe.srcdoc = html;
+                }
+            } catch (err) {
+                console.error('bgeOpenPreview error:', err);
+                if (typeof showAuthorToast === 'function') {
+                    showAuthorToast('Önizleme yüklenirken bir hata oluştu.', 'error');
+                } else {
+                    alert('Önizleme yüklenirken bir hata oluştu.');
+                }
+            }
+        }
+
+        async function previewBilimGundem(id) {
+            let item = (bilimGundemData || []).find(i => String(i.id) === String(id));
+            const token = localStorage.getItem('token');
+
+            // If not found in memory, attempt fetch
+            if (!item && id && !String(id).startsWith('bg_')) {
+                try {
+                    const res = await fetch(`/api/author/gundem/${id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        item = await res.json();
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            const title = item ? item.title : 'Bilim Gündemi Önizleme';
+            const category = item ? (item.category || 'Gündem') : 'Gündem';
+            const authorName = item ? (item.author_fullname || item.author_name || currentUser?.fullname || 'AperionX Yazarı') : (currentUser?.fullname || 'AperionX Yazarı');
+
+            const titleEl = document.getElementById('bg-preview-title');
+            if (titleEl) titleEl.innerText = title;
+            const catEl = document.getElementById('bg-preview-category');
+            if (catEl) catEl.innerText = category;
+            const authorEl = document.getElementById('bg-preview-author');
+            if (authorEl) authorEl.innerText = authorName;
+
+            const submitBtn = document.getElementById('bg-preview-submit-btn');
+            if (submitBtn) {
+                if (item && (item.status === 'draft' || item.status === 'taslak' || item.status === 'duzenleme' || item.status === 'rejected')) {
+                    submitBtn.style.display = 'inline-flex';
+                    submitBtn.onclick = () => {
+                        closeBilimGundemPreview();
+                        editBilimGundem(id);
+                    };
+                    submitBtn.innerHTML = '<i class="ph-bold ph-note-pencil"></i> Düzenlemeye Git';
+                } else {
+                    submitBtn.style.display = 'none';
+                }
+            }
+
+            const overlay = document.getElementById('bg-preview-modal-overlay');
+            if (overlay) overlay.classList.add('show');
+
+            const iframe = document.getElementById('bg-preview-iframe');
+            const newTabBtn = document.getElementById('bg-preview-newtab-btn');
+
+            if (id && !String(id).startsWith('bg_')) {
+                const previewUrl = `/preview-gundem/${id}?token=${token}`;
+                if (newTabBtn) newTabBtn.href = previewUrl;
+                if (iframe) {
+                    iframe.removeAttribute('srcdoc');
+                    iframe.src = previewUrl;
+                }
+            } else if (item) {
+                // For localStorage item without DB ID, use preview-live
+                try {
+                    const res = await fetch('/api/author/gundem/preview-live', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            title: item.title,
+                            category: item.category,
+                            content: item.content || item.summary || '',
+                            excerpt: item.description || item.summary || '',
+                            tags: item.tags ? (Array.isArray(item.tags) ? item.tags.join(', ') : item.tags) : item.category,
+                            image_url: item.imageDataUrl || item.image_url || ''
+                        })
+                    });
+                    if (res.ok) {
+                        const html = await res.text();
+                        if (bgPreviewBlobUrl) URL.revokeObjectURL(bgPreviewBlobUrl);
+                        const blob = new Blob([html], { type: 'text/html' });
+                        bgPreviewBlobUrl = URL.createObjectURL(blob);
+                        if (newTabBtn) newTabBtn.href = bgPreviewBlobUrl;
+                        if (iframe) {
+                            iframe.removeAttribute('src');
+                            iframe.srcdoc = html;
+                        }
+                    }
+                } catch (e) {
+                    console.error('previewBilimGundem live error:', e);
+                }
+            }
+        }
+
+        function bgePreviewComingSoon() {
+            bgeOpenPreview();
         }
 
         async function submitBilimGundemToEditor() {

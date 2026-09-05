@@ -972,6 +972,56 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
     }
 });
 
+app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, next) => {
+    try {
+        const body = req.body || {};
+        const { title, category, content, excerpt, tags, image_url } = body;
+
+        const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
+        fs.readFile(filePath, 'utf8', (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+                const canonicalUrl = `${origin}/gundem/onizleme`;
+                const dateObj = new Date();
+                const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                const finalImg = image_url ? (image_url.startsWith('http') || image_url.startsWith('data:') ? image_url : `${origin}${image_url.startsWith('/') ? '' : '/'}${image_url}`) : `${origin}/uploads/logo.png`;
+
+                let html = htmlData
+                    .replace(/\{\{TITLE\}\}/g, title || 'Başlıksız Gündem')
+                    .replace(/\{\{CATEGORY\}\}/g, category || 'Gündem')
+                    .replace(/\{\{EXCERPT\}\}/g, excerpt || title || '')
+                    .replace(/\{\{CONTENT\}\}/g, content || '')
+                    .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
+                    .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+                    .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
+                    .replace(/\{\{DATE_ISO\}\}/g, dateObj.toISOString())
+                    .replace(/\{\{READ_TIME\}\}/g, '3')
+                    .replace(/\{\{VIEWS\}\}/g, '0')
+                    .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
+                    .replace(/\{\{AUTHOR_NAME\}\}/g, req.user.fullname || 'AperionX Yazarı')
+                    .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                    .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(title || ''))
+                    .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
+                    .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');
+
+                html = html.replace(/<script[^>]*adsbygoogle[^>]*><\/script>/gi, '');
+                html = html.replace(/<script[^>]*googletagmanager[^>]*><\/script>/gi, '');
+
+                res.send(html);
+            } catch (err2) {
+                console.error('Preview error:', err2);
+                res.status(500).send('Önizleme Hatası');
+            }
+        });
+    } catch (e) {
+        console.error('Preview live error:', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+
 // Helpers for SSR
 function escapeHtml(str) {
     if (!str) return '';
