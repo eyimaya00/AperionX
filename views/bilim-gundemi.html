@@ -491,6 +491,83 @@
             box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
         }
 
+        /* Aşağı Kaydır İndikatörü */
+        .gundem-scroll-down-bar {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .gundem-scroll-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            font-size: 1.35rem;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: bounceDown 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 16px rgba(99, 102, 241, 0.2);
+            position: relative;
+        }
+
+        .gundem-scroll-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(99, 102, 241, 0.5);
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .gundem-scroll-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(165, 180, 252, 0.6);
+            transform: scale(1.12);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.4);
+            animation-play-state: paused;
+        }
+
+        .gundem-scroll-btn:hover::before {
+            opacity: 1;
+            animation: pulseRing 1.8s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+
+        .gundem-scroll-btn.clicked {
+            transform: translateY(10px) scale(0.92) !important;
+            background: rgba(99, 102, 241, 0.6) !important;
+            border-color: #818cf8 !important;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.85) !important;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(8px); }
+            60% { transform: translateY(4px); }
+        }
+
         /* ==========================================================
            === YENİ BÖLÜM: APERIONX BİLİM GÜNDEMİ FEED (MODERN & ZARİF) ===
            ========================================================== */
@@ -903,6 +980,14 @@
             .gundem-item-img-wrap {
                 height: 200px;
             }
+            .gundem-scroll-down-bar {
+                bottom: 16px;
+            }
+            .gundem-scroll-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -1008,6 +1093,13 @@
 
             <!-- Slider Noktaları (Indicators) -->
             <div class="gundem-dots-wrapper" id="gundemDotsWrapper"></div>
+        </div>
+
+        <!-- Aşağı Kaydır İndikatörü -->
+        <div class="gundem-scroll-down-bar">
+            <a href="#gundemFeed" class="gundem-scroll-btn" id="scrollDownBtn" aria-label="Gelişmeleri Görmek İçin Aşağı Kaydır" title="Gelişmeleri Gör">
+                <i class="ph-bold ph-caret-down"></i>
+            </a>
         </div>
     </section>
 
@@ -1438,6 +1530,58 @@
             renderDots();
             renderSlide(0);
             startAutoplay();
+
+            /* === AŞAĞI KAYDIR BUTONU ETKİLEŞİMİ === */
+            const scrollDownBtn = document.getElementById('scrollDownBtn');
+            const targetFeedSection = document.getElementById('gundemFeed');
+
+            if (scrollDownBtn && targetFeedSection) {
+                scrollDownBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    scrollDownBtn.classList.add('clicked');
+                    setTimeout(() => {
+                        scrollDownBtn.classList.remove('clicked');
+                    }, 450);
+
+                    const header = document.getElementById('mainHeader');
+                    const headerHeight = header ? header.offsetHeight : 65;
+                    const targetTop = targetFeedSection.getBoundingClientRect().top + window.pageYOffset - headerHeight + 5;
+
+                    const startPosition = window.pageYOffset;
+                    const distance = targetTop - startPosition;
+                    const duration = 380; // ms
+                    let startTime = null;
+                    let isInterrupted = false;
+
+                    const cancelOnInteraction = () => { isInterrupted = true; };
+                    window.addEventListener('wheel', cancelOnInteraction, { once: true, passive: true });
+                    window.addEventListener('touchmove', cancelOnInteraction, { once: true, passive: true });
+
+                    function easeInOutCubic(t, b, c, d) {
+                        t /= d / 2;
+                        if (t < 1) return (c / 2) * t * t * t + b;
+                        t -= 2;
+                        return (c / 2) * (t * t * t + 2) + b;
+                    }
+
+                    function step(currentTime) {
+                        if (isInterrupted) return;
+                        if (!startTime) startTime = currentTime;
+                        const elapsed = currentTime - startTime;
+                        const run = easeInOutCubic(elapsed, startPosition, distance, duration);
+                        window.scrollTo(0, run);
+
+                        if (elapsed < duration) {
+                            requestAnimationFrame(step);
+                        } else {
+                            window.scrollTo(0, targetTop);
+                        }
+                    }
+
+                    requestAnimationFrame(step);
+                });
+            }
         });
     </script>
 </body>
