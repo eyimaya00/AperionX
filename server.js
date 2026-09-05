@@ -4408,6 +4408,12 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ?, published_at = NOW(), was_published = 1 WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             }
+        } else if (decision === 'revision') {
+            status = 'rejected';
+            msg = `Makaleniz için düzenleme talep edildi: ${title}. Düzenleme Notu: ${rejection_reason || 'Gerekçe belirtilmedi'}`;
+            type = 'warning';
+            updateQuery = "UPDATE articles SET status = 'rejected', rejection_reason = ? WHERE id = ?";
+            queryParams = [rejection_reason || 'Düzenleme talep edildi.', articleId];
         } else if (decision === 'reject') {
             status = 'rejected';
             msg = `Makaleniz reddedildi: ${title}. ${rejection_reason ? 'Sebep: ' + rejection_reason : ''}`;
@@ -4792,10 +4798,16 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, published_at = NOW(), was_published = 1, approved_by = ? WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             }
+        } else if (decision === 'revision') {
+            status = 'rejected';
+            msg = `Bilim Gündemi yazınız için düzenleme talep edildi: ${title}. Düzenleme Notu: ${rejection_reason || 'Gerekçe belirtilmedi'}`;
+            type = 'warning';
+            updateQuery = "UPDATE articles SET status = 'rejected', rejection_reason = ? WHERE id = ?";
+            queryParams = [rejection_reason || 'Düzenleme talep edildi.', articleId];
         } else if (decision === 'reject') {
             status = 'rejected';
-            msg = `Bilim Gündemi yazınız revizyon için reddedildi: ${title}. Sebep: ${rejection_reason || 'Gerekçe belirtilmedi'}`;
-            type = 'warning';
+            msg = `Bilim Gündemi yazınız reddedildi: ${title}. Sebep: ${rejection_reason || 'Gerekçe belirtilmedi'}`;
+            type = 'error';
             updateQuery = "UPDATE articles SET status = 'rejected', rejection_reason = ? WHERE id = ?";
             queryParams = [rejection_reason || 'Gerekçe belirtilmedi', articleId];
         } else {

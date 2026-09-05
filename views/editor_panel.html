@@ -4249,14 +4249,23 @@
             if (isPending) {
                 footer.innerHTML = `
                     <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
-                        <textarea id="reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
-                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <textarea id="reject-reason" placeholder="Düzenleme talebinizi veya gerekçenizi buraya yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
                             <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
-                            <button class="btn btn-danger" onclick="toggleRejectInput()">Reddet...</button>
-                            <button class="btn btn-primary" onclick="submitDecision('approve')">Yayına Al</button>
+                            <button class="btn" style="background:#f59e0b; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="toggleArticleFeedback('revision')">
+                                <i class="ph-bold ph-pencil-simple-line"></i> Düzenlemeye Gönder
+                            </button>
+                            <button class="btn btn-danger" onclick="toggleArticleFeedback('reject')">
+                                <i class="ph-bold ph-x-circle"></i> Reddet...
+                            </button>
+                            <button class="btn btn-primary" onclick="submitDecision('approve')">
+                                <i class="ph-bold ph-check-circle"></i> Yayına Al
+                            </button>
                         </div>
                         <div id="confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
-                            <button class="btn btn-danger" onclick="submitDecision('reject')">Reddet ve Bitir</button>
+                            <button class="btn" id="btn-article-feedback-submit" style="background:#f59e0b; color:white; border:none; padding:8px 18px; border-radius:8px; font-weight:600;" onclick="submitArticleFeedback()">
+                                Düzenleme Notuyla Gönder
+                            </button>
                         </div>
                     </div>
                 `;
@@ -4271,31 +4280,61 @@
             }
         }
 
-        function toggleRejectInput() {
+        let activeArticleFeedbackType = 'revision';
+
+        function toggleArticleFeedback(type) {
+            activeArticleFeedbackType = type;
             const area = document.getElementById('reject-reason');
             const confirmArea = document.getElementById('confirm-reject-area');
-            if (area.style.display === 'none') {
+            const btn = document.getElementById('btn-article-feedback-submit');
+
+            if (area) {
                 area.style.display = 'block';
-                confirmArea.style.display = 'flex';
+                if (type === 'revision') {
+                    area.placeholder = 'Lütfen yazara iletilecek düzenleme notunu yazınız (Yazar bu nota göre içeriğini güncelleyecektir)...';
+                    if (btn) {
+                        btn.style.background = '#f59e0b';
+                        btn.innerText = 'Düzenleme Notuyla Gönder';
+                    }
+                } else {
+                    area.placeholder = 'Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)...';
+                    if (btn) {
+                        btn.style.background = '#ef4444';
+                        btn.innerText = 'Kesin Reddet ve Bitir';
+                    }
+                }
+                if (confirmArea) confirmArea.style.display = 'flex';
                 area.focus();
-            } else {
-                area.style.display = 'none';
-                confirmArea.style.display = 'none';
             }
         }
 
-        async function submitDecision(decision) {
+        function toggleRejectInput() {
+            toggleArticleFeedback('reject');
+        }
+
+        async function submitArticleFeedback() {
+            const reason = document.getElementById('reject-reason')?.value;
+            if (!reason || !reason.trim()) {
+                showToast(activeArticleFeedbackType === 'revision' ? 'Lütfen düzenleme notunu yazınız.' : 'Lütfen red sebebini yazınız.', 'error');
+                return;
+            }
+            await submitDecision(activeArticleFeedbackType, reason.trim());
+        }
+
+        async function submitDecision(decision, reason = null) {
             if (!currentArticleId) return;
 
             let body = { decision };
 
-            if (decision === 'reject') {
-                const reason = document.getElementById('reject-reason').value;
+            if (decision === 'reject' || decision === 'revision') {
+                if (!reason) {
+                    reason = document.getElementById('reject-reason')?.value;
+                }
                 if (!reason || !reason.trim()) {
-                    showToast('Lütfen red sebebini yazınız.', 'error');
+                    showToast(decision === 'revision' ? 'Lütfen düzenleme notunu yazınız.' : 'Lütfen red sebebini yazınız.', 'error');
                     return;
                 }
-                body.rejection_reason = reason;
+                body.rejection_reason = reason.trim();
                 performSubmit();
             } else {
                 showConfirm('Bu makaleyi yayına almak istediğinize emin misiniz?', performSubmit);
@@ -4956,6 +4995,11 @@
                     <button class="btn btn-primary" style="padding:6px 14px; font-size:0.85rem;" onclick="openGundemReview(${item.id})">
                         <i class="ph-bold ph-eye"></i> İncele
                     </button>
+                    ${isPending ? `
+                        <button class="btn" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:6px 12px; font-size:0.85rem; font-weight:600; border-radius:6px; display:inline-flex; align-items:center; gap:4px;" onclick="quickGundemRevision(${item.id})" title="Yazara Düzenleme Talebi Gönder">
+                            <i class="ph-bold ph-pencil-simple-line"></i> Düzenlemeye Gönder
+                        </button>
+                    ` : ''}
                     ${item.status === 'published' ? `
                         <a href="/gundem/${item.slug}" target="_blank" class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem; text-decoration:none;" title="Sitede Canlı Gör">
                             <i class="ph-bold ph-arrow-square-out"></i>
@@ -5025,7 +5069,7 @@
                 let rejectionHtml = '';
                 if (item.status === 'rejected' && item.rejection_reason) {
                     rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
-                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
+                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red / Düzenleme Sebebi:</strong> 
                         ${escapeHtml(item.rejection_reason)}
                     </div>`;
                 }
@@ -5056,14 +5100,23 @@
                 if (isPending) {
                     footer.innerHTML = `
                         <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
-                            <textarea id="gundem-reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
-                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <textarea id="gundem-feedback-reason" placeholder="Düzenleme talebinizi veya gerekçenizi buraya yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
+                            <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
                                 <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
-                                <button class="btn btn-danger" onclick="toggleGundemRejectInput()">Reddet...</button>
-                                <button class="btn btn-primary" onclick="submitGundemDecision('approve')">Yayına Al</button>
+                                <button class="btn" style="background:#f59e0b; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="toggleGundemFeedback('revision')">
+                                    <i class="ph-bold ph-pencil-simple-line"></i> Düzenlemeye Gönder
+                                </button>
+                                <button class="btn btn-danger" onclick="toggleGundemFeedback('reject')">
+                                    <i class="ph-bold ph-x-circle"></i> Reddet...
+                                </button>
+                                <button class="btn btn-primary" onclick="submitGundemDecision('approve')">
+                                    <i class="ph-bold ph-check-circle"></i> Yayına Al
+                                </button>
                             </div>
-                            <div id="gundem-confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
-                                <button class="btn btn-danger" onclick="submitGundemDecision('reject')">Reddet ve Bitir</button>
+                            <div id="gundem-confirm-feedback-area" style="display:none; justify-content:flex-end; gap:10px;">
+                                <button class="btn" id="gundem-btn-send-feedback" style="background:#f59e0b; color:white; border:none; padding:8px 18px; border-radius:8px; font-weight:600;" onclick="submitGundemFeedbackDecision()">
+                                    Düzenleme Notuyla Gönder
+                                </button>
                             </div>
                         </div>
                     `;
@@ -5083,56 +5136,97 @@
             }
         }
 
-        function toggleGundemRejectInput() {
-            const area = document.getElementById('gundem-reject-reason');
-            const confirmArea = document.getElementById('gundem-confirm-reject-area');
-            if (area && area.style.display === 'none') {
+        let activeGundemFeedbackType = 'revision';
+
+        function toggleGundemFeedback(type) {
+            activeGundemFeedbackType = type;
+            const area = document.getElementById('gundem-feedback-reason');
+            const confirmArea = document.getElementById('gundem-confirm-feedback-area');
+            const btn = document.getElementById('gundem-btn-send-feedback');
+
+            if (area) {
                 area.style.display = 'block';
+                if (type === 'revision') {
+                    area.placeholder = 'Lütfen yazara iletilecek düzenleme notunu yazınız (Yazar bu nota göre içeriğini güncelleyecektir)...';
+                    if (btn) {
+                        btn.style.background = '#f59e0b';
+                        btn.innerText = 'Düzenleme Notuyla Gönder';
+                    }
+                } else {
+                    area.placeholder = 'Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)...';
+                    if (btn) {
+                        btn.style.background = '#ef4444';
+                        btn.innerText = 'Kesin Reddet ve Bitir';
+                    }
+                }
                 if (confirmArea) confirmArea.style.display = 'flex';
                 area.focus();
-            } else if (area) {
-                area.style.display = 'none';
-                if (confirmArea) confirmArea.style.display = 'none';
             }
+        }
+
+        function toggleGundemRejectInput() {
+            toggleGundemFeedback('reject');
+        }
+
+        async function submitGundemFeedbackDecision() {
+            const reason = document.getElementById('gundem-feedback-reason')?.value;
+            if (!reason || !reason.trim()) {
+                showToast(activeGundemFeedbackType === 'revision' ? 'Lütfen düzenleme notunu yazınız.' : 'Lütfen red sebebini yazınız.', 'error');
+                return;
+            }
+            await submitGundemDecisionWithParams(activeGundemFeedbackType, reason.trim());
+        }
+
+        function quickGundemRevision(id) {
+            currentGundemId = id;
+            const note = prompt('Yazara iletilecek düzenleme notunu yazınız:');
+            if (note === null) return;
+            if (!note.trim()) {
+                showToast('Lütfen düzenleme notunu belirtiniz.', 'error');
+                return;
+            }
+            submitGundemDecisionWithParams('revision', note.trim());
         }
 
         async function submitGundemDecision(decision) {
             if (!currentGundemId) return;
 
-            let body = { decision };
-
-            if (decision === 'reject') {
-                const reason = document.getElementById('gundem-reject-reason')?.value;
-                if (!reason || !reason.trim()) {
-                    showToast('Lütfen red sebebini yazınız.', 'error');
-                    return;
-                }
-                body.rejection_reason = reason;
-                performGundemSubmit();
+            if (decision === 'approve') {
+                showConfirm('Bu bilim gündemi yazısını yayına almak istediğinize emin misiniz?', () => {
+                    submitGundemDecisionWithParams('approve');
+                });
             } else {
-                showConfirm('Bu bilim gündemi yazısını yayına almak istediğinize emin misiniz?', performGundemSubmit);
+                toggleGundemFeedback(decision);
             }
+        }
 
-            async function performGundemSubmit() {
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_URL}/editor/gundem/decide/${currentGundemId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify(body)
-                    });
+        async function submitGundemDecisionWithParams(decision, reason = null) {
+            if (!currentGundemId) return;
 
-                    if (res.ok) {
-                        showToast(decision === 'approve' ? 'Bilim Gündemi yazısı başarıyla yayına alındı!' : 'Yazı reddedildi ve yazara iletildi.', 'success');
-                        closeModal();
-                        loadGundemDashboard();
-                    } else {
-                        const txt = await res.text();
-                        showToast('Hata: ' + txt, 'error');
-                    }
-                } catch (e) {
-                    showToast('Sunucu hatası', 'error');
+            let body = { decision };
+            if (reason) body.rejection_reason = reason;
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/editor/gundem/decide/${currentGundemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    let msg = 'Bilim Gündemi yazısı başarıyla yayına alındı!';
+                    if (decision === 'revision') msg = 'Yazı düzenlemeye gönderildi ve yazara iletildi.';
+                    else if (decision === 'reject') msg = 'Yazı reddedildi.';
+                    showToast(msg, 'success');
+                    closeModal();
+                    loadGundemDashboard();
+                } else {
+                    const txt = await res.text();
+                    showToast('Hata: ' + txt, 'error');
                 }
+            } catch (e) {
+                showToast('Sunucu hatası', 'error');
             }
         }
 
