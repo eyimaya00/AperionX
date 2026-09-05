@@ -5444,6 +5444,21 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
 
                 clearCache('articles');
 
+                // Notify co-authors
+                if (coAuthorIds && coAuthorIds.length > 0) {
+                    const currentAuthorName = req.user.fullname || req.user.username || 'Bir yazar';
+                    for (const caId of coAuthorIds) {
+                        if (caId && caId !== req.user.id) {
+                            try {
+                                await pool.query(
+                                    "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')",
+                                    [caId, `${currentAuthorName} sizi "${title.trim()}" başlıklı Bilim Gündemi yazısına ortak yazar olarak ekledi.`]
+                                );
+                            } catch (ne) {}
+                        }
+                    }
+                }
+
                 if (status === 'pending') {
                     try {
                         const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
@@ -5503,6 +5518,21 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
         }
 
         clearCache('articles');
+
+        // Notify co-authors
+        if (coAuthorIds && coAuthorIds.length > 0) {
+            const currentAuthorName = req.user.fullname || req.user.username || 'Bir yazar';
+            for (const caId of coAuthorIds) {
+                if (caId && caId !== req.user.id) {
+                    try {
+                        await pool.query(
+                            "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')",
+                            [caId, `${currentAuthorName} sizi "${title.trim()}" başlıklı Bilim Gündemi yazısına ortak yazar olarak ekledi.`]
+                        );
+                    } catch (ne) {}
+                }
+            }
+        }
 
         if (status === 'pending') {
             try {
