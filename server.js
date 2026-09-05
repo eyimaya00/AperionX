@@ -4993,11 +4993,54 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
 
 app.get('/api/author/gundem', authenticateToken, async (req, res) => {
     try {
+        await ensureGundemColumns();
         const [rows] = await pool.query(
-            "SELECT id, title, slug, category, excerpt, image_url, status, tags, views, rejection_reason, created_at, submitted_at, updated_at FROM articles WHERE author_id = ? AND is_gundem = 1 ORDER BY created_at DESC",
+            `SELECT id, title, slug, category, excerpt, image_url, status, tags, views, rejection_reason, gundem_data, content, created_at, submitted_at, updated_at,
+             (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count,
+             (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count
+             FROM articles 
+             WHERE author_id = ? AND is_gundem = 1 
+             ORDER BY COALESCE(updated_at, submitted_at, created_at) DESC`,
             [req.user.id]
         );
         res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/author/gundem/:id', authenticateToken, async (req, res) => {
+    try {
+        await ensureGundemColumns();
+        const [rows] = await pool.query(
+            "SELECT * FROM articles WHERE id = ? AND author_id = ? AND is_gundem = 1",
+            [req.params.id, req.user.id]
+        );
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: 'Bilim Gündemi yazısı bulunamadı.' });
+        }
+        res.json(rows[0]);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/author/gundem/:id', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query("SELECT id, status FROM articles WHERE id = ? AND author_id = ? AND is_gundem = 1", [req.params.id, req.user.id]);
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: 'Yazı bulunamadı.' });
+        }
+        if (rows[0].status === 'trash') {
+            await pool.query("DELETE FROM articles WHERE id = ?", [req.params.id]);
+            res.json({ success: true, message: 'Yazı kalıcı olarak silindi.' });
+        } else {
+            await pool.query("UPDATE articles SET status = 'trash', updated_at = NOW() WHERE id = ?", [req.params.id]);
+            res.json({ success: true, message: 'Yazı çöpe taşındı.' });
+        }
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/author/gundem/restore/:id', authenticateToken, async (req, res) => {
+    try {
+        await pool.query("UPDATE articles SET status = 'draft', updated_at = NOW() WHERE id = ? AND author_id = ? AND is_gundem = 1", [req.params.id, req.user.id]);
+        res.json({ success: true, message: 'Yazı geri yüklendi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
