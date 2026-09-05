@@ -560,11 +560,15 @@ function startHeroLoop(count) {
 
 // --- Theme Toggle ---
 function initTheme() {
-    const isGundemPage = window.location.pathname.includes('/gundem');
+    const isGundemPage = window.location.pathname.includes('/gundem') || 
+                         window.location.pathname.includes('/preview-gundem') || 
+                         window.location.pathname.includes('/bilimgundemi') || 
+                         window.location.pathname.includes('/bilim-gundemi');
     const themeBtn = document.getElementById('themeToggle');
     
-    // Gündem sayfasında tema butonu tamamen gizli tutulur
+    // Gündem sayfası ve haber okuma yeri daima gece modunda kalır, tema butonları gizlenir
     if (isGundemPage) {
+        document.documentElement.setAttribute('data-theme', 'dark');
         if (themeBtn) themeBtn.style.display = 'none';
         const mBtn = document.getElementById('mobileThemeToggle');
         if (mBtn) mBtn.style.display = 'none';

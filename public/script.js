@@ -427,7 +427,16 @@ function startHeroLoop(count) {
 
 // --- Theme Toggle ---
 function initTheme() {
+    const isGundemPage = window.location.pathname.includes('/gundem') || 
+                         window.location.pathname.includes('/preview-gundem') || 
+                         window.location.pathname.includes('/bilimgundemi') || 
+                         window.location.pathname.includes('/bilim-gundemi');
     const themeBtn = document.getElementById('themeToggle');
+    if (isGundemPage) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeBtn) themeBtn.style.display = 'none';
+        return;
+    }
     if (!themeBtn) return;
 
     // Check saved theme (default to dark)

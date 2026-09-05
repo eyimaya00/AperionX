@@ -1,16 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 
 <head>
     <script>
-        (function() {
-            var saved = localStorage.getItem('theme');
-            if (saved === 'dark' || (!saved && !window.location.pathname.includes('author'))) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else if (saved === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        })();
+        document.documentElement.setAttribute('data-theme', 'dark');
     </script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
@@ -118,10 +111,6 @@
             transition: background-color 0.3s ease;
         }
 
-        html[data-theme="light"],
-        html[data-theme="light"] body {
-            background: #f8fafc;
-        }
 
         /* Kaydırma çubuklarını gizle (Cross-browser mobil uyum) */
         html,
@@ -219,33 +208,7 @@
             border-color: #6366f1 !important;
         }
 
-        /* Açık temada scrolled header görünümü */
-        html[data-theme="light"] header.header.scrolled {
-            background: rgba(255, 255, 255, 0.92) !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
-        }
 
-        html[data-theme="light"] header.header.scrolled .nav-link {
-            color: #1e293b !important;
-            text-shadow: none !important;
-        }
-
-        html[data-theme="light"] header.header.scrolled .nav-link:hover,
-        html[data-theme="light"] header.header.scrolled .nav-link.active {
-            color: #4f46e5 !important;
-        }
-
-        html[data-theme="light"] header.header.scrolled .icon-btn {
-            color: #1e293b !important;
-            text-shadow: none !important;
-        }
-
-        html[data-theme="light"] header.header.scrolled .btn-login {
-            background: #4f46e5 !important;
-            border-color: #4f46e5 !important;
-            color: #ffffff !important;
-        }
 
         /* === BİLİM GÜNDEMİ TAM EKRAN HERO SLIDER === */
         .gundem-hero-slider {
@@ -530,10 +493,6 @@
             transition: background-color 0.3s ease;
         }
 
-        html[data-theme="light"] .gundem-feed-section {
-            background: #f8fafc;
-        }
-
         .gundem-feed-container {
             max-width: 1280px;
             margin: 0 auto;
@@ -557,11 +516,6 @@
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
             transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        html[data-theme="light"] .gundem-featured-card {
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
         }
 
         .gundem-featured-card:hover {
@@ -753,23 +707,11 @@
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
 
-        html[data-theme="light"] .gundem-item-card {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.07);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-        }
-
         .gundem-item-card:hover {
             transform: translateY(-3px);
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(99, 102, 241, 0.35);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
-        }
-
-        html[data-theme="light"] .gundem-item-card:hover {
-            background: #ffffff;
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.12);
         }
 
         .gundem-item-img-wrap {
@@ -782,10 +724,6 @@
             border: 1px solid rgba(255, 255, 255, 0.06);
             margin-bottom: 12px;
             flex-shrink: 0;
-        }
-
-        html[data-theme="light"] .gundem-item-img-wrap {
-            border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .gundem-item-img-wrap img {
@@ -813,16 +751,8 @@
             transition: color 0.2s ease;
         }
 
-        html[data-theme="light"] .gundem-item-title {
-            color: #0f172a;
-        }
-
         .gundem-item-card:hover .gundem-item-title {
             color: #818cf8;
-        }
-
-        html[data-theme="light"] .gundem-item-card:hover .gundem-item-title {
-            color: #4f46e5;
         }
 
         .gundem-item-author-row {
@@ -832,10 +762,6 @@
             margin-top: auto;
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        html[data-theme="light"] .gundem-item-author-row {
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .gundem-item-avatar {
@@ -852,10 +778,6 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.6);
             transition: color 0.2s ease;
-        }
-
-        html[data-theme="light"] .gundem-item-author-name {
-            color: #64748b;
         }
 
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
