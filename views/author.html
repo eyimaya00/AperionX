@@ -13296,9 +13296,20 @@
             const iframe = document.getElementById('bg-preview-iframe');
             const newTabBtn = document.getElementById('bg-preview-newtab-btn');
 
-            // Render live preview from server (views/gundem-detail.html)
+            // If editing an existing article on server, load via /preview-gundem/:id
+            if (editingBilimGundemId && !String(editingBilimGundemId).startsWith('bg_')) {
+                const previewUrl = `/preview-gundem/${editingBilimGundemId}?token=${encodeURIComponent(token)}`;
+                if (newTabBtn) newTabBtn.href = previewUrl;
+                if (iframe) {
+                    iframe.removeAttribute('srcdoc');
+                    iframe.src = previewUrl;
+                }
+                return;
+            }
+
+            // Otherwise create live preview session on server (renders full views/gundem-detail.html identically to editor panel)
             try {
-                const res = await fetch('/api/author/gundem/preview-live', {
+                const res = await fetch('/api/author/gundem/preview-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -13317,26 +13328,24 @@
                 });
 
                 if (res.ok) {
-                    const html = await res.text();
-                    if (bgPreviewBlobUrl) URL.revokeObjectURL(bgPreviewBlobUrl);
-                    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-                    bgPreviewBlobUrl = URL.createObjectURL(blob);
-                    if (newTabBtn) newTabBtn.href = bgPreviewBlobUrl;
+                    const data = await res.json();
+                    const previewUrl = data.previewUrl;
+                    if (newTabBtn) newTabBtn.href = previewUrl;
                     if (iframe) {
                         iframe.removeAttribute('srcdoc');
-                        iframe.src = bgPreviewBlobUrl;
+                        iframe.src = previewUrl;
                     }
                 } else {
-                    console.error('Failed to load preview');
+                    console.error('Failed to create preview session');
                 }
             } catch (err) {
-                console.error('Error fetching live preview:', err);
+                console.error('Error in bgeOpenPreview:', err);
             }
         }
 
         async function previewBilimGundem(id) {
-            let item = (bilimGundemData || []).find(i => String(i.id) === String(id));
             const token = localStorage.getItem('token');
+            let item = (bilimGundemData || []).find(i => String(i.id) === String(id));
 
             // If not found in memory, attempt fetch from server
             if (!item && id && !String(id).startsWith('bg_')) {
@@ -13350,7 +13359,7 @@
                 } catch (e) { console.error(e); }
             }
 
-            const title = item ? item.title : 'Bilim Gündemi';
+            const title = item ? (item.title || 'Bilim Gündemi') : 'Bilim Gündemi';
             const category = item ? (item.category || 'Gündem') : 'Gündem';
             const authorName = item ? (item.author_fullname || item.author_name || currentUser?.fullname || 'AperionX Yazarı') : (currentUser?.fullname || 'AperionX Yazarı');
 
@@ -13404,7 +13413,7 @@
             const newTabBtn = document.getElementById('bg-preview-newtab-btn');
             const iframe = document.getElementById('bg-preview-iframe');
 
-            // If item has a server numeric ID, load directly via /preview-gundem/:id (EXACTLY AS EDITOR PANEL DOES)
+            // If item has a server numeric ID, load directly via /preview-gundem/:id?token=... (EXACTLY AS EDITOR PANEL DOES)
             const isServerItem = id && !String(id).startsWith('bg_');
             if (isServerItem) {
                 const previewUrl = `/preview-gundem/${id}?token=${encodeURIComponent(token)}`;
@@ -13414,13 +13423,13 @@
                     iframe.src = previewUrl;
                 }
             } else {
-                // Local item not yet on server: use /api/author/gundem/preview-live
+                // Local item not yet on server: create preview session to get real HTTP preview URL
                 try {
                     let structured = {};
                     if (item && item.gundem_data) {
                         try { structured = typeof item.gundem_data === 'string' ? JSON.parse(item.gundem_data) : item.gundem_data; } catch(e){}
                     }
-                    const res = await fetch('/api/author/gundem/preview-live', {
+                    const res = await fetch('/api/author/gundem/preview-session', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -13433,23 +13442,21 @@
                             excerpt: item ? (item.excerpt || item.summary || '') : '',
                             tags: item ? (item.tags || category) : category,
                             image_url: item ? (item.image_url || '') : '',
-                            sections: structured.sections || null,
-                            sources: structured.sources || null
+                            sections: structured.sections || (item && item.sections) || null,
+                            sources: structured.sources || (item && item.sources) || null
                         })
                     });
                     if (res.ok) {
-                        const html = await res.text();
-                        if (bgPreviewBlobUrl) URL.revokeObjectURL(bgPreviewBlobUrl);
-                        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-                        bgPreviewBlobUrl = URL.createObjectURL(blob);
-                        if (newTabBtn) newTabBtn.href = bgPreviewBlobUrl;
+                        const data = await res.json();
+                        const previewUrl = data.previewUrl;
+                        if (newTabBtn) newTabBtn.href = previewUrl;
                         if (iframe) {
                             iframe.removeAttribute('srcdoc');
-                            iframe.src = bgPreviewBlobUrl;
+                            iframe.src = previewUrl;
                         }
                     }
                 } catch (e) {
-                    console.error('Local preview error:', e);
+                    console.error('Local preview session error:', e);
                 }
             }
         }

@@ -904,8 +904,18 @@ app.get('/preview-article/:id', async (req, res, next) => {
     }
 });
 
+const livePreviewSessions = new Map();
+
+// Periodic cleanup of preview sessions older than 1 hour
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, val] of livePreviewSessions.entries()) {
+        if (now - val.timestamp > 3600000) livePreviewSessions.delete(key);
+    }
+}, 600000);
+
 app.get('/preview-gundem/:id', async (req, res, next) => {
-    const token = req.query.token;
+    const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.token;
     if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
 
     try {
@@ -918,12 +928,13 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
     const id = req.params.id;
 
     try {
-        const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = ?', [id]);
+        const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = ? OR a.slug = ?', [id, id]);
         if (rows.length === 0) return res.status(404).send('Bilim gündemi yazısı bulunamadı (404)');
 
         const article = rows[0];
 
-        if (req.user.role !== 'admin' && req.user.role !== 'editor' && article.author_id !== req.user.id) {
+        // Allow preview for admin, editor, author (and author matching)
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && req.user.role !== 'author' && Number(article.author_id) !== Number(req.user.id)) {
             return res.status(403).send('Erişim Reddedildi');
         }
 
@@ -992,6 +1003,107 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
         console.error('DB Error:', e);
         res.status(500).send('Sunucu Hatası');
     }
+});
+
+// Live preview session create endpoint (returns real HTTP URL instead of blob)
+app.post('/api/author/gundem/preview-session', authenticateToken, (req, res) => {
+    try {
+        const body = req.body || {};
+        const sessionId = 'live_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+        livePreviewSessions.set(sessionId, {
+            data: body,
+            user: req.user,
+            timestamp: Date.now()
+        });
+        const token = req.headers.authorization?.split(' ')[1] || req.query.token || '';
+        res.json({
+            success: true,
+            sessionId,
+            previewUrl: `/preview-gundem-live/${sessionId}?token=${encodeURIComponent(token)}`
+        });
+    } catch (e) {
+        console.error('preview-session error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Live preview viewer endpoint (renders views/gundem-detail.html identically to /preview-gundem/:id)
+app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
+    const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+    if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+    } catch (e) {
+        return res.status(403).send('Yetkisiz Erişim (Geçersiz Token)');
+    }
+
+    const sessionId = req.params.sessionId;
+    const session = livePreviewSessions.get(sessionId);
+    if (!session) {
+        return res.status(404).send('Önizleme oturumu bulunamadı veya süresi doldu. Lütfen yazar panelinden tekrar "Önizle"ye tıklayınız.');
+    }
+
+    const body = session.data || {};
+    const { title, category, content, excerpt, tags, image_url } = body;
+
+    let contentHtml = content || '';
+    if (!contentHtml && body.sections && Array.isArray(body.sections)) {
+        contentHtml = body.sections.map((s, idx) => `
+            <section class="gundem-article-section" id="bolum-${idx + 1}">
+                <h2>${s.title || ('Bölüm ' + (idx + 1))}</h2>
+                <div class="gundem-section-content">${s.content || ''}</div>
+            </section>
+        `).join('');
+        if (body.sources && Array.isArray(body.sources) && body.sources.length > 0) {
+            contentHtml += '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">' +
+                body.sources.map(src => {
+                    const txt = src.type === 'bilimsel_makale' ? [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ') : (src.url || 'Kaynak');
+                    return `<li>${src.url ? `<a href="${src.url}" target="_blank">${txt}</a>` : txt}</li>`;
+                }).join('') + '</ul></section>';
+        }
+    }
+
+    const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
+    fs.readFile(filePath, 'utf8', (err, htmlData) => {
+        if (err) return next(err);
+
+        try {
+            const origin = `${req.protocol}://${req.get('host')}`;
+            const canonicalUrl = `${origin}/gundem/onizleme`;
+            const dateObj = new Date();
+            const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+            const finalImg = image_url ? (image_url.startsWith('http') || image_url.startsWith('data:') ? image_url : `${origin}${image_url.startsWith('/') ? '' : '/'}${image_url}`) : `${origin}/uploads/logo.png`;
+
+            let html = htmlData
+                .replace(/\{\{TITLE\}\}/g, title || 'Başlıksız Gündem')
+                .replace(/\{\{CATEGORY\}\}/g, category || 'Gündem')
+                .replace(/\{\{EXCERPT\}\}/g, excerpt || title || '')
+                .replace(/\{\{CONTENT\}\}/g, contentHtml)
+                .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
+                .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+                .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
+                .replace(/\{\{DATE_ISO\}\}/g, dateObj.toISOString())
+                .replace(/\{\{READ_TIME\}\}/g, '3')
+                .replace(/\{\{VIEWS\}\}/g, '0')
+                .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
+                .replace(/\{\{AUTHOR_NAME\}\}/g, (session.user && session.user.fullname) || req.user.fullname || 'AperionX Yazarı')
+                .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(title || ''))
+                .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
+                .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');
+
+            html = html.replace(/<script[^>]*adsbygoogle[^>]*><\/script>/gi, '');
+            html = html.replace(/<script[^>]*googletagmanager[^>]*><\/script>/gi, '');
+
+            res.send(html);
+        } catch (err2) {
+            console.error('Preview live error:', err2);
+            res.status(500).send('Önizleme Hatası');
+        }
+    });
 });
 
 app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, next) => {
@@ -5099,10 +5211,12 @@ app.get('/api/author/gundem', authenticateToken, async (req, res) => {
 app.get('/api/author/gundem/:id', authenticateToken, async (req, res) => {
     try {
         await ensureGundemColumns();
-        const [rows] = await pool.query(
-            "SELECT * FROM articles WHERE id = ? AND author_id = ? AND is_gundem = 1",
-            [req.params.id, req.user.id]
-        );
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const query = isStaff
+            ? "SELECT * FROM articles WHERE (id = ? OR slug = ?)"
+            : "SELECT * FROM articles WHERE (id = ? OR slug = ?) AND (author_id = ? OR is_gundem = 1)";
+        const params = isStaff ? [req.params.id, req.params.id] : [req.params.id, req.params.id, req.user.id];
+        const [rows] = await pool.query(query, params);
         if (!rows || rows.length === 0) {
             return res.status(404).json({ error: 'Bilim Gündemi yazısı bulunamadı.' });
         }
