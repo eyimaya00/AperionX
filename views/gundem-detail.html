@@ -85,6 +85,11 @@
             --gundem-card-bg: rgba(15, 23, 42, 0.7);
         }
 
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
         /* Kaydırma çubuklarını gizle (Cross-browser mobil uyum) */
         html,
         body,
@@ -400,30 +405,86 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             color: #ffffff;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             cursor: pointer;
             text-decoration: none;
-            backdrop-filter: blur(8px);
-            animation: bounceDown 2s infinite;
-            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: bounceDown 2.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 16px rgba(99, 102, 241, 0.2);
+            position: relative;
+        }
+
+        .gundem-scroll-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(99, 102, 241, 0.5);
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
         }
 
         .gundem-scroll-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(165, 180, 252, 0.6);
+            transform: scale(1.12);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.4);
+            animation-play-state: paused;
+        }
+
+        .gundem-scroll-btn:hover::before {
+            opacity: 1;
+            animation: pulseRing 1.8s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+
+        /* Tıklama Efekti (Buton Basılma ve Parıldama) */
+        .gundem-scroll-btn.clicked {
+            transform: translateY(10px) scale(0.92) !important;
+            background: rgba(99, 102, 241, 0.6) !important;
+            border-color: #818cf8 !important;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.85) !important;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         @keyframes bounceDown {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(8px); }
             60% { transform: translateY(4px); }
+        }
+
+        /* Okumaya Başlama Yumuşak Geçiş Odaklanma Efekti */
+        .gundem-article-container {
+            transition: filter 0.8s ease, transform 0.8s ease;
+        }
+
+        .gundem-article-container.reading-focus {
+            animation: readingGlow 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes readingGlow {
+            0% {
+                filter: brightness(1);
+            }
+            40% {
+                filter: brightness(1.14);
+            }
+            100% {
+                filter: brightness(1);
+            }
         }
 
         /* === 2. BÖLÜM: MAKALE GÖVDESİ VE İÇERİK === */
@@ -989,7 +1050,7 @@
 
         <!-- Aşağı Kaydır İndikatörü -->
         <div class="gundem-scroll-down-bar">
-            <a href="#gundemContent" class="gundem-scroll-btn" aria-label="İçeriğe Kaydır">
+            <a href="#gundemContent" class="gundem-scroll-btn" id="scrollDownBtn" aria-label="Haberi Okumak İçin Aşağı Kaydır" title="Haberi Oku">
                 <i class="ph-bold ph-caret-down"></i>
             </a>
         </div>
@@ -1198,6 +1259,69 @@
 
             /* === KAYDEDİLEN HABER DURUMU KONTROLÜ === */
             checkSaveState();
+
+            /* === HABERİ OKUMAK İÇİN AŞAĞI KAYDIRMA EFEKTİ === */
+            const scrollDownBtn = document.getElementById('scrollDownBtn') || document.querySelector('.gundem-scroll-btn');
+            const targetSection = document.getElementById('gundemContent');
+
+            if (scrollDownBtn && targetSection) {
+                scrollDownBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Tıklama efekti (Butonda basılma ve ışıma animasyonu)
+                    scrollDownBtn.classList.add('clicked');
+                    setTimeout(() => {
+                        scrollDownBtn.classList.remove('clicked');
+                    }, 450);
+
+                    // Sabit header payını hesaba katarak hedef konumu belirle
+                    const header = document.getElementById('mainHeader');
+                    const headerHeight = header ? header.offsetHeight : 65;
+                    const targetTop = targetSection.getBoundingClientRect().top + window.pageYOffset - headerHeight + 5;
+
+                    // Sinematik Easing Kaydırma (easeInOutCubic)
+                    const startPosition = window.pageYOffset;
+                    const distance = targetTop - startPosition;
+                    const duration = 750; // ms
+                    let startTime = null;
+                    let isInterrupted = false;
+
+                    const cancelOnInteraction = () => { isInterrupted = true; };
+                    window.addEventListener('wheel', cancelOnInteraction, { once: true, passive: true });
+                    window.addEventListener('touchmove', cancelOnInteraction, { once: true, passive: true });
+
+                    function easeInOutCubic(t, b, c, d) {
+                        t /= d / 2;
+                        if (t < 1) return (c / 2) * t * t * t + b;
+                        t -= 2;
+                        return (c / 2) * (t * t * t + 2) + b;
+                    }
+
+                    function step(currentTime) {
+                        if (isInterrupted) return;
+                        if (!startTime) startTime = currentTime;
+                        const elapsed = currentTime - startTime;
+                        const run = easeInOutCubic(elapsed, startPosition, distance, duration);
+                        window.scrollTo(0, run);
+
+                        if (elapsed < duration) {
+                            requestAnimationFrame(step);
+                        } else {
+                            window.scrollTo(0, targetTop);
+                            // İçeriğe hafif sinematik odaklanma / parlama efekti
+                            const articleContainer = targetSection.querySelector('.gundem-article-container');
+                            if (articleContainer) {
+                                articleContainer.classList.add('reading-focus');
+                                setTimeout(() => {
+                                    articleContainer.classList.remove('reading-focus');
+                                }, 1200);
+                            }
+                        }
+                    }
+
+                    requestAnimationFrame(step);
+                });
+            }
         });
 
         /* === BİLDİRİM TOAST FONKSİYONU === */
