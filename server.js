@@ -939,11 +939,33 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                 const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
                 const imageUrl = article.image_url ? (article.image_url.startsWith('http') ? article.image_url : `${origin}${article.image_url.startsWith('/') ? '' : '/'}${article.image_url}`) : `${origin}/uploads/logo.png`;
 
+                let contentHtml = article.content || '';
+                if (!contentHtml && article.gundem_data) {
+                    try {
+                        const gd = typeof article.gundem_data === 'string' ? JSON.parse(article.gundem_data) : article.gundem_data;
+                        if (gd && gd.sections && Array.isArray(gd.sections) && gd.sections.length > 0) {
+                            contentHtml = gd.sections.map((s, idx) => `
+                                <section class="gundem-article-section" id="bolum-${idx + 1}">
+                                    <h2>${s.title || ('Bölüm ' + (idx + 1))}</h2>
+                                    <div class="gundem-section-content">${s.content || ''}</div>
+                                </section>
+                            `).join('');
+                            if (gd.sources && Array.isArray(gd.sources) && gd.sources.length > 0) {
+                                contentHtml += '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">' +
+                                    gd.sources.map(src => {
+                                        const txt = src.type === 'bilimsel_makale' ? [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ') : (src.url || 'Kaynak');
+                                        return `<li>${src.url ? `<a href="${src.url}" target="_blank">${txt}</a>` : txt}</li>`;
+                                    }).join('') + '</ul></section>';
+                            }
+                        }
+                    } catch (e) {}
+                }
+
                 let html = htmlData
                     .replace(/\{\{TITLE\}\}/g, article.title || '')
                     .replace(/\{\{CATEGORY\}\}/g, article.category || 'Gündem')
                     .replace(/\{\{EXCERPT\}\}/g, article.excerpt || article.title || '')
-                    .replace(/\{\{CONTENT\}\}/g, article.content || '')
+                    .replace(/\{\{CONTENT\}\}/g, contentHtml)
                     .replace(/\{\{IMAGE_URL\}\}/g, imageUrl)
                     .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
                     .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
@@ -977,6 +999,23 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
         const body = req.body || {};
         const { title, category, content, excerpt, tags, image_url } = body;
 
+        let contentHtml = content || '';
+        if (!contentHtml && body.sections && Array.isArray(body.sections)) {
+            contentHtml = body.sections.map((s, idx) => `
+                <section class="gundem-article-section" id="bolum-${idx + 1}">
+                    <h2>${s.title || ('Bölüm ' + (idx + 1))}</h2>
+                    <div class="gundem-section-content">${s.content || ''}</div>
+                </section>
+            `).join('');
+            if (body.sources && Array.isArray(body.sources) && body.sources.length > 0) {
+                contentHtml += '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">' +
+                    body.sources.map(src => {
+                        const txt = src.type === 'bilimsel_makale' ? [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ') : (src.url || 'Kaynak');
+                        return `<li>${src.url ? `<a href="${src.url}" target="_blank">${txt}</a>` : txt}</li>`;
+                    }).join('') + '</ul></section>';
+            }
+        }
+
         const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
         fs.readFile(filePath, 'utf8', (err, htmlData) => {
             if (err) return next(err);
@@ -993,7 +1032,7 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
                     .replace(/\{\{TITLE\}\}/g, title || 'Başlıksız Gündem')
                     .replace(/\{\{CATEGORY\}\}/g, category || 'Gündem')
                     .replace(/\{\{EXCERPT\}\}/g, excerpt || title || '')
-                    .replace(/\{\{CONTENT\}\}/g, content || '')
+                    .replace(/\{\{CONTENT\}\}/g, contentHtml)
                     .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
                     .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
                     .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
