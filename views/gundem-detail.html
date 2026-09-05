@@ -598,11 +598,15 @@
             color: #a5b4fc;
         }
 
-        /* 2. Yazar Bilgileri */
+        /* 1. Yazar Bilgisi Kartı */
+        .sidebar-card.card-author {
+            padding: 16px 18px;
+        }
+
         .sidebar-author-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .sidebar-author-avatar-link {
@@ -620,8 +624,8 @@
         }
 
         .sidebar-author-img {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             border: 1.5px solid rgba(255, 255, 255, 0.16);
             object-fit: cover;
@@ -639,17 +643,17 @@
         .sidebar-author-details {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             min-width: 0;
         }
 
         .sidebar-author-name {
             font-weight: 700;
-            font-size: 0.92rem;
+            font-size: 0.95rem;
             color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -665,18 +669,18 @@
 
         .sidebar-author-name i {
             color: #60a5fa;
-            font-size: 0.95rem;
+            font-size: 1rem;
             flex-shrink: 0;
         }
 
         .sidebar-author-title {
-            font-size: 0.76rem;
-            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.6);
             line-height: 1.35;
         }
 
         .sidebar-author-date {
-            font-size: 0.72rem;
+            font-size: 0.73rem;
             color: rgba(255, 255, 255, 0.45);
             display: flex;
             align-items: center;
@@ -685,7 +689,7 @@
         }
 
         .sidebar-author-date i {
-            font-size: 0.80rem;
+            font-size: 0.82rem;
             color: #94a3b8;
         }
 
@@ -1521,11 +1525,8 @@
 
             <!-- SAĞ SİDEBAR (Masaüstü: Sağ / Mobil: İçeriğin Altında) -->
             <aside class="gundem-sidebar">
-                <!-- 1. Yazar Bilgileri -->
+                <!-- 1. Yazar Bilgisi (Başlıksız, Doğrudan Profil, İsim, Ünvan ve Tarih) -->
                 <div class="sidebar-card card-author">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-fill ph-user-circle"></i> Yazar Bilgileri</h3>
-                    </div>
                     <div class="sidebar-author-row">
                         <a href="{{AUTHOR_PROFILE_URL}}" class="sidebar-author-avatar-link" title="{{AUTHOR_NAME}} Profilini Gör">
                             <img src="{{AUTHOR_AVATAR_URL}}" class="sidebar-author-img" style="{{AUTHOR_AVATAR_STYLE}}" alt="{{AUTHOR_NAME}}" onerror="this.src='/uploads/aperionx-a-transparent.png'; this.style.padding='4px'; this.style.objectFit='contain';">
@@ -1541,7 +1542,27 @@
                     </div>
                 </div>
 
-                <!-- 2. Sen de Değerlendir (AperionX "A" Logo Yıldızlar - Şeffaf) -->
+                <!-- 2. Özet -->
+                <div class="sidebar-card card-summary">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title"><i class="ph-bold ph-text-align-left"></i> Özet</h3>
+                    </div>
+                    <p class="sidebar-summary-box">
+                        {{EXCERPT}}
+                    </p>
+                </div>
+
+                <!-- 3. İçindekiler -->
+                <div class="sidebar-card card-toc">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title"><i class="ph-bold ph-list-bullets"></i> İçindekiler</h3>
+                    </div>
+                    <ul class="sidebar-toc-menu" id="sidebarTocList">
+                        <!-- Makaledeki h2 başlıkları dinamik olarak buraya eklenecek -->
+                    </ul>
+                </div>
+
+                <!-- 4. Değerlendirme (Sen de Değerlendir) -->
                 <div class="sidebar-card card-rating">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-star"></i> Sen de Değerlendir</h3>
@@ -1560,37 +1581,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Özet -->
-                <div class="sidebar-card card-summary">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-bold ph-text-align-left"></i> Özet</h3>
-                    </div>
-                    <p class="sidebar-summary-box">
-                        {{EXCERPT}}
-                    </p>
-                </div>
-
-                <!-- 4. İçindekiler -->
-                <div class="sidebar-card card-toc">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-bold ph-list-bullets"></i> İçindekiler</h3>
-                    </div>
-                    <ul class="sidebar-toc-menu" id="sidebarTocList">
-                        <!-- Makaledeki h2 başlıkları dinamik olarak buraya eklenecek -->
-                    </ul>
-                </div>
-
-                <!-- 5. Etiketler -->
-                <div class="sidebar-card card-tags">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-bold ph-tag"></i> Etiketler</h3>
-                    </div>
-                    <div class="sidebar-tags-container" id="sidebarTagsList" data-raw-tags="{{TAGS}}" data-category="{{CATEGORY}}">
-                        <!-- JS dinamik etiketleri oluşturacak -->
-                    </div>
-                </div>
-
-                <!-- 6. Tartışmalar / Yorumlar -->
+                <!-- 5. Tartışma (Tartışmalar / Yorumlar) -->
                 <div class="sidebar-card card-comments">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-chat-circle-dots"></i> Tartışmalar</h3>
@@ -1609,6 +1600,17 @@
                             <p class="sidebar-no-comments">Henüz tartışma başlatılmadı. İlk yorumu siz yapın!</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- 6. Etiket (Etiketler) -->
+                <div class="sidebar-card card-tags">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title"><i class="ph-bold ph-tag"></i> Etiketler</h3>
+                    </div>
+                    <div class="sidebar-tags-container" id="sidebarTagsList" data-raw-tags="{{TAGS}}" data-category="{{CATEGORY}}">
+                        <!-- JS dinamik etiketleri oluşturacak -->
+                    </div>
+                </div>
             </aside>
 
             <!-- Diğer Gündem Başlıkları (Mobilde Kartlardan Sonra / Masaüstünde En Altta) -->
