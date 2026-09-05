@@ -904,6 +904,74 @@ app.get('/preview-article/:id', async (req, res, next) => {
     }
 });
 
+app.get('/preview-gundem/:id', async (req, res, next) => {
+    const token = req.query.token;
+    if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+    } catch (e) {
+        return res.status(403).send('Yetkisiz Erişim (Geçersiz Token)');
+    }
+
+    const id = req.params.id;
+
+    try {
+        const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = ?', [id]);
+        if (rows.length === 0) return res.status(404).send('Bilim gündemi yazısı bulunamadı (404)');
+
+        const article = rows[0];
+
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && article.author_id !== req.user.id) {
+            return res.status(403).send('Erişim Reddedildi');
+        }
+
+        const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
+        fs.readFile(filePath, 'utf8', (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+                const canonicalUrl = `${origin}/gundem/${article.slug || 'onizleme'}`;
+                const dateObj = article.created_at ? new Date(article.created_at) : new Date();
+                const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                const imageUrl = article.image_url ? (article.image_url.startsWith('http') ? article.image_url : `${origin}${article.image_url.startsWith('/') ? '' : '/'}${article.image_url}`) : `${origin}/uploads/logo.png`;
+
+                let html = htmlData
+                    .replace(/\{\{TITLE\}\}/g, article.title || '')
+                    .replace(/\{\{CATEGORY\}\}/g, article.category || 'Gündem')
+                    .replace(/\{\{EXCERPT\}\}/g, article.excerpt || article.title || '')
+                    .replace(/\{\{CONTENT\}\}/g, article.content || '')
+                    .replace(/\{\{IMAGE_URL\}\}/g, imageUrl)
+                    .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+                    .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
+                    .replace(/\{\{DATE_ISO\}\}/g, dateObj.toISOString())
+                    .replace(/\{\{READ_TIME\}\}/g, '3')
+                    .replace(/\{\{VIEWS\}\}/g, String(article.views || 0))
+                    .replace(/\{\{TAGS\}\}/g, article.tags || article.category || 'Gündem')
+                    .replace(/\{\{AUTHOR_NAME\}\}/g, article.author_fullname || 'AperionX Bilim Ekibi')
+                    .replace(/\{\{AUTHOR_TITLE\}\}/g, 'Bilim, Teknoloji ve Analiz Masası')
+                    .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(article.title || ''))
+                    .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
+                    .replace(/\{\{RELATED_NEWS_HTML\}\}/g, '');
+
+                html = html.replace(/<script[^>]*adsbygoogle[^>]*><\/script>/gi, '');
+                html = html.replace(/<script[^>]*googletagmanager[^>]*><\/script>/gi, '');
+
+                res.send(html);
+            } catch (err2) {
+                console.error('Preview error:', err2);
+                res.status(500).send('Önizleme Hatası');
+            }
+        });
+    } catch (e) {
+        console.error('DB Error:', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+
 // Helpers for SSR
 function escapeHtml(str) {
     if (!str) return '';
@@ -4577,7 +4645,7 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.status = 'pending' 
+            WHERE a.status = 'pending' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
         `);
         res.json(rows);
@@ -4591,7 +4659,7 @@ app.get('/api/editor/history', authenticateToken, async (req, res) => {
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.status IN ('published', 'rejected')
+            WHERE a.status IN ('published', 'rejected') AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(a.published_at, a.created_at) DESC, a.id DESC
         `);
         res.json(rows);
@@ -4605,7 +4673,7 @@ app.get('/api/editor/trash', authenticateToken, async (req, res) => {
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.status = 'trash' 
+            WHERE a.status = 'trash' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY a.created_at DESC
         `);
         res.json(rows);
@@ -4631,6 +4699,276 @@ app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
+});
+
+// === EDITOR GUNDEM ROUTES ===
+app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.author_id, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.is_gundem = 1 AND a.status = 'pending' 
+            ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
+        `);
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/editor/gundem/history', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.published_at, a.author_id, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.is_gundem = 1 AND a.status IN ('published', 'rejected')
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC, a.id DESC
+        `);
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.id = ? AND a.is_gundem = 1
+        `, [req.params.id]);
+
+        if (rows.length === 0) return res.status(404).json({ message: 'Gündem yazısı bulunamadı.' });
+        res.json(rows[0]);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const articleId = req.params.id;
+    const { decision, rejection_reason } = req.body;
+
+    try {
+        const [rows] = await pool.query('SELECT author_id, title, was_published FROM articles WHERE id = ? AND is_gundem = 1', [articleId]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Gündem yazısı bulunamadı.' });
+
+        const authorId = rows[0].author_id;
+        const title = rows[0].title;
+        const wasPublished = rows[0].was_published;
+
+        let status = '';
+        let msg = '';
+        let type = '';
+        let updateQuery = '';
+        let queryParams = [];
+
+        if (decision === 'approve') {
+            status = 'published';
+            msg = `Bilim Gündemi yazınız yayına alındı: ${title}`;
+            type = 'success';
+            if (wasPublished) {
+                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
+                queryParams = [req.user.id, articleId];
+            } else {
+                updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, published_at = NOW(), was_published = 1, approved_by = ? WHERE id = ?";
+                queryParams = [req.user.id, articleId];
+            }
+        } else if (decision === 'reject') {
+            status = 'rejected';
+            msg = `Bilim Gündemi yazınız revizyon için reddedildi: ${title}. Sebep: ${rejection_reason || 'Gerekçe belirtilmedi'}`;
+            type = 'warning';
+            updateQuery = "UPDATE articles SET status = 'rejected', rejection_reason = ? WHERE id = ?";
+            queryParams = [rejection_reason || 'Gerekçe belirtilmedi', articleId];
+        } else {
+            return res.status(400).json({ message: 'Geçersiz karar.' });
+        }
+
+        await pool.query(updateQuery, queryParams);
+        clearCache('articles');
+
+        if (authorId) {
+            try {
+                await pool.query(
+                    "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
+                    [authorId, msg, type]
+                );
+            } catch (ne) {}
+        }
+
+        res.json({ message: 'İşlem başarılı.', status });
+    } catch (e) {
+        console.error('Gundem decide error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        await pool.query('DELETE FROM articles WHERE id = ? AND is_gundem = 1', [req.params.id]);
+        clearCache('articles');
+        res.json({ message: 'Gündem yazısı başarıyla silindi.' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// === AUTHOR GUNDEM SUBMIT & LIST ROUTES ===
+app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMiddleware, async (req, res) => {
+    if (!['author', 'editor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Yetkisiz işlem.' });
+    }
+
+    const body = req.body || {};
+    const { title, category, content, excerpt, tags, gundem_data } = body;
+    let status = body.status || 'pending';
+
+    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+        status = 'pending';
+    }
+
+    let image_url = body.image_url || null;
+    if (req.files && req.files.length > 0) {
+        const imgFile = req.files.find(f => f.fieldname === 'image');
+        if (imgFile) image_url = 'uploads/' + imgFile.filename;
+    }
+
+    try {
+        if (!title || !title.trim()) {
+            return res.status(400).json({ error: 'Başlık zorunludur.' });
+        }
+
+        const cleanContent = DOMPurify.sanitize(content || '');
+
+        // If updating an existing article by ID
+        if (body.id && !isNaN(Number(body.id))) {
+            const [existing] = await pool.query('SELECT * FROM articles WHERE id = ? AND author_id = ?', [body.id, req.user.id]);
+            if (existing && existing.length > 0) {
+                let finalImg = image_url || existing[0].image_url;
+                const submittedAt = status === 'pending' ? new Date() : existing[0].submitted_at;
+
+                await pool.query(`
+                    UPDATE articles SET
+                        title = ?,
+                        category = ?,
+                        content = ?,
+                        excerpt = ?,
+                        image_url = ?,
+                        tags = ?,
+                        status = ?,
+                        is_gundem = 1,
+                        gundem_data = ?,
+                        submitted_at = ?,
+                        rejection_reason = NULL,
+                        updated_at = NOW()
+                    WHERE id = ?
+                `, [
+                    title.trim(),
+                    category || 'Gündem',
+                    cleanContent,
+                    excerpt || title.trim(),
+                    finalImg,
+                    tags || 'Gündem',
+                    status,
+                    typeof gundem_data === 'string' ? gundem_data : JSON.stringify(gundem_data || {}),
+                    submittedAt,
+                    body.id
+                ]);
+
+                clearCache('articles');
+
+                if (status === 'pending') {
+                    try {
+                        const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+                        for (const ed of editors) {
+                            await pool.query(
+                                "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')",
+                                [ed.id, `Güncellenen Bilim Gündemi yazısı onay bekliyor: "${title.trim()}"`]
+                            );
+                        }
+                    } catch (ne) {}
+                }
+
+                return res.json({
+                    success: true,
+                    id: body.id,
+                    slug: existing[0].slug,
+                    status,
+                    message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak güncellendi.'
+                });
+            }
+        }
+
+        // New Gundem Article
+        const slug = await getUniqueSlug(pool, title.trim());
+        const submittedAt = (status === 'pending') ? new Date() : null;
+        const publishedAt = (status === 'published') ? new Date() : null;
+
+        const [insertResult] = await pool.query(
+            `INSERT INTO articles 
+            (title, slug, category, content, excerpt, image_url, author_id, status, tags, is_gundem, gundem_data, submitted_at, published_at, was_published) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)`,
+            [
+                title.trim(),
+                slug,
+                category || 'Gündem',
+                cleanContent,
+                excerpt || title.trim(),
+                image_url,
+                req.user.id,
+                status,
+                tags || 'Gündem',
+                typeof gundem_data === 'string' ? gundem_data : JSON.stringify(gundem_data || {}),
+                submittedAt,
+                publishedAt,
+                status === 'published' ? 1 : 0
+            ]
+        );
+
+        const newId = insertResult.insertId;
+
+        try {
+            await pool.query('INSERT IGNORE INTO article_authors (article_id, user_id, order_index) VALUES (?, ?, 0)', [newId, req.user.id]);
+        } catch (e) {}
+
+        clearCache('articles');
+
+        if (status === 'pending') {
+            try {
+                const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+                for (const ed of editors) {
+                    await pool.query(
+                        "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')",
+                        [ed.id, `Yeni bir Bilim Gündemi yazısı onay bekliyor: "${title.trim()}"`]
+                    );
+                }
+            } catch (notifErr) {
+                console.error('Notification error:', notifErr);
+            }
+        }
+
+        res.json({
+            success: true,
+            id: newId,
+            slug,
+            status,
+            message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak kaydedildi.'
+        });
+    } catch (e) {
+        console.error('Author gundem error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/author/gundem', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            "SELECT id, title, slug, category, excerpt, image_url, status, tags, views, rejection_reason, created_at, submitted_at, updated_at FROM articles WHERE author_id = ? AND is_gundem = 1 ORDER BY created_at DESC",
+            [req.user.id]
+        );
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 

@@ -6665,7 +6665,7 @@
                         <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
                             <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
                         </button>
-                        <button class="bge-btn-publish" onclick="bgeSubmitComingSoon()" title="Editöre Gönder">
+                        <button class="bge-btn-publish" onclick="submitBilimGundemToEditor()" title="Editöre Gönder">
                             <i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder
                         </button>
                     </div>
@@ -6833,7 +6833,7 @@
                     <button class="bge-btn-draft" onclick="saveBilimGundemFromEditor()">
                         <i class="ph-bold ph-floppy-disk"></i> Taslak Olarak Kaydet
                     </button>
-                    <button class="bge-btn-publish" onclick="bgeSubmitComingSoon()" title="Editöre Gönder">
+                    <button class="bge-btn-publish" onclick="submitBilimGundemToEditor()" title="Editöre Gönder">
                         <i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder
                     </button>
                 </div>
@@ -12998,12 +12998,181 @@
             }
         }
 
-        function bgeSubmitComingSoon() {
-            if (typeof showAuthorToast === 'function') {
-                showAuthorToast('Editöre gönderme özelliği yakında aktif edilecektir.', 'info');
-            } else {
-                alert('Editöre gönderme özelliği yakında aktif edilecektir.');
+        async function submitBilimGundemToEditor() {
+            const title = (document.getElementById('bge-title')?.value || '').trim();
+            const description = (document.getElementById('bge-description')?.value || '').trim();
+            let category = document.getElementById('bge-category')?.value || '';
+            if (category === 'Diğer') {
+                const custom = (document.getElementById('bge-custom-category')?.value || '').trim();
+                if (custom) category = custom;
             }
+            const summary = (document.getElementById('bge-summary')?.value || '').trim();
+            const altText = (document.getElementById('bge-alt-text')?.value || '').trim();
+
+            if (!title) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Lütfen bir başlık giriniz.', 'error');
+                else alert('Lütfen bir başlık giriniz.');
+                document.getElementById('bge-title')?.focus();
+                return;
+            }
+
+            if (!category) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Lütfen bir kategori seçiniz.', 'error');
+                else alert('Lütfen bir kategori seçiniz.');
+                document.getElementById('bge-category')?.focus();
+                return;
+            }
+
+            // Save current section and source values from DOM
+            bgeSaveSectionValues();
+            bgeSaveSourceValues();
+
+            if (!bgeSections || bgeSections.length === 0 || !bgeSections.some(s => (s.title && s.title.trim()) || (s.content && s.content.trim()))) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Lütfen en az bir bölüm ve içerik ekleyiniz.', 'error');
+                else alert('Lütfen en az bir bölüm ve içerik ekleyiniz.');
+                return;
+            }
+
+            // Build compiled HTML content from sections
+            let compiledContent = '';
+            bgeSections.forEach((sec, idx) => {
+                const secTitle = sec.title ? sec.title.trim() : `Bölüm ${idx + 1}`;
+                const secContent = sec.content || '';
+                compiledContent += `
+                    <section class="gundem-article-section" id="bolum-${idx + 1}">
+                        <h2>${escapeHtml(secTitle)}</h2>
+                        <div class="gundem-section-content">${secContent}</div>
+                    </section>
+                `;
+            });
+
+            // If sources exist, append bibliography
+            if (bgeSources && bgeSources.length > 0) {
+                let sourcesHtml = '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">';
+                bgeSources.forEach((src) => {
+                    let srcText = '';
+                    if (src.type === 'bilimsel_makale') {
+                        srcText = [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ');
+                    } else {
+                        srcText = src.url || 'Kaynak';
+                    }
+                    const link = src.url ? `<a href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(srcText || src.url)}</a>` : escapeHtml(srcText);
+                    sourcesHtml += `<li>${link}</li>`;
+                });
+                sourcesHtml += '</ul></section>';
+                compiledContent += sourcesHtml;
+            }
+
+            const structuredData = {
+                title,
+                description,
+                category,
+                tags: [...bgeTags],
+                summary,
+                altText,
+                sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
+                sources: bgeSources.map(s => ({ ...s }))
+            };
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Oturum süreniz dolmuş, lütfen tekrar giriş yapın.', 'error');
+                else alert('Lütfen giriş yapın.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('excerpt', summary || description || title);
+            formData.append('content', compiledContent);
+            formData.append('tags', bgeTags.join(', '));
+            formData.append('status', 'pending');
+            formData.append('gundem_data', JSON.stringify(structuredData));
+
+            // If editing an existing DB article
+            if (editingBilimGundemId && !editingBilimGundemId.toString().startsWith('bg_')) {
+                formData.append('id', editingBilimGundemId);
+            }
+
+            // Image
+            if (bgeImageFile) {
+                formData.append('image', bgeImageFile);
+            } else if (bgeImageDataUrl && bgeImageDataUrl.startsWith('http')) {
+                formData.append('image_url', bgeImageDataUrl);
+            }
+
+            const publishBtns = document.querySelectorAll('.bge-btn-publish');
+            publishBtns.forEach(b => {
+                b.disabled = true;
+                b.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Gönderiliyor...';
+            });
+
+            try {
+                const res = await fetch('/api/author/gundem', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Update local storage representation
+                    const articleId = data.id || editingBilimGundemId || ('bg_' + Date.now());
+                    const idx = (bilimGundemData || []).findIndex(i => i.id === editingBilimGundemId);
+                    const updatedItem = {
+                        id: articleId,
+                        title: title,
+                        description: description,
+                        category: category,
+                        tags: [...bgeTags],
+                        summary: summary,
+                        altText: altText,
+                        imageDataUrl: bgeImageDataUrl || null,
+                        sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
+                        sources: bgeSources.map(s => ({ ...s })),
+                        status: 'pending',
+                        views: 0,
+                        likes: 0,
+                        comments: 0,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    if (idx !== -1) {
+                        bilimGundemData[idx] = updatedItem;
+                    } else {
+                        bilimGundemData.push(updatedItem);
+                    }
+                    saveBilimGundemStorage(bilimGundemData);
+
+                    if (typeof showAuthorToast === 'function') {
+                        showAuthorToast('Bilim Gündemi yazınız editör onayına başarıyla gönderildi!', 'success');
+                    } else {
+                        alert('Bilim Gündemi yazınız editör onayına başarıyla gönderildi!');
+                    }
+
+                    backToBilimGundemi();
+                    loadBilimGundemiData();
+                } else {
+                    const err = data.error || data.message || 'Gönderim sırasında hata oluştu.';
+                    if (typeof showAuthorToast === 'function') showAuthorToast('Hata: ' + err, 'error');
+                    else alert('Hata: ' + err);
+                }
+            } catch (err) {
+                console.error('Submit error:', err);
+                if (typeof showAuthorToast === 'function') showAuthorToast('Sunucu bağlantı hatası.', 'error');
+                else alert('Sunucu bağlantı hatası.');
+            } finally {
+                publishBtns.forEach(b => {
+                    b.disabled = false;
+                    b.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder';
+                });
+            }
+        }
+
+        function bgeSubmitComingSoon() {
+            submitBilimGundemToEditor();
         }
 
         function bgeSetupQuillImageHandler(quillInstance) {

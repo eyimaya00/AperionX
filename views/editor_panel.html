@@ -1815,6 +1815,10 @@
                 onclick="showSection('experiments-dashboard', this); setTimeout(() => loadExperimentsDashboard(), 50);">
                 <i class="ph ph-flask"></i> <span>Deney Onayları</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item"
+                onclick="showSection('gundem-dashboard', this); setTimeout(() => loadGundemDashboard(), 50);">
+                <i class="ph ph-newspaper"></i> <span>Gündem Onayları</span>
+            </a>
 
             <!-- STATS MENU -->
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('section-stats-final', this)">
@@ -2265,6 +2269,86 @@
                         <!-- JS ile dolacak -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- BILIM GUNDEMI DASHBOARD SECTION -->
+        <div id="gundem-dashboard" class="section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h1 class="page-title" style="margin: 0;">Bilim Gündemi Onayları</h1>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-top: 4px;">Yazarlar tarafından gönderilen bilim gündemi yazılarını inceleyin, onaylayın veya revizyon isteyin.</p>
+                </div>
+            </div>
+
+            <!-- GUNDEM STATS -->
+            <div class="dashboard-stats" style="margin-bottom: 32px;">
+                <div class="stat-card" onclick="filterGundem('pending')" style="cursor: pointer;">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="ph ph-hourglass-high"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="gundem-count-pending">0</h3>
+                            <p>Onay Bekleyen Gündem Yazıları</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" onclick="filterGundem('published')" style="cursor: pointer;">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="ph ph-check-square"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="gundem-count-published">0</h3>
+                            <p>Yayındaki Gündem Yazıları</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" onclick="filterGundem('rejected')" style="cursor: pointer;">
+                    <div class="stat-card-content">
+                        <div class="stat-icon-wrapper" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            <i class="ph ph-x-square"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="gundem-count-rejected">0</h3>
+                            <p>Reddedilen / Revizyondaki Yazılar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GUNDEM LIST TABLE -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b;" id="gundem-table-title">Onay Bekleyen Gündem Yazıları</h3>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary gundem-filter-btn" id="btn-gundem-pending" onclick="filterGundem('pending')" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 600; background: #6366f1; color: white;">Bekleyenler</button>
+                        <button class="btn btn-secondary gundem-filter-btn" id="btn-gundem-history" onclick="filterGundem('history')" style="padding: 8px 16px; font-size: 0.85rem;">Geçmiş</button>
+                        <button class="btn btn-secondary gundem-filter-btn" id="btn-gundem-all" onclick="filterGundem('all')" style="padding: 8px 16px; font-size: 0.85rem;">Tümü</button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Görsel</th>
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Başlık & Bilgi</th>
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Yazar</th>
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Kategori</th>
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569;">Okunma</th>
+                                <th style="padding: 16px 24px; font-weight: 600; color: #475569; text-align: right;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gundem-table-body">
+                            <!-- JS ile dolacak -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -3304,6 +3388,9 @@
             }
             if (id === 'experiments-dashboard') {
                 loadExperimentsDashboard();
+            }
+            if (id === 'gundem-dashboard') {
+                loadGundemDashboard();
             }
             if (id === 'yazar-takip') {
                 loadYazarTakip();
@@ -4760,6 +4847,313 @@
                     }
                 } catch (e) { showToast('Sunucu hatası', 'error'); }
             }
+        }
+
+        // ==========================================
+        // BILIM GUNDEMI DASHBOARD & REVIEW FUNCTIONS
+        // ==========================================
+        let allGundem = [];
+        let currentGundemFilter = 'pending';
+        let currentGundemId = null;
+
+        async function loadGundemDashboard() {
+            try {
+                const token = localStorage.getItem('token');
+                const [resPending, resHistory] = await Promise.all([
+                    fetch(`${API_URL}/editor/pending-gundem`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/editor/gundem/history`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                const safeJson = async (r) => r.ok ? await r.json() : [];
+
+                const pending = await safeJson(resPending);
+                const history = await safeJson(resHistory);
+
+                allGundem = [...(pending || []), ...(history || [])];
+
+                const pendingCount = (pending || []).length;
+                const publishedCount = (history || []).filter(e => e.status === 'published').length;
+                const rejectedCount = (history || []).filter(e => e.status === 'rejected').length;
+
+                const elPending = document.getElementById('gundem-count-pending');
+                const elPublished = document.getElementById('gundem-count-published');
+                const elRejected = document.getElementById('gundem-count-rejected');
+
+                if (elPending) elPending.innerText = pendingCount;
+                if (elPublished) elPublished.innerText = publishedCount;
+                if (elRejected) elRejected.innerText = rejectedCount;
+
+                filterGundem(currentGundemFilter);
+            } catch (e) {
+                console.error('Gündem yükleme hatası:', e);
+                const tbody = document.getElementById('gundem-table-body');
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center; padding:40px;">Yükleme hatası: ${e.message}</td></tr>`;
+            }
+        }
+
+        function filterGundem(status) {
+            currentGundemFilter = status;
+            const titleEl = document.getElementById('gundem-table-title');
+
+            document.querySelectorAll('.gundem-filter-btn').forEach(btn => {
+                btn.style.background = '#f1f5f9';
+                btn.style.color = '#475569';
+                btn.style.fontWeight = '500';
+            });
+            const activeBtn = document.getElementById(`btn-gundem-${status}`);
+            if (activeBtn) {
+                activeBtn.style.background = '#6366f1';
+                activeBtn.style.color = 'white';
+                activeBtn.style.fontWeight = '600';
+            }
+
+            let filtered = [];
+            if (status === 'pending') {
+                filtered = allGundem.filter(e => e.status === 'pending');
+                if (titleEl) titleEl.innerText = 'Onay Bekleyen Gündem Yazıları';
+            } else if (status === 'published') {
+                filtered = allGundem.filter(e => e.status === 'published');
+                if (titleEl) titleEl.innerText = 'Yayındaki Gündem Yazıları';
+            } else if (status === 'rejected') {
+                filtered = allGundem.filter(e => e.status === 'rejected');
+                if (titleEl) titleEl.innerText = 'Reddedilen / Revizyondaki Yazılar';
+            } else if (status === 'history') {
+                filtered = allGundem.filter(e => e.status !== 'pending');
+                if (titleEl) titleEl.innerText = 'Gündem Geçmişi (Yayınlananlar ve Reddedilenler)';
+            } else {
+                filtered = allGundem;
+                if (titleEl) titleEl.innerText = 'Tüm Bilim Gündemi Yazıları';
+            }
+
+            renderGundemTable(filtered);
+        }
+
+        function renderGundemTable(items) {
+            const tbody = document.getElementById('gundem-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; height:220px; vertical-align:middle; color:#94a3b8;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                        <i class="ph-duotone ph-newspaper" style="font-size:3rem; opacity:0.5;"></i>
+                        <span>Bu filtreye uygun bilim gündemi yazısı bulunamadı.</span>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const date = new Date(item.submitted_at || item.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                let statusBadge = '';
+                if (item.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
+                else if (item.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                else if (item.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
+
+                const actions = `
+                    <button class="btn btn-primary" style="padding:6px 14px; font-size:0.85rem;" onclick="openGundemReview(${item.id})">
+                        <i class="ph-bold ph-eye"></i> İncele
+                    </button>
+                    ${item.status === 'published' ? `
+                        <a href="/gundem/${item.slug}" target="_blank" class="btn btn-secondary" style="padding:6px 12px; font-size:0.85rem; text-decoration:none;" title="Sitede Canlı Gör">
+                            <i class="ph-bold ph-arrow-square-out"></i>
+                        </a>
+                    ` : ''}
+                    <button class="btn btn-danger-soft" style="padding:6px 12px; font-size:0.85rem;" onclick="deleteGundem(${item.id})" title="Sil">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                `;
+
+                const imgSrc = item.image_url ? (item.image_url.startsWith('http') ? item.image_url : '/' + item.image_url.replace(/^\//, '')) : '/uploads/logo.png';
+
+                const row = `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        <td style="padding: 14px 24px;">
+                            <img src="${imgSrc}" alt="" style="width:65px; height:44px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;" onerror="this.src='/uploads/logo.png'">
+                        </td>
+                        <td style="padding: 14px 24px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 4px; height: 36px; background: ${item.status === 'published' ? '#10b981' : (item.status === 'rejected' ? '#ef4444' : '#f59e0b')}; border-radius: 4px;"></div>
+                                <div>
+                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">${escapeHtml(item.title)}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">${date} · ${statusBadge}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 24px; font-weight: 500; color: #475569;">${escapeHtml(item.author_name || 'Bilinmiyor')}</td>
+                        <td style="padding: 14px 24px;">
+                            <span class="category-badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; padding:4px 10px; border-radius:6px; font-size:0.8rem;">${escapeHtml(item.category || 'Gündem')}</span>
+                        </td>
+                        <td style="padding: 14px 24px; font-weight: 500; color: #475569;">
+                            <span style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                <i class="ph-bold ph-eye" style="color: #64748b; font-size: 1.05rem;"></i>
+                                <span>${item.views || 0}</span>
+                            </span>
+                        </td>
+                        <td style="padding: 14px 24px; text-align: right;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                ${actions}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        async function openGundemReview(id) {
+            try {
+                const token = localStorage.getItem('token');
+                let item = allGundem.find(a => a.id == id);
+                if (!item || !item.content) {
+                    const res = await fetch(`${API_URL}/editor/gundem/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        item = await res.json();
+                    }
+                }
+                if (!item) {
+                    showToast('Gündem yazısı bulunamadı!', 'error');
+                    return;
+                }
+
+                currentGundemId = item.id;
+                document.getElementById('modal-title').innerText = '(Önizleme) ' + item.title;
+                const isPending = item.status === 'pending';
+
+                let rejectionHtml = '';
+                if (item.status === 'rejected' && item.rejection_reason) {
+                    rejectionHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #fca5a5;">
+                        <strong style="display:block; margin-bottom:4px;"><i class="ph-bold ph-warning"></i> Red Sebebi:</strong> 
+                        ${escapeHtml(item.rejection_reason)}
+                    </div>`;
+                }
+
+                let html = `
+                    ${rejectionHtml}
+                    <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8fafc; padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <span style="font-size: 0.88rem; color: #475569;">
+                            <i class="ph-bold ph-user"></i> Yazar: <strong>${escapeHtml(item.author_name || 'Bilinmiyor')}</strong> &nbsp;|&nbsp; 
+                            <i class="ph-bold ph-tag"></i> Kategori: <strong>${escapeHtml(item.category || 'Gündem')}</strong>
+                        </span>
+                        <a href="/preview-gundem/${item.id}?token=${token}" target="_blank" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="ph-bold ph-arrow-square-out"></i> Yeni Sekmede Önizle
+                        </a>
+                    </div>
+                    <iframe src="/preview-gundem/${item.id}?token=${token}" width="100%" height="650px" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #090b10;"></iframe>
+                `;
+
+                const modalBox = document.querySelector('#review-modal .modal-box');
+                if (modalBox) {
+                    modalBox.style.maxWidth = '1200px';
+                    modalBox.style.width = '95%';
+                }
+
+                document.getElementById('modal-body').innerHTML = html;
+
+                const footer = document.querySelector('#review-modal .modal-footer');
+                if (isPending) {
+                    footer.innerHTML = `
+                        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                            <textarea id="gundem-reject-reason" placeholder="Reddediyorsanız lütfen buraya açık bir sebep yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                                <button class="btn btn-danger" onclick="toggleGundemRejectInput()">Reddet...</button>
+                                <button class="btn btn-primary" onclick="submitGundemDecision('approve')">Yayına Al</button>
+                            </div>
+                            <div id="gundem-confirm-reject-area" style="display:none; justify-content:flex-end; gap:10px;">
+                                <button class="btn btn-danger" onclick="submitGundemDecision('reject')">Reddet ve Bitir</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    footer.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                            <span style="font-size:0.85rem; color:#64748b;">Durum: <strong>${item.status === 'published' ? 'Yayında' : 'Reddedildi'}</strong></span>
+                            <button class="btn btn-secondary" onclick="closeModal()">Kapat</button>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('review-modal').classList.add('show');
+            } catch (error) {
+                console.error("openGundemReview error:", error);
+                showToast("Bilim gündemi önizlemesi yüklenirken bir hata oluştu.", "error");
+            }
+        }
+
+        function toggleGundemRejectInput() {
+            const area = document.getElementById('gundem-reject-reason');
+            const confirmArea = document.getElementById('gundem-confirm-reject-area');
+            if (area && area.style.display === 'none') {
+                area.style.display = 'block';
+                if (confirmArea) confirmArea.style.display = 'flex';
+                area.focus();
+            } else if (area) {
+                area.style.display = 'none';
+                if (confirmArea) confirmArea.style.display = 'none';
+            }
+        }
+
+        async function submitGundemDecision(decision) {
+            if (!currentGundemId) return;
+
+            let body = { decision };
+
+            if (decision === 'reject') {
+                const reason = document.getElementById('gundem-reject-reason')?.value;
+                if (!reason || !reason.trim()) {
+                    showToast('Lütfen red sebebini yazınız.', 'error');
+                    return;
+                }
+                body.rejection_reason = reason;
+                performGundemSubmit();
+            } else {
+                showConfirm('Bu bilim gündemi yazısını yayına almak istediğinize emin misiniz?', performGundemSubmit);
+            }
+
+            async function performGundemSubmit() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${API_URL}/editor/gundem/decide/${currentGundemId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (res.ok) {
+                        showToast(decision === 'approve' ? 'Bilim Gündemi yazısı başarıyla yayına alındı!' : 'Yazı reddedildi ve yazara iletildi.', 'success');
+                        closeModal();
+                        loadGundemDashboard();
+                    } else {
+                        const txt = await res.text();
+                        showToast('Hata: ' + txt, 'error');
+                    }
+                } catch (e) {
+                    showToast('Sunucu hatası', 'error');
+                }
+            }
+        }
+
+        async function deleteGundem(id) {
+            showConfirm('Bu bilim gündemi yazısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${API_URL}/editor/gundem/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        showToast('Gündem yazısı silindi.', 'success');
+                        loadGundemDashboard();
+                    } else {
+                        showToast('Silme işlemi başarısız oldu.', 'error');
+                    }
+                } catch (e) {
+                    showToast('Sunucu hatası.', 'error');
+                }
+            });
         }
 
         async function loadSettings() {
