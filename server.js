@@ -201,8 +201,18 @@ app.get(['/gundem', '/en/gundem'], (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'gundem.html'));
 });
 
+// Türkçe karakterli '/gündem' ve varyasyonlarını kalıcı olarak /gundem'e 301 yönlendir
+app.get(['/gündem', '/gündem/', '/en/gündem', '/en/gündem/', encodeURI('/gündem'), encodeURI('/gündem/'), encodeURI('/en/gündem'), encodeURI('/en/gündem/'), '/%C3%BCndem', '/%c3%bcndem', '/%C3%BCndem/', '/%c3%bcndem/'], (req, res) => {
+    res.redirect(301, '/gundem');
+});
+
+// /gündem/:slug linklerini kalıcı olarak /gundem/:slug'a yönlendir
+app.get(['/gündem/:slug', '/en/gündem/:slug', encodeURI('/gündem') + '/:slug', encodeURI('/en/gündem') + '/:slug', '/%C3%BCndem/:slug', '/%c3%bcndem/:slug'], (req, res) => {
+    res.redirect(301, `/gundem/${encodeURIComponent(req.params.slug)}`);
+});
+
 // Eski Bilim Gündemi linklerini kalıcı olarak /gundem'e 301 SEO Redirect et
-app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi'], (req, res) => {
+app.get(['/bilimgundemi', '/bilim-gundemi', '/bilimgündemi', '/en/bilimgundemi', '/en/bilim-gundemi', '/en/bilimgündemi', encodeURI('/bilimgündemi'), encodeURI('/en/bilimgündemi')], (req, res) => {
     res.redirect(301, '/gundem');
 });
 
