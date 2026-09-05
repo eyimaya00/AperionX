@@ -13216,6 +13216,553 @@
             }
         }
 
+        function buildBilimGundemPreviewHtml(data) {
+            const title = data.title || 'Başlıksız Bilim Gündemi';
+            const category = data.category || 'Gündem';
+            const excerpt = data.excerpt || '';
+            const authorName = data.authorName || 'AperionX Yazarı';
+            const authorTitle = data.authorTitle || 'Bilim, Teknoloji ve Analiz Masası';
+            const dateStr = data.dateStr || new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            const coverImg = data.coverImg || '';
+            const tags = Array.isArray(data.tags) ? data.tags : (data.tags ? String(data.tags).split(',').map(t => t.trim()) : [category]);
+
+            // Build sections HTML
+            let sectionsHtml = '';
+            let tocItems = [];
+            if (Array.isArray(data.sections) && data.sections.length > 0) {
+                data.sections.forEach((sec, idx) => {
+                    const secTitle = sec.title ? sec.title.trim() : `Bölüm ${idx + 1}`;
+                    const secContent = sec.content || '';
+                    const secImg = sec.image_url ? `<div class="gundem-sec-img"><img src="${sec.image_url}" alt="${escapeHtml(secTitle)}"></div>` : '';
+                    tocItems.push(secTitle);
+                    sectionsHtml += `
+                        <section class="gundem-sec" id="bolum-${idx + 1}">
+                            <h2 class="gundem-sec-title">
+                                <span class="sec-num">${idx + 1}</span>
+                                <span>${escapeHtml(secTitle)}</span>
+                            </h2>
+                            ${secImg}
+                            <div class="gundem-sec-body">${secContent}</div>
+                        </section>
+                    `;
+                });
+            } else if (data.content && data.content.trim()) {
+                sectionsHtml = `
+                    <section class="gundem-sec">
+                        <div class="gundem-sec-body">${data.content}</div>
+                    </section>
+                `;
+            } else {
+                sectionsHtml = `
+                    <section class="gundem-sec">
+                        <div style="padding: 24px; text-align: center; color: #94a3b8; font-style: italic;">Haber metni henüz eklenmedi.</div>
+                    </section>
+                `;
+            }
+
+            // Build Sources HTML
+            let sourcesHtml = '';
+            if (Array.isArray(data.sources) && data.sources.length > 0) {
+                let listItems = '';
+                data.sources.forEach((src) => {
+                    let srcText = '';
+                    if (src.type === 'bilimsel_makale') {
+                        srcText = [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ');
+                    } else {
+                        srcText = src.url || 'Kaynak';
+                    }
+                    if (src.url) {
+                        listItems += `<li><a href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(srcText || src.url)}</a></li>`;
+                    } else if (srcText) {
+                        listItems += `<li>${escapeHtml(srcText)}</li>`;
+                    }
+                });
+                if (listItems) {
+                    sourcesHtml = `
+                        <div class="gundem-sources-card">
+                            <h3 class="sources-title"><i class="ph-bold ph-books"></i> Kaynaklar ve Referanslar</h3>
+                            <ol class="sources-list">${listItems}</ol>
+                        </div>
+                    `;
+                }
+            }
+
+            // Cover Image HTML
+            const coverHtml = coverImg ? `
+                <div class="gundem-cover-container">
+                    <img src="${coverImg}" alt="${escapeHtml(title)}" class="gundem-cover-img">
+                </div>
+            ` : '';
+
+            // TOC HTML
+            const tocHtml = tocItems.length > 0 ? `
+                <div class="sidebar-widget">
+                    <h4 class="widget-title"><i class="ph-bold ph-list-bullets"></i> İçindekiler</h4>
+                    <ul class="widget-toc-list">
+                        ${tocItems.map((t, i) => `<li><a href="#bolum-${i + 1}"><span>${i + 1}.</span> ${escapeHtml(t)}</a></li>`).join('')}
+                    </ul>
+                </div>
+            ` : '';
+
+            // Tags HTML
+            const tagsHtml = (tags && tags.length > 0 && tags.some(Boolean)) ? `
+                <div class="sidebar-widget">
+                    <h4 class="widget-title"><i class="ph-bold ph-tag"></i> Etiketler</h4>
+                    <div class="widget-tags">
+                        ${tags.filter(Boolean).map(t => `<span class="widget-tag-pill">#${escapeHtml(t)}</span>`).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            return `<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(title)} - Bilim Gündemi | AperionX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            background-color: #090b10;
+            color: #f1f5f9;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.75;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #090b10; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+        /* Mini Top Navigation Bar */
+        .preview-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .preview-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+        .preview-logo i {
+            color: #6366f1;
+            font-size: 1.5rem;
+        }
+        .preview-mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Hero Header */
+        .gundem-hero-wrap {
+            position: relative;
+            padding: 45px 24px 35px;
+            background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.16) 0%, rgba(9, 11, 16, 1) 75%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .gundem-hero-inner {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .hero-cat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.22);
+            border: 1px solid rgba(165, 180, 252, 0.3);
+            color: #c7d2fe;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .hero-cat-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #818cf8;
+            box-shadow: 0 0 8px #818cf8;
+        }
+        .hero-main-title {
+            font-size: clamp(2rem, 3.6vw, 2.9rem);
+            font-weight: 800;
+            line-height: 1.22;
+            color: #ffffff;
+            margin-bottom: 16px;
+            letter-spacing: -0.025em;
+        }
+        .hero-summary {
+            font-size: 1.15rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 22px;
+            border-left: 3px solid #6366f1;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0 10px 10px 0;
+        }
+        .hero-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: #94a3b8;
+            font-size: 0.88rem;
+            flex-wrap: wrap;
+            padding-top: 4px;
+        }
+        .hero-meta-row .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hero-meta-row strong {
+            color: #f1f5f9;
+        }
+
+        /* Cover Image */
+        .gundem-cover-container {
+            max-width: 960px;
+            margin: 30px auto 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            background: #05070a;
+        }
+        .gundem-cover-img {
+            width: 100%;
+            max-height: 520px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Content & Sidebar Grid */
+        .gundem-grid {
+            max-width: 1140px;
+            margin: 40px auto 80px;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 40px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .gundem-grid {
+                grid-template-columns: 1fr;
+                margin-top: 24px;
+            }
+        }
+
+        /* Sections */
+        .gundem-sec {
+            margin-bottom: 35px;
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 28px;
+        }
+        .gundem-sec-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .sec-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .gundem-sec-img {
+            margin: 18px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .gundem-sec-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .gundem-sec-body {
+            color: #cbd5e1;
+            font-size: 1.06rem;
+            line-height: 1.85;
+        }
+        .gundem-sec-body p { margin-bottom: 14px; }
+        .gundem-sec-body h3 { color: #f8fafc; margin: 20px 0 10px; font-size: 1.25rem; }
+        .gundem-sec-body ul, .gundem-sec-body ol { margin: 12px 0 16px 24px; }
+        .gundem-sec-body li { margin-bottom: 6px; }
+        .gundem-sec-body blockquote {
+            border-left: 3px solid #6366f1;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* Sources Card */
+        .gundem-sources-card {
+            margin-top: 30px;
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+        .sources-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sources-title i { color: #6366f1; }
+        .sources-list {
+            padding-left: 20px;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+        .sources-list li { margin-bottom: 8px; }
+        .sources-list a {
+            color: #818cf8;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        /* Sidebar */
+        .gundem-sidebar-col {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .sidebar-widget {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+        }
+        .widget-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .widget-title i { color: #6366f1; }
+        .author-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .author-avatar-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+        .author-meta-name {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        .author-meta-title {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .widget-toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .widget-toc-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
+        }
+        .widget-toc-list a {
+            color: #cbd5e1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .widget-toc-list a:hover {
+            color: #818cf8;
+        }
+        .widget-toc-list span {
+            color: #6366f1;
+            font-weight: 700;
+        }
+        .widget-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .widget-tag-pill {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .rating-preview-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+        .rating-stars {
+            display: flex;
+            gap: 6px;
+            color: #f59e0b;
+            font-size: 1.5rem;
+        }
+        .rating-hint {
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Mini Nav -->
+    <header class="preview-nav">
+        <div class="preview-logo">
+            <i class="ph-fill ph-atom"></i>
+            <span>AperionX</span>
+        </div>
+        <div class="preview-mode-badge">
+            <i class="ph-bold ph-eye"></i> Canlı Okuyucu Önizlemesi
+        </div>
+    </header>
+
+    <!-- Hero Header -->
+    <div class="gundem-hero-wrap">
+        <div class="gundem-hero-inner">
+            <div class="hero-cat-badge">
+                <span class="dot"></span>
+                <span>${escapeHtml(category)}</span>
+            </div>
+            <h1 class="hero-main-title">${escapeHtml(title)}</h1>
+            ${excerpt ? `<div class="hero-summary">${escapeHtml(excerpt)}</div>` : ''}
+            <div class="hero-meta-row">
+                <div class="item"><i class="ph-bold ph-user"></i> <span><strong>${escapeHtml(authorName)}</strong></span></div>
+                <div class="item"><i class="ph-bold ph-calendar-blank"></i> <span>${dateStr}</span></div>
+                <div class="item"><i class="ph-bold ph-clock"></i> <span>~3 dk okuma</span></div>
+            </div>
+        </div>
+        ${coverHtml}
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="gundem-grid">
+        <main class="gundem-main-col">
+            ${sectionsHtml}
+            ${sourcesHtml}
+        </main>
+        <aside class="gundem-sidebar-col">
+            <!-- Author Card -->
+            <div class="sidebar-widget">
+                <h4 class="widget-title"><i class="ph-bold ph-user-circle"></i> Yazar Bilgileri</h4>
+                <div class="author-box">
+                    <div class="author-avatar-circle">${escapeHtml(authorName.charAt(0).toUpperCase())}</div>
+                    <div>
+                        <div class="author-meta-name">${escapeHtml(authorName)}</div>
+                        <div class="author-meta-title">${escapeHtml(authorTitle)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sen De Değerlendir -->
+            <div class="sidebar-widget">
+                <h4 class="widget-title"><i class="ph-bold ph-star"></i> Sen de Değerlendir</h4>
+                <div class="rating-preview-box">
+                    <div class="rating-stars">
+                        <i class="ph-fill ph-star"></i>
+                        <i class="ph-fill ph-star"></i>
+                        <i class="ph-fill ph-star"></i>
+                        <i class="ph-fill ph-star"></i>
+                        <i class="ph-fill ph-star"></i>
+                    </div>
+                    <div class="rating-hint">Okuyucular bu haberi puanlayabilir (5.0 / 5)</div>
+                </div>
+            </div>
+
+            ${tocHtml}
+            ${tagsHtml}
+        </aside>
+    </div>
+</body>
+</html>`;
+        }
+
         async function bgeOpenPreview() {
             const title = (document.getElementById('bge-title')?.value || '').trim() || 'Başlıksız Bilim Gündemi';
             let category = document.getElementById('bge-category')?.value || 'Genel';
@@ -13224,7 +13771,7 @@
                 if (custom) category = custom;
             }
             const excerpt = (document.getElementById('bge-summary')?.value || document.getElementById('bge-description')?.value || '').trim();
-            const tags = (bgeTags && bgeTags.length > 0) ? bgeTags.join(', ') : (category || 'Gündem');
+            const tags = (bgeTags && bgeTags.length > 0) ? bgeTags : [category || 'Gündem'];
             const authorName = (typeof currentUser !== 'undefined' && currentUser && (currentUser.fullname || currentUser.username)) 
                 ? (currentUser.fullname || currentUser.username) 
                 : 'AperionX Yazarı';
@@ -13235,40 +13782,6 @@
                 if (typeof bgeSaveSourceValues === 'function') bgeSaveSourceValues();
             } catch (e) {
                 console.warn('Error syncing section/source values:', e);
-            }
-
-            // Build compiled content from sections
-            let compiledContent = '';
-            if (Array.isArray(bgeSections) && bgeSections.length > 0) {
-                bgeSections.forEach((sec, idx) => {
-                    const secTitle = sec.title ? sec.title.trim() : `Bölüm ${idx + 1}`;
-                    const secContent = sec.content || '';
-                    compiledContent += `
-                        <section class="gundem-article-section" id="bolum-${idx + 1}" style="margin-bottom: 30px;">
-                            <h2 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 16px; border-left: 4px solid #6366f1; padding-left: 12px;">${escapeHtml(secTitle)}</h2>
-                            <div class="gundem-section-content" style="color: #cbd5e1; line-height: 1.8; font-size: 1.05rem;">${secContent}</div>
-                        </section>
-                    `;
-                });
-            } else {
-                compiledContent = '<p style="color: #94a3b8; font-style: italic;">Henüz içerik eklenmedi.</p>';
-            }
-
-            // Append sources
-            if (Array.isArray(bgeSources) && bgeSources.length > 0) {
-                let sourcesHtml = '<section class="gundem-sources-section" id="kaynakca" style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;"><h3 style="font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-bottom: 14px;">Kaynaklar ve Referanslar</h3><ul class="gundem-sources-list" style="margin: 0; padding-left: 20px; color: #94a3b8;">';
-                bgeSources.forEach((src) => {
-                    let srcText = '';
-                    if (src.type === 'bilimsel_makale') {
-                        srcText = [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).join(' · ');
-                    } else {
-                        srcText = src.url || 'Kaynak';
-                    }
-                    const link = src.url ? `<a href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer" style="color: #818cf8; text-decoration: underline;">${escapeHtml(srcText || src.url)}</a>` : escapeHtml(srcText);
-                    sourcesHtml += `<li style="margin-bottom: 8px;">${link}</li>`;
-                });
-                sourcesHtml += '</ul></section>';
-                compiledContent += sourcesHtml;
             }
 
             // Cover image
@@ -13292,7 +13805,30 @@
                 submitBtn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> Editöre Gönder';
             }
 
-            // SHOW MODAL IMMEDIATELY
+            // Build full self-contained reader HTML
+            const fullHtml = buildBilimGundemPreviewHtml({
+                title,
+                category,
+                excerpt,
+                sections: bgeSections,
+                sources: bgeSources,
+                tags,
+                authorName,
+                coverImg
+            });
+
+            // Update blob for New Tab button
+            if (bgPreviewBlobUrl) {
+                URL.revokeObjectURL(bgPreviewBlobUrl);
+            }
+            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+            bgPreviewBlobUrl = URL.createObjectURL(blob);
+            const newTabBtn = document.getElementById('bg-preview-newtab-btn');
+            if (newTabBtn) {
+                newTabBtn.href = bgPreviewBlobUrl;
+            }
+
+            // Show modal immediately
             const overlay = document.getElementById('bg-preview-modal-overlay');
             if (overlay) {
                 overlay.classList.add('active');
@@ -13300,107 +13836,11 @@
             }
             document.body.style.overflow = 'hidden';
 
+            // Render into iframe
             const iframe = document.getElementById('bg-preview-iframe');
             if (iframe) {
                 iframe.removeAttribute('src');
-                iframe.srcdoc = `
-                    <!DOCTYPE html>
-                    <html><head><meta charset="utf-8"></head><body style="margin:0; background:#090b10; color:#e2e8f0; font-family:'Outfit',sans-serif; display:flex; align-items:center; justify-content:center; height:100vh;">
-                        <div style="text-align:center;">
-                            <div style="width:48px; height:48px; border:3px solid rgba(99,102,241,0.2); border-top-color:#6366f1; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px;"></div>
-                            <p style="font-size:1.05rem; font-weight:600; margin:0; color:#f8fafc;">Önizleme Hazırlanıyor...</p>
-                            <p style="font-size:0.85rem; color:#94a3b8; margin:6px 0 0;">Canlı okuyucu görünümü derleniyor</p>
-                        </div>
-                        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-                    </body></html>
-                `;
-            }
-
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch('/api/author/gundem/preview-live', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        title,
-                        category,
-                        content: compiledContent,
-                        excerpt,
-                        tags,
-                        image_url: coverImg
-                    })
-                });
-
-                if (res.ok) {
-                    const html = await res.text();
-
-                    if (bgPreviewBlobUrl) {
-                        URL.revokeObjectURL(bgPreviewBlobUrl);
-                    }
-                    const blob = new Blob([html], { type: 'text/html' });
-                    bgPreviewBlobUrl = URL.createObjectURL(blob);
-
-                    const newTabBtn = document.getElementById('bg-preview-newtab-btn');
-                    if (newTabBtn) {
-                        newTabBtn.href = bgPreviewBlobUrl;
-                    }
-
-                    if (iframe) {
-                        iframe.removeAttribute('src');
-                        iframe.srcdoc = html;
-                    }
-                } else {
-                    throw new Error('Server returned ' + res.status);
-                }
-            } catch (err) {
-                console.warn('Live preview API error, using standalone preview render:', err);
-                const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-                const heroImgHtml = coverImg ? `<div style="max-height:450px; overflow:hidden; border-radius:16px; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,0.5);"><img src="${coverImg}" style="width:100%; height:auto; display:block; object-fit:cover;"></div>` : '';
-                const standaloneHtml = `
-                    <!DOCTYPE html>
-                    <html lang="tr">
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>${escapeHtml(title)} - Bilim Gündemi Önizleme</title>
-                        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-                        <style>
-                            body { background: #090b10; color: #f8fafc; font-family: 'Outfit', sans-serif; margin: 0; padding: 40px 20px; line-height: 1.7; }
-                            .container { max-width: 860px; margin: 0 auto; }
-                            .badge { display: inline-block; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 16px; }
-                            h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin: 0 0 16px; }
-                            .meta { display: flex; align-items: center; gap: 16px; color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-                            .excerpt { font-size: 1.2rem; color: #cbd5e1; font-weight: 400; margin-bottom: 30px; line-height: 1.6; border-left: 3px solid #6366f1; padding-left: 16px; }
-                            .content { font-size: 1.05rem; color: #94a3b8; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <span class="badge">${escapeHtml(category)}</span>
-                            <h1>${escapeHtml(title)}</h1>
-                            <div class="meta">
-                                <span><strong>Yazar:</strong> ${escapeHtml(authorName)}</span>
-                                <span>•</span>
-                                <span>${dateStr}</span>
-                            </div>
-                            ${heroImgHtml}
-                            ${excerpt ? `<div class="excerpt">${escapeHtml(excerpt)}</div>` : ''}
-                            <div class="content">${compiledContent}</div>
-                        </div>
-                    </body>
-                    </html>
-                `;
-                if (bgPreviewBlobUrl) URL.revokeObjectURL(bgPreviewBlobUrl);
-                const blob = new Blob([standaloneHtml], { type: 'text/html' });
-                bgPreviewBlobUrl = URL.createObjectURL(blob);
-                const newTabBtn = document.getElementById('bg-preview-newtab-btn');
-                if (newTabBtn) newTabBtn.href = bgPreviewBlobUrl;
-                if (iframe) {
-                    iframe.removeAttribute('src');
-                    iframe.srcdoc = standaloneHtml;
-                }
+                iframe.srcdoc = fullHtml;
             }
         }
 
@@ -13423,6 +13863,19 @@
             const title = item ? item.title : 'Bilim Gündemi Önizleme';
             const category = item ? (item.category || 'Gündem') : 'Gündem';
             const authorName = item ? (item.author_fullname || item.author_name || currentUser?.fullname || 'AperionX Yazarı') : (currentUser?.fullname || 'AperionX Yazarı');
+            const excerpt = item ? (item.excerpt || item.description || item.summary || '') : '';
+            const coverImg = item ? (item.image_url || item.imageDataUrl || '') : '';
+            const rawDate = item ? (item.submitted_at || item.updated_at || item.created_at || item.createdAt) : null;
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // Extract structured data if available
+            let structured = {};
+            if (item && item.gundem_data) {
+                try { structured = typeof item.gundem_data === 'string' ? JSON.parse(item.gundem_data) : item.gundem_data; } catch(e){}
+            }
+            const sections = (structured.sections && structured.sections.length > 0) ? structured.sections : null;
+            const sources = structured.sources || [];
+            const tags = structured.tags || (item && item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',').map(t => t.trim())) : [category]);
 
             const titleEl = document.getElementById('bg-preview-title');
             if (titleEl) titleEl.innerText = title;
@@ -13445,6 +13898,31 @@
                 }
             }
 
+            // Build self-contained HTML
+            const fullHtml = buildBilimGundemPreviewHtml({
+                title,
+                category,
+                excerpt,
+                content: item ? (item.content || '') : '',
+                sections,
+                sources,
+                tags,
+                authorName,
+                coverImg,
+                dateStr
+            });
+
+            // Update blob for New Tab button
+            if (bgPreviewBlobUrl) {
+                URL.revokeObjectURL(bgPreviewBlobUrl);
+            }
+            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+            bgPreviewBlobUrl = URL.createObjectURL(blob);
+            const newTabBtn = document.getElementById('bg-preview-newtab-btn');
+            if (newTabBtn) {
+                newTabBtn.href = bgPreviewBlobUrl;
+            }
+
             // SHOW MODAL IMMEDIATELY
             const overlay = document.getElementById('bg-preview-modal-overlay');
             if (overlay) {
@@ -13454,59 +13932,9 @@
             document.body.style.overflow = 'hidden';
 
             const iframe = document.getElementById('bg-preview-iframe');
-            const newTabBtn = document.getElementById('bg-preview-newtab-btn');
-
-            if (id && !String(id).startsWith('bg_')) {
-                const previewUrl = `/preview-gundem/${id}?token=${token}`;
-                if (newTabBtn) newTabBtn.href = previewUrl;
-                if (iframe) {
-                    iframe.removeAttribute('srcdoc');
-                    iframe.src = previewUrl;
-                }
-            } else if (item) {
-                if (iframe) {
-                    iframe.removeAttribute('src');
-                    iframe.srcdoc = `
-                        <!DOCTYPE html>
-                        <html><head><meta charset="utf-8"></head><body style="margin:0; background:#090b10; color:#e2e8f0; font-family:'Outfit',sans-serif; display:flex; align-items:center; justify-content:center; height:100vh;">
-                            <div style="text-align:center;">
-                                <div style="width:48px; height:48px; border:3px solid rgba(99,102,241,0.2); border-top-color:#6366f1; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px;"></div>
-                                <p style="font-size:1.05rem; font-weight:600; margin:0; color:#f8fafc;">Önizleme Hazırlanıyor...</p>
-                            </div>
-                            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-                        </body></html>
-                    `;
-                }
-                try {
-                    const res = await fetch('/api/author/gundem/preview-live', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            title: item.title,
-                            category: item.category,
-                            content: item.content || item.summary || '',
-                            excerpt: item.description || item.summary || '',
-                            tags: item.tags ? (Array.isArray(item.tags) ? item.tags.join(', ') : item.tags) : item.category,
-                            image_url: item.imageDataUrl || item.image_url || ''
-                        })
-                    });
-                    if (res.ok) {
-                        const html = await res.text();
-                        if (bgPreviewBlobUrl) URL.revokeObjectURL(bgPreviewBlobUrl);
-                        const blob = new Blob([html], { type: 'text/html' });
-                        bgPreviewBlobUrl = URL.createObjectURL(blob);
-                        if (newTabBtn) newTabBtn.href = bgPreviewBlobUrl;
-                        if (iframe) {
-                            iframe.removeAttribute('src');
-                            iframe.srcdoc = html;
-                        }
-                    }
-                } catch (e) {
-                    console.error('previewBilimGundem live error:', e);
-                }
+            if (iframe) {
+                iframe.removeAttribute('src');
+                iframe.srcdoc = fullHtml;
             }
         }
 
