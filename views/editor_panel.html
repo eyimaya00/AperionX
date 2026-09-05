@@ -699,6 +699,59 @@
             background: #dc2626;
         }
 
+        /* CUSTOM PROMPT / REVISION MODAL */
+        #custom-prompt-modal .modal-box {
+            width: 500px;
+            height: auto;
+            max-width: 92%;
+            text-align: left;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #custom-prompt-modal textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        #custom-prompt-modal textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+        }
+        body.dark-mode #custom-prompt-modal .modal-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+        }
+        body.dark-mode #custom-prompt-modal textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        body.dark-mode #custom-prompt-modal textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+        }
+        body.dark-mode #custom-prompt-modal .custom-prompt-title {
+            color: #f8fafc !important;
+        }
+        body.dark-mode #custom-prompt-modal .custom-prompt-desc {
+            color: #94a3b8 !important;
+        }
+        body.dark-mode #custom-prompt-modal label {
+            color: #cbd5e1 !important;
+        }
+
         /* TOP BAR */
         .top-bar {
             display: flex;
@@ -2767,6 +2820,37 @@
         </div>
     </div>
 
+    <!-- CUSTOM PROMPT MODAL (REVISION / NOTES) -->
+    <div class="modal-overlay" id="custom-prompt-modal" style="z-index: 2050;">
+        <div class="modal-box">
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                <div id="custom-prompt-icon-wrap" style="width: 46px; height: 46px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                    <i id="custom-prompt-icon" class="ph-bold ph-pencil-simple-line"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h3 class="custom-prompt-title" id="custom-prompt-title" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;">Düzenlemeye Gönder</h3>
+                    <p class="custom-prompt-desc" id="custom-prompt-desc" style="margin: 3px 0 0; font-size: 0.85rem; color: #64748b;">Yazara iletilecek düzenleme notunu yazınız.</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 6px;">Düzenleme / Revizyon Notu:</label>
+                <textarea id="custom-prompt-input" rows="4" placeholder="Yazarın düzeltmesini veya güncellemesini istediğiniz noktaları açıklayınız..."></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Yazar bu notu panelinde ve bildirimlerinde görecektir.</span>
+                    <span style="font-size: 0.75rem; color: #94a3b8;">(Ctrl + Enter ile gönder)</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeCustomPromptModal()" style="padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">Vazgeç</button>
+                <button type="button" class="btn" id="custom-prompt-confirm-btn" onclick="submitCustomPrompt()" style="background: #f59e0b; color: white; border: none; padding: 9px 20px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <i class="ph-bold ph-paper-plane-tilt"></i> <span id="custom-prompt-confirm-text">Düzenlemeye Gönder</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TABLE INSERT MODAL -->
     <div class="modal-overlay" id="table-insert-modal" style="z-index: 2000;">
         <div class="modal-box" style="text-align: left;">
@@ -3498,6 +3582,83 @@
         document.getElementById('confirm-yes-btn').addEventListener('click', () => {
             if (confirmCallback) confirmCallback();
             closeConfirmModal();
+        });
+
+        // CUSTOM PROMPT / REVISION MODAL HELPERS
+        let customPromptCallback = null;
+
+        function showCustomPrompt(options) {
+            const modal = document.getElementById('custom-prompt-modal');
+            const titleEl = document.getElementById('custom-prompt-title');
+            const descEl = document.getElementById('custom-prompt-desc');
+            const inputEl = document.getElementById('custom-prompt-input');
+            const btnEl = document.getElementById('custom-prompt-confirm-btn');
+            const btnTextEl = document.getElementById('custom-prompt-confirm-text');
+            const iconEl = document.getElementById('custom-prompt-icon');
+            const iconWrap = document.getElementById('custom-prompt-icon-wrap');
+
+            if (titleEl) titleEl.innerText = options.title || 'Bilgi Girişi';
+            if (descEl) descEl.innerText = options.desc || '';
+            if (inputEl) {
+                inputEl.placeholder = options.placeholder || 'Lütfen açıklamanızı yazınız...';
+                inputEl.value = options.defaultValue || '';
+            }
+            if (btnTextEl) btnTextEl.innerText = options.confirmText || 'Tamam';
+            if (btnEl) btnEl.style.background = options.confirmColor || '#f59e0b';
+
+            if (iconEl && options.icon) iconEl.className = options.icon;
+            if (iconWrap && options.iconBg) {
+                iconWrap.style.background = options.iconBg;
+                iconWrap.style.color = options.iconColor || options.confirmColor || '#d97706';
+            } else if (iconWrap) {
+                iconWrap.style.background = '#fef3c7';
+                iconWrap.style.color = '#d97706';
+            }
+
+            customPromptCallback = options.onConfirm;
+            modal.classList.add('show');
+            setTimeout(() => {
+                if (inputEl) {
+                    inputEl.focus();
+                    inputEl.select();
+                }
+            }, 120);
+        }
+
+        function closeCustomPromptModal() {
+            const modal = document.getElementById('custom-prompt-modal');
+            if (modal) modal.classList.remove('show');
+            customPromptCallback = null;
+        }
+
+        function submitCustomPrompt() {
+            const inputEl = document.getElementById('custom-prompt-input');
+            const val = inputEl ? inputEl.value : '';
+            const cb = customPromptCallback;
+            closeCustomPromptModal();
+            if (cb) {
+                cb(val);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const promptModal = document.getElementById('custom-prompt-modal');
+            if (promptModal) {
+                promptModal.addEventListener('click', (e) => {
+                    if (e.target === promptModal) closeCustomPromptModal();
+                });
+            }
+            const promptInput = document.getElementById('custom-prompt-input');
+            if (promptInput) {
+                promptInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        submitCustomPrompt();
+                    } else if (e.key === 'Escape') {
+                        closeCustomPromptModal();
+                    }
+                });
+            }
         });
 
 
@@ -5180,13 +5341,23 @@
 
         function quickGundemRevision(id) {
             currentGundemId = id;
-            const note = prompt('Yazara iletilecek düzenleme notunu yazınız:');
-            if (note === null) return;
-            if (!note.trim()) {
-                showToast('Lütfen düzenleme notunu belirtiniz.', 'error');
-                return;
-            }
-            submitGundemDecisionWithParams('revision', note.trim());
+            showCustomPrompt({
+                title: 'Düzenlemeye Gönder',
+                desc: 'Yazara iletilecek düzenleme talebinizi veya revizyon notunuzu yazınız:',
+                placeholder: 'Örn: Başlık ve ilk bölümdeki verileri güncelleyip kaynak bağlantısını kontrol ediniz...',
+                confirmText: 'Düzenlemeye Gönder',
+                confirmColor: '#f59e0b',
+                icon: 'ph-bold ph-pencil-simple-line',
+                iconBg: '#fef3c7',
+                iconColor: '#d97706',
+                onConfirm: (note) => {
+                    if (!note || !note.trim()) {
+                        showToast('Lütfen düzenleme notunu belirtiniz.', 'error');
+                        return;
+                    }
+                    submitGundemDecisionWithParams('revision', note.trim());
+                }
+            });
         }
 
         async function submitGundemDecision(decision) {
