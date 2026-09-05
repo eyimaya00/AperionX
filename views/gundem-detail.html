@@ -499,12 +499,12 @@
             max-width: 1260px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 1fr 300px;
             gap: 36px;
             align-items: start;
         }
 
-        /* === SOL SİDEBAR (1/4 Genişlik) === */
+        /* === SAĞ SİDEBAR (1/4 Genişlik) === */
         .gundem-sidebar {
             position: sticky;
             top: 86px;
@@ -515,7 +515,7 @@
             overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
-            padding-right: 4px;
+            padding-left: 2px;
         }
 
         .gundem-sidebar::-webkit-scrollbar {
@@ -1459,7 +1459,71 @@
     <!-- === 2. BÖLÜM: MAKALE GÖVDESİ VE İÇERİK === -->
     <main class="gundem-content-section" id="gundemContent">
         <div class="gundem-article-container">
-            <!-- SOL SİDEBAR (1/4 Genişlik) -->
+            <!-- SOL KOLON (Masaüstü: Sol / Mobil: İlk Sırada Haber Okuma Alanı) -->
+            <div class="gundem-main-content">
+                <!-- Yazar ve Yayın Bilgisi Barı -->
+                <div class="gundem-author-bar">
+                    <div class="gundem-author-profile">
+                        <img src="/uploads/favicon-48x48.png" class="gundem-author-avatar-img" alt="{{AUTHOR_NAME}}">
+                        <div class="gundem-author-meta-texts">
+                            <span class="gundem-author-full-name">
+                                {{AUTHOR_NAME}}
+                                <i class="ph-fill ph-seal-check" title="Doğrulanmış Kaynak"></i>
+                            </span>
+                            <span class="gundem-author-dept">{{AUTHOR_TITLE}}</span>
+                        </div>
+                    </div>
+
+                    <div class="gundem-author-date-info">
+                        <i class="ph ph-calendar-blank"></i>
+                        <span>{{DATE_FORMATTED}} tarihinde yayınlandı</span>
+                    </div>
+                </div>
+
+                <!-- Makale Metni -->
+                <article class="gundem-article-prose" id="gundemArticleBody">
+                    {{CONTENT}}
+                </article>
+
+                <!-- Alt Paylaşım Çubuğu -->
+                <div class="gundem-bottom-share-box">
+                    <div class="gundem-bottom-share-title">
+                        <i class="ph-bold ph-share-network"></i> Haberi Çevrenizle Paylaşın:
+                    </div>
+                    <div class="gundem-social-share-group">
+                        <a href="https://twitter.com/intent/tweet?text={{ENCODED_TITLE}}&url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="X'te Paylaş">
+                            <i class="ph-fill ph-x-logo"></i>
+                        </a>
+                        <a href="https://api.whatsapp.com/send?text={{ENCODED_TITLE}}%20{{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="WhatsApp'ta Paylaş">
+                            <i class="ph-fill ph-whatsapp-logo"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="LinkedIn'de Paylaş">
+                            <i class="ph-fill ph-linkedin-logo"></i>
+                        </a>
+                        <a href="https://t.me/share/url?url={{ENCODED_URL}}&text={{ENCODED_TITLE}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="Telegram'da Paylaş">
+                            <i class="ph-fill ph-telegram-logo"></i>
+                        </a>
+                        <button type="button" class="gundem-social-circle-btn" onclick="copyGundemUrl()" title="Bağlantıyı Kopyala">
+                            <i class="ph-bold ph-link" id="copyIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Diğer Gündem Başlıkları -->
+                <section class="gundem-related-section">
+                    <div class="gundem-related-header">
+                        <h3><i class="ph-bold ph-newspaper"></i> Diğer Gündem Başlıkları</h3>
+                        <a href="/gundem" class="gundem-related-all-link">
+                            Tüm Gelişmeler <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="gundem-related-grid">
+                        {{RELATED_NEWS_HTML}}
+                    </div>
+                </section>
+            </div>
+
+            <!-- SAĞ SİDEBAR (Masaüstü: Sağ / Mobil: İçeriğin Altında) -->
             <aside class="gundem-sidebar">
                 <!-- 1. Sen de Değerlendir (AperionX Logo Yıldızlar) -->
                 <div class="sidebar-card card-rating">
@@ -1548,70 +1612,6 @@
                     </ul>
                 </div>
             </aside>
-
-            <!-- SAĞ KOLON (Okuma Alanı - 3/4 Genişlik) -->
-            <div class="gundem-main-content">
-                <!-- Yazar ve Yayın Bilgisi Barı -->
-                <div class="gundem-author-bar">
-                    <div class="gundem-author-profile">
-                        <img src="/uploads/favicon-48x48.png" class="gundem-author-avatar-img" alt="{{AUTHOR_NAME}}">
-                        <div class="gundem-author-meta-texts">
-                            <span class="gundem-author-full-name">
-                                {{AUTHOR_NAME}}
-                                <i class="ph-fill ph-seal-check" title="Doğrulanmış Kaynak"></i>
-                            </span>
-                            <span class="gundem-author-dept">{{AUTHOR_TITLE}}</span>
-                        </div>
-                    </div>
-
-                    <div class="gundem-author-date-info">
-                        <i class="ph ph-calendar-blank"></i>
-                        <span>{{DATE_FORMATTED}} tarihinde yayınlandı</span>
-                    </div>
-                </div>
-
-                <!-- Makale Metni -->
-                <article class="gundem-article-prose" id="gundemArticleBody">
-                    {{CONTENT}}
-                </article>
-
-                <!-- Alt Paylaşım Çubuğu -->
-                <div class="gundem-bottom-share-box">
-                    <div class="gundem-bottom-share-title">
-                        <i class="ph-bold ph-share-network"></i> Haberi Çevrenizle Paylaşın:
-                    </div>
-                    <div class="gundem-social-share-group">
-                        <a href="https://twitter.com/intent/tweet?text={{ENCODED_TITLE}}&url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="X'te Paylaş">
-                            <i class="ph-fill ph-x-logo"></i>
-                        </a>
-                        <a href="https://api.whatsapp.com/send?text={{ENCODED_TITLE}}%20{{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="WhatsApp'ta Paylaş">
-                            <i class="ph-fill ph-whatsapp-logo"></i>
-                        </a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ENCODED_URL}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="LinkedIn'de Paylaş">
-                            <i class="ph-fill ph-linkedin-logo"></i>
-                        </a>
-                        <a href="https://t.me/share/url?url={{ENCODED_URL}}&text={{ENCODED_TITLE}}" target="_blank" rel="noopener noreferrer" class="gundem-social-circle-btn" title="Telegram'da Paylaş">
-                            <i class="ph-fill ph-telegram-logo"></i>
-                        </a>
-                        <button type="button" class="gundem-social-circle-btn" onclick="copyGundemUrl()" title="Bağlantıyı Kopyala">
-                            <i class="ph-bold ph-link" id="copyIcon"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Diğer Gündem Başlıkları -->
-                <section class="gundem-related-section">
-                    <div class="gundem-related-header">
-                        <h3><i class="ph-bold ph-newspaper"></i> Diğer Gündem Başlıkları</h3>
-                        <a href="/gundem" class="gundem-related-all-link">
-                            Tüm Gelişmeler <i class="ph-bold ph-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="gundem-related-grid">
-                        {{RELATED_NEWS_HTML}}
-                    </div>
-                </section>
-            </div>
         </div>
     </main>
 
