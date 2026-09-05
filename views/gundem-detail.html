@@ -705,6 +705,53 @@
             color: #94a3b8;
         }
 
+        /* Ortak Çalışma (Birden Çok Yazar) */
+        .sidebar-joint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        body.light-mode .sidebar-joint-header {
+            border-bottom-color: rgba(0, 0, 0, 0.08);
+        }
+        .sidebar-joint-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18));
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        body.light-mode .sidebar-joint-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        .sidebar-authors-joint-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sidebar-author-row.joint-row {
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-author-row.joint-row:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        body.light-mode .sidebar-author-row.joint-row {
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+        }
+
         /* 3. Etiketler (Tags) */
         .sidebar-tags-container {
             display: flex;
@@ -1575,21 +1622,9 @@
 
             <!-- SAĞ SİDEBAR (Masaüstü: Sağ / Mobil: İçeriğin Altında) -->
             <aside class="gundem-sidebar">
-                <!-- 1. Yazar Bilgisi (Başlıksız, Doğrudan Profil, İsim, Ünvan ve Tarih) -->
+                <!-- 1. Yazar Bilgisi (Doğrudan Profil veya Ortak Çalışma) -->
                 <div class="sidebar-card card-author">
-                    <div class="sidebar-author-row">
-                        <a href="{{AUTHOR_PROFILE_URL}}" class="sidebar-author-avatar-link" title="{{AUTHOR_NAME}} Profilini Gör">
-                            <img src="{{AUTHOR_AVATAR_URL}}" class="sidebar-author-img" style="{{AUTHOR_AVATAR_STYLE}}" alt="{{AUTHOR_NAME}}" onerror="this.src='/uploads/aperionx-a-transparent.png'; this.style.padding='4px'; this.style.objectFit='contain';">
-                        </a>
-                        <div class="sidebar-author-details">
-                            <a href="{{AUTHOR_PROFILE_URL}}" class="sidebar-author-name" title="{{AUTHOR_NAME}} Profilini Gör">
-                                <span>{{AUTHOR_NAME}}</span>
-                                <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
-                            </a>
-                            <span class="sidebar-author-title">{{AUTHOR_TITLE}}</span>
-                            <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> {{DATE_FORMATTED}} tarihinde yayınlandı</span>
-                        </div>
-                    </div>
+                    {{AUTHOR_CARD_HTML}}
                 </div>
 
                 <!-- 2. Özet -->

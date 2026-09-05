@@ -5996,6 +5996,52 @@
                     border-color: var(--primary-accent);
                 }
 
+                /* Co-Authors / Ortak Çalışma */
+                .bge-author-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: var(--card-bg, #ffffff);
+                    border: 1.5px solid var(--border-color, #e2e8f0);
+                    padding: 6px 12px;
+                    border-radius: 30px;
+                    font-size: 0.84rem;
+                    font-weight: 600;
+                    color: var(--text-main, #1e293b);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+                    animation: slideUp 0.2s ease;
+                }
+                .bge-author-tag.primary {
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12));
+                    border-color: rgba(99, 102, 241, 0.35);
+                    color: var(--primary-accent, #6366f1);
+                }
+                .bge-author-tag-remove {
+                    background: none;
+                    border: none;
+                    color: #ef4444;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 2px;
+                    border-radius: 50%;
+                    font-size: 0.85rem;
+                    margin-left: 2px;
+                    opacity: 0.75;
+                    transition: opacity 0.2s, background-color 0.2s;
+                }
+                .bge-author-tag-remove:hover {
+                    opacity: 1;
+                    background-color: rgba(239, 68, 68, 0.12);
+                }
+                .bge-author-search-item {
+                    transition: background 0.15s ease, border-color 0.15s ease;
+                }
+                .bge-author-search-item:hover {
+                    border-color: var(--primary-accent, #6366f1) !important;
+                }
+
                 /* Upload Zone */
                 .bge-upload-zone {
                     border: 2px dashed var(--border-color);
@@ -6491,6 +6537,20 @@
                     border-color: rgba(99, 102, 241, 0.25);
                     color: #818cf8;
                 }
+                body.dark-mode .bge-author-tag {
+                    background: #1e293b;
+                    border-color: #334155;
+                    color: #f1f5f9;
+                }
+                body.dark-mode .bge-author-tag.primary {
+                    background: rgba(99, 102, 241, 0.15);
+                    border-color: rgba(99, 102, 241, 0.4);
+                    color: #a5b4fc;
+                }
+                body.dark-mode .bge-author-search-item {
+                    background: #1e293b !important;
+                    border-color: #334155 !important;
+                }
                 body.dark-mode .bge-upload-zone {
                     background: rgba(15, 23, 42, 0.5);
                     border-color: #334155;
@@ -6749,6 +6809,31 @@
                                     <i class="ph-bold ph-plus" style="font-size: 0.8rem;"></i> Ekle
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Ortak Çalışma (Birden Çok Yazar Ekle) -->
+                    <div class="bge-form-group" style="margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--border-color);">
+                        <label class="bge-label" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                            <span>
+                                <i class="ph-bold ph-users-three" style="color: var(--primary-accent); margin-right: 6px;"></i> Ortak Çalışma (Yazar Arkadaşı Ekle)
+                            </span>
+                            <span style="font-size: 0.78rem; font-weight: normal; color: #64748b;">(İsteğe bağlı)</span>
+                        </label>
+                        <p class="bge-hint" style="margin-top: 0; margin-bottom: 10px; font-size: 0.83rem; color: #64748b;">
+                            Bu haber ortak bir çalışmaysa AperionX bünyesindeki diğer yazarları ekleyebilirsiniz. Siz ana yazar olarak yer alacaksınız.
+                        </p>
+                        <div class="bge-author-search-box" style="position: relative;">
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" class="bge-input" id="bge-author-search" placeholder="Yazar adı veya @kullanıcıadı yazın..." onkeydown="if(event.key==='Enter'){event.preventDefault();bgeSearchAuthors();}">
+                                <button type="button" class="btn" style="background: var(--primary-accent); color: white; border: none; border-radius: 10px; padding: 0 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;" onclick="bgeSearchAuthors()">
+                                    <i class="ph-bold ph-magnifying-glass"></i> Ara
+                                </button>
+                            </div>
+                            <div id="bge-author-search-results" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;"></div>
+                        </div>
+                        <div id="bge-selected-authors" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                            <!-- Primary Author + Co-Authors will be rendered here -->
                         </div>
                     </div>
                 </div>
@@ -12798,6 +12883,8 @@
                         tags: tags,
                         sections: sections,
                         sources: structured.sources || [],
+                        coAuthors: structured.coAuthors || [],
+                        isJoint: Boolean(row.author_count > 1 || (structured.coAuthors && structured.coAuthors.length > 0)),
                         content: row.content || '',
                         imageDataUrl: imgUrl,
                         image_url: imgUrl,
@@ -13038,7 +13125,10 @@
                                 ${thumbHtml}
                                 <div class="art-cell-details">
                                     <div class="art-row-title" title="${escapeHtml(item.title)}" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">${escapeHtml(item.title)}</div>
-                                    <div class="art-row-category" style="margin-top: 2px;">${escapeHtml(item.category || 'Genel')}</div>
+                                    <div class="art-row-category" style="margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                        <span>${escapeHtml(item.category || 'Genel')}</span>
+                                        ${(item.isJoint || (item.coAuthors && item.coAuthors.length > 0)) ? '<span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 2px 8px; border-radius: 12px; font-size: 0.74rem; font-weight: 600;"><i class="ph-bold ph-users-three"></i> Ortak Çalışma</span>' : ''}
+                                    </div>
                                     ${(item.status === 'rejected' || item.status === 'duzenleme') && item.rejection_reason ? `
                                         <div style="margin-top: 8px; display: inline-flex; align-items: flex-start; gap: 6px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; max-width: 520px;">
                                             <i class="ph-bold ph-pencil-simple-line" style="color: #d97706; font-size: 1rem; flex-shrink: 0; margin-top: 2px;"></i>
@@ -13164,6 +13254,7 @@
         // Editor State
         let editingBilimGundemId = null;
         let bgeTags = [];
+        let bgeSelectedAuthors = [];
         let bgeSections = [];
         let bgeSources = [];
         let bgeImageFile = null;
@@ -13322,6 +13413,7 @@
                         excerpt,
                         tags,
                         image_url: coverImg,
+                        coAuthors: bgeSelectedAuthors,
                         sections: bgeSections,
                         sources: bgeSources
                     })
@@ -13537,6 +13629,7 @@
                 tags: [...bgeTags],
                 summary,
                 altText,
+                coAuthors: [...bgeSelectedAuthors],
                 sections: bgeSections.map(s => ({ title: s.title, content: s.content })),
                 sources: bgeSources.map(s => ({ ...s }))
             };
@@ -13556,6 +13649,7 @@
             formData.append('tags', bgeTags.join(', '));
             formData.append('status', 'pending');
             formData.append('gundem_data', JSON.stringify(structuredData));
+            formData.append('coAuthors', JSON.stringify(bgeSelectedAuthors.map(a => a.id)));
 
             // If editing an existing DB article
             if (editingBilimGundemId && !editingBilimGundemId.toString().startsWith('bg_')) {
@@ -13677,6 +13771,7 @@
 
             // Reset editor state
             bgeTags = [];
+            bgeSelectedAuthors = [];
             bgeSections = [];
             bgeSources = [];
             bgeImageFile = null;
@@ -13721,6 +13816,7 @@
                                 tags: structured.tags || (row.tags ? row.tags.split(',').map(t => t.trim()) : []),
                                 sections: (structured.sections && structured.sections.length > 0) ? structured.sections : [],
                                 sources: structured.sources || [],
+                                coAuthors: structured.coAuthors || row.co_authors || [],
                                 imageDataUrl: row.image_url,
                                 status: row.status,
                                 rejection_reason: row.rejection_reason || null
@@ -13779,6 +13875,13 @@
                         bgeTags = item.tags.split(',').map(t => t.trim()).filter(Boolean);
                     }
 
+                    // Co-authors
+                    if (Array.isArray(item.coAuthors)) {
+                        bgeSelectedAuthors = [...item.coAuthors];
+                    } else if (Array.isArray(item.co_authors)) {
+                        bgeSelectedAuthors = [...item.co_authors];
+                    }
+
                     // Sections
                     if (Array.isArray(item.sections) && item.sections.length > 0) {
                         bgeSections = item.sections.map((s) => ({
@@ -13825,6 +13928,7 @@
 
             // Render lists
             bgeRenderTags();
+            bgeRenderAuthors();
             bgeRenderSections();
             bgeRenderSources();
             bgeUpdateTOC();
@@ -13900,6 +14004,124 @@
                     </button>
                 </div>
             `;
+
+            container.innerHTML = html;
+        }
+
+        // ─── Co-Authors (Ortak Çalışma) ───
+        async function bgeSearchAuthors() {
+            const input = document.getElementById('bge-author-search');
+            const term = input ? input.value.trim() : '';
+            const resultsContainer = document.getElementById('bge-author-search-results');
+            if (!resultsContainer) return;
+
+            if (term.length < 2) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Arama yapmak için en az 2 karakter girin.', 'error');
+                else alert('Arama yapmak için en az 2 karakter girin.');
+                return;
+            }
+
+            resultsContainer.innerHTML = '<div style="padding: 8px; color: #64748b; font-size: 0.85rem;"><i class="ph-bold ph-spinner ph-spin"></i> Aranıyor...</div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`/api/users/search-authors?q=${encodeURIComponent(term)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Arama hatası');
+                const users = await res.json();
+
+                resultsContainer.innerHTML = '';
+                if (!users || users.length === 0) {
+                    resultsContainer.innerHTML = '<div style="padding: 8px; color: #64748b; font-size: 0.85rem;">Sonuç bulunamadı.</div>';
+                    return;
+                }
+
+                const currentUserId = user ? user.id : null;
+
+                users.forEach(u => {
+                    const isSelf = currentUserId && Number(u.id) === Number(currentUserId);
+                    const isAlreadyAdded = bgeSelectedAuthors.some(a => Number(a.id) === Number(u.id));
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'bge-author-search-item';
+                    itemDiv.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); background: var(--bg-surface, #ffffff);';
+
+                    const avatar = u.avatar_url ? (u.avatar_url.startsWith('http') ? u.avatar_url : ('/' + u.avatar_url.replace(/^\//, ''))) : '/uploads/aperionx-a-transparent.png';
+
+                    itemDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${avatar}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='/uploads/aperionx-a-transparent.png'">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main, #1e293b);">${escapeHtml(u.fullname || u.username)}</div>
+                                <div style="font-size: 0.78rem; color: #64748b;">@${escapeHtml(u.username)}</div>
+                            </div>
+                        </div>
+                        <div>
+                            ${isSelf ? '<span style="font-size: 0.78rem; color: #64748b; font-style: italic;">Ana Yazar (Siz)</span>' :
+                              isAlreadyAdded ? '<span style="font-size: 0.78rem; color: #10b981; font-weight: 600;"><i class="ph-bold ph-check"></i> Eklendi</span>' :
+                              `<button type="button" class="btn" style="background: var(--primary-accent); color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer;" onclick="bgeAddAuthor(${u.id}, '${escapeHtml(u.fullname || u.username).replace(/'/g, "\\'")}', '${escapeHtml(u.username).replace(/'/g, "\\'")}', '${escapeHtml(u.avatar_url || '').replace(/'/g, "\\'")}')">Ekle</button>`
+                            }
+                        </div>
+                    `;
+                    resultsContainer.appendChild(itemDiv);
+                });
+            } catch (e) {
+                console.error('Author search error:', e);
+                resultsContainer.innerHTML = '<div style="padding: 8px; color: #ef4444; font-size: 0.85rem;">Arama sırasında hata oluştu.</div>';
+            }
+        }
+
+        function bgeAddAuthor(id, fullname, username, avatar_url) {
+            if (bgeSelectedAuthors.some(a => Number(a.id) === Number(id))) {
+                if (typeof showAuthorToast === 'function') showAuthorToast('Bu yazar zaten eklendi.', 'warning');
+                return;
+            }
+            bgeSelectedAuthors.push({ id, fullname, username, avatar_url });
+            bgeRenderAuthors();
+            const resultsContainer = document.getElementById('bge-author-search-results');
+            if (resultsContainer) resultsContainer.innerHTML = '';
+            const searchInput = document.getElementById('bge-author-search');
+            if (searchInput) searchInput.value = '';
+            if (typeof showAuthorToast === 'function') showAuthorToast(`${fullname} ortak yazar olarak eklendi.`, 'success');
+        }
+
+        function bgeRemoveAuthor(id) {
+            bgeSelectedAuthors = bgeSelectedAuthors.filter(a => Number(a.id) !== Number(id));
+            bgeRenderAuthors();
+        }
+
+        function bgeRenderAuthors() {
+            const container = document.getElementById('bge-selected-authors');
+            if (!container) return;
+
+            const primaryName = (user && (user.fullname || user.username)) ? (user.fullname || user.username) : 'Siz';
+            let primaryAvatar = (user && user.avatar_url) ? user.avatar_url : '/uploads/aperionx-a-transparent.png';
+            if (!primaryAvatar.startsWith('http') && !primaryAvatar.startsWith('/')) primaryAvatar = '/' + primaryAvatar;
+
+            let html = `
+                <div class="bge-author-tag primary" title="Ana Yazar (İçerik Sahibi)">
+                    <img src="${primaryAvatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" onerror="this.src='/uploads/aperionx-a-transparent.png'">
+                    <span>${escapeHtml(primaryName)} <small style="opacity: 0.85; font-weight: 500;">(Ana Yazar)</small></span>
+                </div>
+            `;
+
+            if (Array.isArray(bgeSelectedAuthors) && bgeSelectedAuthors.length > 0) {
+                bgeSelectedAuthors.forEach(a => {
+                    let av = a.avatar_url || '/uploads/aperionx-a-transparent.png';
+                    if (!av.startsWith('http') && !av.startsWith('/')) av = '/' + av;
+                    const aName = a.fullname || a.username || 'Yazar';
+                    html += `
+                        <div class="bge-author-tag" title="Ortak Yazar">
+                            <img src="${av}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" onerror="this.src='/uploads/aperionx-a-transparent.png'">
+                            <span>${escapeHtml(aName)} <small style="opacity: 0.75; font-weight: normal;">(@${escapeHtml(a.username || '')})</small></span>
+                            <button type="button" class="bge-author-tag-remove" onclick="bgeRemoveAuthor(${a.id})" title="Ortak Yazarı Kaldır">
+                                <i class="ph-bold ph-x"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            }
 
             container.innerHTML = html;
         }
@@ -14296,6 +14518,7 @@
                         description: description,
                         category: category,
                         tags: [...bgeTags],
+                        coAuthors: [...bgeSelectedAuthors],
                         summary: summary,
                         altText: altText,
                         imageDataUrl: bgeImageDataUrl || null,
@@ -14323,6 +14546,7 @@
                     description: description,
                     category: category,
                     tags: [...bgeTags],
+                    coAuthors: [...bgeSelectedAuthors],
                     summary: summary,
                     altText: altText,
                     imageDataUrl: bgeImageDataUrl || null,

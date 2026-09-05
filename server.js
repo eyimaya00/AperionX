@@ -389,6 +389,16 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 const authorSlug = slugify(row.author_fullname) || row.author_username || row.author_user_id || '';
                 const authorProfileUrl = authorSlug ? `/yazar/${authorSlug}` : '/articles';
 
+                // Fetch authors (primary + co-authors)
+                const articleAuthors = await getArticleAuthors(pool, row.id);
+                const authorCardHtml = buildAuthorCardHtml(articleAuthors.length > 0 ? articleAuthors : [{
+                    fullname: authorName,
+                    job_title: authorTitle,
+                    avatar_url: authorAvatar,
+                    username: row.author_username,
+                    id: row.author_user_id
+                }], formattedDate);
+
                 articleData = {
                     title: row.title,
                     category: row.category || 'Gündem',
@@ -404,7 +414,8 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     authorTitle: authorTitle,
                     authorAvatar: authorAvatar,
                     authorAvatarStyle: isDefaultAvatar ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;',
-                    authorProfileUrl: authorProfileUrl
+                    authorProfileUrl: authorProfileUrl,
+                    authorCardHtml: authorCardHtml
                 };
 
                 // Asenkron okunma artırımı
@@ -417,6 +428,12 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
         // 2. Veritabanında yoksa statik gündem havuzuna bak
         if (!articleData && STATIC_GUNDEM_NEWS[slug]) {
             const item = STATIC_GUNDEM_NEWS[slug];
+            const authorCardHtml = buildAuthorCardHtml([{
+                fullname: item.authorName || 'AperionX Bilim Ekibi',
+                job_title: item.authorTitle || 'Bilim, Teknoloji ve Analiz Masası',
+                avatar_url: '/uploads/aperionx-a-transparent.png'
+            }], item.date || 'Bugün');
+
             articleData = {
                 title: item.title,
                 category: item.category || 'Gündem',
@@ -432,7 +449,8 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 authorTitle: item.authorTitle || 'Bilim, Teknoloji ve Analiz Masası',
                 authorAvatar: '/uploads/aperionx-a-transparent.png',
                 authorAvatarStyle: 'padding: 4px; object-fit: contain;',
-                authorProfileUrl: '/articles'
+                authorProfileUrl: '/articles',
+                authorCardHtml: authorCardHtml
             };
         }
 
@@ -480,6 +498,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
             .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml)
             .replace(/\{\{TAGS\}\}/g, articleData.tags || '')
+            .replace(/\{\{AUTHOR_CARD_HTML\}\}/g, articleData.authorCardHtml || '')
             .replace(/\{\{AUTHOR_NAME\}\}/g, articleData.authorName || 'AperionX Bilim Ekibi')
             .replace(/\{\{AUTHOR_TITLE\}\}/g, articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası')
             .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, articleData.authorAvatar || '/uploads/aperionx-a-transparent.png')
@@ -569,6 +588,88 @@ async function getArticleAuthors(pool, articleId) {
         console.error('getArticleAuthors Error:', e);
         return [];
     }
+}
+
+function buildAuthorCardHtml(authors, formattedDate) {
+    if (!authors || authors.length === 0) return '';
+
+    if (authors.length === 1) {
+        const a = authors[0];
+        const name = a.fullname || a.username || 'AperionX Bilim Ekibi';
+        const title = a.job_title || 'Bilim, Teknoloji ve Analiz Masası';
+        let avatar = '/uploads/aperionx-a-transparent.png';
+        let isDefault = true;
+        if (a.avatar_url && a.avatar_url.trim() !== '') {
+            avatar = a.avatar_url.trim();
+            if (!avatar.startsWith('http') && !avatar.startsWith('data:')) {
+                avatar = avatar.startsWith('/') ? avatar : '/' + avatar;
+            }
+            isDefault = false;
+        }
+        const aSlug = slugify(a.fullname) || a.username || a.id || '';
+        const profileUrl = aSlug ? `/yazar/${aSlug}` : '/articles';
+        const avatarStyle = isDefault ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;';
+
+        return `
+            <div class="sidebar-author-row">
+                <a href="${profileUrl}" class="sidebar-author-avatar-link" title="${escapeHtml(name)} Profilini Gör">
+                    <img src="${avatar}" class="sidebar-author-img" style="${avatarStyle}" alt="${escapeHtml(name)}" onerror="this.src='/uploads/aperionx-a-transparent.png'; this.style.padding='4px'; this.style.objectFit='contain';">
+                </a>
+                <div class="sidebar-author-details">
+                    <a href="${profileUrl}" class="sidebar-author-name" title="${escapeHtml(name)} Profilini Gör">
+                        <span>${escapeHtml(name)}</span>
+                        <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
+                    </a>
+                    <span class="sidebar-author-title">${escapeHtml(title)}</span>
+                    <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> ${formattedDate} tarihinde yayınlandı</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Ortak Çalışma (Birden Çok Yazar)
+    const listHtml = authors.map((a, idx) => {
+        const name = a.fullname || a.username || 'AperionX Yazarı';
+        const defaultRole = idx === 0 ? 'Ana Yazar' : 'Ortak Yazar';
+        const title = a.job_title || defaultRole;
+        let avatar = '/uploads/aperionx-a-transparent.png';
+        let isDefault = true;
+        if (a.avatar_url && a.avatar_url.trim() !== '') {
+            avatar = a.avatar_url.trim();
+            if (!avatar.startsWith('http') && !avatar.startsWith('data:')) {
+                avatar = avatar.startsWith('/') ? avatar : '/' + avatar;
+            }
+            isDefault = false;
+        }
+        const aSlug = slugify(a.fullname) || a.username || a.id || '';
+        const profileUrl = aSlug ? `/yazar/${aSlug}` : '/articles';
+        const avatarStyle = isDefault ? 'padding: 4px; object-fit: contain;' : 'object-fit: cover;';
+
+        return `
+            <div class="sidebar-author-row joint-row">
+                <a href="${profileUrl}" class="sidebar-author-avatar-link" title="${escapeHtml(name)} Profilini Gör">
+                    <img src="${avatar}" class="sidebar-author-img" style="${avatarStyle}" alt="${escapeHtml(name)}" onerror="this.src='/uploads/aperionx-a-transparent.png'; this.style.padding='4px'; this.style.objectFit='contain';">
+                </a>
+                <div class="sidebar-author-details">
+                    <a href="${profileUrl}" class="sidebar-author-name" title="${escapeHtml(name)} Profilini Gör">
+                        <span>${escapeHtml(name)}</span>
+                        <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
+                    </a>
+                    <span class="sidebar-author-title">${escapeHtml(title)}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="sidebar-joint-header">
+            <span class="sidebar-joint-badge"><i class="ph-bold ph-users-three"></i> Ortak Çalışma (${authors.length} Yazar)</span>
+            <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> ${formattedDate}</span>
+        </div>
+        <div class="sidebar-authors-joint-list">
+            ${listHtml}
+        </div>
+    `;
 }
 
 async function getExperimentAuthors(pool, experimentId) {
@@ -992,7 +1093,7 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
         }
 
         const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
-        fs.readFile(filePath, 'utf8', (err, htmlData) => {
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
             if (err) return next(err);
 
             try {
@@ -1039,6 +1140,15 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                 const authorSlug = slugify(article.author_fullname) || article.author_username || article.author_user_id || '';
                 const authorProfileUrl = authorSlug ? `/yazar/${authorSlug}` : '/articles';
 
+                const previewAuthors = await getArticleAuthors(pool, article.id);
+                const authorCardHtml = buildAuthorCardHtml(previewAuthors.length > 0 ? previewAuthors : [{
+                    fullname: authorName,
+                    job_title: authorTitle,
+                    avatar_url: authorAvatar,
+                    username: article.author_username,
+                    id: article.author_user_id
+                }], formattedDate);
+
                 let html = htmlData
                     .replace(/\{\{TITLE\}\}/g, article.title || '')
                     .replace(/\{\{CATEGORY\}\}/g, article.category || 'Gündem')
@@ -1051,6 +1161,7 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     .replace(/\{\{READ_TIME\}\}/g, '3')
                     .replace(/\{\{VIEWS\}\}/g, String(article.views || 0))
                     .replace(/\{\{TAGS\}\}/g, article.tags || article.category || 'Gündem')
+                    .replace(/\{\{AUTHOR_CARD_HTML\}\}/g, authorCardHtml)
                     .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
                     .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
                     .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
@@ -1164,6 +1275,30 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
         }
     }
 
+    let liveAuthors = [{
+        fullname: authorName,
+        job_title: authorTitle,
+        avatar_url: authorAvatar,
+        username: (session.user && session.user.username) || '',
+        id: targetUserId
+    }];
+
+    if (body.coAuthors && Array.isArray(body.coAuthors) && body.coAuthors.length > 0) {
+        body.coAuthors.forEach(ca => {
+            if (ca && (ca.id || ca.fullname)) {
+                liveAuthors.push({
+                    fullname: ca.fullname || ca.username,
+                    job_title: ca.job_title || 'Ortak Yazar',
+                    avatar_url: ca.avatar_url,
+                    username: ca.username,
+                    id: ca.id
+                });
+            }
+        });
+    }
+
+    const authorCardHtml = buildAuthorCardHtml(liveAuthors, formattedDate);
+
     const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
     fs.readFile(filePath, 'utf8', (err, htmlData) => {
         if (err) return next(err);
@@ -1188,6 +1323,7 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
                 .replace(/\{\{READ_TIME\}\}/g, '3')
                 .replace(/\{\{VIEWS\}\}/g, '0')
                 .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
+                .replace(/\{\{AUTHOR_CARD_HTML\}\}/g, authorCardHtml)
                 .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
                 .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
                 .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
@@ -1259,6 +1395,33 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
             }
         }
 
+        let liveAuthors = [{
+            fullname: authorName,
+            job_title: authorTitle,
+            avatar_url: authorAvatar,
+            username: req.user.username || '',
+            id: targetUserId
+        }];
+
+        if (body.coAuthors && Array.isArray(body.coAuthors) && body.coAuthors.length > 0) {
+            body.coAuthors.forEach(ca => {
+                if (ca && (ca.id || ca.fullname)) {
+                    liveAuthors.push({
+                        fullname: ca.fullname || ca.username,
+                        job_title: ca.job_title || 'Ortak Yazar',
+                        avatar_url: ca.avatar_url,
+                        username: ca.username,
+                        id: ca.id
+                    });
+                }
+            });
+        }
+
+        const dateObj = new Date();
+        const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+        const authorCardHtml = buildAuthorCardHtml(liveAuthors, formattedDate);
+
         const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
         fs.readFile(filePath, 'utf8', (err, htmlData) => {
             if (err) return next(err);
@@ -1266,9 +1429,6 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
             try {
                 const origin = `${req.protocol}://${req.get('host')}`;
                 const canonicalUrl = `${origin}/gundem/onizleme`;
-                const dateObj = new Date();
-                const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-                const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
                 const finalImg = image_url ? (image_url.startsWith('http') || image_url.startsWith('data:') ? image_url : `${origin}${image_url.startsWith('/') ? '' : '/'}${image_url}`) : `${origin}/uploads/logo.png`;
 
                 let html = htmlData
@@ -1283,6 +1443,7 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
                     .replace(/\{\{READ_TIME\}\}/g, '3')
                     .replace(/\{\{VIEWS\}\}/g, '0')
                     .replace(/\{\{TAGS\}\}/g, tags || category || 'Gündem')
+                    .replace(/\{\{AUTHOR_CARD_HTML\}\}/g, authorCardHtml)
                     .replace(/\{\{AUTHOR_NAME\}\}/g, authorName)
                     .replace(/\{\{AUTHOR_TITLE\}\}/g, authorTitle)
                     .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, authorAvatar)
@@ -5197,6 +5358,25 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
         if (imgFile) image_url = 'uploads/' + imgFile.filename;
     }
 
+    let coAuthorIds = [];
+    if (body.coAuthors) {
+        try {
+            const parsed = typeof body.coAuthors === 'string' ? JSON.parse(body.coAuthors) : body.coAuthors;
+            if (Array.isArray(parsed)) {
+                coAuthorIds = parsed.map(Number).filter(id => id && !isNaN(id) && id !== req.user.id);
+            }
+        } catch (e) {
+            console.warn('Error parsing coAuthors:', e);
+        }
+    } else if (gundem_data) {
+        try {
+            const gd = typeof gundem_data === 'string' ? JSON.parse(gundem_data) : gundem_data;
+            if (gd && Array.isArray(gd.coAuthors)) {
+                coAuthorIds = gd.coAuthors.map(a => typeof a === 'object' ? a.id : a).map(Number).filter(id => id && !isNaN(id) && id !== req.user.id);
+            }
+        } catch (e) {}
+    }
+
     try {
         await ensureGundemColumns();
 
@@ -5208,8 +5388,17 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
 
         // If updating an existing article by ID
         if (body.id && !isNaN(Number(body.id))) {
-            const [existing] = await pool.query('SELECT * FROM articles WHERE id = ? AND author_id = ?', [body.id, req.user.id]);
+            const [existing] = await pool.query('SELECT * FROM articles WHERE id = ?', [body.id]);
             if (existing && existing.length > 0) {
+                const isAuthor = existing[0].author_id === req.user.id;
+                const [coRows] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [body.id, req.user.id]);
+                const isCoAuthor = coRows && coRows.length > 0;
+                const isStaff = ['admin', 'editor'].includes(req.user.role);
+
+                if (!isAuthor && !isCoAuthor && !isStaff) {
+                    return res.status(403).json({ error: 'Bu yazıyı düzenleme yetkiniz yok.' });
+                }
+
                 let finalImg = image_url || existing[0].image_url;
                 const submittedAt = status === 'pending' ? new Date() : existing[0].submitted_at;
 
@@ -5240,6 +5429,18 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     submittedAt,
                     body.id
                 ]);
+
+                // Synchronize article_authors table
+                try {
+                    const primaryAuthorId = existing[0].author_id || req.user.id;
+                    await pool.query('DELETE FROM article_authors WHERE article_id = ?', [body.id]);
+                    const filteredCoAuthors = coAuthorIds.filter(id => id !== primaryAuthorId);
+                    const allAuthors = [primaryAuthorId, ...filteredCoAuthors];
+                    const authorValues = allAuthors.map((uid, idx) => [body.id, uid, idx]);
+                    await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
+                } catch (aaErr) {
+                    console.error('Error synchronizing article_authors:', aaErr);
+                }
 
                 clearCache('articles');
 
@@ -5294,8 +5495,12 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
         const newId = insertResult.insertId;
 
         try {
-            await pool.query('INSERT IGNORE INTO article_authors (article_id, user_id, order_index) VALUES (?, ?, 0)', [newId, req.user.id]);
-        } catch (e) {}
+            const allAuthors = [req.user.id, ...coAuthorIds];
+            const authorValues = allAuthors.map((uid, idx) => [newId, uid, idx]);
+            await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
+        } catch (e) {
+            console.error('Error inserting article_authors for gundem:', e);
+        }
 
         clearCache('articles');
 
@@ -5330,13 +5535,15 @@ app.get('/api/author/gundem', authenticateToken, async (req, res) => {
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(
-            `SELECT id, title, slug, category, excerpt, image_url, status, tags, views, rejection_reason, gundem_data, content, created_at, submitted_at, updated_at,
+            `SELECT DISTINCT articles.id, articles.title, articles.slug, articles.category, articles.excerpt, articles.image_url, articles.status, articles.tags, articles.views, articles.rejection_reason, articles.gundem_data, articles.content, articles.created_at, articles.submitted_at, articles.updated_at, articles.author_id,
              (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count,
-             (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count
+             (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count,
+             (SELECT COUNT(*) FROM article_authors WHERE article_id = articles.id) as author_count
              FROM articles 
-             WHERE author_id = ? AND is_gundem = 1 
-             ORDER BY COALESCE(updated_at, submitted_at, created_at) DESC`,
-            [req.user.id]
+             LEFT JOIN article_authors ON articles.id = article_authors.article_id
+             WHERE (articles.author_id = ? OR article_authors.user_id = ?) AND articles.is_gundem = 1 
+             ORDER BY COALESCE(articles.updated_at, articles.submitted_at, articles.created_at) DESC`,
+            [req.user.id, req.user.id]
         );
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -5348,13 +5555,29 @@ app.get('/api/author/gundem/:id', authenticateToken, async (req, res) => {
         const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
         const query = isStaff
             ? "SELECT * FROM articles WHERE (id = ? OR slug = ?)"
-            : "SELECT * FROM articles WHERE (id = ? OR slug = ?) AND (author_id = ? OR is_gundem = 1)";
-        const params = isStaff ? [req.params.id, req.params.id] : [req.params.id, req.params.id, req.user.id];
+            : `SELECT DISTINCT a.* FROM articles a 
+               LEFT JOIN article_authors aa ON a.id = aa.article_id
+               WHERE (a.id = ? OR a.slug = ?) AND (a.author_id = ? OR aa.user_id = ? OR a.is_gundem = 1)`;
+        const params = isStaff ? [req.params.id, req.params.id] : [req.params.id, req.params.id, req.user.id, req.user.id];
         const [rows] = await pool.query(query, params);
         if (!rows || rows.length === 0) {
             return res.status(404).json({ error: 'Bilim Gündemi yazısı bulunamadı.' });
         }
-        res.json(rows[0]);
+        const article = rows[0];
+
+        // Fetch all authors from article_authors
+        const [authors] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.avatar_url, u.job_title, aa.order_index
+            FROM article_authors aa
+            JOIN users u ON aa.user_id = u.id
+            WHERE aa.article_id = ?
+            ORDER BY aa.order_index ASC, aa.created_at ASC
+        `, [article.id]);
+
+        article.authors = authors;
+        article.co_authors = authors.filter(a => Number(a.id) !== Number(article.author_id));
+
+        res.json(article);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
