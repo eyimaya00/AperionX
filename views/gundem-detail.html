@@ -506,35 +506,9 @@
 
         /* === SAĞ SİDEBAR (1/4 Genişlik) === */
         .gundem-sidebar {
-            position: sticky;
-            top: 86px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
-            padding-left: 2px;
-            padding-right: 6px;
-            padding-bottom: 30px;
-        }
-
-        .gundem-sidebar::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .gundem-sidebar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .gundem-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.35);
-            border-radius: 10px;
-        }
-
-        .gundem-sidebar::-webkit-scrollbar-thumb:hover {
-            background: var(--gundem-primary);
+            gap: 16px;
         }
 
         /* Sidebar Kart Tasarımı */
@@ -542,7 +516,7 @@
             background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            padding: 14px 16px;
+            padding: 16px 18px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -643,8 +617,8 @@
             border-radius: 50%;
             border: 2px solid #6366f1;
             object-fit: contain;
-            background: #0f172a;
-            padding: 3px;
+            background: rgba(99, 102, 241, 0.12);
+            padding: 4px;
             flex-shrink: 0;
             box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
         }
@@ -1536,32 +1510,13 @@
 
             <!-- SAĞ SİDEBAR (Masaüstü: Sağ / Mobil: İçeriğin Altında) -->
             <aside class="gundem-sidebar">
-                <!-- 1. Sen de Değerlendir (AperionX Logo Yıldızlar) -->
-                <div class="sidebar-card card-rating">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-fill ph-star"></i> Sen de Değerlendir</h3>
-                        <span class="sidebar-rating-badge" id="ratingScoreBadge" style="font-size: 0.76rem; font-weight: 700; color: #a5b4fc;">5.0</span>
-                    </div>
-                    <div class="sidebar-rating-stars" id="ratingStars">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Yıldız">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Yıldız">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Yıldız">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Yıldız">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Yıldız">
-                    </div>
-                    <div class="sidebar-rating-info">
-                        <span id="ratingStatusText">Habere oy verin</span>
-                        <span class="rating-score" id="userScoreDisplay"></span>
-                    </div>
-                </div>
-
-                <!-- 2. Yazar Bilgileri -->
+                <!-- 1. Yazar Bilgileri -->
                 <div class="sidebar-card card-author">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-user-circle"></i> Yazar Bilgileri</h3>
                     </div>
                     <div class="sidebar-author-row">
-                        <img src="/uploads/favicon-48x48.png" class="sidebar-author-img" alt="{{AUTHOR_NAME}}">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-author-img" alt="{{AUTHOR_NAME}}">
                         <div class="sidebar-author-details">
                             <span class="sidebar-author-name">
                                 {{AUTHOR_NAME}}
@@ -1573,17 +1528,26 @@
                     </div>
                 </div>
 
-                <!-- 3. Etiketler (Tags) -->
-                <div class="sidebar-card card-tags">
+                <!-- 2. Sen de Değerlendir (AperionX "A" Logo Yıldızlar - Şeffaf) -->
+                <div class="sidebar-card card-rating">
                     <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-bold ph-tag"></i> Etiketler</h3>
+                        <h3 class="sidebar-card-title"><i class="ph-fill ph-star"></i> Sen de Değerlendir</h3>
+                        <span class="sidebar-rating-badge" id="ratingScoreBadge" style="font-size: 0.76rem; font-weight: 700; color: #a5b4fc;">5.0</span>
                     </div>
-                    <div class="sidebar-tags-container" id="sidebarTagsList" data-raw-tags="{{TAGS}}" data-category="{{CATEGORY}}">
-                        <!-- JS dinamik etiketleri oluşturacak -->
+                    <div class="sidebar-rating-stars" id="ratingStars">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Yıldız">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Yıldız">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Yıldız">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Yıldız">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Yıldız">
+                    </div>
+                    <div class="sidebar-rating-info">
+                        <span id="ratingStatusText">Habere oy verin</span>
+                        <span class="rating-score" id="userScoreDisplay"></span>
                     </div>
                 </div>
 
-                <!-- 4. Özet (Summary) -->
+                <!-- 3. Özet -->
                 <div class="sidebar-card card-summary">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title"><i class="ph-bold ph-text-align-left"></i> Özet</h3>
@@ -1593,7 +1557,27 @@
                     </p>
                 </div>
 
-                <!-- 5. Tartışmalar / Yorumlar -->
+                <!-- 4. İçindekiler -->
+                <div class="sidebar-card card-toc">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title"><i class="ph-bold ph-list-bullets"></i> İçindekiler</h3>
+                    </div>
+                    <ul class="sidebar-toc-menu" id="sidebarTocList">
+                        <!-- Makaledeki h2 başlıkları dinamik olarak buraya eklenecek -->
+                    </ul>
+                </div>
+
+                <!-- 5. Etiketler -->
+                <div class="sidebar-card card-tags">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title"><i class="ph-bold ph-tag"></i> Etiketler</h3>
+                    </div>
+                    <div class="sidebar-tags-container" id="sidebarTagsList" data-raw-tags="{{TAGS}}" data-category="{{CATEGORY}}">
+                        <!-- JS dinamik etiketleri oluşturacak -->
+                    </div>
+                </div>
+
+                <!-- 6. Tartışmalar / Yorumlar -->
                 <div class="sidebar-card card-comments">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title"><i class="ph-fill ph-chat-circle-dots"></i> Tartışmalar</h3>
@@ -1612,16 +1596,6 @@
                             <p class="sidebar-no-comments">Henüz tartışma başlatılmadı. İlk yorumu siz yapın!</p>
                         </div>
                     </div>
-                </div>
-
-                <!-- 6. İçindekiler (TOC) -->
-                <div class="sidebar-card card-toc">
-                    <div class="sidebar-card-header">
-                        <h3 class="sidebar-card-title"><i class="ph-bold ph-list-bullets"></i> İçindekiler</h3>
-                    </div>
-                    <ul class="sidebar-toc-menu" id="sidebarTocList">
-                        <!-- Makaledeki h2 başlıkları dinamik olarak buraya eklenecek -->
-                    </ul>
                 </div>
             </aside>
         </div>
