@@ -40,7 +40,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 
     <!-- Schema.org NewsArticle JSON-LD -->
     <script type="application/ld+json">
@@ -1229,6 +1229,44 @@
             pointer-events: auto;
         }
 
+        /* === GOOGLE GİRİŞ BUTONU (MODAL) === */
+        .custom-google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            margin: 0 auto;
+        }
+
+        .custom-google-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+        }
+
+        .custom-google-btn:active {
+            transform: translateY(0);
+        }
+
+        .custom-google-btn svg {
+            flex-shrink: 0;
+        }
+
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
         @media (max-width: 1024px) {
             .gundem-article-container {
@@ -1680,21 +1718,11 @@
                 <span style="padding: 0 10px; color: var(--nav-text); font-size: 0.85rem;">veya</span>
                 <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
             </div>
-            <div id="g_id_onload"
-                 data-client_id="YOUR_GOOGLE_CLIENT_ID"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleGoogleSignIn"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="rectangular"
-                 data-theme="outline"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left"
-                 style="display: flex; justify-content: center; width: 100%;">
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Giriş Yap
+                </button>
             </div>
             <div class="modal-footer">
                 <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Kayıt Ol</a></p>
@@ -1733,6 +1761,17 @@
                 </div>
                 <button type="submit" class="btn-primary">Kayıt Ol</button>
             </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: var(--nav-text); font-size: 0.85rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Kayıt Ol
+                </button>
+            </div>
             <div class="modal-footer">
                 <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
             </div>
@@ -1741,7 +1780,7 @@
 
     <!-- Bildirim Toast'ı -->
     <div class="gundem-toast" id="gundemToast">
-        <i class="ph-fill ph-check-circle" style="color: #34d399; font-size: 1.25rem;"></i>
+        <i class="ph-fill ph-check-circle" id="gundemToastIcon" style="color: #34d399; font-size: 1.25rem;"></i>
         <span id="gundemToastText">Bağlantı kopyalandı!</span>
     </div>
 
@@ -1837,10 +1876,29 @@
 
             /* === 3. TARTIŞMALAR / YORUMLAR === */
             loadSidebarComments();
+            initCommentAuthCheck();
 
             /* === 4. İÇİNDEKİLER (TOC) VE BÖLÜM TAKİBİ === */
             initTableOfContents();
         });
+
+        /* === GİRİŞ KONTROL YARDIMCISI === */
+        function isUserLoggedIn() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user') || localStorage.getItem('currentUser');
+            return !!(token && user);
+        }
+
+        /* === GOOGLE OAUTH YEDEK ÇAĞRI === */
+        if (typeof window.triggerGoogleSignIn === 'undefined') {
+            window.triggerGoogleSignIn = function() {
+                const clientId = "181445432661-0i7m20n5leci7raa45o249a86tnb53cn.apps.googleusercontent.com";
+                const redirectUri = window.location.origin + '/api/auth/google/callback';
+                const scope = 'email profile openid';
+                const state = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+            };
+        }
 
         /* === 1. APERIONX LOGO YILDIZ DEĞERLENDİRME === */
         function initRatingSystem() {
@@ -1858,6 +1916,8 @@
                 if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
                 if (userScoreDisplay) userScoreDisplay.innerText = `${savedRating}/5`;
                 if (scoreBadge) scoreBadge.innerText = `${savedRating}.0`;
+            } else if (!isUserLoggedIn()) {
+                if (statusText) statusText.innerText = 'Değerlendirmek için üye girişi yapın';
             }
 
             stars.forEach((star) => {
@@ -1871,6 +1931,13 @@
                 });
 
                 star.addEventListener('click', () => {
+                    if (!isUserLoggedIn()) {
+                        showGundemToast('Habere oy verebilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
+                        if (typeof openModal === 'function') {
+                            openModal('loginModal');
+                        }
+                        return;
+                    }
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
                     localStorage.setItem(storageKey, rating);
                     applyRating(rating);
@@ -1953,14 +2020,42 @@
             `).join('');
         }
 
+        function initCommentAuthCheck() {
+            const input = document.getElementById('sidebarCommentInput');
+            if (!input) return;
+
+            if (!isUserLoggedIn()) {
+                input.placeholder = 'Yorum yapmak için lütfen üye girişi yapın...';
+            }
+
+            input.addEventListener('focus', (e) => {
+                if (!isUserLoggedIn()) {
+                    e.preventDefault();
+                    input.blur();
+                    showGundemToast('Yorum yapabilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
+                    if (typeof openModal === 'function') {
+                        openModal('loginModal');
+                    }
+                }
+            });
+        }
+
         function handleSidebarComment(e) {
             e.preventDefault();
+            if (!isUserLoggedIn()) {
+                showGundemToast('Yorum yapabilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
+                if (typeof openModal === 'function') {
+                    openModal('loginModal');
+                }
+                return;
+            }
+
             const input = document.getElementById('sidebarCommentInput');
             if (!input || !input.value.trim()) return;
 
             const commentText = input.value.trim();
             const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
-            let authorName = 'Bilim Sever';
+            let authorName = 'AperionX Okuru';
             if (userStr) {
                 try {
                     const parsed = JSON.parse(userStr);
@@ -2071,16 +2166,23 @@
         }
 
         /* === BİLDİRİM TOAST FONKSİYONU === */
-        function showGundemToast(message) {
+        function showGundemToast(message, iconClass = 'ph-fill ph-check-circle', iconColor = '#34d399') {
             const toast = document.getElementById('gundemToast');
             const textEl = document.getElementById('gundemToastText');
+            const iconEl = document.getElementById('gundemToastIcon');
             if (!toast || !textEl) return;
             textEl.innerText = message;
+            if (iconEl) {
+                iconEl.className = iconClass;
+                iconEl.style.color = iconColor;
+            }
             toast.classList.add('show');
-            setTimeout(() => {
+            clearTimeout(window._gundemToastTimer);
+            window._gundemToastTimer = setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 3200);
         }
+
 
         /* === PAYLAŞ BUTONU FONKSİYONU === */
         async function handleGundemShare() {
