@@ -348,7 +348,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
 
         // 1. Önce Veritabanında ara (Yazar/Editör Panelinden eklenenler)
         try {
-            const [rows] = await pool.query('SELECT * FROM articles WHERE slug = ?', [slug]);
+            const [rows] = await pool.query('SELECT a.*, u.fullname as author_fullname FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.slug = ?', [slug]);
             if (rows && rows.length > 0) {
                 const row = rows[0];
                 const dateObj = row.created_at ? new Date(row.created_at) : new Date();
@@ -364,7 +364,10 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     date: formattedDate,
                     dateIso: dateObj.toISOString(),
                     readTime: Math.max(2, Math.ceil((row.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
-                    views: (row.views || 0) + 1
+                    views: (row.views || 0) + 1,
+                    tags: row.tags || row.category || 'Gündem',
+                    authorName: row.author_fullname || 'AperionX Bilim Ekibi',
+                    authorTitle: 'Bilim, Teknoloji ve Analiz Masası'
                 };
 
                 // Asenkron okunma artırımı
@@ -386,7 +389,10 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 date: item.date,
                 dateIso: new Date().toISOString(),
                 readTime: item.readTime,
-                views: item.views
+                views: item.views,
+                tags: item.tags || item.category || 'Gündem',
+                authorName: item.authorName || 'AperionX Bilim Ekibi',
+                authorTitle: item.authorTitle || 'Bilim, Teknoloji ve Analiz Masası'
             };
         }
 
@@ -432,7 +438,10 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             .replace(/\{\{VIEWS\}\}/g, articleData.views.toString())
             .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(articleData.title))
             .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
-            .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml);
+            .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml)
+            .replace(/\{\{TAGS\}\}/g, articleData.tags || '')
+            .replace(/\{\{AUTHOR_NAME\}\}/g, articleData.authorName || 'AperionX Bilim Ekibi')
+            .replace(/\{\{AUTHOR_TITLE\}\}/g, articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası');
 
         return res.send(html);
     } catch (err) {
