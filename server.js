@@ -1678,7 +1678,7 @@ app.get(['/articles', '/articles.html', '/en/articles', '/en/articles.html'], as
 
             try {
                 // 1. Fetch Articles
-                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published'";
+                let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)";
                 query += " ORDER BY COALESCE(published_at, created_at) DESC";
                 const [articles] = await pool.query(query);
 
@@ -2273,7 +2273,7 @@ app.get('/experiment-detail.html', async (req, res) => {
 app.get('/feed.xml', async (req, res) => {
     try {
         const [articles] = await pool.query(
-            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, published_at, author_id FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC LIMIT 30"
+            "SELECT id, title, slug, excerpt, image_url, category, tags, created_at, published_at, author_id FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL) ORDER BY COALESCE(published_at, created_at) DESC LIMIT 30"
         );
         const origin = `${req.protocol}://${req.get('host')}`;
 
@@ -2329,7 +2329,7 @@ app.get('/feed.xml', async (req, res) => {
 // === SITEMAP ROUTE ===
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const [articles] = await pool.query("SELECT title, slug, image_url, created_at, published_at FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
+        const [articles] = await pool.query("SELECT title, slug, image_url, is_gundem, created_at, published_at, updated_at FROM articles WHERE status = 'published' ORDER BY COALESCE(published_at, created_at) DESC");
         const [categories] = await pool.query("SELECT * FROM categories");
         const [experiments] = await pool.query("SELECT title, slug, image_url, created_at, published_at FROM experiments WHERE status = 'published' AND deleted_at IS NULL ORDER BY COALESCE(published_at, created_at) DESC");
         
@@ -2762,6 +2762,7 @@ async function ensureSchema() {
         try { await pool.query('ALTER TABLE articles ADD COLUMN updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN is_gundem TINYINT(1) DEFAULT 0'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN gundem_data LONGTEXT NULL'); } catch(e) {}
+        try { await pool.query("UPDATE articles SET is_gundem = 1 WHERE (gundem_data IS NOT NULL AND gundem_data != '' AND gundem_data != '{}') AND (is_gundem = 0 OR is_gundem IS NULL)"); } catch(e) {}
         // Add linkedin_url, public_email, show_email to users table if missing
         try { await pool.query('ALTER TABLE users ADD COLUMN linkedin_url VARCHAR(255) NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE users ADD COLUMN public_email VARCHAR(255) NULL'); } catch(e) {}
@@ -4056,8 +4057,8 @@ app.get('/api/articles', async (req, res) => {
         const cached = getCachedData(cacheKey);
         if (cached) return res.json(cached);
 
-        // 1. Fetch Articles
-        let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published'";
+        // 1. Fetch Articles (Exclude Bilim Gundemi articles so they only appear under /gundem)
+        let query = "SELECT id, title, slug, excerpt, image_url, category, created_at, published_at, views, author_id, tags FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)";
         const params = [];
 
         if (idsParam && idsParam.length > 0) {
@@ -6925,7 +6926,7 @@ app.get('/api/articles', async (req, res) => {
             SELECT a.id, a.slug, a.title, a.category, u.fullname as author_name, a.author_id, a.image_url, a.created_at, a.views, LEFT(a.excerpt, 300) as excerpt 
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
-            WHERE a.status = 'published'
+            WHERE a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
         `;
         const params = [];
 
