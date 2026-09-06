@@ -6046,7 +6046,7 @@
                 .bge-upload-zone {
                     border: 2px dashed var(--border-color);
                     border-radius: 16px;
-                    padding: 48px 24px;
+                    padding: 40px 24px;
                     text-align: center;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -6065,9 +6065,10 @@
                 }
                 .bge-upload-zone.has-image {
                     border-style: solid;
-                    border-color: #10b981;
+                    border-color: rgba(16, 185, 129, 0.5);
                     padding: 16px;
-                    background: rgba(16, 185, 129, 0.03);
+                    cursor: default;
+                    background: rgba(16, 185, 129, 0.02);
                 }
                 .bge-upload-icon {
                     font-size: 3rem;
@@ -6089,33 +6090,65 @@
                     font-size: 0.85rem;
                     margin: 0;
                 }
-                .bge-upload-preview {
-                    max-width: 100%;
-                    max-height: 320px;
-                    border-radius: 12px;
-                    object-fit: contain;
-                }
-                .bge-upload-remove {
-                    position: absolute;
-                    top: 12px;
-                    right: 12px;
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    background: rgba(239, 68, 68, 0.9);
-                    color: white;
-                    border: none;
-                    cursor: pointer;
+                .bge-upload-preview-wrap {
+                    position: relative;
+                    width: 100%;
+                    max-height: 400px;
                     display: flex;
+                    flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.1rem;
-                    transition: all 0.2s;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
                 }
-                .bge-upload-remove:hover {
+                .bge-upload-preview {
+                    max-width: 100%;
+                    max-height: 360px;
+                    border-radius: 12px;
+                    object-fit: cover;
+                    display: block;
+                    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+                }
+                .bge-upload-preview-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-top: 14px;
+                }
+                .bge-upload-btn-change {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s;
+                }
+                .bge-upload-btn-change:hover {
+                    border-color: var(--primary-accent);
+                    color: var(--primary-accent);
+                    background: rgba(99, 102, 241, 0.06);
+                }
+                .bge-upload-btn-remove {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(239, 68, 68, 0.3);
+                    background: rgba(239, 68, 68, 0.08);
+                    color: #ef4444;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s;
+                }
+                .bge-upload-btn-remove:hover {
                     background: #ef4444;
-                    transform: scale(1.1);
+                    color: white;
                 }
 
                 /* Sections (Bölümler) */
@@ -6215,6 +6248,7 @@
                     border-color: var(--primary-accent);
                     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
                 }
+                .bge-editor-wrap .ql-toolbar,
                 .bge-quill-toolbar {
                     border: none !important;
                     border-bottom: 1px solid var(--border-color) !important;
@@ -6263,9 +6297,13 @@
                 .bge-quill-editor .ql-editor img {
                     max-width: 100%;
                     border-radius: 12px;
-                    margin: 14px auto;
-                    display: block;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                    cursor: pointer;
+                    transition: outline 0.15s ease;
+                }
+                .bge-quill-editor .ql-editor img:not([style*="float"]):not([style*="display: inline"]) {
+                    display: block;
+                    margin: 14px auto;
                 }
                 .bge-quill-editor .ql-editor.ql-blank::before {
                     color: #94a3b8;
@@ -6598,38 +6636,54 @@
                     border-color: #818cf8;
                     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar,
                 body.dark-mode .bge-quill-toolbar {
                     background: #1e293b;
                     border-bottom-color: #334155 !important;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-stroke,
                 body.dark-mode .bge-quill-toolbar .ql-stroke {
                     stroke: #94a3b8;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-fill,
                 body.dark-mode .bge-quill-toolbar .ql-fill {
                     fill: #94a3b8;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker,
                 body.dark-mode .bge-quill-toolbar .ql-picker {
                     color: #94a3b8;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-options,
                 body.dark-mode .bge-quill-toolbar .ql-picker-options {
                     background-color: #1e293b;
                     border-color: #334155;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-item,
                 body.dark-mode .bge-quill-toolbar .ql-picker-item {
                     color: #e2e8f0;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar button:hover .ql-stroke,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-label:hover .ql-stroke,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-item:hover .ql-stroke,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,
                 body.dark-mode .bge-quill-toolbar button:hover .ql-stroke,
                 body.dark-mode .bge-quill-toolbar .ql-picker-label:hover .ql-stroke,
                 body.dark-mode .bge-quill-toolbar .ql-picker-item:hover .ql-stroke,
                 body.dark-mode .bge-quill-toolbar .ql-picker-item.ql-selected .ql-stroke {
                     stroke: #818cf8;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar button:hover .ql-fill,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-label:hover .ql-fill,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-item:hover .ql-fill,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-item.ql-selected .ql-fill,
                 body.dark-mode .bge-quill-toolbar button:hover .ql-fill,
                 body.dark-mode .bge-quill-toolbar .ql-picker-label:hover .ql-fill,
                 body.dark-mode .bge-quill-toolbar .ql-picker-item:hover .ql-fill,
                 body.dark-mode .bge-quill-toolbar .ql-picker-item.ql-selected .ql-fill {
                     fill: #818cf8;
                 }
+                body.dark-mode .bge-editor-wrap .ql-toolbar button:hover,
+                body.dark-mode .bge-editor-wrap .ql-toolbar .ql-picker-label:hover,
                 body.dark-mode .bge-quill-toolbar button:hover,
                 body.dark-mode .bge-quill-toolbar .ql-picker-label:hover {
                     color: #818cf8;
@@ -6845,7 +6899,7 @@
                     </h2>
 
                     <div class="bge-upload-zone" id="bge-upload-zone"
-                         onclick="document.getElementById('bge-image-input').click()"
+                         onclick="bgeOnUploadZoneClick(event)"
                          ondragover="event.preventDefault(); this.classList.add('dragover')"
                          ondragleave="this.classList.remove('dragover')"
                          ondrop="event.preventDefault(); this.classList.remove('dragover'); bgeHandleImageDrop(event)">
@@ -6856,9 +6910,14 @@
                         </div>
                         <div id="bge-upload-preview-wrap" style="display: none;">
                             <img id="bge-upload-preview" class="bge-upload-preview" src="" alt="Önizleme">
-                            <button class="bge-upload-remove" onclick="event.stopPropagation(); bgeRemoveImage()" title="Görseli Kaldır">
-                                <i class="ph-bold ph-x"></i>
-                            </button>
+                            <div class="bge-upload-preview-actions">
+                                <button type="button" class="bge-upload-btn-change" onclick="event.stopPropagation(); document.getElementById('bge-image-input').click()">
+                                    <i class="ph-bold ph-arrows-clockwise"></i> Görseli Değiştir
+                                </button>
+                                <button type="button" class="bge-upload-btn-remove" onclick="event.stopPropagation(); bgeRemoveImage()">
+                                    <i class="ph-bold ph-trash"></i> Görseli Kaldır
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <input type="file" id="bge-image-input" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="bgeHandleImageSelect(event)">
@@ -8307,10 +8366,12 @@
         console.log('=== QUILL INIT END ===');
 
         // === IMAGE RESIZE HELPER ===
+        let activeQuillResizeInstance = null;
+        let activeResizeImg = null;
+
         function attachImageResizeHelper(quillInstance) {
             if (!quillInstance || !quillInstance.root) return;
             
-            let activeImg = null;
             let toolbarEl = document.getElementById('quill-image-floating-toolbar');
             
             if (!toolbarEl) {
@@ -8318,7 +8379,7 @@
                 toolbarEl.id = 'quill-image-floating-toolbar';
                 toolbarEl.style.cssText = `
                     position: absolute;
-                    z-index: 99999;
+                    z-index: 999999;
                     display: none;
                     background: #0f172a;
                     color: #ffffff;
@@ -8348,7 +8409,7 @@
 
                 toolbarEl.addEventListener('click', function(e) {
                     const btn = e.target.closest('.img-tb-btn');
-                    if (!btn || !activeImg) return;
+                    if (!btn || !activeResizeImg) return;
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -8359,38 +8420,44 @@
                     if (size) {
                         let newWidth = size;
                         if (size === 'custom') {
-                            const val = prompt('Resim genişliğini girin (ör. 350px, 40%, 600px):', activeImg.style.width || '50%');
+                            const val = prompt('Resim genişliğini girin (ör. 350px, 40%, 600px):', activeResizeImg.style.width || '50%');
                             if (val && val.trim() !== '') newWidth = val.trim();
                             else return;
                         }
-                        activeImg.style.width = newWidth;
-                        activeImg.style.maxWidth = '100%';
-                        activeImg.style.height = 'auto';
-                        activeImg.setAttribute('width', newWidth);
+                        activeResizeImg.style.width = newWidth;
+                        activeResizeImg.style.maxWidth = '100%';
+                        activeResizeImg.style.height = 'auto';
+                        activeResizeImg.setAttribute('width', newWidth);
                     }
 
                     if (align) {
                         if (align === 'center') {
-                            activeImg.style.display = 'block';
-                            activeImg.style.marginLeft = 'auto';
-                            activeImg.style.marginRight = 'auto';
-                            activeImg.style.float = 'none';
+                            activeResizeImg.style.display = 'block';
+                            activeResizeImg.style.marginLeft = 'auto';
+                            activeResizeImg.style.marginRight = 'auto';
+                            activeResizeImg.style.float = 'none';
                         } else if (align === 'left') {
-                            activeImg.style.display = 'inline-block';
-                            activeImg.style.float = 'left';
-                            activeImg.style.margin = '0 15px 15px 0';
+                            activeResizeImg.style.display = 'inline-block';
+                            activeResizeImg.style.float = 'left';
+                            activeResizeImg.style.margin = '0 15px 15px 0';
                         } else if (align === 'right') {
-                            activeImg.style.display = 'inline-block';
-                            activeImg.style.float = 'right';
-                            activeImg.style.margin = '0 0 15px 15px';
+                            activeResizeImg.style.display = 'inline-block';
+                            activeResizeImg.style.float = 'right';
+                            activeResizeImg.style.margin = '0 0 15px 15px';
                         }
                     }
 
                     if (action === 'delete') {
-                        activeImg.remove();
+                        const targetImg = activeResizeImg;
+                        targetImg.remove();
                         hideToolbar();
                     } else {
-                        positionToolbar(activeImg);
+                        positionToolbar(activeResizeImg);
+                    }
+
+                    // Trigger text-change on the owning quill instance so content state is preserved
+                    if (activeQuillResizeInstance && typeof activeQuillResizeInstance.update === 'function') {
+                        activeQuillResizeInstance.update();
                     }
                 });
             }
@@ -8404,26 +8471,30 @@
             }
 
             function hideToolbar() {
-                toolbarEl.style.display = 'none';
-                if (activeImg) {
-                    activeImg.style.outline = 'none';
-                    activeImg = null;
+                if (toolbarEl) toolbarEl.style.display = 'none';
+                if (activeResizeImg) {
+                    activeResizeImg.style.outline = 'none';
+                    activeResizeImg = null;
                 }
+                activeQuillResizeInstance = null;
             }
 
             quillInstance.root.addEventListener('click', function(e) {
                 if (e.target && e.target.tagName === 'IMG') {
-                    if (activeImg) activeImg.style.outline = 'none';
-                    activeImg = e.target;
-                    activeImg.style.outline = '3px solid #6366f1';
-                    positionToolbar(activeImg);
+                    if (activeResizeImg && activeResizeImg !== e.target) {
+                        activeResizeImg.style.outline = 'none';
+                    }
+                    activeResizeImg = e.target;
+                    activeQuillResizeInstance = quillInstance;
+                    activeResizeImg.style.outline = '3px solid #6366f1';
+                    positionToolbar(activeResizeImg);
                 } else {
                     hideToolbar();
                 }
             });
 
             document.addEventListener('scroll', function() {
-                if (activeImg) positionToolbar(activeImg);
+                if (activeResizeImg) positionToolbar(activeResizeImg);
             }, true);
         }
 
@@ -13665,7 +13736,7 @@
             // Image
             if (bgeImageFile) {
                 formData.append('image', bgeImageFile);
-            } else if (bgeImageDataUrl && bgeImageDataUrl.startsWith('http')) {
+            } else if (bgeImageDataUrl && (bgeImageDataUrl.startsWith('http') || bgeImageDataUrl.startsWith('/uploads/'))) {
                 formData.append('image_url', bgeImageDataUrl);
             }
 
@@ -13870,7 +13941,7 @@
 
                         if (zone) zone.classList.add('has-image');
                         if (placeholder) placeholder.style.display = 'none';
-                        if (previewWrap) previewWrap.style.display = 'block';
+                        if (previewWrap) previewWrap.style.display = 'flex';
                         if (previewImg) previewImg.src = bgeImageDataUrl;
                     }
 
@@ -14217,42 +14288,6 @@
                     </div>
                     <!-- Word-like Rich Text Editor Container -->
                     <div class="bge-editor-wrap">
-                        <div id="bge-toolbar-${sec.id}" class="bge-quill-toolbar">
-                            <span class="ql-formats">
-                                <select class="ql-header" title="Başlık Seviyesi">
-                                    <option value="2">Büyük Başlık (H2)</option>
-                                    <option value="3">Orta Başlık (H3)</option>
-                                    <option value="4">Küçük Başlık (H4)</option>
-                                    <option selected>Normal Metin</option>
-                                </select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-bold" title="Kalın (Ctrl+B)"></button>
-                                <button class="ql-italic" title="İtalik (Ctrl+I)"></button>
-                                <button class="ql-underline" title="Altı Çizili (Ctrl+U)"></button>
-                                <button class="ql-strike" title="Üstü Çizili"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <select class="ql-color" title="Metin Rengi"></select>
-                                <select class="ql-background" title="Vurgu Rengi"></select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-list" value="ordered" title="Numaralı Liste"></button>
-                                <button class="ql-list" value="bullet" title="Maddeli Liste"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <select class="ql-align" title="Hizalama"></select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-blockquote" title="Alıntı Ekle"></button>
-                                <button class="ql-code-block" title="Kod Bloğu"></button>
-                                <button class="ql-link" title="Bağlantı Ekle"></button>
-                                <button class="ql-image" title="Fotoğraf / Görsel Ekle"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-clean" title="Biçimlendirmeyi Temizle"></button>
-                            </span>
-                        </div>
                         <div id="bge-editor-${sec.id}" class="bge-quill-editor"></div>
                     </div>
                 </div>
@@ -14261,12 +14296,23 @@
             // Initialize Quill for each section
             bgeQuillInstances = {};
             bgeSections.forEach(sec => {
-                const toolbarEl = document.getElementById('bge-toolbar-' + sec.id);
                 const editorEl = document.getElementById('bge-editor-' + sec.id);
-                if (toolbarEl && editorEl) {
+                if (editorEl) {
+                    const qToolbarOptions = [
+                        [{ 'header': [2, 3, 4, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'align': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image'],
+                        ['clean']
+                    ];
+
                     const q = new Quill(editorEl, {
                         modules: {
-                            toolbar: toolbarEl
+                            toolbar: qToolbarOptions,
+                            ...(ResizeModule ? { resize: { showSize: true } } : {})
                         },
                         theme: 'snow',
                         placeholder: 'Bu bölümün içeriğini Word gibi yazın; ara başlıklar, kalın/italik metinler veya fotoğraflar ekleyin...'
@@ -14314,6 +14360,16 @@
         }
 
         // ─── Image Upload ───
+        function bgeOnUploadZoneClick(event) {
+            const zone = document.getElementById('bge-upload-zone');
+            if (zone && zone.classList.contains('has-image')) {
+                // If it already has an image, clicking the background doesn't reopen picker accidentally
+                return;
+            }
+            const input = document.getElementById('bge-image-input');
+            if (input) input.click();
+        }
+
         function bgeHandleImageSelect(event) {
             const file = event.target.files[0];
             if (file) bgeProcessImage(file);
@@ -14346,7 +14402,7 @@
 
                 if (zone) zone.classList.add('has-image');
                 if (placeholder) placeholder.style.display = 'none';
-                if (previewWrap) previewWrap.style.display = 'block';
+                if (previewWrap) previewWrap.style.display = 'flex';
                 if (previewImg) previewImg.src = e.target.result;
             };
             reader.readAsDataURL(file);
