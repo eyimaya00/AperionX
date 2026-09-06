@@ -3500,14 +3500,6 @@
                         Yorumları Oku <i class="ph-bold ph-arrow-right"></i>
                     </span>
                 </div>
-                <div class="art-stat-card" onclick="openArtRatingsModal()" title="Değerlendirenleri ve verilen puanları gör">
-                    <i class="ph-bold ph-star art-stat-icon" style="color: #f59e0b;"></i>
-                    <div class="art-stat-value" id="art-total-ratings">0</div>
-                    <div class="art-stat-label">Değerlendirmeler</div>
-                    <span style="font-size: 0.72rem; color: #f59e0b; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
-                        Kim Kaç Yıldız Verdi? <i class="ph-bold ph-arrow-right"></i>
-                    </span>
-                </div>
                 <div class="art-stat-card" onclick="setArticleFilter('published')">
                     <i class="ph-bold ph-books art-stat-icon"></i>
                     <div class="art-stat-value" id="art-total-published">0</div>
@@ -5048,7 +5040,7 @@
                 /* Stat Cards Grid */
                 .bg-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    grid-template-columns: repeat(5, 1fr);
                     gap: 18px;
                     margin-top: 24px;
                 }
@@ -5564,6 +5556,14 @@
                     <i class="ph-bold ph-chat-circle-text bg-stat-icon"></i>
                     <div class="bg-stat-value" id="bg-stat-comments">0</div>
                     <div class="bg-stat-label">Toplam Yorum</div>
+                </div>
+                <div class="bg-stat-card" onclick="openArtRatingsModal()" style="cursor: pointer;" title="Değerlendirenleri ve verilen puanları gör">
+                    <i class="ph-bold ph-star bg-stat-icon" style="color: #f59e0b;"></i>
+                    <div class="bg-stat-value" id="bg-stat-ratings">0</div>
+                    <div class="bg-stat-label">Değerlendirmeler</div>
+                    <span style="font-size: 0.72rem; color: #f59e0b; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Kim Kaç Yıldız Verdi? <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
                 <div class="bg-stat-card">
                     <i class="ph-bold ph-newspaper bg-stat-icon"></i>
@@ -9119,7 +9119,7 @@
             if (document.getElementById('art-total-comments')) document.getElementById('art-total-comments').textContent = totalComments.toLocaleString('tr-TR');
             if (document.getElementById('art-total-published')) document.getElementById('art-total-published').textContent = totalPublished.toLocaleString('tr-TR');
 
-            // Toplam Değerlendirme Sayısını Yükle
+            // Toplam Değerlendirme Sayısını Yükle (Bilim Gündemi & Dashboard)
             const tokenRating = token || localStorage.getItem('token');
             if (tokenRating) {
                 fetch(`${API_URL}/author/article-ratings`, { headers: { 'Authorization': `Bearer ${tokenRating}` } })
@@ -9127,10 +9127,10 @@
                     .then(ratings => {
                         if (Array.isArray(ratings)) {
                             const countStr = ratings.length.toLocaleString('tr-TR');
-                            const el1 = document.getElementById('art-total-ratings');
-                            const el2 = document.getElementById('dash-total-ratings');
-                            if (el1) el1.textContent = countStr;
-                            if (el2) el2.textContent = countStr;
+                            const elBg = document.getElementById('bg-stat-ratings');
+                            const elDash = document.getElementById('dash-total-ratings');
+                            if (elBg) elBg.textContent = countStr;
+                            if (elDash) elDash.textContent = countStr;
                         }
                     })
                     .catch(() => {});
@@ -13155,6 +13155,19 @@
             el('bg-stat-likes', totalLikes);
             el('bg-stat-comments', totalComments);
             el('bg-stat-published', published.length);
+
+            const tokenRating = token || localStorage.getItem('token');
+            if (tokenRating) {
+                fetch(`${API_URL}/author/article-ratings`, { headers: { 'Authorization': `Bearer ${tokenRating}` } })
+                    .then(r => r.json())
+                    .then(ratings => {
+                        if (Array.isArray(ratings)) {
+                            el('bg-stat-ratings', ratings.length);
+                            el('dash-total-ratings', ratings.length);
+                        }
+                    })
+                    .catch(() => {});
+            }
         }
 
         function updateContinueCard() {

@@ -209,6 +209,33 @@
             padding-bottom: 120px;
         }
 
+        /* Filter Tabs */
+        .author-filter-tab {
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .author-filter-tab:hover {
+            color: #f8fafc;
+            border-color: #64748b;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .author-filter-tab.active {
+            background: #6366f1;
+            color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
         /* ISOLATED STYLE FOR AUTHOR PROFILE CARDS */
         .author-article-card {
             position: relative;
@@ -471,7 +498,15 @@
         </section>
 
         <div class="container-custom">
-            <h2 class="section-title">Yazarın İçerikleri</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin-bottom: 0;">Yazarın İçerikleri</h2>
+                <div class="author-filter-tabs" id="author-filter-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="author-filter-tab active" data-filter="all" onclick="filterAuthorContent('all')">Tümü (<span id="cnt-all">0</span>)</button>
+                    <button class="author-filter-tab" data-filter="article" onclick="filterAuthorContent('article')">Makaleler (<span id="cnt-article">0</span>)</button>
+                    <button class="author-filter-tab" data-filter="gundem" onclick="filterAuthorContent('gundem')">Bilim Gündemi (<span id="cnt-gundem">0</span>)</button>
+                    <button class="author-filter-tab" data-filter="experiment" onclick="filterAuthorContent('experiment')">Deneyler (<span id="cnt-experiment">0</span>)</button>
+                </div>
+            </div>
             <div class="articles-grid" id="articles-grid">
                 <!-- Articles will be injected here -->
             </div>
@@ -785,17 +820,45 @@
                     socialContainer.innerHTML = socialHtml;
                 }
 
-                // 2. Fill Articles and Experiments (Combined)
-                const combinedItems = [
-                    ...(articles || []).map(a => ({ ...a, type: 'article' })),
-                    ...(experiments || []).map(e => ({ ...e, type: 'experiment' }))
-                ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                // 2. Separate & Normalize Articles, Gundem, Experiments
+                const regArticles = (data.articles || [])
+                    .filter(a => !a.is_gundem)
+                    .map(a => ({ ...a, type: 'article' }));
+                
+                const gundemNews = [
+                    ...(data.gundem || []).map(g => ({ ...g, type: 'gundem', is_gundem: 1 })),
+                    ...(data.articles || []).filter(a => a.is_gundem).map(g => ({ ...g, type: 'gundem', is_gundem: 1 }))
+                ];
 
-                const grid = document.getElementById('articles-grid');
-                if (combinedItems.length === 0) {
-                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu yazarın henüz yayınlanmış bir içeriği yok.</div>';
-                } else {
-                    grid.innerHTML = combinedItems.map(item => {
+                const exps = (data.experiments || []).map(e => ({ ...e, type: 'experiment' }));
+
+                const combinedItems = [...regArticles, ...gundemNews, ...exps]
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                // Update tab counters
+                const elAll = document.getElementById('cnt-all');
+                const elArt = document.getElementById('cnt-article');
+                const elGun = document.getElementById('cnt-gundem');
+                const elExp = document.getElementById('cnt-experiment');
+                if (elAll) elAll.textContent = combinedItems.length;
+                if (elArt) elArt.textContent = regArticles.length;
+                if (elGun) elGun.textContent = gundemNews.length;
+                if (elExp) elExp.textContent = exps.length;
+
+                let currentProfileFilter = 'all';
+
+                function renderProfileItems() {
+                    const grid = document.getElementById('articles-grid');
+                    const filtered = currentProfileFilter === 'all'
+                        ? combinedItems
+                        : combinedItems.filter(item => item.type === currentProfileFilter);
+
+                    if (filtered.length === 0) {
+                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#64748b;">Bu kategoride yayınlanmış bir içerik bulunmuyor.</div>';
+                        return;
+                    }
+
+                    grid.innerHTML = filtered.map(item => {
                         const isExperiment = item.type === 'experiment';
                         const isGundem = Boolean(item.is_gundem) || item.type === 'gundem';
                         const linkPath = isExperiment 
@@ -847,6 +910,16 @@
                         </a>
                     `}).join('');
                 }
+
+                window.filterAuthorContent = function(filter) {
+                    currentProfileFilter = filter;
+                    document.querySelectorAll('.author-filter-tab').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.filter === filter);
+                    });
+                    renderProfileItems();
+                };
+
+                renderProfileItems();
 
             } catch (e) {
                 console.error(e);

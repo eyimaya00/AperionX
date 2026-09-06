@@ -4319,7 +4319,7 @@ app.get('/api/author/articles', authenticateToken, async (req, res) => {
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
-            WHERE author_id = ? 
+            WHERE author_id = ? AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(published_at, created_at) DESC
         `, [req.user.id]);
         res.json(rows);
@@ -4337,7 +4337,7 @@ app.get('/api/articles/my-articles', authenticateToken, async (req, res) => {
             (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
             (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
             FROM articles a 
-            WHERE author_id = ? 
+            WHERE author_id = ? AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(published_at, created_at) DESC
         `, [req.user.id]);
         res.json(rows);
@@ -4491,17 +4491,36 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             }
         }
 
-        // 3. Fetch Published Articles for all matching user IDs
+        // 3. Fetch Published Articles (excluding Gündem) for all matching user IDs
         const [articles] = await pool.query(`
-            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.is_gundem, a.gundem_data, a.content, a.created_at, a.published_at, a.views
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.is_gundem, a.content, a.created_at, a.published_at, a.views
             FROM articles a
             LEFT JOIN article_authors aa ON a.id = aa.article_id
-            WHERE (a.author_id IN (?) OR aa.user_id IN (?)) AND LOWER(a.status) = 'published' AND a.deleted_at IS NULL
+            WHERE (a.author_id IN (?) OR aa.user_id IN (?)) AND LOWER(a.status) = 'published' AND a.deleted_at IS NULL AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `, [userIds, userIds]);
 
-        // Normalize article image URLs and extract fallback if missing
         articles.forEach(a => {
+            if (!a.image_url && a.content) {
+                const m = a.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (m && m[1]) a.image_url = m[1];
+            }
+            if (a.image_url && !a.image_url.startsWith('http') && !a.image_url.startsWith('data:')) {
+                a.image_url = '/' + a.image_url.replace(/^\/+/, '');
+            }
+            delete a.content;
+        });
+
+        // 3.5. Fetch Published Bilim Gündemi for all matching user IDs
+        const [gundemNews] = await pool.query(`
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.is_gundem, a.gundem_data, a.content, a.created_at, a.published_at, a.views
+            FROM articles a
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            WHERE (a.author_id IN (?) OR aa.user_id IN (?)) AND LOWER(a.status) = 'published' AND a.deleted_at IS NULL AND a.is_gundem = 1
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
+        `, [userIds, userIds]);
+
+        gundemNews.forEach(a => {
             if (!a.image_url && a.gundem_data) {
                 try {
                     const gd = typeof a.gundem_data === 'string' ? JSON.parse(a.gundem_data) : a.gundem_data;
@@ -4544,6 +4563,7 @@ app.get('/api/public/author/:identifier', async (req, res) => {
         res.json({
             profile: user,
             articles: articles,
+            gundem: gundemNews,
             experiments: experiments
         });
 
