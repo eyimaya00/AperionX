@@ -5157,6 +5157,9 @@
                     <button class="btn btn-primary" style="padding:6px 14px; font-size:0.85rem;" onclick="openGundemReview(${item.id})">
                         <i class="ph-bold ph-eye"></i> İncele
                     </button>
+                    <button class="btn" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; padding:6px 12px; font-size:0.85rem; font-weight:600; border-radius:6px; display:inline-flex; align-items:center; gap:4px;" onclick="openEditGundemModal(${item.id})" title="Gündemi Düzenle">
+                        <i class="ph-bold ph-pencil-line"></i> Düzenle
+                    </button>
                     ${isPending ? `
                         <button class="btn" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:6px 12px; font-size:0.85rem; font-weight:600; border-radius:6px; display:inline-flex; align-items:center; gap:4px;" onclick="quickGundemRevision(${item.id})" title="Yazara Düzenleme Talebi Gönder">
                             <i class="ph-bold ph-pencil-simple-line"></i> Düzenlemeye Gönder
@@ -5265,6 +5268,9 @@
                             <textarea id="gundem-feedback-reason" placeholder="Düzenleme talebinizi veya gerekçenizi buraya yazın (Yazar bunu görecek)..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; display:none; min-height:80px; font-family:inherit;"></textarea>
                             <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
                                 <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                                <button class="btn" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; padding:8px 16px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="closeModal(); openEditGundemModal(currentGundemId)">
+                                    <i class="ph-bold ph-pencil-line"></i> Düzenle
+                                </button>
                                 <button class="btn" style="background:#f59e0b; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="toggleGundemFeedback('revision')">
                                     <i class="ph-bold ph-pencil-simple-line"></i> Düzenlemeye Gönder
                                 </button>
@@ -6156,6 +6162,213 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/index';
+        }
+
+        // === EDIT GUNDEM MODAL ===
+        let gundemQuillEdit = null;
+
+        async function openEditGundemModal(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/editor/gundem/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    showToast('Gündem yazısı yüklenemedi.', 'error');
+                    return;
+                }
+                const item = await res.json();
+
+                // Build modal HTML
+                const modalHtml = `
+                <div class="modal-overlay" id="edit-gundem-modal" style="display:flex; justify-content:center; align-items:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+                    <div style="background:white; border-radius:16px; width:95%; max-width:1000px; height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                            <h2 style="margin:0; font-size:1.3rem; color:#1e293b;"><i class="ph-bold ph-pencil-line" style="color:#6366f1;"></i> Gündemi Düzenle</h2>
+                            <button onclick="closeEditGundemModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b;">&times;</button>
+                        </div>
+                        <div style="padding:20px 24px; overflow-y:auto; flex:1;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">Başlık</label>
+                                    <input type="text" id="edit-gundem-title" class="form-control" value="${escapeHtml(item.title || '')}" style="width:100%; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">Kategori</label>
+                                    <select id="edit-gundem-category" class="form-control" style="width:100%; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem;">
+                                        <option value="Bilim Gündemi" ${item.category === 'Bilim Gündemi' ? 'selected' : ''}>Bilim Gündemi</option>
+                                        <option value="Biyoloji" ${item.category === 'Biyoloji' ? 'selected' : ''}>Biyoloji</option>
+                                        <option value="Fizik" ${item.category === 'Fizik' ? 'selected' : ''}>Fizik</option>
+                                        <option value="Astronomi" ${item.category === 'Astronomi' ? 'selected' : ''}>Astronomi</option>
+                                        <option value="Teknoloji" ${item.category === 'Teknoloji' ? 'selected' : ''}>Teknoloji</option>
+                                        <option value="Psikoloji" ${item.category === 'Psikoloji' ? 'selected' : ''}>Psikoloji</option>
+                                        <option value="Sağlık" ${item.category === 'Sağlık' ? 'selected' : ''}>Sağlık</option>
+                                        <option value="Yapay Zeka" ${item.category === 'Yapay Zeka' ? 'selected' : ''}>Yapay Zeka</option>
+                                        <option value="Çevre" ${item.category === 'Çevre' ? 'selected' : ''}>Çevre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">Kısa Özet</label>
+                                <textarea id="edit-gundem-excerpt" class="form-control" rows="3" style="width:100%; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem; resize:vertical;">${escapeHtml(item.excerpt || '')}</textarea>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">Etiketler</label>
+                                    <input type="text" id="edit-gundem-tags" class="form-control" value="${escapeHtml(item.tags || '')}" placeholder="Virgülle ayırın" style="width:100%; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">Kapak Görseli Değiştir</label>
+                                    <input type="file" id="edit-gundem-image" accept="image/*" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-size:0.9rem;">
+                                    <small style="color:#64748b; font-size:0.8rem;">Mevcut görseli korumak için boş bırakın.</small>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block; margin-bottom:6px; font-weight:600; color:#374151; font-size:0.9rem;">İçerik</label>
+                                <div id="edit-gundem-editor-container" style="height:350px; border:1px solid #d1d5db; border-radius:8px;"></div>
+                            </div>
+                            <div style="margin-bottom:16px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px;">
+                                <label style="display:block; margin-bottom:6px; font-weight:600; color:#92400e; font-size:0.9rem;"><i class="ph-bold ph-note-pencil"></i> Yazara Not / Düzenleme Gerekçesi (İsteğe bağlı)</label>
+                                <textarea id="edit-gundem-revision-note" rows="3" placeholder="Bu notu yazara iletmek isterseniz doldurun (geri gönderme durumunda yazar bu notu görecektir)..." style="width:100%; padding:10px 14px; border:1px solid #fde68a; border-radius:8px; font-size:0.9rem; resize:vertical; background:white;"></textarea>
+                            </div>
+                            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; font-size:0.85rem; color:#166534;">
+                                <i class="ph-bold ph-info"></i> <strong>Yazar:</strong> ${escapeHtml(item.author_name || 'Bilinmiyor')} &nbsp;|&nbsp; <strong>Durum:</strong> ${item.status === 'published' ? 'Yayında' : item.status === 'pending' ? 'Onay Bekliyor' : 'Reddedildi'} &nbsp;|&nbsp; <strong>Oluşturulma:</strong> ${new Date(item.created_at).toLocaleDateString('tr-TR')}
+                            </div>
+                        </div>
+                        <div style="padding:16px 24px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; background:#f8fafc; border-radius:0 0 16px 16px;">
+                            <button class="btn btn-secondary" onclick="closeEditGundemModal()" style="padding:8px 16px;">İptal</button>
+                            <button class="btn" style="background:#10b981; color:white; border:none; padding:8px 18px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="saveGundemEdit('approve')">
+                                <i class="ph-bold ph-check-circle"></i> Kaydet & Yayına Al
+                            </button>
+                            <button class="btn" style="background:#f59e0b; color:white; border:none; padding:8px 18px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="saveGundemEdit('revision')">
+                                <i class="ph-bold ph-arrow-u-up-left"></i> Düzenleyip Yazara Gönder
+                            </button>
+                            <button class="btn" style="background:#6366f1; color:white; border:none; padding:8px 18px; border-radius:8px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="saveGundemEdit('save')">
+                                <i class="ph-bold ph-floppy-disk"></i> Sadece Kaydet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                // Remove existing modal if any
+                const existingModal = document.getElementById('edit-gundem-modal');
+                if (existingModal) existingModal.remove();
+
+                // Insert modal into body
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                // Initialize Quill editor for gundem content
+                setTimeout(() => {
+                    try {
+                        gundemQuillEdit = new Quill('#edit-gundem-editor-container', {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    [{ 'align': [] }],
+                                    ['blockquote', 'code-block'],
+                                    ['link', 'image', 'video'],
+                                    ['clean']
+                                ]
+                            }
+                        });
+                        // Set content
+                        if (item.content) {
+                            gundemQuillEdit.root.innerHTML = item.content;
+                        }
+                    } catch(e) {
+                        console.error('Failed to init gundem Quill editor:', e);
+                        // Fallback to textarea
+                        const container = document.getElementById('edit-gundem-editor-container');
+                        if (container) {
+                            container.innerHTML = `<textarea id="edit-gundem-content-fallback" style="width:100%; height:100%; padding:12px; border:none; font-family:inherit; font-size:0.95rem; resize:none;">${item.content || ''}</textarea>`;
+                        }
+                    }
+                }, 100);
+
+                // Store the article ID for saving
+                document.getElementById('edit-gundem-modal').dataset.articleId = id;
+
+            } catch(error) {
+                console.error('openEditGundemModal error:', error);
+                showToast('Gündem düzenleme modalı açılırken hata oluştu.', 'error');
+            }
+        }
+
+        function closeEditGundemModal() {
+            const modal = document.getElementById('edit-gundem-modal');
+            if (modal) modal.remove();
+            gundemQuillEdit = null;
+        }
+
+        async function saveGundemEdit(action) {
+            const modal = document.getElementById('edit-gundem-modal');
+            if (!modal) return;
+
+            const articleId = modal.dataset.articleId;
+            const title = document.getElementById('edit-gundem-title')?.value;
+            const category = document.getElementById('edit-gundem-category')?.value;
+            const excerpt = document.getElementById('edit-gundem-excerpt')?.value;
+            const tags = document.getElementById('edit-gundem-tags')?.value;
+            const revisionNote = document.getElementById('edit-gundem-revision-note')?.value;
+            const imageFile = document.getElementById('edit-gundem-image')?.files?.[0];
+
+            // Get content from Quill or fallback textarea
+            let content = '';
+            if (gundemQuillEdit) {
+                content = gundemQuillEdit.root.innerHTML;
+            } else {
+                content = document.getElementById('edit-gundem-content-fallback')?.value || '';
+            }
+
+            if (!title || !title.trim()) {
+                showToast('Başlık boş olamaz.', 'error');
+                return;
+            }
+
+            if (action === 'revision' && (!revisionNote || !revisionNote.trim())) {
+                showToast('Yazara geri göndermek için lütfen düzenleme notunu yazınız.', 'error');
+                return;
+            }
+
+            // Build FormData
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('excerpt', excerpt || '');
+            formData.append('tags', tags || '');
+            formData.append('content', content);
+            formData.append('decision', action);
+            if (revisionNote) formData.append('rejection_reason', revisionNote);
+            if (imageFile) formData.append('image', imageFile);
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/editor/gundem/${articleId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    let msg = 'Gündem yazısı kaydedildi.';
+                    if (action === 'approve') msg = 'Gündem yazısı düzenlendi ve yayına alındı!';
+                    else if (action === 'revision') msg = 'Gündem yazısı düzenlendi ve yazara geri gönderildi.';
+                    showToast(msg, 'success');
+                    closeEditGundemModal();
+                    loadGundemDashboard();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast('Hata: ' + (errData.error || errData.message || 'Bilinmeyen hata'), 'error');
+                }
+            } catch(e) {
+                console.error('saveGundemEdit error:', e);
+                showToast('Sunucu hatası oluştu.', 'error');
+            }
         }
     </script>
     <!-- === COMMENTS === -->

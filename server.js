@@ -5776,6 +5776,119 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
     }
 });
 
+// Editor edits gundem content (with optional image upload)
+app.put('/api/editor/gundem/:id', authenticateToken, upload.any(), optimizeImageMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const articleId = req.params.id;
+    const body = req.body || {};
+    const { title, category, content, excerpt, tags, decision, rejection_reason } = body;
+
+    try {
+        await ensureGundemColumns();
+        const [rows] = await pool.query('SELECT * FROM articles WHERE id = ? AND is_gundem = 1', [articleId]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Gündem yazısı bulunamadı.' });
+
+        const article = rows[0];
+        const authorId = article.author_id;
+        const articleTitle = title || article.title;
+
+        // Handle image upload
+        let image_url = article.image_url;
+        if (req.files && req.files.length > 0) {
+            const imgFile = req.files.find(f => f.fieldname === 'image');
+            if (imgFile) image_url = 'uploads/' + imgFile.filename;
+        }
+        if (body.image_url && body.image_url.startsWith('data:image/')) {
+            try {
+                const matches = body.image_url.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+                if (matches) {
+                    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+                    const base64Data = matches[2];
+                    const filename = `gundem-editor-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+                    const targetPath = path.join(__dirname, 'uploads', filename);
+                    fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+                    image_url = 'uploads/' + filename;
+                }
+            } catch (b64Err) {
+                console.error('Error saving editor base64 cover image:', b64Err);
+            }
+        }
+
+        // Clean content
+        const cleanContent = content ? DOMPurify.sanitize(content) : article.content;
+        const cleanExcerpt = excerpt || article.excerpt;
+        const cleanTags = tags || article.tags;
+        const cleanCategory = category || article.category;
+
+        // Determine status based on decision
+        let newStatus = article.status;
+        let notifyMsg = '';
+        let notifyType = 'info';
+
+        if (decision === 'approve') {
+            newStatus = 'published';
+            notifyMsg = `Editör tarafından düzenlenen Bilim Gündemi yazınız yayına alındı: ${articleTitle}`;
+            notifyType = 'success';
+        } else if (decision === 'revision') {
+            newStatus = 'rejected';
+            notifyMsg = `Editör, Bilim Gündemi yazınızı düzenledi ve size geri gönderdi: ${articleTitle}. Not: ${rejection_reason || 'Lütfen düzenlemeleri gözden geçirin.'}`;
+            notifyType = 'warning';
+        } else if (decision === 'save') {
+            // Just save, keep current status
+            notifyMsg = '';
+        }
+
+        // Build update query
+        let updateFields = 'title = ?, category = ?, excerpt = ?, tags = ?, content = ?, image_url = ?';
+        let updateParams = [articleTitle, cleanCategory, cleanExcerpt, cleanTags, cleanContent, image_url];
+
+        if (decision === 'approve') {
+            if (article.was_published) {
+                updateFields += ', status = ?, rejection_reason = NULL, approved_by = ?';
+                updateParams.push('published', req.user.id);
+            } else {
+                updateFields += ', status = ?, rejection_reason = NULL, published_at = NOW(), was_published = 1, approved_by = ?';
+                updateParams.push('published', req.user.id);
+            }
+        } else if (decision === 'revision') {
+            updateFields += ', status = ?, rejection_reason = ?';
+            updateParams.push('rejected', rejection_reason || 'Editör tarafından düzenlendi. Lütfen gözden geçirin.');
+        }
+
+        updateParams.push(articleId);
+        await pool.query(`UPDATE articles SET ${updateFields} WHERE id = ?`, updateParams);
+        clearCache('articles');
+
+        // Send notification to author if needed
+        if (notifyMsg && authorId) {
+            try {
+                const notifiedUserIds = new Set();
+                notifiedUserIds.add(Number(authorId));
+
+                const [coRows] = await pool.query('SELECT user_id FROM article_authors WHERE article_id = ?', [articleId]);
+                if (coRows && coRows.length > 0) {
+                    coRows.forEach(r => { if (r.user_id) notifiedUserIds.add(Number(r.user_id)); });
+                }
+
+                for (const uid of notifiedUserIds) {
+                    await pool.query(
+                        "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
+                        [uid, notifyMsg, notifyType]
+                    );
+                }
+            } catch (ne) {
+                console.error('Error sending editor-edit notifications:', ne);
+            }
+        }
+
+        res.json({ message: 'Gündem yazısı başarıyla güncellendi.', status: newStatus || article.status });
+    } catch (e) {
+        console.error('Editor gundem edit error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.delete('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
     try {
