@@ -108,7 +108,7 @@
             background-color: var(--gundem-bg);
             color: #f1f5f9;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            overflow-x: clip;
             margin: 0;
             padding: 0;
         }
@@ -1353,8 +1353,17 @@
             flex-shrink: 0;
         }
 
-        /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
-        @media (max-width: 1024px) {
+        /* === TABLET VE DİZÜSTÜ (869px - 1100px: 2 Kolon Korunur) === */
+        @media (max-width: 1100px) and (min-width: 869px) {
+            .gundem-article-container {
+                grid-template-columns: 1fr 270px;
+                gap: 24px;
+                padding: 0 16px;
+            }
+        }
+
+        /* === MOBİL VE DAR TABLET (< 868px) === */
+        @media (max-width: 868px) {
             .gundem-article-container {
                 grid-template-columns: 1fr;
                 max-width: 860px;
@@ -2369,32 +2378,46 @@
                 tocList.appendChild(li);
             });
 
-            // IntersectionObserver ile scroll sırasında aktif başlığı takip et
-            if ('IntersectionObserver' in window) {
-                const observerOptions = {
-                    root: null,
-                    rootMargin: '-80px 0px -60% 0px',
-                    threshold: 0
-                };
+            // Scroll sırasında aktif okunan başlığı İçindekiler'de otomatik ve kesintisiz takip et (Scroll Spy)
+            let isScrollTicking = false;
+            function updateActiveToc() {
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                const header = document.getElementById('mainHeader');
+                const headerH = header ? header.offsetHeight : 65;
+                const triggerPoint = scrollY + headerH + 90;
 
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            const activeId = entry.target.id;
-                            document.querySelectorAll('.sidebar-toc-anchor').forEach((link) => {
-                                const href = link.getAttribute('href');
-                                if (href === '#' + activeId) {
-                                    link.classList.add('active');
-                                } else {
-                                    link.classList.remove('active');
-                                }
-                            });
+                let activeId = headingElements.length > 0 ? headingElements[0].id : null;
+                for (let i = 0; i < headingElements.length; i++) {
+                    const topPos = headingElements[i].el.getBoundingClientRect().top + scrollY;
+                    if (topPos <= triggerPoint) {
+                        activeId = headingElements[i].id;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (activeId) {
+                    const links = document.querySelectorAll('.sidebar-toc-anchor');
+                    links.forEach((link) => {
+                        const href = link.getAttribute('href');
+                        if (href === '#' + activeId) {
+                            link.classList.add('active');
+                        } else {
+                            link.classList.remove('active');
                         }
                     });
-                }, observerOptions);
-
-                headingElements.forEach(h => observer.observe(h.el));
+                }
+                isScrollTicking = false;
             }
+
+            window.addEventListener('scroll', () => {
+                if (!isScrollTicking) {
+                    window.requestAnimationFrame(updateActiveToc);
+                    isScrollTicking = true;
+                }
+            }, { passive: true });
+
+            updateActiveToc();
         }
 
         /* === BİLDİRİM TOAST FONKSİYONU === */
