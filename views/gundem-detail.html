@@ -1080,6 +1080,19 @@
             color: #e2e8f0;
         }
 
+        .gundem-article-prose img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            cursor: zoom-in;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .gundem-article-prose img:hover {
+            transform: scale(1.015);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        }
+
         /* Alt Paylaşım Alanı */
         .gundem-bottom-share-box {
             margin-top: 50px;
@@ -2476,6 +2489,7 @@
             }
         }
     </script>
+    <script src="/lightbox.js"></script>
 </body>
 
 </html>

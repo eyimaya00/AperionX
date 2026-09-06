@@ -803,7 +803,6 @@ function buildAuthorCardHtml(authors, formattedDate) {
                         <i class="ph-fill ph-seal-check" title="Doğrulanmış Yazar"></i>
                     </a>
                     <span class="sidebar-author-title">${escapeHtml(title)}</span>
-                    <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> ${formattedDate} tarihinde yayınlandı</span>
                 </div>
             </div>
         `;
@@ -844,10 +843,6 @@ function buildAuthorCardHtml(authors, formattedDate) {
     }).join('');
 
     return `
-        <div class="sidebar-joint-header">
-            <span class="sidebar-joint-badge"><i class="ph-bold ph-users-three"></i> Ortak Çalışma (${authors.length} Yazar)</span>
-            <span class="sidebar-author-date"><i class="ph ph-calendar-blank"></i> ${formattedDate}</span>
-        </div>
         <div class="sidebar-authors-joint-list">
             ${listHtml}
         </div>

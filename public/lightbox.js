@@ -21,7 +21,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. Event Delegation for Images (Handles dynamic content)
     document.body.addEventListener('click', function (e) {
         if (e.target.tagName === 'IMG' &&
-            (e.target.closest('.article-content') || e.target.classList.contains('detail-hero-image'))) {
+            (e.target.closest('.article-content') || 
+             e.target.closest('.gundem-article-prose') ||
+             e.target.closest('.ql-editor') ||
+             e.target.classList.contains('detail-hero-image'))) {
+
+            // Exclude avatar images or tiny icons if any
+            if (e.target.classList.contains('sidebar-author-img') || 
+                e.target.closest('.author-avatar') ||
+                e.target.closest('.sidebar-author-row')) {
+                return;
+            }
 
             const src = e.target.getAttribute('src');
             if (src) {
