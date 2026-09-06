@@ -4425,12 +4425,38 @@ app.get('/api/public/author/:identifier', async (req, res) => {
 
         // 3. Fetch Published Articles for all matching user IDs
         const [articles] = await pool.query(`
-            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.created_at, a.published_at, a.views
+            SELECT DISTINCT a.id, a.title, a.slug, a.excerpt, a.image_url, a.category, a.is_gundem, a.gundem_data, a.content, a.created_at, a.published_at, a.views
             FROM articles a
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             WHERE (a.author_id IN (?) OR aa.user_id IN (?)) AND LOWER(a.status) = 'published' AND a.deleted_at IS NULL
             ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `, [userIds, userIds]);
+
+        // Normalize article image URLs and extract fallback if missing
+        articles.forEach(a => {
+            if (!a.image_url && a.gundem_data) {
+                try {
+                    const gd = typeof a.gundem_data === 'string' ? JSON.parse(a.gundem_data) : a.gundem_data;
+                    if (gd.imageDataUrl) a.image_url = gd.imageDataUrl;
+                    else if (gd.imageUrl) a.image_url = gd.imageUrl;
+                    else if (Array.isArray(gd.sections)) {
+                        for (const sec of gd.sections) {
+                            const m = sec.content && sec.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                            if (m && m[1]) { a.image_url = m[1]; break; }
+                        }
+                    }
+                } catch(e) {}
+            }
+            if (!a.image_url && a.content) {
+                const m = a.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (m && m[1]) a.image_url = m[1];
+            }
+            if (a.image_url && !a.image_url.startsWith('http') && !a.image_url.startsWith('data:')) {
+                a.image_url = '/' + a.image_url.replace(/^\/+/, '');
+            }
+            delete a.content;
+            delete a.gundem_data;
+        });
 
         // 4. Fetch Published Experiments for all matching user IDs
         const [experiments] = await pool.query(`
@@ -4440,6 +4466,12 @@ app.get('/api/public/author/:identifier', async (req, res) => {
             WHERE (e.author_id IN (?) OR ea.user_id IN (?)) AND LOWER(e.status) = 'published' AND e.deleted_at IS NULL
             ORDER BY COALESCE(e.published_at, e.created_at) DESC
         `, [userIds, userIds]);
+
+        experiments.forEach(e => {
+            if (e.image_url && !e.image_url.startsWith('http') && !e.image_url.startsWith('data:')) {
+                e.image_url = '/' + e.image_url.replace(/^\/+/, '');
+            }
+        });
 
         res.json({
             profile: user,
@@ -5571,6 +5603,51 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
         if (imgFile) image_url = 'uploads/' + imgFile.filename;
     }
 
+    // Save base64 image to disk if provided
+    if (image_url && image_url.startsWith('data:image/')) {
+        try {
+            const matches = image_url.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+            if (matches) {
+                const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+                const base64Data = matches[2];
+                const filename = `gundem-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+                const targetPath = path.join(__dirname, 'uploads', filename);
+                fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+                image_url = 'uploads/' + filename;
+            }
+        } catch (b64Err) {
+            console.error('Error saving base64 cover image:', b64Err);
+        }
+    }
+
+    // Strip leading slashes so image paths are stored uniformly as uploads/...
+    if (image_url && !image_url.startsWith('http') && !image_url.startsWith('data:')) {
+        image_url = image_url.replace(/^\/+/, '');
+    }
+
+    // If no cover image was provided, try auto-detecting first image from content
+    if (!image_url && content) {
+        const match = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (match && match[1]) {
+            let extracted = match[1];
+            if (extracted.startsWith('data:image/')) {
+                try {
+                    const matches = extracted.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+                    if (matches) {
+                        const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+                        const base64Data = matches[2];
+                        const filename = `gundem-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+                        const targetPath = path.join(__dirname, 'uploads', filename);
+                        fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+                        image_url = 'uploads/' + filename;
+                    }
+                } catch(e) {}
+            } else if (extracted.length <= 255) {
+                image_url = extracted.replace(/^\/+/, '');
+            }
+        }
+    }
+
     let coAuthorIds = [];
     if (body.coAuthors) {
         try {
@@ -5788,6 +5865,23 @@ app.get('/api/author/gundem', authenticateToken, async (req, res) => {
              ORDER BY COALESCE(articles.updated_at, articles.submitted_at, articles.created_at) DESC`,
             [req.user.id, req.user.id]
         );
+
+        rows.forEach(r => {
+            if (!r.image_url && r.gundem_data) {
+                try {
+                    const gd = typeof r.gundem_data === 'string' ? JSON.parse(r.gundem_data) : r.gundem_data;
+                    if (gd.imageDataUrl) r.image_url = gd.imageDataUrl;
+                    else if (gd.imageUrl) r.image_url = gd.imageUrl;
+                } catch(e) {}
+            }
+            if (!r.image_url && r.content) {
+                const m = r.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (m && m[1]) r.image_url = m[1];
+            }
+            if (r.image_url && !r.image_url.startsWith('http') && !r.image_url.startsWith('data:')) {
+                r.image_url = '/' + r.image_url.replace(/^\/+/, '');
+            }
+        });
         res.json(rows);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -5807,6 +5901,9 @@ app.get('/api/author/gundem/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ error: 'Bilim Gündemi yazısı bulunamadı.' });
         }
         const article = rows[0];
+        if (article.image_url && !article.image_url.startsWith('http') && !article.image_url.startsWith('data:')) {
+            article.image_url = '/' + article.image_url.replace(/^\/+/, '');
+        }
 
         // Fetch all authors from article_authors
         const [authors] = await pool.query(`

@@ -797,16 +797,39 @@
                 } else {
                     grid.innerHTML = combinedItems.map(item => {
                         const isExperiment = item.type === 'experiment';
-                        const linkPath = isExperiment ? `/deney/${item.slug || item.id}` : `/makale/${item.slug || item.id}`;
-                        const badgeLabel = item.category || 'Genel';
-                        const typeLabel = isExperiment ? 'Deney' : 'Makale';
+                        const isGundem = Boolean(item.is_gundem) || item.type === 'gundem';
+                        const linkPath = isExperiment 
+                            ? `/deney/${item.slug || item.id}` 
+                            : (isGundem ? `/gundem/${item.slug || item.id}` : `/makale/${item.slug || item.id}`);
+                        const badgeLabel = item.category || (isGundem ? 'Gündem' : 'Genel');
+                        const typeLabel = isExperiment ? 'Deney' : (isGundem ? 'Gündem' : 'Makale');
+                        const typeBadgeStyle = isGundem 
+                            ? 'background: #0284c7; border-color: transparent;' 
+                            : (isExperiment ? 'background: #10b981; border-color: transparent;' : 'background: #6366f1; border-color: transparent;');
+
+                        const fallbackImg = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop';
+                        let rawImg = item.image_url;
+                        if (!rawImg && item.gundem_data) {
+                            try {
+                                const gd = typeof item.gundem_data === 'string' ? JSON.parse(item.gundem_data) : item.gundem_data;
+                                rawImg = gd.imageDataUrl || gd.imageUrl;
+                            } catch(e) {}
+                        }
+                        let finalImgSrc = fallbackImg;
+                        if (rawImg && rawImg !== 'null' && rawImg !== 'undefined') {
+                            if (rawImg.startsWith('http') || rawImg.startsWith('data:')) {
+                                finalImgSrc = rawImg;
+                            } else {
+                                finalImgSrc = '/' + rawImg.replace(/^\/+/, '');
+                            }
+                        }
 
                         return `
                         <a href="${linkPath}" class="author-article-card">
                             <div class="card-image-wrapper">
-                                <img src="${item.image_url ? (item.image_url.startsWith('http') ? item.image_url : '/' + item.image_url) : '/uploads/default-hero.jpg'}" alt="${item.title}" class="card-image">
+                                <img src="${finalImgSrc}" alt="${item.title}" class="card-image" onerror="this.onerror=null; this.src='${fallbackImg}';">
                                 <span class="card-category" style="top: 20px; left: 20px;">${badgeLabel}</span>
-                                <span class="card-category" style="top: 20px; right: 20px; left: auto; background: #6366f1; border-color: transparent;">${typeLabel}</span>
+                                <span class="card-category" style="top: 20px; right: 20px; left: auto; ${typeBadgeStyle}">${typeLabel}</span>
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${item.title}</h3>

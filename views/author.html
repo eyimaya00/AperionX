@@ -12936,8 +12936,12 @@
                         : extractSectionsFromHtml(row.content);
 
                     let imgUrl = row.image_url || structured.imageDataUrl || null;
-                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
-                        imgUrl = '/' + imgUrl;
+                    if (!imgUrl && row.content) {
+                        const m = row.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                        if (m && m[1]) imgUrl = m[1];
+                    }
+                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('data:')) {
+                        imgUrl = '/' + imgUrl.replace(/^\/+/, '');
                     }
 
                     let tags = [];
@@ -13138,8 +13142,11 @@
                 
                 let thumbHtml = `<div class="art-thumb"><i class="ph-fill ph-newspaper"></i></div>`;
                 if (item.imageDataUrl || item.image_url) {
-                    const src = item.imageDataUrl || item.image_url;
-                    thumbHtml = `<img src="${src}" class="art-thumb" alt="${escapeHtml(item.title)}" onerror="this.outerHTML='<div class=\\'art-thumb\\'><i class=\\'ph-fill ph-newspaper\\'></i></div>'">`;
+                    let src = item.imageDataUrl || item.image_url;
+                    if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                        src = '/' + src.replace(/^\/+/, '');
+                    }
+                    thumbHtml = `<img src="${src}" class="art-thumb" alt="${escapeHtml(item.title)}" onerror="this.onerror=null; this.outerHTML='<div class=\\'art-thumb\\'><i class=\\'ph-fill ph-newspaper\\'></i></div>'">`;
                 }
 
                 const views = parseInt(item.views || 0, 10).toLocaleString('tr-TR');
@@ -13736,8 +13743,25 @@
             // Image
             if (bgeImageFile) {
                 formData.append('image', bgeImageFile);
-            } else if (bgeImageDataUrl && (bgeImageDataUrl.startsWith('http') || bgeImageDataUrl.startsWith('/uploads/'))) {
-                formData.append('image_url', bgeImageDataUrl);
+            } else if (bgeImageDataUrl) {
+                if (bgeImageDataUrl.startsWith('data:image/')) {
+                    try {
+                        const parts = bgeImageDataUrl.split(',');
+                        const mime = parts[0].match(/:(.*?);/)[1];
+                        const bstr = atob(parts[1]);
+                        let n = bstr.length;
+                        const u8arr = new Uint8Array(n);
+                        while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n);
+                        }
+                        const blob = new Blob([u8arr], { type: mime });
+                        formData.append('image', blob, 'cover-image.jpg');
+                    } catch (b64Err) {
+                        formData.append('image_url', bgeImageDataUrl);
+                    }
+                } else {
+                    formData.append('image_url', bgeImageDataUrl);
+                }
             }
 
             const publishBtns = document.querySelectorAll('.bge-btn-publish');
@@ -13931,9 +13955,13 @@
                     if (el('bge-alt-text')) el('bge-alt-text').value = item.altText || '';
 
                     // Image restoration
-                    const imgUrl = item.imageDataUrl || item.image_url;
+                    let imgUrl = item.imageDataUrl || item.image_url;
+                    if (!imgUrl && item.content) {
+                        const m = item.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                        if (m && m[1]) imgUrl = m[1];
+                    }
                     if (imgUrl) {
-                        bgeImageDataUrl = imgUrl.startsWith('http') ? imgUrl : ('/' + imgUrl.replace(/^\//, ''));
+                        bgeImageDataUrl = (imgUrl.startsWith('http') || imgUrl.startsWith('data:')) ? imgUrl : ('/' + imgUrl.replace(/^\/+/, ''));
                         const zone = el('bge-upload-zone');
                         const placeholder = el('bge-upload-placeholder');
                         const previewWrap = el('bge-upload-preview-wrap');
