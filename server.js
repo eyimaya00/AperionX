@@ -348,6 +348,25 @@ const STATIC_GUNDEM_NEWS = {
     }
 };
 
+async function ensureGundemArticle(slug) {
+    if (!slug) return null;
+    try {
+        const [rows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [slug]);
+        if (rows.length > 0) return rows[0].id;
+        if (STATIC_GUNDEM_NEWS && STATIC_GUNDEM_NEWS[slug]) {
+            const item = STATIC_GUNDEM_NEWS[slug];
+            const [res] = await pool.query(`
+                INSERT INTO articles (title, slug, category, excerpt, content, image_url, status, is_gundem, views, published_at, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'published', 1, ?, NOW(), NOW())
+            `, [item.title, slug, item.category || 'Gündem', item.excerpt || '', item.content || '', item.imageUrl || '', item.views || 0]);
+            return res.insertId;
+        }
+    } catch(e) {
+        console.error('ensureGundemArticle error:', e);
+    }
+    return null;
+}
+
 app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim-gundemi/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
     const origin = `${req.protocol}://${req.get('host')}`;
@@ -449,6 +468,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
 
         // 2. Veritabanında yoksa statik gündem havuzuna bak
         if (!articleData && STATIC_GUNDEM_NEWS[slug]) {
+            const staticId = await ensureGundemArticle(slug);
             const item = STATIC_GUNDEM_NEWS[slug];
             const authorCardHtml = buildAuthorCardHtml([{
                 fullname: item.authorName || 'AperionX Bilim Ekibi',
@@ -457,7 +477,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             }], item.date || 'Bugün');
 
             articleData = {
-                id: 0,
+                id: staticId || 0,
                 title: item.title,
                 category: item.category || 'Gündem',
                 excerpt: item.excerpt,
@@ -3254,6 +3274,10 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
 app.get('/api/author/article-ratings', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? '1=1' : '(a.author_id = ? OR aa.user_id = ?)';
+        const params = isStaff ? [] : [userId, userId];
+
         const query = `
             SELECT 
                 r.id,
@@ -3261,22 +3285,26 @@ app.get('/api/author/article-ratings', authenticateToken, async (req, res) => {
                 r.rating,
                 r.created_at,
                 r.updated_at,
-                COALESCE(u.fullname, u.name, u.username, 'Okur') AS user_name,
+                COALESCE(u.fullname, u.username, 'Okur') AS user_name,
                 u.avatar_url AS user_avatar,
                 a.title AS article_title,
-                a.slug AS article_slug
+                a.slug AS article_slug,
+                a.is_gundem
             FROM article_ratings r
             JOIN articles a ON r.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON r.user_id = u.id
-            WHERE a.author_id = ? OR aa.user_id = ?
+            WHERE ${whereClause}
             ORDER BY COALESCE(r.updated_at, r.created_at) DESC
         `;
-        const [rows] = await pool.query(query, [userId, userId]);
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (e) {
         console.error('Author Article Ratings Error:', e);
         try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? '1=1' : 'a.author_id = ?';
+            const fbParams = isStaff ? [] : [req.user.id];
             const fallbackQuery = `
                 SELECT 
                     r.id,
@@ -3284,17 +3312,18 @@ app.get('/api/author/article-ratings', authenticateToken, async (req, res) => {
                     r.rating,
                     r.created_at,
                     r.updated_at,
-                    COALESCE(u.fullname, u.name, u.username, 'Okur') AS user_name,
+                    COALESCE(u.fullname, u.username, 'Okur') AS user_name,
                     u.avatar_url AS user_avatar,
                     a.title AS article_title,
-                    a.slug AS article_slug
+                    a.slug AS article_slug,
+                    a.is_gundem
                 FROM article_ratings r
                 JOIN articles a ON r.article_id = a.id
                 JOIN users u ON r.user_id = u.id
-                WHERE a.author_id = ?
+                WHERE ${fbWhere}
                 ORDER BY COALESCE(r.updated_at, r.created_at) DESC
             `;
-            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
             return res.json(fbRows);
         } catch (e2) {
             console.error('Author Article Ratings Fallback Error:', e2);
@@ -7975,19 +8004,55 @@ app.get('/article-detail.html', async (req, res) => {
 // === LIKES & COMMENTS ===
 
 // Likes
-app.get('/api/articles/:id/like', authenticateToken, async (req, res) => {
+app.get('/api/articles/:id/like', async (req, res) => {
     try {
-        const articleId = req.params.id;
-        const userId = req.user.id;
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
+
+        let userId = null;
+        const authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'gizli_anahtar');
+                userId = decoded.id;
+            } catch (err) {}
+        }
+
         const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE article_id = ?', [articleId]);
-        const [me] = await pool.query('SELECT * FROM likes WHERE article_id = ? AND user_id = ?', [articleId, userId]);
-        res.json({ count: likes[0].count, liked: !!me.length });
+        let liked = false;
+        if (userId) {
+            const [me] = await pool.query('SELECT * FROM likes WHERE article_id = ? AND user_id = ?', [articleId, userId]);
+            liked = !!me.length;
+        }
+        res.json({ count: likes[0].count, liked: liked });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/articles/:id/like', authenticateToken, async (req, res) => {
     try {
-        const articleId = req.params.id;
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
         const userId = req.user.id;
         const [exists] = await pool.query('SELECT * FROM likes WHERE article_id = ? AND user_id = ?', [articleId, userId]);
         if (exists.length) {
@@ -8003,7 +8068,18 @@ app.post('/api/articles/:id/like', authenticateToken, async (req, res) => {
 // === ARTICLE RATINGS (Puanlama / Yıldız Değerlendirmesi) ===
 app.post('/api/articles/:id/rate', authenticateToken, async (req, res) => {
     try {
-        const articleId = parseInt(req.params.id, 10);
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
         const userId = req.user.id;
         let { rating } = req.body;
         rating = parseInt(rating, 10);
@@ -8040,7 +8116,18 @@ app.post('/api/articles/:id/rate', authenticateToken, async (req, res) => {
 
 app.get('/api/articles/:id/rate', async (req, res) => {
     try {
-        const articleId = parseInt(req.params.id, 10);
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
         let userRating = null;
 
         const authHeader = req.headers['authorization'];
@@ -8176,7 +8263,18 @@ app.get('/api/user/liked-articles', authenticateToken, async (req, res) => {
 // Comments - Public Get (Approved Only + My Pending)
 app.get('/api/articles/:id/comments', async (req, res) => {
     try {
-        const articleId = req.params.id;
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
         let userId = null;
 
         // Manual Auth Check
@@ -8223,12 +8321,24 @@ app.get('/api/articles/:id/comments', async (req, res) => {
 // Post Comment (Auth Required)
 app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
     try {
+        let articleId = req.params.id;
+        if (!/^\d+$/.test(articleId)) {
+            let realId = await ensureGundemArticle(articleId);
+            if (!realId) {
+                const [artRows] = await pool.query('SELECT id FROM articles WHERE slug = ?', [articleId]);
+                if (artRows.length > 0) realId = artRows[0].id;
+            }
+            if (realId) articleId = realId;
+            else return res.status(404).json({ error: 'Makale bulunamadı' });
+        } else {
+            articleId = parseInt(articleId, 10);
+        }
         const { content } = req.body;
         if (!content) return res.status(400).json({ error: 'Yorum boş olamaz' });
 
         // Default is_approved = 1 (Auto-approve)
         const cleanContent = DOMPurify.sanitize(content);
-        await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
+        await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [articleId, req.user.id, cleanContent]);
         res.json({ message: 'Yorum gönderildi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

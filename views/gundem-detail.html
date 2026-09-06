@@ -598,42 +598,40 @@
             color: #94a3b8;
         }
 
-        /* 1. Sen de Değerlendir (AperionX Logo Yıldızlar) */
+        /* 1. Sen de Değerlendir (Yıldız Değerlendirmesi) */
         .sidebar-rating-stars {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin: 8px 0 10px;
         }
 
         .sidebar-rating-star {
-            width: 22px;
-            height: 22px;
+            font-size: 1.65rem;
+            color: #475569;
             cursor: pointer;
-            opacity: 0.35;
-            filter: grayscale(100%) brightness(0.7);
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
-            -webkit-user-drag: none;
-            object-fit: contain;
-            border-radius: 4px;
-            padding: 1px;
-            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .sidebar-rating-star:hover {
-            transform: scale(1.15) translateY(-1px);
+            transform: scale(1.25) translateY(-2px);
+            color: #fbbf24;
         }
 
         .sidebar-rating-star.active {
-            opacity: 1;
-            filter: grayscale(0%) brightness(1);
-            transform: scale(1.05);
+            color: #f59e0b !important;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+            transform: scale(1.08);
         }
 
         .sidebar-rating-star.hovered {
-            opacity: 0.85;
-            filter: grayscale(0%) brightness(0.95);
+            color: #fbbf24 !important;
+            filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5));
         }
 
         .sidebar-rating-info {
@@ -841,24 +839,29 @@
 
         .sidebar-comment-textarea {
             width: 100%;
-            min-height: 64px;
+            min-height: 74px;
             padding: 10px 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(9, 11, 16, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(9, 11, 16, 0.85);
             color: #ffffff;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             font-family: 'Inter', sans-serif;
             line-height: 1.5;
-            resize: none;
+            resize: vertical;
             box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: text !important;
+            pointer-events: auto !important;
+            position: relative;
+            z-index: 5;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
         .sidebar-comment-textarea:focus {
             outline: none;
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            background: rgba(15, 23, 42, 0.95);
         }
 
         .sidebar-comment-btn-row {
@@ -1719,11 +1722,11 @@
                         <span class="sidebar-rating-badge" id="ratingScoreBadge" style="font-size: 0.76rem; font-weight: 700; color: #a5b4fc;">5.0</span>
                     </div>
                     <div class="sidebar-rating-stars" id="ratingStars">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Yıldız">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Yıldız">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Yıldız">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Yıldız">
-                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Yıldız">
+                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="1" title="1 Yıldız"></i>
+                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="2" title="2 Yıldız"></i>
+                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="3" title="3 Yıldız"></i>
+                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="4" title="4 Yıldız"></i>
+                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="5" title="5 Yıldız"></i>
                     </div>
                     <div class="sidebar-rating-info">
                         <span id="ratingStatusText">Habere oy verin</span>
@@ -1900,6 +1903,18 @@
     <script defer src="/script_v105.js?v=326"></script>
 
     <script>
+        const RAW_ARTICLE_ID = '{{ARTICLE_ID}}';
+        let CURRENT_ARTICLE_ID = parseInt(RAW_ARTICLE_ID, 10);
+        if (isNaN(CURRENT_ARTICLE_ID) || CURRENT_ARTICLE_ID <= 0) {
+            CURRENT_ARTICLE_ID = 0;
+        }
+
+        function getArticleKey() {
+            if (CURRENT_ARTICLE_ID > 0) return CURRENT_ARTICLE_ID;
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            return pathParts[pathParts.length - 1] || '0';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             /* === SCROLL DİNLENEREK HEADER DEĞİŞİMİ === */
             const mainHeader = document.getElementById('mainHeader');
@@ -1997,9 +2012,16 @@
 
         /* === GİRİŞ KONTROL YARDIMCISI === */
         function isUserLoggedIn() {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            if (token && token.trim() !== '' && token !== 'null' && token !== 'undefined') return true;
             const user = localStorage.getItem('user') || localStorage.getItem('currentUser');
-            return !!(token && user);
+            if (user) {
+                try {
+                    const u = typeof user === 'string' ? JSON.parse(user) : user;
+                    if (u && (u.id || u.email || u.username)) return true;
+                } catch (e) {}
+            }
+            return false;
         }
 
         /* === GOOGLE OAUTH YEDEK ÇAĞRI === */
@@ -2013,7 +2035,7 @@
             };
         }
 
-        /* === 1. APERIONX LOGO YILDIZ DEĞERLENDİRME === */
+        /* === 1. YILDIZ DEĞERLENDİRME SİSTEMİ === */
         function initRatingSystem() {
             const starsContainer = document.getElementById('ratingStars');
             if (!starsContainer) return;
@@ -2021,37 +2043,41 @@
             const statusText = document.getElementById('ratingStatusText');
             const userScoreDisplay = document.getElementById('userScoreDisplay');
             const scoreBadge = document.getElementById('ratingScoreBadge');
-            const storageKey = 'aperionx_rating_' + window.location.pathname;
+            const artKey = getArticleKey();
+            const storageKey = 'aperionx_rating_' + artKey;
 
+            let currentScore = 5;
             const savedRating = localStorage.getItem(storageKey);
             if (savedRating) {
-                applyRating(parseInt(savedRating, 10));
+                currentScore = parseInt(savedRating, 10);
+                applyRating(currentScore);
                 if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
-                if (userScoreDisplay) userScoreDisplay.innerText = `${savedRating}/5`;
-                if (scoreBadge) scoreBadge.innerText = `${savedRating}.0`;
-            } else if (!isUserLoggedIn()) {
-                if (statusText) statusText.innerText = 'Değerlendirmek için üye girişi yapın';
+                if (userScoreDisplay) userScoreDisplay.innerText = `${savedRating}/5 Yıldız`;
+            } else {
+                applyRating(5);
             }
 
             // Sunucudan güncel ortalama ve kullanıcının puanını yükle
-            if (CURRENT_ARTICLE_ID > 0) {
-                const token = localStorage.getItem('token');
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                fetch(`/api/articles/${CURRENT_ARTICLE_ID}/rate`, { headers })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data && data.avg_rating && scoreBadge) {
-                            scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
-                        }
-                        if (data && data.user_rating) {
-                            applyRating(data.user_rating);
-                            if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
-                            if (userScoreDisplay) userScoreDisplay.innerText = `${data.user_rating}/5`;
-                            localStorage.setItem(storageKey, data.user_rating);
-                        }
-                    })
-                    .catch(() => {});
-            }
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            fetch(`/api/articles/${artKey}/rate`, { headers })
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.avg_rating && scoreBadge) {
+                        scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
+                    }
+                    if (data && data.user_rating) {
+                        currentScore = parseInt(data.user_rating, 10);
+                        applyRating(currentScore);
+                        if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
+                        if (userScoreDisplay) userScoreDisplay.innerText = `${data.user_rating}/5 Yıldız`;
+                        localStorage.setItem(storageKey, data.user_rating);
+                    } else if (data && data.avg_rating && !savedRating) {
+                        currentScore = Math.max(1, Math.min(5, Math.round(Number(data.avg_rating))));
+                        applyRating(currentScore);
+                    }
+                })
+                .catch(() => {});
 
             stars.forEach((star) => {
                 star.addEventListener('mouseenter', () => {
@@ -2072,37 +2098,36 @@
                         return;
                     }
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
+                    currentScore = rating;
                     localStorage.setItem(storageKey, rating);
                     applyRating(rating);
                     if (statusText) statusText.innerText = 'Puanınız kaydediliyor...';
-                    if (userScoreDisplay) userScoreDisplay.innerText = `${rating}/5`;
+                    if (userScoreDisplay) userScoreDisplay.innerText = `${rating}/5 Yıldız`;
 
-                    if (CURRENT_ARTICLE_ID > 0) {
-                        try {
-                            const token = localStorage.getItem('token');
-                            const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/rate`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify({ rating })
-                            });
-                            if (res.ok) {
-                                const data = await res.json();
-                                if (statusText) statusText.innerText = 'Puanınız kaydedildi!';
-                                if (scoreBadge && data.avg_rating) {
-                                    scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
-                                }
-                                showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
-                                return;
+                    try {
+                        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+                        const res = await fetch(`/api/articles/${artKey}/rate`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ rating })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (statusText) statusText.innerText = 'Puanınız kaydedildi!';
+                            if (scoreBadge && data.avg_rating) {
+                                scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
                             }
-                        } catch (e) {
-                            console.error('Rating submit error:', e);
+                            showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
+                            return;
                         }
+                    } catch (e) {
+                        console.error('Rating submit error:', e);
                     }
                     if (statusText) statusText.innerText = 'Puanınız için teşekkürler!';
-                    showGundemToast(`Haber ${rating} AperionX puanı ile değerlendirildi!`);
+                    showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
                 });
             });
 
@@ -2110,11 +2135,13 @@
                 stars.forEach((s) => {
                     const val = parseInt(s.getAttribute('data-rating'), 10);
                     s.classList.toggle('hovered', val <= rating);
+                    s.classList.toggle('active', val <= rating);
                 });
             }
 
             function clearHover() {
                 stars.forEach((s) => s.classList.remove('hovered'));
+                applyRating(currentScore);
             }
 
             function applyRating(rating) {
@@ -2150,10 +2177,8 @@
         }
 
         /* === 3. TARTIŞMALAR / YORUMLAR VE BEĞENİ ENTEGRASYONU === */
-        const CURRENT_ARTICLE_ID = parseInt('{{ARTICLE_ID}}', 10) || 0;
-
         function getCommentsStorageKey() {
-            return 'aperionx_comments_' + window.location.pathname;
+            return 'aperionx_comments_' + getArticleKey();
         }
 
         async function loadSidebarComments() {
@@ -2161,40 +2186,39 @@
             const countBadge = document.getElementById('commentCountBadge');
             if (!commentListEl) return;
 
-            // 1. Veritabanı API'sinden çek
-            if (CURRENT_ARTICLE_ID > 0) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                    const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/comments`, { headers });
-                    if (res.ok) {
-                        const comments = await res.json();
-                        if (countBadge) countBadge.innerText = `${comments ? comments.length : 0} Yorum`;
+            const artKey = getArticleKey();
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-                        if (!comments || comments.length === 0) {
-                            commentListEl.innerHTML = '<p class="sidebar-no-comments">Henüz tartışma başlatılmadı. İlk yorumu siz yapın!</p>';
-                            return;
-                        }
+            try {
+                const res = await fetch(`/api/articles/${artKey}/comments`, { headers });
+                if (res.ok) {
+                    const comments = await res.json();
+                    if (countBadge) countBadge.innerText = `${comments ? comments.length : 0} Yorum`;
 
-                        const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-                        commentListEl.innerHTML = comments.map(c => {
-                            const d = c.created_at ? new Date(c.created_at) : new Date();
-                            const dateStr = `${d.getDate()} ${trMonths[d.getMonth()]} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                            return `
-                                <div class="sidebar-comment-item">
-                                    <div class="sidebar-comment-author">
-                                        <span><i class="ph-fill ph-user-circle"></i> ${escapeHtml(c.fullname || 'AperionX Okuru')}</span>
-                                        <span class="sidebar-comment-date">${dateStr}</span>
-                                    </div>
-                                    <p class="sidebar-comment-text">${escapeHtml(c.content)}</p>
-                                </div>
-                            `;
-                        }).join('');
+                    if (!comments || comments.length === 0) {
+                        commentListEl.innerHTML = '<p class="sidebar-no-comments">Henüz tartışma başlatılmadı. İlk yorumu siz yapın!</p>';
                         return;
                     }
-                } catch (e) {
-                    console.error('Error fetching comments from API:', e);
+
+                    const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                    commentListEl.innerHTML = comments.map(c => {
+                        const d = c.created_at ? new Date(c.created_at) : new Date();
+                        const dateStr = `${d.getDate()} ${trMonths[d.getMonth()]} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                        return `
+                            <div class="sidebar-comment-item">
+                                <div class="sidebar-comment-author">
+                                    <span><i class="ph-fill ph-user-circle"></i> ${escapeHtml(c.fullname || 'AperionX Okuru')}</span>
+                                    <span class="sidebar-comment-date">${dateStr}</span>
+                                </div>
+                                <p class="sidebar-comment-text">${escapeHtml(c.content)}</p>
+                            </div>
+                        `;
+                    }).join('');
+                    return;
                 }
+            } catch (e) {
+                console.error('Error fetching comments from API:', e);
             }
 
             // 2. Statik makaleler için LocalStorage yedeği
@@ -2221,25 +2245,27 @@
             const input = document.getElementById('sidebarCommentInput');
             if (!input) return;
 
-            if (!isUserLoggedIn()) {
-                input.placeholder = 'Yorum yapmak için lütfen üye girişi yapın...';
+            // Önceden yazılmış ama giriş bekleyen taslak varsa geri getir
+            const pending = sessionStorage.getItem('pending_gundem_comment');
+            if (pending) {
+                input.value = pending;
+                sessionStorage.removeItem('pending_gundem_comment');
             }
 
-            input.addEventListener('focus', (e) => {
-                if (!isUserLoggedIn()) {
-                    e.preventDefault();
-                    input.blur();
-                    showGundemToast('Yorum yapabilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
-                    if (typeof openModal === 'function') {
-                        openModal('loginModal');
-                    }
-                }
-            });
+            input.placeholder = isUserLoggedIn() 
+                ? 'Bu gelişme hakkındaki görüşünüzü paylaşın...' 
+                : 'Bu gelişme hakkındaki görüşünüzü paylaşın... (Giriş yaparak gönderin)';
         }
 
         async function handleSidebarComment(e) {
             e.preventDefault();
+            const input = document.getElementById('sidebarCommentInput');
+            if (!input || !input.value.trim()) return;
+
+            const commentText = input.value.trim();
+
             if (!isUserLoggedIn()) {
+                sessionStorage.setItem('pending_gundem_comment', commentText);
                 showGundemToast('Yorum yapabilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
                 if (typeof openModal === 'function') {
                     openModal('loginModal');
@@ -2247,39 +2273,33 @@
                 return;
             }
 
-            const input = document.getElementById('sidebarCommentInput');
-            if (!input || !input.value.trim()) return;
+            const artKey = getArticleKey();
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
 
-            const commentText = input.value.trim();
-
-            // 1. Veritabanına kaydet
-            if (CURRENT_ARTICLE_ID > 0) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/comments`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ content: commentText })
-                    });
-                    if (res.ok) {
-                        input.value = '';
-                        await loadSidebarComments();
-                        showGundemToast('Yorumunuz paylaşıldı!');
-                        return;
-                    } else {
-                        const errData = await res.json().catch(() => ({}));
-                        showGundemToast(errData.error || 'Yorum gönderilemedi.', 'ph-fill ph-warning-circle', '#ef4444');
-                        return;
-                    }
-                } catch (err) {
-                    console.error('Comment submit error:', err);
+            try {
+                const res = await fetch(`/api/articles/${artKey}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content: commentText })
+                });
+                if (res.ok) {
+                    input.value = '';
+                    await loadSidebarComments();
+                    showGundemToast('Yorumunuz başarıyla paylaşıldı!');
+                    return;
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showGundemToast(errData.error || 'Yorum gönderilemedi.', 'ph-fill ph-warning-circle', '#ef4444');
+                    return;
                 }
+            } catch (err) {
+                console.error('Comment submit error:', err);
             }
 
-            // 2. Statik yedek
+            // Statik yedek
             const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
             let authorName = 'AperionX Okuru';
             if (userStr) {
@@ -2298,9 +2318,9 @@
                 date: timeFormatted
             };
 
-            const comments = JSON.parse(localStorage.getItem(getCommentsStorageKey()) || '[]');
-            comments.unshift(newComment);
-            localStorage.setItem(getCommentsStorageKey(), JSON.stringify(comments));
+            const fallbackComments = JSON.parse(localStorage.getItem(getCommentsStorageKey()) || '[]');
+            fallbackComments.unshift(newComment);
+            localStorage.setItem(getCommentsStorageKey(), JSON.stringify(fallbackComments));
 
             input.value = '';
             loadSidebarComments();
@@ -2315,23 +2335,19 @@
             const btn = document.getElementById('btnLikeGundem');
             if (!btn) return;
 
-            if (CURRENT_ARTICLE_ID > 0) {
-                try {
-                    const token = localStorage.getItem('token');
-                    if (token) {
-                        const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/like`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            currentLikesCount = data.count || 0;
-                            isCurrentLiked = !!data.liked;
-                            updateLikeUi();
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
+            const artKey = getArticleKey();
+            try {
+                const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`/api/articles/${artKey}/like`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    currentLikesCount = data.count || 0;
+                    isCurrentLiked = !!data.liked;
+                    updateLikeUi();
+                    return;
+                }
+            } catch (e) {}
 
             // Statik fallback
             const localLiked = localStorage.getItem('aperionx_liked_' + window.location.pathname) === 'true';
@@ -2365,13 +2381,13 @@
                 return;
             }
 
-            if (CURRENT_ARTICLE_ID > 0) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/like`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+            const artKey = getArticleKey();
+            try {
+                const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+                const res = await fetch(`/api/articles/${artKey}/like`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                     if (res.ok) {
                         const data = await res.json();
                         isCurrentLiked = !!data.liked;
