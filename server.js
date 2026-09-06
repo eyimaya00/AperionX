@@ -1479,6 +1479,9 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
         });
     }
 
+    const dateObj = new Date();
+    const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
     const authorCardHtml = buildAuthorCardHtml(liveAuthors, formattedDate);
 
     const filePath = path.join(__dirname, 'views', 'gundem-detail.html');
@@ -1488,9 +1491,6 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
         try {
             const origin = `${req.protocol}://${req.get('host')}`;
             const canonicalUrl = `${origin}/gundem/onizleme`;
-            const dateObj = new Date();
-            const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-            const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
             const finalImg = image_url ? (image_url.startsWith('http') || image_url.startsWith('data:') ? image_url : `${origin}${image_url.startsWith('/') ? '' : '/'}${image_url}`) : `${origin}/uploads/logo.png`;
 
             let html = htmlData
