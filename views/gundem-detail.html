@@ -519,7 +519,7 @@
             align-items: start;
         }
 
-        /* === SAĞ SİDEBAR (1/4 Genişlik - Masaüstünde Yapışkan / Sticky) === */
+        /* === SAĞ SİDEBAR (1/4 Genişlik - Masaüstünde Yapışkan / Kendi İçinde Kayar) === */
         .gundem-sidebar {
             display: flex;
             flex-direction: column;
@@ -528,6 +528,32 @@
             position: sticky;
             top: 84px;
             align-self: flex-start;
+            max-height: calc(100vh - 104px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 6px;
+            padding-bottom: 24px;
+            box-sizing: border-box;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.35);
+            border-radius: 10px;
+        }
+
+        .gundem-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.65);
         }
 
         /* Sidebar Kart Tasarımı */
@@ -2007,6 +2033,26 @@
                 if (statusText) statusText.innerText = 'Değerlendirmek için üye girişi yapın';
             }
 
+            // Sunucudan güncel ortalama ve kullanıcının puanını yükle
+            if (CURRENT_ARTICLE_ID > 0) {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                fetch(`/api/articles/${CURRENT_ARTICLE_ID}/rate`, { headers })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.avg_rating && scoreBadge) {
+                            scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
+                        }
+                        if (data && data.user_rating) {
+                            applyRating(data.user_rating);
+                            if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
+                            if (userScoreDisplay) userScoreDisplay.innerText = `${data.user_rating}/5`;
+                            localStorage.setItem(storageKey, data.user_rating);
+                        }
+                    })
+                    .catch(() => {});
+            }
+
             stars.forEach((star) => {
                 star.addEventListener('mouseenter', () => {
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
@@ -2017,7 +2063,7 @@
                     clearHover();
                 });
 
-                star.addEventListener('click', () => {
+                star.addEventListener('click', async () => {
                     if (!isUserLoggedIn()) {
                         showGundemToast('Habere oy verebilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
                         if (typeof openModal === 'function') {
@@ -2028,9 +2074,34 @@
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
                     localStorage.setItem(storageKey, rating);
                     applyRating(rating);
-                    if (statusText) statusText.innerText = 'Puanınız için teşekkürler!';
+                    if (statusText) statusText.innerText = 'Puanınız kaydediliyor...';
                     if (userScoreDisplay) userScoreDisplay.innerText = `${rating}/5`;
-                    if (scoreBadge) scoreBadge.innerText = `${rating}.0`;
+
+                    if (CURRENT_ARTICLE_ID > 0) {
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`/api/articles/${CURRENT_ARTICLE_ID}/rate`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ rating })
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (statusText) statusText.innerText = 'Puanınız kaydedildi!';
+                                if (scoreBadge && data.avg_rating) {
+                                    scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
+                                }
+                                showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Rating submit error:', e);
+                        }
+                    }
+                    if (statusText) statusText.innerText = 'Puanınız için teşekkürler!';
                     showGundemToast(`Haber ${rating} AperionX puanı ile değerlendirildi!`);
                 });
             });

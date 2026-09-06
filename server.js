@@ -2571,6 +2571,20 @@ async function ensureSchema() {
             )
         `);
 
+        // --- NEW: Article Ratings Tablosu (Puanlar / Değerlendirmeler) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS article_ratings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                article_id INT NOT NULL,
+                user_id INT NOT NULL,
+                rating TINYINT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_user_article_rating (user_id, article_id),
+                INDEX idx_article_ratings (article_id, user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
         // Ensure article_id is nullable on likes (to allow experiment likes)
         try {
             await pool.query("ALTER TABLE likes MODIFY COLUMN article_id INT NULL");
@@ -3232,6 +3246,59 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
         } catch (e2) {
             console.error('Author Article Comments Fallback Error:', e2);
             res.status(500).json({ message: 'Makale yorum verileri alınamadı.' });
+        }
+    }
+});
+
+// === GET DEDICATED ARTICLE RATINGS (Yıldız Değerlendirmeleri) ===
+app.get('/api/author/article-ratings', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const query = `
+            SELECT 
+                r.id,
+                r.article_id,
+                r.rating,
+                r.created_at,
+                r.updated_at,
+                COALESCE(u.fullname, u.name, u.username, 'Okur') AS user_name,
+                u.avatar_url AS user_avatar,
+                a.title AS article_title,
+                a.slug AS article_slug
+            FROM article_ratings r
+            JOIN articles a ON r.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            JOIN users u ON r.user_id = u.id
+            WHERE a.author_id = ? OR aa.user_id = ?
+            ORDER BY COALESCE(r.updated_at, r.created_at) DESC
+        `;
+        const [rows] = await pool.query(query, [userId, userId]);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Article Ratings Error:', e);
+        try {
+            const fallbackQuery = `
+                SELECT 
+                    r.id,
+                    r.article_id,
+                    r.rating,
+                    r.created_at,
+                    r.updated_at,
+                    COALESCE(u.fullname, u.name, u.username, 'Okur') AS user_name,
+                    u.avatar_url AS user_avatar,
+                    a.title AS article_title,
+                    a.slug AS article_slug
+                FROM article_ratings r
+                JOIN articles a ON r.article_id = a.id
+                JOIN users u ON r.user_id = u.id
+                WHERE a.author_id = ?
+                ORDER BY COALESCE(r.updated_at, r.created_at) DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Article Ratings Fallback Error:', e2);
+            res.status(500).json({ message: 'Makale değerlendirme verileri alınamadı.' });
         }
     }
 });
@@ -7911,6 +7978,85 @@ app.post('/api/articles/:id/like', authenticateToken, async (req, res) => {
             res.json({ liked: true });
         }
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// === ARTICLE RATINGS (Puanlama / Yıldız Değerlendirmesi) ===
+app.post('/api/articles/:id/rate', authenticateToken, async (req, res) => {
+    try {
+        const articleId = parseInt(req.params.id, 10);
+        const userId = req.user.id;
+        let { rating } = req.body;
+        rating = parseInt(rating, 10);
+
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Puan 1 ile 5 arasında olmalıdır.' });
+        }
+
+        await pool.query(`
+            INSERT INTO article_ratings (article_id, user_id, rating)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE rating = VALUES(rating), updated_at = NOW()
+        `, [articleId, userId, rating]);
+
+        const [stats] = await pool.query(`
+            SELECT 
+                ROUND(AVG(rating), 1) as avg_rating,
+                COUNT(*) as total_ratings
+            FROM article_ratings
+            WHERE article_id = ?
+        `, [articleId]);
+
+        res.json({
+            success: true,
+            user_rating: rating,
+            avg_rating: stats[0].avg_rating || rating,
+            total_ratings: stats[0].total_ratings || 1
+        });
+    } catch (e) {
+        console.error('Article Rating Error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/articles/:id/rate', async (req, res) => {
+    try {
+        const articleId = parseInt(req.params.id, 10);
+        let userRating = null;
+
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        if (token) {
+            try {
+                const user = jwt.verify(token, process.env.JWT_SECRET || 'aperionx_jwt_secret_key_2024');
+                if (user && user.id) {
+                    const [userRows] = await pool.query(
+                        'SELECT rating FROM article_ratings WHERE article_id = ? AND user_id = ?',
+                        [articleId, user.id]
+                    );
+                    if (userRows.length > 0) {
+                        userRating = userRows[0].rating;
+                    }
+                }
+            } catch (err) {}
+        }
+
+        const [stats] = await pool.query(`
+            SELECT 
+                ROUND(AVG(rating), 1) as avg_rating,
+                COUNT(*) as total_ratings
+            FROM article_ratings
+            WHERE article_id = ?
+        `, [articleId]);
+
+        res.json({
+            user_rating: userRating,
+            avg_rating: stats[0].avg_rating || '5.0',
+            total_ratings: stats[0].total_ratings || 0
+        });
+    } catch (e) {
+        console.error('Get Article Rating Error:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Post View Count - Article
