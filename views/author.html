@@ -5552,10 +5552,13 @@
                     <div class="bg-stat-value" id="bg-stat-likes">0</div>
                     <div class="bg-stat-label">Toplam Beğeni</div>
                 </div>
-                <div class="bg-stat-card">
+                <div class="bg-stat-card" onclick="openGundemCommentsModal()" style="cursor: pointer;" title="Gündem yorumlarını gör">
                     <i class="ph-bold ph-chat-circle-text bg-stat-icon"></i>
                     <div class="bg-stat-value" id="bg-stat-comments">0</div>
                     <div class="bg-stat-label">Toplam Yorum</div>
+                    <span style="font-size: 0.72rem; color: #8b5cf6; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;">
+                        Yorumları Oku <i class="ph-bold ph-arrow-right"></i>
+                    </span>
                 </div>
                 <div class="bg-stat-card" onclick="openArtRatingsModal()" style="cursor: pointer;" title="Değerlendirenleri ve verilen puanları gör">
                     <i class="ph-bold ph-star bg-stat-icon" style="color: #f59e0b;"></i>
@@ -7228,6 +7231,29 @@
                 </div>
                 <div class="exp-modal-body" id="art-comments-list" style="max-height: 480px; overflow-y: auto; padding: 16px 20px;">
                     <!-- Injected by openArtCommentsModal() -->
+                </div>
+            </div>
+        </div>
+
+        <!-- BILIM GUNDEMI COMMENTS MODAL -->
+        <div class="exp-modal-overlay" id="gundem-comments-modal-overlay" onclick="if(event.target===this) closeGundemCommentsModal()">
+            <div class="exp-modal-box" style="max-width: 680px;">
+                <div class="exp-modal-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="ph-fill ph-microscope"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Bilim Gündemi Yorumları</h3>
+                            <p style="margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8;">Gündem haberlerinize gelen tartışma ve değerlendirmeler</p>
+                        </div>
+                    </div>
+                    <button class="exp-modal-close" onclick="closeGundemCommentsModal()" title="Kapat">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="exp-modal-body" id="gundem-comments-list" style="max-height: 480px; overflow-y: auto; padding: 16px 20px;">
+                    <!-- Injected by openGundemCommentsModal() -->
                 </div>
             </div>
         </div>
@@ -9916,15 +9942,18 @@
                     }
                 }
 
-                // STRICT FILTER: Keep ONLY comments belonging to articles (exclude experiments)
+                // STRICT FILTER: Keep ONLY comments belonging to non-gundem articles (exclude experiments and gundem)
                 if (Array.isArray(comments)) {
                     comments = comments.filter(c => {
-                        if (c.article_id) return true;
-                        if (c.experiment_id) return false;
-                        if (myArticlesList && myArticlesList.length > 0) {
+                        if (c.experiment_id || c.experiment_title) return false;
+                        if (c.is_gundem == 1 || c.is_gundem === true || c.category === 'Gündem') return false;
+                        if (typeof bilimGundemData !== 'undefined' && Array.isArray(bilimGundemData) && bilimGundemData.length > 0) {
+                            if (bilimGundemData.some(g => g.id === c.article_id || g.title === c.article_title)) return false;
+                        }
+                        if (typeof myArticlesList !== 'undefined' && Array.isArray(myArticlesList) && myArticlesList.length > 0) {
                             return myArticlesList.some(a => a.id === c.article_id || a.title === c.article_title);
                         }
-                        return !c.experiment_title;
+                        return true;
                     });
                 }
 
@@ -9990,6 +10019,99 @@
             document.body.style.overflow = '';
         }
         window.closeArtCommentsModal = closeArtCommentsModal;
+
+        // ================= BILIM GUNDEMI COMMENTS MODAL LOGIC =================
+        async function openGundemCommentsModal() {
+            const modal = document.getElementById('gundem-comments-modal-overlay');
+            const listEl = document.getElementById('gundem-comments-list');
+            if (!modal || !listEl) return;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            listEl.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 0.95rem;">Bilim Gündemi yorumları yükleniyor...</p>
+                </div>
+            `;
+
+            try {
+                const authToken = (typeof token !== 'undefined' && token) ? token : localStorage.getItem('token');
+                let comments = [];
+
+                try {
+                    const res = await fetch(`${API_URL}/author/gundem-comments`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (res.ok) {
+                        comments = await res.json();
+                    }
+                } catch (e1) {
+                    console.warn('Dedicated gundem-comments failed:', e1);
+                }
+
+                if (!Array.isArray(comments) || comments.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                                <i class="ph ph-chat-circle-dots"></i>
+                            </div>
+                            <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Gündem Yorumu Yok</h4>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız bilim gündemi haberlerine yorum yapıldığında burada listelenecektir.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = comments.map(comm => {
+                    let avatarUrl = comm.user_avatar;
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+
+                    const avatarHtml = avatarUrl 
+                        ? `<img src="${avatarUrl}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Okur')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'O').charAt(0).toUpperCase()}</div>'">` 
+                        : `<div class="exp-user-avatar">${(comm.user_name || 'O').charAt(0).toUpperCase()}</div>`;
+                    
+                    const dateStr = comm.created_at ? new Date(comm.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+                    const artTitle = comm.article_title || 'Bilim Gündemi Haberi';
+                    const commentText = comm.content || comm.comment || comm.text || '';
+
+                    return `
+                        <div class="exp-user-item" style="align-items: flex-start;">
+                            ${avatarHtml}
+                            <div class="exp-user-info">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <div class="exp-user-name">
+                                        ${escapeHtml(comm.user_name || 'Okur')}
+                                    </div>
+                                    <div class="exp-user-date">${dateStr}</div>
+                                </div>
+                                <div class="exp-user-exp-title" title="${escapeHtml(artTitle)}"><i class="ph-bold ph-newspaper" style="color:#8b5cf6; margin-right:4px;"></i> ${escapeHtml(artTitle)}</div>
+                                <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('openGundemCommentsModal error:', e);
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(139,92,246,0.08); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px;">
+                            <i class="ph ph-chat-circle-dots"></i>
+                        </div>
+                        <h4 style="margin: 0 0 6px; color: var(--text-main);">Henüz Gündem Yorumu Yok</h4>
+                        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Yayınladığınız bilim gündemi haberlerine yorum yapıldığında burada listelenecektir.</p>
+                    </div>
+                `;
+            }
+        }
+        window.openGundemCommentsModal = openGundemCommentsModal;
+
+        function closeGundemCommentsModal() {
+            const modal = document.getElementById('gundem-comments-modal-overlay');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        window.closeGundemCommentsModal = closeGundemCommentsModal;
 
         // ================= ARTICLE RATINGS MODAL LOGIC (Kim Kaç Yıldız Verdi?) =================
         async function openArtRatingsModal() {
@@ -11131,8 +11253,9 @@
             `;
 
             try {
+                const authToken = (typeof token !== 'undefined' && token) ? token : localStorage.getItem('token');
                 const res = await fetch(`${API_URL}/author/experiment-likes`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (!res.ok) throw new Error('Yüklenemedi');
                 const likes = await res.json();
@@ -11151,12 +11274,15 @@
                 }
 
                 listEl.innerHTML = likes.map(like => {
-                    const avatarHtml = like.liker_avatar 
-                        ? `<img src="/${like.liker_avatar}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                    let avatarUrl = like.liker_avatar;
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+
+                    const avatarHtml = avatarUrl 
+                        ? `<img src="${avatarUrl}" class="exp-user-avatar" alt="${escapeHtml(like.liker_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>'">` 
                         : `<div class="exp-user-avatar">${(like.liker_name || 'U').charAt(0).toUpperCase()}</div>`;
                     
                     const dateStr = like.created_at ? new Date(like.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-                    const expTitle = like.article_title || 'Deney Çalışması';
+                    const expTitle = like.experiment_title || like.article_title || 'Deney Çalışması';
 
                     return `
                         <div class="exp-user-item">
@@ -11182,12 +11308,14 @@
                 `;
             }
         }
+        window.openExpLikesModal = openExpLikesModal;
 
         function closeExpLikesModal() {
             const modal = document.getElementById('exp-likes-modal-overlay');
             if (modal) modal.classList.remove('active');
             document.body.style.overflow = '';
         }
+        window.closeExpLikesModal = closeExpLikesModal;
 
         // ================= EXPERIMENT COMMENTS MODAL LOGIC =================
         async function openExpCommentsModal() {
@@ -11205,8 +11333,9 @@
             `;
 
             try {
+                const authToken = (typeof token !== 'undefined' && token) ? token : localStorage.getItem('token');
                 const res = await fetch(`${API_URL}/author/experiment-comments`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (!res.ok) throw new Error('Yüklenemedi');
                 const comments = await res.json();
@@ -11225,12 +11354,15 @@
                 }
 
                 listEl.innerHTML = comments.map(comm => {
-                    const avatarHtml = comm.user_avatar 
-                        ? `<img src="/${comm.user_avatar}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
+                    let avatarUrl = comm.user_avatar;
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+
+                    const avatarHtml = avatarUrl 
+                        ? `<img src="${avatarUrl}" class="exp-user-avatar" alt="${escapeHtml(comm.user_name || 'Kullanıcı')}" onerror="this.outerHTML='<div class=\\'exp-user-avatar\\'>${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>'">` 
                         : `<div class="exp-user-avatar">${(comm.user_name || 'U').charAt(0).toUpperCase()}</div>`;
                     
                     const dateStr = comm.created_at ? new Date(comm.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-                    const expTitle = comm.article_title || 'Deney Çalışması';
+                    const expTitle = comm.experiment_title || comm.article_title || 'Deney Çalışması';
                     const commentText = comm.content || comm.comment || comm.text || '';
 
                     return `
@@ -11259,12 +11391,14 @@
                 `;
             }
         }
+        window.openExpCommentsModal = openExpCommentsModal;
 
         function closeExpCommentsModal() {
             const modal = document.getElementById('exp-comments-modal-overlay');
             if (modal) modal.classList.remove('active');
             document.body.style.overflow = '';
         }
+        window.closeExpCommentsModal = closeExpCommentsModal;
 
         function showAuthorToast(msg, type) {
             const container = document.getElementById('toast-container');

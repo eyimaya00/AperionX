@@ -2046,12 +2046,14 @@
             const artKey = getArticleKey();
             const storageKey = 'aperionx_rating_' + artKey;
 
+            let hasUserVoted = false;
             let currentScore = 5;
             const savedRating = localStorage.getItem(storageKey);
             if (savedRating) {
+                hasUserVoted = true;
                 currentScore = parseInt(savedRating, 10);
                 applyRating(currentScore);
-                if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
+                if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi (1 oy kullanıldı)';
                 if (userScoreDisplay) userScoreDisplay.innerText = `${savedRating}/5 Yıldız`;
             } else {
                 applyRating(5);
@@ -2067,9 +2069,10 @@
                         scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
                     }
                     if (data && data.user_rating) {
+                        hasUserVoted = true;
                         currentScore = parseInt(data.user_rating, 10);
                         applyRating(currentScore);
-                        if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi';
+                        if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi (1 oy kullanıldı)';
                         if (userScoreDisplay) userScoreDisplay.innerText = `${data.user_rating}/5 Yıldız`;
                         localStorage.setItem(storageKey, data.user_rating);
                     } else if (data && data.avg_rating && !savedRating) {
@@ -2081,15 +2084,22 @@
 
             stars.forEach((star) => {
                 star.addEventListener('mouseenter', () => {
+                    if (hasUserVoted) return;
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
                     highlightHover(rating);
                 });
 
                 star.addEventListener('mouseleave', () => {
+                    if (hasUserVoted) return;
                     clearHover();
                 });
 
                 star.addEventListener('click', async () => {
+                    if (hasUserVoted) {
+                        showGundemToast('Bu habere daha önce oy verdiniz. Her kullanıcı bir kez oy verebilir.', 'ph-fill ph-check-circle', '#10b981');
+                        return;
+                    }
+
                     if (!isUserLoggedIn()) {
                         showGundemToast('Habere oy verebilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
                         if (typeof openModal === 'function') {
@@ -2099,7 +2109,6 @@
                     }
                     const rating = parseInt(star.getAttribute('data-rating'), 10);
                     currentScore = rating;
-                    localStorage.setItem(storageKey, rating);
                     applyRating(rating);
                     if (statusText) statusText.innerText = 'Puanınız kaydediliyor...';
                     if (userScoreDisplay) userScoreDisplay.innerText = `${rating}/5 Yıldız`;
@@ -2114,19 +2123,36 @@
                             },
                             body: JSON.stringify({ rating })
                         });
+                        const data = await res.json().catch(() => ({}));
                         if (res.ok) {
-                            const data = await res.json();
-                            if (statusText) statusText.innerText = 'Puanınız kaydedildi!';
+                            hasUserVoted = true;
+                            localStorage.setItem(storageKey, rating);
+                            if (statusText) statusText.innerText = 'Puanınız kaydedildi (1 oy kullanıldı)';
                             if (scoreBadge && data.avg_rating) {
                                 scoreBadge.innerText = Number(data.avg_rating).toFixed(1);
                             }
                             showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
                             return;
+                        } else if (data.already_rated) {
+                            hasUserVoted = true;
+                            if (data.user_rating) {
+                                currentScore = data.user_rating;
+                                applyRating(currentScore);
+                                localStorage.setItem(storageKey, data.user_rating);
+                            }
+                            if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi (1 oy kullanıldı)';
+                            showGundemToast(data.error || 'Bu habere zaten oy kullandınız.', 'ph-fill ph-check-circle', '#10b981');
+                            return;
+                        } else {
+                            showGundemToast(data.error || 'Puan kaydedilemedi.', 'ph-fill ph-warning-circle', '#ef4444');
+                            return;
                         }
                     } catch (e) {
                         console.error('Rating submit error:', e);
                     }
-                    if (statusText) statusText.innerText = 'Puanınız için teşekkürler!';
+                    hasUserVoted = true;
+                    localStorage.setItem(storageKey, rating);
+                    if (statusText) statusText.innerText = 'Değerlendirmeniz kaydedildi (1 oy kullanıldı)';
                     showGundemToast(`Haber ${rating} yıldız ile değerlendirildi!`);
                 });
             });

@@ -3177,42 +3177,48 @@ app.get('/api/author/likes', authenticateToken, async (req, res) => {
 app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? '(a.is_gundem = 0 OR a.is_gundem IS NULL)' : '(a.author_id = ? OR aa.user_id = ?) AND (a.is_gundem = 0 OR a.is_gundem IS NULL)';
+        const params = isStaff ? [] : [userId, userId];
+
         const query = `
             SELECT 
                 l.user_id,
                 l.article_id,
                 l.created_at,
-                COALESCE(u.fullname, u.name, u.username, 'Okur') AS liker_name, 
+                COALESCE(u.fullname, u.username, 'Okur') AS liker_name, 
                 u.avatar_url AS liker_avatar, 
                 a.title AS article_title
             FROM likes l
             JOIN articles a ON l.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON l.user_id = u.id
-            WHERE a.author_id = ? OR aa.user_id = ?
+            WHERE ${whereClause}
             ORDER BY l.created_at DESC
         `;
-        const [rows] = await pool.query(query, [userId, userId]);
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (e) {
         console.error('Author Article Likes Error:', e);
-        // Fallback query if article_authors table doesn't exist
         try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? '(a.is_gundem = 0 OR a.is_gundem IS NULL)' : 'a.author_id = ? AND (a.is_gundem = 0 OR a.is_gundem IS NULL)';
+            const fbParams = isStaff ? [] : [req.user.id];
             const fallbackQuery = `
                 SELECT 
                     l.user_id,
                     l.article_id,
                     l.created_at,
-                    COALESCE(u.fullname, u.name, u.username, 'Okur') AS liker_name, 
+                    COALESCE(u.fullname, u.username, 'Okur') AS liker_name, 
                     u.avatar_url AS liker_avatar, 
                     a.title AS article_title
                 FROM likes l
                 JOIN articles a ON l.article_id = a.id
                 JOIN users u ON l.user_id = u.id
-                WHERE a.author_id = ?
+                WHERE ${fbWhere}
                 ORDER BY l.created_at DESC
             `;
-            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
             return res.json(fbRows);
         } catch (e2) {
             console.error('Author Article Likes Fallback Error:', e2);
@@ -3225,47 +3231,112 @@ app.get('/api/author/article-likes', authenticateToken, async (req, res) => {
 app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? '(a.is_gundem = 0 OR a.is_gundem IS NULL)' : '(a.author_id = ? OR aa.user_id = ?) AND (a.is_gundem = 0 OR a.is_gundem IS NULL)';
+        const params = isStaff ? [] : [userId, userId];
+
         const query = `
             SELECT 
                 c.id,
                 c.article_id,
                 c.content,
                 c.created_at,
-                COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
                 a.title as article_title
             FROM comments c
             JOIN articles a ON c.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
             JOIN users u ON c.user_id = u.id
-            WHERE a.author_id = ? OR aa.user_id = ?
+            WHERE ${whereClause}
             ORDER BY c.created_at DESC
         `;
-        const [rows] = await pool.query(query, [userId, userId]);
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (e) {
         console.error('Author Article Comments Error:', e);
         try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? '(a.is_gundem = 0 OR a.is_gundem IS NULL)' : 'a.author_id = ? AND (a.is_gundem = 0 OR a.is_gundem IS NULL)';
+            const fbParams = isStaff ? [] : [req.user.id];
             const fallbackQuery = `
                 SELECT 
                     c.id,
                     c.article_id,
                     c.content,
                     c.created_at,
-                    COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                    COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                     u.avatar_url as user_avatar,
                     a.title as article_title
                 FROM comments c
                 JOIN articles a ON c.article_id = a.id
                 JOIN users u ON c.user_id = u.id
-                WHERE a.author_id = ?
+                WHERE ${fbWhere}
                 ORDER BY c.created_at DESC
             `;
-            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
             return res.json(fbRows);
         } catch (e2) {
             console.error('Author Article Comments Fallback Error:', e2);
             res.status(500).json({ message: 'Makale yorum verileri alınamadı.' });
+        }
+    }
+});
+
+// === GET DEDICATED GUNDEM COMMENTS ===
+app.get('/api/author/gundem-comments', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? 'a.is_gundem = 1' : '(a.author_id = ? OR aa.user_id = ?) AND a.is_gundem = 1';
+        const params = isStaff ? [] : [userId, userId];
+
+        const query = `
+            SELECT 
+                c.id,
+                c.article_id,
+                c.content,
+                c.created_at,
+                COALESCE(u.fullname, u.username, 'Okur') AS user_name,
+                u.avatar_url as user_avatar,
+                a.title as article_title,
+                a.slug as article_slug
+            FROM comments c
+            JOIN articles a ON c.article_id = a.id
+            LEFT JOIN article_authors aa ON a.id = aa.article_id
+            JOIN users u ON c.user_id = u.id
+            WHERE ${whereClause}
+            ORDER BY c.created_at DESC
+        `;
+        const [rows] = await pool.query(query, params);
+        res.json(rows);
+    } catch (e) {
+        console.error('Author Gundem Comments Error:', e);
+        try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? 'a.is_gundem = 1' : 'a.author_id = ? AND a.is_gundem = 1';
+            const fbParams = isStaff ? [] : [req.user.id];
+            const fallbackQuery = `
+                SELECT 
+                    c.id,
+                    c.article_id,
+                    c.content,
+                    c.created_at,
+                    COALESCE(u.fullname, u.username, 'Okur') AS user_name,
+                    u.avatar_url as user_avatar,
+                    a.title as article_title,
+                    a.slug as article_slug
+                FROM comments c
+                JOIN articles a ON c.article_id = a.id
+                JOIN users u ON c.user_id = u.id
+                WHERE ${fbWhere}
+                ORDER BY c.created_at DESC
+            `;
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
+            return res.json(fbRows);
+        } catch (e2) {
+            console.error('Author Gundem Comments Fallback Error:', e2);
+            res.status(500).json({ message: 'Gündem yorum verileri alınamadı.' });
         }
     }
 });
@@ -3336,41 +3407,48 @@ app.get('/api/author/article-ratings', authenticateToken, async (req, res) => {
 app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? '1=1' : '(e.author_id = ? OR ea.user_id = ?)';
+        const params = isStaff ? [] : [userId, userId];
+
         const query = `
             SELECT 
                 l.user_id,
                 l.experiment_id,
                 l.created_at,
-                COALESCE(u.fullname, u.name, u.username, 'Bilim Sever') AS liker_name, 
+                COALESCE(u.fullname, u.username, 'Bilim Sever') AS liker_name, 
                 u.avatar_url AS liker_avatar, 
                 e.title AS experiment_title
             FROM likes l
             JOIN experiments e ON l.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             JOIN users u ON l.user_id = u.id
-            WHERE e.author_id = ? OR ea.user_id = ?
+            WHERE ${whereClause}
             ORDER BY l.created_at DESC
         `;
-        const [rows] = await pool.query(query, [userId, userId]);
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (e) {
         console.error('Author Experiment Likes Error:', e);
         try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? '1=1' : 'e.author_id = ?';
+            const fbParams = isStaff ? [] : [req.user.id];
             const fallbackQuery = `
                 SELECT 
                     l.user_id,
                     l.experiment_id,
                     l.created_at,
-                    COALESCE(u.fullname, u.name, u.username, 'Bilim Sever') AS liker_name, 
+                    COALESCE(u.fullname, u.username, 'Bilim Sever') AS liker_name, 
                     u.avatar_url AS liker_avatar, 
                     e.title AS experiment_title
                 FROM likes l
                 JOIN experiments e ON l.experiment_id = e.id
                 JOIN users u ON l.user_id = u.id
-                WHERE e.author_id = ?
+                WHERE ${fbWhere}
                 ORDER BY l.created_at DESC
             `;
-            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
             return res.json(fbRows);
         } catch (e2) {
             console.error('Author Experiment Likes Fallback Error:', e2);
@@ -3383,43 +3461,50 @@ app.get('/api/author/experiment-likes', authenticateToken, async (req, res) => {
 app.get('/api/author/experiment-comments', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+        const whereClause = isStaff ? '1=1' : '(e.author_id = ? OR ea.user_id = ?)';
+        const params = isStaff ? [] : [userId, userId];
+
         const query = `
             SELECT 
                 c.id,
                 c.experiment_id,
                 c.content,
                 c.created_at,
-                COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
                 e.title as experiment_title
             FROM comments c
             JOIN experiments e ON c.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
             JOIN users u ON c.user_id = u.id
-            WHERE e.author_id = ? OR ea.user_id = ?
+            WHERE ${whereClause}
             ORDER BY c.created_at DESC
         `;
-        const [rows] = await pool.query(query, [userId, userId]);
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (e) {
         console.error('Author Experiment Comments Error:', e);
         try {
+            const isStaff = req.user.role === 'admin' || req.user.role === 'editor';
+            const fbWhere = isStaff ? '1=1' : 'e.author_id = ?';
+            const fbParams = isStaff ? [] : [req.user.id];
             const fallbackQuery = `
                 SELECT 
                     c.id,
                     c.experiment_id,
                     c.content,
                     c.created_at,
-                    COALESCE(u.fullname, u.name, u.username, 'Kullanıcı') AS user_name,
+                    COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                     u.avatar_url as user_avatar,
                     e.title as experiment_title
                 FROM comments c
                 JOIN experiments e ON c.experiment_id = e.id
                 JOIN users u ON c.user_id = u.id
-                WHERE e.author_id = ?
+                WHERE ${fbWhere}
                 ORDER BY c.created_at DESC
             `;
-            const [fbRows] = await pool.query(fallbackQuery, [userId]);
+            const [fbRows] = await pool.query(fallbackQuery, fbParams);
             return res.json(fbRows);
         } catch (e2) {
             console.error('Author Experiment Comments Fallback Error:', e2);
@@ -8088,10 +8173,18 @@ app.post('/api/articles/:id/rate', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'Puan 1 ile 5 arasında olmalıdır.' });
         }
 
+        const [existingRating] = await pool.query('SELECT id, rating FROM article_ratings WHERE article_id = ? AND user_id = ?', [articleId, userId]);
+        if (existingRating.length > 0) {
+            return res.status(400).json({
+                error: 'Bu habere daha önce oy verdiniz. Her kullanıcı yalnızca bir kez oy verebilir.',
+                already_rated: true,
+                user_rating: existingRating[0].rating
+            });
+        }
+
         await pool.query(`
             INSERT INTO article_ratings (article_id, user_id, rating)
             VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE rating = VALUES(rating), updated_at = NOW()
         `, [articleId, userId, rating]);
 
         const [stats] = await pool.query(`
