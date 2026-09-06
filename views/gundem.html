@@ -782,73 +782,93 @@
         }
 
         .gundem-item-card {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px 18px 16px 18px;
+            min-height: 220px;
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 14px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
         }
 
         .gundem-item-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(99, 102, 241, 0.35);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55), 0 0 24px rgba(99, 102, 241, 0.2);
         }
 
-        .gundem-item-img-wrap {
-            position: relative;
-            width: 100%;
-            height: 135px;
-            border-radius: 12px;
+        /* Küçük Kart Arka Plan Görseli & Karartma Degradesi */
+        .gundem-item-poster-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
             overflow: hidden;
             background: #0f172a;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            margin-bottom: 12px;
-            flex-shrink: 0;
         }
 
-        .gundem-item-img-wrap img {
+        .gundem-item-poster-bg img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.4s ease;
+            transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .gundem-item-card:hover .gundem-item-img-wrap img {
-            transform: scale(1.05);
+        .gundem-item-card:hover .gundem-item-poster-bg img {
+            transform: scale(1.07);
+        }
+
+        .gundem-item-poster-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(9, 11, 16, 0.15) 0%, rgba(9, 11, 16, 0.40) 35%, rgba(9, 11, 16, 0.88) 72%, rgba(9, 11, 16, 0.98) 100%);
+            transition: background 0.3s ease;
+        }
+
+        .gundem-item-card:hover .gundem-item-poster-overlay {
+            background: linear-gradient(180deg, rgba(9, 11, 16, 0.08) 0%, rgba(9, 11, 16, 0.30) 30%, rgba(9, 11, 16, 0.84) 68%, rgba(9, 11, 16, 0.98) 100%);
+        }
+
+        /* Küçük Kart İçerik Bloğu */
+        .gundem-item-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
         }
 
         .gundem-item-title {
-            font-size: 0.94rem;
+            font-size: 0.98rem;
             font-weight: 700;
-            line-height: 1.42;
-            color: #ffffff;
-            margin: 0 0 10px 0;
+            line-height: 1.40;
+            color: #ffffff !important;
+            margin: 0;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
             transition: color 0.2s ease;
         }
 
         .gundem-item-card:hover .gundem-item-title {
-            color: #818cf8;
+            color: #c7d2fe !important;
         }
 
         .gundem-item-author-row {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: auto;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 2px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
         }
 
         .gundem-item-avatar {
@@ -857,14 +877,14 @@
             border-radius: 50%;
             object-fit: cover;
             background: #1e1b4b;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
         }
 
         .gundem-item-author-name {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.6);
-            transition: color 0.2s ease;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92) !important;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         }
 
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
@@ -934,16 +954,13 @@
             /* Alt Grid Mobil Düzen */
             .gundem-cards-grid {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 16px;
             }
             .gundem-feed-section {
                 padding: 35px 16px 60px;
             }
-            .gundem-featured-img-wrap {
-                height: 200px;
-            }
-            .gundem-item-img-wrap {
-                height: 200px;
+            .gundem-item-card {
+                min-height: 200px;
             }
             .gundem-scroll-down-bar {
                 bottom: 16px;
@@ -1103,57 +1120,69 @@
                 <div class="gundem-cards-grid" id="gundemCardsGrid">
                     <!-- Kart 1 -->
                     <a href="/gundem/optik-kuantum-cipleriyle-super-iletken-hizinda-veri-isleme-basarisi" class="gundem-item-card">
-                        <div class="gundem-item-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" alt="Yapay Zeka ve Çipler">
+                        <div class="gundem-item-poster-bg">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" alt="Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                            <div class="gundem-item-poster-overlay"></div>
                         </div>
-                        <h4 class="gundem-item-title">
-                            Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı
-                        </h4>
-                        <div class="gundem-item-author-row">
-                            <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi">
-                            <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                        <div class="gundem-item-content">
+                            <h4 class="gundem-item-title">
+                                Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı
+                            </h4>
+                            <div class="gundem-item-author-row">
+                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
+                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                            </div>
                         </div>
                     </a>
 
                     <!-- Kart 2 -->
                     <a href="/gundem/sentetik-biyolojide-donum-noktasi-yapay-hucre-zari-uretildi" class="gundem-item-card">
-                        <div class="gundem-item-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop" alt="Laboratuvar ve Genetik">
+                        <div class="gundem-item-poster-bg">
+                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop" alt="Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                            <div class="gundem-item-poster-overlay"></div>
                         </div>
-                        <h4 class="gundem-item-title">
-                            Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi
-                        </h4>
-                        <div class="gundem-item-author-row">
-                            <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi">
-                            <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                        <div class="gundem-item-content">
+                            <h4 class="gundem-item-title">
+                                Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi
+                            </h4>
+                            <div class="gundem-item-author-row">
+                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
+                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                            </div>
                         </div>
                     </a>
 
                     <!-- Kart 3 -->
                     <a href="/gundem/gunes-firtinalarini-48-saat-onceden-tahmin-eden-erken-uyari-uydusu-firlatildi" class="gundem-item-card">
-                        <div class="gundem-item-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=800&auto=format&fit=crop" alt="Uydu ve Uzay Keşifleri">
+                        <div class="gundem-item-poster-bg">
+                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=800&auto=format&fit=crop" alt="Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyari Uydusu Fırlatıldı" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                            <div class="gundem-item-poster-overlay"></div>
                         </div>
-                        <h4 class="gundem-item-title">
-                            Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı
-                        </h4>
-                        <div class="gundem-item-author-row">
-                            <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi">
-                            <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                        <div class="gundem-item-content">
+                            <h4 class="gundem-item-title">
+                                Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı
+                            </h4>
+                            <div class="gundem-item-author-row">
+                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
+                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                            </div>
                         </div>
                     </a>
 
                     <!-- Kart 4 -->
                     <a href="/gundem/kuantum-sonrasi-kriptografi-algoritmalari-kuresel-standart-olarak-onaylandi" class="gundem-item-card">
-                        <div class="gundem-item-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Siber Güvenlik ve Kodlama">
+                        <div class="gundem-item-poster-bg">
+                            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                            <div class="gundem-item-poster-overlay"></div>
                         </div>
-                        <h4 class="gundem-item-title">
-                            Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı
-                        </h4>
-                        <div class="gundem-item-author-row">
-                            <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi">
-                            <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                        <div class="gundem-item-content">
+                            <h4 class="gundem-item-title">
+                                Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı
+                            </h4>
+                            <div class="gundem-item-author-row">
+                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
+                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
+                            </div>
                         </div>
                     </a>
                 </div>
@@ -1568,15 +1597,18 @@
                         const gridArticles = articles.slice(1, 5);
                         gridEl.innerHTML = gridArticles.map(item => `
                             <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
-                                <div class="gundem-item-img-wrap">
+                                <div class="gundem-item-poster-bg">
                                     <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                                    <div class="gundem-item-poster-overlay"></div>
                                 </div>
-                                <h4 class="gundem-item-title">
-                                    ${escapeGundemHtml(item.title)}
-                                </h4>
-                                <div class="gundem-item-author-row">
-                                    <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
-                                    <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                                <div class="gundem-item-content">
+                                    <h4 class="gundem-item-title">
+                                        ${escapeGundemHtml(item.title)}
+                                    </h4>
+                                    <div class="gundem-item-author-row">
+                                        <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
+                                        <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                                    </div>
                                 </div>
                             </a>
                         `).join('');
