@@ -371,6 +371,27 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             `, [slug]);
             if (rows && rows.length > 0) {
                 const row = rows[0];
+
+                // Security & SEO: Only published articles are public. Drafts/pending require author or staff auth.
+                if (row.status !== 'published') {
+                    let canView = false;
+                    const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+                    if (token) {
+                        try {
+                            const decoded = jwt.verify(token, JWT_SECRET);
+                            if (decoded.role === 'admin' || decoded.role === 'editor' || Number(decoded.id) === Number(row.author_id)) {
+                                canView = true;
+                            } else {
+                                const [co] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [row.id, decoded.id]);
+                                if (co && co.length > 0) canView = true;
+                            }
+                        } catch (e) {}
+                    }
+                    if (!canView) {
+                        return res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+                    }
+                }
+
                 const dateObj = row.created_at ? new Date(row.created_at) : new Date();
                 const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
                 const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
@@ -2328,6 +2349,7 @@ app.get('/sitemap.xml', async (req, res) => {
         // Static Pages (Using Clean URLs for SEO)
         const staticPages = [
             { path: '', priority: '1.0', freq: 'daily' },
+            { path: '/gundem', priority: '0.95', freq: 'daily' },
             { path: '/articles', priority: '0.9', freq: 'daily' },
             { path: '/experiments', priority: '0.9', freq: 'daily' },
             { path: '/tools', priority: '0.9', freq: 'daily' },
@@ -2379,16 +2401,40 @@ app.get('/sitemap.xml', async (req, res) => {
                 const safeTitle = (article.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 imageXml = `\n        <image:image>\n            <image:loc>${imgLoc}</image:loc>\n            <image:title>${safeTitle}</image:title>\n        </image:image>`;
             }
+            const itemPath = article.is_gundem ? `/gundem/${article.slug}` : `/makale/${article.slug}`;
+            const enItemPath = article.is_gundem ? `/en/gundem/${article.slug}` : `/en/makale/${article.slug}`;
             xml += `    <url>
-        <loc>${baseUrl}/makale/${article.slug}</loc>
-        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/makale/${article.slug}"/>
-        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/makale/${article.slug}"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/makale/${article.slug}"/>
+        <loc>${baseUrl}${itemPath}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}${itemPath}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${enItemPath}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${itemPath}"/>
         <lastmod>${date}</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>${imageXml}
+        <priority>${article.is_gundem ? '0.9' : '0.8'}</priority>${imageXml}
     </url>\n`;
         });
+
+        // Static Bilim Gündemi Articles (if not already published in DB)
+        try {
+            const dbGundemSlugs = new Set(articles.filter(a => a.is_gundem).map(a => a.slug));
+            Object.entries(STATIC_GUNDEM_NEWS).forEach(([s, gItem]) => {
+                if (!dbGundemSlugs.has(s)) {
+                    let gImg = '';
+                    if (gItem.imageUrl) {
+                        const safeTitle = (gItem.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                        gImg = `\n        <image:image>\n            <image:loc>${gItem.imageUrl}</image:loc>\n            <image:title>${safeTitle}</image:title>\n        </image:image>`;
+                    }
+                    xml += `    <url>
+        <loc>${baseUrl}/gundem/${s}</loc>
+        <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/gundem/${s}"/>
+        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/gundem/${s}"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/gundem/${s}"/>
+        <changefreq>weekly</changefreq>
+        <priority>0.85</priority>${gImg}
+    </url>\n`;
+                }
+            });
+        } catch (e) {}
 
         // Dynamic Experiments (Turkish and English Alternates + Image Sitemap)
         experiments.forEach(exp => {
