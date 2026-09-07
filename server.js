@@ -2806,6 +2806,17 @@ async function ensureSchema() {
         try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
         try { await pool.query("UPDATE articles SET submitted_at = created_at WHERE status = 'pending' AND submitted_at IS NULL"); } catch(e) { console.error('Migration Error 3:', e); }
 
+        // Clean orphaned stats from previously deleted articles
+        try {
+            await pool.query('DELETE FROM likes WHERE article_id NOT IN (SELECT id FROM articles)');
+            await pool.query('DELETE FROM comments WHERE article_id NOT IN (SELECT id FROM articles) AND article_id IS NOT NULL');
+            await pool.query('DELETE FROM article_ratings WHERE article_id NOT IN (SELECT id FROM articles)');
+            await pool.query('DELETE FROM article_authors WHERE article_id NOT IN (SELECT id FROM articles)');
+            await pool.query('DELETE FROM article_views WHERE article_id NOT IN (SELECT id FROM articles)');
+        } catch(e) {
+            console.warn('Orphan stats cleanup warning:', e.message);
+        }
+
         // Fix the experiment dates to match exact publication order (oldest to newest):
         // 1. Bakır Sülfatın Kristallendirme Yöntemi ile Saflaştırılması
         // 2. Ispanak Yapraklarından Kloroplast İzolasyonu

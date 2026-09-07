@@ -9153,9 +9153,7 @@
                     .then(ratings => {
                         if (Array.isArray(ratings)) {
                             const countStr = ratings.length.toLocaleString('tr-TR');
-                            const elBg = document.getElementById('bg-stat-ratings');
                             const elDash = document.getElementById('dash-total-ratings');
-                            if (elBg) elBg.textContent = countStr;
                             if (elDash) elDash.textContent = countStr;
                         }
                     })
@@ -13304,10 +13302,12 @@
         }
 
         function updateBilimGundemStats() {
-            const published = (bilimGundemData || []).filter(i => i.status === 'yayinda' || i.status === 'published');
-            const totalViews = (bilimGundemData || []).reduce((s, i) => s + (parseInt(i.views, 10) || 0), 0);
-            const totalLikes = (bilimGundemData || []).reduce((s, i) => s + (parseInt(i.likes || i.like_count, 10) || 0), 0);
-            const totalComments = (bilimGundemData || []).reduce((s, i) => s + (parseInt(i.comments || i.comment_count, 10) || 0), 0);
+            // Çöpte olmayan aktif gündemler
+            const activeGundem = (bilimGundemData || []).filter(i => i.status !== 'trash' && i.status !== 'cop');
+            const published = activeGundem.filter(i => i.status === 'yayinda' || i.status === 'published');
+            const totalViews = activeGundem.reduce((s, i) => s + (parseInt(i.views, 10) || 0), 0);
+            const totalLikes = activeGundem.reduce((s, i) => s + (parseInt(i.likes || i.like_count, 10) || 0), 0);
+            const totalComments = activeGundem.reduce((s, i) => s + (parseInt(i.comments || i.comment_count, 10) || 0), 0);
 
             const el = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val.toLocaleString('tr-TR'); };
             el('bg-stat-views', totalViews);
@@ -13321,11 +13321,18 @@
                     .then(r => r.json())
                     .then(ratings => {
                         if (Array.isArray(ratings)) {
-                            el('bg-stat-ratings', ratings.length);
-                            el('dash-total-ratings', ratings.length);
+                            // Sadece silinmemiş Bilim Gündemi yazılarının değerlendirmelerini say
+                            const gundemRatings = ratings.filter(r => (r.is_gundem == 1 || r.is_gundem === true));
+                            el('bg-stat-ratings', gundemRatings.length);
+                        } else {
+                            el('bg-stat-ratings', 0);
                         }
                     })
-                    .catch(() => {});
+                    .catch(() => {
+                        el('bg-stat-ratings', 0);
+                    });
+            } else {
+                el('bg-stat-ratings', 0);
             }
         }
 
