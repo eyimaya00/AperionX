@@ -2738,7 +2738,8 @@ function renderArticleDetail(article) {
 
     // Inner Content
     document.getElementById('detail-category').innerText = article.category || 'Genel';
-    document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
+    const displayDate = article.published_at || article.created_at;
+    document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${displayDate ? new Date(displayDate).toLocaleDateString('tr-TR') : ''}`;
     // Multi-author Support
     // Multi-author Support
     // MERGE: Ensure article.authors is populated from SSR global if missing
@@ -3188,7 +3189,7 @@ async function loadArticleSlider(currentId) {
                         : `<span>${art.author_name || 'AperionX Yazarı'}</span>`)
                 }
                              <span style="width:4px; height:4px; background:rgba(255,255,255,0.5); border-radius:50%;"></span>
-                            <span>${new Date(art.created_at).toLocaleDateString('tr-TR')}</span>
+                            <span>${new Date(art.published_at || art.created_at).toLocaleDateString('tr-TR')}</span>
                         </div>
                      </div>
                 </div>

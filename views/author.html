@@ -8089,7 +8089,7 @@
             }
 
             articles.forEach(art => {
-                const date = new Date(art.created_at).toLocaleDateString('tr-TR');
+                const date = new Date(art.published_at || art.created_at).toLocaleDateString('tr-TR');
                 const row = `
                     <tr class="author-table-row">
                         <td class="author-table-title">${escapeHtml(art.title)}</td>
@@ -9389,7 +9389,8 @@
             }
 
             tbody.innerHTML = list.map(art => {
-                const dateStr = art.created_at ? new Date(art.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '—';
+                const dateVal = art.status === 'published' ? (art.published_at || art.created_at) : art.created_at;
+                const dateStr = dateVal ? new Date(dateVal).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '—';
                 const viewsCount = (parseInt(art.views) || 0).toLocaleString('tr-TR');
                 const likesCount = (parseInt(art.like_count !== undefined ? art.like_count : art.likes) || 0).toLocaleString('tr-TR');
                 const commentsCount = (parseInt(art.comment_count !== undefined ? art.comment_count : art.comments) || 0).toLocaleString('tr-TR');

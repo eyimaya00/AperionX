@@ -411,7 +411,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     }
                 }
 
-                const dateObj = row.created_at ? new Date(row.created_at) : new Date();
+                const dateObj = (row.published_at || row.created_at) ? new Date(row.published_at || row.created_at) : new Date();
                 const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
                 const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
                 
@@ -1296,7 +1296,7 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
             try {
                 const origin = `${req.protocol}://${req.get('host')}`;
                 const canonicalUrl = `${origin}/gundem/${article.slug || 'onizleme'}`;
-                const dateObj = article.created_at ? new Date(article.created_at) : new Date();
+                const dateObj = (article.published_at || article.created_at) ? new Date(article.published_at || article.created_at) : new Date();
                 const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
                 const formattedDate = `${dateObj.getDate()} ${trMonths[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
                 const imageUrl = article.image_url ? (article.image_url.startsWith('http') ? article.image_url : `${origin}${article.image_url.startsWith('/') ? '' : '/'}${article.image_url}`) : `${origin}/uploads/logo.png`;
@@ -4948,7 +4948,7 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), optimiz
 app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const articleId = req.params.id;
     // Verify ownership
-    const [check] = await pool.query('SELECT author_id, was_published FROM articles WHERE id = ?', [articleId]);
+    const [check] = await pool.query('SELECT author_id, was_published, published_at FROM articles WHERE id = ?', [articleId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') {
         const [coAuthors] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [articleId, req.user.id]);
@@ -4958,6 +4958,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     }
 
     const wasPublished = check[0].was_published;
+    const existingPubAt = check[0].published_at;
     const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
 
     // Determine status update logic
@@ -4995,7 +4996,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (finalStatus === 'published') {
         updates.push('status = ?');
         params.push('published');
-        if (!wasPublished) {
+        if (!wasPublished || !existingPubAt) {
             updates.push('published_at = NOW()');
             updates.push('was_published = 1');
         }
@@ -5465,12 +5466,13 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
     const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
 
     try {
-        const [rows] = await pool.query('SELECT author_id, title, was_published FROM articles WHERE id = ?', [articleId]);
+        const [rows] = await pool.query('SELECT author_id, title, was_published, published_at FROM articles WHERE id = ?', [articleId]);
         if (rows.length === 0) return res.status(404).json({ message: 'Article not found' });
 
         const authorId = rows[0].author_id;
         const title = rows[0].title;
         const wasPublished = rows[0].was_published;
+        const existingPubAt = rows[0].published_at;
 
         let status = '';
         let msg = '';
@@ -5482,7 +5484,7 @@ app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
             status = 'published';
             msg = `Makaleniz yayına alındı: ${title}`;
             type = 'success';
-            if (wasPublished) {
+            if (wasPublished && existingPubAt) {
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             } else {
@@ -5868,12 +5870,13 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
     const { decision, rejection_reason } = req.body;
 
     try {
-        const [rows] = await pool.query('SELECT author_id, title, was_published FROM articles WHERE id = ? AND is_gundem = 1', [articleId]);
+        const [rows] = await pool.query('SELECT author_id, title, was_published, published_at FROM articles WHERE id = ? AND is_gundem = 1', [articleId]);
         if (rows.length === 0) return res.status(404).json({ message: 'Gündem yazısı bulunamadı.' });
 
         const authorId = rows[0].author_id;
         const title = rows[0].title;
         const wasPublished = rows[0].was_published;
+        const existingPubAt = rows[0].published_at;
 
         let status = '';
         let msg = '';
@@ -5883,9 +5886,9 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
 
         if (decision === 'approve') {
             status = 'published';
-            msg = `Bilim Gündemi yazınız yayına alındı: ${title}`;
-            type = 'success';
-            if (wasPublished) {
+            notifyMsg = `Bilim Gündemi yazınız yayına alındı: ${title}`;
+            notifyType = 'success';
+            if (wasPublished && existingPubAt) {
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
                 queryParams = [req.user.id, articleId];
             } else {
@@ -6006,7 +6009,7 @@ app.put('/api/editor/gundem/:id', authenticateToken, upload.any(), optimizeImage
         let updateParams = [articleTitle, cleanCategory, cleanExcerpt, cleanTags, cleanContent, image_url];
 
         if (decision === 'approve') {
-            if (article.was_published) {
+            if (article.was_published && article.published_at) {
                 updateFields += ', status = ?, rejection_reason = NULL, approved_by = ?';
                 updateParams.push('published', req.user.id);
             } else {

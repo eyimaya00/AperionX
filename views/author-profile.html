@@ -833,7 +833,7 @@
                 const exps = (data.experiments || []).map(e => ({ ...e, type: 'experiment' }));
 
                 const combinedItems = [...regArticles, ...gundemNews, ...exps]
-                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    .sort((a, b) => new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at));
 
                 // Update tab counters
                 const elAll = document.getElementById('cnt-all');
@@ -900,7 +900,7 @@
                                 <div class="card-footer">
                                     <span class="card-date">
                                         <i class="ph ph-calendar-blank" style="vertical-align:middle; margin-right:4px;"></i>
-                                        ${new Date(item.created_at).toLocaleDateString('tr-TR')}
+                                        ${new Date(item.published_at || item.created_at).toLocaleDateString('tr-TR')}
                                     </span>
                                     <div class="circle-arrow-btn">
                                         <i class="ph-bold ph-arrow-right"></i>

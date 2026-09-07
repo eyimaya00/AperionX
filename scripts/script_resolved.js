@@ -1282,7 +1282,8 @@ async function loadArticleDetail() {
 
         // Inner Content
         document.getElementById('detail-category').innerText = article.category || 'Genel';
-        document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${new Date(article.created_at).toLocaleDateString('tr-TR')}`;
+        const displayDate = article.published_at || article.created_at;
+        document.getElementById('detail-date').innerHTML = `<i class="ph ph-calendar"></i> ${displayDate ? new Date(displayDate).toLocaleDateString('tr-TR') : ''}`;
         document.getElementById('detail-author').innerHTML = `<i class="ph ph-user"></i> ${article.author_name || 'Gizli Yazar'}`;
         document.getElementById('detail-title').innerText = article.title;
 

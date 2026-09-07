@@ -41,7 +41,7 @@ function renderSlider() {
                             <a href="article-detail.html?id=${article.id}" style="text-decoration: none; color: inherit;">${article.title}</a>
                         </h4>
                         <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
-                             <span>${new Date(article.created_at).toLocaleDateString('tr-TR')}</span>
+                             <span>${new Date(article.published_at || article.created_at).toLocaleDateString('tr-TR')}</span>
                              <span><i class="ph ph-eye"></i> ${article.views || 0}</span>
                         </div>
                     </div>
