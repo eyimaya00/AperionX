@@ -9319,6 +9319,8 @@ app.get('/api/admin/newsletter/preview/:type/:id', authenticateToken, async (req
         let html;
         if (type === 'experiment') {
             html = await generateExperimentNewsletterHTML(id);
+        } else if (type === 'gundem') {
+            html = await generateGundemNewsletterHTML(id);
         } else {
             html = await generateNewsletterHTML(id);
         }
@@ -9368,6 +9370,8 @@ app.post('/api/admin/newsletter/send', authenticateToken, async (req, res) => {
         // Send logic
         if (type === 'experiment') {
             await sendExperimentNewsletterToRecipients(id, recipients);
+        } else if (type === 'gundem') {
+            await sendGundemNewsletterToRecipients(id, recipients);
         } else {
             await sendNewsletterToRecipients(id, recipients);
         }
@@ -9513,6 +9517,79 @@ async function generateExperimentNewsletterHTML(experimentId) {
 
                     <div class="button-container">
                         <a href="${expLink}" class="read-btn">Deneyi İncele</a>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>&copy; 2025 AperionX. Bilimin Sınırlarında.</p>
+                    <p>Bu bülten üyelerimize özel otomatik olarak gönderilmiştir. Almak istemiyorsanız <a href="${unsubscribeLink}">buradan ayrılabilirsiniz</a>.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+}
+
+// Helper: Generate HTML for Bilim Gundemi Newsletter
+async function generateGundemNewsletterHTML(gundemId) {
+    const [rows] = await pool.query(`
+        SELECT a.*, u.fullname as author_name
+        FROM articles a
+        LEFT JOIN users u ON a.author_id = u.id
+        WHERE a.id = ? AND a.is_gundem = 1
+    `, [gundemId]);
+
+    if (rows.length === 0) return null;
+    const gundem = rows[0];
+
+    const siteUrl = 'https://aperionx.com';
+    const gundemLink = `${siteUrl}/gundem/${gundem.slug}`;
+    const unsubscribeLink = `${siteUrl}/unsubscribe.html`;
+    const heroImage = gundem.image_url ?
+        (gundem.image_url.startsWith('http') ? gundem.image_url : `${siteUrl}/${gundem.image_url.startsWith('/') ? gundem.image_url.slice(1) : gundem.image_url}`) :
+        `${siteUrl}/uploads/default-hero.jpg`;
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; }
+                .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .header { background-color: #0f172a; padding: 25px; text-align: center; }
+                .logo { max-width: 180px; height: auto; display: block; margin: 0 auto; }
+                .hero-image { width: 100%; height: 250px; object-fit: cover; }
+                .content { padding: 30px; color: #334155; }
+                .tag { display: inline-block; background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
+                .title { font-size: 26px; font-weight: 800; color: #0f172a; margin: 10px 0 15px 0; line-height: 1.3; }
+                .author { font-size: 14px; color: #64748b; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+                .excerpt { font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+                .button-container { text-align: center; margin: 30px 0; }
+                .read-btn { background-color: #f59e0b; color: #ffffff !important; padding: 16px 36px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
+                .footer { background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="header">
+                   <a href="${siteUrl}" style="text-decoration:none;">
+                        <img src="cid:unique-logo-id" alt="AperionX" class="logo" style="color: white; font-size: 24px; font-weight: bold;">
+                   </a>
+                </div>
+                <a href="${gundemLink}" style="text-decoration:none; display:block;">
+                    <img src="${heroImage}" alt="${gundem.title}" class="hero-image">
+                </a>
+                <div class="content">
+                    <span class="tag">⚡ BİLİM GÜNDEMİ</span>
+                    <h1 class="title">${gundem.title}</h1>
+
+                    <div class="author">
+                        <span>📡 Hazırlayan: <span style="color: #0f172a;">${gundem.author_name || 'AperionX Bilim Ekibi'}</span></span>
+                    </div>
+
+                    <p class="excerpt">${gundem.excerpt || 'Bilim dünyasından en son gelişmeler ve sıcak haberler...'}</p>
+
+                    <div class="button-container">
+                        <a href="${gundemLink}" class="read-btn">Gündemi İncele</a>
                     </div>
                 </div>
                 <div class="footer">
@@ -9686,6 +9763,84 @@ async function sendExperimentNewsletterToRecipients(experimentId, recipientEmail
             [null, experimentId, `🧪 Yeni Deney: ${expTitle}`, successCount, status]);
     } catch (e) {
         console.error('[NEWSLETTER] Error logging to DB:', e);
+    }
+}
+
+// Helper: Send Gundem Newsletter to Recipients
+async function sendGundemNewsletterToRecipients(gundemId, recipientEmails) {
+    if (recipientEmails.length === 0) return;
+
+    const htmlContent = await generateGundemNewsletterHTML(gundemId);
+    if (!htmlContent) return;
+
+    const logoPath = path.join(__dirname, 'uploads', 'logo.png');
+
+    // Fetch Gundem Title for Subject
+    const [rows] = await pool.query('SELECT title FROM articles WHERE id = ? AND is_gundem = 1', [gundemId]);
+    if (rows.length === 0) return;
+    const gundemTitle = rows[0].title;
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        },
+        tls: { rejectUnauthorized: false },
+        pool: true,
+        maxConnections: 1,
+        maxMessages: 10,
+        rateDelta: 2000,
+        rateLimit: 1
+    });
+
+    console.log(`[NEWSLETTER] Starting gundem batch send to ${recipientEmails.length} recipients...`);
+
+    let successCount = 0;
+    let failCount = 0;
+    let consecutiveFailures = 0;
+    const MAX_CONSECUTIVE_FAILURES = 5;
+
+    for (const recipient of recipientEmails) {
+        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+            console.error(`[NEWSLETTER] ⛔ Circuit breaker triggered after ${MAX_CONSECUTIVE_FAILURES} consecutive failures. Aborting batch.`);
+            break;
+        }
+
+        try {
+            await transporter.sendMail({
+                from: '"AperionX Bülten" <' + process.env.SMTP_USER + '>',
+                to: recipient,
+                subject: `⚡ Bilim Gündemi: ${gundemTitle}`,
+                html: htmlContent,
+                attachments: [{ filename: 'logo.png', path: logoPath, cid: 'unique-logo-id' }]
+            });
+            successCount++;
+            consecutiveFailures = 0;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        } catch (e) {
+            console.error(`[NEWSLETTER] Failed to send to ${recipient}: ${e.message}`);
+            failCount++;
+            consecutiveFailures++;
+
+            const backoffMs = Math.min(consecutiveFailures * 3000, 30000);
+            console.log(`[NEWSLETTER] Backing off for ${backoffMs / 1000}s after failure...`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+        }
+    }
+
+    console.log(`[NEWSLETTER] Gundem batch finished. Success: ${successCount}, Fail: ${failCount}`);
+    transporter.close();
+
+    const status = failCount === 0 ? 'sent' : (successCount > 0 ? 'partial' : 'failed');
+
+    try {
+        await pool.query('INSERT INTO email_logs (article_id, subject, recipient_count, status) VALUES (?, ?, ?, ?)',
+            [gundemId, `⚡ Bilim Gündemi: ${gundemTitle}`, successCount, status]);
+    } catch (e) {
+        console.error('[NEWSLETTER] Error logging gundem to DB:', e);
     }
 }
 

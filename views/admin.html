@@ -1252,7 +1252,7 @@
             <div class="card">
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="font-weight:600; margin-bottom:10px; display:block;">📝 İçerik Türü</label>
-                    <div style="display:flex; gap:20px;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="radio" name="newsletter_type" value="article" checked onchange="onNewsletterTypeChange()">
                             <span style="font-weight: 500;">Makale (Article)</span>
@@ -1260,6 +1260,10 @@
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="radio" name="newsletter_type" value="experiment" onchange="onNewsletterTypeChange()">
                             <span style="font-weight: 500;">Deney (Experiment)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="radio" name="newsletter_type" value="gundem" onchange="onNewsletterTypeChange()">
+                            <span style="font-weight: 500;">Bilim Gündemi (News)</span>
                         </label>
                     </div>
                 </div>
@@ -6129,6 +6133,11 @@
                 help.innerText = "Sadece 'Yayında' (Published) olan deneyler listelenir.";
                 select.innerHTML = '<option value="">Deney Seçiniz...</option>';
                 await loadNewsletterExperiments();
+            } else if (type === 'gundem') {
+                label.innerText = '📣 Gönderilecek Bilim Gündemi';
+                help.innerText = "Sadece 'Yayında' (Published) olan bilim gündemleri listelenir.";
+                select.innerHTML = '<option value="">Bilim Gündemi Seçiniz...</option>';
+                await loadNewsletterGundem();
             } else {
                 label.innerText = '📣 Gönderilecek Makale';
                 help.innerText = "Sadece 'Yayında' (Published) olan makaleler listelenir.";
@@ -6136,6 +6145,34 @@
                 await loadNewsletterManagement();
             }
             previewNewsletter();
+        }
+
+        async function loadNewsletterGundem() {
+            const select = document.getElementById('newsletter-article-select');
+            select.innerHTML = '<option value="">Yükleniyor...</option>';
+            try {
+                const res = await fetch(`${API_URL}/editor/gundem/history`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const gundems = await res.json();
+
+                select.innerHTML = '<option value="">Bilim Gündemi Seçiniz...</option>';
+
+                const published = (Array.isArray(gundems) ? gundems : []).filter(g => g.status === 'published');
+
+                if (published.length === 0) {
+                    select.innerHTML = '<option value="">Yayınlanmış bilim gündemi yok</option>';
+                    return;
+                }
+
+                published.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.innerText = `${g.title} (${new Date(g.published_at || g.created_at).toLocaleDateString('tr-TR')})`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error(e);
+                showToast('Bilim Gündemi yüklenemedi', 'error');
+            }
         }
 
         async function loadNewsletterExperiments() {
@@ -6157,7 +6194,7 @@
                 published.forEach(e => {
                     const opt = document.createElement('option');
                     opt.value = e.id;
-                    opt.innerText = `${e.title} (${new Date(e.created_at).toLocaleDateString('tr-TR')})`;
+                    opt.innerText = `${e.title} (${new Date(e.published_at || e.created_at).toLocaleDateString('tr-TR')})`;
                     select.appendChild(opt);
                 });
             } catch (e) {
@@ -6187,7 +6224,7 @@
                 published.forEach(a => {
                     const opt = document.createElement('option');
                     opt.value = a.id;
-                    opt.innerText = `${a.title} (${new Date(a.created_at).toLocaleDateString('tr-TR')})`;
+                    opt.innerText = `${a.title} (${new Date(a.published_at || a.created_at).toLocaleDateString('tr-TR')})`;
                     select.appendChild(opt);
                 });
             } catch (e) {
