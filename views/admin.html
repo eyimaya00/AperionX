@@ -779,6 +779,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('articles-management', this); loadAllArticles();">
                 <i class="ph ph-article"></i> <span>Makale Yönetimi</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('gundem-management', this); loadAdminGundem();">
+                <i class="ph ph-newspaper"></i> <span>Bilim Gündemi</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('monthly-top-articles', this); loadMonthlyTopArticles(); loadMonthlyTopExperiments();">
                 <i class="ph ph-crown"></i> <span>Ayın Popülerleri</span>
             </a>
@@ -2080,6 +2083,173 @@
                             <!-- JS Populate -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bilim Gündemi Management Section -->
+        <div id="gundem-management" class="section">
+            <div class="header-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+                <div>
+                    <h1 class="page-title" style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <i class="ph-fill ph-newspaper" style="color:var(--primary-accent, #6366f1);"></i> Bilim Gündemi Yönetimi
+                    </h1>
+                    <p style="margin:4px 0 0 0; color:#64748b; font-size:0.9rem;">
+                        Tüm bilim gündemi yayınlarını, yazarlarını, okunma, beğeni ve yıldız değerlendirmelerini tek ekrandan takip edin.
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="loadAdminGundem()" style="display:inline-flex; align-items:center; gap:6px;">
+                        <i class="ph ph-arrows-clockwise"></i> Yenile
+                    </button>
+                    <a href="/author" target="_blank" class="btn" style="background:#10b981; color:white; display:inline-flex; align-items:center; gap:6px; text-decoration:none; padding:10px 18px; border-radius:8px; font-weight:600;">
+                        <i class="ph ph-plus"></i> Yeni Gündem Yaz
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Cards Grid (Summary & Performance) -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:16px; margin-bottom: 24px;">
+                <div class="card stat-card click-filter" onclick="filterAdminGundem('all', this)"
+                    style="border-left: 4px solid #6366f1; cursor: pointer; transition:all 0.2s; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Toplam Gündem</h3>
+                        <i class="ph-fill ph-newspaper" style="color:#6366f1; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-total" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#1e293b;">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterAdminGundem('published', this)"
+                    style="border-left: 4px solid #10b981; cursor: pointer; transition:all 0.2s; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Yayında</h3>
+                        <i class="ph-fill ph-check-circle" style="color:#10b981; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-published" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#10b981;">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterAdminGundem('pending', this)"
+                    style="border-left: 4px solid #f59e0b; cursor: pointer; transition:all 0.2s; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Onay Bekleyen</h3>
+                        <i class="ph-fill ph-clock" style="color:#f59e0b; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-pending" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#f59e0b;">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterAdminGundem('rejected', this)"
+                    style="border-left: 4px solid #ef4444; cursor: pointer; transition:all 0.2s; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Red / Revizyon</h3>
+                        <i class="ph-fill ph-x-circle" style="color:#ef4444; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-rejected" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#ef4444;">0</p>
+                </div>
+                <div class="card stat-card click-filter" onclick="filterAdminGundem('draft', this)"
+                    style="border-left: 4px solid #64748b; cursor: pointer; transition:all 0.2s; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Taslak</h3>
+                        <i class="ph-fill ph-file-dashed" style="color:#64748b; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-draft" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#64748b;">0</p>
+                </div>
+                <div class="card stat-card" style="border-left: 4px solid #3b82f6; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Toplam Okunma</h3>
+                        <i class="ph-fill ph-eye" style="color:#3b82f6; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-views" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#3b82f6;">0</p>
+                </div>
+                <div class="card stat-card" style="border-left: 4px solid #ec4899; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Toplam Beğeni</h3>
+                        <i class="ph-fill ph-heart" style="color:#ec4899; font-size:1.4rem;"></i>
+                    </div>
+                    <p class="stat-value" id="admin-gundem-likes" style="font-size:1.8rem; font-weight:800; margin:8px 0 0 0; color:#ec4899;">0</p>
+                </div>
+                <div class="card stat-card" style="border-left: 4px solid #f59e0b; padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; font-size:0.85rem; color:#64748b; font-weight:600;">Yıldız & Oy</h3>
+                        <i class="ph-fill ph-star" style="color:#f59e0b; font-size:1.4rem;"></i>
+                    </div>
+                    <div style="display:flex; align-items:baseline; gap:6px; margin-top:8px;">
+                        <span class="stat-value" id="admin-gundem-rating-avg" style="font-size:1.8rem; font-weight:800; color:#f59e0b;">0.0</span>
+                        <span id="admin-gundem-rating-count" style="font-size:0.82rem; color:#64748b; font-weight:600;">(0 Oy)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Card: Filters & Table -->
+            <div class="card" style="padding:24px; border-radius:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+                    <!-- Status Filter Tabs -->
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;" id="admin-gundem-tabs">
+                        <button class="btn btn-secondary active gundem-tab-btn" onclick="filterAdminGundem('all', this)" style="padding:8px 16px; border-radius:20px; font-size:0.85rem; font-weight:600;">Tümü (<span id="tab-cnt-all">0</span>)</button>
+                        <button class="btn btn-secondary gundem-tab-btn" onclick="filterAdminGundem('published', this)" style="padding:8px 16px; border-radius:20px; font-size:0.85rem; font-weight:600;">Yayında (<span id="tab-cnt-pub">0</span>)</button>
+                        <button class="btn btn-secondary gundem-tab-btn" onclick="filterAdminGundem('pending', this)" style="padding:8px 16px; border-radius:20px; font-size:0.85rem; font-weight:600;">Onay Bekleyen (<span id="tab-cnt-pend">0</span>)</button>
+                        <button class="btn btn-secondary gundem-tab-btn" onclick="filterAdminGundem('rejected', this)" style="padding:8px 16px; border-radius:20px; font-size:0.85rem; font-weight:600;">Reddedilen (<span id="tab-cnt-rej">0</span>)</button>
+                        <button class="btn btn-secondary gundem-tab-btn" onclick="filterAdminGundem('draft', this)" style="padding:8px 16px; border-radius:20px; font-size:0.85rem; font-weight:600;">Taslak (<span id="tab-cnt-drf">0</span>)</button>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                        <div style="position:relative; width:260px;">
+                            <i class="ph ph-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8;"></i>
+                            <input type="text" id="admin-gundem-search" class="form-control" placeholder="Başlık, yazar ara..." 
+                                oninput="filterAdminGundemSearch(this.value)"
+                                style="padding-left:36px; padding-top:8px; padding-bottom:8px; border-radius:20px; font-size:0.88rem; width:100%;">
+                        </div>
+                        <select id="admin-gundem-category-select" class="form-control" onchange="filterAdminGundemCategory(this.value)" style="padding:8px 14px; border-radius:20px; font-size:0.88rem; width:auto;">
+                            <option value="all">Tüm Kategoriler</option>
+                        </select>
+                        <select id="admin-gundem-sort-select" class="form-control" onchange="filterAdminGundemSort(this.value)" style="padding:8px 14px; border-radius:20px; font-size:0.88rem; width:auto;">
+                            <option value="newest">En Yeni</option>
+                            <option value="views">En Çok Okunan</option>
+                            <option value="likes">En Çok Beğenilen</option>
+                            <option value="ratings">En Yüksek Yıldız</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse;" id="admin-gundem-table">
+                        <thead>
+                            <tr style="text-align:left; border-bottom:2px solid #e2e8f0; font-size:0.82rem; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">
+                                <th style="padding:14px 12px; width:70px;">Görsel</th>
+                                <th style="padding:14px 12px; min-width:200px;">Gündem Başlığı</th>
+                                <th style="padding:14px 12px; min-width:160px;">Yazar</th>
+                                <th style="padding:14px 12px;">Kategori</th>
+                                <th style="padding:14px 12px; text-align:center;">Durum</th>
+                                <th style="padding:14px 12px; text-align:center;">Okunma</th>
+                                <th style="padding:14px 12px; text-align:center;">Beğeni</th>
+                                <th style="padding:14px 12px; text-align:center;">Yıldız (Ort / Oy)</th>
+                                <th style="padding:14px 12px; text-align:center;">Yorum</th>
+                                <th style="padding:14px 12px;">Tarih</th>
+                                <th style="padding:14px 12px; text-align:right; width:130px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-gundem-table-body">
+                            <!-- Populated by loadAdminGundem() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Gundem Detail / Preview Modal -->
+        <div class="modal-overlay" id="admin-gundem-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(3px);">
+            <div style="background:white; border-radius:20px; width:95%; max-width:850px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.3); overflow:hidden;">
+                <div style="padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i class="ph-fill ph-newspaper" style="color:#6366f1; font-size:1.5rem;"></i>
+                        <h2 style="margin:0; font-size:1.25rem; color:#1e293b;" id="agm-title">Gündem Detayı</h2>
+                    </div>
+                    <button onclick="closeAdminGundemModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b;">&times;</button>
+                </div>
+                <div style="padding:24px; overflow-y:auto; flex:1;" id="agm-body">
+                    <!-- Populated dynamically -->
+                </div>
+                <div style="padding:16px 24px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;" id="agm-footer">
+                    <button class="btn btn-secondary" onclick="closeAdminGundemModal()">Kapat</button>
+                    <div style="display:flex; gap:10px;" id="agm-actions"></div>
                 </div>
             </div>
         </div>
@@ -4520,6 +4690,397 @@
             }
         }
 
+        // ==========================================
+        // BILIM GUNDEMI YÖNETİMİ (ADMIN PANEL)
+        // ==========================================
+        let allAdminGundemData = [];
+        let currentAdminGundemStatusFilter = 'all';
+        let currentAdminGundemCategoryFilter = 'all';
+        let currentAdminGundemSearchQuery = '';
+        let currentAdminGundemSort = 'newest';
+
+        async function loadAdminGundem() {
+            const tableBody = document.getElementById('admin-gundem-table-body');
+            if (!tableBody) return;
+            tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:40px; color:#64748b;"><i class="ph ph-spinner" style="font-size:1.8rem; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;"></i><br>Bilim Gündemi içerikleri yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/gundem`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('API hatası: ' + res.status);
+                const data = await res.json();
+
+                allAdminGundemData = Array.isArray(data.items) ? data.items : [];
+                const stats = data.stats || {};
+
+                // Update summary stat cards
+                if (document.getElementById('admin-gundem-total')) document.getElementById('admin-gundem-total').innerText = (stats.totalCount || allAdminGundemData.length).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-published')) document.getElementById('admin-gundem-published').innerText = (stats.publishedCount || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-pending')) document.getElementById('admin-gundem-pending').innerText = (stats.pendingCount || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-rejected')) document.getElementById('admin-gundem-rejected').innerText = (stats.rejectedCount || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-draft')) document.getElementById('admin-gundem-draft').innerText = (stats.draftCount || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-views')) document.getElementById('admin-gundem-views').innerText = (stats.totalViews || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-likes')) document.getElementById('admin-gundem-likes').innerText = (stats.totalLikes || 0).toLocaleString('tr-TR');
+                if (document.getElementById('admin-gundem-rating-avg')) document.getElementById('admin-gundem-rating-avg').innerText = stats.overallAvgRating || '0.0';
+                if (document.getElementById('admin-gundem-rating-count')) document.getElementById('admin-gundem-rating-count').innerText = `(${stats.totalRatings || 0} Oy)`;
+
+                // Update tab counters
+                if (document.getElementById('tab-cnt-all')) document.getElementById('tab-cnt-all').innerText = allAdminGundemData.length;
+                if (document.getElementById('tab-cnt-pub')) document.getElementById('tab-cnt-pub').innerText = stats.publishedCount || 0;
+                if (document.getElementById('tab-cnt-pend')) document.getElementById('tab-cnt-pend').innerText = stats.pendingCount || 0;
+                if (document.getElementById('tab-cnt-rej')) document.getElementById('tab-cnt-rej').innerText = stats.rejectedCount || 0;
+                if (document.getElementById('tab-cnt-drf')) document.getElementById('tab-cnt-drf').innerText = stats.draftCount || 0;
+
+                // Populate Category Filter dropdown
+                const catSelect = document.getElementById('admin-gundem-category-select');
+                if (catSelect) {
+                    const currentVal = catSelect.value;
+                    const categories = Array.from(new Set(allAdminGundemData.map(i => i.category || 'Gündem'))).filter(Boolean);
+                    catSelect.innerHTML = '<option value="all">Tüm Kategoriler</option>';
+                    categories.forEach(cat => {
+                        const opt = document.createElement('option');
+                        opt.value = cat;
+                        opt.textContent = cat;
+                        if (cat === currentVal) opt.selected = true;
+                        catSelect.appendChild(opt);
+                    });
+                }
+
+                applyAdminGundemFilters();
+            } catch (err) {
+                console.error('loadAdminGundem error:', err);
+                tableBody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:30px; color:#ef4444;"><i class="ph-bold ph-warning-circle" style="font-size:1.6rem; display:inline-block; margin-bottom:6px;"></i><br>İçerikler yüklenirken hata oluştu: ${err.message}</td></tr>`;
+            }
+        }
+
+        function filterAdminGundem(status, btnEl) {
+            currentAdminGundemStatusFilter = status;
+            if (btnEl) {
+                document.querySelectorAll('#admin-gundem-tabs .gundem-tab-btn').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+            applyAdminGundemFilters();
+        }
+
+        function filterAdminGundemSearch(term) {
+            currentAdminGundemSearchQuery = (term || '').trim().toLowerCase();
+            applyAdminGundemFilters();
+        }
+
+        function filterAdminGundemCategory(cat) {
+            currentAdminGundemCategoryFilter = cat || 'all';
+            applyAdminGundemFilters();
+        }
+
+        function filterAdminGundemSort(sortBy) {
+            currentAdminGundemSort = sortBy || 'newest';
+            applyAdminGundemFilters();
+        }
+
+        function applyAdminGundemFilters() {
+            let filtered = [...allAdminGundemData];
+
+            // 1. Status Filter
+            if (currentAdminGundemStatusFilter !== 'all') {
+                filtered = filtered.filter(item => item.status === currentAdminGundemStatusFilter);
+            }
+
+            // 2. Category Filter
+            if (currentAdminGundemCategoryFilter !== 'all') {
+                filtered = filtered.filter(item => (item.category || 'Gündem') === currentAdminGundemCategoryFilter);
+            }
+
+            // 3. Search Filter
+            if (currentAdminGundemSearchQuery) {
+                filtered = filtered.filter(item => {
+                    const title = (item.title || '').toLowerCase();
+                    const author = (item.author_name || '').toLowerCase();
+                    const username = (item.author_username || '').toLowerCase();
+                    const tags = (item.tags || '').toLowerCase();
+                    const excerpt = (item.excerpt || '').toLowerCase();
+                    return title.includes(currentAdminGundemSearchQuery) ||
+                           author.includes(currentAdminGundemSearchQuery) ||
+                           username.includes(currentAdminGundemSearchQuery) ||
+                           tags.includes(currentAdminGundemSearchQuery) ||
+                           excerpt.includes(currentAdminGundemSearchQuery);
+                });
+            }
+
+            // 4. Sorting
+            filtered.sort((a, b) => {
+                if (currentAdminGundemSort === 'views') {
+                    return (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
+                } else if (currentAdminGundemSort === 'likes') {
+                    return (parseInt(b.like_count) || 0) - (parseInt(a.like_count) || 0);
+                } else if (currentAdminGundemSort === 'ratings') {
+                    const scoreA = (parseFloat(a.rating_avg) || 0) * 100 + (parseInt(a.rating_count) || 0);
+                    const scoreB = (parseFloat(b.rating_avg) || 0) * 100 + (parseInt(b.rating_count) || 0);
+                    return scoreB - scoreA;
+                } else {
+                    // newest
+                    const dateA = new Date(a.published_at || a.submitted_at || a.created_at || 0);
+                    const dateB = new Date(b.published_at || b.submitted_at || b.created_at || 0);
+                    return dateB - dateA;
+                }
+            });
+
+            renderAdminGundemTable(filtered);
+        }
+
+        function renderAdminGundemTable(items) {
+            const tbody = document.getElementById('admin-gundem-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:50px; color:#94a3b8;"><i class="ph ph-newspaper" style="font-size:2.5rem; opacity:0.4; display:block; margin-bottom:8px;"></i>Kriterlere uygun bilim gündemi yazısı bulunamadı.</td></tr>';
+                return;
+            }
+
+            items.forEach(item => {
+                // Status badge
+                let statusBadge = '';
+                if (item.status === 'published') {
+                    statusBadge = '<span style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-check-circle"></i> Yayında</span>';
+                } else if (item.status === 'pending') {
+                    statusBadge = '<span style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-clock"></i> Onay Bekliyor</span>';
+                } else if (item.status === 'rejected') {
+                    statusBadge = '<span style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-x-circle"></i> Red / Revizyon</span>';
+                } else if (item.status === 'draft') {
+                    statusBadge = '<span style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-file-dashed"></i> Taslak</span>';
+                } else {
+                    statusBadge = `<span style="background:#f8fafc; color:#64748b; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600;">${item.status}</span>`;
+                }
+
+                // Image handling
+                const imgSrc = item.image_url ? (item.image_url.startsWith('http') ? item.image_url : (item.image_url.startsWith('/') ? item.image_url : '/' + item.image_url)) : '/uploads/logo.png';
+                
+                // Author avatar
+                const authorAvatar = item.author_avatar ? (item.author_avatar.startsWith('http') ? item.author_avatar : (item.author_avatar.startsWith('/') ? item.author_avatar : '/' + item.author_avatar)) : '/uploads/logo.png';
+
+                // Rating string
+                const ratingCount = parseInt(item.rating_count, 10) || 0;
+                const ratingAvg = item.rating_avg ? parseFloat(item.rating_avg).toFixed(1) : (ratingCount > 0 ? '5.0' : '-');
+                const ratingHtml = ratingCount > 0 
+                    ? `<span style="display:inline-flex; align-items:center; gap:4px; font-weight:700; color:#d97706; background:#fef3c7; border:1px solid #fde68a; padding:3px 8px; border-radius:8px; font-size:0.82rem;"><i class="ph-fill ph-star" style="color:#f59e0b;"></i> ${ratingAvg} <span style="color:#78350f; font-weight:500; font-size:0.75rem;">(${ratingCount})</span></span>`
+                    : `<span style="color:#94a3b8; font-size:0.8rem;">-</span>`;
+
+                // Date
+                const displayDate = item.published_at || item.submitted_at || item.created_at;
+                const dateStr = displayDate ? new Date(displayDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
+                // Live link
+                const liveUrl = item.slug ? `/gundem/${item.slug}` : (item.id ? `/preview-gundem/${item.id}` : '#');
+
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #f1f5f9';
+                tr.style.transition = 'background 0.2s';
+                tr.onmouseover = () => tr.style.background = '#f8fafc';
+                tr.onmouseout = () => tr.style.background = 'white';
+
+                tr.innerHTML = `
+                    <td style="padding:12px;">
+                        <img src="${imgSrc}" alt="" style="width:54px; height:38px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;" onerror="this.src='/uploads/logo.png'">
+                    </td>
+                    <td style="padding:12px;">
+                        <a href="javascript:void(0)" onclick="openAdminGundemModal(${item.id})" style="font-weight:600; color:#1e293b; text-decoration:none; font-size:0.92rem; display:block; line-height:1.35;" title="Detayları gör">
+                            ${escapeHtml(item.title)}
+                        </a>
+                        <span style="color:#94a3b8; font-size:0.75rem;">#${item.id} • ${escapeHtml(item.slug || '')}</span>
+                    </td>
+                    <td style="padding:12px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <img src="${authorAvatar}" alt="" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;" onerror="this.src='/uploads/logo.png'">
+                            <div>
+                                <div style="font-weight:600; font-size:0.85rem; color:#334155;">${escapeHtml(item.author_name || 'Bilinmiyor')}</div>
+                                ${item.author_username ? `<div style="font-size:0.72rem; color:#94a3b8;">@${escapeHtml(item.author_username)}</div>` : ''}
+                                ${item.co_authors ? `<div style="font-size:0.7rem; color:#6366f1;">+ ${escapeHtml(item.co_authors)}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding:12px;">
+                        <span style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; padding:4px 10px; border-radius:6px; font-size:0.78rem; font-weight:600;">
+                            ${escapeHtml(item.category || 'Gündem')}
+                        </span>
+                    </td>
+                    <td style="padding:12px; text-align:center;">
+                        ${statusBadge}
+                    </td>
+                    <td style="padding:12px; text-align:center; font-weight:600; color:#3b82f6;">
+                        <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.88rem;">
+                            <i class="ph-bold ph-eye" style="color:#3b82f6;"></i> ${(item.views || 0).toLocaleString('tr-TR')}
+                        </span>
+                    </td>
+                    <td style="padding:12px; text-align:center; font-weight:600; color:#ec4899;">
+                        <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.88rem;">
+                            <i class="ph-bold ph-heart" style="color:#ec4899;"></i> ${(item.like_count || 0).toLocaleString('tr-TR')}
+                        </span>
+                    </td>
+                    <td style="padding:12px; text-align:center;">
+                        ${ratingHtml}
+                    </td>
+                    <td style="padding:12px; text-align:center; font-weight:600; color:#8b5cf6;">
+                        <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.88rem;">
+                            <i class="ph-bold ph-chat-circle-text" style="color:#8b5cf6;"></i> ${(item.comment_count || 0).toLocaleString('tr-TR')}
+                        </span>
+                    </td>
+                    <td style="padding:12px; color:#64748b; font-size:0.82rem; white-space:nowrap;">
+                        ${dateStr}
+                    </td>
+                    <td style="padding:12px; text-align:right;">
+                        <div style="display:inline-flex; align-items:center; gap:6px;">
+                            ${item.status === 'published' ? `
+                                <a href="${liveUrl}" target="_blank" class="btn btn-secondary" style="padding:6px 10px; font-size:0.8rem; border-radius:6px;" title="Sitede Canlı Gör">
+                                    <i class="ph-bold ph-arrow-square-out"></i>
+                                </a>
+                            ` : ''}
+                            <button class="btn" style="padding:6px 10px; font-size:0.8rem; background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:6px;" onclick="openAdminGundemModal(${item.id})" title="Detayları İncele">
+                                <i class="ph-bold ph-eye"></i>
+                            </button>
+                            <button class="btn" style="padding:6px 10px; font-size:0.8rem; background:#fee2e2; color:#ef4444; border:1px solid #fecaca; border-radius:6px;" onclick="deleteAdminGundem(${item.id}, '${escapeHtml((item.title || '').replace(/'/g, "\\'"))}')" title="Sil">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAdminGundemModal(id) {
+            const item = allAdminGundemData.find(i => i.id == id);
+            if (!item) return;
+
+            document.getElementById('agm-title').innerText = item.title;
+            const imgSrc = item.image_url ? (item.image_url.startsWith('http') ? item.image_url : (item.image_url.startsWith('/') ? item.image_url : '/' + item.image_url)) : '/uploads/logo.png';
+            const authorAvatar = item.author_avatar ? (item.author_avatar.startsWith('http') ? item.author_avatar : (item.author_avatar.startsWith('/') ? item.author_avatar : '/' + item.author_avatar)) : '/uploads/logo.png';
+            const ratingCount = parseInt(item.rating_count, 10) || 0;
+            const ratingAvg = item.rating_avg ? parseFloat(item.rating_avg).toFixed(1) : (ratingCount > 0 ? '5.0' : '-');
+
+            let statusLabel = 'Taslak';
+            let statusColor = '#64748b';
+            let statusBg = '#f1f5f9';
+            if (item.status === 'published') { statusLabel = 'Yayında'; statusColor = '#15803d'; statusBg = '#dcfce7'; }
+            else if (item.status === 'pending') { statusLabel = 'Onay Bekliyor'; statusColor = '#b45309'; statusBg = '#fef3c7'; }
+            else if (item.status === 'rejected') { statusLabel = 'Red / Düzenleme Gerekli'; statusColor = '#b91c1c'; statusBg = '#fee2e2'; }
+
+            const bodyHtml = `
+                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
+                    <img src="${imgSrc}" alt="" style="width:180px; height:120px; object-fit:cover; border-radius:12px; border:1px solid #e2e8f0;" onerror="this.src='/uploads/logo.png'">
+                    <div style="flex:1; min-width:260px;">
+                        <div style="margin-bottom:8px;">
+                            <span style="background:${statusBg}; color:${statusColor}; font-weight:700; font-size:0.8rem; padding:4px 10px; border-radius:8px;">${statusLabel}</span>
+                            <span style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; font-weight:600; font-size:0.8rem; padding:4px 10px; border-radius:8px; margin-left:6px;">${escapeHtml(item.category || 'Gündem')}</span>
+                        </div>
+                        <h3 style="margin:0 0 10px 0; font-size:1.25rem; color:#1e293b;">${escapeHtml(item.title)}</h3>
+                        <div style="display:flex; align-items:center; gap:10px; color:#64748b; font-size:0.85rem;">
+                            <img src="${authorAvatar}" alt="" style="width:32px; height:32px; border-radius:50%; object-fit:cover;" onerror="this.src='/uploads/logo.png'">
+                            <div>
+                                <strong>${escapeHtml(item.author_name || 'Bilinmiyor')}</strong> 
+                                ${item.author_username ? `<span style="color:#94a3b8;">(@${escapeHtml(item.author_username)})</span>` : ''}
+                                ${item.co_authors ? `<br><small style="color:#6366f1;">Ortak Yazarlar: ${escapeHtml(item.co_authors)}</small>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Stats Cards in Modal -->
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:20px;">
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px; text-align:center;">
+                        <i class="ph-bold ph-eye" style="color:#3b82f6; font-size:1.3rem;"></i>
+                        <div style="font-size:1.3rem; font-weight:800; color:#1e40af; margin-top:4px;">${(item.views || 0).toLocaleString('tr-TR')}</div>
+                        <div style="font-size:0.75rem; color:#60a5fa; font-weight:600;">Okunma</div>
+                    </div>
+                    <div style="background:#fdf2f8; border:1px solid #fbcfe8; border-radius:12px; padding:14px; text-align:center;">
+                        <i class="ph-bold ph-heart" style="color:#ec4899; font-size:1.3rem;"></i>
+                        <div style="font-size:1.3rem; font-weight:800; color:#9d174d; margin-top:4px;">${(item.like_count || 0).toLocaleString('tr-TR')}</div>
+                        <div style="font-size:0.75rem; color:#f472b6; font-weight:600;">Beğeni</div>
+                    </div>
+                    <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:14px; text-align:center;">
+                        <i class="ph-bold ph-star" style="color:#f59e0b; font-size:1.3rem;"></i>
+                        <div style="font-size:1.3rem; font-weight:800; color:#b45309; margin-top:4px;">${ratingAvg} ★</div>
+                        <div style="font-size:0.75rem; color:#fbbf24; font-weight:600;">${ratingCount} Değerlendirme</div>
+                    </div>
+                    <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:12px; padding:14px; text-align:center;">
+                        <i class="ph-bold ph-chat-circle-text" style="color:#8b5cf6; font-size:1.3rem;"></i>
+                        <div style="font-size:1.3rem; font-weight:800; color:#5b21b6; margin-top:4px;">${(item.comment_count || 0).toLocaleString('tr-TR')}</div>
+                        <div style="font-size:0.75rem; color:#a78bfa; font-weight:600;">Yorum</div>
+                    </div>
+                </div>
+
+                ${item.excerpt ? `
+                    <div style="margin-bottom:16px;">
+                        <h4 style="margin:0 0 6px 0; font-size:0.9rem; color:#475569;">Kısa Özet:</h4>
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; font-size:0.9rem; color:#334155; line-height:1.5;">
+                            ${escapeHtml(item.excerpt)}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${item.rejection_reason ? `
+                    <div style="margin-bottom:16px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px;">
+                        <h4 style="margin:0 0 4px 0; font-size:0.88rem; color:#991b1b; display:flex; align-items:center; gap:6px;">
+                            <i class="ph-bold ph-warning-circle"></i> Düzenleme / Red Sebebi:
+                        </h4>
+                        <div style="font-size:0.88rem; color:#7f1d1d;">${escapeHtml(item.rejection_reason)}</div>
+                    </div>
+                ` : ''}
+
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:0.8rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:12px;">
+                    <div>Oluşturulma: <strong>${new Date(item.created_at).toLocaleString('tr-TR')}</strong></div>
+                    ${item.published_at ? `<div>Yayınlanma: <strong>${new Date(item.published_at).toLocaleString('tr-TR')}</strong></div>` : ''}
+                    ${item.approver_name ? `<div>Onaylayan: <strong>${escapeHtml(item.approver_name)}</strong></div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('agm-body').innerHTML = bodyHtml;
+
+            const liveUrl = item.slug ? `/gundem/${item.slug}` : `/preview-gundem/${item.id}`;
+            const actionsHtml = `
+                <a href="${liveUrl}" target="_blank" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                    <i class="ph-bold ph-arrow-square-out"></i> Canlı Önizle
+                </a>
+                <button class="btn btn-danger" onclick="deleteAdminGundem(${item.id}, '${escapeHtml((item.title || '').replace(/'/g, "\\'"))}'); closeAdminGundemModal();" style="display:inline-flex; align-items:center; gap:6px;">
+                    <i class="ph-bold ph-trash"></i> Sil
+                </button>
+            `;
+            document.getElementById('agm-actions').innerHTML = actionsHtml;
+
+            const modal = document.getElementById('admin-gundem-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeAdminGundemModal() {
+            const modal = document.getElementById('admin-gundem-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function deleteAdminGundem(id, title) {
+            if (!confirm(`"${title || 'Bu bilim gündemi yazısını'}" silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz. İlgili tüm beğeni, yorum ve yıldız değerlendirmeleri de veritabanından kalıcı olarak temizlenecektir.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/editor/gundem/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    showToast('Bilim Gündemi yazısı ve tüm istatistikleri başarıyla silindi.', 'success');
+                    loadAdminGundem();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast('Hata: ' + (errData.error || errData.message || 'Silinemedi'), 'error');
+                }
+            } catch (e) {
+                console.error('deleteAdminGundem error:', e);
+                showToast('Sunucu hatası oluştu: ' + e.message, 'error');
+            }
+        }
+
         async function loadLikes() {
             const tbody = document.getElementById('likes-table-body');
             try {
@@ -5031,6 +5592,7 @@
 
                 // Load Section Specific Data
                 if (sectionId === 'articles-management') loadAllArticles();
+                if (sectionId === 'gundem-management') loadAdminGundem();
                 if (sectionId === 'monthly-top-articles') { loadMonthlyTopArticles(); loadMonthlyTopExperiments(); }
                 if (sectionId === 'article-detail-management') loadArticleDetailSettings();
                 if (sectionId === 'homepage-management') loadHomepageSettings();

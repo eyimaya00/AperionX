@@ -4154,6 +4154,100 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).send(e.toString()); }
 });
 
+app.get('/api/admin/gundem', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        await ensureGundemColumns();
+        const [rows] = await pool.query(`
+            SELECT 
+                a.id, 
+                a.title, 
+                a.slug, 
+                a.category, 
+                a.status, 
+                a.views, 
+                a.tags,
+                a.created_at, 
+                a.submitted_at, 
+                a.published_at, 
+                a.updated_at,
+                a.image_url, 
+                a.author_id, 
+                a.approved_by,
+                a.rejection_reason, 
+                LEFT(a.excerpt, 250) as excerpt, 
+                u.fullname as author_name, 
+                u.username as author_username,
+                u.avatar_url as author_avatar,
+                appr.fullname as approver_name,
+                (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count,
+                (SELECT COUNT(*) FROM article_ratings WHERE article_id = a.id) as rating_count,
+                (SELECT ROUND(AVG(rating), 1) FROM article_ratings WHERE article_id = a.id) as rating_avg,
+                (SELECT GROUP_CONCAT(u2.fullname SEPARATOR ', ') 
+                 FROM article_authors aa 
+                 JOIN users u2 ON aa.user_id = u2.id 
+                 WHERE aa.article_id = a.id) as co_authors
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            LEFT JOIN users appr ON a.approved_by = appr.id
+            WHERE a.is_gundem = 1
+            ORDER BY COALESCE(a.published_at, a.submitted_at, a.created_at) DESC, a.id DESC
+        `);
+
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+        let totalRatings = 0;
+        let ratingSum = 0;
+        let publishedCount = 0;
+        let pendingCount = 0;
+        let rejectedCount = 0;
+        let draftCount = 0;
+
+        rows.forEach(r => {
+            totalViews += parseInt(r.views, 10) || 0;
+            totalLikes += parseInt(r.like_count, 10) || 0;
+            totalComments += parseInt(r.comment_count, 10) || 0;
+            const rCount = parseInt(r.rating_count, 10) || 0;
+            totalRatings += rCount;
+            if (r.rating_avg && rCount > 0) {
+                ratingSum += (parseFloat(r.rating_avg) * rCount);
+            }
+
+            if (r.status === 'published') publishedCount++;
+            else if (r.status === 'pending') pendingCount++;
+            else if (r.status === 'rejected') rejectedCount++;
+            else if (r.status === 'draft') draftCount++;
+
+            if (r.image_url && !r.image_url.startsWith('http') && !r.image_url.startsWith('data:')) {
+                r.image_url = '/' + r.image_url.replace(/^\/+/, '');
+            }
+        });
+
+        const overallAvgRating = totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';
+
+        res.json({
+            items: rows,
+            stats: {
+                totalCount: rows.length,
+                totalViews,
+                totalLikes,
+                totalComments,
+                totalRatings,
+                overallAvgRating,
+                publishedCount,
+                pendingCount,
+                rejectedCount,
+                draftCount
+            }
+        });
+    } catch (e) {
+        console.error('Admin gundem list error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 
 // 3. Articles (GET Public, POST Author)
 // ==========================================
