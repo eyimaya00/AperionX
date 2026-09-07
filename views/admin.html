@@ -782,7 +782,7 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('gundem-management', this); loadAdminGundem();">
                 <i class="ph ph-newspaper"></i> <span>Bilim Gündemi</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showSection('monthly-top-articles', this); loadMonthlyTopArticles(); loadMonthlyTopExperiments();">
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('monthly-top-articles', this); loadMonthlyTopArticles(); loadMonthlyTopExperiments(); loadMonthlyTopGundem();">
                 <i class="ph ph-crown"></i> <span>Ayın Popülerleri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('newsletter-subscribers', this); loadSubscribers();">
@@ -1569,7 +1569,12 @@
 
             <div style="margin-top: 40px;">
                 <h2 style="font-size: 1.5rem; margin-bottom: 20px; color: #1e293b;">Detaylı İstatistikler</h2>
-                <div class="card">
+                
+                <!-- Makale Detaylı İstatistikler -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <i class="ph ph-article" style="color: #3b82f6;"></i> Makale İstatistikleri
+                    </h3>
                     <div class="table-container">
                         <table class="data-table" style="width: 100%; border-collapse: collapse;">
                             <thead>
@@ -1582,6 +1587,56 @@
                                 </tr>
                             </thead>
                             <tbody id="detailed-stats-body">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:20px;">Yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Deney Detaylı İstatistikler -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <i class="ph ph-flask" style="color: #db2777;"></i> Deney İstatistikleri
+                    </h3>
+                    <div class="table-container">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                                    <th style="padding: 16px; color: #64748b;">Deney Başlığı</th>
+                                    <th style="padding: 16px; color: #64748b;">Yazar</th>
+                                    <th style="padding: 16px; color: #64748b;">Görüntülenme</th>
+                                    <th style="padding: 16px; color: #64748b;">Beğeni</th>
+                                    <th style="padding: 16px; color: #64748b;">Yorum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailed-exp-stats-body">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:20px;">Yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bilim Gündemi Detaylı İstatistikler -->
+                <div class="card">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <i class="ph ph-newspaper" style="color: #d97706;"></i> Bilim Gündemi İstatistikleri
+                    </h3>
+                    <div class="table-container">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                                    <th style="padding: 16px; color: #64748b;">Gündem Başlığı</th>
+                                    <th style="padding: 16px; color: #64748b;">Yazar</th>
+                                    <th style="padding: 16px; color: #64748b;">Görüntülenme</th>
+                                    <th style="padding: 16px; color: #64748b;">Beğeni</th>
+                                    <th style="padding: 16px; color: #64748b;">Yorum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailed-gundem-stats-body">
                                 <tr>
                                     <td colspan="5" style="text-align:center; padding:20px;">Yükleniyor...</td>
                                 </tr>
@@ -2316,7 +2371,7 @@
                         </select>
                     </div>
 
-                    <button class="btn btn-primary" onclick="loadMonthlyTopArticles(); loadMonthlyTopExperiments();" style="display: inline-flex; align-items: center; gap: 8px; height: 42px;">
+                    <button class="btn btn-primary" onclick="loadMonthlyTopArticles(); loadMonthlyTopExperiments(); loadMonthlyTopGundem();" style="display: inline-flex; align-items: center; gap: 8px; height: 42px;">
                         <i class="ph ph-funnel"></i> Filtrele / Yenile
                     </button>
                 </div>
@@ -2361,6 +2416,32 @@
                         <tbody id="top-experiments-table-body">
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Deneyler yükleniyor...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- New: Ayın En Çok Okunan Bilim Gündemleri -->
+            <div class="header-row" style="margin-top: 40px; margin-bottom: 20px;">
+                <h1 class="page-title">Ayın En Çok Okunan Bilim Gündemleri</h1>
+            </div>
+
+            <div class="card">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                                <th style="padding: 12px; width: 80px;">Sıra</th>
+                                <th style="padding: 12px; width: 80px;">ID</th>
+                                <th style="padding: 12px;">Başlık</th>
+                                <th style="padding: 12px; width: 200px;">Yazar</th>
+                                <th style="padding: 12px; width: 150px; text-align: right;">Okunma Sayısı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-gundem-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">Gündem yazıları yükleniyor...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -4312,29 +4393,80 @@
         }
 
         async function loadDetailedStats() {
-            const tbody = document.getElementById('detailed-stats-body');
-            try {
-                const res = await fetch(`${API_URL}/admin/detailed-stats`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const rows = await res.json();
+            // 1. Makaleler Detaylı İstatistikler
+            const tbodyArticles = document.getElementById('detailed-stats-body');
+            if (tbodyArticles) {
+                try {
+                    const res = await fetch(`${API_URL}/admin/detailed-stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const rows = await res.json();
+                    tbodyArticles.innerHTML = '';
+                    if (rows.length === 0) {
+                        tbodyArticles.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Veri bulunamadı.</td></tr>';
+                    } else {
+                        rows.forEach(row => {
+                            tbodyArticles.innerHTML += `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 16px; font-weight: 600; color: #334155;">${escapeHtml(row.title)}</td>
+                                    <td style="padding: 16px; color: #64748b;">${escapeHtml(row.author_name || 'Bilinmiyor')}</td>
+                                    <td style="padding: 16px;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${row.views}</span></td>
+                                    <td style="padding: 16px; color: #ef4444;"><i class="ph-fill ph-heart"></i> ${row.like_count}</td>
+                                    <td style="padding: 16px; color: #f59e0b;"><i class="ph-fill ph-chat-circle-text"></i> ${row.comment_count}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                } catch (e) { console.error('Makale detaylı istatistik yükleme hatası:', e); }
+            }
 
-                tbody.innerHTML = '';
-                if (rows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Veri bulunamadı.</td></tr>';
-                    return;
-                }
+            // 2. Deneyler Detaylı İstatistikler
+            const tbodyExps = document.getElementById('detailed-exp-stats-body');
+            if (tbodyExps) {
+                try {
+                    const res = await fetch(`${API_URL}/admin/detailed-experiments`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const rows = await res.json();
+                    tbodyExps.innerHTML = '';
+                    if (rows.length === 0) {
+                        tbodyExps.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Veri bulunamadı.</td></tr>';
+                    } else {
+                        rows.forEach(row => {
+                            tbodyExps.innerHTML += `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 16px; font-weight: 600; color: #334155;">${escapeHtml(row.title)}</td>
+                                    <td style="padding: 16px; color: #64748b;">${escapeHtml(row.author_name || 'Bilinmiyor')}</td>
+                                    <td style="padding: 16px;"><span style="background: #fdf2f8; color: #db2777; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${row.views}</span></td>
+                                    <td style="padding: 16px; color: #ef4444;"><i class="ph-fill ph-heart"></i> ${row.like_count}</td>
+                                    <td style="padding: 16px; color: #f59e0b;"><i class="ph-fill ph-chat-circle-text"></i> ${row.comment_count}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                } catch (e) { console.error('Deney detaylı istatistik yükleme hatası:', e); }
+            }
 
-                rows.forEach(row => {
-                    tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 16px; font-weight: 600; color: #334155;">${escapeHtml(row.title)}</td>
-                            <td style="padding: 16px; color: #64748b;">${escapeHtml(row.author_name)}</td>
-                            <td style="padding: 16px;"><span style="background: #f3e8ff; color: #9333ea; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${row.views}</span></td>
-                            <td style="padding: 16px; color: #ef4444;"><i class="ph-fill ph-heart"></i> ${row.like_count}</td>
-                            <td style="padding: 16px; color: #f59e0b;"><i class="ph-fill ph-chat-circle-text"></i> ${row.comment_count}</td>
-                        </tr>
-                    `;
-                });
-            } catch (e) { console.error(e); }
+            // 3. Bilim Gündemi Detaylı İstatistikler
+            const tbodyGundem = document.getElementById('detailed-gundem-stats-body');
+            if (tbodyGundem) {
+                try {
+                    const res = await fetch(`${API_URL}/admin/detailed-gundem`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const rows = await res.json();
+                    tbodyGundem.innerHTML = '';
+                    if (rows.length === 0) {
+                        tbodyGundem.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Veri bulunamadı.</td></tr>';
+                    } else {
+                        rows.forEach(row => {
+                            tbodyGundem.innerHTML += `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 16px; font-weight: 600; color: #334155;">${escapeHtml(row.title)}</td>
+                                    <td style="padding: 16px; color: #64748b;">${escapeHtml(row.author_name || 'Bilinmiyor')}</td>
+                                    <td style="padding: 16px;"><span style="background: #fff7ed; color: #ea580c; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${row.views}</span></td>
+                                    <td style="padding: 16px; color: #ef4444;"><i class="ph-fill ph-heart"></i> ${row.like_count}</td>
+                                    <td style="padding: 16px; color: #f59e0b;"><i class="ph-fill ph-chat-circle-text"></i> ${row.comment_count}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                } catch (e) { console.error('Gündem detaylı istatistik yükleme hatası:', e); }
+            }
         }
 
         async function loadHeroSliderData() {
@@ -5639,7 +5771,7 @@
                 // Load Section Specific Data
                 if (sectionId === 'articles-management') loadAllArticles();
                 if (sectionId === 'gundem-management') loadAdminGundem();
-                if (sectionId === 'monthly-top-articles') { loadMonthlyTopArticles(); loadMonthlyTopExperiments(); }
+                if (sectionId === 'monthly-top-articles') { loadMonthlyTopArticles(); loadMonthlyTopExperiments(); loadMonthlyTopGundem(); }
                 if (sectionId === 'article-detail-management') loadArticleDetailSettings();
                 if (sectionId === 'homepage-management') loadHomepageSettings();
                 if (sectionId === 'newsletter-subscribers') loadSubscribers();
@@ -6435,6 +6567,73 @@
                         <td style="padding:14px 12px; color:#334155; vertical-align:middle;">${escapeHtml(exp.author_name || 'Bilinmiyor')}</td>
                         <td style="padding:14px 12px; text-align:right; vertical-align:middle;">
                             <span style="background:#fdf2f8; color:#db2777; padding:4px 12px; border-radius:20px; font-size:0.9rem; font-weight:700;">${exp.view_count}</span>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Veriler yüklenirken bir hata oluştu.</td></tr>';
+            }
+        }
+
+        async function loadMonthlyTopGundem() {
+            const tableBody = document.getElementById('top-gundem-table-body');
+            if (!tableBody) return;
+
+            const yearSelect = document.getElementById('filter-top-year');
+            const monthSelect = document.getElementById('filter-top-month');
+
+            const month = monthSelect ? monthSelect.value : (new Date().getMonth() + 1);
+            const year = yearSelect ? yearSelect.value : new Date().getFullYear();
+
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Veriler yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`/api/admin/top-gundem?month=${month}&year=${year}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        showToast('Bu işlemi yapmak için yetkiniz yok.', 'error');
+                        return;
+                    }
+                    throw new Error('API hatası');
+                }
+
+                const rows = await res.json();
+                tableBody.innerHTML = '';
+
+                if (rows.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;"><i class="ph ph-newspaper" style="font-size:1.5rem; vertical-align:middle; margin-right:6px;"></i> Seçilen ayda okunma kaydı bulunamadı.</td></tr>';
+                    return;
+                }
+
+                rows.forEach((gundem, idx) => {
+                    const rank = idx + 1;
+                    let rankBadge = '';
+                    if (rank === 1) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="1. Sırada">🥇</span>';
+                    } else if (rank === 2) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="2. Sırada">🥈</span>';
+                    } else if (rank === 3) {
+                        rankBadge = '<span style="font-size:1.3rem;" title="3. Sırada">🥉</span>';
+                    } else {
+                        rankBadge = `<span style="font-weight: 600; color: #64748b; padding-left: 4px;">${rank}.</span>`;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f1f5f9';
+                    tr.innerHTML = `
+                        <td style="padding:14px 12px; vertical-align:middle;">${rankBadge}</td>
+                        <td style="padding:14px 12px; color:#64748b; vertical-align:middle;">#${gundem.id}</td>
+                        <td style="padding:14px 12px; font-weight:600; vertical-align:middle;">
+                            <a href="/gundem/${gundem.slug}" target="_blank" style="text-decoration:none; color:inherit; hover:text-decoration:underline;">${escapeHtml(gundem.title)}</a>
+                        </td>
+                        <td style="padding:14px 12px; color:#334155; vertical-align:middle;">${escapeHtml(gundem.author_name || 'Bilinmiyor')}</td>
+                        <td style="padding:14px 12px; text-align:right; vertical-align:middle;">
+                            <span style="background:#fff7ed; color:#ea580c; padding:4px 12px; border-radius:20px; font-size:0.9rem; font-weight:700;">${gundem.view_count}</span>
                         </td>
                     `;
                     tableBody.appendChild(tr);

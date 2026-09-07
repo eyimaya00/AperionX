@@ -4123,6 +4123,46 @@ app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).send(e.toString()); }
 });
 
+app.get('/api/admin/detailed-experiments', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                e.id, 
+                e.title, 
+                u.fullname as author_name, 
+                e.views, 
+                (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count, 
+                (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count 
+            FROM experiments e 
+            LEFT JOIN users u ON e.author_id = u.id 
+            WHERE e.status = 'published' AND e.deleted_at IS NULL
+            ORDER BY e.views DESC
+        `);
+        res.json(rows);
+    } catch (e) { res.status(500).send(e.toString()); }
+});
+
+app.get('/api/admin/detailed-gundem', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                a.id, 
+                a.title, 
+                u.fullname as author_name, 
+                a.views, 
+                (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count, 
+                (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            WHERE a.status = 'published' AND a.is_gundem = 1
+            ORDER BY a.views DESC
+        `);
+        res.json(rows);
+    } catch (e) { res.status(500).send(e.toString()); }
+});
+
 app.get('/api/admin/likes', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
