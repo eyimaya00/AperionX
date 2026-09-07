@@ -12197,8 +12197,13 @@
                         const data = await resSys.json().catch(() => null);
                         if (data && Array.isArray(data.notifications)) {
                             data.notifications.forEach(sn => {
+                                const nid = `sys_${sn.id}`;
+                                // If DB says is_read, also mark in local readIds
+                                if (sn.is_read && !readIds.includes(nid)) {
+                                    readIds.push(nid);
+                                }
                                 notifs.push({
-                                    id: `sys_${sn.id}`,
+                                    id: nid,
                                     type: sn.type || 'comments',
                                     title: sn.title || 'Editör Mesajı 📩',
                                     message: sn.message,
@@ -12207,6 +12212,7 @@
                                     created_at: sn.created_at || new Date().toISOString()
                                 });
                             });
+                            saveReadNotifIds(readIds);
                         }
                     }
                 }
@@ -12305,6 +12311,17 @@
                     readIds.push(id);
                     saveReadNotifIds(readIds);
                 }
+                // Persist to backend for system notifications
+                if (String(id).startsWith('sys_')) {
+                    const dbId = String(id).replace('sys_', '');
+                    const authToken = token || localStorage.getItem('token');
+                    if (authToken) {
+                        fetch(`${API_URL}/notifications/${dbId}/read`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${authToken}` }
+                        }).catch(() => {});
+                    }
+                }
                 updateNotificationBadges();
                 renderFullNotifications();
             }
@@ -12312,11 +12329,19 @@
 
         function markAllNotificationsAsRead() {
             const readIds = getReadNotifIds();
+            const authToken = token || localStorage.getItem('token');
             authorNotifications.forEach(n => {
                 n.is_read = true;
                 if (!readIds.includes(n.id)) readIds.push(n.id);
             });
             saveReadNotifIds(readIds);
+            // Bulk mark all system notifications as read on backend
+            if (authToken) {
+                fetch(`${API_URL}/notifications/read-all`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                }).catch(() => {});
+            }
             updateNotificationBadges();
             renderFullNotifications();
             showAuthorToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');

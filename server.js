@@ -8724,6 +8724,13 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.put('/api/notifications/read-all', authenticateToken, async (req, res) => {
+    try {
+        await pool.query('UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0', [req.user.id]);
+        res.json({ message: 'Tüm bildirimler okundu olarak işaretlendi.' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.put('/api/notifications/:id/read', authenticateToken, async (req, res) => {
     try {
         await pool.query('UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
