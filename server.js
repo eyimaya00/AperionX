@@ -5891,10 +5891,19 @@ app.put('/api/editor/gundem/:id', authenticateToken, upload.any(), optimizeImage
 
 app.delete('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    const articleId = req.params.id;
     try {
-        await pool.query('DELETE FROM articles WHERE id = ? AND is_gundem = 1', [req.params.id]);
+        // Önce ilişkili istatistikleri sil
+        await pool.query('DELETE FROM likes WHERE article_id = ?', [articleId]);
+        await pool.query('DELETE FROM comments WHERE article_id = ?', [articleId]);
+        await pool.query('DELETE FROM article_ratings WHERE article_id = ?', [articleId]);
+        await pool.query('DELETE FROM article_authors WHERE article_id = ?', [articleId]);
+        try { await pool.query('DELETE FROM article_views WHERE article_id = ?', [articleId]); } catch(e) {}
+        try { await pool.query('DELETE FROM notifications WHERE message LIKE ?', [`%#gundem-${articleId}%`]); } catch(e) {}
+        // Son olarak makaleyi sil
+        await pool.query('DELETE FROM articles WHERE id = ? AND is_gundem = 1', [articleId]);
         clearCache('articles');
-        res.json({ message: 'Gündem yazısı başarıyla silindi.' });
+        res.json({ message: 'Gündem yazısı ve tüm istatistikleri başarıyla silindi.' });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -6243,8 +6252,15 @@ app.delete('/api/author/gundem/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ error: 'Yazı bulunamadı.' });
         }
         if (rows[0].status === 'trash') {
-            await pool.query("DELETE FROM articles WHERE id = ?", [req.params.id]);
-            res.json({ success: true, message: 'Yazı kalıcı olarak silindi.' });
+            const articleId = req.params.id;
+            // İstatistikleri de sil
+            await pool.query('DELETE FROM likes WHERE article_id = ?', [articleId]);
+            await pool.query('DELETE FROM comments WHERE article_id = ?', [articleId]);
+            await pool.query('DELETE FROM article_ratings WHERE article_id = ?', [articleId]);
+            await pool.query('DELETE FROM article_authors WHERE article_id = ?', [articleId]);
+            try { await pool.query('DELETE FROM article_views WHERE article_id = ?', [articleId]); } catch(e) {}
+            await pool.query("DELETE FROM articles WHERE id = ?", [articleId]);
+            res.json({ success: true, message: 'Yazı ve tüm istatistikleri kalıcı olarak silindi.' });
         } else {
             await pool.query("UPDATE articles SET status = 'trash', updated_at = NOW() WHERE id = ?", [req.params.id]);
             res.json({ success: true, message: 'Yazı çöpe taşındı.' });
