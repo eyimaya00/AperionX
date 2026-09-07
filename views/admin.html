@@ -1480,6 +1480,19 @@
                     </div>
                 </div>
 
+                <!-- Gundem Views -->
+                <div class="stat-card"
+                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fffbeb; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-newspaper"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-gundem-views">-</h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Gündem Okunma</p>
+                    </div>
+                </div>
+
                 <!-- Total Views -->
                 <div class="stat-card"
                     style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
@@ -1495,7 +1508,8 @@
 
                 <!-- Published Articles -->
                 <div class="stat-card"
-                    style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    onclick="showSection('all-articles', document.querySelector('a[onclick*=\'all-articles\']'))"
+                    style="cursor: pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
                     <div
                         style="width: 72px; height: 72px; border-radius: 16px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 36px;">
                         <i class="ph ph-article-medium"></i>
@@ -1504,6 +1518,21 @@
                         <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-articles">-
                         </h3>
                         <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Yayında Makale</p>
+                    </div>
+                </div>
+
+                <!-- Published Gundem -->
+                <div class="stat-card"
+                    onclick="showSection('gundem-management', document.querySelector('a[onclick*=\'gundem-management\']'))"
+                    style="cursor: pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #fff7ed; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph ph-newspaper-clipping"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #1e293b;" id="stat-gundem">-
+                        </h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Yayında Gündem</p>
                     </div>
                 </div>
 
@@ -2388,6 +2417,12 @@
                     <h3 id="m-experiment-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
                     <p style="margin: 0; color: #64748b;">Deney Okunma</p>
                 </div>
+                <!-- Card 1.25 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #d97706; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-newspaper"></i></div>
+                    <h3 id="m-gundem-views" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Gündem Okunma</p>
+                </div>
                 <!-- Card 1.3 -->
                 <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
                     <div style="color: #6366f1; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-eye"></i></div>
@@ -2427,6 +2462,13 @@
                     <h3 id="m-experiments" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
                     <p style="margin: 0; color: #64748b;">Yayınlanan Deney</p>
                 </div>
+                <!-- Card 7 -->
+                <div class="card" style="padding: 24px; text-align: center; margin-bottom:0;">
+                    <div style="color: #ea580c; font-size: 2rem; margin-bottom: 10px;"><i class="ph ph-newspaper-clipping"></i>
+                    </div>
+                    <h3 id="m-gundem" style="font-size: 2rem; margin: 0; color: #1e293b;">-</h3>
+                    <p style="margin: 0; color: #64748b;">Yayınlanan Gündem</p>
+                </div>
             </div>
 
             <div class="card">
@@ -2454,7 +2496,7 @@
                             <th style="padding: 12px; color:#64748b;">Beğeni</th>
                             <th style="padding: 12px; color:#64748b;">Yorum</th>
                             <th style="padding: 12px; color:#64748b;">Yeni Üye</th>
-                            <th style="padding: 12px; color:#64748b;">Yayınlanan (Makale / Deney)</th>
+                            <th style="padding: 12px; color:#64748b;">Yayınlanan (Makale / Deney / Gündem)</th>
                         </tr>
                     </thead>
                     <tbody id="monthly-history-body">
@@ -4137,8 +4179,10 @@
                 const stats = await res.json();
                 document.getElementById('stat-users').innerText = stats.users;
                 document.getElementById('stat-articles').innerText = stats.articles;
+                if (document.getElementById('stat-gundem')) document.getElementById('stat-gundem').innerText = stats.gundem || 0;
                 if (document.getElementById('stat-article-views')) document.getElementById('stat-article-views').innerText = stats.article_views;
                 if (document.getElementById('stat-experiment-views')) document.getElementById('stat-experiment-views').innerText = stats.experiment_views;
+                if (document.getElementById('stat-gundem-views')) document.getElementById('stat-gundem-views').innerText = stats.gundem_views || 0;
                 document.getElementById('stat-views').innerText = stats.views;
                 document.getElementById('stat-likes').innerText = stats.likes;
                 document.getElementById('stat-comments').innerText = stats.comments;
@@ -4164,12 +4208,14 @@
             if (data.monthlyStats) {
                 if (document.getElementById('m-article-views')) document.getElementById('m-article-views').innerText = data.monthlyStats.article_views;
                 if (document.getElementById('m-experiment-views')) document.getElementById('m-experiment-views').innerText = data.monthlyStats.experiment_views;
+                if (document.getElementById('m-gundem-views')) document.getElementById('m-gundem-views').innerText = data.monthlyStats.gundem_views || 0;
                 if (document.getElementById('m-views')) document.getElementById('m-views').innerText = data.monthlyStats.views;
                 if (document.getElementById('m-likes')) document.getElementById('m-likes').innerText = data.monthlyStats.likes;
                 if (document.getElementById('m-comments')) document.getElementById('m-comments').innerText = data.monthlyStats.comments;
                 if (document.getElementById('m-users')) document.getElementById('m-users').innerText = data.monthlyStats.users;
                 if (document.getElementById('m-articles')) document.getElementById('m-articles').innerText = data.monthlyStats.articles;
                 if (document.getElementById('m-experiments')) document.getElementById('m-experiments').innerText = data.monthlyStats.experiments;
+                if (document.getElementById('m-gundem')) document.getElementById('m-gundem').innerText = data.monthlyStats.gundem || 0;
             }
 
             // Update Monthly History Table
@@ -4191,7 +4237,7 @@
                                     <td style="padding:16px;">${m.likes}</td>
                                     <td style="padding:16px;">${m.comments}</td>
                                     <td style="padding:16px;">${m.users}</td>
-                                    <td style="padding:16px;">${m.articles} Makale / ${m.experiments || 0} Deney</td>
+                                    <td style="padding:16px;">${m.articles} Makale / ${m.experiments || 0} Deney / ${m.gundem || 0} Gündem</td>
                                 </tr>
                             `;
                         });

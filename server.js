@@ -4116,7 +4116,7 @@ app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
                 (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
-            WHERE a.status = 'published'
+            WHERE a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY a.views DESC
         `);
         res.json(rows);
@@ -4145,9 +4145,13 @@ app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.published_at, a.image_url, u.fullname as author_name  
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.published_at, a.image_url, 
+                   u.fullname as author_name,
+                   u2.fullname as approver_name
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
+            LEFT JOIN users u2 ON a.approved_by = u2.id
+            WHERE (a.is_gundem = 0 OR a.is_gundem IS NULL)
             ORDER BY COALESCE(a.published_at, a.created_at) DESC
         `);
         res.json(rows);
@@ -5569,11 +5573,14 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             [comments],
             [expPublishedRes],
             [expPendingRes],
-            [expViewsRes]
+            [expViewsRes],
+            [gundemPublishedRes],
+            [gundemPendingRes],
+            [gundemViewsRes]
         ] = await Promise.all([
-            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
-            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending'", [userId]),
-            pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published'", [userId]),
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)", [userId]),
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending' AND (is_gundem = 0 OR is_gundem IS NULL)", [userId]),
+            pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)", [userId]),
             pool.query(`
                 SELECT COUNT(DISTINCT l.id) as count 
                 FROM likes l 
@@ -5594,17 +5601,27 @@ app.get('/api/author/stats', authenticateToken, async (req, res) => {
             `, [userId, userId, userId, userId]),
             pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL", [userId, userId]),
             pool.query("SELECT COUNT(DISTINCT e.id) as count FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'pending' AND e.deleted_at IS NULL", [userId, userId]),
-            pool.query("SELECT SUM(views) as count FROM (SELECT DISTINCT e.id, e.views FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL) t", [userId, userId])
+            pool.query("SELECT SUM(views) as count FROM (SELECT DISTINCT e.id, e.views FROM experiments e LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id WHERE (e.author_id = ? OR ea.user_id = ?) AND e.status = 'published' AND e.deleted_at IS NULL) t", [userId, userId]),
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'published' AND is_gundem = 1", [userId]),
+            pool.query("SELECT COUNT(*) as count FROM articles WHERE author_id = ? AND status = 'pending' AND is_gundem = 1", [userId]),
+            pool.query("SELECT SUM(views) as count FROM articles WHERE author_id = ? AND status = 'published' AND is_gundem = 1", [userId])
         ]);
+
+        const totalArtViews = Number(views[0].count || 0);
+        const totalExpViews = Number(expViewsRes[0].count || 0);
+        const totalGundemViews = Number(gundemViewsRes[0].count || 0);
 
         res.json({
             published: published[0].count,
             pending: pending[0].count,
             expPublished: expPublishedRes[0].count,
             expPending: expPendingRes[0].count,
-            article_views: Number(views[0].count || 0),
-            experiment_views: Number(expViewsRes[0].count || 0),
-            views: Number(views[0].count || 0) + Number(expViewsRes[0].count || 0), // Combined views
+            gundemPublished: gundemPublishedRes[0].count,
+            gundemPending: gundemPendingRes[0].count,
+            article_views: totalArtViews,
+            experiment_views: totalExpViews,
+            gundem_views: totalGundemViews,
+            views: totalArtViews + totalExpViews + totalGundemViews,
             likes: Number(likes[0].count || 0),
             comments: Number(comments[0].count || 0)
         });
@@ -5620,7 +5637,7 @@ app.get('/api/author/analytics', authenticateToken, async (req, res) => {
         // Get all articles and experiments with their view counts, like counts AND COMMENT counts
         const [items] = await pool.query(`
             SELECT DISTINCT
-                a.id, a.title, a.created_at, a.published_at, a.views, 'article' as type,
+                a.id, a.title, a.created_at, a.published_at, a.views, IF(a.is_gundem = 1, 'gundem', 'article') as type,
                 (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as likes,
                 (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comments
             FROM articles a
@@ -6387,13 +6404,13 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
     const { author_id } = req.query;
 
     try {
-        let pendingQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'pending'";
-        let publishedQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'published'";
-        let rejectedQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'rejected'";
-        let viewsQ = "SELECT SUM(views) as count FROM articles";
-        let likesQ = "SELECT COUNT(*) as count FROM likes";
-        let commentsQ = "SELECT COUNT(*) as count FROM comments";
-        let articlesQ = "SELECT articles.id, articles.title, articles.category, articles.status, articles.created_at, articles.published_at, articles.views, users.fullname as author_name, (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count, (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count FROM articles LEFT JOIN users ON articles.author_id = users.id WHERE articles.status = 'published'";
+        let pendingQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'pending' AND (is_gundem = 0 OR is_gundem IS NULL)";
+        let publishedQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)";
+        let rejectedQ = "SELECT COUNT(*) as count FROM articles WHERE status = 'rejected' AND (is_gundem = 0 OR is_gundem IS NULL)";
+        let viewsQ = "SELECT SUM(views) as count FROM articles WHERE (is_gundem = 0 OR is_gundem IS NULL)";
+        let likesQ = "SELECT COUNT(l.id) as count FROM likes l JOIN articles a ON l.article_id = a.id WHERE (a.is_gundem = 0 OR a.is_gundem IS NULL)";
+        let commentsQ = "SELECT COUNT(c.id) as count FROM comments c JOIN articles a ON c.article_id = a.id WHERE (a.is_gundem = 0 OR a.is_gundem IS NULL)";
+        let articlesQ = "SELECT articles.id, articles.title, articles.category, articles.status, articles.created_at, articles.published_at, articles.views, users.fullname as author_name, (SELECT COUNT(*) FROM likes WHERE article_id = articles.id) as like_count, (SELECT COUNT(*) FROM comments WHERE article_id = articles.id) as comment_count FROM articles LEFT JOIN users ON articles.author_id = users.id WHERE articles.status = 'published' AND (articles.is_gundem = 0 OR articles.is_gundem IS NULL)";
 
         let params = [];
         if (author_id && author_id !== 'all') {
@@ -6403,9 +6420,9 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
             pendingQ += " AND author_id = ?";
             publishedQ += " AND author_id = ?";
             rejectedQ += " AND author_id = ?";
-            viewsQ += " WHERE author_id = ?";
-            likesQ = "SELECT COUNT(l.id) as count FROM likes l JOIN articles a ON l.article_id = a.id WHERE a.author_id = ?";
-            commentsQ = "SELECT COUNT(c.id) as count FROM comments c JOIN articles a ON c.article_id = a.id WHERE a.author_id = ?";
+            viewsQ += " AND author_id = ?";
+            likesQ += " AND a.author_id = ?";
+            commentsQ += " AND a.author_id = ?";
             articlesQ += " AND articles.author_id = ?";
         }
 
@@ -7668,26 +7685,6 @@ app.put('/api/profile', authenticateToken, upload.single('avatar'), optimizeImag
 });
 
 
-// Admin: Get All Articles
-// Admin: Get All Articles
-app.get('/api/admin/all-articles', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.sendStatus(403);
-    try {
-        const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.status, a.created_at, a.published_at, 
-                   u.fullname as author_name,
-                   u2.fullname as approver_name
-            FROM articles a
-            LEFT JOIN users u ON a.author_id = u.id
-            LEFT JOIN users u2 ON a.approved_by = u2.id
-            ORDER BY COALESCE(a.published_at, a.created_at) DESC
-        `);
-        res.json(rows);
-    } catch (e) {
-        res.status(500).send(e.toString());
-    }
-});
-
 // Admin: Get Monthly Top Articles
 app.get('/api/admin/top-articles', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
@@ -7711,7 +7708,43 @@ app.get('/api/admin/top-articles', authenticateToken, async (req, res) => {
             FROM article_views v
             JOIN articles a ON v.article_id = a.id
             LEFT JOIN users u ON a.author_id = u.id
-            WHERE v.viewed_at >= ? AND v.viewed_at < ?
+            WHERE v.viewed_at >= ? AND v.viewed_at < ? AND a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
+            GROUP BY a.id, a.title, a.slug, u.fullname
+            ORDER BY view_count DESC
+            LIMIT ?
+        `;
+
+        const [rows] = await pool.query(query, [startDate, endDate, limit]);
+        res.json(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin: Get Monthly Top Gundem
+app.get('/api/admin/top-gundem', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    try {
+        const month = parseInt(req.query.month) || (new Date().getMonth() + 1);
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const limit = parseInt(req.query.limit) || 10;
+
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01 00:00:00`;
+        let nextMonth = month + 1;
+        let nextYear = year;
+        if (nextMonth > 12) {
+            nextMonth = 1;
+            nextYear += 1;
+        }
+        const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`;
+
+        const query = `
+            SELECT a.id, a.title, a.slug, COUNT(v.id) as view_count, u.fullname as author_name
+            FROM article_views v
+            JOIN articles a ON v.article_id = a.id
+            LEFT JOIN users u ON a.author_id = u.id
+            WHERE v.viewed_at >= ? AND v.viewed_at < ? AND a.status = 'published' AND a.is_gundem = 1
             GROUP BY a.id, a.title, a.slug, u.fullname
             ORDER BY view_count DESC
             LIMIT ?
@@ -7919,26 +7952,31 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     console.log('[DEBUG] /api/admin/stats CALLED');
     try {
         const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
-        const [articles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published'"); // Published articles only
+        const [articles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)"); // Published articles only
+        const [gundem] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status = 'published' AND is_gundem = 1"); // Published gundem only
         const [experiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status = 'published' AND deleted_at IS NULL"); // Published experiments only
 
-        // Views: Only from published articles & experiments
-        const [articleViews] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published'");
+        // Views: Only from published articles, gundem & experiments
+        const [articleViews] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL)");
+        const [gundemViews] = await pool.query("SELECT SUM(views) as count FROM articles WHERE status = 'published' AND is_gundem = 1");
         const [experimentViews] = await pool.query("SELECT SUM(views) as count FROM experiments WHERE status = 'published' AND deleted_at IS NULL");
 
         const [likes] = await pool.query('SELECT COUNT(*) as count FROM likes');
         const [comments] = await pool.query('SELECT COUNT(*) as count FROM comments');
 
         const totalArticleViews = Number(articleViews[0].count || 0);
+        const totalGundemViews = Number(gundemViews[0].count || 0);
         const totalExperimentViews = Number(experimentViews[0].count || 0);
 
         res.json({
             users: users[0].count,
             articles: articles[0].count,
+            gundem: gundem[0].count,
             experiments: experiments[0].count,
             article_views: totalArticleViews,
+            gundem_views: totalGundemViews,
             experiment_views: totalExperimentViews,
-            views: totalArticleViews + totalExperimentViews,
+            views: totalArticleViews + totalGundemViews + totalExperimentViews,
             likes: likes[0].count,
             comments: comments[0].count
         });
@@ -7951,13 +7989,20 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
 app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
-        // 1. Daily Views (Last 7 Days) - Published Only
+        // 1. Daily Views (Last 7 Days) - Published Only (Articles, Gundem & Experiments)
         const [viewsRows] = await pool.query(`
-            SELECT DATE(v.viewed_at) as date, COUNT(*) as count 
-            FROM article_views v
-            JOIN articles a ON v.article_id = a.id
-            WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
-            GROUP BY DATE(v.viewed_at) 
+            SELECT date, COUNT(*) as count FROM (
+                SELECT DATE(v.viewed_at) as date 
+                FROM article_views v
+                JOIN articles a ON v.article_id = a.id
+                WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                UNION ALL
+                SELECT DATE(v.viewed_at) as date 
+                FROM experiment_views v
+                JOIN experiments e ON v.experiment_id = e.id
+                WHERE e.status = 'published' AND e.deleted_at IS NULL AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            ) all_views
+            GROUP BY date 
             ORDER BY date ASC
         `);
 
@@ -7969,7 +8014,6 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             GROUP BY DATE(created_at) 
             ORDER BY date ASC
         `);
-
 
         // Helper to fill missing dates with 0
         const getLast7Days = () => {
@@ -7998,7 +8042,13 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             SELECT COUNT(*) as count 
             FROM article_views v 
             JOIN articles a ON v.article_id = a.id 
-            WHERE a.status = 'published' AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            WHERE a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL) AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        `);
+        const [mGundemViews] = await pool.query(`
+            SELECT COUNT(*) as count 
+            FROM article_views v 
+            JOIN articles a ON v.article_id = a.id 
+            WHERE a.status = 'published' AND a.is_gundem = 1 AND v.viewed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         `);
         const [mExperimentViews] = await pool.query(`
             SELECT COUNT(*) as count 
@@ -8010,7 +8060,8 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
         const [mLikes] = await pool.query('SELECT COUNT(*) as count FROM likes WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mComments] = await pool.query('SELECT COUNT(*) as count FROM comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
         const [mUsers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
-        const [mArticles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+        const [mArticles] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND (is_gundem = 0 OR is_gundem IS NULL) AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+        const [mGundem] = await pool.query("SELECT COUNT(*) as count FROM articles WHERE status='published' AND is_gundem = 1 AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
         const [mExperiments] = await pool.query("SELECT COUNT(*) as count FROM experiments WHERE status='published' AND deleted_at IS NULL AND COALESCE(published_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
 
         // 4. Historical Data (Monthly) - Fetch last 12 months
@@ -8021,13 +8072,24 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             return rows;
         };
 
-        // Specific for views to filter published
-        const getViewMonthGroups = async () => {
+        // Specific for views to filter published (Articles and Gundem separate)
+        const getArticleViewMonthGroups = async () => {
             const [rows] = await pool.query(`
                 SELECT DATE_FORMAT(v.viewed_at, '%Y-%m') as month, COUNT(*) as count 
                 FROM article_views v
                 JOIN articles a ON v.article_id = a.id
-                WHERE a.status = 'published'
+                WHERE a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
+                GROUP BY month ORDER BY month DESC LIMIT 12
+            `);
+            return rows;
+        };
+
+        const getGundemViewMonthGroups = async () => {
+            const [rows] = await pool.query(`
+                SELECT DATE_FORMAT(v.viewed_at, '%Y-%m') as month, COUNT(*) as count 
+                FROM article_views v
+                JOIN articles a ON v.article_id = a.id
+                WHERE a.status = 'published' AND a.is_gundem = 1
                 GROUP BY month ORDER BY month DESC LIMIT 12
             `);
             return rows;
@@ -8044,9 +8106,15 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             return rows;
         };
 
-        // Articles extra condition
+        // Articles extra condition (Makale only)
         const getArticleMonthGroups = async () => {
-            const [rows] = await pool.query(`SELECT DATE_FORMAT(COALESCE(published_at, created_at), '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' GROUP BY month ORDER BY month DESC LIMIT 12`);
+            const [rows] = await pool.query(`SELECT DATE_FORMAT(COALESCE(published_at, created_at), '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' AND (is_gundem = 0 OR is_gundem IS NULL) GROUP BY month ORDER BY month DESC LIMIT 12`);
+            return rows;
+        };
+
+        // Gundem extra condition (Gundem only)
+        const getGundemMonthGroups = async () => {
+            const [rows] = await pool.query(`SELECT DATE_FORMAT(COALESCE(published_at, created_at), '%Y-%m') as month, COUNT(*) as count FROM articles WHERE status='published' AND is_gundem = 1 GROUP BY month ORDER BY month DESC LIMIT 12`);
             return rows;
         };
 
@@ -8056,33 +8124,40 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             return rows;
         };
 
-        const hViews = await getViewMonthGroups();
+        const hArticleViews = await getArticleViewMonthGroups();
+        const hGundemViews = await getGundemViewMonthGroups();
         const hExperimentViews = await getExperimentViewMonthGroups();
         const hLikes = await getMonthGroups('likes', 'created_at');
         const hComments = await getMonthGroups('comments', 'created_at');
         const hUsers = await getMonthGroups('users', 'created_at');
         const hArticles = await getArticleMonthGroups();
+        const hGundem = await getGundemMonthGroups();
         const hExperiments = await getExperimentMonthGroups();
 
         // Merge History
         const allMonths = new Set([
-            ...hViews.map(r => r.month), ...hExperimentViews.map(r => r.month),
+            ...hArticleViews.map(r => r.month), ...hGundemViews.map(r => r.month), ...hExperimentViews.map(r => r.month),
             ...hLikes.map(r => r.month), ...hComments.map(r => r.month),
             ...hUsers.map(r => r.month), ...hArticles.map(r => r.month),
-            ...hExperiments.map(r => r.month)
+            ...hGundem.map(r => r.month), ...hExperiments.map(r => r.month)
         ]);
         const sortedMonths = Array.from(allMonths).sort().reverse().slice(0, 12);
 
         const monthlyHistory = sortedMonths.map(m => {
-            const aViews = (hViews.find(r => r.month === m) || {}).count || 0;
+            const aViews = (hArticleViews.find(r => r.month === m) || {}).count || 0;
+            const gViews = (hGundemViews.find(r => r.month === m) || {}).count || 0;
             const eViews = (hExperimentViews.find(r => r.month === m) || {}).count || 0;
             return {
                 month: m,
-                views: aViews + eViews,
+                views: aViews + gViews + eViews,
+                article_views: aViews,
+                gundem_views: gViews,
+                experiment_views: eViews,
                 likes: (hLikes.find(r => r.month === m) || {}).count || 0,
                 comments: (hComments.find(r => r.month === m) || {}).count || 0,
                 users: (hUsers.find(r => r.month === m) || {}).count || 0,
                 articles: (hArticles.find(r => r.month === m) || {}).count || 0,
+                gundem: (hGundem.find(r => r.month === m) || {}).count || 0,
                 experiments: (hExperiments.find(r => r.month === m) || {}).count || 0
             };
         });
@@ -8092,12 +8167,14 @@ app.get('/api/admin/chart-data', authenticateToken, async (req, res) => {
             users: fillData(usersRows),
             monthlyStats: {
                 article_views: mArticleViews[0].count,
+                gundem_views: mGundemViews[0].count,
                 experiment_views: mExperimentViews[0].count,
-                views: mArticleViews[0].count + mExperimentViews[0].count,
+                views: mArticleViews[0].count + mGundemViews[0].count + mExperimentViews[0].count,
                 likes: mLikes[0].count,
                 comments: mComments[0].count,
                 users: mUsers[0].count,
                 articles: mArticles[0].count,
+                gundem: mGundem[0].count,
                 experiments: mExperiments[0].count
             },
             monthlyHistory
