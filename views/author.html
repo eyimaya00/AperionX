@@ -1907,8 +1907,8 @@
                 /* Stats Grid */
                 .dash-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
-                    gap: 18px;
+                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                    gap: 16px;
                     margin-bottom: 24px;
                 }
                 .dash-stat-card {
@@ -2275,10 +2275,20 @@
                     <div class="dash-stat-value" id="dash-total-ratings">0</div>
                     <div class="dash-stat-label">Değerlendirmeler</div>
                 </div>
-                <div class="dash-stat-card" onclick="goToMyArticles('published')">
-                    <i class="ph-bold ph-books dash-stat-icon"></i>
+                <div class="dash-stat-card" onclick="goToMyArticles('published')" title="Yayındaki makaleleri gör">
+                    <i class="ph-bold ph-books dash-stat-icon" style="color: #3b82f6;"></i>
                     <div class="dash-stat-value" id="dash-total-published">0</div>
                     <div class="dash-stat-label">Yayındaki Makale</div>
+                </div>
+                <div class="dash-stat-card" onclick="goToMyExperiments('published')" title="Yayındaki deneyleri gör">
+                    <i class="ph-bold ph-flask dash-stat-icon" style="color: #10b981;"></i>
+                    <div class="dash-stat-value" id="dash-total-published-exp">0</div>
+                    <div class="dash-stat-label">Yayındaki Deney</div>
+                </div>
+                <div class="dash-stat-card" onclick="goToMyGundem('yayinda')" title="Yayındaki bilim gündemlerini gör">
+                    <i class="ph-bold ph-newspaper dash-stat-icon" style="color: #f97316;"></i>
+                    <div class="dash-stat-value" id="dash-total-published-gundem">0</div>
+                    <div class="dash-stat-label">Yayındaki Gündem</div>
                 </div>
             </div>
 
@@ -7548,6 +7558,19 @@
             setArticleFilter(filter);
         }
 
+        function goToMyExperiments(filter) {
+            showSection('my-experiments', document.querySelector('a[title="Deney Yayınlarım"]'));
+            if (typeof setExperimentFilter === 'function') setExperimentFilter(filter);
+        }
+
+        function goToMyGundem(filter) {
+            showSection('bilim-gundemi', document.querySelector('a[title="Bilim Gündemi"]'));
+            if (typeof filterBilimGundem === 'function') {
+                const tabEl = document.querySelector(`.art-filter-tab[onclick*="'${filter}'"]`);
+                filterBilimGundem(filter, tabEl);
+            }
+        }
+
         function goToAnalytics() {
             showSection('analytics');
         }
@@ -7621,16 +7644,18 @@
                     authorNameEl.textContent = displayName;
                 }
 
-                // 2. Fetch Articles, Experiments & Analytics in parallel
-                const [resArticles, resExps, resStats] = await Promise.allSettled([
+                // 2. Fetch Articles, Experiments, Gundem & Analytics in parallel
+                const [resArticles, resExps, resStats, resGundem] = await Promise.allSettled([
                     fetch(`${API_URL}/author/articles`, { headers: { 'Authorization': 'Bearer ' + authToken } }),
                     fetch(`${API_URL}/author/experiments`, { headers: { 'Authorization': 'Bearer ' + authToken } }),
-                    fetch(`${API_URL}/author/stats`, { headers: { 'Authorization': 'Bearer ' + authToken } })
+                    fetch(`${API_URL}/author/stats`, { headers: { 'Authorization': 'Bearer ' + authToken } }),
+                    fetch(`${API_URL}/author/gundem`, { headers: { 'Authorization': 'Bearer ' + authToken } })
                 ]);
 
                 let articles = [];
                 let experiments = [];
                 let stats = {};
+                let gundemItems = [];
 
                 if (resArticles.status === 'fulfilled' && resArticles.value.ok) {
                     articles = await resArticles.value.json();
@@ -7641,22 +7666,27 @@
                 if (resStats.status === 'fulfilled' && resStats.value.ok) {
                     stats = await resStats.value.json();
                 }
-
-                // Get Bilim Gundemi items from storage
-                let gundemItems = [];
-                try {
-                    const bgRaw = localStorage.getItem('bilim_gundemi_author_data');
-                    if (bgRaw) gundemItems = JSON.parse(bgRaw);
-                } catch (e) {}
+                if (resGundem.status === 'fulfilled' && resGundem.value.ok) {
+                    try {
+                        gundemItems = await resGundem.value.json();
+                    } catch(e) {}
+                }
+                if (!Array.isArray(gundemItems) || gundemItems.length === 0) {
+                    try {
+                        const bgRaw = localStorage.getItem('bilim_gundemi_author_data');
+                        if (bgRaw) gundemItems = JSON.parse(bgRaw);
+                    } catch (e) {}
+                }
 
                 // Active (non-trash) collections
                 const activeArticles = Array.isArray(articles) ? articles.filter(a => a.status !== 'trash') : [];
                 const activeExps = Array.isArray(experiments) ? experiments.filter(e => e.status !== 'trash') : [];
+                const activeGundem = Array.isArray(gundemItems) ? gundemItems.filter(g => g.status !== 'trash' && g.status !== 'cop') : [];
 
                 // 3. Update Todo List (YAPILACAKLAR)
                 const rejectedArticles = activeArticles.filter(a => a.status === 'rejected').length;
                 const pendingExps = activeExps.filter(e => e.status === 'pending').length;
-                const publishedCount = activeArticles.filter(a => a.status === 'published').length + activeExps.filter(e => e.status === 'published').length + (Array.isArray(gundemItems) ? gundemItems.filter(g => g.status === 'published').length : 0);
+                const publishedCount = activeArticles.filter(a => a.status === 'published').length + activeExps.filter(e => e.status === 'published').length + activeGundem.filter(g => g.status === 'published' || g.status === 'yayinda').length;
 
                 const elRejected = document.getElementById('dash-todo-rejected');
                 const elPending = document.getElementById('dash-todo-pending');
@@ -7674,11 +7704,9 @@
                 activeExps.filter(e => e.status === 'draft' || e.status === 'rejected' || e.status === 'pending').forEach(e => {
                     inProgressWorks.push({ ...e, type: 'experiment' });
                 });
-                if (Array.isArray(gundemItems)) {
-                    gundemItems.filter(g => g.status === 'draft').forEach(g => {
-                        inProgressWorks.push({ ...g, type: 'gundem' });
-                    });
-                }
+                activeGundem.filter(g => g.status === 'draft' || g.status === 'taslak' || g.status === 'rejected' || g.status === 'pending').forEach(g => {
+                    inProgressWorks.push({ ...g, type: 'gundem' });
+                });
 
                 const contTitleEl = document.getElementById('dash-continue-title');
                 const progFillEl = document.getElementById('dash-progress-fill');
@@ -7724,21 +7752,25 @@
                 }
 
                 // 5. Update Stat Cards (PERFORMANSIM)
-                const totalViews = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0);
-                const totalLikes = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0);
-                const totalComments = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0);
+                const totalViews = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0) + activeGundem.reduce((acc, cur) => acc + (parseInt(cur.views) || 0), 0);
+                const totalLikes = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0) + activeGundem.reduce((acc, cur) => acc + (parseInt(cur.like_count !== undefined ? cur.like_count : cur.likes) || 0), 0);
+                const totalComments = activeArticles.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0) + activeExps.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0) + activeGundem.reduce((acc, cur) => acc + (parseInt(cur.comment_count !== undefined ? cur.comment_count : cur.comments) || 0), 0);
                 const totalPubArticles = activeArticles.filter(a => a.status === 'published').length;
+                const totalPubExps = activeExps.filter(e => e.status === 'published').length;
+                const totalPubGundem = activeGundem.filter(g => g.status === 'published' || g.status === 'yayinda').length;
 
                 if (document.getElementById('dash-total-views')) document.getElementById('dash-total-views').textContent = totalViews.toLocaleString('tr-TR');
                 if (document.getElementById('dash-total-likes')) document.getElementById('dash-total-likes').textContent = totalLikes.toLocaleString('tr-TR');
                 if (document.getElementById('dash-total-comments')) document.getElementById('dash-total-comments').textContent = totalComments.toLocaleString('tr-TR');
                 if (document.getElementById('dash-total-published')) document.getElementById('dash-total-published').textContent = totalPubArticles.toLocaleString('tr-TR');
+                if (document.getElementById('dash-total-published-exp')) document.getElementById('dash-total-published-exp').textContent = totalPubExps.toLocaleString('tr-TR');
+                if (document.getElementById('dash-total-published-gundem')) document.getElementById('dash-total-published-gundem').textContent = totalPubGundem.toLocaleString('tr-TR');
 
                 // 6. Render Chart (Son 30 Gün)
                 renderDashboardMainChart(totalViews, totalLikes, totalComments);
 
                 // 7. Render Recent Contents Table
-                renderDashboardRecentTable(activeArticles, activeExps, gundemItems);
+                renderDashboardRecentTable(activeArticles, activeExps, activeGundem);
 
             } catch (e) {
                 console.error('loadDashboardStats Error:', e);
