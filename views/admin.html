@@ -3785,6 +3785,12 @@
                 <small style="color: #64748b; display: block; margin-top: 6px;">Seçilen kullanıcı ilgili üniversiteye bağlanacak ve yetkisi Üniversite Temsilcisi yapılacaktır.</small>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <button type="button" class="btn btn-sm" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; padding: 10px; border-radius: 8px;" onclick="switchToCreateRepModal()">
+                    <i class="ph ph-user-plus"></i> Veya Sıfırdan Yeni Temsilci Hesabı Oluştur
+                </button>
+            </div>
+
             <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div>
                     <button type="button" id="btn-remove-rep" class="btn btn-danger" style="display: none; padding: 8px 14px;" onclick="handleRemoveRepresentative()"><i class="ph ph-user-minus"></i> Temsilciyi Kaldır</button>
@@ -3794,6 +3800,65 @@
                     <button type="button" class="btn btn-primary" onclick="handleSaveRepresentative()"><i class="ph ph-check"></i> Kaydet</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 3B. Create New Representative Modal -->
+    <div class="modal-overlay" id="uniCreateRepModal">
+        <div class="modal-box" style="width: 520px; max-width: 95%; text-align: left; padding: 28px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); color: var(--text-main, #1e293b);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main, #1e293b); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-user-plus" style="color: #10b981;"></i> <span>Yeni Temsilci Oluştur ve Ata</span>
+                </h3>
+                <button type="button" onclick="closeCreateRepModal()" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 18px; padding: 12px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px;">
+                <div style="font-size: 0.82rem; color: #065f46; margin-bottom: 2px; font-weight: 600;">Bağlanacak Üniversite:</div>
+                <div id="create_rep_uni_name" style="font-weight: 800; color: #047857; font-size: 1.05rem;">-</div>
+            </div>
+
+            <form id="createRepForm" onsubmit="event.preventDefault(); handleCreateRepresentative();">
+                <input type="hidden" id="create_rep_uni_id">
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Temsilci Adı Soyadı *</label>
+                    <input type="text" id="create_rep_fullname" class="form-control" placeholder="Örn: Dr. Ahmet Yılmaz" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">E-posta Adresi (Giriş için) *</label>
+                    <input type="email" id="create_rep_email" class="form-control" placeholder="temsilci@universite.edu.tr" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-weight: 500; font-size: 0.9rem; margin: 0; color: #475569;">Şifre *</label>
+                        <button type="button" onclick="generateRandomRepPassword()" style="background: none; border: none; color: #6366f1; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 0;">
+                            <i class="ph ph-magic-wand"></i> Rastgele Şifre Üret
+                        </button>
+                    </div>
+                    <div style="position: relative;">
+                        <input type="text" id="create_rep_password" class="form-control" placeholder="En az 6 karakter" required minlength="6" style="padding-right: 40px;">
+                        <button type="button" onclick="toggleRepPasswordVisibility()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem;" title="Gizle/Göster">
+                            <i class="ph ph-eye" id="rep_pwd_eye_icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 20px;">
+                    <div style="font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                        <i class="ph-fill ph-info" style="color: #3b82f6;"></i> Bu kullanıcı <strong>Üniversite Temsilcisi</strong> rolüyle oluşturulacak ve doğrudan bu üniversiteye bağlanacaktır. Bu e-posta ve şifreyle giriş yaptığında doğrudan <strong>Temsilci Paneli</strong>'ne yönlendirilecektir.
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+                    <button type="button" class="btn" style="background: #f1f5f9; color: #475569;" onclick="closeCreateRepModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-create-rep" style="background: #10b981; border-color: #10b981;">
+                        <i class="ph ph-user-plus"></i> Temsilciyi Oluştur ve Ata
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -7808,6 +7873,9 @@
                                 <button class="btn btn-sm" style="background: ${u.representative_user_id ? '#e0f2fe' : '#fef3c7'}; color: ${u.representative_user_id ? '#0369a1' : '#b45309'}; padding: 6px 10px; border-radius: 8px;" title="${u.representative_user_id ? 'Temsilciyi Değiştir' : 'Temsilci Ata'}" onclick="openAssignRepModal(${u.id})">
                                     <i class="ph ph-user-circle-gear"></i>
                                 </button>
+                                <button class="btn btn-sm" style="background: #ecfdf5; color: #059669; padding: 6px 10px; border-radius: 8px;" title="Yeni Temsilci Oluştur" onclick="openCreateRepModal(${u.id})">
+                                    <i class="ph ph-user-plus"></i>
+                                </button>
                                 <button class="btn btn-sm" style="background: ${isActive ? '#fee2e2' : '#dcfce7'}; color: ${isActive ? '#ef4444' : '#16a34a'}; padding: 6px 10px; border-radius: 8px;" title="${isActive ? 'Pasif Yap' : 'Aktif Yap'}" onclick="toggleUniversityStatus(${u.id}, '${u.status}')">
                                     <i class="ph ph-${isActive ? 'pause' : 'play'}"></i>
                                 </button>
@@ -8111,6 +8179,108 @@
                     showToast('Sunucu hatası.', 'error');
                 }
             });
+        }
+
+        // --- Create Representative Functions ---
+        function openCreateRepModal(uniId) {
+            const uni = allUniversities.find(u => u.id === uniId);
+            if (!uni) return;
+
+            document.getElementById('create_rep_uni_id').value = uni.id;
+            document.getElementById('create_rep_uni_name').innerText = uni.name;
+            document.getElementById('create_rep_fullname').value = '';
+            document.getElementById('create_rep_email').value = '';
+            
+            // Generate a default random strong password
+            generateRandomRepPassword();
+
+            const modal = document.getElementById('uniCreateRepModal');
+            if (modal) modal.classList.add('show');
+        }
+
+        function closeCreateRepModal() {
+            const modal = document.getElementById('uniCreateRepModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function switchToCreateRepModal() {
+            const uniId = parseInt(document.getElementById('rep_uni_id').value);
+            closeAssignRepModal();
+            if (uniId) openCreateRepModal(uniId);
+        }
+
+        function generateRandomRepPassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+            let pwd = '';
+            for (let i = 0; i < 10; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const input = document.getElementById('create_rep_password');
+            if (input) {
+                input.type = 'text';
+                input.value = pwd;
+                const icon = document.getElementById('rep_pwd_eye_icon');
+                if (icon) icon.className = 'ph ph-eye-slash';
+            }
+        }
+
+        function toggleRepPasswordVisibility() {
+            const input = document.getElementById('create_rep_password');
+            const icon = document.getElementById('rep_pwd_eye_icon');
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'ph ph-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'ph ph-eye';
+            }
+        }
+
+        async function handleCreateRepresentative() {
+            const uniId = document.getElementById('create_rep_uni_id').value;
+            const fullname = document.getElementById('create_rep_fullname').value.trim();
+            const email = document.getElementById('create_rep_email').value.trim();
+            const password = document.getElementById('create_rep_password').value;
+            const btn = document.getElementById('btn-submit-create-rep');
+
+            if (!email || !password) {
+                return showToast('Lütfen e-posta ve şifre giriniz.', 'error');
+            }
+            if (password.length < 6) {
+                return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph ph-spinner spinner"></i> Oluşturuluyor...';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/universities/${uniId}/create-representative`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fullname, email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Temsilci oluşturulamadı.');
+
+                showToast(data.message || 'Temsilci başarıyla oluşturuldu ve atandı.', 'success');
+                closeCreateRepModal();
+                await loadUniversities();
+            } catch (e) {
+                console.error('Create representative error:', e);
+                showToast(e.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-user-plus"></i> Temsilciyi Oluştur ve Ata';
+                }
+            }
         }
 
         function openUniversityDetailModal(id) {

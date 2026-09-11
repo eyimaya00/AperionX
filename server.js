@@ -11117,6 +11117,80 @@ app.put('/api/admin/universities/:id/representative', authenticateToken, async (
     }
 });
 
+// Admin: Create & Assign representative directly with email & password
+app.post('/api/admin/universities/:id/create-representative', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const uniId = Number(req.params.id);
+    const { fullname, email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'E-posta ve şifre zorunludur.' });
+    }
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
+    }
+
+    try {
+        const [uni] = await pool.query('SELECT id, name FROM universities WHERE id = ?', [uniId]);
+        if (uni.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+
+        // Check if email is already in use
+        const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email.trim()]);
+        if (existing.length > 0) {
+            return res.status(400).json({ error: 'Bu e-posta adresi ile zaten kayıtlı bir kullanıcı var.' });
+        }
+
+        const name = (fullname && fullname.trim()) ? fullname.trim() : email.split('@')[0];
+        const cleanBase = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 20) || 'rep';
+        const username = `${cleanBase}_${Math.floor(1000 + Math.random() * 9000)}`;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Previous representative on this university
+        const [currentTeam] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [uniId]);
+        const prevRepId = currentTeam.length > 0 ? currentTeam[0].representative_user_id : null;
+        if (prevRepId) {
+            await pool.query("UPDATE users SET role = 'university_editor' WHERE id = ? AND role = 'university_representative'", [prevRepId]);
+        }
+
+        // Insert new user
+        const [insertRes] = await pool.query(
+            'INSERT INTO users (fullname, email, username, password, role, university_id, created_at) VALUES (?, ?, ?, ?, "university_representative", ?, NOW())',
+            [name, email.trim(), username, hashedPassword, uniId]
+        );
+        const newUserId = insertRes.insertId;
+
+        // Assign to university_teams
+        await pool.query(
+            'INSERT INTO university_teams (university_id, representative_user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE representative_user_id = ?',
+            [uniId, newUserId, newUserId]
+        );
+
+        // Send appointment notification
+        await createNotification(
+            newUserId,
+            `Tebrikler! ${uni[0].name} AperionX Üniversite Temsilcisi hesabınız oluşturuldu.`,
+            'success'
+        ).catch(() => {});
+
+        res.status(201).json({
+            success: true,
+            message: `${uni[0].name} için temsilci hesabı başarıyla oluşturuldu ve atandı.`,
+            user: {
+                id: newUserId,
+                fullname: name,
+                email: email.trim(),
+                username,
+                role: 'university_representative',
+                university_id: uniId
+            }
+        });
+    } catch (e) {
+        console.error('Admin Create Representative Error:', e);
+        res.status(500).json({ error: e.message || 'Temsilci oluşturulamadı.' });
+    }
+});
+
 // -----------------------------------------------------------------------------
 // --- 2. UNIVERSITY REPRESENTATIVE & STAFF ROUTES ------------------------------
 // -----------------------------------------------------------------------------
