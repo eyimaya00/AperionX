@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baş Editör Paneli — AperionX</title>
+    <link rel="icon" type="image/png" href="/uploads/logo.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-surface: #0f172a;
+            --bg-card: #151f38;
+            --bg-card-hover: #1c2a4c;
+            --border-subtle: #1e293b;
+            --border-card: #223254;
+            --border-focus: #6366f1;
+            
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: rgba(139, 92, 246, 0.15);
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.15);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.15);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --info: #0ea5e9;
+            --info-light: rgba(14, 165, 233, 0.15);
+            
+            --text-main: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --sidebar-width: 270px;
+            --header-height: 72px;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-surface); }
+        ::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-card);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .brand-logo-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-main);
+        }
+
+        .brand-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            display: inline-block;
+            margin-top: 2px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            padding: 12px 14px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .nav-item i {
+            font-size: 19px;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background-color: var(--bg-card);
+        }
+
+        .nav-item:hover i {
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: white;
+            font-weight: 600;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active i {
+            color: var(--primary);
+        }
+
+        .nav-counter {
+            margin-left: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .nav-counter.active-pulse {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .user-info {
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        /* === MAIN CONTENT WRAPPER === */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        /* === TOPBAR === */
+        .topbar {
+            height: var(--header-height);
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            backdrop-filter: blur(10px);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .topbar-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .topbar-title p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border-color: var(--border-card);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-focus);
+        }
+
+        .btn-success {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: #d97706;
+            color: white;
+            border-color: #d97706;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* === CONTENT BODY === */
+        .content-body {
+            padding: 32px;
+            flex: 1;
+        }
+
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* === STATS GRID === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .stat-icon.purple { background: var(--accent-purple-light); color: var(--accent-purple); }
+        .stat-icon.green { background: var(--success-light); color: var(--success); }
+
+        .stat-info {
+            overflow: hidden;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* === CARD CONTAINER === */
+        .card-container {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .card-header h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-secondary);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-card-hover);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* === DATA TABLE === */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        table.data-table th {
+            padding: 14px 20px;
+            background-color: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--border-card);
+            white-space: nowrap;
+        }
+
+        table.data-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        table.data-table tbody tr:hover td {
+            background-color: rgba(99, 102, 241, 0.03);
+        }
+
+        table.data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* === BADGES === */
+        .badge-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-role.article { background: var(--info-light); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-role.experiment { background: var(--primary-light); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); }
+        .badge-role.gundem { background: var(--warning-light); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .status-pill.purple { background: var(--accent-purple-light); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3); }
+        .status-pill.success { background: var(--success-light); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-pill.warning { background: var(--warning-light); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-pill.danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        /* === MODAL === */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+            animation: modalIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover { color: var(--text-main); }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Form Controls */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        /* Review History Timeline */
+        .review-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            padding-left: 24px;
+            margin-top: 10px;
+        }
+
+        .review-timeline::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            left: 8px;
+            width: 2px;
+            background: var(--border-card);
+        }
+
+        .timeline-step {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 3px var(--bg-surface);
+        }
+
+        .timeline-step.revision::before { background: #fb923c; }
+        .timeline-step.approved::before { background: var(--success); }
+        .timeline-step.rejected::before { background: var(--danger); }
+        .timeline-step.forwarded::before { background: var(--info); }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .timeline-actor {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .timeline-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .timeline-note {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-card);
+            line-height: 1.45;
+        }
+
+        /* Spinner & Empty State */
+        .state-container {
+            padding: 60px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .state-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .state-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .state-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            max-width: 360px;
+        }
+
+        .spinner {
+            width: 34px;
+            height: 34px;
+            border: 3px solid var(--border-card);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 300;
+        }
+
+        .toast-msg {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-card);
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: var(--transition);
+        }
+
+        .toast-msg.success { border-color: var(--success); color: var(--success); }
+        .toast-msg.error { border-color: var(--danger); color: var(--danger); }
+        .toast-msg.warning { border-color: var(--warning); color: var(--warning); }
+        .toast-msg.info { border-color: var(--primary); color: var(--primary); }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+            .btn-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-wrap">
+                <i class="ph-bold ph-shield-check"></i>
+            </div>
+            <div class="brand-text">
+                <h1>AperionX</h1>
+                <span class="brand-badge">Baş Editör Masası</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-label">GENEL</div>
+            <a class="nav-item active" data-tab="tab-dashboard">
+                <i class="ph-bold ph-squares-four"></i>
+                <span>Genel Bakış</span>
+            </a>
+
+            <div class="menu-label">ONAY KUYRUĞU</div>
+            <a class="nav-item" data-tab="tab-queue" data-type="all">
+                <i class="ph-bold ph-tray"></i>
+                <span>Tüm Kuyruk</span>
+                <span class="nav-counter active-pulse" id="sideQueueCount">0</span>
+            </a>
+            <a class="nav-item" data-tab="tab-queue" data-type="articles">
+                <i class="ph-bold ph-books"></i>
+                <span>Makaleler</span>
+                <span class="nav-counter" id="sideArticleCount">0</span>
+            </a>
+            <a class="nav-item" data-tab="tab-queue" data-type="experiments">
+                <i class="ph-bold ph-flask"></i>
+                <span>Deneyler</span>
+                <span class="nav-counter" id="sideExpCount">0</span>
+            </a>
+            <a class="nav-item" data-tab="tab-queue" data-type="gundem">
+                <i class="ph-bold ph-newspaper"></i>
+                <span>Bilim Gündemi</span>
+                <span class="nav-counter" id="sideGundemCount">0</span>
+            </a>
+
+            <div class="menu-label">YÖNETİM</div>
+            <a class="nav-item" href="/admin" target="_blank">
+                <i class="ph-bold ph-gear"></i>
+                <span>Ana Admin Paneli</span>
+            </a>
+            <a class="nav-item" href="/" target="_blank">
+                <i class="ph-bold ph-globe"></i>
+                <span>Siteyi Gör</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-mini">
+                <div class="user-avatar" id="sidebarAvatar">BE</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarUserName">Baş Editör</div>
+                    <div class="user-role" id="sidebarUserRole">chief_editor</div>
+                </div>
+            </div>
+            <button class="btn-logout" title="Çıkış Yap" onclick="handleLogout()">
+                <i class="ph-bold ph-sign-out"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="btn-menu-toggle" onclick="toggleSidebar()">
+                    <i class="ph-bold ph-list"></i>
+                </button>
+                <div class="topbar-title">
+                    <h2>Baş Editör Onay Merkezi</h2>
+                    <p>Üniversite temsilciliklerinden onaylanıp iletilen bilimsel yayınların son kontrol ve yayınlama paneli</p>
+                </div>
+            </div>
+
+            <div class="topbar-actions">
+                <button class="btn btn-secondary btn-sm" onclick="loadQueueData()">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                    <span>Kuyruğu Yenile</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT BODY -->
+        <main class="content-body">
+            <!-- 1. TAB: GENEL BAKIŞ -->
+            <section class="tab-section active" id="tab-dashboard">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h3>Baş Editör Yayın Masası</h3>
+                        <p>Üniversite temsilciliklerinin ön incelemesinden geçen ve canlı yayın onayınızı bekleyen içerikler.</p>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="switchQueueType('all')" style="cursor: pointer;">
+                        <div class="stat-icon amber"><i class="ph-bold ph-hourglass-high"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statTotalPending">0</div>
+                            <div class="stat-label">Onay Bekleyen Toplam</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="switchQueueType('articles')" style="cursor: pointer;">
+                        <div class="stat-icon blue"><i class="ph-bold ph-books"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPendingArticles">0</div>
+                            <div class="stat-label">Bekleyen Makale</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="switchQueueType('experiments')" style="cursor: pointer;">
+                        <div class="stat-icon purple"><i class="ph-bold ph-flask"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPendingExperiments">0</div>
+                            <div class="stat-label">Bekleyen Deney</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="switchQueueType('gundem')" style="cursor: pointer;">
+                        <div class="stat-icon green"><i class="ph-bold ph-newspaper"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPendingGundem">0</div>
+                            <div class="stat-label">Bekleyen Bilim Gündemi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-container" style="padding: 24px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(99, 102, 241, 0.04));">
+                    <h4 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
+                        🛡️ Baş Editör Yayınlama Akışı &amp; Sorumluluk Rehberi
+                    </h4>
+                    <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; max-width: 820px;">
+                        Bu masada listelenen tüm içerikler ilgili üniversitenin <strong>Üniversite Temsilcisi</strong> tarafından ön kontrolden geçirilmiş ve Baş Editör onayına iletilmiştir.
+                        Onayladığınız içerikler anında AperionX canlı sitesinde üniversite temsilciliği rozeti ve logosuyla yayınlanır.
+                        Geliştirme gerektiren çalışmaları doğrudan revizyona gönderebilir veya standartlara uymayanları gerekçe belirterek reddedebilirsiniz.
+                    </p>
+                    <div style="margin-top: 16px;">
+                        <button class="btn btn-primary btn-sm" onclick="switchTab('tab-queue')">
+                            <i class="ph-bold ph-tray"></i> Onay Kuyruğuna Git
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. TAB: ONAY KUYRUĞU -->
+            <section class="tab-section" id="tab-queue">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h3>Baş Editör İçerik Kuyruğu</h3>
+                        <p>Son kontrolünüzü bekleyen üniversite makale, deney ve bilim gündemi yazıları.</p>
+                    </div>
+                </div>
+
+                <div class="card-container">
+                    <div class="card-header">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-queue-tab="all" onclick="switchQueueFilter('all', this)">Tümü (<span id="tabCountAll">0</span>)</button>
+                            <button class="filter-btn" data-queue-tab="articles" onclick="switchQueueFilter('articles', this)">Makaleler (<span id="tabCountArticles">0</span>)</button>
+                            <button class="filter-btn" data-queue-tab="experiments" onclick="switchQueueFilter('experiments', this)">Deneyler (<span id="tabCountExperiments">0</span>)</button>
+                            <button class="filter-btn" data-queue-tab="gundem" onclick="switchQueueFilter('gundem', this)">Bilim Gündemi (<span id="tabCountGundem">0</span>)</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>İçerik Başlığı</th>
+                                    <th>Tür</th>
+                                    <th>Üniversite</th>
+                                    <th>Yazar</th>
+                                    <th>Durum</th>
+                                    <th>Gönderim Tarihi</th>
+                                    <th style="text-align: right;">Karar / İncele</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueTableBody">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="state-container">
+                                            <div class="spinner"></div>
+                                            <div class="state-title" style="margin-top: 12px;">Kuyruk Yükleniyor...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: DETAYLI İNCELEME & KARAR MASASI -->
+    <div class="modal-backdrop" id="chiefDetailModal">
+        <div class="modal-box" style="max-width: 860px; max-height: 90vh;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="stat-icon purple" style="width:36px; height:36px; font-size:18px; margin:0;"><i class="ph-bold ph-shield-check"></i></div>
+                    <div>
+                        <h4 id="cdmTitle" style="margin:0; font-size: 16px;">İçerik Detay &amp; Karar Masası</h4>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <span class="badge-role article" id="cdmTypeBadge">Makale</span>
+                            <span class="status-pill purple" id="cdmStatusBadge"><span class="status-dot"></span> Baş Editör Masasında</span>
+                            <span style="font-size: 11.5px; color: var(--text-muted);" id="cdmDate">—</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal('chiefDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="cdmBody">
+                <div class="state-container">
+                    <div class="spinner"></div>
+                    <div class="state-title" style="margin-top: 12px;">İçerik Yükleniyor...</div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('chiefDetailModal')">Kapat</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-danger" onclick="openChiefRejectModal()">
+                        <i class="ph-bold ph-x-circle"></i>
+                        <span>Reddet</span>
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="openChiefRevisionModal()">
+                        <i class="ph-bold ph-pencil-simple-line"></i>
+                        <span>Revizyon İste</span>
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="openChiefApproveModal()">
+                        <i class="ph-bold ph-check-circle"></i>
+                        <span>Yayınla</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: YAYINLAMA ONAYI -->
+    <div class="modal-backdrop" id="chiefApproveModal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h4><i class="ph-bold ph-check-circle" style="color: var(--success);"></i> Yayına Almayı Onayla</h4>
+                <button class="modal-close" onclick="closeModal('chiefApproveModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
+                    Bu içeriği onaylayarak AperionX'ta <strong>canlı yayına</strong> almak üzeresiniz. Yazar ve üniversite temsilcisine otomatik başarı bildirimi iletilecektir.
+                </p>
+                <div style="padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                    <i class="ph-fill ph-seal-check" style="color: var(--success);"></i>
+                    İçerik üniversite temsilciliği damgası ve yazar bilgileriyle hemen yayına alınacaktır.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('chiefApproveModal')">Vazgeç</button>
+                <button type="button" class="btn btn-success" id="btnConfirmApprove" onclick="executeChiefDecision('approve')">
+                    <i class="ph-bold ph-check-circle"></i>
+                    <span>Evet, Yayına Al</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REVİZYON TALEBİ -->
+    <div class="modal-backdrop" id="chiefRevisionModal">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h4><i class="ph-bold ph-pencil-simple-line" style="color: #fb923c;"></i> Baş Editör Revizyon Talebi</h4>
+                <button class="modal-close" onclick="closeModal('chiefRevisionModal')">&times;</button>
+            </div>
+            <form onsubmit="handleChiefRevisionSubmit(event)">
+                <div class="modal-body">
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                        Yazara ve üniversite temsilcisine revizyon gerekçesini ve talep edilen düzenlemeleri iletiniz.
+                    </p>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="form-label">Revizyon Notları &amp; İstenen Geliştirmeler *</label>
+                        <textarea id="chiefRevisionNotes" class="form-control" rows="5" placeholder="Örn: Bilimsel kaynakça formatı APA stiline uygun güncellenmeli ve deney sonuçları tablosu eklenmelidir..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('chiefRevisionModal')">Vazgeç</button>
+                    <button type="submit" class="btn btn-warning" id="btnConfirmRevision">
+                        <i class="ph-bold ph-paper-plane-tilt"></i>
+                        <span>Revizyon Talebini İlet</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RET GEREKÇESİ -->
+    <div class="modal-backdrop" id="chiefRejectModal">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h4><i class="ph-bold ph-x-circle" style="color: var(--danger);"></i> İçeriği Reddet</h4>
+                <button class="modal-close" onclick="closeModal('chiefRejectModal')">&times;</button>
+            </div>
+            <form onsubmit="handleChiefRejectSubmit(event)">
+                <div class="modal-body">
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                        Bu içeriğin yayına uygun olmadığını düşünüyorsanız ret gerekçesi belirterek işlemi tamamlayabilirsiniz.
+                    </p>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="form-label">Ret Gerekçesi *</label>
+                        <textarea id="chiefRejectNotes" class="form-control" rows="4" placeholder="Örn: İçerik AperionX yayın ilkelerine ve özgünlük standartlarına uygun bulunmamıştır..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('chiefRejectModal')">Vazgeç</button>
+                    <button type="submit" class="btn btn-danger" id="btnConfirmReject">
+                        <i class="ph-bold ph-x-circle"></i>
+                        <span>İçeriği Reddet</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // === AUTH & ROLE VERIFICATION ===
+        const token = localStorage.getItem('token');
+        let currentUser = null;
+
+        try {
+            currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+        } catch (e) {}
+
+        if (!token || !currentUser || !['chief_editor', 'admin'].includes(currentUser.role)) {
+            console.warn('Yetkisiz erişim: chief_editor veya admin rolü gereklidir.');
+            window.location.href = '/';
+        }
+
+        // Global State
+        let pendingArticles = [];
+        let pendingExperiments = [];
+        let pendingGundem = [];
+        let currentQueueFilter = 'all';
+        let currentDetailItem = null; // { type, id, data }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initSidebarUser();
+            initTabNav();
+            await loadQueueData();
+        });
+
+        function initSidebarUser() {
+            if (currentUser) {
+                document.getElementById('sidebarUserName').innerText = currentUser.fullname || 'Baş Editör';
+                document.getElementById('sidebarUserRole').innerText = currentUser.role === 'admin' ? 'Yönetici' : 'Baş Editör';
+                
+                const initials = (currentUser.fullname || 'BE')
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+
+                const avatarEl = document.getElementById('sidebarAvatar');
+                if (currentUser.avatar_url) {
+                    avatarEl.innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                } else {
+                    avatarEl.innerText = initials;
+                }
+            }
+        }
+
+        function initTabNav() {
+            document.querySelectorAll('.sidebar-menu .nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const tabId = item.getAttribute('data-tab');
+                    const qType = item.getAttribute('data-type');
+                    if (tabId) {
+                        switchTab(tabId);
+                        if (tabId === 'tab-queue' && qType) {
+                            switchQueueFilter(qType);
+                        }
+                    }
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu .nav-item').forEach(nav => nav.classList.remove('active'));
+
+            const targetSection = document.getElementById(tabId);
+            if (targetSection) targetSection.classList.add('active');
+
+            const activeNav = document.querySelector(`.sidebar-menu .nav-item[data-tab="${tabId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            options.headers = options.headers || {};
+            options.headers['Authorization'] = `Bearer ${token}`;
+            if (!options.headers['Content-Type'] && !(options.body instanceof FormData)) {
+                options.headers['Content-Type'] = 'application/json';
+            }
+            const res = await fetch(url, options);
+            if (res.status === 401 || res.status === 403) {
+                const data = await res.json().catch(() => ({}));
+                if (res.status === 401) {
+                    showToast('Oturum süreniz doldu, lütfen tekrar giriş yapın.', 'error');
+                    setTimeout(() => handleLogout(), 1500);
+                }
+                throw new Error(data.error || 'Yetkisiz işlem.');
+            }
+            return res;
+        }
+
+        // === QUEUE DATA LOADER ===
+        async function loadQueueData() {
+            const tbody = document.getElementById('queueTableBody');
+            try {
+                const res = await fetchWithAuth('/api/chief-editor/pending?type=all');
+                const data = await res.json();
+
+                pendingArticles = (data.articles || []).map(a => ({ ...a, raw_type: 'article', type_label: 'Makale' }));
+                pendingExperiments = (data.experiments || []).map(e => ({ ...e, raw_type: 'experiment', type_label: 'Deney' }));
+                pendingGundem = (data.gundem || []).map(g => ({ ...g, raw_type: 'gundem', type_label: 'Bilim Gündemi' }));
+
+                const totalPending = pendingArticles.length + pendingExperiments.length + pendingGundem.length;
+
+                // Dashboard Metrics
+                const elTot = document.getElementById('statTotalPending');
+                const elArt = document.getElementById('statPendingArticles');
+                const elExp = document.getElementById('statPendingExperiments');
+                const elGun = document.getElementById('statPendingGundem');
+                if (elTot) elTot.innerText = totalPending;
+                if (elArt) elArt.innerText = pendingArticles.length;
+                if (elExp) elExp.innerText = pendingExperiments.length;
+                if (elGun) elGun.innerText = pendingGundem.length;
+
+                // Sidebar Counters
+                const sideTot = document.getElementById('sideQueueCount');
+                const sideArt = document.getElementById('sideArticleCount');
+                const sideExp = document.getElementById('sideExpCount');
+                const sideGun = document.getElementById('sideGundemCount');
+                if (sideTot) sideTot.innerText = totalPending;
+                if (sideArt) sideArt.innerText = pendingArticles.length;
+                if (sideExp) sideExp.innerText = pendingExperiments.length;
+                if (sideGun) sideGun.innerText = pendingGundem.length;
+
+                // Filter Tab Counters
+                const tcAll = document.getElementById('tabCountAll');
+                const tcArt = document.getElementById('tabCountArticles');
+                const tcExp = document.getElementById('tabCountExperiments');
+                const tcGun = document.getElementById('tabCountGundem');
+                if (tcAll) tcAll.innerText = totalPending;
+                if (tcArt) tcArt.innerText = pendingArticles.length;
+                if (tcExp) tcExp.innerText = pendingExperiments.length;
+                if (tcGun) tcGun.innerText = pendingGundem.length;
+
+                renderQueueTable();
+            } catch (err) {
+                console.error('Queue load error:', err);
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--danger);">${err.message}</td></tr>`;
+                }
+            }
+        }
+
+        function switchQueueFilter(filter, btnEl) {
+            currentQueueFilter = filter;
+            if (btnEl) {
+                document.querySelectorAll('#tab-queue .filter-btn').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            } else {
+                document.querySelectorAll('#tab-queue .filter-btn').forEach(b => {
+                    if (b.getAttribute('data-queue-tab') === filter) b.classList.add('active');
+                    else b.classList.remove('active');
+                });
+            }
+            renderQueueTable();
+        }
+
+        function switchQueueType(type) {
+            switchTab('tab-queue');
+            switchQueueFilter(type);
+        }
+
+        function renderQueueTable() {
+            const tbody = document.getElementById('queueTableBody');
+            if (!tbody) return;
+
+            let list = [];
+            if (currentQueueFilter === 'all') {
+                list = [...pendingArticles, ...pendingExperiments, ...pendingGundem];
+            } else if (currentQueueFilter === 'articles') {
+                list = pendingArticles;
+            } else if (currentQueueFilter === 'experiments') {
+                list = pendingExperiments;
+            } else if (currentQueueFilter === 'gundem') {
+                list = pendingGundem;
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="state-container">
+                                <div class="state-icon"><i class="ph-bold ph-check-circle" style="color:var(--success);"></i></div>
+                                <div class="state-title">Kuyruk Tertemiz!</div>
+                                <div class="state-desc">Bu kategoride Baş Editör onayı bekleyen herhangi bir üniversite içeriği bulunmamaktadır.</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = list.map(item => {
+                const dateVal = item.submitted_at || item.created_at;
+                const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                const typeClass = item.raw_type === 'experiment' ? 'experiment' : (item.raw_type === 'gundem' ? 'gundem' : 'article');
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--text-main); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${escapeHtml(item.title || 'Başlıksız')}
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                                ${escapeHtml(item.category || 'Genel')}
+                            </div>
+                        </td>
+                        <td><span class="badge-role ${typeClass}">${item.type_label}</span></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${item.university_logo ? `<img src="${item.university_logo}" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">` : '<i class="ph-bold ph-buildings" style="color:var(--accent-purple);"></i>'}
+                                <span style="font-size: 12.5px; color: var(--text-main); font-weight: 500;">${escapeHtml(item.university_name || 'Üniversite')}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500; color: var(--text-main); font-size: 12.5px;">${escapeHtml(item.author_name || 'Bilinmiyor')}</div>
+                        </td>
+                        <td>
+                            <span class="status-pill purple">
+                                <span class="status-dot"></span>
+                                Baş Editör Masasında
+                            </span>
+                        </td>
+                        <td style="font-size: 12px; color: var(--text-muted);">${formattedDate}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-primary btn-sm" onclick="openChiefDetailModal('${item.raw_type}', ${item.id})">
+                                <i class="ph-bold ph-sliders"></i>
+                                <span>İncele &amp; Karar Ver</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // === DETAIL MODAL ===
+        async function openChiefDetailModal(type, id) {
+            const modal = document.getElementById('chiefDetailModal');
+            const body = document.getElementById('cdmBody');
+            const titleEl = document.getElementById('cdmTitle');
+            const typeBadge = document.getElementById('cdmTypeBadge');
+            const dateEl = document.getElementById('cdmDate');
+
+            modal.classList.add('show');
+            body.innerHTML = `
+                <div class="state-container">
+                    <div class="spinner"></div>
+                    <div class="state-title" style="margin-top:12px;">İçerik Yükleniyor...</div>
+                </div>
+            `;
+
+            try {
+                const res = await fetchWithAuth(`/api/chief-editor/content/${type}/${id}`);
+                const data = await res.json();
+                currentDetailItem = { type, id, data };
+
+                titleEl.innerText = data.title || 'İçerik İnceleme';
+                typeBadge.innerText = type === 'experiment' ? 'Deney' : (type === 'gundem' ? 'Bilim Gündemi' : 'Makale');
+                dateEl.innerText = `Gönderim: ${data.created_at ? new Date(data.created_at).toLocaleDateString('tr-TR') : '-'}`;
+
+                // Co-authors
+                const coAuthorsHtml = (data.co_authors && data.co_authors.length > 0)
+                    ? data.co_authors.map(ca => `<span class="badge-role article"><i class="ph-bold ph-user"></i> ${escapeHtml(ca.fullname)}</span>`).join(' ')
+                    : '<span style="font-size:12px; color:var(--text-muted);">Ortak yazar bulunmuyor.</span>';
+
+                // Representative info
+                const repHtml = data.representative
+                    ? `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="ph-bold ph-identification-card" style="color:var(--accent-purple); font-size: 18px;"></i>
+                            <div>
+                                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-main);">${escapeHtml(data.representative.fullname)}</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(data.representative.email)}</div>
+                            </div>
+                        </div>
+                    `
+                    : '<span style="font-size:12px; color:var(--text-muted);">Temsilci bilgisi bulunamadı.</span>';
+
+                // Review Timeline
+                const reviewTimelineHtml = (data.review_history && data.review_history.length > 0)
+                    ? data.review_history.map(h => {
+                        let stepClass = 'forwarded';
+                        let actionLabel = h.action;
+                        if (h.action === 'revision_requested' || h.action === 'chief_revision_requested') {
+                            stepClass = 'revision';
+                            actionLabel = 'Revizyon Talep Edildi';
+                        } else if (h.action === 'forwarded_to_chief') {
+                            stepClass = 'forwarded';
+                            actionLabel = 'Baş Editöre İletildi';
+                        } else if (h.action === 'approved') {
+                            stepClass = 'approved';
+                            actionLabel = 'Onaylandı & Yayına Alındı';
+                        } else if (h.action === 'rejected') {
+                            stepClass = 'rejected';
+                            actionLabel = 'Reddedildi';
+                        }
+                        const hDate = h.created_at ? new Date(h.created_at).toLocaleString('tr-TR') : '-';
+                        return `
+                            <div class="timeline-step ${stepClass}">
+                                <div class="timeline-header">
+                                    <span class="timeline-actor"><i class="ph-bold ph-user-circle"></i> ${escapeHtml(h.actor_name || 'Yetkili')} (${escapeHtml(h.actor_role || '-')}) — ${actionLabel}</span>
+                                    <span class="timeline-date">${hDate}</span>
+                                </div>
+                                ${h.note ? `<div class="timeline-note">${escapeHtml(h.note)}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')
+                    : '<div style="font-size:12px; color:var(--text-muted); padding: 8px 0;">Henüz inceleme geçmişi kaydı bulunmuyor.</div>';
+
+                body.innerHTML = `
+                    <!-- Üniversite & Temsilci & Yazar Bilgi Kartı -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; padding: 14px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+                        <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">Üniversite</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${data.university_logo ? `<img src="${data.university_logo}" style="width:24px;height:24px;object-fit:contain;border-radius:4px;">` : '<i class="ph-bold ph-buildings" style="color:var(--accent-purple);"></i>'}
+                                <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">${escapeHtml(data.university_name || 'Üniversite')}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">Üniversite Temsilcisi</div>
+                            ${repHtml}
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">Birincil Yazar</div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">${escapeHtml(data.author_name || 'Bilinmiyor')}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(data.author_job_title || 'Yazar')}</div>
+                        </div>
+                    </div>
+
+                    <!-- Ortak Yazarlar -->
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">Ortak Yazarlar</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            ${coAuthorsHtml}
+                        </div>
+                    </div>
+
+                    <!-- Özet / Giriş -->
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Özet / Açıklama</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; background: var(--bg-card); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                            ${escapeHtml(data.excerpt || data.summary || 'Özet belirtilmemiş.')}
+                        </div>
+                    </div>
+
+                    <!-- İçerik Metni -->
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Tam İçerik Metni</div>
+                        <div style="max-height: 280px; overflow-y: auto; background: var(--bg-card); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); font-size: 13px; line-height: 1.6; color: var(--text-main);">
+                            ${data.content || '<em style="color:var(--text-muted);">İçerik metni boş.</em>'}
+                        </div>
+                    </div>
+
+                    <!-- İnceleme Geçmişi -->
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <i class="ph-bold ph-clock-counter-clockwise"></i> Süreç &amp; İnceleme Geçmişi
+                        </div>
+                        <div class="review-timeline">
+                            ${reviewTimelineHtml}
+                        </div>
+                    </div>
+                `;
+
+            } catch (err) {
+                console.error('Content detail error:', err);
+                body.innerHTML = `
+                    <div class="state-container">
+                        <div class="state-title" style="color:var(--danger);">İçerik Detayları Alınamadı</div>
+                        <div class="state-desc">${err.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // === DECISION MODALS TRIGGER ===
+        function openChiefApproveModal() {
+            if (!currentDetailItem) return;
+            document.getElementById('chiefApproveModal').classList.add('show');
+        }
+
+        function openChiefRevisionModal() {
+            if (!currentDetailItem) return;
+            document.getElementById('chiefRevisionNotes').value = '';
+            document.getElementById('chiefRevisionModal').classList.add('show');
+        }
+
+        function openChiefRejectModal() {
+            if (!currentDetailItem) return;
+            document.getElementById('chiefRejectNotes').value = '';
+            document.getElementById('chiefRejectModal').classList.add('show');
+        }
+
+        // === DECISION EXECUTION ===
+        async function executeChiefDecision(decision, notes = '') {
+            if (!currentDetailItem) return;
+            const { type, id } = currentDetailItem;
+
+            let btnEl = null;
+            if (decision === 'approve') btnEl = document.getElementById('btnConfirmApprove');
+            else if (decision === 'revision') btnEl = document.getElementById('btnConfirmRevision');
+            else if (decision === 'reject') btnEl = document.getElementById('btnConfirmReject');
+
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> İşleniyor...';
+            }
+
+            try {
+                // Route endpoint selection
+                let endpointType = 'articles';
+                if (type === 'experiment') endpointType = 'experiments';
+                else if (type === 'gundem') endpointType = 'gundem';
+
+                const res = await fetchWithAuth(`/api/chief-editor/${endpointType}/${id}/decide`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        decision,
+                        notes,
+                        rejection_reason: notes
+                    })
+                });
+                const data = await res.json();
+
+                showToast(data.message || 'Kararınız başarıyla kaydedildi.', 'success');
+                closeModal('chiefApproveModal');
+                closeModal('chiefRevisionModal');
+                closeModal('chiefRejectModal');
+                closeModal('chiefDetailModal');
+                await loadQueueData();
+            } catch (err) {
+                console.error('Decision error:', err);
+                showToast(err.message || 'Karar işlenirken hata oluştu.', 'error');
+            } finally {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    if (decision === 'approve') btnEl.innerHTML = '<i class="ph-bold ph-check-circle"></i> <span>Evet, Yayına Al</span>';
+                    else if (decision === 'revision') btnEl.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>Revizyon Talebini İlet</span>';
+                    else if (decision === 'reject') btnEl.innerHTML = '<i class="ph-bold ph-x-circle"></i> <span>İçeriği Reddet</span>';
+                }
+            }
+        }
+
+        function handleChiefRevisionSubmit(e) {
+            e.preventDefault();
+            const notes = document.getElementById('chiefRevisionNotes').value.trim();
+            executeChiefDecision('revision', notes);
+        }
+
+        function handleChiefRejectSubmit(e) {
+            e.preventDefault();
+            const notes = document.getElementById('chiefRejectNotes').value.trim();
+            executeChiefDecision('reject', notes);
+        }
+
+        // === HELPERS ===
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('show');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${type}`;
+            
+            const icons = {
+                success: 'ph-check-circle',
+                error: 'ph-x-circle',
+                warning: 'ph-warning-circle',
+                info: 'ph-info'
+            };
+            
+            toast.innerHTML = `
+                <i class="ph-bold ${icons[type] || 'ph-info'}" style="font-size:20px;"></i>
+                <span>${escapeHtml(msg)}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

@@ -1210,10 +1210,12 @@ if (loginForm) {
                 checkAuthStatus(); // Update UI
 
                 if (data.redirectUrl) {
-                    setTimeout(() => window.location.href = '/' + data.redirectUrl, 1000);
-                } else if (data.user.role === 'admin') {
+                    setTimeout(() => window.location.href = (data.redirectUrl.startsWith('/') ? '' : '/') + data.redirectUrl, 1000);
+                } else if (data.user.role === 'admin' || data.user.role === 'chief_editor') {
                     setTimeout(() => window.location.href = '/admin', 1000);
-                } else if (data.user.role === 'editor') {
+                } else if (data.user.role === 'university_representative') {
+                    setTimeout(() => window.location.href = '/university-panel', 1000);
+                } else if (data.user.role === 'editor' || data.user.role === 'university_editor') {
                     setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
                     setTimeout(() => window.location.href = '/author', 1000);
@@ -1250,13 +1252,16 @@ function checkAuthStatus() {
             let titleAttr = 'Profilime Git';
             let roleBadge = '';
 
-            if (user.role === 'admin') {
+            if (user.role === 'admin' || user.role === 'chief_editor') {
                 dashboardAction = "window.location.href='/admin'";
                 roleBadge = '<span class="role-badge admin">Admin</span>';
+            } else if (user.role === 'university_representative') {
+                dashboardAction = "window.location.href='/university-panel'";
+                roleBadge = '<span class="role-badge" style="background:#8b5cf6;color:white;">Temsilci</span>';
             } else if (user.role === 'author') {
                 dashboardAction = "window.location.href='/author'";
                 roleBadge = '<span class="role-badge author">Yazar</span>';
-            } else if (user.role === 'editor') {
+            } else if (user.role === 'editor' || user.role === 'university_editor') {
                 dashboardAction = "window.location.href='/editor'";
                 roleBadge = '<span class="role-badge editor">Editör</span>';
             }
@@ -1284,14 +1289,21 @@ function checkAuthStatus() {
                 navMenu.appendChild(profileLink);
 
                 // 2. Admin/Dashboard Link
-                if (user.role === 'admin') {
+                if (user.role === 'admin' || user.role === 'chief_editor') {
                     const adminLink = document.createElement('a');
                     adminLink.href = '/admin';
                     adminLink.className = 'nav-link special-nav-link admin-link';
                     adminLink.innerHTML = '<i class="ph-fill ph-gear"></i> Admin';
                     adminLink.style.color = 'var(--primary-color)';
                     navMenu.appendChild(adminLink);
-                } else if (user.role === 'editor') {
+                } else if (user.role === 'university_representative') {
+                    const uniLink = document.createElement('a');
+                    uniLink.href = '/university-panel';
+                    uniLink.className = 'nav-link special-nav-link';
+                    uniLink.innerHTML = '<i class="ph-fill ph-buildings"></i> Temsilci Paneli';
+                    uniLink.style.color = '#8b5cf6';
+                    navMenu.appendChild(uniLink);
+                } else if (user.role === 'editor' || user.role === 'university_editor') {
                     const editorLink = document.createElement('a');
                     editorLink.href = '/editor';
                     editorLink.className = 'nav-link special-nav-link';

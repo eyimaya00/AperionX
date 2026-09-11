@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
+     crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5WGJ7ME86"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5WGJ7ME86');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AperionX Üniversite Ağı: Türkiye'nin ve dünyanın önde gelen üniversitelerindeki öğrenci toplulukları, araştırmacıları ve temsilcilikleriyle bilimin sınırlarını keşfedin.">
+    <meta name="keywords"
+        content="aperionx üniversite ağı, üniversite temsilcilikleri, bilim toplulukları, akademik ağ, üniversite kulüpleri, bilimsel araştırma">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aperionx.com/universities">
+    <meta property="og:title" content="Üniversite Ağı - AperionX">
+    <meta property="og:description"
+        content="AperionX Üniversite Ağı: Bilim ve araştırma odaklı üniversite toplulukları ve temsilcilikleri.">
+    <meta property="og:image" content="https://aperionx.com/uploads/logo.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Üniversite Ağı - AperionX">
+    <meta name="twitter:description"
+        content="AperionX Üniversite Ağı: Bilim ve araştırma odaklı üniversite toplulukları ve temsilcilikleri.">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://aperionx.com/universities" />
+    <link rel="alternate" hreflang="tr" href="https://aperionx.com/universities">
+    <link rel="alternate" hreflang="en" href="https://aperionx.com/en/universities">
+    <link rel="alternate" hreflang="x-default" href="https://aperionx.com/universities">
+
+    <title>Üniversite Ağı - AperionX</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon.png">
+    <link rel="stylesheet" href="/style.css?v=306">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web"></script>
+
+    <style>
+        /* University Profile Hero */
+        .uni-detail-hero {
+            position: relative;
+            background: linear-gradient(135deg, #090a0f 0%, #111322 50%, #1c1538 100%);
+            padding: 80px 0 60px;
+            color: white;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .uni-detail-hero::before {
+            content: '';
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            background: rgba(99, 102, 241, 0.18);
+            border-radius: 50%;
+            filter: blur(100px);
+            top: -60px;
+            left: 5%;
+        }
+
+        .uni-detail-hero::after {
+            content: '';
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            background: rgba(168, 85, 247, 0.15);
+            border-radius: 50%;
+            filter: blur(100px);
+            bottom: -60px;
+            right: 8%;
+        }
+
+        .uni-detail-hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .uni-hero-logo-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+        }
+
+        .uni-hero-logo-img {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+
+        .uni-hero-info {
+            flex: 1;
+        }
+
+        .uni-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            background: rgba(99, 102, 241, 0.18);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .uni-hero-name {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 12px 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .uni-hero-description {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin-bottom: 22px;
+            max-width: 780px;
+        }
+
+        .uni-hero-counters {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .uni-counter-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .uni-counter-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .uni-counter-lbl {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        /* Representative Section */
+        .uni-detail-body {
+            padding: 60px 0 100px;
+            background: var(--bg-color);
+            min-height: 60vh;
+        }
+
+        .section-header-row {
+            margin-bottom: 28px;
+        }
+
+        .section-heading {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 6px 0;
+        }
+
+        .section-subheading {
+            color: var(--text-secondary, #64748b);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Representative Spotlight Card */
+        .rep-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 22px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .rep-card {
+            background: linear-gradient(135deg, #131627 0%, #18142e 100%);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .rep-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #6366f1;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+            flex-shrink: 0;
+        }
+
+        .rep-info {
+            flex: 1;
+        }
+
+        .rep-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #6366f1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .rep-name {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 6px 0;
+        }
+
+        .rep-details {
+            font-size: 0.95rem;
+            color: var(--text-secondary, #64748b);
+            margin-bottom: 12px;
+        }
+
+        .rep-bio {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: var(--text-secondary, #94a3b8);
+            margin-bottom: 16px;
+            max-width: 650px;
+        }
+
+        .rep-profile-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .rep-profile-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 22px;
+            margin-bottom: 60px;
+        }
+
+        .member-card {
+            background: var(--card-bg, #ffffff);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 18px;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        [data-theme="dark"] .member-card {
+            background: #111420;
+            border-color: rgba(255, 255, 255, 0.07);
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .member-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(99, 102, 241, 0.25);
+            margin-bottom: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .member-card:hover .member-avatar {
+            transform: scale(1.05);
+            border-color: #6366f1;
+        }
+
+        .member-name {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 4px 0;
+        }
+
+        .member-role {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 6px;
+        }
+
+        .member-dept {
+            font-size: 0.82rem;
+            color: var(--text-secondary, #94a3b8);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .member-link-tag {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6366f1;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        /* Content Filter Tabs */
+        .content-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+            padding-bottom: 14px;
+        }
+
+        .content-tab-btn {
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary, #94a3b8);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .content-tab-btn:hover {
+            color: var(--text-color);
+            border-color: #64748b;
+        }
+
+        .content-tab-btn.active {
+            background: #6366f1;
+            color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 26px;
+        }
+
+        .content-card {
+            position: relative;
+            background: #000 !important;
+            border-radius: 22px !important;
+            overflow: hidden !important;
+            text-decoration: none;
+            color: white !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 380px !important;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            isolation: isolate;
+        }
+
+        .content-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-card:hover .card-bg-img {
+            transform: scale(1.05);
+        }
+
+        .card-bg-img-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .card-bg-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .content-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.55) 50%, transparent 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .content-card-tag {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-card-type {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            color: white;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            z-index: 3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-card-body {
+            position: relative;
+            z-index: 3;
+            margin-top: auto;
+            padding: 22px;
+        }
+
+        .content-card-title {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            line-height: 1.35;
+        }
+
+        .content-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .empty-content-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card-bg, #ffffff);
+            border: 1px dashed var(--border-color, #cbd5e1);
+            border-radius: 18px;
+            color: var(--text-secondary, #64748b);
+        }
+
+        [data-theme="dark"] .empty-content-box {
+            background: #111420;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .uni-detail-hero-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            .uni-hero-counters {
+                justify-content: center;
+            }
+            .rep-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .rep-bio {
+                margin: 0 auto 16px auto;
+            }
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo-container">
+                <img id="loader-logo-img" src="/uploads/logo.png" alt="AperionX Logo" style="max-width: 180px; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <img src="/uploads/logo.png" alt="AperionX Logo" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/gundem" class="nav-link">Gündem</a>
+                <a href="/articles" class="nav-link">Makaleler</a>
+                <a href="/experiments" class="nav-link">Deneyler</a>
+                <a href="/tools" class="nav-link">Araçlar</a>
+                <a href="/universities" class="nav-link active">Üniversite Ağı</a>
+                <a href="/about" class="nav-link">Hakkında</a>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Auth Buttons -->
+                <div class="auth-buttons" id="user-menu-container">
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                </div>
+
+                <!-- Language Switcher -->
+                <a href="javascript:void(0)" class="icon-btn lang-btn" id="lang-switch-btn" title="Switch Language"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                    <i class="ph-bold ph-globe"></i> EN
+                </a>
+
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+                    <i class="ph ph-moon"></i>
+                </button>
+
+                <button class="mobile-menu-btn icon-btn" id="hamburgerBtn" aria-label="Menüyü aç" aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-auth">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- Hero Section (Dynamic) -->
+    <section class="uni-detail-hero" id="uni-hero-section">
+        <div class="uni-detail-hero-content">
+            <div class="uni-hero-logo-box">
+                <img id="uni-detail-logo" src="" alt="Üniversite Logosu" class="uni-hero-logo-img" style="display:none;">
+                <i id="uni-detail-logo-fallback" class="ph-bold ph-graduation-cap" style="font-size: 54px; color: #818cf8;"></i>
+            </div>
+            <div class="uni-hero-info">
+                <div class="uni-hero-badge">
+                    <i class="ph-bold ph-buildings"></i> AperionX Üniversite Ağı
+                </div>
+                <h1 class="uni-hero-name" id="uni-detail-name">Üniversite Yükleniyor...</h1>
+                <p class="uni-hero-description" id="uni-detail-desc">Lütfen bekleyiniz, üniversite temsilcilik bilgileri getiriliyor.</p>
+                <div class="uni-hero-counters">
+                    <div class="uni-counter-item">
+                        <span class="uni-counter-val" id="cnt-team">0</span>
+                        <span class="uni-counter-lbl">Ekip Üyesi</span>
+                    </div>
+                    <div class="uni-counter-item">
+                        <span class="uni-counter-val" id="cnt-author">0</span>
+                        <span class="uni-counter-lbl">Yazar</span>
+                    </div>
+                    <div class="uni-counter-item">
+                        <span class="uni-counter-val" id="cnt-articles">0</span>
+                        <span class="uni-counter-lbl">Makale</span>
+                    </div>
+                    <div class="uni-counter-item">
+                        <span class="uni-counter-val" id="cnt-experiments">0</span>
+                        <span class="uni-counter-lbl">Deney</span>
+                    </div>
+                    <div class="uni-counter-item">
+                        <span class="uni-counter-val" id="cnt-gundem">0</span>
+                        <span class="uni-counter-lbl">Gündem</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="uni-detail-body">
+        <div class="container" id="uni-main-container">
+            
+            <!-- 1. REPRESENTATIVE SPOTLIGHT -->
+            <div id="representative-section" style="display:none;">
+                <div class="section-header-row">
+                    <h2 class="section-heading">Üniversite Temsilcisi</h2>
+                    <p class="section-subheading">AperionX'in bu üniversitedeki resmi temsilcisi ve koordinatörü.</p>
+                </div>
+
+                <div class="rep-card" id="rep-card-box">
+                    <img id="rep-avatar-img" src="/uploads/default-avatar.png" alt="Temsilci" class="rep-avatar">
+                    <div class="rep-info">
+                        <span class="rep-badge"><i class="ph-fill ph-seal-check"></i> Resmi Temsilci</span>
+                        <h3 class="rep-name" id="rep-name">Temsilci Adı</h3>
+                        <div class="rep-details" id="rep-details">Bölüm Bilgisi</div>
+                        <p class="rep-bio" id="rep-bio">Biyografi bilgisi bulunmuyor.</p>
+                        <a id="rep-profile-link" href="#" class="rep-profile-btn">
+                            Profili Gör <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. TEAM MEMBERS GRID -->
+            <div id="team-section" style="display:none;">
+                <div class="section-header-row">
+                    <h2 class="section-heading">AperionX Ekibi</h2>
+                    <p class="section-subheading">Bu üniversitede içerik üreten yazarlarımız, editörlerimiz ve topluluk üyelerimiz.</p>
+                </div>
+
+                <div class="team-grid" id="team-grid-box">
+                    <!-- Dynamic Team Member Cards -->
+                </div>
+            </div>
+
+            <!-- 3. UNIVERSITY PUBLISHED CONTENTS -->
+            <div id="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h2 class="section-heading">Üniversiteden İçerikler</h2>
+                        <p class="section-subheading">Öğrenci ve araştırmacılarımızın hazırlayıp yayınladığı bilimsel çalışmalar.</p>
+                    </div>
+
+                    <div class="content-tabs" id="content-tabs" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
+                        <button class="content-tab-btn active" data-tab="all" onclick="filterContentTab('all')">
+                            Tümü (<span id="tab-cnt-all">0</span>)
+                        </button>
+                        <button class="content-tab-btn" data-tab="articles" onclick="filterContentTab('articles')">
+                            Makaleler (<span id="tab-cnt-articles">0</span>)
+                        </button>
+                        <button class="content-tab-btn" data-tab="experiments" onclick="filterContentTab('experiments')">
+                            Deneyler (<span id="tab-cnt-experiments">0</span>)
+                        </button>
+                        <button class="content-tab-btn" data-tab="gundem" onclick="filterContentTab('gundem')">
+                            Bilim Gündemi (<span id="tab-cnt-gundem">0</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-grid" id="content-grid-box">
+                    <div class="empty-content-box">
+                        <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: #6366f1;"></i>
+                        <p style="margin-top: 10px;">İçerikler yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <div id="global-footer"></div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <p>Hesabınıza erişmek için bilgilerinizi girin.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="login-email" placeholder="E-posta veya Kullanıcı Adı" required aria-label="E-posta veya Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="remember-me-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <label class="remember-me-label" style="display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; color: var(--text-color);">
+                        <input type="checkbox" id="login-remember" class="remember-checkbox" style="margin-right: 8px;">
+                        <span>Beni Hatırla</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="switchModal('loginModal', 'forgotPasswordModal')" class="forgot-password-link" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Giriş Yap
+                </button>
+            </div>
+            <div class="modal-footer">
+                <p>Hesabınız yok mu? <a href="javascript:void(0)" onclick="switchModal('loginModal', 'signupModal')">Üye Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signupModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Üye Ol</h2>
+                <p>Aramıza katılmak için formu doldurun.</p>
+            </div>
+            <form>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-fullname" placeholder="Ad Soyad" required aria-label="Ad Soyad">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="signup-username" placeholder="Kullanıcı Adı" required aria-label="Kullanıcı Adı">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="signup-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Şifre" required aria-label="Şifre">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Şifre Tekrar" required aria-label="Şifre Tekrar">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Üye Ol</button>
+            </form>
+            <div class="social-login-divider" style="display: flex; align-items: center; text-align: center; margin: 20px 0;">
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px; color: #888; font-size: 0.9rem;">veya</span>
+                <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);"></span>
+            </div>
+            <div class="social-login-buttons" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+                <button type="button" class="custom-google-btn" onclick="triggerGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google ile Üye Ol
+                </button>
+            </div>
+            <div class="modal-footer">
+                <p>Zaten üye misiniz? <a href="javascript:void(0)" onclick="switchModal('signupModal', 'loginModal')">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('forgotPasswordModal')" aria-label="Kapat"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h2>Şifremi Unuttum</h2>
+                <p>Hesabınıza kayıtlı e-posta adresinizi girin.</p>
+            </div>
+            <form id="forgot-password-form">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="forgot-email" placeholder="E-posta Adresi" required aria-label="E-posta Adresi">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sıfırlama Bağlantısı Gönder</button>
+            </form>
+            <div class="modal-footer">
+                <p><a href="javascript:void(0)" onclick="switchModal('forgotPasswordModal', 'loginModal')">Girişe Dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="/script_v105.js?v=306"></script>
+    <script>
+        let currentTab = 'all';
+        let allArticles = [];
+        let allExperiments = [];
+        let allGundem = [];
+        let currentSlug = '';
+
+        function getSlugFromUrl() {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            if (parts.length >= 2 && parts[0] === 'universities') {
+                return parts[1].replace(/\.html$/, '');
+            }
+            const params = new URLSearchParams(window.location.search);
+            return params.get('slug') || params.get('u') || '';
+        }
+
+        async function loadUniversityDetail() {
+            currentSlug = getSlugFromUrl();
+            if (!currentSlug) {
+                render404('Geçerli bir üniversite adresi belirtilmedi.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/public/universities/${encodeURIComponent(currentSlug)}`);
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        render404('Aradığınız üniversite bulunamadı veya henüz aktif değil.');
+                        return;
+                    }
+                    throw new Error('Üniversite bilgileri alınamadı.');
+                }
+
+                const data = await res.json();
+                renderProfileHero(data.university);
+                renderRepresentative(data.representative);
+                renderTeam(data.team, data.representative);
+
+                await Promise.all([
+                    fetchArticles(),
+                    fetchExperiments(),
+                    fetchGundem()
+                ]);
+
+                updateTabCounters();
+                renderActiveTabContent();
+
+            } catch (e) {
+                console.error('Load university error:', e);
+                render404('Üniversite sayfası yüklenirken bir sorun oluştu.');
+            }
+        }
+
+        function renderProfileHero(uni) {
+            if (!uni) return;
+
+            document.title = `${uni.name} - Üniversite Ağı | AperionX`;
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', uni.description || `${uni.name} AperionX Üniversite Temsilciliği ve bilimsel yayınları.`);
+            }
+
+            document.getElementById('uni-detail-name').textContent = uni.name;
+            document.getElementById('uni-detail-desc').textContent = uni.description || 'AperionX resmi üniversite temsilciliği ve genç araştırmacı ekibi.';
+
+            const logoImg = document.getElementById('uni-detail-logo');
+            const logoFallback = document.getElementById('uni-detail-logo-fallback');
+
+            if (uni.logo && uni.logo.trim() !== '') {
+                let lSrc = uni.logo.trim();
+                if (!lSrc.startsWith('http') && !lSrc.startsWith('/')) lSrc = '/' + lSrc;
+                logoImg.src = lSrc;
+                logoImg.style.display = 'block';
+                if (logoFallback) logoFallback.style.display = 'none';
+                logoImg.onerror = () => {
+                    logoImg.style.display = 'none';
+                    if (logoFallback) logoFallback.style.display = 'block';
+                };
+            } else {
+                if (logoImg) logoImg.style.display = 'none';
+                if (logoFallback) logoFallback.style.display = 'block';
+            }
+
+            const stats = uni.stats || {};
+            document.getElementById('cnt-team').textContent = stats.team_count || 0;
+            const elAuthor = document.getElementById('cnt-author');
+            if (elAuthor) elAuthor.textContent = stats.author_count || 0;
+            document.getElementById('cnt-articles').textContent = stats.articles || 0;
+            document.getElementById('cnt-experiments').textContent = stats.experiments || 0;
+            document.getElementById('cnt-gundem').textContent = stats.gundem || 0;
+        }
+
+        function renderRepresentative(rep) {
+            const sec = document.getElementById('representative-section');
+            if (!rep) {
+                sec.style.display = 'none';
+                return;
+            }
+
+            sec.style.display = 'block';
+            document.getElementById('rep-name').textContent = rep.fullname || 'Temsilci';
+
+            const deptParts = [];
+            if (rep.department) deptParts.push(rep.department);
+            if (rep.class_level) deptParts.push(rep.class_level);
+            if (rep.job_title) deptParts.push(rep.job_title);
+            document.getElementById('rep-details').textContent = deptParts.join(' • ') || 'AperionX Üniversite Temsilcisi';
+
+            document.getElementById('rep-bio').textContent = rep.bio || 'Bu temsilci henüz bir biyografi eklemedi.';
+
+            const avatarImg = document.getElementById('rep-avatar-img');
+            let aSrc = rep.avatar_url || '/uploads/default-avatar.png';
+            if (!aSrc.startsWith('http') && !aSrc.startsWith('/')) aSrc = '/' + aSrc;
+            avatarImg.src = aSrc;
+            avatarImg.onerror = () => { avatarImg.src = '/uploads/default-avatar.png'; };
+
+            const profileLink = document.getElementById('rep-profile-link');
+            if (rep.public_slug) {
+                profileLink.href = `/yazar/${rep.public_slug}`;
+                profileLink.style.display = 'inline-flex';
+            } else {
+                profileLink.style.display = 'none';
+            }
+        }
+
+        function renderTeam(team, rep) {
+            const sec = document.getElementById('team-section');
+            const grid = document.getElementById('team-grid-box');
+
+            if (!team || team.length === 0) {
+                sec.style.display = 'none';
+                return;
+            }
+
+            const displayTeam = rep ? team.filter(m => m.id !== rep.id) : team;
+
+            if (displayTeam.length === 0) {
+                sec.style.display = 'none';
+                return;
+            }
+
+            sec.style.display = 'block';
+            grid.innerHTML = displayTeam.map(m => {
+                let aSrc = m.avatar_url || '/uploads/default-avatar.png';
+                if (!aSrc.startsWith('http') && !aSrc.startsWith('/')) aSrc = '/' + aSrc;
+
+                const deptText = [m.department, m.class_level].filter(Boolean).join(' - ') || 'AperionX Ekip Üyesi';
+                const profileUrl = m.public_slug ? `/yazar/${m.public_slug}` : '#';
+
+                return `
+                    <a href="${profileUrl}" class="member-card">
+                        <img src="${aSrc}" alt="${escapeHtml(m.fullname)}" class="member-avatar" onerror="this.src='/uploads/default-avatar.png';">
+                        <h4 class="member-name">${escapeHtml(m.fullname)}</h4>
+                        <span class="member-role">${escapeHtml(m.role_label)}</span>
+                        <span class="member-dept">${escapeHtml(deptText)}</span>
+                        <span class="member-link-tag">Profili Gör <i class="ph-bold ph-arrow-right"></i></span>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        async function fetchArticles() {
+            try {
+                const res = await fetch(`/api/public/universities/${encodeURIComponent(currentSlug)}/articles`);
+                if (res.ok) allArticles = await res.json();
+            } catch (e) {
+                console.error('Fetch articles error:', e);
+            }
+        }
+
+        async function fetchExperiments() {
+            try {
+                const res = await fetch(`/api/public/universities/${encodeURIComponent(currentSlug)}/experiments`);
+                if (res.ok) allExperiments = await res.json();
+            } catch (e) {
+                console.error('Fetch experiments error:', e);
+            }
+        }
+
+        async function fetchGundem() {
+            try {
+                const res = await fetch(`/api/public/universities/${encodeURIComponent(currentSlug)}/gundem`);
+                if (res.ok) allGundem = await res.json();
+            } catch (e) {
+                console.error('Fetch gundem error:', e);
+            }
+        }
+
+        function updateTabCounters() {
+            const total = allArticles.length + allExperiments.length + allGundem.length;
+            document.getElementById('tab-cnt-all').textContent = total;
+            document.getElementById('tab-cnt-articles').textContent = allArticles.length;
+            document.getElementById('tab-cnt-experiments').textContent = allExperiments.length;
+            document.getElementById('tab-cnt-gundem').textContent = allGundem.length;
+        }
+
+        function filterContentTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.content-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+            });
+            renderActiveTabContent();
+        }
+
+        function renderActiveTabContent() {
+            const grid = document.getElementById('content-grid-box');
+            let items = [];
+
+            if (currentTab === 'all') {
+                const taggedArticles = allArticles.map(a => ({ ...a, contentType: 'article', typeLabel: 'Makale', typeBadgeBg: '#6366f1' }));
+                const taggedExps = allExperiments.map(e => ({ ...e, contentType: 'experiment', typeLabel: 'Deney', typeBadgeBg: '#10b981' }));
+                const taggedGundem = allGundem.map(g => ({ ...g, contentType: 'gundem', typeLabel: 'Gündem', typeBadgeBg: '#0284c7' }));
+
+                items = [...taggedArticles, ...taggedExps, ...taggedGundem].sort((a, b) => 
+                    new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at)
+                );
+            } else if (currentTab === 'articles') {
+                items = allArticles.map(a => ({ ...a, contentType: 'article', typeLabel: 'Makale', typeBadgeBg: '#6366f1' }));
+            } else if (currentTab === 'experiments') {
+                items = allExperiments.map(e => ({ ...e, contentType: 'experiment', typeLabel: 'Deney', typeBadgeBg: '#10b981' }));
+            } else if (currentTab === 'gundem') {
+                items = allGundem.map(g => ({ ...g, contentType: 'gundem', typeLabel: 'Gündem', typeBadgeBg: '#0284c7' }));
+            }
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-content-box">
+                        <i class="ph ph-folder-open" style="font-size: 2.2rem; color: #94a3b8; margin-bottom: 8px;"></i>
+                        <p style="margin: 0; font-size: 1rem;">Bu kategoride henüz yayınlanmış bir içerik bulunmuyor.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const fallbackImg = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop';
+
+            grid.innerHTML = items.map(item => {
+                let link = '#';
+                if (item.contentType === 'experiment') link = `/deney/${item.slug || item.id}`;
+                else if (item.contentType === 'gundem') link = `/gundem/${item.slug || item.id}`;
+                else link = `/makale/${item.slug || item.id}`;
+
+                let rawImg = item.image_url;
+                let finalImgSrc = fallbackImg;
+                if (rawImg && rawImg !== 'null' && rawImg !== 'undefined') {
+                    if (rawImg.startsWith('http') || rawImg.startsWith('data:')) finalImgSrc = rawImg;
+                    else finalImgSrc = '/' + rawImg.replace(/^\/+/, '');
+                }
+
+                const dateStr = (item.published_at || item.created_at) 
+                    ? new Date(item.published_at || item.created_at).toLocaleDateString('tr-TR')
+                    : '';
+
+                const authorName = item.author_fullname || item.author_username || 'AperionX Ekibi';
+                const catLabel = item.category || (item.contentType === 'gundem' ? 'Gündem' : 'Genel');
+
+                return `
+                    <a href="${link}" class="content-card">
+                        <div class="card-bg-img-wrap">
+                            <img src="${finalImgSrc}" alt="${escapeHtml(item.title)}" class="card-bg-img" onerror="this.src='${fallbackImg}';">
+                        </div>
+                        <span class="content-card-tag">${escapeHtml(catLabel)}</span>
+                        <span class="content-card-type" style="background: ${item.typeBadgeBg};">${item.typeLabel}</span>
+                        <div class="content-card-body">
+                            <h3 class="content-card-title">${escapeHtml(item.title)}</h3>
+                            <div class="content-card-footer">
+                                <span><i class="ph ph-user" style="vertical-align:middle; margin-right:4px;"></i>${escapeHtml(authorName)}</span>
+                                <span><i class="ph ph-calendar-blank" style="vertical-align:middle; margin-right:4px;"></i>${dateStr}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function render404(message) {
+            const hero = document.getElementById('uni-hero-section');
+            if (hero) hero.style.display = 'none';
+
+            const container = document.getElementById('uni-main-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 36px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <i class="ph ph-buildings"></i>
+                        </div>
+                        <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: var(--text-color); margin-bottom: 12px;">Üniversite Bulunamadı</h2>
+                        <p style="color: var(--text-secondary, #64748b); max-width: 500px; margin: 0 auto 28px; line-height: 1.6;">${escapeHtml(message)}</p>
+                        <a href="/universities" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">
+                            <i class="ph-bold ph-arrow-left"></i> Üniversite Ağına Dön
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUniversityDetail();
+        });
+    </script>
+</body>
+
+</html>

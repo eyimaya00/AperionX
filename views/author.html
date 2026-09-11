@@ -3130,6 +3130,30 @@
                 .art-badge.rejected { background: #ffedd5; color: #c2410c; }
                 .art-badge.draft { background: #fef3c7; color: #92400e; }
                 .art-badge.trash { background: #fee2e2; color: #b91c1c; }
+                .art-badge.uni_pending { background: #e0f2fe; color: #0369a1; }
+                .art-badge.uni_revision { background: #ffedd5; color: #ea580c; border: 1px solid #fed7aa; }
+                .art-badge.chief_pending { background: #ede9fe; color: #6d28d9; }
+                .art-badge.chief_revision { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+                .author-revision-alert {
+                    margin-top: 8px;
+                    display: inline-flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    background: #fffbeb;
+                    border: 1px solid #fde68a;
+                    color: #92400e;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 0.82rem;
+                    line-height: 1.45;
+                    max-width: 540px;
+                }
+                body.dark-mode .author-revision-alert {
+                    background: rgba(245, 158, 11, 0.12);
+                    border-color: rgba(245, 158, 11, 0.25);
+                    color: #fcd34d;
+                }
 
                 .art-metric {
                     color: #64748b;
@@ -3464,6 +3488,10 @@
                 body.dark-mode .art-badge.rejected { background: rgba(249, 115, 22, 0.18); color: #fb923c; }
                 body.dark-mode .art-badge.draft { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
                 body.dark-mode .art-badge.trash { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+                body.dark-mode .art-badge.uni_pending { background: rgba(14, 165, 233, 0.18); color: #38bdf8; }
+                body.dark-mode .art-badge.uni_revision { background: rgba(249, 115, 22, 0.2); color: #fb923c; border-color: rgba(249, 115, 22, 0.35); }
+                body.dark-mode .art-badge.chief_pending { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
+                body.dark-mode .art-badge.chief_revision { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); }
                 body.dark-mode .exp-modal-box { background: #1e293b; border-color: rgba(255, 255, 255, 0.08); }
                 body.dark-mode .exp-modal-header,
                 body.dark-mode .exp-modal-footer { background: #0f172a; border-color: rgba(255, 255, 255, 0.08); }
@@ -7924,6 +7952,22 @@
                     badgeClass = 'editorde';
                     badgeLabel = 'Editörde';
                     badgeIcon = 'ph-clock';
+                } else if (item.status === 'uni_pending') {
+                    badgeClass = 'uni_pending';
+                    badgeLabel = 'Temsilci İncelemesinde';
+                    badgeIcon = 'ph-hourglass';
+                } else if (item.status === 'uni_revision') {
+                    badgeClass = 'uni_revision';
+                    badgeLabel = 'Revizyon İstendi';
+                    badgeIcon = 'ph-pencil-simple-line';
+                } else if (item.status === 'chief_pending') {
+                    badgeClass = 'chief_pending';
+                    badgeLabel = 'Baş Editörde';
+                    badgeIcon = 'ph-shield-check';
+                } else if (item.status === 'chief_revision') {
+                    badgeClass = 'chief_revision';
+                    badgeLabel = 'Baş Editör Revizyonu';
+                    badgeIcon = 'ph-warning';
                 } else if (item.status === 'rejected') {
                     badgeClass = 'duzenleme';
                     badgeLabel = 'Düzenle';
@@ -9416,6 +9460,22 @@
                     badgeClass = 'editorde';
                     badgeLabel = 'Editörde';
                     badgeIcon = 'ph-clock';
+                } else if (art.status === 'uni_pending') {
+                    badgeClass = 'uni_pending';
+                    badgeLabel = 'Temsilci İncelemesinde';
+                    badgeIcon = 'ph-hourglass';
+                } else if (art.status === 'uni_revision') {
+                    badgeClass = 'uni_revision';
+                    badgeLabel = 'Revizyon İstendi';
+                    badgeIcon = 'ph-pencil-simple-line';
+                } else if (art.status === 'chief_pending') {
+                    badgeClass = 'chief_pending';
+                    badgeLabel = 'Baş Editör İncelemesinde';
+                    badgeIcon = 'ph-shield-check';
+                } else if (art.status === 'chief_revision') {
+                    badgeClass = 'chief_revision';
+                    badgeLabel = 'Baş Editör Revizyonu';
+                    badgeIcon = 'ph-warning';
                 } else if (art.status === 'rejected') {
                     badgeClass = 'duzenleme';
                     badgeLabel = 'Düzenleme Gerekli';
@@ -9427,7 +9487,7 @@
                 }
 
                 const badgeHtml = `
-                    <span class="art-badge ${badgeClass}" ${art.status === 'rejected' && art.rejection_reason ? `title="Red Gerekçesi: ${escapeHtml(art.rejection_reason)}"` : ''}>
+                    <span class="art-badge ${badgeClass}" ${(art.status === 'rejected' || art.status === 'uni_revision' || art.status === 'chief_revision') && art.rejection_reason ? `title="Gerekçe: ${escapeHtml(art.rejection_reason)}"` : ''}>
                         <i class="ph-fill ${badgeIcon}"></i> ${badgeLabel}
                     </span>
                 `;
@@ -9458,6 +9518,8 @@
                     `;
                 }
 
+                const isRevisionState = art.status === 'uni_revision' || art.status === 'chief_revision' || (art.status === 'rejected' && art.rejection_reason);
+
                 return `
                     <tr>
                         <td>
@@ -9466,7 +9528,20 @@
                                 <div class="art-cell-details">
                                     <div class="art-row-title" title="${escapeHtml(art.title)}">${escapeHtml(art.title || 'Başlıksız Makale')}</div>
                                     <span class="art-row-category">${escapeHtml(art.category || 'Genel')}</span>
-                                    ${art.status === 'rejected' && art.rejection_reason ? `<div style="font-size:0.78rem; color:#ea580c; margin-top:2px;"><i class="ph ph-info"></i> <strong>Not:</strong> ${escapeHtml(art.rejection_reason)}</div>` : ''}
+                                    ${isRevisionState ? `
+                                        <div class="author-revision-alert">
+                                            <i class="ph-bold ph-pencil-simple-line" style="color: #ea580c; font-size: 1.1rem; flex-shrink: 0; margin-top: 1px;"></i>
+                                            <div>
+                                                <strong>${art.status === 'chief_revision' ? 'Baş Editör Revizyon Notu:' : (art.status === 'uni_revision' ? 'Temsilci Revizyon Notu:' : 'Düzenleme Notu:')}</strong>
+                                                ${escapeHtml(art.rejection_reason || 'Lütfen içeriği düzenleyip tekrar gönderiniz.')}
+                                                <div style="margin-top: 4px;">
+                                                    <button onclick="editArticle(${art.id})" style="background: none; border: none; color: #ea580c; font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; padding: 0;">
+                                                        İçeriği Düzenle →
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </td>
@@ -10815,6 +10890,14 @@
                     statusBadge = '<span class="art-badge published"><i class="ph-fill ph-check-circle"></i> Yayında</span>';
                 } else if (exp.status === 'pending') {
                     statusBadge = '<span class="art-badge pending"><i class="ph-fill ph-clock"></i> Editörde</span>';
+                } else if (exp.status === 'uni_pending') {
+                    statusBadge = '<span class="art-badge uni_pending"><i class="ph-fill ph-hourglass"></i> Temsilci İncelemesinde</span>';
+                } else if (exp.status === 'uni_revision') {
+                    statusBadge = '<span class="art-badge uni_revision"><i class="ph-fill ph-pencil-simple-line"></i> Revizyon İstendi</span>';
+                } else if (exp.status === 'chief_pending') {
+                    statusBadge = '<span class="art-badge chief_pending"><i class="ph-fill ph-shield-check"></i> Baş Editör İncelemesinde</span>';
+                } else if (exp.status === 'chief_revision') {
+                    statusBadge = '<span class="art-badge chief_revision"><i class="ph-fill ph-warning"></i> Baş Editör Revizyonu</span>';
                 } else if (exp.status === 'rejected') {
                     const reason = exp.rejection_reason ? `title="Red Sebebi: ${escapeHtml(exp.rejection_reason)}"` : '';
                     statusBadge = `<span class="art-badge rejected" ${reason} style="cursor:help;"><i class="ph-fill ph-warning-circle"></i> Düzenleme Gerekli</span>`;
@@ -10829,14 +10912,30 @@
                 const dateObj = exp.published_at || exp.created_at;
                 const formattedDate = dateObj ? new Date(dateObj).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '—';
 
+                const isExpRevisionState = exp.status === 'uni_revision' || exp.status === 'chief_revision' || (exp.status === 'rejected' && exp.rejection_reason);
+
                 return `
                     <tr>
                         <td>
-                            <div style="display: flex; align-items: center; gap: 14px;">
+                            <div style="display: flex; align-items: flex-start; gap: 14px;">
                                 ${thumbHtml}
                                 <div class="art-cell-details">
                                     <div class="art-row-title" title="${escapeHtml(exp.title)}">${escapeHtml(exp.title)}</div>
                                     <div class="art-row-category">${escapeHtml(exp.category || 'Genel')}</div>
+                                    ${isExpRevisionState ? `
+                                        <div class="author-revision-alert">
+                                            <i class="ph-bold ph-pencil-simple-line" style="color: #ea580c; font-size: 1.1rem; flex-shrink: 0; margin-top: 1px;"></i>
+                                            <div>
+                                                <strong>${exp.status === 'chief_revision' ? 'Baş Editör Revizyon Notu:' : (exp.status === 'uni_revision' ? 'Temsilci Revizyon Notu:' : 'Düzenleme Notu:')}</strong>
+                                                ${escapeHtml(exp.rejection_reason || 'Lütfen deneyi düzenleyip tekrar gönderiniz.')}
+                                                <div style="margin-top: 4px;">
+                                                    <button onclick="editExperiment(${exp.id})" style="background: none; border: none; color: #ea580c; font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; padding: 0;">
+                                                        Deneyi Düzenle →
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </td>
@@ -13496,6 +13595,10 @@
                 'draft': { label: 'Taslak', badgeClass: 'draft', icon: 'ph-pencil-simple' },
                 'editorde': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
                 'pending': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
+                'uni_pending': { label: 'Temsilci İncelemesinde', badgeClass: 'uni_pending', icon: 'ph-hourglass' },
+                'uni_revision': { label: 'Revizyon İstendi', badgeClass: 'uni_revision', icon: 'ph-pencil-simple-line' },
+                'chief_pending': { label: 'Baş Editör İncelemesinde', badgeClass: 'chief_pending', icon: 'ph-shield-check' },
+                'chief_revision': { label: 'Baş Editör Revizyonu', badgeClass: 'chief_revision', icon: 'ph-warning' },
                 'duzenleme': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
                 'rejected': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
                 'trash': { label: 'Çöpte', badgeClass: 'trash', icon: 'ph-trash' },
@@ -13573,10 +13676,18 @@
                                         <span>${escapeHtml(item.category || 'Genel')}</span>
                                         ${(item.isJoint || (item.coAuthors && item.coAuthors.length > 0)) ? '<span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 2px 8px; border-radius: 12px; font-size: 0.74rem; font-weight: 600;"><i class="ph-bold ph-users-three"></i> Ortak Çalışma</span>' : ''}
                                     </div>
-                                    ${(item.status === 'rejected' || item.status === 'duzenleme') && item.rejection_reason ? `
-                                        <div style="margin-top: 8px; display: inline-flex; align-items: flex-start; gap: 6px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; max-width: 520px;">
-                                            <i class="ph-bold ph-pencil-simple-line" style="color: #d97706; font-size: 1rem; flex-shrink: 0; margin-top: 2px;"></i>
-                                            <div><strong>Editör Düzenleme Notu:</strong> ${escapeHtml(item.rejection_reason)}</div>
+                                    ${(item.status === 'rejected' || item.status === 'duzenleme' || item.status === 'uni_revision' || item.status === 'chief_revision') && item.rejection_reason ? `
+                                        <div class="author-revision-alert" style="margin-top: 8px;">
+                                            <i class="ph-bold ph-pencil-simple-line" style="color: #d97706; font-size: 1.1rem; flex-shrink: 0; margin-top: 2px;"></i>
+                                            <div>
+                                                <strong>${item.status === 'chief_revision' ? 'Baş Editör Revizyon Notu:' : (item.status === 'uni_revision' ? 'Temsilci Revizyon Notu:' : 'Editör Düzenleme Notu:')}</strong>
+                                                ${escapeHtml(item.rejection_reason)}
+                                                <div style="margin-top: 4px;">
+                                                    <button onclick="editBilimGundem('${item.id}')" style="background: none; border: none; color: #ea580c; font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; padding: 0;">
+                                                        Gündemi Düzenle →
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     ` : ''}
                                 </div>

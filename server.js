@@ -89,6 +89,10 @@ app.use(async (req, res, next) => {
         '/author.html',  // Allow Author access
         '/author',       // Allow Author clean URL
         '/author_v2',    // Allow Debug Author access
+        '/university-panel.html', // Allow University Representative access
+        '/university-panel',      // Allow University clean URL
+        '/chief-editor-panel.html', // Allow Chief Editor access
+        '/chief-editor-panel',      // Allow Chief Editor clean URL
         '/index.html',   // Allow Login on index
         '/api/login',    // Allow login API
         '/api/register', // Allow register API
@@ -3061,6 +3065,152 @@ async function ensureSchema() {
         try { await pool.query("CREATE INDEX idx_articles_author ON articles(author_id)"); } catch (e) {}
         try { await pool.query("CREATE INDEX idx_exp_status ON experiments(status)"); } catch (e) {}
 
+        // === UNIVERSITY SYSTEM MIGRATION ===
+        console.log('[MIGRATION] Starting University System migration...');
+
+        // 1. Universities Table
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS universities (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    slug VARCHAR(255) UNIQUE NOT NULL,
+                    logo VARCHAR(255) NULL,
+                    description TEXT NULL,
+                    status ENUM('active', 'inactive') DEFAULT 'active',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            console.log('[MIGRATION] universities table ensured.');
+        } catch (uniErr) {
+            console.error('[MIGRATION] universities table error:', uniErr.message);
+        }
+
+        // 2. University Teams Table
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS university_teams (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    university_id INT NOT NULL UNIQUE,
+                    representative_user_id INT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE,
+                    FOREIGN KEY (representative_user_id) REFERENCES users(id) ON DELETE SET NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            console.log('[MIGRATION] university_teams table ensured.');
+        } catch (teamErr) {
+            console.error('[MIGRATION] university_teams table error:', teamErr.message);
+        }
+
+        // 3. Add university_id to users table
+        try {
+            const [uniCol] = await pool.query("SHOW COLUMNS FROM users LIKE 'university_id'");
+            if (uniCol.length === 0) {
+                await pool.query("ALTER TABLE users ADD COLUMN university_id INT NULL");
+                console.log('[MIGRATION] Added university_id column to users table.');
+                try {
+                    await pool.query("ALTER TABLE users ADD CONSTRAINT fk_users_university FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL");
+                    console.log('[MIGRATION] Added FK constraint fk_users_university.');
+                } catch (fkErr) {
+                    console.error('[MIGRATION] FK fk_users_university error (may already exist):', fkErr.message);
+                }
+            }
+        } catch (uColErr) {
+            console.error('[MIGRATION] users.university_id error:', uColErr.message);
+        }
+
+        // 4. Add university_id to articles table
+        try {
+            const [artUniCol] = await pool.query("SHOW COLUMNS FROM articles LIKE 'university_id'");
+            if (artUniCol.length === 0) {
+                await pool.query("ALTER TABLE articles ADD COLUMN university_id INT NULL");
+                console.log('[MIGRATION] Added university_id column to articles table.');
+                try {
+                    await pool.query("ALTER TABLE articles ADD CONSTRAINT fk_articles_university FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL");
+                    console.log('[MIGRATION] Added FK constraint fk_articles_university.');
+                } catch (fkErr) {
+                    console.error('[MIGRATION] FK fk_articles_university error (may already exist):', fkErr.message);
+                }
+            }
+        } catch (aColErr) {
+            console.error('[MIGRATION] articles.university_id error:', aColErr.message);
+        }
+
+        // 5. Add university_id to experiments table
+        try {
+            const [expUniCol] = await pool.query("SHOW COLUMNS FROM experiments LIKE 'university_id'");
+            if (expUniCol.length === 0) {
+                await pool.query("ALTER TABLE experiments ADD COLUMN university_id INT NULL");
+                console.log('[MIGRATION] Added university_id column to experiments table.');
+                try {
+                    await pool.query("ALTER TABLE experiments ADD CONSTRAINT fk_experiments_university FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL");
+                    console.log('[MIGRATION] Added FK constraint fk_experiments_university.');
+                } catch (fkErr) {
+                    console.error('[MIGRATION] FK fk_experiments_university error (may already exist):', fkErr.message);
+                }
+            }
+        } catch (eColErr) {
+            console.error('[MIGRATION] experiments.university_id error:', eColErr.message);
+        }
+
+        // 6. Performance indexes for university_id columns
+        try { await pool.query("CREATE INDEX idx_users_university ON users(university_id)"); } catch (e) {}
+        try { await pool.query("CREATE INDEX idx_articles_university ON articles(university_id)"); } catch (e) {}
+        try { await pool.query("CREATE INDEX idx_experiments_university ON experiments(university_id)"); } catch (e) {}
+
+        // 7. Add is_active and class_level to users table for representative team management
+        try {
+            const [activeCol] = await pool.query("SHOW COLUMNS FROM users LIKE 'is_active'");
+            if (activeCol.length === 0) {
+                await pool.query("ALTER TABLE users ADD COLUMN is_active TINYINT(1) DEFAULT 1");
+                console.log('[MIGRATION] Added is_active column to users table.');
+            }
+        } catch (actErr) {
+            console.error('[MIGRATION] users.is_active error:', actErr.message);
+        }
+
+        try {
+            const [classCol] = await pool.query("SHOW COLUMNS FROM users LIKE 'class_level'");
+            if (classCol.length === 0) {
+                await pool.query("ALTER TABLE users ADD COLUMN class_level VARCHAR(50) NULL");
+                console.log('[MIGRATION] Added class_level column to users table.');
+            }
+        } catch (clsErr) {
+            console.error('[MIGRATION] users.class_level error:', clsErr.message);
+        }
+
+        // 8. Add content_review_history table for full workflow audit trail
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS content_review_history (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    content_type ENUM('article', 'experiment', 'gundem') NOT NULL,
+                    content_id INT NOT NULL,
+                    university_id INT NULL,
+                    action VARCHAR(50) NOT NULL,
+                    actor_user_id INT NULL,
+                    actor_role VARCHAR(50) NULL,
+                    note TEXT NULL,
+                    from_status VARCHAR(50) NULL,
+                    to_status VARCHAR(50) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_crh_content (content_type, content_id),
+                    INDEX idx_crh_university (university_id),
+                    FOREIGN KEY (actor_user_id) REFERENCES users(id) ON DELETE SET NULL,
+                    FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            console.log('[MIGRATION] content_review_history table ensured.');
+        } catch (crhErr) {
+            console.error('[MIGRATION] content_review_history table error:', crhErr.message);
+        }
+
+        console.log('[MIGRATION] University System migration complete.');
+        // === END UNIVERSITY SYSTEM MIGRATION ===
+
     } catch (e) {
         console.error('Auto-migration Error:', e);
     }
@@ -3644,6 +3794,7 @@ function authenticateToken(req, res, next) {
         console.log('Middleware: Token valid for user:', user.email);
         req.user = user;
         req.user.role = user.role || 'user'; // Ensure role is explicitly set
+        req.user.university_id = user.university_id || null; // University scope from JWT
         next();
     });
 }
@@ -3659,6 +3810,36 @@ function checkRole(allowedRoles) {
             return res.status(403).json({ error: 'Erişim reddedildi: Bu işlem için yetki yetersiz.' });
         }
     };
+}
+
+/**
+ * Üniversite kapsamlı yetkilendirme kontrol yardımcısı.
+ * - admin ve chief_editor: global erişim.
+ * - global editor (university_id === null): global erişim.
+ * - university_representative, university_editor, social_media_manager: yalnızca kendi university_id'sine erişim.
+ * - author (üniversiteye bağlıysa): kendi university_id'sine erişim.
+ */
+function requireUniversityScope(req, targetUniversityId) {
+    if (!req.user || !req.user.role) return false;
+    if (['admin', 'chief_editor'].includes(req.user.role)) return true;
+    if (req.user.role === 'editor' && !req.user.university_id) return true;
+    if (!req.user.university_id) return false;
+    return Number(req.user.university_id) === Number(targetUniversityId);
+}
+
+/**
+ * Audit trail / history helper for university content workflow
+ */
+async function recordContentReviewHistory({ contentType, contentId, universityId = null, action, actorUserId = null, actorRole = null, note = null, fromStatus = null, toStatus = null }) {
+    try {
+        await pool.query(
+            `INSERT INTO content_review_history (content_type, content_id, university_id, action, actor_user_id, actor_role, note, from_status, to_status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [contentType, contentId, universityId, action, actorUserId, actorRole, note, fromStatus, toStatus]
+        );
+    } catch (err) {
+        console.error('Error in recordContentReviewHistory:', err.message);
+    }
 }
 
 async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
@@ -4871,15 +5052,28 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         if (pdfFile) pdf_url = 'uploads/' + pdfFile.filename;
     }
 
-    let finalStatus = status;
-    console.log(`[DEBUG] POST Article - User Role: ${req.user.role}, Requested Status: ${status}`);
-
-    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
-        finalStatus = 'pending';
-        console.log('[DEBUG] Enforcing PENDING status for non-admin/editor');
-    }
-
     try {
+        // Resolve author's university_id automatically (cannot be chosen by author)
+        let authorUniId = req.user.university_id || null;
+        if (!authorUniId) {
+            try {
+                const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+                if (uRows.length > 0 && uRows[0].university_id) authorUniId = uRows[0].university_id;
+            } catch (uErr) {}
+        }
+
+        let finalStatus = status;
+        console.log(`[DEBUG] POST Article - User Role: ${req.user.role}, Requested Status: ${status}, UniId: ${authorUniId}`);
+
+        if (status === 'published' && !['admin', 'editor', 'chief_editor'].includes(req.user.role)) {
+            // For authors/users attempting to publish directly
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+            console.log(`[DEBUG] Enforcing ${finalStatus} status for non-admin/editor`);
+        } else if (status !== 'draft' && status !== 'published') {
+            // If submitted for review
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+        }
+
         // Sanitize Content
         const cleanContent = DOMPurify.sanitize(content);
 
@@ -4887,12 +5081,12 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         const slug = await getUniqueSlug(pool, title);
 
         const publishedAt = finalStatus === 'published' ? new Date() : null;
-        const submittedAt = finalStatus === 'pending' ? new Date() : null;
+        const submittedAt = ['pending', 'uni_pending'].includes(finalStatus) ? new Date() : null;
         const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
 
         const [insertResult] = await pool.query(
-            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url, published_at, was_published, submitted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url, publishedAt, wasPublishedVal, submittedAt]
+            'INSERT INTO articles (title, slug, category, content, image_url, author_id, excerpt, status, tags, references_list, visual_references_list, pdf_url, published_at, was_published, submitted_at, university_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, cleanContent, image_url, req.user.id, excerpt, finalStatus, tags, references_list, visual_references_list, pdf_url, publishedAt, wasPublishedVal, submittedAt, authorUniId]
         );
 
         const newArticleId = insertResult.insertId;
@@ -4903,28 +5097,64 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
             await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
         }
 
+        // Audit Trail History
+        if (finalStatus === 'uni_pending') {
+            await recordContentReviewHistory({
+                contentType: 'article',
+                contentId: newArticleId,
+                universityId: authorUniId,
+                action: 'submitted',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: 'Üniversite yazarı tarafından makale oluşturuldu ve temsilci onayına gönderildi.',
+                fromStatus: status === 'draft' ? 'draft' : null,
+                toStatus: 'uni_pending'
+            });
+        }
+
         console.log('Route: Article inserted successfully');
 
         // Clear cache so new article appears immediately in list
         clearCache('articles');
 
-        // NOTIFY EDITORS & ADMINS if Pending
+        // NOTIFICATIONS
         if (finalStatus === 'pending') {
+            // Independent author -> Notify global editors/admins
             try {
-                // Get author name
                 const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
                 const authorName = authors[0]?.fullname || 'Bir Yazar';
-
-                // Get all editors/admins
                 const [destUsers] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
-
                 const msg = `Yeni makale onayı bekliyor: ${title.substring(0, 30)}... - ${authorName}`;
                 for (const u of destUsers) {
-                    if (u.id !== req.user.id) { // Don't notify self if admin
+                    if (u.id !== req.user.id) {
                         await createNotification(u.id, msg, 'info');
                     }
                 }
             } catch (notifErr) { console.error('Notif failed:', notifErr); }
+        } else if (finalStatus === 'uni_pending') {
+            // University author -> Notify university representative
+            try {
+                const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const authorName = authors[0]?.fullname || 'Bir Yazar';
+                const [uniRow] = await pool.query('SELECT name FROM universities WHERE id = ?', [authorUniId]);
+                const uniName = uniRow[0]?.name || 'Üniversite';
+
+                // Find representative of this university
+                const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [authorUniId]);
+                let repUserId = teamRep[0]?.representative_user_id;
+                if (!repUserId) {
+                    const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [authorUniId]);
+                    repUserId = repUser[0]?.id;
+                }
+
+                if (repUserId) {
+                    const msg = `[${uniName}] Yeni makale incelemenizi bekliyor: "${title.substring(0, 35)}..." - ${authorName}`;
+                    await createNotification(repUserId, msg, 'info');
+                }
+
+                // Also notify author
+                await createNotification(req.user.id, `Yeni makaleniz Üniversite Temsilcisi incelemesini bekliyor: "${title.substring(0, 35)}..."`, 'info');
+            } catch (notifErr) { console.error('Uni Article Notif failed:', notifErr); }
         }
 
         // SEO: If admin/editor published directly, ping search engines (Auto-newsletter disabled)
@@ -4959,15 +5189,24 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
 
     const wasPublished = check[0].was_published;
     const existingPubAt = check[0].published_at;
+    const prevStatus = check[0].status;
     const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
 
+    // Resolve author's university_id
+    let articleUniId = check[0].university_id || req.user.university_id || null;
+    if (!articleUniId && req.user.id) {
+        try {
+            const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+            if (uRows.length > 0 && uRows[0].university_id) articleUniId = uRows[0].university_id;
+        } catch (uErr) {}
+    }
+
     // Determine status update logic
-    // If editing a 'published' article, does it go back to pending? 
-    // Usually yes for major edits, but let's keep it simple: 
-    // If Author sets 'published' -> 'pending'.
     let finalStatus = status;
     if (status === 'published' && req.user.role === 'author') {
-        finalStatus = 'pending';
+        finalStatus = articleUniId ? 'uni_pending' : 'pending';
+    } else if ((status === 'pending' || prevStatus === 'uni_revision') && req.user.role === 'author') {
+        finalStatus = articleUniId ? 'uni_pending' : 'pending';
     }
 
     let author_ids = req.body.author_ids;
@@ -5003,8 +5242,9 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     } else if (finalStatus) {
         updates.push('status = ?');
         params.push(finalStatus);
-        if (finalStatus === 'pending') {
+        if (['pending', 'uni_pending'].includes(finalStatus)) {
             updates.push('submitted_at = NOW()');
+            updates.push('rejection_reason = NULL');
         }
     }
     if (tags) { updates.push('tags = ?'); params.push(tags); }
@@ -5035,6 +5275,21 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
             }
         }
 
+        // Audit Trail History
+        if (finalStatus === 'uni_pending') {
+            await recordContentReviewHistory({
+                contentType: 'article',
+                contentId: articleId,
+                universityId: articleUniId,
+                action: prevStatus === 'uni_revision' ? 'resubmitted' : 'submitted',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: prevStatus === 'uni_revision' ? 'Yazar tarafından revizyon tamamlandı ve temsilciye yeniden gönderildi.' : 'Makale güncellendi ve onaya gönderildi.',
+                fromStatus: prevStatus,
+                toStatus: 'uni_pending'
+            });
+        }
+
         // Notification Logic
         if (finalStatus && req.user.role !== 'author') {
             const authorId = check[0].author_id;
@@ -5043,6 +5298,23 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
                 let type = finalStatus === 'published' ? 'success' : (finalStatus === 'rejected' ? 'error' : 'info');
                 await createNotification(authorId, msg, type);
             }
+        } else if (finalStatus === 'uni_pending' && articleUniId) {
+            // Notify representative
+            try {
+                const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [articleUniId]);
+                let repUserId = teamRep[0]?.representative_user_id;
+                if (!repUserId) {
+                    const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [articleUniId]);
+                    repUserId = repUser[0]?.id;
+                }
+                if (repUserId) {
+                    const notifMsg = prevStatus === 'uni_revision'
+                        ? `Revizyonu tamamlanan makale yeniden incelemenize sunuldu: "${title || check[0].title}"`
+                        : `Güncellenen makale incelemenizi bekliyor: "${title || check[0].title}"`;
+                    await createNotification(repUserId, notifMsg, 'info');
+                }
+                await createNotification(req.user.id, `Makaleniz Üniversite Temsilcisi incelemesine iletildi: "${title || check[0].title}"`, 'info');
+            } catch (ne) {}
         }
         // Clear cache so updated article reflects immediately
         clearCache('articles');
@@ -5083,12 +5355,23 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         if (req.files['pdf']) pdf_url = 'uploads/' + req.files['pdf'][0].filename;
     }
 
-    let finalStatus = status;
-    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
-        finalStatus = 'pending';
-    }
-
     try {
+        // Resolve author's university_id automatically
+        let authorUniId = req.user.university_id || null;
+        if (!authorUniId) {
+            try {
+                const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+                if (uRows.length > 0 && uRows[0].university_id) authorUniId = uRows[0].university_id;
+            } catch (uErr) {}
+        }
+
+        let finalStatus = status;
+        if (status === 'published' && !['admin', 'editor', 'chief_editor'].includes(req.user.role)) {
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+        } else if (status !== 'draft' && status !== 'published') {
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+        }
+
         const slug = await getUniqueSlug(pool, title, null, 'experiments');
 
         const cleanObjective = objective ? DOMPurify.sanitize(objective) : null;
@@ -5106,11 +5389,11 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const [insertResult] = await pool.query(
             `INSERT INTO experiments (
                 title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
-                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, visual_references_list, published_at, was_published
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, visual_references_list, published_at, was_published, university_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
-                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, cleanVisualReferences, publishedAt, wasPublishedVal
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, cleanVisualReferences, publishedAt, wasPublishedVal, authorUniId
             ]
         );
 
@@ -5138,7 +5421,22 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
             await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
         }
 
-        // Send notifications if pending
+        // Audit Trail History
+        if (finalStatus === 'uni_pending') {
+            await recordContentReviewHistory({
+                contentType: 'experiment',
+                contentId: newExperimentId,
+                universityId: authorUniId,
+                action: 'submitted',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: 'Üniversite yazarı tarafından deney oluşturuldu ve temsilci onayına gönderildi.',
+                fromStatus: status === 'draft' ? 'draft' : null,
+                toStatus: 'uni_pending'
+            });
+        }
+
+        // Send notifications
         if (finalStatus === 'pending') {
             try {
                 const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
@@ -5151,6 +5449,27 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
                     }
                 }
             } catch (notifErr) { console.error('Notif failed:', notifErr); }
+        } else if (finalStatus === 'uni_pending') {
+            try {
+                const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const authorName = authors[0]?.fullname || 'Bir Yazar';
+                const [uniRow] = await pool.query('SELECT name FROM universities WHERE id = ?', [authorUniId]);
+                const uniName = uniRow[0]?.name || 'Üniversite';
+
+                const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [authorUniId]);
+                let repUserId = teamRep[0]?.representative_user_id;
+                if (!repUserId) {
+                    const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [authorUniId]);
+                    repUserId = repUser[0]?.id;
+                }
+
+                if (repUserId) {
+                    const msg = `[${uniName}] Yeni deney incelemenizi bekliyor: "${title.substring(0, 35)}..." - ${authorName}`;
+                    await createNotification(repUserId, msg, 'info');
+                }
+
+                await createNotification(req.user.id, `Yeni deneyiniz Üniversite Temsilcisi incelemesini bekliyor: "${title.substring(0, 35)}..."`, 'info');
+            } catch (notifErr) { console.error('Uni Experiment Notif failed:', notifErr); }
         }
 
         res.status(201).json({ message: 'Experiment created', status: finalStatus });
@@ -5163,15 +5482,26 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
 // 3. Update Experiment (PUT)
 app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image' }, { name: 'pdf' }]), optimizeImageMiddleware, async (req, res) => {
     const experimentId = req.params.id;
-    const [check] = await pool.query('SELECT author_id, was_published FROM experiments WHERE id = ?', [experimentId]);
+    const [check] = await pool.query('SELECT author_id, was_published, status, university_id, title FROM experiments WHERE id = ?', [experimentId]);
     if (check.length === 0) return res.status(404).json({ message: 'Not found' });
     if (check[0].author_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+
+    const prevStatus = check[0].status;
+    let expUniId = check[0].university_id || req.user.university_id || null;
+    if (!expUniId && req.user.id) {
+        try {
+            const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+            if (uRows.length > 0 && uRows[0].university_id) expUniId = uRows[0].university_id;
+        } catch (uErr) {}
+    }
 
     const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, visual_references_list, coAuthors } = req.body;
 
     let finalStatus = status;
     if (status === 'published' && req.user.role === 'author') {
-        finalStatus = 'pending';
+        finalStatus = expUniId ? 'uni_pending' : 'pending';
+    } else if ((status === 'pending' || prevStatus === 'uni_revision') && req.user.role === 'author') {
+        finalStatus = expUniId ? 'uni_pending' : 'pending';
     }
 
     let updates = [];
@@ -5193,7 +5523,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
             updates.push('published_at = NOW()');
             updates.push('was_published = 1');
         }
-        if (finalStatus === 'pending' || finalStatus === 'draft') {
+        if (['pending', 'uni_pending', 'draft'].includes(finalStatus)) {
             updates.push('rejection_reason = NULL');
         }
     }
@@ -5223,6 +5553,21 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
         await pool.query(`UPDATE experiments SET ${updates.join(', ')} WHERE id = ?`, params);
         clearCache('experiments');
 
+        // Audit Trail History
+        if (finalStatus === 'uni_pending') {
+            await recordContentReviewHistory({
+                contentType: 'experiment',
+                contentId: experimentId,
+                universityId: expUniId,
+                action: prevStatus === 'uni_revision' ? 'resubmitted' : 'submitted',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: prevStatus === 'uni_revision' ? 'Yazar tarafından revizyon tamamlandı ve temsilciye yeniden gönderildi.' : 'Deney güncellendi ve onaya gönderildi.',
+                fromStatus: prevStatus,
+                toStatus: 'uni_pending'
+            });
+        }
+
         if (finalStatus && req.user.role !== 'author') {
             const authorId = check[0].author_id;
             if (req.user.id !== authorId) {
@@ -5230,6 +5575,22 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
                 let type = finalStatus === 'published' ? 'success' : (finalStatus === 'rejected' ? 'error' : 'info');
                 await createNotification(authorId, msg, type);
             }
+        } else if (finalStatus === 'uni_pending' && expUniId) {
+            try {
+                const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [expUniId]);
+                let repUserId = teamRep[0]?.representative_user_id;
+                if (!repUserId) {
+                    const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [expUniId]);
+                    repUserId = repUser[0]?.id;
+                }
+                if (repUserId) {
+                    const notifMsg = prevStatus === 'uni_revision'
+                        ? `Revizyonu tamamlanan deney yeniden incelemenize sunuldu: "${title || check[0].title}"`
+                        : `Güncellenen deney incelemenizi bekliyor: "${title || check[0].title}"`;
+                    await createNotification(repUserId, notifMsg, 'info');
+                }
+                await createNotification(req.user.id, `Deneyiniz Üniversite Temsilcisi incelemesine iletildi: "${title || check[0].title}"`, 'info');
+            } catch (ne) {}
         }
     }
 
@@ -5345,7 +5706,7 @@ app.get('/api/experiments/by-id/:id', authenticateToken, async (req, res) => {
 
 // 1. Pending Experiments (Optimized query with batched co-authors)
 app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name 
@@ -5382,7 +5743,7 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
 
 // 2. History of Experiments (Published or Rejected - Summary fields)
 app.get('/api/editor/experiments/history', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name 
@@ -5400,7 +5761,7 @@ app.get('/api/editor/experiments/history', authenticateToken, async (req, res) =
 
 // 3. Decide on Experiment (Approve/Reject)
 app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
     const experimentId = req.params.id;
 
@@ -5460,7 +5821,7 @@ app.put('/api/editor/experiments/decide/:id', authenticateToken, async (req, res
 
 // Editor Decision Endpoint (Approve/Reject)
 app.put('/api/editor/decide/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
 
     const articleId = req.params.id;
     const { decision, rejection_reason } = req.body; // 'approve' or 'reject'
@@ -5754,7 +6115,7 @@ async function ensureGundemColumns() {
 
 // === EDITOR ROUTES (OPTIMIZED LIGHTWEIGHT METADATA) ===
 app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(`
@@ -5769,7 +6130,7 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/editor/history', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
@@ -5783,7 +6144,7 @@ app.get('/api/editor/history', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/editor/trash', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
@@ -5798,7 +6159,7 @@ app.get('/api/editor/trash', authenticateToken, async (req, res) => {
 
 // Editor endpoint to get full article details by ID regardless of status
 app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar
@@ -5819,7 +6180,7 @@ app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
 
 // === EDITOR GUNDEM ROUTES ===
 app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(`
@@ -5834,7 +6195,7 @@ app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/editor/gundem/history', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(`
@@ -5849,7 +6210,7 @@ app.get('/api/editor/gundem/history', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
             SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar
@@ -5864,7 +6225,7 @@ app.get('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
 });
 
 app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'editor') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
 
     const articleId = req.params.id;
     const { decision, rejection_reason } = req.body;
@@ -6074,7 +6435,7 @@ app.delete('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
 
 // === AUTHOR GUNDEM SUBMIT & LIST ROUTES ===
 app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMiddleware, async (req, res) => {
-    if (!['author', 'editor', 'admin'].includes(req.user.role)) {
+    if (!['author', 'editor', 'admin', 'chief_editor', 'university_representative', 'university_editor'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Yetkisiz işlem.' });
     }
 
@@ -6082,7 +6443,7 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
     const { title, category, content, excerpt, tags, gundem_data } = body;
     let status = body.status || 'pending';
 
-    if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
+    if (status === 'published' && !['admin', 'editor', 'chief_editor'].includes(req.user.role)) {
         status = 'pending';
     }
 
@@ -6165,6 +6526,15 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
 
         const cleanContent = DOMPurify.sanitize(content || '');
 
+        // Resolve author's university_id automatically
+        let authorUniId = req.user.university_id || null;
+        if (!authorUniId) {
+            try {
+                const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+                if (uRows.length > 0 && uRows[0].university_id) authorUniId = uRows[0].university_id;
+            } catch (uErr) {}
+        }
+
         // If updating an existing article by ID
         if (body.id && !isNaN(Number(body.id))) {
             const [existing] = await pool.query('SELECT * FROM articles WHERE id = ?', [body.id]);
@@ -6178,8 +6548,21 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     return res.status(403).json({ error: 'Bu yazıyı düzenleme yetkiniz yok.' });
                 }
 
+                const prevStatus = existing[0].status;
+                let finalUpdateStatus = status;
+                const uniScopeId = existing[0].university_id || authorUniId;
+
+                // If resubmitting after revision or requesting submission
+                if (status === 'pending' || prevStatus === 'uni_revision') {
+                    if (uniScopeId) {
+                        finalUpdateStatus = 'uni_pending';
+                    } else {
+                        finalUpdateStatus = 'pending';
+                    }
+                }
+
                 let finalImg = image_url || existing[0].image_url;
-                const submittedAt = status === 'pending' ? new Date() : existing[0].submitted_at;
+                const submittedAt = ['pending', 'uni_pending'].includes(finalUpdateStatus) ? new Date() : existing[0].submitted_at;
 
                 await pool.query(`
                     UPDATE articles SET
@@ -6203,7 +6586,7 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     excerpt || title.trim(),
                     finalImg,
                     tags || 'Gündem',
-                    status,
+                    finalUpdateStatus,
                     typeof gundem_data === 'string' ? gundem_data : JSON.stringify(gundem_data || {}),
                     submittedAt,
                     body.id
@@ -6221,24 +6604,25 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     console.error('Error synchronizing article_authors:', aaErr);
                 }
 
-                clearCache('articles');
-
-                // Notify co-authors
-                if (coAuthorIds && coAuthorIds.length > 0) {
-                    const currentAuthorName = req.user.fullname || req.user.username || 'Bir yazar';
-                    for (const caId of coAuthorIds) {
-                        if (caId && caId !== req.user.id) {
-                            try {
-                                await pool.query(
-                                    "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'info')",
-                                    [caId, `${currentAuthorName} sizi "${title.trim()}" başlıklı Bilim Gündemi yazısına ortak yazar olarak ekledi.`]
-                                );
-                            } catch (ne) {}
-                        }
-                    }
+                // Audit trail if university workflow
+                if (finalUpdateStatus === 'uni_pending') {
+                    await recordContentReviewHistory({
+                        contentType: 'gundem',
+                        contentId: body.id,
+                        universityId: uniScopeId,
+                        action: prevStatus === 'uni_revision' ? 'resubmitted' : 'submitted',
+                        actorUserId: req.user.id,
+                        actorRole: req.user.role,
+                        note: prevStatus === 'uni_revision' ? 'Yazar tarafından revizyon tamamlandı ve temsilciye yeniden gönderildi.' : 'Gündem güncellendi ve onaya gönderildi.',
+                        fromStatus: prevStatus,
+                        toStatus: 'uni_pending'
+                    });
                 }
 
-                if (status === 'pending') {
+                clearCache('articles');
+
+                // Notifications
+                if (finalUpdateStatus === 'pending') {
                     try {
                         const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
                         for (const ed of editors) {
@@ -6248,27 +6632,50 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                             );
                         }
                     } catch (ne) {}
+                } else if (finalUpdateStatus === 'uni_pending' && uniScopeId) {
+                    try {
+                        const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [uniScopeId]);
+                        let repUserId = teamRep[0]?.representative_user_id;
+                        if (!repUserId) {
+                            const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [uniScopeId]);
+                            repUserId = repUser[0]?.id;
+                        }
+                        if (repUserId) {
+                            const notifMsg = prevStatus === 'uni_revision'
+                                ? `Revizyonu tamamlanan Bilim Gündemi yeniden incelemenize sunuldu: "${title.trim()}"`
+                                : `Güncellenen Bilim Gündemi incelemenizi bekliyor: "${title.trim()}"`;
+                            await createNotification(repUserId, notifMsg, 'info');
+                        }
+                        await createNotification(req.user.id, `Bilim Gündemi yazınız Üniversite Temsilcisi incelemesine iletildi: "${title.trim()}"`, 'info');
+                    } catch (ne) {}
                 }
 
                 return res.json({
                     success: true,
                     id: body.id,
                     slug: existing[0].slug,
-                    status,
-                    message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak güncellendi.'
+                    status: finalUpdateStatus,
+                    message: ['pending', 'uni_pending'].includes(finalUpdateStatus) ? 'Bilim Gündemi yazınız onaya gönderildi.' : 'Taslak güncellendi.'
                 });
             }
         }
 
         // New Gundem Article
+        let finalStatus = status;
+        if (status === 'published' && !['admin', 'editor', 'chief_editor'].includes(req.user.role)) {
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+        } else if (status !== 'draft' && status !== 'published') {
+            finalStatus = authorUniId ? 'uni_pending' : 'pending';
+        }
+
         const slug = await getUniqueSlug(pool, title.trim());
-        const submittedAt = (status === 'pending') ? new Date() : null;
-        const publishedAt = (status === 'published') ? new Date() : null;
+        const submittedAt = ['pending', 'uni_pending'].includes(finalStatus) ? new Date() : null;
+        const publishedAt = (finalStatus === 'published') ? new Date() : null;
 
         const [insertResult] = await pool.query(
             `INSERT INTO articles 
-            (title, slug, category, content, excerpt, image_url, author_id, status, tags, is_gundem, gundem_data, submitted_at, published_at, was_published) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)`,
+            (title, slug, category, content, excerpt, image_url, author_id, status, tags, is_gundem, gundem_data, submitted_at, published_at, was_published, university_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`,
             [
                 title.trim(),
                 slug,
@@ -6277,12 +6684,13 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                 excerpt || title.trim(),
                 image_url,
                 req.user.id,
-                status,
+                finalStatus,
                 tags || 'Gündem',
                 typeof gundem_data === 'string' ? gundem_data : JSON.stringify(gundem_data || {}),
                 submittedAt,
                 publishedAt,
-                status === 'published' ? 1 : 0
+                finalStatus === 'published' ? 1 : 0,
+                authorUniId
             ]
         );
 
@@ -6294,6 +6702,21 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             await pool.query('INSERT INTO article_authors (article_id, user_id, order_index) VALUES ?', [authorValues]);
         } catch (e) {
             console.error('Error inserting article_authors for gundem:', e);
+        }
+
+        // Audit Trail History
+        if (finalStatus === 'uni_pending') {
+            await recordContentReviewHistory({
+                contentType: 'gundem',
+                contentId: newId,
+                universityId: authorUniId,
+                action: 'submitted',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: 'Üniversite yazarı tarafından Bilim Gündemi oluşturuldu ve temsilci onayına gönderildi.',
+                fromStatus: status === 'draft' ? 'draft' : null,
+                toStatus: 'uni_pending'
+            });
         }
 
         clearCache('articles');
@@ -6313,7 +6736,8 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             }
         }
 
-        if (status === 'pending') {
+        // Notifications
+        if (finalStatus === 'pending') {
             try {
                 const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
                 for (const ed of editors) {
@@ -6325,14 +6749,35 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             } catch (notifErr) {
                 console.error('Notification error:', notifErr);
             }
+        } else if (finalStatus === 'uni_pending') {
+            try {
+                const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
+                const authorName = authors[0]?.fullname || 'Bir Yazar';
+                const [uniRow] = await pool.query('SELECT name FROM universities WHERE id = ?', [authorUniId]);
+                const uniName = uniRow[0]?.name || 'Üniversite';
+
+                const [teamRep] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [authorUniId]);
+                let repUserId = teamRep[0]?.representative_user_id;
+                if (!repUserId) {
+                    const [repUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [authorUniId]);
+                    repUserId = repUser[0]?.id;
+                }
+
+                if (repUserId) {
+                    const msg = `[${uniName}] Yeni Bilim Gündemi incelemenizi bekliyor: "${title.substring(0, 35)}..." - ${authorName}`;
+                    await createNotification(repUserId, msg, 'info');
+                }
+
+                await createNotification(req.user.id, `Yeni Bilim Gündemi yazınız Üniversite Temsilcisi incelemesini bekliyor: "${title.substring(0, 35)}..."`, 'info');
+            } catch (notifErr) { console.error('Uni Gundem Notif failed:', notifErr); }
         }
 
         res.json({
             success: true,
             id: newId,
             slug,
-            status,
-            message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak kaydedildi.'
+            status: finalStatus,
+            message: ['pending', 'uni_pending'].includes(finalStatus) ? 'Bilim Gündemi yazınız onaya gönderildi.' : 'Taslak kaydedildi.'
         });
     } catch (e) {
         console.error('Author gundem error:', e);
@@ -6443,7 +6888,7 @@ app.put('/api/author/gundem/restore/:id', authenticateToken, async (req, res) =>
 
 
 app.get('/api/editor/stats', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     const { author_id } = req.query;
 
     try {
@@ -6502,7 +6947,7 @@ app.get('/api/editor/stats', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/editor/authors', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
+    if (!['editor', 'admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
     try {
         const [authors] = await pool.query("SELECT id, fullname, avatar_url FROM users WHERE role = 'author'");
         res.json(authors);
@@ -7165,11 +7610,20 @@ app.post('/api/login', async (req, res) => {
         if (rows.length === 0) return res.status(400).json({ message: 'User not found' });
 
         const user = rows[0];
+        if (user.is_active === 0) {
+            return res.status(403).json({ message: 'Hesabınız pasifleştirilmiştir. Lütfen üniversite temsilciniz veya yönetici ile iletişime geçiniz.' });
+        }
+
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
         const tokenExpiry = rememberMe ? '30d' : '24h';
-        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: tokenExpiry });
+        const token = jwt.sign({ 
+            id: user.id, 
+            email: user.email, 
+            role: user.role, 
+            university_id: user.university_id || null 
+        }, JWT_SECRET, { expiresIn: tokenExpiry });
 
         // Track login activity
         await pool.query(
@@ -7184,8 +7638,10 @@ app.post('/api/login', async (req, res) => {
 
         let redirectUrl = 'index.html';
         if (user.role === 'admin') redirectUrl = 'admin';
-        else if (user.role === 'author') redirectUrl = 'author';
-        else if (user.role === 'editor') redirectUrl = 'editor';
+        else if (user.role === 'chief_editor') redirectUrl = 'chief-editor-panel';
+        else if (user.role === 'university_representative') redirectUrl = 'university-panel';
+        else if (user.role === 'author' || user.role === 'social_media_manager') redirectUrl = 'author';
+        else if (user.role === 'editor' || user.role === 'university_editor') redirectUrl = 'editor';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7196,6 +7652,7 @@ app.post('/api/login', async (req, res) => {
                 email: user.email,
                 username: user.username,
                 role: user.role,
+                university_id: user.university_id || null,
                 avatar_url: user.avatar_url,
                 bio: user.bio,
                 job_title: user.job_title
@@ -7261,13 +7718,24 @@ app.post('/api/auth/google', async (req, res) => {
             }
         }
         
+        if (user.is_active === 0) {
+            return res.status(403).json({ message: 'Hesabınız pasifleştirilmiştir. Lütfen üniversite temsilciniz veya yönetici ile iletişime geçiniz.' });
+        }
+        
         // Token oluştur (Google girişleri için varsayılan 30 gün verebiliriz veya standart 24h)
-        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ 
+            id: user.id, 
+            email: user.email, 
+            role: user.role, 
+            university_id: user.university_id || null 
+        }, JWT_SECRET, { expiresIn: '30d' });
         
         let redirectUrl = 'index.html';
         if (user.role === 'admin') redirectUrl = 'admin';
-        else if (user.role === 'author') redirectUrl = 'author';
-        else if (user.role === 'editor') redirectUrl = 'editor';
+        else if (user.role === 'chief_editor') redirectUrl = 'chief-editor-panel';
+        else if (user.role === 'university_representative') redirectUrl = 'university-panel';
+        else if (user.role === 'author' || user.role === 'social_media_manager') redirectUrl = 'author';
+        else if (user.role === 'editor' || user.role === 'university_editor') redirectUrl = 'editor';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7278,6 +7746,7 @@ app.post('/api/auth/google', async (req, res) => {
                 email: user.email,
                 username: user.username,
                 role: user.role,
+                university_id: user.university_id || null,
                 avatar_url: user.avatar_url,
                 bio: user.bio,
                 job_title: user.job_title
@@ -7545,6 +8014,28 @@ app.get('/editor', (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('editor_panel.html', { root: path.join(__dirname, 'views') });
 });
+
+app.get(['/university-panel', '/university-panel.html'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('university-panel.html', { root: path.join(__dirname, 'views') });
+});
+
+app.get(['/chief-editor-panel', '/chief-editor-panel.html'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('chief-editor-panel.html', { root: path.join(__dirname, 'views') });
+});
+
+// Public University Network Directory & Profile Pages
+app.get(['/universities', '/universities.html'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('universities.html', { root: path.join(__dirname, 'views') });
+});
+
+app.get(['/universities/:slug', '/universities/:slug.html'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('university-detail.html', { root: path.join(__dirname, 'views') });
+});
+
 
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/experiments/categories', async (req, res) => {
@@ -10359,6 +10850,1471 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
         res.status(500).json({ message: 'PDF oluşturma hatası: ' + error.message });
     }
 });
+
+// =============================================================================
+// === UNIVERSITY REPRESENTATION & MANAGEMENT API MODULE ======================
+// =============================================================================
+
+// Helper middleware for university representative & staff
+const ensureUniversityRepresentative = async (req, res, next) => {
+    if (!req.user || !['admin', 'chief_editor', 'university_representative'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Erişim reddedildi: Bu işlem için temsilci veya yönetici yetkisi gereklidir.' });
+    }
+    // If representative, ensure user actually belongs to a university
+    if (req.user.role === 'university_representative') {
+        let uniId = req.user.university_id;
+        if (!uniId) {
+            try {
+                const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+                if (uRows.length > 0 && uRows[0].university_id) {
+                    uniId = uRows[0].university_id;
+                    req.user.university_id = uniId;
+                }
+            } catch (e) {}
+        }
+        if (!uniId) {
+            return res.status(403).json({ error: 'Erişim reddedildi: Kullanıcının atanmış bir üniversitesi bulunmuyor.' });
+        }
+    }
+    next();
+};
+
+// Helper middleware for any university staff (rep, editor, social media)
+const ensureUniversityStaff = async (req, res, next) => {
+    const allowed = ['admin', 'chief_editor', 'university_representative', 'university_editor', 'social_media_manager'];
+    if (!req.user || !allowed.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Erişim reddedildi: Bu işlem için üniversite personeli yetkisi gereklidir.' });
+    }
+    if (['university_representative', 'university_editor', 'social_media_manager'].includes(req.user.role)) {
+        if (!req.user.university_id) {
+            try {
+                const [uRows] = await pool.query('SELECT university_id FROM users WHERE id = ?', [req.user.id]);
+                if (uRows.length > 0 && uRows[0].university_id) {
+                    req.user.university_id = uRows[0].university_id;
+                }
+            } catch (e) {}
+        }
+        if (!req.user.university_id) {
+            return res.status(403).json({ error: 'Erişim reddedildi: Kullanıcının atanmış bir üniversitesi bulunmuyor.' });
+        }
+    }
+    next();
+};
+
+// -----------------------------------------------------------------------------
+// --- 1. ADMIN UNIVERSITY MANAGEMENT ROUTES -----------------------------------
+// -----------------------------------------------------------------------------
+
+// Admin: List all universities with team & stats
+app.get('/api/admin/universities', authenticateToken, async (req, res) => {
+    if (!['admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
+    try {
+        const query = `
+            SELECT 
+                u.*,
+                ut.representative_user_id,
+                rep.fullname as representative_name,
+                rep.email as representative_email,
+                rep.avatar_url as representative_avatar,
+                (SELECT COUNT(*) FROM users WHERE university_id = u.id) as member_count,
+                (SELECT COUNT(*) FROM articles WHERE university_id = u.id AND (is_gundem = 0 OR is_gundem IS NULL)) as article_count,
+                (SELECT COUNT(*) FROM experiments WHERE university_id = u.id) as experiment_count,
+                (SELECT COUNT(*) FROM articles WHERE university_id = u.id AND is_gundem = 1) as gundem_count
+            FROM universities u
+            LEFT JOIN university_teams ut ON u.id = ut.university_id
+            LEFT JOIN users rep ON ut.representative_user_id = rep.id
+            ORDER BY u.name ASC
+        `;
+        const [rows] = await pool.query(query);
+        res.json(rows);
+    } catch (e) {
+        console.error('Admin Universities List Error:', e);
+        res.status(500).json({ error: 'Üniversiteler listelenemedi.' });
+    }
+});
+
+// Admin: Create new university
+app.post('/api/admin/universities', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { name, logo, description, status } = req.body;
+    if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Üniversite adı zorunludur.' });
+    }
+
+    try {
+        const slug = slugify(name.trim()) || `uni-${Date.now()}`;
+        const [exists] = await pool.query('SELECT id FROM universities WHERE slug = ? OR name = ?', [slug, name.trim()]);
+        if (exists.length > 0) {
+            return res.status(400).json({ error: 'Bu üniversite veya benzer slug zaten kayıtlı.' });
+        }
+
+        const [insertResult] = await pool.query(
+            'INSERT INTO universities (name, slug, logo, description, status) VALUES (?, ?, ?, ?, ?)',
+            [name.trim(), slug, logo || null, description || null, status === 'inactive' ? 'inactive' : 'active']
+        );
+
+        const newUniId = insertResult.insertId;
+
+        // Auto create university_teams record
+        await pool.query(
+            'INSERT INTO university_teams (university_id) VALUES (?) ON DUPLICATE KEY UPDATE updated_at = NOW()',
+            [newUniId]
+        );
+
+        res.status(201).json({ success: true, id: newUniId, message: 'Üniversite başarıyla oluşturuldu.' });
+    } catch (e) {
+        console.error('Admin Create University Error:', e);
+        res.status(500).json({ error: e.message || 'Üniversite oluşturulamadı.' });
+    }
+});
+
+// Admin: Update university
+app.put('/api/admin/universities/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const uniId = req.params.id;
+    const { name, logo, description, status } = req.body;
+
+    try {
+        const [check] = await pool.query('SELECT id FROM universities WHERE id = ?', [uniId]);
+        if (check.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+
+        const updates = [];
+        const params = [];
+
+        if (name && name.trim()) {
+            updates.push('name = ?');
+            params.push(name.trim());
+            const newSlug = slugify(name.trim());
+            if (newSlug) {
+                updates.push('slug = ?');
+                params.push(newSlug);
+            }
+        }
+        if (logo !== undefined) {
+            updates.push('logo = ?');
+            params.push(logo || null);
+        }
+        if (description !== undefined) {
+            updates.push('description = ?');
+            params.push(description || null);
+        }
+        if (status && ['active', 'inactive'].includes(status)) {
+            updates.push('status = ?');
+            params.push(status);
+        }
+
+        if (updates.length > 0) {
+            params.push(uniId);
+            await pool.query(`UPDATE universities SET ${updates.join(', ')} WHERE id = ?`, params);
+        }
+
+        res.json({ success: true, message: 'Üniversite bilgileri güncellendi.' });
+    } catch (e) {
+        console.error('Admin Update University Error:', e);
+        res.status(500).json({ error: e.message || 'Üniversite güncellenemedi.' });
+    }
+});
+
+// Admin: Delete university
+app.delete('/api/admin/universities/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const uniId = req.params.id;
+
+    try {
+        const [check] = await pool.query('SELECT id FROM universities WHERE id = ?', [uniId]);
+        if (check.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+
+        // Remove team and university (users/articles university_id will set to NULL via ON DELETE SET NULL)
+        await pool.query('DELETE FROM universities WHERE id = ?', [uniId]);
+        res.json({ success: true, message: 'Üniversite ve ekibi silindi.' });
+    } catch (e) {
+        console.error('Admin Delete University Error:', e);
+        res.status(500).json({ error: e.message || 'Üniversite silinemedi.' });
+    }
+});
+
+// Admin: Assign / Change representative
+app.put('/api/admin/universities/:id/representative', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const uniId = req.params.id;
+    const { user_id } = req.body;
+
+    try {
+        const [uni] = await pool.query('SELECT id, name FROM universities WHERE id = ?', [uniId]);
+        if (uni.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+
+        if (user_id) {
+            const [u] = await pool.query('SELECT id, fullname, role FROM users WHERE id = ?', [user_id]);
+            if (u.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+
+            // Assign user to university and set role to university_representative
+            await pool.query('UPDATE users SET university_id = ?, role = "university_representative" WHERE id = ?', [uniId, user_id]);
+
+            // Update university_teams
+            await pool.query(
+                'INSERT INTO university_teams (university_id, representative_user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE representative_user_id = ?',
+                [uniId, user_id, user_id]
+            );
+
+            await createNotification(
+                user_id,
+                `Tebrikler! ${uni[0].name} AperionX Üniversite Temsilcisi olarak atandınız.`,
+                'success'
+            );
+        } else {
+            // Unassign representative
+            await pool.query('UPDATE university_teams SET representative_user_id = NULL WHERE university_id = ?', [uniId]);
+        }
+
+        res.json({ success: true, message: 'Temsilci ataması güncellendi.' });
+    } catch (e) {
+        console.error('Admin Assign Representative Error:', e);
+        res.status(500).json({ error: e.message || 'Temsilci ataması başarısız.' });
+    }
+});
+
+// -----------------------------------------------------------------------------
+// --- 2. UNIVERSITY REPRESENTATIVE & STAFF ROUTES ------------------------------
+// -----------------------------------------------------------------------------
+
+// Get own university info
+app.get('/api/university/info', authenticateToken, ensureUniversityStaff, async (req, res) => {
+    try {
+        const targetUniId = (['admin', 'chief_editor'].includes(req.user.role) && req.query.university_id)
+            ? Number(req.query.university_id)
+            : Number(req.user.university_id);
+
+        if (!targetUniId) return res.status(400).json({ error: 'Üniversite ID belirtilmedi.' });
+
+        const [rows] = await pool.query(`
+            SELECT u.*, ut.representative_user_id, rep.fullname as representative_name, rep.email as representative_email
+            FROM universities u
+            LEFT JOIN university_teams ut ON u.id = ut.university_id
+            LEFT JOIN users rep ON ut.representative_user_id = rep.id
+            WHERE u.id = ?
+        `, [targetUniId]);
+
+        if (rows.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+        res.json(rows[0]);
+    } catch (e) {
+        console.error('University Info Error:', e);
+        res.status(500).json({ error: 'Üniversite bilgisi alınamadı.' });
+    }
+});
+
+// -----------------------------------------------------------------------------
+// --- 2. UNIVERSITY REPRESENTATIVE & STAFF ROUTES ------------------------------
+// -----------------------------------------------------------------------------
+
+// Dashboard statistics for own university
+app.get('/api/university/dashboard', authenticateToken, ensureUniversityStaff, async (req, res) => {
+    try {
+        const targetUniId = (['admin', 'chief_editor'].includes(req.user.role) && req.query.university_id)
+            ? Number(req.query.university_id)
+            : Number(req.user.university_id);
+
+        if (!requireUniversityScope(req, targetUniId)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin verilerine erişemezsiniz.' });
+        }
+
+        // 1. Ekip Metrikleri
+        const [memberCounts] = await pool.query(`
+            SELECT 
+                COUNT(*) as total_members,
+                SUM(CASE WHEN role = 'author' AND COALESCE(is_active, 1) = 1 THEN 1 ELSE 0 END) as active_authors,
+                SUM(CASE WHEN role = 'university_editor' THEN 1 ELSE 0 END) as university_editors,
+                SUM(CASE WHEN role = 'social_media_manager' THEN 1 ELSE 0 END) as social_media_managers
+            FROM users
+            WHERE university_id = ?
+        `, [targetUniId]);
+
+        // 2. İçerik Metrikleri (Makale + Deney + Gündem)
+        const [articleCounts] = await pool.query(`
+            SELECT 
+                SUM(CASE WHEN status = 'pending' AND (rejection_reason IS NULL OR rejection_reason = '') THEN 1 ELSE 0 END) as pending_review,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as in_revision,
+                SUM(CASE WHEN status = 'pending' AND rejection_reason IS NOT NULL AND rejection_reason != '' THEN 1 ELSE 0 END) as chief_pending,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published
+            FROM articles
+            WHERE university_id = ? AND deleted_at IS NULL
+        `, [targetUniId]);
+
+        const [expCounts] = await pool.query(`
+            SELECT 
+                SUM(CASE WHEN status = 'pending' AND (rejection_reason IS NULL OR rejection_reason = '') THEN 1 ELSE 0 END) as pending_review,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as in_revision,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published
+            FROM experiments
+            WHERE university_id = ? AND deleted_at IS NULL
+        `, [targetUniId]);
+
+        // 3. Üniversite Bilgisi
+        const [uniInfo] = await pool.query('SELECT id, name, slug, logo, description, status FROM universities WHERE id = ?', [targetUniId]);
+
+        res.json({
+            university: uniInfo[0] || {},
+            team: {
+                total_members: Number(memberCounts[0]?.total_members) || 0,
+                active_authors: Number(memberCounts[0]?.active_authors) || 0,
+                university_editors: Number(memberCounts[0]?.university_editors) || 0,
+                social_media_managers: Number(memberCounts[0]?.social_media_managers) || 0
+            },
+            content: {
+                pending_review: (Number(articleCounts[0]?.pending_review) || 0) + (Number(expCounts[0]?.pending_review) || 0),
+                in_revision: (Number(articleCounts[0]?.in_revision) || 0) + (Number(expCounts[0]?.in_revision) || 0),
+                chief_pending: (Number(articleCounts[0]?.chief_pending) || 0),
+                published: (Number(articleCounts[0]?.published) || 0) + (Number(expCounts[0]?.published) || 0)
+            }
+        });
+    } catch (e) {
+        console.error('University Dashboard Error:', e);
+        res.status(500).json({ error: 'Dashboard verileri alınamadı.' });
+    }
+});
+
+// Get team members of own university (with real content count, class level, active status)
+app.get('/api/university/team', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    try {
+        const targetUniId = (['admin', 'chief_editor'].includes(req.user.role) && req.query.university_id)
+            ? Number(req.query.university_id)
+            : Number(req.user.university_id);
+
+        if (!requireUniversityScope(req, targetUniId)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin ekibini görüntüleyemezsiniz.' });
+        }
+
+        const [members] = await pool.query(`
+            SELECT 
+                u.id, u.fullname, u.username, u.email, u.role, u.job_title, u.avatar_url, 
+                u.department, u.class_level, u.academic_level, u.is_online, u.last_login, 
+                u.created_at, u.university_id, COALESCE(u.is_active, 1) as is_active,
+                ((SELECT COUNT(*) FROM articles WHERE author_id = u.id AND deleted_at IS NULL) +
+                 (SELECT COUNT(*) FROM experiments WHERE author_id = u.id AND deleted_at IS NULL)) as content_count
+            FROM users u
+            WHERE u.university_id = ?
+            ORDER BY FIELD(u.role, 'university_representative', 'university_editor', 'social_media_manager', 'author', 'reader'), u.fullname ASC
+        `, [targetUniId]);
+
+        res.json(members);
+    } catch (e) {
+        console.error('University Team Error:', e);
+        res.status(500).json({ error: 'Ekip listesi alınamadı.' });
+    }
+});
+
+// Add user to own university team (with secure token invitation system - representative never sees/enters password)
+app.post('/api/university/users', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    const { fullname, email, role, username, job_title, department, class_level, avatar_url } = req.body;
+    const targetUniId = req.user.university_id;
+
+    if (!targetUniId) {
+        return res.status(403).json({ error: 'Bağlı olduğunuz bir üniversite bulunmuyor.' });
+    }
+
+    // STRICT SECURITY: Representative can ONLY create specific team roles
+    const allowedNewRoles = ['author', 'university_editor', 'social_media_manager'];
+    if (!allowedNewRoles.includes(role)) {
+        return res.status(403).json({ error: `Erişim engellendi: '${role}' rolü oluşturma yetkiniz bulunmamaktadır. Yalnızca Yazar, Üniversite Editörü veya Sosyal Medya Sorumlusu oluşturabilirsiniz.` });
+    }
+
+    if (!fullname || !email) {
+        return res.status(400).json({ error: 'İsim ve e-posta zorunludur.' });
+    }
+
+    try {
+        const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email.trim()]);
+        if (existing.length > 0) {
+            return res.status(400).json({ error: 'Bu e-posta adresi zaten sistemde kayıtlı.' });
+        }
+
+        // Secure Random Temporary Password & Activation Token
+        const randomTempPassword = crypto.randomBytes(16).toString('hex');
+        const hashedPassword = await bcrypt.hash(randomTempPassword, 10);
+        
+        const activationToken = crypto.randomBytes(32).toString('hex');
+        const tokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days validity
+
+        const finalUsername = username && username.trim() 
+            ? username.trim() 
+            : email.split('@')[0] + Math.floor(Math.random() * 1000);
+
+        const [insertResult] = await pool.query(
+            'INSERT INTO users (fullname, email, username, password, role, job_title, department, class_level, avatar_url, university_id, is_active, reset_token, reset_token_expires) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)',
+            [fullname.trim(), email.trim(), finalUsername, hashedPassword, role, job_title || null, department || null, class_level || null, avatar_url || null, targetUniId, activationToken, tokenExpires]
+        );
+
+        // Activation Link for user to set their password
+        const activationLink = `${req.protocol}://${req.get('host')}/index.html?modal=reset-password&token=${activationToken}`;
+
+        // Send Invitation / Activation email
+        try {
+            const [uni] = await pool.query('SELECT name FROM universities WHERE id = ?', [targetUniId]);
+            const uniName = uni[0]?.name || 'Üniversite';
+            const roleNameMap = {
+                author: 'Yazar',
+                university_editor: 'Üniversite Editörü',
+                social_media_manager: 'Sosyal Medya Sorumlusu'
+            };
+            const roleTitle = roleNameMap[role] || role;
+
+            const welcomeTitle = `AperionX ${uniName} Ekibine Davet Edildiniz`;
+            const welcomeBody = `
+                <h2>Merhaba ${fullname},</h2>
+                <p>AperionX <strong>${uniName}</strong> temsilcilik ekibine <strong>${roleTitle}</strong> olarak davet edildiniz.</p>
+                <p>Hesabınızı etkinleştirmek ve şifrenizi belirlemek için aşağıdaki bağlantıya tıklayın:</p>
+                <br>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="${activationLink}" style="display:inline-block; padding:12px 24px; background-color:#6366F1; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:15px;">Hesabımı Etkinleştir & Şifre Belirle</a>
+                </div>
+                <p style="font-size:12px; color:#666;">Bağlantı 7 gün boyunca geçerlidir. Link çalışmıyorsa tarayıcınıza yapıştırın:<br><a href="${activationLink}">${activationLink}</a></p>
+            `;
+            await sendDynamicEmail(email.trim(), 'custom', welcomeBody, welcomeTitle);
+        } catch (mErr) {
+            console.warn('Team member invitation email error:', mErr.message);
+        }
+
+        res.status(201).json({ 
+            success: true, 
+            id: insertResult.insertId, 
+            message: 'Ekip üyesi başarıyla oluşturuldu ve aktivasyon bağlantısı e-posta adresine gönderildi.' 
+        });
+    } catch (e) {
+        console.error('Create University User Error:', e);
+        res.status(500).json({ error: e.message || 'Kullanıcı oluşturulamadı.' });
+    }
+});
+
+// Update user in own university team
+app.put('/api/university/users/:id', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    const targetUserId = req.params.id;
+    const { role, job_title, department, class_level } = req.body;
+
+    try {
+        const [targetUser] = await pool.query('SELECT id, role, university_id FROM users WHERE id = ?', [targetUserId]);
+        if (targetUser.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+
+        // STRICT SECURITY: Target user must belong to representative's university!
+        if (!requireUniversityScope(req, targetUser[0].university_id)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin kullanıcısını güncelleyemezsiniz.' });
+        }
+
+        // Target cannot be admin or chief_editor
+        if (['admin', 'chief_editor'].includes(targetUser[0].role) && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Bu kullanıcıyı güncelleme yetkiniz bulunmamaktadır.' });
+        }
+
+        const updates = [];
+        const params = [];
+
+        if (role) {
+            const allowedRoles = ['author', 'university_editor', 'social_media_manager'];
+            if (!allowedRoles.includes(role) && req.user.role !== 'admin') {
+                return res.status(403).json({ error: `Erişim engellendi: '${role}' rolü verilemez.` });
+            }
+            updates.push('role = ?');
+            params.push(role);
+        }
+        if (job_title !== undefined) { updates.push('job_title = ?'); params.push(job_title || null); }
+        if (department !== undefined) { updates.push('department = ?'); params.push(department || null); }
+        if (class_level !== undefined) { updates.push('class_level = ?'); params.push(class_level || null); }
+
+        if (updates.length > 0) {
+            params.push(targetUserId);
+            await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
+        }
+
+        res.json({ success: true, message: 'Ekip üyesi bilgileri güncellendi.' });
+    } catch (e) {
+        console.error('Update University User Error:', e);
+        res.status(500).json({ error: e.message || 'Kullanıcı güncellenemedi.' });
+    }
+});
+
+// Toggle member active/inactive status (physical deletion avoided)
+app.put('/api/university/users/:id/toggle-status', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    const targetUserId = req.params.id;
+
+    try {
+        const [targetUser] = await pool.query('SELECT id, fullname, role, university_id, is_active FROM users WHERE id = ?', [targetUserId]);
+        if (targetUser.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+
+        // STRICT SECURITY: Target user must belong to representative's university!
+        if (!requireUniversityScope(req, targetUser[0].university_id)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin kullanıcısını değiştiremezsiniz.' });
+        }
+
+        if (['admin', 'chief_editor', 'university_representative'].includes(targetUser[0].role)) {
+            return res.status(403).json({ error: 'Bu kullanıcının durumunu değiştiremezsiniz.' });
+        }
+
+        const currentActive = targetUser[0].is_active === null ? 1 : Number(targetUser[0].is_active);
+        const newStatus = currentActive === 1 ? 0 : 1;
+        await pool.query('UPDATE users SET is_active = ? WHERE id = ?', [newStatus, targetUserId]);
+
+        res.json({ 
+            success: true, 
+            is_active: newStatus, 
+            message: newStatus === 1 ? 'Kullanıcı hesabı aktif edildi.' : 'Kullanıcı hesabı pasifleştirildi.' 
+        });
+    } catch (e) {
+        console.error('Toggle User Status Error:', e);
+        res.status(500).json({ error: e.message || 'Kullanıcı durumu güncellenemedi.' });
+    }
+});
+
+// Get member details with real content statistics
+app.get('/api/university/users/:id', authenticateToken, ensureUniversityStaff, async (req, res) => {
+    const targetUserId = req.params.id;
+
+    try {
+        const [users] = await pool.query(`
+            SELECT id, fullname, username, email, role, job_title, department, class_level, avatar_url, bio, COALESCE(is_active, 1) as is_active, created_at, university_id
+            FROM users 
+            WHERE id = ?
+        `, [targetUserId]);
+
+        if (users.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        const member = users[0];
+
+        // STRICT SECURITY: Must belong to representative's university!
+        if (!requireUniversityScope(req, member.university_id)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin kullanıcısını görüntüleyemezsiniz.' });
+        }
+
+        // Real content statistics
+        const [articleStats] = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            FROM articles 
+            WHERE author_id = ? AND (is_gundem = 0 OR is_gundem IS NULL) AND deleted_at IS NULL
+        `, [targetUserId]);
+
+        const [expStats] = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            FROM experiments 
+            WHERE author_id = ? AND deleted_at IS NULL
+        `, [targetUserId]);
+
+        const [gundemStats] = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            FROM articles 
+            WHERE author_id = ? AND is_gundem = 1 AND deleted_at IS NULL
+        `, [targetUserId]);
+
+        // Recent contents by this author
+        const [recentArticles] = await pool.query(`
+            SELECT id, title, slug, status, created_at, views, 'article' as content_type
+            FROM articles
+            WHERE author_id = ? AND deleted_at IS NULL
+            ORDER BY created_at DESC LIMIT 5
+        `, [targetUserId]);
+
+        res.json({
+            member,
+            stats: {
+                articles: articleStats[0] || { total: 0, published: 0, pending: 0, rejected: 0 },
+                experiments: expStats[0] || { total: 0, published: 0, pending: 0, rejected: 0 },
+                gundem: gundemStats[0] || { total: 0, published: 0, pending: 0, rejected: 0 },
+                total_content: (Number(articleStats[0]?.total) || 0) + (Number(expStats[0]?.total) || 0) + (Number(gundemStats[0]?.total) || 0)
+            },
+            recent_contents: recentArticles
+        });
+    } catch (e) {
+        console.error('Member Details Error:', e);
+        res.status(500).json({ error: 'Üye bilgileri alınamadı.' });
+    }
+});
+
+// Update own university profile (description and logo only)
+app.put('/api/university/profile', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    const targetUniId = req.user.university_id;
+    const { description, logo } = req.body;
+
+    if (!targetUniId) return res.status(403).json({ error: 'Bağlı olduğunuz bir üniversite bulunmuyor.' });
+
+    try {
+        const updates = [];
+        const params = [];
+
+        if (description !== undefined) { updates.push('description = ?'); params.push(description); }
+        if (logo !== undefined) { updates.push('logo = ?'); params.push(logo); }
+
+        if (updates.length > 0) {
+            params.push(targetUniId);
+            await pool.query(`UPDATE universities SET ${updates.join(', ')} WHERE id = ?`, params);
+        }
+
+        res.json({ success: true, message: 'Üniversite profil bilgileri güncellendi.' });
+    } catch (e) {
+        console.error('University Profile Update Error:', e);
+        res.status(500).json({ error: 'Profil güncellenemedi.' });
+    }
+});
+
+// List content of own university
+app.get('/api/university/content', authenticateToken, ensureUniversityStaff, async (req, res) => {
+    try {
+        const targetUniId = (['admin', 'chief_editor'].includes(req.user.role) && req.query.university_id)
+            ? Number(req.query.university_id)
+            : Number(req.user.university_id);
+
+        if (!requireUniversityScope(req, targetUniId)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin içeriklerini görüntüleyemezsiniz.' });
+        }
+
+        const type = req.query.type || 'all'; // 'all', 'articles', 'experiments', 'gundem'
+        const statusFilter = req.query.status; // optional: 'uni_pending', 'uni_revision', 'chief_pending', etc.
+        const results = { articles: [], experiments: [], gundem: [] };
+
+        let statusClause = '';
+        let queryParams = [targetUniId];
+        if (statusFilter) {
+            statusClause = ' AND a.status = ?';
+            queryParams.push(statusFilter);
+        }
+
+        if (type === 'all' || type === 'articles') {
+            const [articles] = await pool.query(`
+                SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.submitted_at, a.published_at, a.author_id, a.rejection_reason, u.fullname as author_name, a.university_id
+                FROM articles a
+                LEFT JOIN users u ON a.author_id = u.id
+                WHERE a.university_id = ? AND (a.is_gundem = 0 OR a.is_gundem IS NULL) AND a.deleted_at IS NULL${statusClause}
+                ORDER BY COALESCE(a.submitted_at, a.created_at) DESC
+            `, queryParams);
+            results.articles = articles;
+        }
+
+        if (type === 'all' || type === 'experiments') {
+            let expParams = [targetUniId];
+            let expStatusClause = '';
+            if (statusFilter) {
+                expStatusClause = ' AND e.status = ?';
+                expParams.push(statusFilter);
+            }
+            const [experiments] = await pool.query(`
+                SELECT e.id, e.title, e.slug, e.category, e.status, e.views, e.created_at, e.published_at, e.author_id, e.rejection_reason, u.fullname as author_name, e.university_id
+                FROM experiments e
+                LEFT JOIN users u ON e.author_id = u.id
+                WHERE e.university_id = ? AND e.deleted_at IS NULL${expStatusClause}
+                ORDER BY e.created_at DESC
+            `, expParams);
+            results.experiments = experiments;
+        }
+
+        if (type === 'all' || type === 'gundem') {
+            const [gundem] = await pool.query(`
+                SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.created_at, a.submitted_at, a.published_at, a.author_id, a.rejection_reason, u.fullname as author_name, a.university_id
+                FROM articles a
+                LEFT JOIN users u ON a.author_id = u.id
+                WHERE a.university_id = ? AND a.is_gundem = 1 AND a.deleted_at IS NULL${statusClause}
+                ORDER BY COALESCE(a.submitted_at, a.created_at) DESC
+            `, queryParams);
+            results.gundem = gundem;
+        }
+
+        res.json(results);
+    } catch (e) {
+        console.error('University Content Error:', e);
+        res.status(500).json({ error: 'İçerikler listelenemedi.' });
+    }
+});
+
+// View specific content item of own university (with strict university_id authorization check)
+app.get('/api/university/content/:type/:id', authenticateToken, ensureUniversityStaff, async (req, res) => {
+    const { type, id } = req.params;
+
+    try {
+        let contentItem = null;
+
+        if (type === 'article' || type === 'gundem') {
+            const [rows] = await pool.query(`
+                SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar, u.job_title as author_job_title,
+                       uni.name as university_name, uni.logo as university_logo
+                FROM articles a 
+                LEFT JOIN users u ON a.author_id = u.id 
+                LEFT JOIN universities uni ON a.university_id = uni.id
+                WHERE a.id = ?
+            `, [id]);
+            if (rows.length > 0) contentItem = rows[0];
+        } else if (type === 'experiment') {
+            const [rows] = await pool.query(`
+                SELECT e.*, u.fullname as author_name, u.avatar_url as author_avatar, u.job_title as author_job_title,
+                       uni.name as university_name, uni.logo as university_logo
+                FROM experiments e 
+                LEFT JOIN users u ON e.author_id = u.id 
+                LEFT JOIN universities uni ON e.university_id = uni.id
+                WHERE e.id = ?
+            `, [id]);
+            if (rows.length > 0) contentItem = rows[0];
+        } else {
+            return res.status(400).json({ error: 'Geçersiz içerik türü.' });
+        }
+
+        if (!contentItem) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+
+        // STRICT SECURITY: Must match representative's university!
+        if (!requireUniversityScope(req, contentItem.university_id)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin içeriğine erişemezsiniz.' });
+        }
+
+        // Fetch co-authors
+        const coAuthorsTable = (type === 'experiment') ? 'experiment_authors' : 'article_authors';
+        const foreignKeyName = (type === 'experiment') ? 'experiment_id' : 'article_id';
+        try {
+            const [coRows] = await pool.query(`
+                SELECT ca.user_id, u.fullname, u.username, u.email, u.avatar_url 
+                FROM ${coAuthorsTable} ca
+                JOIN users u ON ca.user_id = u.id
+                WHERE ca.${foreignKeyName} = ?
+                ORDER BY ca.order_index ASC
+            `, [id]);
+            contentItem.co_authors = coRows || [];
+        } catch (e) {
+            contentItem.co_authors = [];
+        }
+
+        // Fetch workflow audit trail history
+        const normalizedContentType = (type === 'gundem') ? 'gundem' : (type === 'experiment' ? 'experiment' : 'article');
+        try {
+            const [historyRows] = await pool.query(`
+                SELECT h.*, u.fullname as actor_name, u.avatar_url as actor_avatar
+                FROM content_review_history h
+                LEFT JOIN users u ON h.actor_user_id = u.id
+                WHERE h.content_type = ? AND h.content_id = ?
+                ORDER BY h.created_at ASC
+            `, [normalizedContentType, id]);
+            contentItem.review_history = historyRows || [];
+        } catch (e) {
+            contentItem.review_history = [];
+        }
+
+        res.json(contentItem);
+    } catch (e) {
+        console.error('University Content Detail Error:', e);
+        res.status(500).json({ error: 'İçerik detayı alınamadı.' });
+    }
+});
+
+// Representative Review: Send revision to author or forward to Chief Editor
+app.put('/api/university/content/:type/:id/review', authenticateToken, ensureUniversityRepresentative, async (req, res) => {
+    const { type, id } = req.params;
+    const { action, decision, notes } = req.body; 
+    const effectiveAction = decision || action; // supports both 'decision' and 'action'
+
+    if (!['revision', 'forward', 'send_to_chief'].includes(effectiveAction)) {
+        return res.status(400).json({ error: 'Geçersiz işlem türü. ("revision" veya "forward" olmalıdır)' });
+    }
+
+    try {
+        let contentItem = null;
+        const tableName = (type === 'experiment') ? 'experiments' : 'articles';
+        const normalizedContentType = (type === 'gundem') ? 'gundem' : (type === 'experiment' ? 'experiment' : 'article');
+
+        const [rows] = await pool.query(`SELECT id, title, author_id, university_id, status FROM ${tableName} WHERE id = ?`, [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+        contentItem = rows[0];
+
+        // STRICT SECURITY: Content must belong to representative's university!
+        if (!requireUniversityScope(req, contentItem.university_id)) {
+            return res.status(403).json({ error: 'Erişim engellendi: Başka bir üniversitenin içeriğini inceleyemezsiniz.' });
+        }
+
+        const [uni] = await pool.query('SELECT name FROM universities WHERE id = ?', [contentItem.university_id]);
+        const uniName = uni[0]?.name || 'Üniversite';
+        const prevStatus = contentItem.status;
+
+        // 1. REVISION REQUEST
+        if (effectiveAction === 'revision') {
+            const reason = notes || 'Üniversite Temsilciniz tarafından düzenleme talep edildi.';
+            const newStatus = 'uni_revision';
+
+            await pool.query(`UPDATE ${tableName} SET status = ?, rejection_reason = ? WHERE id = ?`, [newStatus, reason, id]);
+
+            // Record History
+            await recordContentReviewHistory({
+                contentType: normalizedContentType,
+                contentId: id,
+                universityId: contentItem.university_id,
+                action: 'revision_requested',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: reason,
+                fromStatus: prevStatus,
+                toStatus: newStatus
+            });
+
+            // Notify Primary Author and Co-Authors
+            const authorIdsToNotify = new Set();
+            if (contentItem.author_id) authorIdsToNotify.add(Number(contentItem.author_id));
+
+            const coAuthorsTable = (type === 'experiment') ? 'experiment_authors' : 'article_authors';
+            const foreignKeyName = (type === 'experiment') ? 'experiment_id' : 'article_id';
+            try {
+                const [coRows] = await pool.query(`SELECT user_id FROM ${coAuthorsTable} WHERE ${foreignKeyName} = ?`, [id]);
+                coRows.forEach(r => { if (r.user_id) authorIdsToNotify.add(Number(r.user_id)); });
+            } catch (e) {}
+
+            const notifMsg = `[${uniName}] İçeriğiniz için Üniversite Temsilcisi tarafından düzenleme talep edildi: "${contentItem.title}". Not: ${reason}`;
+            for (const uid of authorIdsToNotify) {
+                await createNotification(uid, notifMsg, 'warning');
+            }
+
+            clearCache('articles');
+            clearCache('experiments');
+            return res.json({ success: true, message: 'İçerik yazara revizyona gönderildi.', status: newStatus });
+        }
+
+        // 2. FORWARD TO CHIEF EDITOR
+        if (effectiveAction === 'forward' || effectiveAction === 'send_to_chief') {
+            // Forward is valid from uni_pending, or if representative forwards revised content
+            if (!['uni_pending', 'chief_revision'].includes(contentItem.status) && req.user.role !== 'admin') {
+                return res.status(400).json({ error: `Bu aşamadaki içerik (${contentItem.status}) Baş Editör masasına iletilemez.` });
+            }
+
+            const newStatus = 'chief_pending';
+            await pool.query(`UPDATE ${tableName} SET status = ?, rejection_reason = NULL WHERE id = ?`, [newStatus, id]);
+
+            // Record History
+            await recordContentReviewHistory({
+                contentType: normalizedContentType,
+                contentId: id,
+                universityId: contentItem.university_id,
+                action: 'forwarded_to_chief',
+                actorUserId: req.user.id,
+                actorRole: req.user.role,
+                note: notes || 'Temsilci incelemesini tamamladı ve Baş Editör onayına sundu.',
+                fromStatus: prevStatus,
+                toStatus: newStatus
+            });
+
+            // Get Author Name
+            const [uAuthor] = await pool.query('SELECT fullname FROM users WHERE id = ?', [contentItem.author_id]);
+            const authorFullName = uAuthor[0]?.fullname || 'Yazar';
+
+            // Notify Chief Editors & Admins
+            const [chiefs] = await pool.query('SELECT id FROM users WHERE role IN ("chief_editor", "admin")');
+            const typeLabel = normalizedContentType === 'gundem' ? 'Bilim Gündemi' : (normalizedContentType === 'experiment' ? 'Deney' : 'Makale');
+            const notifyChiefMsg = `[${uniName}] Yeni üniversite içeriği Baş Editör incelemesini bekliyor: ${typeLabel} - "${contentItem.title}" (Yazar: ${authorFullName})`;
+            
+            for (const ch of chiefs) {
+                if (ch.id !== req.user.id) {
+                    await createNotification(ch.id, notifyChiefMsg, 'info');
+                }
+            }
+
+            // Notify Author
+            if (contentItem.author_id) {
+                await createNotification(
+                    contentItem.author_id,
+                    `İçeriğiniz (${contentItem.title}) temsilciniz tarafından incelendi ve Baş Editör onayına sunuldu.`,
+                    'info'
+                );
+            }
+
+            clearCache('articles');
+            clearCache('experiments');
+            return res.json({ success: true, message: 'İçerik Baş Editör masasına iletildi.', status: newStatus });
+        }
+    } catch (e) {
+        console.error('University Content Review Error:', e);
+        res.status(500).json({ error: e.message || 'İçerik incelenirken hata oluştu.' });
+    }
+});
+
+// ==========================================
+// === CHIEF EDITOR ENDPOINTS (STAGE 3) ===
+// ==========================================
+
+// Helper middleware for Chief Editor & Admin access
+const ensureChiefEditorOrAdmin = (req, res, next) => {
+    if (!req.user || !['chief_editor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Erişim engellendi: Bu işlem yalnızca Baş Editör veya Yönetici tarafından yapılabilir.' });
+    }
+    next();
+};
+
+// 1. Get Pending Content Queue for Chief Editor (status = 'chief_pending')
+app.get('/api/chief-editor/pending', authenticateToken, ensureChiefEditorOrAdmin, async (req, res) => {
+    try {
+        const type = req.query.type || 'all'; // 'all', 'articles', 'experiments', 'gundem'
+        const results = { articles: [], experiments: [], gundem: [] };
+
+        if (type === 'all' || type === 'articles') {
+            const [articles] = await pool.query(`
+                SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, 
+                       u.fullname as author_name, a.university_id, uni.name as university_name, uni.logo as university_logo,
+                       LEFT(a.excerpt, 200) as excerpt
+                FROM articles a
+                LEFT JOIN users u ON a.author_id = u.id
+                LEFT JOIN universities uni ON a.university_id = uni.id
+                WHERE a.status = 'chief_pending' AND (a.is_gundem = 0 OR a.is_gundem IS NULL) AND a.deleted_at IS NULL
+                ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
+            `);
+            results.articles = articles;
+        }
+
+        if (type === 'all' || type === 'experiments') {
+            const [experiments] = await pool.query(`
+                SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.author_id, 
+                       u.fullname as author_name, e.university_id, uni.name as university_name, uni.logo as university_logo,
+                       LEFT(e.excerpt, 200) as excerpt
+                FROM experiments e
+                LEFT JOIN users u ON e.author_id = u.id
+                LEFT JOIN universities uni ON e.university_id = uni.id
+                WHERE e.status = 'chief_pending' AND e.deleted_at IS NULL
+                ORDER BY e.created_at ASC
+            `);
+            results.experiments = experiments;
+        }
+
+        if (type === 'all' || type === 'gundem') {
+            const [gundem] = await pool.query(`
+                SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, 
+                       u.fullname as author_name, a.university_id, uni.name as university_name, uni.logo as university_logo,
+                       LEFT(a.excerpt, 200) as excerpt
+                FROM articles a
+                LEFT JOIN users u ON a.author_id = u.id
+                LEFT JOIN universities uni ON a.university_id = uni.id
+                WHERE a.status = 'chief_pending' AND a.is_gundem = 1 AND a.deleted_at IS NULL
+                ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
+            `);
+            results.gundem = gundem;
+        }
+
+        res.json(results);
+    } catch (e) {
+        console.error('Chief Editor Pending Queue Error:', e);
+        res.status(500).json({ error: 'Baş Editör kuyruğu alınamadı.' });
+    }
+});
+
+// 2. Get Detailed Content for Chief Editor
+app.get('/api/chief-editor/content/:type/:id', authenticateToken, ensureChiefEditorOrAdmin, async (req, res) => {
+    const { type, id } = req.params;
+
+    try {
+        let contentItem = null;
+        if (type === 'article' || type === 'gundem') {
+            const [rows] = await pool.query(`
+                SELECT a.*, u.fullname as author_name, u.avatar_url as author_avatar, u.job_title as author_job_title,
+                       uni.name as university_name, uni.logo as university_logo, uni.slug as university_slug
+                FROM articles a
+                LEFT JOIN users u ON a.author_id = u.id
+                LEFT JOIN universities uni ON a.university_id = uni.id
+                WHERE a.id = ?
+            `, [id]);
+            if (rows.length > 0) contentItem = rows[0];
+        } else if (type === 'experiment') {
+            const [rows] = await pool.query(`
+                SELECT e.*, u.fullname as author_name, u.avatar_url as author_avatar, u.job_title as author_job_title,
+                       uni.name as university_name, uni.logo as university_logo, uni.slug as university_slug
+                FROM experiments e
+                LEFT JOIN users u ON e.author_id = u.id
+                LEFT JOIN universities uni ON e.university_id = uni.id
+                WHERE e.id = ?
+            `, [id]);
+            if (rows.length > 0) contentItem = rows[0];
+        } else {
+            return res.status(400).json({ error: 'Geçersiz içerik türü.' });
+        }
+
+        if (!contentItem) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+
+        // Co-Authors
+        const coAuthorsTable = (type === 'experiment') ? 'experiment_authors' : 'article_authors';
+        const foreignKeyName = (type === 'experiment') ? 'experiment_id' : 'article_id';
+        try {
+            const [coRows] = await pool.query(`
+                SELECT ca.user_id, u.fullname, u.username, u.email, u.avatar_url 
+                FROM ${coAuthorsTable} ca
+                JOIN users u ON ca.user_id = u.id
+                WHERE ca.${foreignKeyName} = ?
+                ORDER BY ca.order_index ASC
+            `, [id]);
+            contentItem.co_authors = coRows || [];
+        } catch (e) { contentItem.co_authors = []; }
+
+        // Find University Representative details
+        if (contentItem.university_id) {
+            try {
+                const [repRows] = await pool.query(`
+                    SELECT u.id, u.fullname, u.email, u.avatar_url
+                    FROM university_teams ut
+                    JOIN users u ON ut.representative_user_id = u.id
+                    WHERE ut.university_id = ?
+                `, [contentItem.university_id]);
+                contentItem.representative = repRows[0] || null;
+            } catch (e) { contentItem.representative = null; }
+        }
+
+        // Review History
+        const normalizedContentType = (type === 'gundem') ? 'gundem' : (type === 'experiment' ? 'experiment' : 'article');
+        try {
+            const [historyRows] = await pool.query(`
+                SELECT h.*, u.fullname as actor_name, u.avatar_url as actor_avatar
+                FROM content_review_history h
+                LEFT JOIN users u ON h.actor_user_id = u.id
+                WHERE h.content_type = ? AND h.content_id = ?
+                ORDER BY h.created_at ASC
+            `, [normalizedContentType, id]);
+            contentItem.review_history = historyRows || [];
+        } catch (e) { contentItem.review_history = []; }
+
+        res.json(contentItem);
+    } catch (e) {
+        console.error('Chief Editor Content Detail Error:', e);
+        res.status(500).json({ error: 'İçerik detayı alınamadı.' });
+    }
+});
+
+// Helper for Chief Editor Decisions (Approve, Revision, Reject)
+async function handleChiefEditorDecision(req, res, contentType) {
+    const contentId = req.params.id;
+    const { decision, rejection_reason, notes } = req.body; // 'approve', 'revision', 'reject'
+    const reasonText = notes || rejection_reason || '';
+
+    if (!['approve', 'revision', 'reject'].includes(decision)) {
+        return res.status(400).json({ error: 'Geçersiz karar türü. ("approve", "revision", "reject" olmalıdır)' });
+    }
+
+    try {
+        const tableName = (contentType === 'experiment') ? 'experiments' : 'articles';
+        
+        // GÜNDEM TYPE GUARD: Ensure correct content type when querying articles table
+        let typeCondition = '';
+        if (contentType === 'gundem') {
+            typeCondition = ' AND is_gundem = 1';
+        } else if (contentType === 'article') {
+            typeCondition = ' AND (is_gundem = 0 OR is_gundem IS NULL)';
+        }
+
+        const [rows] = await pool.query(
+            `SELECT id, title, slug, author_id, university_id, status, was_published, published_at FROM ${tableName} WHERE id = ?${typeCondition}`,
+            [contentId]
+        );
+
+        if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+        const content = rows[0];
+        const prevStatus = content.status;
+
+        // CHIEF EDITOR STATUS GUARD: Only chief_pending contents can be decided upon
+        if (content.status !== 'chief_pending') {
+            return res.status(400).json({ 
+                error: `Bu içerik üzerinde karar verilemez. Yalnızca 'chief_pending' (Baş Editör Onayı Bekliyor) durumundaki içerikler işleme alınabilir. (Mevcut durum: '${content.status}')` 
+            });
+        }
+
+        let newStatus = '';
+        let action = '';
+        let updateQuery = '';
+        let queryParams = [];
+
+        // 1. APPROVE -> PUBLISHED
+        if (decision === 'approve') {
+            newStatus = 'published';
+            action = 'approved';
+            if (content.was_published && content.published_at) {
+                updateQuery = `UPDATE ${tableName} SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?`;
+                queryParams = [req.user.id, contentId];
+            } else {
+                updateQuery = `UPDATE ${tableName} SET status = 'published', rejection_reason = NULL, approved_by = ?, published_at = NOW(), was_published = 1 WHERE id = ?`;
+                queryParams = [req.user.id, contentId];
+            }
+        } 
+        // 2. REVISION -> CHIEF_REVISION
+        else if (decision === 'revision') {
+            newStatus = 'chief_revision';
+            action = 'chief_revision_requested';
+            updateQuery = `UPDATE ${tableName} SET status = 'chief_revision', rejection_reason = ? WHERE id = ?`;
+            queryParams = [reasonText || 'Baş Editör tarafından revizyon talep edildi.', contentId];
+        } 
+        // 3. REJECT -> REJECTED
+        else if (decision === 'reject') {
+            newStatus = 'rejected';
+            action = 'rejected';
+            updateQuery = `UPDATE ${tableName} SET status = 'rejected', rejection_reason = ? WHERE id = ?`;
+            queryParams = [reasonText || 'Baş Editör tarafından reddedildi.', contentId];
+        }
+
+        await pool.query(updateQuery, queryParams);
+
+        // Record Audit Trail
+        await recordContentReviewHistory({
+            contentType,
+            contentId,
+            universityId: content.university_id,
+            action,
+            actorUserId: req.user.id,
+            actorRole: req.user.role,
+            note: reasonText || (decision === 'approve' ? 'Baş Editör tarafından onaylandı ve yayınlandı.' : null),
+            fromStatus: prevStatus,
+            toStatus: newStatus
+        });
+
+        // Resolve University & Representative
+        let uniName = 'Üniversite';
+        let repUserId = null;
+        if (content.university_id) {
+            const [uRow] = await pool.query('SELECT name FROM universities WHERE id = ?', [content.university_id]);
+            if (uRow.length > 0) uniName = uRow[0].name;
+
+            const [repRow] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [content.university_id]);
+            repUserId = repRow[0]?.representative_user_id;
+            if (!repUserId) {
+                const [rUser] = await pool.query("SELECT id FROM users WHERE university_id = ? AND role = 'university_representative' LIMIT 1", [content.university_id]);
+                repUserId = rUser[0]?.id;
+            }
+        }
+
+        // Notify Co-Authors and Primary Author
+        const authorIdsToNotify = new Set();
+        if (content.author_id) authorIdsToNotify.add(Number(content.author_id));
+
+        const coAuthorsTable = (contentType === 'experiment') ? 'experiment_authors' : 'article_authors';
+        const foreignKeyName = (contentType === 'experiment') ? 'experiment_id' : 'article_id';
+        try {
+            const [coRows] = await pool.query(`SELECT user_id FROM ${coAuthorsTable} WHERE ${foreignKeyName} = ?`, [contentId]);
+            coRows.forEach(r => { if (r.user_id) authorIdsToNotify.add(Number(r.user_id)); });
+        } catch (e) {}
+
+        // Notification routing based on decision
+        if (decision === 'approve') {
+            const authorMsg = `Tebrikler! "${content.title}" başlıklı içeriğiniz Baş Editör tarafından onaylandı ve AperionX'ta yayınlandı.`;
+            for (const uid of authorIdsToNotify) {
+                await createNotification(uid, authorMsg, 'success');
+            }
+
+            if (repUserId) {
+                await createNotification(repUserId, `[${uniName}] Üniversitenizden gönderilen "${content.title}" başlıklı içerik Baş Editör tarafından onaylanarak yayınlandı.`, 'success');
+            }
+
+            // Search engine ping
+            if (content.slug) {
+                pingSearchEngines(content.slug).catch(err => console.error('[SEO-PING] Error:', err));
+            }
+        } else if (decision === 'revision') {
+            const repMsg = `[${uniName}] Üniversitenizden gönderilen "${content.title}" için Baş Editör tarafından revizyon talep edildi. Gerekçe: ${reasonText}`;
+            if (repUserId) {
+                await createNotification(repUserId, repMsg, 'warning');
+            }
+
+            const authorMsg = `"${content.title}" başlıklı içeriğiniz için Baş Editör tarafından revizyon talep edildi. Lütfen temsilcinizle iletişime geçiniz. Gerekçe: ${reasonText}`;
+            for (const uid of authorIdsToNotify) {
+                await createNotification(uid, authorMsg, 'warning');
+            }
+        } else if (decision === 'reject') {
+            const authorMsg = `"${content.title}" başlıklı içeriğiniz Baş Editör tarafından reddedildi. Gerekçe: ${reasonText || 'Belirtilmedi'}`;
+            for (const uid of authorIdsToNotify) {
+                await createNotification(uid, authorMsg, 'error');
+            }
+
+            if (repUserId) {
+                await createNotification(repUserId, `[${uniName}] Üniversitenizden gönderilen "${content.title}" içeriği Baş Editör tarafından reddedildi.`, 'error');
+            }
+        }
+
+        clearCache('articles');
+        clearCache('experiments');
+
+        res.json({
+            success: true,
+            status: newStatus,
+            message: decision === 'approve' ? 'İçerik onaylandı ve yayınlandı.' : (decision === 'revision' ? 'İçerik Baş Editör revizyonuna alındı.' : 'İçerik reddedildi.')
+        });
+    } catch (e) {
+        console.error('Chief Editor Decision Error:', e);
+        res.status(500).json({ error: e.message || 'Karar kaydedilirken hata oluştu.' });
+    }
+}
+
+// 3. Chief Editor Decide Endpoints
+app.put('/api/chief-editor/articles/:id/decide', authenticateToken, ensureChiefEditorOrAdmin, (req, res) => {
+    handleChiefEditorDecision(req, res, 'article');
+});
+
+app.put('/api/chief-editor/experiments/:id/decide', authenticateToken, ensureChiefEditorOrAdmin, (req, res) => {
+    handleChiefEditorDecision(req, res, 'experiment');
+});
+
+app.put('/api/chief-editor/gundem/:id/decide', authenticateToken, ensureChiefEditorOrAdmin, (req, res) => {
+    handleChiefEditorDecision(req, res, 'gundem');
+});
+
+// ==========================================
+// === PUBLIC UNIVERSITY NETWORK ENDPOINTS (STAGE 5) ===
+// ==========================================
+
+// 1. List active universities with team & published content counts
+app.get('/api/public/universities', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                u.id, 
+                u.name, 
+                u.slug, 
+                u.logo, 
+                u.description,
+                COUNT(DISTINCT CASE WHEN utm.is_active = 1 THEN utm.id END) AS team_member_count,
+                COUNT(DISTINCT CASE WHEN utm.is_active = 1 AND utm.role = 'author' THEN utm.id END) AS author_count,
+                (
+                    (SELECT COUNT(*) FROM articles a WHERE a.university_id = u.id AND a.status = 'published' AND a.deleted_at IS NULL) +
+                    (SELECT COUNT(*) FROM experiments e WHERE e.university_id = u.id AND e.status = 'published' AND e.deleted_at IS NULL)
+                ) AS article_count
+            FROM universities u
+            LEFT JOIN users utm ON utm.university_id = u.id
+            WHERE u.status = 'active'
+            GROUP BY u.id, u.name, u.slug, u.logo, u.description
+            ORDER BY u.name ASC
+        `;
+        const [rows] = await pool.query(query);
+        res.json(rows);
+    } catch (e) {
+        console.error('Public Universities List Error:', e);
+        res.status(500).json({ error: 'Üniversiteler listelenemedi.' });
+    }
+});
+
+// 2. Fetch single active university profile with representative and safe team list
+app.get('/api/public/universities/:slug', async (req, res) => {
+    const slug = req.params.slug ? req.params.slug.trim() : '';
+    if (!slug) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+
+    try {
+        const [uRows] = await pool.query(`
+            SELECT id, name, slug, logo, description, status, created_at
+            FROM universities
+            WHERE (slug = ? OR id = ?) AND status = 'active'
+            LIMIT 1
+        `, [slug, /^\d+$/.test(slug) ? parseInt(slug) : -1]);
+
+        if (uRows.length === 0) {
+            return res.status(404).json({ error: 'Üniversite bulunamadı veya aktif değil.' });
+        }
+
+        const uni = uRows[0];
+
+        // Safe team members (active only)
+        const [members] = await pool.query(`
+            SELECT id, fullname, username, role, department, class_level, job_title, avatar_url, bio, created_at
+            FROM users
+            WHERE university_id = ? AND is_active = 1
+            ORDER BY FIELD(role, 'university_representative', 'university_editor', 'social_media_manager', 'author', 'reader'), fullname ASC
+        `, [uni.id]);
+
+        // Find representative from university_teams or fallback to role
+        const [teamRecord] = await pool.query(`
+            SELECT representative_user_id 
+            FROM university_teams 
+            WHERE university_id = ? 
+            LIMIT 1
+        `, [uni.id]);
+
+        let repUserId = teamRecord[0]?.representative_user_id;
+        let representative = null;
+
+        if (repUserId) {
+            representative = members.find(m => m.id === repUserId) || null;
+            if (!representative) {
+                // If representative user exists in DB but wasn't in members (e.g. check is_active)
+                const [repRows] = await pool.query(`
+                    SELECT id, fullname, username, role, department, class_level, job_title, avatar_url, bio, created_at
+                    FROM users
+                    WHERE id = ? AND is_active = 1
+                    LIMIT 1
+                `, [repUserId]);
+                if (repRows.length > 0) representative = repRows[0];
+            }
+        }
+
+        if (!representative) {
+            // Fallback: pick member with role = 'university_representative'
+            representative = members.find(m => m.role === 'university_representative') || null;
+        }
+
+        // Format role labels & public slugs safely (NO passwords, NO emails, NO tokens)
+        const roleNameMap = {
+            'university_representative': 'Üniversite Temsilcisi',
+            'university_editor': 'Üniversite Editörü',
+            'social_media_manager': 'Sosyal Medya Sorumlusu',
+            'author': 'Yazar',
+            'reader': 'Okur'
+        };
+
+        const formatSafeUser = (u) => {
+            if (!u) return null;
+            const pSlug = slugify(u.fullname) || u.username || u.id;
+            return {
+                id: u.id,
+                fullname: u.fullname,
+                username: u.username,
+                role: u.role,
+                role_label: roleNameMap[u.role] || u.role || 'Ekip Üyesi',
+                job_title: u.job_title,
+                department: u.department,
+                class_level: u.class_level,
+                avatar_url: u.avatar_url || '/uploads/default-avatar.png',
+                bio: u.bio,
+                public_slug: pSlug
+            };
+        };
+
+        const safeRepresentative = formatSafeUser(representative);
+        const safeTeam = members.map(formatSafeUser);
+
+        // Published content counts
+        const [articleCount] = await pool.query(`
+            SELECT COUNT(*) as total FROM articles 
+            WHERE university_id = ? AND status = 'published' AND (is_gundem = 0 OR is_gundem IS NULL) AND deleted_at IS NULL
+        `, [uni.id]);
+
+        const [expCount] = await pool.query(`
+            SELECT COUNT(*) as total FROM experiments 
+            WHERE university_id = ? AND status = 'published' AND deleted_at IS NULL
+        `, [uni.id]);
+
+        const [gundemCount] = await pool.query(`
+            SELECT COUNT(*) as total FROM articles 
+            WHERE university_id = ? AND status = 'published' AND is_gundem = 1 AND deleted_at IS NULL
+        `, [uni.id]);
+
+        res.json({
+            university: {
+                id: uni.id,
+                name: uni.name,
+                slug: uni.slug,
+                logo: uni.logo,
+                description: uni.description,
+                created_at: uni.created_at,
+                stats: {
+                    articles: articleCount[0]?.total || 0,
+                    experiments: expCount[0]?.total || 0,
+                    gundem: gundemCount[0]?.total || 0,
+                    total_content: (articleCount[0]?.total || 0) + (expCount[0]?.total || 0) + (gundemCount[0]?.total || 0),
+                    team_count: safeTeam.length,
+                    author_count: safeTeam.filter(m => m.role === 'author').length
+                }
+            },
+            representative: safeRepresentative,
+            team: safeTeam
+        });
+    } catch (e) {
+        console.error('Public University Profile Error:', e);
+        res.status(500).json({ error: 'Üniversite bilgileri alınamadı.' });
+    }
+});
+
+// 3. Fetch published articles of university
+app.get('/api/public/universities/:slug/articles', async (req, res) => {
+    const slug = req.params.slug ? req.params.slug.trim() : '';
+    try {
+        const [uRows] = await pool.query('SELECT id FROM universities WHERE (slug = ? OR id = ?) AND status = "active" LIMIT 1', [slug, /^\d+$/.test(slug) ? parseInt(slug) : -1]);
+        if (uRows.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+        const uniId = uRows[0].id;
+
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.excerpt, a.image_url, a.views, a.created_at, a.published_at,
+                   u.fullname as author_fullname, u.username as author_username, u.avatar_url as author_avatar
+            FROM articles a
+            LEFT JOIN users u ON a.author_id = u.id
+            WHERE a.university_id = ? AND a.status = 'published' AND (a.is_gundem = 0 OR a.is_gundem IS NULL) AND a.deleted_at IS NULL
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
+        `, [uniId]);
+
+        articles.forEach(a => {
+            if (a.image_url && !a.image_url.startsWith('http') && !a.image_url.startsWith('data:')) {
+                a.image_url = '/' + a.image_url.replace(/^\/+/, '');
+            }
+            a.author_slug = slugify(a.author_fullname) || a.author_username || '';
+        });
+
+        res.json(articles);
+    } catch (e) {
+        console.error('Public University Articles Error:', e);
+        res.status(500).json({ error: 'Makaleler alınamadı.' });
+    }
+});
+
+// 4. Fetch published experiments of university
+app.get('/api/public/universities/:slug/experiments', async (req, res) => {
+    const slug = req.params.slug ? req.params.slug.trim() : '';
+    try {
+        const [uRows] = await pool.query('SELECT id FROM universities WHERE (slug = ? OR id = ?) AND status = "active" LIMIT 1', [slug, /^\d+$/.test(slug) ? parseInt(slug) : -1]);
+        if (uRows.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+        const uniId = uRows[0].id;
+
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.excerpt, e.image_url, e.views, e.created_at, e.published_at,
+                   u.fullname as author_fullname, u.username as author_username, u.avatar_url as author_avatar
+            FROM experiments e
+            LEFT JOIN users u ON e.author_id = u.id
+            WHERE e.university_id = ? AND e.status = 'published' AND e.deleted_at IS NULL
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
+        `, [uniId]);
+
+        experiments.forEach(e => {
+            if (e.image_url && !e.image_url.startsWith('http') && !e.image_url.startsWith('data:')) {
+                e.image_url = '/' + e.image_url.replace(/^\/+/, '');
+            }
+            e.author_slug = slugify(e.author_fullname) || e.author_username || '';
+        });
+
+        res.json(experiments);
+    } catch (e) {
+        console.error('Public University Experiments Error:', e);
+        res.status(500).json({ error: 'Deneyler alınamadı.' });
+    }
+});
+
+// 5. Fetch published Bilim Gündemi of university
+app.get('/api/public/universities/:slug/gundem', async (req, res) => {
+    const slug = req.params.slug ? req.params.slug.trim() : '';
+    try {
+        const [uRows] = await pool.query('SELECT id FROM universities WHERE (slug = ? OR id = ?) AND status = "active" LIMIT 1', [slug, /^\d+$/.test(slug) ? parseInt(slug) : -1]);
+        if (uRows.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
+        const uniId = uRows[0].id;
+
+        const [gundem] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.excerpt, a.image_url, a.gundem_data, a.views, a.created_at, a.published_at,
+                   u.fullname as author_fullname, u.username as author_username, u.avatar_url as author_avatar
+            FROM articles a
+            LEFT JOIN users u ON a.author_id = u.id
+            WHERE a.university_id = ? AND a.status = 'published' AND a.is_gundem = 1 AND a.deleted_at IS NULL
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
+        `, [uniId]);
+
+        gundem.forEach(g => {
+            if (!g.image_url && g.gundem_data) {
+                try {
+                    const gd = typeof g.gundem_data === 'string' ? JSON.parse(g.gundem_data) : g.gundem_data;
+                    if (gd.imageDataUrl) g.image_url = gd.imageDataUrl;
+                    else if (gd.imageUrl) g.image_url = gd.imageUrl;
+                } catch(e) {}
+            }
+            if (g.image_url && !g.image_url.startsWith('http') && !g.image_url.startsWith('data:')) {
+                g.image_url = '/' + g.image_url.replace(/^\/+/, '');
+            }
+            g.author_slug = slugify(g.author_fullname) || g.author_username || '';
+            delete g.gundem_data;
+        });
+
+        res.json(gundem);
+    } catch (e) {
+        console.error('Public University Gundem Error:', e);
+        res.status(500).json({ error: 'Bilim Gündemi alınamadı.' });
+    }
+});
+
 
 
 app.use((req, res) => {
