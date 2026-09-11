@@ -8349,18 +8349,29 @@ app.get('/api/experiment-stats', (req, res) => {
 // Admin: Create User
 app.post('/api/admin/users', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
-    const { fullname, email, password, role } = req.body;
+    const { fullname, email, password, role, university_id } = req.body;
     if (!fullname || !email || !password || !role) return res.status(400).json({ error: 'Tüm alanlar zorunludur' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         // Generate a username from email
         const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+        const uniId = university_id ? Number(university_id) : null;
 
-        await pool.query('INSERT INTO users (fullname, email, password, role, username) VALUES (?, ?, ?, ?, ?)',
-            [fullname, email, hashedPassword, role, username]);
+        const [insertRes] = await pool.query('INSERT INTO users (fullname, email, password, role, username, university_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [fullname, email, hashedPassword, role, username, uniId]);
 
-        res.sendStatus(201);
+        const newUserId = insertRes.insertId;
+
+        // If role is university_representative and university_id provided, set as representative in university_teams
+        if (role === 'university_representative' && uniId) {
+            await pool.query(
+                'INSERT INTO university_teams (university_id, representative_user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE representative_user_id = ?',
+                [uniId, newUserId, newUserId]
+            );
+        }
+
+        res.status(201).json({ success: true, id: newUserId });
     } catch (e) {
         if (e.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'Bu e-posta veya kullanıcı adı zaten kayıtlı.' });
         res.status(500).json({ error: e.message });
@@ -10907,7 +10918,7 @@ const ensureUniversityStaff = async (req, res, next) => {
 
 // Admin: List all universities with team & stats
 app.get('/api/admin/universities', authenticateToken, async (req, res) => {
-    if (!['admin', 'chief_editor'].includes(req.user.role)) return res.sendStatus(403);
+    if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const query = `
             SELECT 
@@ -10917,9 +10928,11 @@ app.get('/api/admin/universities', authenticateToken, async (req, res) => {
                 rep.email as representative_email,
                 rep.avatar_url as representative_avatar,
                 (SELECT COUNT(*) FROM users WHERE university_id = u.id) as member_count,
+                (SELECT COUNT(*) FROM users WHERE university_id = u.id AND role = 'author') as author_count,
                 (SELECT COUNT(*) FROM articles WHERE university_id = u.id AND (is_gundem = 0 OR is_gundem IS NULL)) as article_count,
                 (SELECT COUNT(*) FROM experiments WHERE university_id = u.id) as experiment_count,
-                (SELECT COUNT(*) FROM articles WHERE university_id = u.id AND is_gundem = 1) as gundem_count
+                (SELECT COUNT(*) FROM articles WHERE university_id = u.id AND is_gundem = 1) as gundem_count,
+                ((SELECT COUNT(*) FROM articles WHERE university_id = u.id AND status = 'published') + (SELECT COUNT(*) FROM experiments WHERE university_id = u.id AND status = 'published')) as published_count
             FROM universities u
             LEFT JOIN university_teams ut ON u.id = ut.university_id
             LEFT JOIN users rep ON ut.representative_user_id = rep.id
@@ -10942,10 +10955,13 @@ app.post('/api/admin/universities', authenticateToken, async (req, res) => {
     }
 
     try {
-        const slug = slugify(name.trim()) || `uni-${Date.now()}`;
+        const slug = (req.body.slug && req.body.slug.trim()) ? slugify(req.body.slug.trim()) : (slugify(name.trim()) || `uni-${Date.now()}`);
+        if (!slug) {
+            return res.status(400).json({ error: 'Geçersiz slug.' });
+        }
         const [exists] = await pool.query('SELECT id FROM universities WHERE slug = ? OR name = ?', [slug, name.trim()]);
         if (exists.length > 0) {
-            return res.status(400).json({ error: 'Bu üniversite veya benzer slug zaten kayıtlı.' });
+            return res.status(400).json({ error: 'Bu üniversite adı veya benzer slug zaten kayıtlı.' });
         }
 
         const [insertResult] = await pool.query(
@@ -10961,7 +10977,7 @@ app.post('/api/admin/universities', authenticateToken, async (req, res) => {
             [newUniId]
         );
 
-        res.status(201).json({ success: true, id: newUniId, message: 'Üniversite başarıyla oluşturuldu.' });
+        res.status(201).json({ success: true, id: newUniId, slug, message: 'Üniversite başarıyla oluşturuldu.' });
     } catch (e) {
         console.error('Admin Create University Error:', e);
         res.status(500).json({ error: e.message || 'Üniversite oluşturulamadı.' });
@@ -10984,12 +11000,29 @@ app.put('/api/admin/universities/:id', authenticateToken, async (req, res) => {
         if (name && name.trim()) {
             updates.push('name = ?');
             params.push(name.trim());
+        }
+
+        if (req.body.slug && req.body.slug.trim()) {
+            const explicitSlug = slugify(req.body.slug.trim());
+            if (explicitSlug) {
+                const [slugExists] = await pool.query('SELECT id FROM universities WHERE slug = ? AND id != ?', [explicitSlug, uniId]);
+                if (slugExists.length > 0) {
+                    return res.status(400).json({ error: 'Bu slug zaten başka bir üniversite tarafından kullanılıyor.' });
+                }
+                updates.push('slug = ?');
+                params.push(explicitSlug);
+            }
+        } else if (name && name.trim()) {
             const newSlug = slugify(name.trim());
             if (newSlug) {
-                updates.push('slug = ?');
-                params.push(newSlug);
+                const [slugExists] = await pool.query('SELECT id FROM universities WHERE slug = ? AND id != ?', [newSlug, uniId]);
+                if (slugExists.length === 0) {
+                    updates.push('slug = ?');
+                    params.push(newSlug);
+                }
             }
         }
+
         if (logo !== undefined) {
             updates.push('logo = ?');
             params.push(logo || null);
@@ -11043,9 +11076,17 @@ app.put('/api/admin/universities/:id/representative', authenticateToken, async (
         const [uni] = await pool.query('SELECT id, name FROM universities WHERE id = ?', [uniId]);
         if (uni.length === 0) return res.status(404).json({ error: 'Üniversite bulunamadı.' });
 
+        const [currentTeam] = await pool.query('SELECT representative_user_id FROM university_teams WHERE university_id = ?', [uniId]);
+        const prevRepId = currentTeam.length > 0 ? currentTeam[0].representative_user_id : null;
+
         if (user_id) {
             const [u] = await pool.query('SELECT id, fullname, role FROM users WHERE id = ?', [user_id]);
             if (u.length === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+
+            // If there was a previous representative and it's a different user, update their role to university_editor
+            if (prevRepId && prevRepId !== Number(user_id)) {
+                await pool.query("UPDATE users SET role = 'university_editor' WHERE id = ? AND role = 'university_representative'", [prevRepId]);
+            }
 
             // Assign user to university and set role to university_representative
             await pool.query('UPDATE users SET university_id = ?, role = "university_representative" WHERE id = ?', [uniId, user_id]);
@@ -11063,6 +11104,9 @@ app.put('/api/admin/universities/:id/representative', authenticateToken, async (
             );
         } else {
             // Unassign representative
+            if (prevRepId) {
+                await pool.query("UPDATE users SET role = 'university_editor' WHERE id = ? AND role = 'university_representative'", [prevRepId]);
+            }
             await pool.query('UPDATE university_teams SET representative_user_id = NULL WHERE university_id = ?', [uniId]);
         }
 

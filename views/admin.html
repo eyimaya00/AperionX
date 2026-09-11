@@ -795,6 +795,11 @@
                 <i class="ph ph-chart-bar"></i> <span>Araç Analizleri</span>
             </a>
 
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('university-management', this); loadUniversities();">
+                <i class="ph ph-buildings"></i>
+                <span>Üniversiteler</span>
+            </a>
+
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('user-management', this); loadUsers();">
                 <i class="ph ph-users"></i>
                 <span>Kullanıcı Yönetimi</span>
@@ -2738,12 +2743,21 @@
                         <input type="text" id="new_fullname" class="form-control" placeholder="Ad Soyad" required>
                         <input type="email" id="new_email" class="form-control" placeholder="E-posta" required>
                         <input type="password" id="new_password" class="form-control" placeholder="Şifre" required>
-                        <select id="new_role" class="form-control">
+                        <select id="new_role" class="form-control" onchange="handleNewUserRoleChange(this.value)">
                             <option value="user">Standart Üye</option>
                             <option value="author">Yazar</option>
                             <option value="editor">Editör</option>
+                            <option value="university_representative">Üniversite Temsilcisi</option>
+                            <option value="university_editor">Üniversite Editörü</option>
+                            <option value="social_media_manager">Sosyal Medya Yöneticisi</option>
                             <option value="admin">Admin</option>
                         </select>
+                        <div id="new-user-uni-group" style="display:none; grid-column: span 2;">
+                            <label style="font-weight: 500; font-size: 0.85rem; margin-bottom: 4px; display: block; color: #475569;">Bağlı Üniversite *</label>
+                            <select id="new_university_id" class="form-control">
+                                <option value="">-- Üniversite Seçiniz --</option>
+                            </select>
+                        </div>
                         <div style="grid-column: span 2;">
                             <button type="submit" class="btn btn-primary">Kaydet</button>
                             <button type="button" class="btn btn-danger"
@@ -3527,6 +3541,95 @@
         </div>
 
 
+        <!-- University Management Section -->
+        <div id="university-management" class="section">
+            <div class="header-row" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+                <div>
+                    <h1 class="page-title">Üniversite Yönetimi</h1>
+                    <p class="section-subtitle" style="margin-bottom: 0;">AperionX Üniversite Ağı'na bağlı üniversiteleri ve temsilcileri yönetin.</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="openAddUniversityModal()"><i class="ph ph-plus-circle"></i> Yeni Üniversite</button>
+                </div>
+            </div>
+
+            <!-- Summary Stats Cards -->
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                <div class="stat-card" style="background: var(--card-bg, #ffffff); padding: 24px; border-radius: 18px; border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 58px; height: 58px; border-radius: 14px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                        <i class="ph ph-buildings"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.9rem; font-weight: 800; color: var(--text-main, #1e293b);" id="stat-total-uni">0</h3>
+                        <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.95rem;">Toplam Üniversite</p>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="background: var(--card-bg, #ffffff); padding: 24px; border-radius: 18px; border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 58px; height: 58px; border-radius: 14px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                        <i class="ph ph-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.9rem; font-weight: 800; color: var(--text-main, #1e293b);" id="stat-active-uni">0</h3>
+                        <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.95rem;">Aktif Üniversite</p>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="background: var(--card-bg, #ffffff); padding: 24px; border-radius: 18px; border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 58px; height: 58px; border-radius: 14px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                        <i class="ph ph-user-check"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.9rem; font-weight: 800; color: var(--text-main, #1e293b);" id="stat-total-rep">0</h3>
+                        <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.95rem;">Toplam Temsilci</p>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="background: var(--card-bg, #ffffff); padding: 24px; border-radius: 18px; border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 58px; height: 58px; border-radius: 14px; background: #f5f3ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                        <i class="ph ph-users-three"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.9rem; font-weight: 800; color: var(--text-main, #1e293b);" id="stat-total-members">0</h3>
+                        <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.95rem;">Toplam Üniversite Üyesi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- University Table Card -->
+            <div class="card" style="padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <div style="position: relative; width: 100%; max-width: 380px;">
+                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
+                        <input type="text" id="uni-search-input" class="form-control" placeholder="Üniversite veya temsilci ara..." oninput="filterUniversitiesList()" style="padding-left: 42px; border-radius: 10px;">
+                    </div>
+                    <div id="uni-count-badge" style="font-size: 0.9rem; color: #64748b; font-weight: 500;">
+                        Yükleniyor...
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 850px;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid var(--border-color, #e2e8f0); color: #64748b; font-size: 0.88rem;">
+                                <th style="padding: 12px 14px;">Üniversite</th>
+                                <th style="padding: 12px 14px;">Slug</th>
+                                <th style="padding: 12px 14px;">Durum</th>
+                                <th style="padding: 12px 14px;">Temsilci</th>
+                                <th style="padding: 12px 14px; text-align: center;">Ekip</th>
+                                <th style="padding: 12px 14px; text-align: center;">Yazar</th>
+                                <th style="padding: 12px 14px;">Tarih</th>
+                                <th style="padding: 12px 14px; text-align: right;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="universities-table-body">
+                            <tr><td colspan="8" style="text-align:center; padding: 24px; color: #94a3b8;"><i class="ph ph-spinner spinner"></i> Üniversiteler yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Custom Confirmation Modal -->
@@ -3538,6 +3641,197 @@
             <div class="modal-actions">
                 <button class="modal-btn btn-cancel" onclick="closeConfirmModal()">Vazgeç</button>
                 <button class="modal-btn btn-confirm" id="confirmActionBtn">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Management Modals -->
+    <!-- 1. Add University Modal -->
+    <div class="modal-overlay" id="uniAddModal">
+        <div class="modal-box" style="width: 540px; max-width: 95%; text-align: left; padding: 28px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); color: var(--text-main, #1e293b);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main, #1e293b); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-buildings" style="color: #6366f1;"></i> Yeni Üniversite Ekle
+                </h3>
+                <button type="button" onclick="closeAddUniversityModal()" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            <form id="uniAddForm" onsubmit="handleSaveNewUniversity(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Üniversite Adı *</label>
+                    <input type="text" id="new_uni_name" class="form-control" placeholder="Örn: Ondokuz Mayıs Üniversitesi" required oninput="handleUniNameInput(this.value)">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Slug * <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem;">(İsimden otomatik üretilir, düzenlenebilir)</span></label>
+                    <input type="text" id="new_uni_slug" class="form-control" placeholder="Örn: ondokuz-mayis-universitesi" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Logo URL <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem;">(Opsiyonel)</span></label>
+                    <input type="text" id="new_uni_logo" class="form-control" placeholder="https://... veya /uploads/...">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Açıklama <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem;">(Opsiyonel)</span></label>
+                    <textarea id="new_uni_desc" class="form-control" rows="3" placeholder="Üniversite hakkında kısa açıklama..."></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 22px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Durum</label>
+                    <select id="new_uni_status" class="form-control">
+                        <option value="active" selected>Aktif</option>
+                        <option value="inactive">Pasif</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn" style="background: #f1f5f9; color: #475569;" onclick="closeAddUniversityModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-new-uni"><i class="ph ph-check"></i> Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Edit University Modal -->
+    <div class="modal-overlay" id="uniEditModal">
+        <div class="modal-box" style="width: 540px; max-width: 95%; text-align: left; padding: 28px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); color: var(--text-main, #1e293b);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main, #1e293b); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-note-pencil" style="color: #6366f1;"></i> Üniversite Düzenle
+                </h3>
+                <button type="button" onclick="closeEditUniversityModal()" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            <form id="uniEditForm" onsubmit="handleSaveEditUniversity(event)">
+                <input type="hidden" id="edit_uni_id">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Üniversite Adı *</label>
+                    <input type="text" id="edit_uni_name" class="form-control" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Slug *</label>
+                    <input type="text" id="edit_uni_slug" class="form-control" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Logo URL</label>
+                    <input type="text" id="edit_uni_logo" class="form-control">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Açıklama</label>
+                    <textarea id="edit_uni_desc" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 22px;">
+                    <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Durum</label>
+                    <select id="edit_uni_status" class="form-control">
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Pasif</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn" style="background: #f1f5f9; color: #475569;" onclick="closeEditUniversityModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-edit-uni"><i class="ph ph-check"></i> Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Assign / Change Representative Modal -->
+    <div class="modal-overlay" id="uniRepModal">
+        <div class="modal-box" style="width: 540px; max-width: 95%; text-align: left; padding: 28px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); color: var(--text-main, #1e293b);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main, #1e293b); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-user-check" style="color: #6366f1;"></i> <span id="rep-modal-title">Temsilci Ata</span>
+                </h3>
+                <button type="button" onclick="closeAssignRepModal()" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 16px; padding: 12px 14px; background: #f8fafc; border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px;">
+                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 2px;">Üniversite:</div>
+                <div id="rep_uni_name" style="font-weight: 700; color: #1e293b; font-size: 1.05rem;">-</div>
+                <div style="margin-top: 8px; font-size: 0.85rem; color: #64748b;">Mevcut Temsilci:</div>
+                <div id="rep_current_name" style="font-weight: 600; color: #0284c7; font-size: 0.95rem;">-</div>
+            </div>
+
+            <input type="hidden" id="rep_uni_id">
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Kullanıcı Ara</label>
+                <input type="text" id="rep-user-search-input" class="form-control" placeholder="İsim veya e-posta ile filtrele..." oninput="filterRepUserCandidates(this.value)">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 22px;">
+                <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; color: #475569;">Atanacak Kullanıcıyı Seçiniz *</label>
+                <select id="rep_selected_user_id" class="form-control" size="6" style="height: 160px; padding: 8px;">
+                    <option value="">Kullanıcılar yükleniyor...</option>
+                </select>
+                <small style="color: #64748b; display: block; margin-top: 6px;">Seçilen kullanıcı ilgili üniversiteye bağlanacak ve yetkisi Üniversite Temsilcisi yapılacaktır.</small>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <button type="button" id="btn-remove-rep" class="btn btn-danger" style="display: none; padding: 8px 14px;" onclick="handleRemoveRepresentative()"><i class="ph ph-user-minus"></i> Temsilciyi Kaldır</button>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn" style="background: #f1f5f9; color: #475569;" onclick="closeAssignRepModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="handleSaveRepresentative()"><i class="ph ph-check"></i> Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. University Detail Modal -->
+    <div class="modal-overlay" id="uniDetailModal">
+        <div class="modal-box" style="width: 600px; max-width: 95%; text-align: left; padding: 28px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); color: var(--text-main, #1e293b);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main, #1e293b); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-info" style="color: #6366f1;"></i> Üniversite Detayları
+                </h3>
+                <button type="button" onclick="closeUniversityDetailModal()" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color, #e2e8f0);">
+                <div id="detail_logo_box" style="width: 64px; height: 64px; border-radius: 14px; background: #f8fafc; border: 1px solid var(--border-color, #e2e8f0); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                    <h2 id="detail_name" style="margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--text-main, #1e293b);">-</h2>
+                    <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                        <code id="detail_slug" style="background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: #475569;">-</code>
+                        <span id="detail_status_badge">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="font-weight: 600; font-size: 0.85rem; color: #64748b; text-transform: uppercase;">Açıklama</label>
+                <p id="detail_desc" style="margin: 6px 0 0 0; color: #334155; line-height: 1.5; font-size: 0.95rem;">-</p>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border-color, #e2e8f0);">
+                <label style="font-weight: 600; font-size: 0.85rem; color: #64748b; text-transform: uppercase;">Üniversite Temsilcisi</label>
+                <div id="detail_rep_box" style="margin-top: 8px; display: flex; align-items: center; gap: 12px;">
+                    -
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div style="background: #eff6ff; padding: 12px; border-radius: 10px; text-align: center;">
+                    <div id="detail_member_count" style="font-size: 1.4rem; font-weight: 800; color: #2563eb;">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">Ekip Üyesi</div>
+                </div>
+                <div style="background: #fef2f2; padding: 12px; border-radius: 10px; text-align: center;">
+                    <div id="detail_author_count" style="font-size: 1.4rem; font-weight: 800; color: #dc2626;">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">Yazar Sayısı</div>
+                </div>
+                <div style="background: #ecfdf5; padding: 12px; border-radius: 10px; text-align: center;">
+                    <div id="detail_published_count" style="font-size: 1.4rem; font-weight: 800; color: #059669;">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">Yayınlanan İçerik</div>
+                </div>
+                <div style="background: #f5f3ff; padding: 12px; border-radius: 10px; text-align: center;">
+                    <div id="detail_article_count" style="font-size: 1.4rem; font-weight: 800; color: #7c3aed;">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">Toplam Makale</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid var(--border-color, #f1f5f9); padding-top: 14px; margin-bottom: 20px;">
+                <div>Oluşturulma: <span id="detail_created_at">-</span></div>
+                <div>Güncellenme: <span id="detail_updated_at">-</span></div>
+            </div>
+
+            <div style="text-align: right;">
+                <button type="button" class="btn btn-primary" onclick="closeUniversityDetailModal()">Kapat</button>
             </div>
         </div>
     </div>
@@ -3745,6 +4039,7 @@
             loadAllArticles(); // Added
             loadMenuItems();
             loadEmailSettings(); // Added
+            loadUniversities(); // Added for University Management
 
             // Force only dashboard active to fix layout glitch
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -4179,10 +4474,30 @@
                     roleBg = '#fee2e2';
                     roleColor = '#ef4444';
                 }
+                else if (u.role === 'chief_editor') {
+                    roleDisplay = 'Baş Editör';
+                    roleBg = '#fef3c7';
+                    roleColor = '#92400e';
+                }
                 else if (u.role === 'editor') {
                     roleDisplay = 'Editör';
                     roleBg = '#dcfce7';
                     roleColor = '#166534';
+                }
+                else if (u.role === 'university_representative') {
+                    roleDisplay = 'Üniversite Temsilcisi';
+                    roleBg = '#e0f2fe';
+                    roleColor = '#0369a1';
+                }
+                else if (u.role === 'university_editor') {
+                    roleDisplay = 'Üniversite Editörü';
+                    roleBg = '#f1f5f9';
+                    roleColor = '#475569';
+                }
+                else if (u.role === 'social_media_manager') {
+                    roleDisplay = 'Sosyal Medya';
+                    roleBg = '#f5f3ff';
+                    roleColor = '#7c3aed';
                 }
                 else if (u.role === 'author') {
                     roleDisplay = 'Yazar';
@@ -4231,18 +4546,22 @@
             const email = document.getElementById('new_email').value;
             const password = document.getElementById('new_password').value;
             const role = document.getElementById('new_role').value;
+            const university_id = document.getElementById('new_university_id') ? document.getElementById('new_university_id').value : null;
 
             try {
                 const res = await fetch(`${API_URL}/admin/users`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ fullname, email, password, role })
+                    body: JSON.stringify({ fullname, email, password, role, university_id })
                 });
                 if (res.ok) {
                     showToast('Kullanıcı eklendi', 'success');
                     document.getElementById('newUserForm').reset();
+                    const uniGroup = document.getElementById('new-user-uni-group');
+                    if (uniGroup) uniGroup.style.display = 'none';
                     document.getElementById('add-user-form').style.display = 'none';
                     loadUsers();
+                    if (typeof loadUniversities === 'function') loadUniversities();
                 } else {
                     const d = await res.json();
                     showToast(d.error || 'Hata', 'error');
@@ -5794,6 +6113,7 @@
                 if (sectionId === 'team-activity') loadTeamActivity();
                 if (sectionId === 'author-consents') loadAuthorConsents();
                 if (sectionId === 'change-author-password-section') loadAuthorsForPasswordReset();
+                if (sectionId === 'university-management') loadUniversities();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -7344,6 +7664,501 @@
             } catch (err) {
                 console.error('Delete consent error:', err);
                 alert('Silme hatası: ' + err.message);
+            }
+        }
+
+        // =========================================================================
+        // --- UNIVERSITIES MANAGEMENT (AperionX Stage 5 Admin UI) -----------------
+        // =========================================================================
+        let allUniversities = [];
+        let cachedUsersForRep = [];
+
+        async function loadUniversities() {
+            const tbody = document.getElementById('universities-table-body');
+            const badge = document.getElementById('uni-count-badge');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;"><i class="ph ph-spinner spinner"></i> Üniversiteler yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/universities`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                allUniversities = await res.json();
+                
+                updateUniversityStats(allUniversities);
+                renderUniversities(allUniversities);
+                populateNewUserUniversityDropdown();
+            } catch (e) {
+                console.error('Error loading universities:', e);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:#ef4444;">Üniversiteler yüklenirken hata oluştu: ${escapeHtml(e.message)}</td></tr>`;
+                if (badge) badge.innerText = 'Hata oluştu';
+            }
+        }
+
+        function updateUniversityStats(unis) {
+            const total = unis.length;
+            const active = unis.filter(u => u.status === 'active').length;
+            const reps = unis.filter(u => u.representative_user_id != null).length;
+            const members = unis.reduce((sum, u) => sum + (parseInt(u.member_count) || 0), 0);
+
+            const elTotal = document.getElementById('stat-total-uni');
+            const elActive = document.getElementById('stat-active-uni');
+            const elReps = document.getElementById('stat-total-rep');
+            const elMembers = document.getElementById('stat-total-members');
+
+            if (elTotal) elTotal.innerText = total;
+            if (elActive) elActive.innerText = active;
+            if (elReps) elReps.innerText = reps;
+            if (elMembers) elMembers.innerText = members;
+        }
+
+        function renderUniversities(unis) {
+            const tbody = document.getElementById('universities-table-body');
+            const badge = document.getElementById('uni-count-badge');
+            if (!tbody) return;
+
+            if (badge) badge.innerText = `Toplam ${unis.length} üniversite listelendi`;
+
+            if (!unis || unis.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;">Kayıtlı üniversite bulunamadı.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = unis.map(u => {
+                const isActive = u.status === 'active';
+                const statusBadge = isActive 
+                    ? `<span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="ph-fill ph-check-circle"></i> Aktif</span>`
+                    : `<span style="background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="ph-fill ph-x-circle"></i> Pasif</span>`;
+
+                const logoHtml = u.logo 
+                    ? `<img src="${escapeHtml(u.logo)}" alt="${escapeHtml(u.name)}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0;" onerror="this.onerror=null; this.src='/uploads/favicon.png';">`
+                    : `<div style="width: 38px; height: 38px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">${escapeHtml(u.name ? u.name.substring(0,2).toUpperCase() : 'UN')}</div>`;
+
+                const repHtml = u.representative_name 
+                    ? `<div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 28px; height: 28px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; overflow: hidden; flex-shrink: 0;">
+                            ${u.representative_avatar ? `<img src="${escapeHtml(u.representative_avatar)}" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(u.representative_name.substring(0,1).toUpperCase())}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.88rem; color: #1e293b;">${escapeHtml(u.representative_name)}</div>
+                            ${u.representative_email ? `<div style="font-size: 0.75rem; color: #94a3b8;">${escapeHtml(u.representative_email)}</div>` : ''}
+                        </div>
+                       </div>`
+                    : `<span style="background: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-style: italic;">Temsilci Atanmadı</span>`;
+
+                const dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : '-';
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--border-color, #f1f5f9); transition: background 0.15s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 14px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                ${logoHtml}
+                                <div>
+                                    <div style="font-weight: 700; color: var(--text-main, #1e293b); font-size: 0.95rem;">${escapeHtml(u.name)}</div>
+                                    ${u.description ? `<div style="font-size: 0.78rem; color: #64748b; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(u.description)}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px;">
+                            <code style="background: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.82rem; font-family: monospace;">${escapeHtml(u.slug)}</code>
+                        </td>
+                        <td style="padding: 14px;">${statusBadge}</td>
+                        <td style="padding: 14px;">${repHtml}</td>
+                        <td style="padding: 14px; text-align: center;">
+                            <span style="font-weight: 700; color: var(--text-main, #334155);">${u.member_count || 0}</span>
+                        </td>
+                        <td style="padding: 14px; text-align: center;">
+                            <span style="font-weight: 700; color: var(--text-main, #334155);">${u.author_count || 0}</span>
+                        </td>
+                        <td style="padding: 14px; color: #64748b; font-size: 0.85rem;">${dateStr}</td>
+                        <td style="padding: 14px; text-align: right;">
+                            <div style="display: inline-flex; gap: 6px; align-items: center;">
+                                <button class="btn btn-sm" style="background: #e0e7ff; color: #4338ca; padding: 6px 10px; border-radius: 8px;" title="Detay" onclick="openUniversityDetailModal(${u.id})">
+                                    <i class="ph ph-info"></i>
+                                </button>
+                                <button class="btn btn-sm" style="background: #f1f5f9; color: #334155; padding: 6px 10px; border-radius: 8px;" title="Düzenle" onclick="openEditUniversityModal(${u.id})">
+                                    <i class="ph ph-pencil-simple"></i>
+                                </button>
+                                <button class="btn btn-sm" style="background: ${u.representative_user_id ? '#e0f2fe' : '#fef3c7'}; color: ${u.representative_user_id ? '#0369a1' : '#b45309'}; padding: 6px 10px; border-radius: 8px;" title="${u.representative_user_id ? 'Temsilciyi Değiştir' : 'Temsilci Ata'}" onclick="openAssignRepModal(${u.id})">
+                                    <i class="ph ph-user-circle-gear"></i>
+                                </button>
+                                <button class="btn btn-sm" style="background: ${isActive ? '#fee2e2' : '#dcfce7'}; color: ${isActive ? '#ef4444' : '#16a34a'}; padding: 6px 10px; border-radius: 8px;" title="${isActive ? 'Pasif Yap' : 'Aktif Yap'}" onclick="toggleUniversityStatus(${u.id}, '${u.status}')">
+                                    <i class="ph ph-${isActive ? 'pause' : 'play'}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterUniversitiesList() {
+            const q = (document.getElementById('uni-search-input')?.value || '').toLowerCase().trim();
+            if (!q) {
+                renderUniversities(allUniversities);
+                return;
+            }
+            const filtered = allUniversities.filter(u => 
+                (u.name && u.name.toLowerCase().includes(q)) ||
+                (u.slug && u.slug.toLowerCase().includes(q)) ||
+                (u.representative_name && u.representative_name.toLowerCase().includes(q)) ||
+                (u.representative_email && u.representative_email.toLowerCase().includes(q))
+            );
+            renderUniversities(filtered);
+        }
+
+        function handleUniNameInput(val) {
+            const slugInput = document.getElementById('new_uni_slug');
+            if (!slugInput) return;
+            const generated = val.toLowerCase()
+                .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            slugInput.value = generated;
+        }
+
+        function openAddUniversityModal() {
+            const form = document.getElementById('uniAddForm');
+            if (form) form.reset();
+            const slugInput = document.getElementById('new_uni_slug');
+            if (slugInput) slugInput.value = '';
+            document.getElementById('uniAddModal').classList.add('show');
+        }
+
+        function closeAddUniversityModal() {
+            document.getElementById('uniAddModal').classList.remove('show');
+        }
+
+        async function handleSaveNewUniversity(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-new-uni');
+            if (btn) btn.disabled = true;
+
+            const name = document.getElementById('new_uni_name').value.trim();
+            const slug = document.getElementById('new_uni_slug').value.trim();
+            const logo = document.getElementById('new_uni_logo').value.trim();
+            const description = document.getElementById('new_uni_desc').value.trim();
+            const status = document.getElementById('new_uni_status').value;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/universities`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, slug, logo, description, status })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Üniversite başarıyla oluşturuldu.', 'success');
+                    closeAddUniversityModal();
+                    loadUniversities();
+                } else {
+                    showToast(data.error || 'Üniversite oluşturulamadı.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Sunucu hatası.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function openEditUniversityModal(id) {
+            const uni = allUniversities.find(u => u.id === id);
+            if (!uni) return;
+
+            document.getElementById('edit_uni_id').value = uni.id;
+            document.getElementById('edit_uni_name').value = uni.name || '';
+            document.getElementById('edit_uni_slug').value = uni.slug || '';
+            document.getElementById('edit_uni_logo').value = uni.logo || '';
+            document.getElementById('edit_uni_desc').value = uni.description || '';
+            document.getElementById('edit_uni_status').value = uni.status || 'active';
+
+            document.getElementById('uniEditModal').classList.add('show');
+        }
+
+        function closeEditUniversityModal() {
+            document.getElementById('uniEditModal').classList.remove('show');
+        }
+
+        async function handleSaveEditUniversity(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit_uni_id').value;
+            const btn = document.getElementById('btn-save-edit-uni');
+            if (btn) btn.disabled = true;
+
+            const name = document.getElementById('edit_uni_name').value.trim();
+            const slug = document.getElementById('edit_uni_slug').value.trim();
+            const logo = document.getElementById('edit_uni_logo').value.trim();
+            const description = document.getElementById('edit_uni_desc').value.trim();
+            const status = document.getElementById('edit_uni_status').value;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/universities/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, slug, logo, description, status })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Üniversite bilgileri güncellendi.', 'success');
+                    closeEditUniversityModal();
+                    loadUniversities();
+                } else {
+                    showToast(data.error || 'Güncelleme başarısız.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Sunucu hatası.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function toggleUniversityStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const actionLabel = newStatus === 'active' ? 'aktifleştirmek' : 'pasifleştirmek';
+            
+            showConfirmModal(`Bu üniversiteyi ${actionLabel} istediğinize emin misiniz?`, async () => {
+                try {
+                    const res = await fetch(`${API_URL}/admin/universities/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    if (res.ok) {
+                        showToast(`Üniversite ${newStatus === 'active' ? 'aktif' : 'pasif'} duruma getirildi.`, 'success');
+                        loadUniversities();
+                    } else {
+                        const data = await res.json();
+                        showToast(data.error || 'İşlem başarısız.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Sunucu hatası.', 'error');
+                }
+            });
+        }
+
+        async function openAssignRepModal(id) {
+            const uni = allUniversities.find(u => u.id === id);
+            if (!uni) return;
+
+            document.getElementById('rep_uni_id').value = uni.id;
+            document.getElementById('rep_uni_name').innerText = uni.name;
+            document.getElementById('rep_current_name').innerText = uni.representative_name 
+                ? `${uni.representative_name} (${uni.representative_email || ''})` 
+                : 'Atanmadı';
+            
+            document.getElementById('rep-modal-title').innerText = uni.representative_user_id ? 'Temsilciyi Değiştir' : 'Temsilci Ata';
+
+            const btnRemove = document.getElementById('btn-remove-rep');
+            if (btnRemove) {
+                btnRemove.style.display = uni.representative_user_id ? 'inline-block' : 'none';
+            }
+
+            const searchInput = document.getElementById('rep-user-search-input');
+            if (searchInput) searchInput.value = '';
+
+            const select = document.getElementById('rep_selected_user_id');
+            select.innerHTML = '<option value="">Yükleniyor...</option>';
+
+            document.getElementById('uniRepModal').classList.add('show');
+
+            // Fetch candidate users if not loaded
+            if (cachedUsersForRep.length === 0) {
+                try {
+                    const res = await fetch(`${API_URL}/admin/users`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        cachedUsersForRep = await res.json();
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            renderRepUserCandidates(cachedUsersForRep, uni.representative_user_id);
+        }
+
+        function renderRepUserCandidates(users, currentRepId) {
+            const select = document.getElementById('rep_selected_user_id');
+            if (!select) return;
+
+            if (!users || users.length === 0) {
+                select.innerHTML = '<option value="">Kullanıcı bulunamadı</option>';
+                return;
+            }
+
+            select.innerHTML = users.map(u => {
+                const isSelected = currentRepId && Number(u.id) === Number(currentRepId);
+                return `<option value="${u.id}" ${isSelected ? 'selected' : ''}>${escapeHtml(u.fullname)} - ${escapeHtml(u.email)} [${escapeHtml(u.role || 'user')}]</option>`;
+            }).join('');
+        }
+
+        function filterRepUserCandidates(q) {
+            const query = (q || '').toLowerCase().trim();
+            const uniId = Number(document.getElementById('rep_uni_id').value);
+            const uni = allUniversities.find(u => u.id === uniId);
+            const currentRepId = uni ? uni.representative_user_id : null;
+
+            if (!query) {
+                renderRepUserCandidates(cachedUsersForRep, currentRepId);
+                return;
+            }
+
+            const filtered = cachedUsersForRep.filter(u => 
+                (u.fullname && u.fullname.toLowerCase().includes(query)) ||
+                (u.email && u.email.toLowerCase().includes(query)) ||
+                (u.role && u.role.toLowerCase().includes(query))
+            );
+            renderRepUserCandidates(filtered, currentRepId);
+        }
+
+        function closeAssignRepModal() {
+            document.getElementById('uniRepModal').classList.remove('show');
+        }
+
+        async function handleSaveRepresentative() {
+            const uniId = document.getElementById('rep_uni_id').value;
+            const userId = document.getElementById('rep_selected_user_id').value;
+
+            if (!userId) {
+                return showToast('Lütfen atanacak bir kullanıcı seçin.', 'error');
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/universities/${uniId}/representative`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Üniversite temsilcisi başarıyla atandı.', 'success');
+                    closeAssignRepModal();
+                    loadUniversities();
+                } else {
+                    showToast(data.error || 'Atama başarısız.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Sunucu hatası.', 'error');
+            }
+        }
+
+        async function handleRemoveRepresentative() {
+            const uniId = document.getElementById('rep_uni_id').value;
+            showConfirmModal('Bu üniversitenin temsilci atamasını kaldırmak istediğinize emin misiniz?', async () => {
+                try {
+                    const res = await fetch(`${API_URL}/admin/universities/${uniId}/representative`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ user_id: null })
+                    });
+                    if (res.ok) {
+                        showToast('Temsilci ataması kaldırıldı.', 'success');
+                        closeAssignRepModal();
+                        loadUniversities();
+                    } else {
+                        const data = await res.json();
+                        showToast(data.error || 'İşlem başarısız.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Sunucu hatası.', 'error');
+                }
+            });
+        }
+
+        function openUniversityDetailModal(id) {
+            const u = allUniversities.find(item => item.id === id);
+            if (!u) return;
+
+            document.getElementById('detail_name').innerText = u.name;
+            document.getElementById('detail_slug').innerText = u.slug;
+            document.getElementById('detail_desc').innerText = u.description || 'Herhangi bir açıklama girilmemiş.';
+            
+            const logoBox = document.getElementById('detail_logo_box');
+            if (logoBox) {
+                logoBox.innerHTML = u.logo 
+                    ? `<img src="${escapeHtml(u.logo)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='/uploads/favicon.png';">`
+                    : `<span style="font-size: 1.5rem; font-weight: 700; color: #6366f1;">${escapeHtml(u.name ? u.name.substring(0, 2).toUpperCase() : 'UN')}</span>`;
+            }
+
+            const badgeEl = document.getElementById('detail_status_badge');
+            if (badgeEl) {
+                badgeEl.innerHTML = u.status === 'active'
+                    ? `<span style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:6px;font-size:0.8rem;font-weight:600;">Aktif</span>`
+                    : `<span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:6px;font-size:0.8rem;font-weight:600;">Pasif</span>`;
+            }
+
+            const repBox = document.getElementById('detail_rep_box');
+            if (repBox) {
+                if (u.representative_name) {
+                    repBox.innerHTML = `
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; overflow: hidden; flex-shrink: 0;">
+                            ${u.representative_avatar ? `<img src="${escapeHtml(u.representative_avatar)}" style="width:100%;height:100%;object-fit:cover;">` : escapeHtml(u.representative_name.substring(0,1).toUpperCase())}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: var(--text-main, #1e293b); font-size: 0.95rem;">${escapeHtml(u.representative_name)}</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">${escapeHtml(u.representative_email || 'E-posta yok')}</div>
+                        </div>
+                    `;
+                } else {
+                    repBox.innerHTML = `<span style="color: #94a3b8; font-style: italic; font-size: 0.9rem;">Henüz bir temsilci atanmamış.</span>`;
+                }
+            }
+
+            document.getElementById('detail_member_count').innerText = u.member_count || 0;
+            document.getElementById('detail_author_count').innerText = u.author_count || 0;
+            document.getElementById('detail_published_count').innerText = u.published_count || 0;
+            document.getElementById('detail_article_count').innerText = u.article_count || 0;
+
+            document.getElementById('detail_created_at').innerText = u.created_at ? new Date(u.created_at).toLocaleString('tr-TR') : '-';
+            document.getElementById('detail_updated_at').innerText = u.updated_at ? new Date(u.updated_at).toLocaleString('tr-TR') : '-';
+
+            document.getElementById('uniDetailModal').classList.add('show');
+        }
+
+        function closeUniversityDetailModal() {
+            document.getElementById('uniDetailModal').classList.remove('show');
+        }
+
+        function handleNewUserRoleChange(role) {
+            const uniRoles = ['university_representative', 'university_editor', 'social_media_manager', 'author'];
+            const uniGroup = document.getElementById('new-user-uni-group');
+            if (uniGroup) {
+                uniGroup.style.display = uniRoles.includes(role) ? 'block' : 'none';
+                if (uniRoles.includes(role)) populateNewUserUniversityDropdown();
+            }
+        }
+
+        function populateNewUserUniversityDropdown() {
+            const sel = document.getElementById('new_university_id');
+            if (!sel) return;
+            if (allUniversities && allUniversities.length > 0) {
+                const currentVal = sel.value;
+                sel.innerHTML = '<option value="">-- Üniversite Seçiniz --</option>' + 
+                    allUniversities.filter(u => u.status === 'active').map(u => 
+                        `<option value="${u.id}" ${currentVal == u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`
+                    ).join('');
             }
         }
     </script>
