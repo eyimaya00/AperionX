@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex">
     <title>AperionX Kampüs Ağı - Kampüs Koordinatörü Paneli</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
     <link rel="icon" type="image/png" href="/uploads/favicon.png" id="favicon">
+    <link rel="shortcut icon" href="/uploads/favicon.png">
+    <link rel="apple-touch-icon" href="/uploads/favicon-192x192.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=288"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=288"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288"></noscript>
     <link href="/author-modern.css?v=290" rel="stylesheet">
@@ -987,7 +992,7 @@
                         </div>
                         <div class="form-group">
                             <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
-                            <input type="email" id="member_email" class="form-control" placeholder="yazar@ekip.org" required>
+                            <input type="email" id="member_email" class="form-control" placeholder="yazar@aperionx.com" required>
                         </div>
                     </div>
 
@@ -1004,10 +1009,8 @@
                         <div class="form-group">
                             <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
                             <select id="member_campus_role" class="form-control" style="cursor: pointer;">
-                                <option value="Ekip Yazarı" selected>Ekip Yazarı (Yazar Paneline Giriş Yapar)</option>
-                                <option value="Kampüs Editörü">Kampüs Editörü (İçerik İnceleme & Yazar Paneli)</option>
-                                <option value="Araştırmacı">Araştırmacı Yazar</option>
-                                <option value="Proje Sorumlusu">Proje Sorumlusu</option>
+                                <option value="Ekip Yazarı" selected>Ekip Yazarı</option>
+                                <option value="Kampüs Editörü">Kampüs Editörü</option>
                             </select>
                         </div>
                     </div>
@@ -1303,9 +1306,24 @@
 
         // Sayfa Başlatma
         document.addEventListener('DOMContentLoaded', () => {
+            loadSiteSettings();
             initCoordinatorProfile();
             loadTeamMembers();
         });
+
+        async function loadSiteSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                if (!res.ok) return;
+                const settings = await res.json();
+                if (settings.site_favicon && settings.site_favicon.trim() !== '') {
+                    const fav = document.getElementById('favicon');
+                    if (fav) fav.href = settings.site_favicon;
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
 
         function initCoordinatorProfile() {
             if (!user) return;
