@@ -151,6 +151,13 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-profile:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
         .sidebar-avatar {
@@ -560,6 +567,101 @@
 
         .toast.success { border-left-color: #10b981; }
         .toast.error { border-left-color: #ef4444; }
+
+        /* PROFILE SECTION MODERN STYLES */
+        .profile-tabs-strip {
+            display: inline-flex;
+            background: rgba(15, 23, 42, 0.05);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        body.dark-mode .profile-tabs-strip {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .profile-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .profile-tab-btn:hover {
+            color: var(--primary-accent);
+        }
+
+        .profile-tab-btn.active {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .profile-avatar-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar-img {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-accent);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+            display: block;
+        }
+
+        .profile-avatar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .profile-avatar-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
     </style>
 </head>
 
@@ -581,8 +683,11 @@
         </a>
 
         <!-- COORDINATOR PROFILE PREVIEW -->
-        <div class="sidebar-profile">
-            <div class="sidebar-avatar" id="coord-avatar-letter">K</div>
+        <div class="sidebar-profile" onclick="showCoordSection('coord-settings', document.querySelector('.menu-item[onclick*=\'coord-settings\']'))" title="Profilimi Düzenle">
+            <div class="sidebar-avatar" id="coord-avatar-container" style="overflow: hidden; padding: 0;">
+                <img id="sidebar-coord-avatar-img" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                <span id="coord-avatar-letter">K</span>
+            </div>
             <div class="sidebar-profile-info">
                 <div class="sidebar-profile-name" id="sidebar-coord-name">Yükleniyor...</div>
                 <div class="sidebar-profile-role">
@@ -839,25 +944,168 @@
             </div>
         </section>
 
-        <!-- 6. PROFİL & ŞİFRE AYARLARI SECTION -->
+        <!-- 6. PROFİL & AYARLAR SECTION -->
         <section id="coord-settings" class="section">
-            <div class="card" style="max-width: 600px;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-key"></i> Şifre Değiştir</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">👤 Profilim</h1>
+                    <p style="margin: 0; font-size: 0.92rem; color: #64748b;">Koordinatör kimliğinizi, okul ve bölüm bilgilerinizi ve hesap ayarlarınızı yönetin.</p>
                 </div>
-                <form id="changePasswordForm" onsubmit="handleCoordinatorPasswordChange(event)">
-                    <div class="form-group">
-                        <label>E-posta Adresiniz</label>
-                        <input type="email" id="settings-email" class="form-control" disabled style="background: #f1f5f9; cursor: not-allowed;">
+            </div>
+
+            <!-- Sekme Seçici -->
+            <div class="profile-tabs-strip">
+                <button type="button" class="profile-tab-btn active" id="tab-btn-coord-profile" onclick="switchCoordinatorProfileTab('profile')">
+                    <i class="ph-fill ph-user"></i> Koordinatör Profilim
+                </button>
+                <button type="button" class="profile-tab-btn" id="tab-btn-coord-security" onclick="switchCoordinatorProfileTab('security')">
+                    <i class="ph-fill ph-lock-key"></i> Şifre & Güvenlik
+                </button>
+            </div>
+
+            <!-- TAB 1: KOORDİNATÖR PROFİLİ -->
+            <div id="coord-tab-profile">
+                <form id="coordinatorProfileForm" onsubmit="handleCoordinatorProfileUpdate(event)">
+                    <!-- Profil Fotoğrafı & Temel Bilgiler -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ph-fill ph-user-circle" style="color: var(--primary-accent);"></i>
+                                Temel Profil Bilgileri
+                            </h3>
+                            <span class="campus-badge">Profil Önizleme</span>
+                        </div>
+
+                        <!-- Profil Fotoğrafı Yükleme -->
+                        <div class="profile-avatar-row">
+                            <div class="profile-avatar-wrap">
+                                <img id="profile-avatar-preview" class="profile-avatar-img" src="/uploads/aperionx-a-transparent.png" alt="Profil Resmi">
+                            </div>
+                            <div>
+                                <label for="coordinator-avatar-file" class="profile-avatar-btn">
+                                    <i class="ph-bold ph-camera"></i> Fotoğraf Yükle / Güncelle
+                                </label>
+                                <input type="file" id="coordinator-avatar-file" accept="image/*" style="display: none;" onchange="previewCoordinatorAvatar(this)">
+                                <p style="margin: 8px 0 0; font-size: 0.82rem; color: #94a3b8;">Önerilen format: Kare 200x200px (JPG, PNG veya WEBP)</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>Ad Soyad</label>
+                                <input type="text" id="coord-profile-fullname" class="form-control" placeholder="Adınız ve Soyadınız" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Bağlı Olduğu Ekip / Topluluk</label>
+                                <input type="text" id="coord-profile-team" class="form-control" placeholder="Örn: AperionX İTÜ Ekibi">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 6px;">
+                            <label>Hakkımda / Kısa Biyografi</label>
+                            <textarea id="coord-profile-bio" class="form-control" rows="3" placeholder="Koordinatörlük çalışmalarınız, ilgi alanlarınız veya hedefleriniz hakkında kısa bilgi verin..."></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Yeni Şifre</label>
-                        <input type="password" id="new-password" class="form-control" placeholder="En az 6 karakterli yeni şifre" minlength="6" required>
+
+                    <!-- Okul & Akademik Bilgiler -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ph-fill ph-graduation-cap" style="color: #8b5cf6;"></i>
+                                Okul & Bölüm Bilgileri
+                            </h3>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>Okul / Üniversite</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-buildings" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8b5cf6; font-size: 1.2rem;"></i>
+                                    <input type="text" id="coord-profile-school" class="form-control" style="padding-left: 42px;" placeholder="Örn: İstanbul Teknik Üniversitesi">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Bölüm</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-books" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #8b5cf6; font-size: 1.2rem;"></i>
+                                    <input type="text" id="coord-profile-department" class="form-control" style="padding-left: 42px;" placeholder="Örn: Bilgisayar Mühendisliği">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Eğitim / Akademik Seviye</label>
+                                <select id="coord-profile-level" class="form-control" style="cursor: pointer;">
+                                    <option value="Lisans Öğrencisi">Lisans Öğrencisi</option>
+                                    <option value="Lisans Mezunu">Lisans Mezunu</option>
+                                    <option value="Yüksek Lisans Öğrencisi">Yüksek Lisans Öğrencisi</option>
+                                    <option value="Yüksek Lisans">Yüksek Lisans</option>
+                                    <option value="Doktora Öğrencisi">Doktora Öğrencisi</option>
+                                    <option value="Doktora / Araştırmacı">Doktora / Araştırmacı</option>
+                                    <option value="Akademisyen">Akademisyen</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>LinkedIn Profili</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-linkedin-logo" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #0077b5; font-size: 1.2rem;"></i>
+                                    <input type="url" id="coord-profile-linkedin" class="form-control" style="padding-left: 42px;" placeholder="https://www.linkedin.com/in/kullanici">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" id="btn-save-pw" class="btn btn-primary">
-                        <i class="ph ph-check-circle"></i> Şifreyi Güncelle
-                    </button>
+
+                    <!-- İletişim Bilgileri -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ph-fill ph-envelope" style="color: #10b981;"></i>
+                                İletişim Bilgileri
+                            </h3>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>Giriş / Hesap E-postası (Salt Okunur)</label>
+                                <input type="email" id="coord-profile-account-email" class="form-control" disabled style="background: #f1f5f9; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label>İletişim / Görünür E-posta</label>
+                                <div style="position: relative;">
+                                    <i class="ph-fill ph-envelope-simple" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #10b981; font-size: 1.2rem;"></i>
+                                    <input type="email" id="coord-profile-public-email" class="form-control" style="padding-left: 42px;" placeholder="iletisim@ekip.org">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px; margin-bottom: 30px;">
+                        <button type="submit" id="btn-save-coord-profile" class="btn btn-primary" style="padding: 13px 30px; font-size: 1rem; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+                            <i class="ph ph-floppy-disk"></i> Profil Bilgilerini Kaydet
+                        </button>
+                    </div>
                 </form>
+            </div>
+
+            <!-- TAB 2: ŞİFRE & GÜVENLİK -->
+            <div id="coord-tab-security" style="display: none;">
+                <div class="card" style="max-width: 650px;">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ph ph-key" style="color: var(--primary-accent);"></i> Şifre Değiştir</h3>
+                    </div>
+                    <form id="changePasswordForm" onsubmit="handleCoordinatorPasswordChange(event)">
+                        <div class="form-group">
+                            <label>Hesap E-posta Adresiniz</label>
+                            <input type="email" id="settings-email" class="form-control" disabled style="background: #f1f5f9; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Yeni Güvenli Şifre</label>
+                            <input type="password" id="new-password" class="form-control" placeholder="En az 6 karakterli yeni şifre" minlength="6" required>
+                        </div>
+                        <button type="submit" id="btn-save-pw" class="btn btn-primary">
+                            <i class="ph ph-check-circle"></i> Şifreyi Güncelle
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     </main>
@@ -886,12 +1134,34 @@
             const name = user.fullname || user.username || 'Koordinatör';
             const email = user.email || '';
             const team = user.university || user.team_name || 'Belirtilmemiş Ekip';
+            const school = user.university || '';
+            const department = user.department || '';
+            const academicLevel = user.academic_level || 'Lisans Öğrencisi';
+            const bio = user.bio || '';
+            const linkedin = user.linkedin_url || '';
+            const publicEmail = user.public_email || user.email || '';
+            const avatarUrl = user.avatar_url || '';
 
             // Sidebar
             const sidebarName = document.getElementById('sidebar-coord-name');
             if (sidebarName) sidebarName.innerText = name;
             const avatarLetter = document.getElementById('coord-avatar-letter');
-            if (avatarLetter) avatarLetter.innerText = name.charAt(0).toUpperCase();
+            const sidebarImg = document.getElementById('sidebar-coord-avatar-img');
+
+            if (avatarUrl && avatarUrl.trim() !== '') {
+                const formattedSrc = (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) ? avatarUrl : '/' + avatarUrl;
+                if (sidebarImg) {
+                    sidebarImg.src = formattedSrc;
+                    sidebarImg.style.display = 'block';
+                }
+                if (avatarLetter) avatarLetter.style.display = 'none';
+            } else {
+                if (sidebarImg) sidebarImg.style.display = 'none';
+                if (avatarLetter) {
+                    avatarLetter.style.display = 'block';
+                    avatarLetter.innerText = name.charAt(0).toUpperCase();
+                }
+            }
 
             // Topbar & Hero
             const heroName = document.getElementById('hero-coord-name');
@@ -903,7 +1173,7 @@
             const statTeam = document.getElementById('stat-team-name');
             if (statTeam) statTeam.innerText = team;
 
-            // Details card
+            // Details card in overview
             const infoName = document.getElementById('info-coord-name');
             if (infoName) infoName.innerText = name;
             const infoEmail = document.getElementById('info-coord-email');
@@ -915,9 +1185,131 @@
             const sectionTeamName = document.getElementById('section-team-name');
             if (sectionTeamName) sectionTeamName.innerText = team;
 
-            // Settings
+            // Profile Form Fields
+            const fieldFullname = document.getElementById('coord-profile-fullname');
+            if (fieldFullname) fieldFullname.value = name;
+            const fieldTeam = document.getElementById('coord-profile-team');
+            if (fieldTeam) fieldTeam.value = team;
+            const fieldBio = document.getElementById('coord-profile-bio');
+            if (fieldBio) fieldBio.value = bio;
+            const fieldSchool = document.getElementById('coord-profile-school');
+            if (fieldSchool) fieldSchool.value = school;
+            const fieldDept = document.getElementById('coord-profile-department');
+            if (fieldDept) fieldDept.value = department;
+            const fieldLevel = document.getElementById('coord-profile-level');
+            if (fieldLevel) fieldLevel.value = academicLevel;
+            const fieldLinkedin = document.getElementById('coord-profile-linkedin');
+            if (fieldLinkedin) fieldLinkedin.value = linkedin;
+            const fieldAccountEmail = document.getElementById('coord-profile-account-email');
+            if (fieldAccountEmail) fieldAccountEmail.value = email;
+            const fieldPublicEmail = document.getElementById('coord-profile-public-email');
+            if (fieldPublicEmail) fieldPublicEmail.value = publicEmail;
+
+            // Profile Avatar Preview
+            const previewImg = document.getElementById('profile-avatar-preview');
+            if (previewImg && avatarUrl) {
+                previewImg.src = (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) ? avatarUrl : '/' + avatarUrl;
+            }
+
+            // Security Tab Settings Email
             const settingsEmail = document.getElementById('settings-email');
             if (settingsEmail) settingsEmail.value = email;
+        }
+
+        // Profile Tabs Switcher (Profile vs Security)
+        function switchCoordinatorProfileTab(tab) {
+            const tabProfile = document.getElementById('coord-tab-profile');
+            const tabSecurity = document.getElementById('coord-tab-security');
+            const btnProfile = document.getElementById('tab-btn-coord-profile');
+            const btnSecurity = document.getElementById('tab-btn-coord-security');
+
+            if (tab === 'profile') {
+                if (tabProfile) tabProfile.style.display = 'block';
+                if (tabSecurity) tabSecurity.style.display = 'none';
+                if (btnProfile) btnProfile.classList.add('active');
+                if (btnSecurity) btnSecurity.classList.remove('active');
+            } else {
+                if (tabProfile) tabProfile.style.display = 'none';
+                if (tabSecurity) tabSecurity.style.display = 'block';
+                if (btnProfile) btnProfile.classList.remove('active');
+                if (btnSecurity) btnSecurity.classList.add('active');
+            }
+        }
+
+        // Live Photo Preview
+        function previewCoordinatorAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('profile-avatar-preview');
+                    if (preview) preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Handle Profile Form Submission (PUT /api/profile)
+        async function handleCoordinatorProfileUpdate(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-coord-profile');
+            const fullname = document.getElementById('coord-profile-fullname') ? document.getElementById('coord-profile-fullname').value.trim() : '';
+            const team = document.getElementById('coord-profile-team') ? document.getElementById('coord-profile-team').value.trim() : '';
+            const school = document.getElementById('coord-profile-school') ? document.getElementById('coord-profile-school').value.trim() : '';
+            const department = document.getElementById('coord-profile-department') ? document.getElementById('coord-profile-department').value.trim() : '';
+            const academicLevel = document.getElementById('coord-profile-level') ? document.getElementById('coord-profile-level').value : '';
+            const bio = document.getElementById('coord-profile-bio') ? document.getElementById('coord-profile-bio').value : '';
+            const linkedinUrl = document.getElementById('coord-profile-linkedin') ? document.getElementById('coord-profile-linkedin').value.trim() : '';
+            const publicEmail = document.getElementById('coord-profile-public-email') ? document.getElementById('coord-profile-public-email').value.trim() : '';
+            const avatarFileInput = document.getElementById('coordinator-avatar-file');
+
+            const formData = new FormData();
+            formData.append('fullname', fullname);
+            // We use team as university in DB, or school if entered
+            formData.append('university', team || school);
+            formData.append('department', department);
+            formData.append('academic_level', academicLevel);
+            formData.append('bio', bio);
+            formData.append('linkedin_url', linkedinUrl);
+            formData.append('public_email', publicEmail);
+            formData.append('job_title', 'Kampüs Koordinatörü' + (team ? ` - ${team}` : ''));
+
+            if (avatarFileInput && avatarFileInput.files[0]) {
+                formData.append('avatar', avatarFileInput.files[0]);
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph ph-spinner spinner"></i> Kaydediliyor...';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Profil bilgileriniz başarıyla güncellendi!', 'success');
+                    if (data.user) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        // Re-initialize UI with updated data
+                        window.location.reload();
+                    }
+                } else {
+                    showToast(data.message || 'Profil güncellenemedi.', 'error');
+                }
+            } catch (err) {
+                showToast('Hata oluştu: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Profil Bilgilerini Kaydet';
+                }
+            }
         }
 
         // Section Switcher
