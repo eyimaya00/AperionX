@@ -1216,6 +1216,8 @@ if (loginForm) {
                     setTimeout(() => window.location.href = '/admin', 1000);
                 } else if (data.user.role === 'campus_coordinator') {
                     setTimeout(() => window.location.href = '/campus-coordinator', 1000);
+                } else if (data.user.role === 'campus_editor') {
+                    setTimeout(() => window.location.href = '/campus-editor', 1000);
                 } else if (data.user.role === 'editor') {
                     setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {

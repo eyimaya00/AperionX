@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex">
+    <title>AperionX Kampüs Ağı - Kampüs Editörü Paneli</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/uploads/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/favicon-192x192.png">
+    <link rel="icon" type="image/png" href="/uploads/favicon.png" id="favicon">
+    <link rel="shortcut icon" href="/uploads/favicon.png">
+    <link rel="apple-touch-icon" href="/uploads/favicon-192x192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css?v=288"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css?v=288"></noscript><link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288"></noscript>
+    <link href="/author-modern.css?v=290" rel="stylesheet">
+
+    <script>
+        // Instant Dark Mode Initialization
+        (function () {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const savedTheme = localStorage.getItem('theme');
+            if (savedDarkMode !== 'false' && savedTheme !== 'light') {
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
+    <style>
+        :root {
+            --admin-bg: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --primary-accent: #6366f1;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --topbar-bg: rgba(255, 255, 255, 0.85);
+            --header-border: #e2e8f0;
+        }
+
+        html.dark-mode {
+            --admin-bg: #0b0f19;
+            --sidebar-bg: #060911;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #111827;
+            --primary-accent: #818cf8;
+            --card-bg: #111827;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #1f2937;
+            --topbar-bg: rgba(17, 24, 39, 0.85);
+            --header-border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 270px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .sidebar-brand span {
+            color: var(--primary-accent);
+        }
+
+        .sidebar-profile {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .profile-avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+        }
+
+        .profile-avatar-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 3px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 16px 12px;
+            list-style: none;
+            overflow-y: auto;
+        }
+
+        .menu-category {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #475569;
+            padding: 12px 14px 6px;
+            letter-spacing: 0.8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 3px;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background-color: var(--sidebar-hover);
+            color: #ffffff;
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+            color: #ffffff;
+            font-weight: 600;
+            border-left: 3px solid var(--primary-accent);
+        }
+
+        .menu-item i {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            transition: color 0.2s ease;
+        }
+
+        .menu-item:hover i,
+        .menu-item.active i {
+            color: var(--primary-accent);
+        }
+
+        .menu-item .badge-count {
+            margin-left: auto;
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: 270px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 270px);
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 70px;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--header-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .breadcrumb {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breadcrumb strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .campus-badge-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-accent);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Content Sections */
+        .content-area {
+            padding: 32px;
+            flex: 1;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            border-radius: 18px;
+            padding: 32px 36px;
+            color: #ffffff;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -5px rgba(67, 56, 202, 0.3);
+        }
+
+        .hero-banner h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-banner p {
+            color: #c7d2fe;
+            font-size: 0.98rem;
+            max-width: 750px;
+            line-height: 1.5;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+        .stat-icon.amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+
+        .stat-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        /* Cards & Tables */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 28px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.9rem;
+        }
+
+        .custom-table th {
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .custom-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending-campus {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.published {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-accent);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #059669;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-warning {
+            background: #d97706;
+            color: #ffffff;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 850px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalPop 0.25s ease;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px 26px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-body {
+            padding: 26px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.7;
+        }
+
+        .modal-footer {
+            padding: 18px 26px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        /* Form Inputs */
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-accent);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            border-radius: 10px;
+            background: #1e293b;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: #065f46; color: #a7f3d0; border: 1px solid #059669; }
+        .toast.error { background: #991b1b; color: #fecaca; border: 1px solid #dc2626; }
+        .toast.warning { background: #92400e; color: #fde68a; border: 1px solid #d97706; }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; width: 100%; }
+            .mobile-menu-btn { display: block; }
+            .topbar { padding: 0 20px; }
+            .content-area { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span style="font-size: 1.7rem; color: var(--primary-accent);"><i class="ph ph-shield-check"></i></span>
+            <div>
+                <h2>Aperion<span>X</span></h2>
+                <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Kampüs Editörü Paneli</div>
+            </div>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar-circle" id="coord-avatar-circle">
+                <span id="coord-avatar-letter">E</span>
+                <img id="sidebar-coord-avatar-img" src="" alt="Avatar" style="display: none;">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" id="sidebar-coord-name">Kampüs Editörü</div>
+                <div class="profile-role-badge">
+                    <i class="ph ph-shield-star"></i> Kampüs Editörü
+                </div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="menu-category">İçerik İnceleme & Köprü</li>
+            <li>
+                <a class="menu-item active" onclick="showSection('sec-dashboard', this)">
+                    <i class="ph ph-squares-four"></i> Genel Bakış
+                </a>
+            </li>
+            <li>
+                <a class="menu-item" onclick="showSection('sec-articles', this)">
+                    <i class="ph ph-article"></i> Makale İncelemeleri
+                    <span class="badge-count" id="badge-articles">0</span>
+                </a>
+            </li>
+            <li>
+                <a class="menu-item" onclick="showSection('sec-experiments', this)">
+                    <i class="ph ph-flask"></i> Deney İncelemeleri
+                    <span class="badge-count" id="badge-experiments">0</span>
+                </a>
+            </li>
+            <li>
+                <a class="menu-item" onclick="showSection('sec-gundem', this)">
+                    <i class="ph ph-newspaper"></i> Gündem İncelemeleri
+                    <span class="badge-count" id="badge-gundem">0</span>
+                </a>
+            </li>
+            <li>
+                <a class="menu-item" onclick="showSection('sec-history', this)">
+                    <i class="ph ph-clock-counter-clockwise"></i> İnceleme Geçmişi
+                </a>
+            </li>
+
+            <li class="menu-category">Yazar İşlemleri</li>
+            <li>
+                <a href="/author" class="menu-item" style="color: #38bdf8;">
+                    <i class="ph ph-pencil-line" style="color: #38bdf8;"></i> Yazar Paneli (Yayın Yaz)
+                </a>
+            </li>
+
+            <li class="menu-category">Hesap & Güvenlik</li>
+            <li>
+                <a class="menu-item" onclick="showSection('sec-settings', this)">
+                    <i class="ph ph-gear"></i> Şifre & Güvenlik
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button type="button" onclick="logout()" class="btn-logout">
+                <i class="ph ph-sign-out"></i> Güvenli Çıkış
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="ph ph-list"></i>
+                </button>
+                <div class="breadcrumb">
+                    <span>AperionX Kampüs Ağı</span>
+                    <i class="ph ph-caret-right" style="font-size: 0.8rem;"></i>
+                    <strong id="breadcrumb-title">Genel Bakış</strong>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="campus-badge-top" id="topbar-campus-name">
+                    <i class="ph ph-graduation-cap"></i> Kampüs Ekibi
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <main class="content-area">
+            <!-- 1. GENEL BAKIŞ (DASHBOARD) -->
+            <section id="sec-dashboard" class="section active">
+                <div class="hero-banner">
+                    <h1>Hoş Geldiniz, <span id="hero-user-name">Editör</span>! 👋</h1>
+                    <p>
+                        Kampüs Yazarlarınızın hazırladığı makale, deney ve bilim gündemi içerikleri bu panelde onayınızı bekler.
+                        İncelediğiniz yayınları tek tıkla <strong>Baş Editör</strong> onayına iletebilir veya revizyon notuyla yazara geri gönderebilirsiniz.
+                    </p>
+                </div>
+
+                <!-- STATS -->
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="showSection('sec-articles', document.querySelectorAll('.menu-item')[1])">
+                        <div class="stat-icon purple"><i class="ph ph-article"></i></div>
+                        <div>
+                            <div class="stat-title">Bekleyen Makaleler</div>
+                            <div class="stat-value" id="stat-articles-count">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showSection('sec-experiments', document.querySelectorAll('.menu-item')[2])">
+                        <div class="stat-icon blue"><i class="ph ph-flask"></i></div>
+                        <div>
+                            <div class="stat-title">Bekleyen Deneyler</div>
+                            <div class="stat-value" id="stat-experiments-count">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showSection('sec-gundem', document.querySelectorAll('.menu-item')[3])">
+                        <div class="stat-icon amber"><i class="ph ph-newspaper"></i></div>
+                        <div>
+                            <div class="stat-title">Bekleyen Gündemler</div>
+                            <div class="stat-value" id="stat-gundem-count">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showSection('sec-history', document.querySelectorAll('.menu-item')[4])">
+                        <div class="stat-icon green"><i class="ph ph-check-circle"></i></div>
+                        <div>
+                            <div class="stat-title">İncelenen Toplam</div>
+                            <div class="stat-value" id="stat-history-count">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OVERVIEW RECENT LIST -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ph ph-clock" style="color: var(--primary-accent);"></i> Öncelikli İnceleme Bekleyenler</h3>
+                        <button class="btn btn-outline btn-sm" onclick="loadPendingData()">
+                            <i class="ph ph-arrows-clockwise"></i> Yenile
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Başlık & Tür</th>
+                                    <th>Yazar</th>
+                                    <th>Kategori</th>
+                                    <th>Gönderim Tarihi</th>
+                                    <th style="text-align: right;">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overview-pending-tbody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                                        Yükleniyor...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. MAKALELER -->
+            <section id="sec-articles" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ph ph-article" style="color: #8b5cf6;"></i>
+                            Kampüs Yazarlarından Bekleyen Makaleler (<span id="articles-list-count">0</span>)
+                        </h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Makale Başlığı</th>
+                                    <th>Kampüs Yazarı</th>
+                                    <th>Kategori</th>
+                                    <th>Gönderim Tarihi</th>
+                                    <th style="text-align: right;">Aksiyon</th>
+                                </tr>
+                            </thead>
+                            <tbody id="articles-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. DENEYLER -->
+            <section id="sec-experiments" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ph ph-flask" style="color: #3b82f6;"></i>
+                            Kampüs Yazarlarından Bekleyen Deneyler (<span id="experiments-list-count">0</span>)
+                        </h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Deney Başlığı</th>
+                                    <th>Kampüs Yazarı</th>
+                                    <th>Kategori</th>
+                                    <th>Tarih</th>
+                                    <th style="text-align: right;">Aksiyon</th>
+                                </tr>
+                            </thead>
+                            <tbody id="experiments-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. BİLİM GÜNDEMİ -->
+            <section id="sec-gundem" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ph ph-newspaper" style="color: #f59e0b;"></i>
+                            Kampüs Yazarlarından Bekleyen Bilim Gündemleri (<span id="gundem-list-count">0</span>)
+                        </h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Gündem Başlığı</th>
+                                    <th>Kampüs Yazarı</th>
+                                    <th>Kategori</th>
+                                    <th>Tarih</th>
+                                    <th style="text-align: right;">Aksiyon</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gundem-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. İNCELEME GEÇMİŞİ -->
+            <section id="sec-history" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ph ph-clock-counter-clockwise" style="color: #10b981;"></i>
+                            İnceleme & İletim Geçmişi
+                        </h3>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Son 50 işlem listelenir</span>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Başlık</th>
+                                    <th>Yazar</th>
+                                    <th>Kategori</th>
+                                    <th>Mevcut Durum</th>
+                                    <th>İnceleme / Yayın Tarihi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. ŞİFRE & GÜVENLİK -->
+            <section id="sec-settings" class="section">
+                <div class="card" style="max-width: 600px;">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ph ph-lock-key"></i> Şifre Değiştir</h3>
+                    </div>
+                    <form onsubmit="handlePasswordChange(event)">
+                        <div style="margin-bottom: 18px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 500;">Yeni Şifre <span style="color: #ef4444;">*</span></label>
+                            <input type="password" id="new-password" class="form-control" placeholder="En az 6 karakterli yeni şifre" minlength="6" required>
+                        </div>
+                        <button type="submit" id="btn-save-pw" class="btn btn-primary">
+                            <i class="ph ph-check"></i> Şifreyi Güncelle
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <span class="status-badge pending-campus" id="modal-item-type-badge">Makale</span>
+                    <h3 id="modal-item-title" style="margin-top: 6px; font-size: 1.25rem;">İçerik Başlığı</h3>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                        <span id="modal-item-author">Yazar Adı</span> • <span id="modal-item-campus">Kampüs</span> • <span id="modal-item-date">Tarih</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeReviewModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-item-body">
+                <!-- Dynamic Content Preview -->
+            </div>
+            <div class="modal-footer" id="modal-actions-bar">
+                <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Kapat</button>
+                <button type="button" class="btn btn-warning" onclick="openRevisionBox()">
+                    <i class="ph ph-arrow-u-up-left"></i> Düzeltme İste
+                </button>
+                <button type="button" class="btn btn-success" onclick="confirmForwardToChiefEditor()">
+                    <i class="ph ph-paper-plane-tilt"></i> Baş Editöre Gönder
+                </button>
+            </div>
+            <!-- REVISION REASON SUB-PANEL -->
+            <div id="modal-revision-panel" style="display: none; padding: 20px 26px; border-top: 1px solid var(--border-color); background: rgba(245, 158, 11, 0.05);">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.88rem; color: #b45309;">
+                    <i class="ph ph-warning"></i> Düzeltme Notu & Gerekçe (Yazara İletilecek):
+                </label>
+                <textarea id="revision-note-input" class="form-control" placeholder="Örn: 2. paragraftaki kaynak referansını kontrol edip yeniden düzenleyiniz..." rows="3"></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="closeRevisionBox()">Vazgeç</button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="submitRevisionToAuthor()">
+                        <i class="ph ph-check"></i> Düzeltme Talebini Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOASTS -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        const API_URL = '/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        // Access control: only campus_editor, campus_coordinator, or admin
+        if (!token || !user || (!['campus_editor', 'campus_coordinator', 'admin'].includes(user.role))) {
+            window.location.href = '/index.html';
+        }
+
+        let pendingDataCache = { articles: [], experiments: [], gundem: [] };
+        let activeModalItem = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUserProfile();
+            loadSiteSettings();
+            loadPendingData();
+            loadHistoryData();
+        });
+
+        function initUserProfile() {
+            if (!user) return;
+            const name = user.fullname || user.username || 'Kampüs Editörü';
+            const university = user.university || 'Kampüs Ekibi';
+
+            const nameEl = document.getElementById('sidebar-coord-name');
+            if (nameEl) nameEl.innerText = name;
+            const heroNameEl = document.getElementById('hero-user-name');
+            if (heroNameEl) heroNameEl.innerText = name;
+            const topCampus = document.getElementById('topbar-campus-name');
+            if (topCampus) topCampus.innerHTML = `<i class="ph ph-graduation-cap"></i> ${escapeHtml(university)}`;
+
+            const letterEl = document.getElementById('coord-avatar-letter');
+            const imgEl = document.getElementById('sidebar-coord-avatar-img');
+            if (user.avatar_url) {
+                const src = user.avatar_url.startsWith('http') || user.avatar_url.startsWith('/') ? user.avatar_url : '/' + user.avatar_url;
+                if (imgEl) { imgEl.src = src; imgEl.style.display = 'block'; }
+                if (letterEl) letterEl.style.display = 'none';
+            } else {
+                if (letterEl) letterEl.innerText = name.charAt(0).toUpperCase();
+            }
+        }
+
+        async function loadSiteSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                if (!res.ok) return;
+                const settings = await res.json();
+                if (settings.site_favicon && settings.site_favicon.trim() !== '') {
+                    const fav = document.getElementById('favicon');
+                    if (fav) fav.href = settings.site_favicon;
+                }
+            } catch (e) {}
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('active');
+        }
+
+        function showSection(sectionId, linkEl) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(sectionId);
+            if (target) target.classList.add('active');
+
+            if (linkEl) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                linkEl.classList.add('active');
+            }
+
+            const titleMap = {
+                'sec-dashboard': 'Genel Bakış',
+                'sec-articles': 'Makale İncelemeleri',
+                'sec-experiments': 'Deney İncelemeleri',
+                'sec-gundem': 'Gündem İncelemeleri',
+                'sec-history': 'İnceleme Geçmişi',
+                'sec-settings': 'Şifre & Güvenlik'
+            };
+            const breadcrumb = document.getElementById('breadcrumb-title');
+            if (breadcrumb && titleMap[sectionId]) {
+                breadcrumb.innerText = titleMap[sectionId];
+            }
+
+            if (window.innerWidth <= 991) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar) sidebar.classList.remove('active');
+            }
+        }
+
+        // Fetch Pending Data
+        async function loadPendingData() {
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/pending`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/index.html';
+                    return;
+                }
+
+                const data = await res.json();
+                pendingDataCache = data;
+
+                // Update Badges & Counts
+                const artCount = data.articles?.length || 0;
+                const expCount = data.experiments?.length || 0;
+                const gunCount = data.gundem?.length || 0;
+
+                document.getElementById('badge-articles').innerText = artCount;
+                document.getElementById('badge-experiments').innerText = expCount;
+                document.getElementById('badge-gundem').innerText = gunCount;
+
+                document.getElementById('stat-articles-count').innerText = artCount;
+                document.getElementById('stat-experiments-count').innerText = expCount;
+                document.getElementById('stat-gundem-count').innerText = gunCount;
+
+                document.getElementById('articles-list-count').innerText = artCount;
+                document.getElementById('experiments-list-count').innerText = expCount;
+                document.getElementById('gundem-list-count').innerText = gunCount;
+
+                renderOverviewTable(data);
+                renderArticlesTable(data.articles || []);
+                renderExperimentsTable(data.experiments || []);
+                renderGundemTable(data.gundem || []);
+            } catch (err) {
+                console.error('loadPendingData error:', err);
+                showToast('Veriler yüklenirken hata oluştu: ' + err.message, 'error');
+            }
+        }
+
+        function renderOverviewTable(data) {
+            const tbody = document.getElementById('overview-pending-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const combined = [
+                ...(data.articles || []).map(a => ({ ...a, itemType: 'article', typeName: 'Makale', typeBadge: 'purple' })),
+                ...(data.experiments || []).map(e => ({ ...e, itemType: 'experiment', typeName: 'Deney', typeBadge: 'blue' })),
+                ...(data.gundem || []).map(g => ({ ...g, itemType: 'gundem', typeName: 'Gündem', typeBadge: 'amber' }))
+            ];
+
+            if (combined.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <i class="ph ph-check-circle" style="font-size: 2.2rem; color: #10b981; display: block; margin-bottom: 8px;"></i>
+                            Harika! Şu anda kampüsünüzden onay bekleyen yeni bir içerik bulunmuyor.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            combined.slice(0, 10).forEach(item => {
+                const tr = document.createElement('tr');
+                const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('tr-TR') : '-';
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">${escapeHtml(item.title)}</div>
+                        <span class="status-badge" style="background: rgba(99,102,241,0.12); color: var(--primary-accent); font-size: 0.72rem;">${item.typeName}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">${escapeHtml(item.author_name || 'Kampüs Yazarı')}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(item.author_university || '-')}</div>
+                    </td>
+                    <td><span style="font-size: 0.85rem;">${escapeHtml(item.category || '-')}</span></td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${dateStr}</td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openReviewModal('${item.itemType}', ${item.id})">
+                            <i class="ph ph-eye"></i> İncele
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderArticlesTable(articles) {
+            const tbody = document.getElementById('articles-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (articles.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Bekleyen makale yok.</td></tr>`;
+                return;
+            }
+
+            articles.forEach(a => {
+                const tr = document.createElement('tr');
+                const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('tr-TR') : '-';
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${escapeHtml(a.title)}</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(a.excerpt || '')}</div>
+                    </td>
+                    <td><strong>${escapeHtml(a.author_name || 'Yazar')}</strong></td>
+                    <td>${escapeHtml(a.category || '-')}</td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${dateStr}</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openReviewModal('article', ${a.id})">
+                            <i class="ph ph-eye"></i> İncele
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" onclick="quickForward('article', ${a.id}, '${escapeHtml(a.title)}')">
+                            <i class="ph ph-paper-plane-tilt"></i> Baş Editöre Gönder
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderExperimentsTable(experiments) {
+            const tbody = document.getElementById('experiments-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (experiments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Bekleyen deney yok.</td></tr>`;
+                return;
+            }
+
+            experiments.forEach(e => {
+                const tr = document.createElement('tr');
+                const dateStr = e.created_at ? new Date(e.created_at).toLocaleDateString('tr-TR') : '-';
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${escapeHtml(e.title)}</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(e.objective || e.excerpt || '')}</div>
+                    </td>
+                    <td><strong>${escapeHtml(e.author_name || 'Yazar')}</strong></td>
+                    <td>${escapeHtml(e.category || '-')}</td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${dateStr}</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openReviewModal('experiment', ${e.id})">
+                            <i class="ph ph-eye"></i> İncele
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" onclick="quickForward('experiment', ${e.id}, '${escapeHtml(e.title)}')">
+                            <i class="ph ph-paper-plane-tilt"></i> Baş Editöre Gönder
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderGundemTable(gundem) {
+            const tbody = document.getElementById('gundem-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (gundem.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Bekleyen bilim gündemi yok.</td></tr>`;
+                return;
+            }
+
+            gundem.forEach(g => {
+                const tr = document.createElement('tr');
+                const dateStr = g.created_at ? new Date(g.created_at).toLocaleDateString('tr-TR') : '-';
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${escapeHtml(g.title)}</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(g.excerpt || '')}</div>
+                    </td>
+                    <td><strong>${escapeHtml(g.author_name || 'Yazar')}</strong></td>
+                    <td>${escapeHtml(g.category || 'Gündem')}</td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${dateStr}</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openReviewModal('gundem', ${g.id})">
+                            <i class="ph ph-eye"></i> İncele
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" onclick="quickForward('gundem', ${g.id}, '${escapeHtml(g.title)}')">
+                            <i class="ph ph-paper-plane-tilt"></i> Baş Editöre Gönder
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Fetch History
+        async function loadHistoryData() {
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const history = await res.json();
+                document.getElementById('stat-history-count').innerText = history.length;
+
+                const tbody = document.getElementById('history-tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (history.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">Henüz bir inceleme geçmişi bulunmuyor.</td></tr>`;
+                    return;
+                }
+
+                history.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const dateStr = item.campus_reviewed_at || item.published_at || item.created_at;
+                    const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('tr-TR') : '-';
+
+                    let statusBadge = '';
+                    if (item.status === 'published') {
+                        statusBadge = '<span class="status-badge published"><i class="ph ph-check-circle"></i> Baş Editör Onayladı (Yayında)</span>';
+                    } else if (item.status === 'pending') {
+                        statusBadge = '<span class="status-badge pending"><i class="ph ph-hourglass-high"></i> Baş Editör Onayında</span>';
+                    } else if (item.status === 'rejected') {
+                        statusBadge = `<span class="status-badge rejected"><i class="ph ph-warning-circle"></i> Düzeltme İstenmiş</span>`;
+                    } else {
+                        statusBadge = `<span class="status-badge pending-campus">${escapeHtml(item.status)}</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td><strong>${escapeHtml(item.title)}</strong></td>
+                        <td>${escapeHtml(item.author_name || '-')}</td>
+                        <td>${escapeHtml(item.category || '-')}</td>
+                        <td>${statusBadge}</td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">${formattedDate}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('loadHistoryData error:', err);
+            }
+        }
+
+        // Review Modal Handlers
+        function openReviewModal(type, id) {
+            let item = null;
+            if (type === 'article') item = pendingDataCache.articles.find(a => a.id == id);
+            else if (type === 'experiment') item = pendingDataCache.experiments.find(e => e.id == id);
+            else if (type === 'gundem') item = pendingDataCache.gundem.find(g => g.id == id);
+
+            if (!item) return showToast('İçerik bilgisi bulunamadı.', 'error');
+            activeModalItem = { ...item, type };
+
+            const typeBadge = document.getElementById('modal-item-type-badge');
+            const titleEl = document.getElementById('modal-item-title');
+            const authorEl = document.getElementById('modal-item-author');
+            const campusEl = document.getElementById('modal-item-campus');
+            const dateEl = document.getElementById('modal-item-date');
+            const bodyEl = document.getElementById('modal-item-body');
+
+            typeBadge.innerText = type === 'article' ? 'Makale' : (type === 'experiment' ? 'Deney' : 'Bilim Gündemi');
+            titleEl.innerText = item.title || '';
+            authorEl.innerText = item.author_name || 'Yazar';
+            campusEl.innerText = item.author_university || 'Kampüs Ekibi';
+            dateEl.innerText = item.created_at ? new Date(item.created_at).toLocaleDateString('tr-TR') : '';
+
+            // Body preview construction
+            let html = '';
+            if (item.image_url) {
+                const imgSrc = (item.image_url.startsWith('http') || item.image_url.startsWith('/')) ? item.image_url : '/' + item.image_url;
+                html += `<div style="text-align: center; margin-bottom: 20px;"><img src="${imgSrc}" alt="Kapak" style="max-width: 100%; max-height: 280px; border-radius: 10px; object-fit: cover;"></div>`;
+            }
+
+            if (item.excerpt) {
+                html += `<div style="background: rgba(99,102,241,0.06); border-left: 3px solid var(--primary-accent); padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-style: italic; color: var(--text-muted);">${escapeHtml(item.excerpt)}</div>`;
+            }
+
+            if (type === 'experiment') {
+                html += `<div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">`;
+                if (item.objective) html += `<div><strong style="color: var(--primary-accent);">Deney Amacı:</strong><div>${escapeHtml(item.objective)}</div></div>`;
+                if (item.materials) html += `<div><strong style="color: var(--primary-accent);">Materyaller:</strong><div>${escapeHtml(item.materials)}</div></div>`;
+                if (item.procedure_steps) html += `<div><strong style="color: var(--primary-accent);">İşlem Adımları:</strong><div>${item.procedure_steps}</div></div>`;
+                if (item.results) html += `<div><strong style="color: var(--primary-accent);">Sonuçlar:</strong><div>${item.results}</div></div>`;
+                if (item.conclusion) html += `<div><strong style="color: var(--primary-accent);">Değerlendirme:</strong><div>${escapeHtml(item.conclusion)}</div></div>`;
+                html += `</div>`;
+            } else {
+                html += `<div class="article-content" style="font-size: 1rem;">${item.content || '<p style="color: var(--text-muted);">İçerik metni bulunamadı.</p>'}</div>`;
+            }
+
+            if (item.pdf_url) {
+                const pdfSrc = (item.pdf_url.startsWith('http') || item.pdf_url.startsWith('/')) ? item.pdf_url : '/' + item.pdf_url;
+                html += `<div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border-color);">
+                    <a href="${pdfSrc}" target="_blank" class="btn btn-outline btn-sm"><i class="ph ph-file-pdf"></i> Ek PDF Dokümanını Görüntüle</a>
+                </div>`;
+            }
+
+            bodyEl.innerHTML = html;
+            closeRevisionBox();
+
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+            activeModalItem = null;
+        }
+
+        function openRevisionBox() {
+            document.getElementById('modal-revision-panel').style.display = 'block';
+            const noteInput = document.getElementById('revision-note-input');
+            if (noteInput) { noteInput.value = ''; noteInput.focus(); }
+        }
+
+        function closeRevisionBox() {
+            const panel = document.getElementById('modal-revision-panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        // Action: Forward to Chief Editor
+        async function confirmForwardToChiefEditor() {
+            if (!activeModalItem) return;
+            const confirmMsg = `"${activeModalItem.title}" başlıklı yayını onaylayıp Baş Editör incelemesine iletmek istediğinize emin misiniz?`;
+            if (!confirm(confirmMsg)) return;
+
+            await executeDecision(activeModalItem.type, activeModalItem.id, 'forward');
+            closeReviewModal();
+        }
+
+        // Quick Forward from table
+        async function quickForward(type, id, title) {
+            const confirmMsg = `"${title}" içeriğini onaylayarak doğrudan Baş Editör incelemesine iletmek istiyor musunuz?`;
+            if (!confirm(confirmMsg)) return;
+
+            await executeDecision(type, id, 'forward');
+        }
+
+        // Action: Submit Revision Note to Author
+        async function submitRevisionToAuthor() {
+            if (!activeModalItem) return;
+            const note = document.getElementById('revision-note-input').value.trim();
+            if (!note) {
+                return showToast('Lütfen yazara iletilecek düzeltme gerekçesini yazınız.', 'warning');
+            }
+
+            await executeDecision(activeModalItem.type, activeModalItem.id, 'revision', note);
+            closeReviewModal();
+        }
+
+        async function executeDecision(type, id, decision, note = '') {
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/decide/${type}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ decision, note })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message, 'success');
+                    loadPendingData();
+                    loadHistoryData();
+                } else {
+                    showToast(data.error || 'İşlem başarısız oldu.', 'error');
+                }
+            } catch (err) {
+                console.error('executeDecision error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            }
+        }
+
+        // Password change handler
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const pwInput = document.getElementById('new-password');
+            const btn = document.getElementById('btn-save-pw');
+            const password = pwInput ? pwInput.value : '';
+
+            if (!password || password.length < 6) {
+                return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph ph-spinner spinner"></i> Güncelleniyor...';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ email: user.email, password })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast('Şifreniz başarıyla güncellendi.', 'success');
+                    if (pwInput) pwInput.value = '';
+                } else {
+                    showToast(data.error || 'Şifre güncellenemedi.', 'error');
+                }
+            } catch (err) {
+                showToast('Hata: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-check"></i> Şifreyi Güncelle';
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="ph ${type === 'success' ? 'ph-check-circle' : type === 'error' ? 'ph-warning-circle' : 'ph-info'}" style="font-size: 1.3rem;"></i>
+                <span>${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>

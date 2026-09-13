@@ -3127,6 +3127,7 @@
                 }
                 .art-badge.published { background: #dcfce7; color: #15803d; }
                 .art-badge.pending { background: #dbeafe; color: #1d4ed8; }
+                .art-badge.pending_campus { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
                 .art-badge.rejected { background: #ffedd5; color: #c2410c; }
                 .art-badge.draft { background: #fef3c7; color: #92400e; }
                 .art-badge.trash { background: #fee2e2; color: #b91c1c; }
@@ -3461,6 +3462,7 @@
                 }
                 body.dark-mode .art-badge.published { background: rgba(16, 185, 129, 0.18); color: #34d399; }
                 body.dark-mode .art-badge.pending { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+                body.dark-mode .art-badge.pending_campus { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.35); }
                 body.dark-mode .art-badge.rejected { background: rgba(249, 115, 22, 0.18); color: #fb923c; }
                 body.dark-mode .art-badge.draft { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
                 body.dark-mode .art-badge.trash { background: rgba(239, 68, 68, 0.18); color: #f87171; }
@@ -7407,7 +7409,7 @@
         // === UNIFIED INIT — Single DOMContentLoaded ===
         // =============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            if (!token || !user || (user.role !== 'author' && user.role !== 'editor' && user.role !== 'admin')) {
+            if (!token || !user || (user.role !== 'author' && user.role !== 'editor' && user.role !== 'admin' && user.role !== 'campus_editor')) {
                 window.location.href = '/?login=true';
                 return;
             }
@@ -7685,7 +7687,7 @@
 
                 // 3. Update Todo List (YAPILACAKLAR)
                 const rejectedArticles = activeArticles.filter(a => a.status === 'rejected').length;
-                const pendingExps = activeExps.filter(e => e.status === 'pending').length;
+                const pendingExps = activeExps.filter(e => e.status === 'pending' || e.status === 'pending_campus').length;
                 const publishedCount = activeArticles.filter(a => a.status === 'published').length + activeExps.filter(e => e.status === 'published').length + activeGundem.filter(g => g.status === 'published' || g.status === 'yayinda').length;
 
                 const elRejected = document.getElementById('dash-todo-rejected');
@@ -7698,13 +7700,13 @@
 
                 // 4. Update Devam Et Card (Latest in-progress item)
                 const inProgressWorks = [];
-                activeArticles.filter(a => a.status === 'draft' || a.status === 'rejected' || a.status === 'pending').forEach(a => {
+                activeArticles.filter(a => a.status === 'draft' || a.status === 'rejected' || a.status === 'pending' || a.status === 'pending_campus').forEach(a => {
                     inProgressWorks.push({ ...a, type: 'article' });
                 });
-                activeExps.filter(e => e.status === 'draft' || e.status === 'rejected' || e.status === 'pending').forEach(e => {
+                activeExps.filter(e => e.status === 'draft' || e.status === 'rejected' || e.status === 'pending' || e.status === 'pending_campus').forEach(e => {
                     inProgressWorks.push({ ...e, type: 'experiment' });
                 });
-                activeGundem.filter(g => g.status === 'draft' || g.status === 'taslak' || g.status === 'rejected' || g.status === 'pending').forEach(g => {
+                activeGundem.filter(g => g.status === 'draft' || g.status === 'taslak' || g.status === 'rejected' || g.status === 'pending' || g.status === 'pending_campus').forEach(g => {
                     inProgressWorks.push({ ...g, type: 'gundem' });
                 });
 
@@ -7718,7 +7720,10 @@
                     const latest = inProgressWorks[0];
                     latestDashboardWork = latest;
 
-                    // Progress %
+                    let completeness = 50;
+                    if (latest.status === 'rejected') completeness = 40;
+                    if (latest.status === 'pending' || latest.status === 'pending_campus') completeness = 85;
+
                     let score = 0;
                     let maxScore = 7;
                     if (latest.title && latest.title.trim().length > 5) score++;
@@ -7731,7 +7736,7 @@
                     const percent = Math.min(100, Math.round((score / maxScore) * 100));
 
                     const typeName = latest.type === 'experiment' ? 'Deney' : (latest.type === 'gundem' ? 'Gündem' : 'Makale');
-                    const statusName = latest.status === 'rejected' ? 'Düzenleme Gerekli' : (latest.status === 'pending' ? 'Editörde' : 'Taslak');
+                    const statusName = latest.status === 'rejected' ? 'Düzenleme Gerekli' : (latest.status === 'pending_campus' ? 'Kampüs Editöründe' : (latest.status === 'pending' ? 'Editörde' : 'Taslak'));
 
                     if (contTitleEl) contTitleEl.textContent = latest.title || 'Başlıksız Çalışma';
                     if (progFillEl) progFillEl.style.width = `${percent}%`;
@@ -7920,6 +7925,10 @@
                     badgeClass = 'yayinda';
                     badgeLabel = 'Yayında';
                     badgeIcon = 'ph-check-circle';
+                } else if (item.status === 'pending_campus') {
+                    badgeClass = 'pending_campus';
+                    badgeLabel = 'Kampüs Editöründe';
+                    badgeIcon = 'ph-graduation-cap';
                 } else if (item.status === 'pending') {
                     badgeClass = 'editorde';
                     badgeLabel = 'Editörde';
@@ -9193,8 +9202,7 @@
             }
 
             // 2. Continue Latest Article Card
-            const inProgress = activeArticles.filter(a => a.status === 'draft' || a.status === 'rejected' || a.status === 'pending');
-            const continueCard = document.getElementById('art-continue-card');
+            const inProgress = activeArticles.filter(a => a.status === 'draft' || a.status === 'rejected' || a.status === 'pending' || a.status === 'pending_campus');
             const continueTitle = document.getElementById('art-continue-title');
             const progressFill = document.getElementById('art-progress-fill');
             const progressText = document.getElementById('art-progress-text');
@@ -9219,7 +9227,7 @@
 
                 if (continueTitle) continueTitle.textContent = latest.title || 'Başlıksız Makale';
                 if (progressFill) progressFill.style.width = `${percent}%`;
-                if (progressText) progressText.textContent = `%${percent} tamamlandı • ${latest.status === 'rejected' ? 'Düzenleme Gerekli' : (latest.status === 'pending' ? 'Editör Onayında' : 'Taslak')}`;
+                if (progressText) progressText.textContent = `%${percent} tamamlandı • ${latest.status === 'rejected' ? 'Düzenleme Gerekli' : (latest.status === 'pending_campus' ? 'Kampüs Editöründe' : (latest.status === 'pending' ? 'Editör Onayında' : 'Taslak'))}`;
                 if (continueBtn) {
                     continueBtn.style.display = 'inline-flex';
                     continueBtn.setAttribute('data-id', latest.id);
@@ -9412,6 +9420,10 @@
                     badgeClass = 'yayinda';
                     badgeLabel = 'Yayında';
                     badgeIcon = 'ph-check-circle';
+                } else if (art.status === 'pending_campus') {
+                    badgeClass = 'pending_campus';
+                    badgeLabel = 'Kampüs Editöründe';
+                    badgeIcon = 'ph-graduation-cap';
                 } else if (art.status === 'pending') {
                     badgeClass = 'editorde';
                     badgeLabel = 'Editörde';
@@ -10813,6 +10825,8 @@
                 let statusBadge = '';
                 if (exp.status === 'published') {
                     statusBadge = '<span class="art-badge published"><i class="ph-fill ph-check-circle"></i> Yayında</span>';
+                } else if (exp.status === 'pending_campus') {
+                    statusBadge = '<span class="art-badge pending_campus"><i class="ph-fill ph-graduation-cap"></i> Kampüs Editöründe</span>';
                 } else if (exp.status === 'pending') {
                     statusBadge = '<span class="art-badge pending"><i class="ph-fill ph-clock"></i> Editörde</span>';
                 } else if (exp.status === 'rejected') {
@@ -13496,6 +13510,7 @@
                 'draft': { label: 'Taslak', badgeClass: 'draft', icon: 'ph-pencil-simple' },
                 'editorde': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
                 'pending': { label: 'Editörde', badgeClass: 'pending', icon: 'ph-clock' },
+                'pending_campus': { label: 'Kampüs Editöründe', badgeClass: 'pending_campus', icon: 'ph-graduation-cap' },
                 'duzenleme': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
                 'rejected': { label: 'Düzenleme Gerekli', badgeClass: 'rejected', icon: 'ph-warning-circle' },
                 'trash': { label: 'Çöpte', badgeClass: 'trash', icon: 'ph-trash' },

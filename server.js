@@ -3057,6 +3057,23 @@ async function ensureSchema() {
             }
         }
 
+        const campusCols = [
+            { table: 'articles', name: 'campus_editor_id', def: 'INT DEFAULT NULL' },
+            { table: 'articles', name: 'campus_reviewed_at', def: 'TIMESTAMP NULL DEFAULT NULL' },
+            { table: 'experiments', name: 'campus_editor_id', def: 'INT DEFAULT NULL' },
+            { table: 'experiments', name: 'campus_reviewed_at', def: 'TIMESTAMP NULL DEFAULT NULL' }
+        ];
+        for (const col of campusCols) {
+            try {
+                await pool.query(`SELECT ${col.name} FROM ${col.table} LIMIT 1`);
+            } catch (err) {
+                if (err.code === 'ER_BAD_FIELD_ERROR') {
+                    console.log(`Migrating: Adding ${col.name} to ${col.table}...`);
+                    await pool.query(`ALTER TABLE ${col.table} ADD COLUMN ${col.name} ${col.def}`);
+                }
+            }
+        }
+
         // --- NEW: Update Araçlar/Ka Hesaplama link_url in database to point to /tools ---
         // --- Performance Optimization: DB Indexes ---
         try { await pool.query("CREATE INDEX idx_articles_status ON articles(status)"); } catch (e) {}
@@ -3663,6 +3680,44 @@ function checkRole(allowedRoles) {
     };
 }
 
+async function getCampusAuthorInfo(userId) {
+    try {
+        const [rows] = await pool.query('SELECT coordinator_id, campus_role, university, fullname FROM users WHERE id = ?', [userId]);
+        if (rows.length > 0 && (rows[0].coordinator_id || (rows[0].campus_role && rows[0].campus_role.includes('Yazar')))) {
+            return {
+                isCampusAuthor: true,
+                coordinatorId: rows[0].coordinator_id,
+                campusRole: rows[0].campus_role,
+                university: rows[0].university,
+                fullname: rows[0].fullname
+            };
+        }
+    } catch (e) {
+        console.error('getCampusAuthorInfo error:', e);
+    }
+    return { isCampusAuthor: false, coordinatorId: null, campusRole: null, university: null, fullname: null };
+}
+
+async function notifyCampusEditors(authorInfo, title, contentType = 'yazı') {
+    try {
+        let ceQuery = "SELECT id FROM users WHERE role = 'campus_editor' AND (coordinator_id = ?";
+        let ceParams = [authorInfo.coordinatorId || 0];
+        if (authorInfo.university) {
+            ceQuery += " OR (university IS NOT NULL AND university = ?)";
+            ceParams.push(authorInfo.university);
+        }
+        ceQuery += ")";
+        const [destUsers] = await pool.query(ceQuery, ceParams);
+        const authorName = authorInfo.fullname || 'Bir Kampüs Yazarı';
+        const msg = `Yeni kampüs ${contentType} inceleme bekliyor: ${title.substring(0, 35)}... (${authorName})`;
+        for (const u of destUsers) {
+            await createNotification(u.id, msg, 'info');
+        }
+    } catch (err) {
+        console.error('notifyCampusEditors error:', err);
+    }
+}
+
 async function sendDynamicEmail(to, type, variablesOrBody = {}, subjectOverride = null) {
     try {
         let subject = 'AperionX Bildirim';
@@ -4234,12 +4289,12 @@ app.post('/api/coordinator/team-members', authenticateToken, async (req, res) =>
     }
 
     // Role mapping:
-    // "Ekip Yazarı" -> system role 'author' (logs in directly to /author panel)
-    // "Kampüs Editörü" -> system role 'editor' (or 'author' with editor permissions)
-    const selectedCampusRole = (campus_role && campus_role.trim()) ? campus_role.trim() : 'Ekip Yazarı';
+    // "Kampüs Yazarı" -> system role 'author' (logs in directly to /author panel)
+    // "Kampüs Editörü" -> system role 'campus_editor' (logs in to /campus-editor panel)
+    const selectedCampusRole = (campus_role && campus_role.trim()) ? campus_role.trim() : 'Kampüs Yazarı';
     let systemRole = 'author';
     if (selectedCampusRole.toLowerCase().includes('editör')) {
-        systemRole = 'editor';
+        systemRole = 'campus_editor';
     }
 
     try {
@@ -5083,9 +5138,12 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
     let finalStatus = status;
     console.log(`[DEBUG] POST Article - User Role: ${req.user.role}, Requested Status: ${status}`);
 
+    const authorCampusInfo = await getCampusAuthorInfo(req.user.id);
     if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
-        finalStatus = 'pending';
-        console.log('[DEBUG] Enforcing PENDING status for non-admin/editor');
+        finalStatus = authorCampusInfo.isCampusAuthor ? 'pending_campus' : 'pending';
+        console.log(`[DEBUG] Enforcing ${finalStatus} status for non-admin/editor`);
+    } else if (status === 'pending' && authorCampusInfo.isCampusAuthor) {
+        finalStatus = 'pending_campus';
     }
 
     try {
@@ -5096,7 +5154,7 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         const slug = await getUniqueSlug(pool, title);
 
         const publishedAt = finalStatus === 'published' ? new Date() : null;
-        const submittedAt = finalStatus === 'pending' ? new Date() : null;
+        const submittedAt = (finalStatus === 'pending' || finalStatus === 'pending_campus') ? new Date() : null;
         const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
 
         const [insertResult] = await pool.query(
@@ -5117,8 +5175,12 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
         // Clear cache so new article appears immediately in list
         clearCache('articles');
 
+        // NOTIFY CAMPUS EDITORS if Pending Campus
+        if (finalStatus === 'pending_campus') {
+            await notifyCampusEditors(authorCampusInfo, title, 'makale');
+        }
         // NOTIFY EDITORS & ADMINS if Pending
-        if (finalStatus === 'pending') {
+        else if (finalStatus === 'pending') {
             try {
                 // Get author name
                 const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
@@ -5171,12 +5233,13 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     const { title, category, content, excerpt, status, tags, references_list, visual_references_list } = req.body;
 
     // Determine status update logic
-    // If editing a 'published' article, does it go back to pending? 
-    // Usually yes for major edits, but let's keep it simple: 
-    // If Author sets 'published' -> 'pending'.
+    // If Author sets 'published' -> 'pending' (or 'pending_campus' if campus author).
     let finalStatus = status;
+    const authorCampusInfo = await getCampusAuthorInfo(check[0].author_id || req.user.id);
     if (status === 'published' && req.user.role === 'author') {
-        finalStatus = 'pending';
+        finalStatus = authorCampusInfo.isCampusAuthor ? 'pending_campus' : 'pending';
+    } else if (status === 'pending' && authorCampusInfo.isCampusAuthor) {
+        finalStatus = 'pending_campus';
     }
 
     let author_ids = req.body.author_ids;
@@ -5212,7 +5275,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     } else if (finalStatus) {
         updates.push('status = ?');
         params.push(finalStatus);
-        if (finalStatus === 'pending') {
+        if (finalStatus === 'pending' || finalStatus === 'pending_campus') {
             updates.push('submitted_at = NOW()');
         }
     }
@@ -5245,7 +5308,9 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
         }
 
         // Notification Logic
-        if (finalStatus && req.user.role !== 'author') {
+        if (finalStatus === 'pending_campus') {
+            await notifyCampusEditors(authorCampusInfo, title || check[0].title || 'Makale', 'makale');
+        } else if (finalStatus && req.user.role !== 'author') {
             const authorId = check[0].author_id;
             if (req.user.id !== authorId) {
                 let msg = `Makalenizin durumu güncellendi: ${finalStatus === 'published' ? 'Yayınlandı' : (finalStatus === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor')}`;
@@ -5293,8 +5358,11 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
     }
 
     let finalStatus = status;
+    const authorCampusInfo = await getCampusAuthorInfo(author_id);
     if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
-        finalStatus = 'pending';
+        finalStatus = authorCampusInfo.isCampusAuthor ? 'pending_campus' : 'pending';
+    } else if (status === 'pending' && authorCampusInfo.isCampusAuthor) {
+        finalStatus = 'pending_campus';
     }
 
     try {
@@ -5347,8 +5415,10 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
             await pool.query('INSERT INTO experiment_authors (experiment_id, user_id, order_index) VALUES ?', [authorValues]);
         }
 
-        // Send notifications if pending
-        if (finalStatus === 'pending') {
+        // Send notifications if pending_campus or pending
+        if (finalStatus === 'pending_campus') {
+            await notifyCampusEditors(authorCampusInfo, title, 'deney');
+        } else if (finalStatus === 'pending') {
             try {
                 const [authors] = await pool.query('SELECT fullname FROM users WHERE id = ?', [req.user.id]);
                 const authorName = authors[0]?.fullname || 'Bir Yazar';
@@ -5379,8 +5449,11 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
     const { title, category, excerpt, status, tags, objective, materials, procedure_steps, results, conclusion, safety_notes, youtube_url, references_list, visual_references_list, coAuthors } = req.body;
 
     let finalStatus = status;
+    const authorCampusInfo = await getCampusAuthorInfo(check[0].author_id || req.user.id);
     if (status === 'published' && req.user.role === 'author') {
-        finalStatus = 'pending';
+        finalStatus = authorCampusInfo.isCampusAuthor ? 'pending_campus' : 'pending';
+    } else if (status === 'pending' && authorCampusInfo.isCampusAuthor) {
+        finalStatus = 'pending_campus';
     }
 
     let updates = [];
@@ -5402,7 +5475,7 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
             updates.push('published_at = NOW()');
             updates.push('was_published = 1');
         }
-        if (finalStatus === 'pending' || finalStatus === 'draft') {
+        if (finalStatus === 'pending' || finalStatus === 'pending_campus' || finalStatus === 'draft') {
             updates.push('rejection_reason = NULL');
         }
     }
@@ -5432,7 +5505,9 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
         await pool.query(`UPDATE experiments SET ${updates.join(', ')} WHERE id = ?`, params);
         clearCache('experiments');
 
-        if (finalStatus && req.user.role !== 'author') {
+        if (finalStatus === 'pending_campus') {
+            await notifyCampusEditors(authorCampusInfo, title || 'Deney', 'deney');
+        } else if (finalStatus && req.user.role !== 'author') {
             const authorId = check[0].author_id;
             if (req.user.id !== authorId) {
                 let msg = `Deneyinizin durumu güncellendi: ${finalStatus === 'published' ? 'Yayınlandı' : (finalStatus === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor')}`;
@@ -5557,7 +5632,9 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, e.campus_editor_id,
+            (SELECT fullname FROM users WHERE id = e.campus_editor_id) as campus_editor_name,
+            LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name, u.university as author_university
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
             WHERE e.status = 'pending' AND e.deleted_at IS NULL
@@ -5967,7 +6044,9 @@ app.get('/api/editor/pending-articles', authenticateToken, async (req, res) => {
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.rejection_reason, a.campus_editor_id,
+            (SELECT fullname FROM users WHERE id = a.campus_editor_id) as campus_editor_name,
+            LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name, u.university as author_university 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.status = 'pending' AND (a.is_gundem = 0 OR a.is_gundem IS NULL)
@@ -6032,7 +6111,9 @@ app.get('/api/editor/pending-gundem', authenticateToken, async (req, res) => {
     try {
         await ensureGundemColumns();
         const [rows] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.author_id, a.rejection_reason, LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name 
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.image_url, a.views, a.created_at, a.submitted_at, a.author_id, a.rejection_reason, a.campus_editor_id,
+            (SELECT fullname FROM users WHERE id = a.campus_editor_id) as campus_editor_name,
+            LEFT(a.excerpt, 200) as excerpt, u.fullname as author_name, u.university as author_university 
             FROM articles a 
             LEFT JOIN users u ON a.author_id = u.id 
             WHERE a.is_gundem = 1 AND a.status = 'pending' 
@@ -6283,16 +6364,19 @@ app.delete('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
 
 // === AUTHOR GUNDEM SUBMIT & LIST ROUTES ===
 app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMiddleware, async (req, res) => {
-    if (!['author', 'editor', 'admin'].includes(req.user.role)) {
+    if (!['author', 'campus_editor', 'editor', 'admin'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Yetkisiz işlem.' });
     }
 
     const body = req.body || {};
     const { title, category, content, excerpt, tags, gundem_data } = body;
     let status = body.status || 'pending';
+    const authorCampusInfo = await getCampusAuthorInfo(req.user.id);
 
     if (status === 'published' && req.user.role !== 'admin' && req.user.role !== 'editor') {
-        status = 'pending';
+        status = authorCampusInfo.isCampusAuthor ? 'pending_campus' : 'pending';
+    } else if (status === 'pending' && authorCampusInfo.isCampusAuthor) {
+        status = 'pending_campus';
     }
 
     let image_url = body.image_url || null;
@@ -6388,7 +6472,7 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                 }
 
                 let finalImg = image_url || existing[0].image_url;
-                const submittedAt = status === 'pending' ? new Date() : existing[0].submitted_at;
+                const submittedAt = (status === 'pending' || status === 'pending_campus') ? new Date() : existing[0].submitted_at;
 
                 await pool.query(`
                     UPDATE articles SET
@@ -6447,7 +6531,9 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     }
                 }
 
-                if (status === 'pending') {
+                if (status === 'pending_campus') {
+                    await notifyCampusEditors(authorCampusInfo, title.trim(), 'gündem yazısı');
+                } else if (status === 'pending') {
                     try {
                         const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
                         for (const ed of editors) {
@@ -6464,14 +6550,14 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
                     id: body.id,
                     slug: existing[0].slug,
                     status,
-                    message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak güncellendi.'
+                    message: (status === 'pending' || status === 'pending_campus') ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak güncellendi.'
                 });
             }
         }
 
         // New Gundem Article
         const slug = await getUniqueSlug(pool, title.trim());
-        const submittedAt = (status === 'pending') ? new Date() : null;
+        const submittedAt = (status === 'pending' || status === 'pending_campus') ? new Date() : null;
         const publishedAt = (status === 'published') ? new Date() : null;
 
         const [insertResult] = await pool.query(
@@ -6522,7 +6608,9 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             }
         }
 
-        if (status === 'pending') {
+        if (status === 'pending_campus') {
+            await notifyCampusEditors(authorCampusInfo, title.trim(), 'gündem yazısı');
+        } else if (status === 'pending') {
             try {
                 const [editors] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
                 for (const ed of editors) {
@@ -6541,7 +6629,7 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             id: newId,
             slug,
             status,
-            message: status === 'pending' ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak kaydedildi.'
+            message: (status === 'pending' || status === 'pending_campus') ? 'Bilim Gündemi yazınız editör onayına gönderildi.' : 'Taslak kaydedildi.'
         });
     } catch (e) {
         console.error('Author gundem error:', e);
@@ -7396,6 +7484,7 @@ app.post('/api/login', async (req, res) => {
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
         else if (user.role === 'campus_coordinator') redirectUrl = 'campus-coordinator';
+        else if (user.role === 'campus_editor') redirectUrl = 'campus-editor';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7406,6 +7495,9 @@ app.post('/api/login', async (req, res) => {
                 email: user.email,
                 username: user.username,
                 role: user.role,
+                campus_role: user.campus_role,
+                coordinator_id: user.coordinator_id,
+                university: user.university,
                 avatar_url: user.avatar_url,
                 bio: user.bio,
                 job_title: user.job_title
@@ -7479,6 +7571,7 @@ app.post('/api/auth/google', async (req, res) => {
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
         else if (user.role === 'campus_coordinator') redirectUrl = 'campus-coordinator';
+        else if (user.role === 'campus_editor') redirectUrl = 'campus-editor';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7489,6 +7582,9 @@ app.post('/api/auth/google', async (req, res) => {
                 email: user.email,
                 username: user.username,
                 role: user.role,
+                campus_role: user.campus_role,
+                coordinator_id: user.coordinator_id,
+                university: user.university,
                 avatar_url: user.avatar_url,
                 bio: user.bio,
                 job_title: user.job_title
@@ -7761,6 +7857,197 @@ app.get('/editor', (req, res) => {
 app.get(['/campus-coordinator', '/campus-coordinator.html', '/kampus-koordinatoru'], (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('campus-coordinator.html', { root: path.join(__dirname, 'views') });
+});
+
+// Campus Editor Panel Route
+app.get(['/campus-editor', '/campus-editor.html', '/kampus-editoru'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('campus-editor.html', { root: path.join(__dirname, 'views') });
+});
+
+// === CAMPUS EDITOR API ROUTES ===
+
+// 1. Pending Submissions for Campus Editor
+app.get('/api/campus-editor/pending', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    try {
+        const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+        const myCoordId = meRows[0]?.coordinator_id;
+        const myUniversity = meRows[0]?.university;
+
+        let userFilter = "";
+        let filterParams = [];
+
+        if (req.user.role === 'admin') {
+            userFilter = "1=1";
+        } else if (req.user.role === 'campus_coordinator') {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [req.user.id, myUniversity || ''];
+        } else {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [myCoordId || 0, myUniversity || ''];
+        }
+
+        // Articles (status = 'pending_campus' and is_gundem = 0)
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.pdf_url, a.image_url, a.content, LEFT(a.excerpt, 250) as excerpt,
+            u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE a.status = 'pending_campus' AND (a.is_gundem = 0 OR a.is_gundem IS NULL) AND ${userFilter}
+            ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
+        `, filterParams);
+
+        // Experiments (status = 'pending_campus')
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.author_id, e.image_url, e.pdf_url, e.excerpt, e.objective, e.materials, e.procedure_steps, e.results, e.conclusion,
+            u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            WHERE e.status = 'pending_campus' AND e.deleted_at IS NULL AND ${userFilter}
+            ORDER BY e.created_at ASC
+        `, filterParams);
+
+        // Gundem (status = 'pending_campus' and is_gundem = 1)
+        const [gundem] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.author_id, a.image_url, a.content, a.gundem_data, LEFT(a.excerpt, 250) as excerpt,
+            u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE a.status = 'pending_campus' AND a.is_gundem = 1 AND ${userFilter}
+            ORDER BY COALESCE(a.submitted_at, a.created_at) ASC
+        `, filterParams);
+
+        res.json({
+            articles,
+            experiments,
+            gundem,
+            counts: {
+                articles: articles.length,
+                experiments: experiments.length,
+                gundem: gundem.length,
+                total: articles.length + experiments.length + gundem.length
+            }
+        });
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-PENDING-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2. Campus Editor History
+app.get('/api/campus-editor/history', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    try {
+        const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+        const myCoordId = meRows[0]?.coordinator_id;
+        const myUniversity = meRows[0]?.university;
+
+        let userFilter = "";
+        let filterParams = [];
+
+        if (req.user.role === 'admin') {
+            userFilter = "1=1";
+        } else if (req.user.role === 'campus_coordinator') {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [req.user.id, myUniversity || ''];
+        } else {
+            userFilter = "(a.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [req.user.id, myCoordId || 0, myUniversity || ''];
+        }
+
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.campus_reviewed_at, a.rejection_reason, a.is_gundem, 'article' as item_type,
+            u.fullname as author_name, u.university as author_university
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE (a.campus_editor_id IS NOT NULL OR a.status IN ('pending', 'published', 'rejected')) AND ${userFilter}
+            ORDER BY COALESCE(a.campus_reviewed_at, a.updated_at, a.created_at) DESC
+            LIMIT 50
+        `, filterParams);
+
+        res.json(articles);
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-HISTORY-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Campus Editor Decision (Forward to Chief Editor or Request Revision)
+app.put('/api/campus-editor/decide/:type/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    const { type, id } = req.params;
+    const { decision, note } = req.body; // 'forward' | 'revision' | 'reject'
+
+    if (!['article', 'experiment', 'gundem'].includes(type)) {
+        return res.status(400).json({ error: 'Geçersiz içerik türü.' });
+    }
+
+    try {
+        const tableName = (type === 'experiment') ? 'experiments' : 'articles';
+        const [rows] = await pool.query(`SELECT id, title, author_id FROM ${tableName} WHERE id = ?`, [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+
+        const item = rows[0];
+        const [authorRows] = await pool.query('SELECT fullname FROM users WHERE id = ?', [item.author_id]);
+        const authorName = authorRows[0]?.fullname || 'Yazar';
+        const editorName = req.user.fullname || 'Kampüs Editörü';
+
+        if (decision === 'forward') {
+            await pool.query(`
+                UPDATE ${tableName} 
+                SET status = 'pending', campus_editor_id = ?, campus_reviewed_at = NOW(), rejection_reason = NULL, submitted_at = NOW() 
+                WHERE id = ?
+            `, [req.user.id, id]);
+
+            if (type === 'experiment') clearCache('experiments');
+            else clearCache('articles');
+
+            // Notify Chief Editors & Admins
+            const [chiefs] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+            const chiefMsg = `Kampüs Editörü (${editorName}) onayladı ve Baş Editör incelemesine iletti: ${item.title}`;
+            for (const c of chiefs) {
+                await createNotification(c.id, chiefMsg, 'info');
+            }
+
+            // Notify Author
+            const authorMsg = `Kampüs editörünüz (${editorName}) "${item.title}" başlıklı içeriğinizi onayladı ve Baş Editör onayına gönderdi.`;
+            await createNotification(item.author_id, authorMsg, 'success');
+
+            return res.json({ success: true, message: 'İçerik onaylandı ve Baş Editör incelemesine başarıyla iletildi.' });
+
+        } else if (decision === 'revision' || decision === 'reject') {
+            const reason = note || 'Kampüs editörü tarafından düzenleme talep edildi.';
+            await pool.query(`
+                UPDATE ${tableName} 
+                SET status = 'rejected', rejection_reason = ? 
+                WHERE id = ?
+            `, [reason, id]);
+
+            if (type === 'experiment') clearCache('experiments');
+            else clearCache('articles');
+
+            // Notify Author
+            const authorMsg = `Kampüs editörünüz (${editorName}) "${item.title}" başlıklı içeriğiniz için düzenleme talep etti. Gerekçe: ${reason}`;
+            await createNotification(item.author_id, authorMsg, 'warning');
+
+            return res.json({ success: true, message: 'Düzeltme talebi yazara iletildi.' });
+        } else {
+            return res.status(400).json({ error: 'Geçersiz karar tipi.' });
+        }
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-DECIDE-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // === CATEGORIES MANAGEMENT ===

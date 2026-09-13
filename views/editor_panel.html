@@ -4148,7 +4148,12 @@
                             `;
                         } else {
                             if (article.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
-                            else if (article.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                            else if (article.status === 'pending') {
+                                statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                                if (article.campus_editor_id) {
+                                    statusBadge += ` <span class="badge" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i class="ph-bold ph-shield-check"></i> Kampüs Editörü Onaylı (${escapeHtml(article.campus_editor_name || 'Kampüs Editörü')})</span>`;
+                                }
+                            }
                             else if (article.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
 
                             const pdfBtn = article.pdf_url ? `
@@ -4287,7 +4292,12 @@
                     `;
                 } else {
                     if (article.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
-                    else if (article.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                    else if (article.status === 'pending') {
+                        statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                        if (article.campus_editor_id) {
+                            statusBadge += ` <span class="badge" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i class="ph-bold ph-shield-check"></i> Kampüs Editörü Onaylı (${escapeHtml(article.campus_editor_name || 'Kampüs Editörü')})</span>`;
+                        }
+                    }
                     else if (article.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
 
                     actions = `
@@ -4724,7 +4734,12 @@
 
                 let statusBadge = '';
                 if (exp.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
-                else if (exp.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                else if (exp.status === 'pending') {
+                    statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                    if (exp.campus_editor_id) {
+                        statusBadge += ` <span class="badge" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i class="ph-bold ph-shield-check"></i> Kampüs Editörü Onaylı (${escapeHtml(exp.campus_editor_name || 'Kampüs Editörü')})</span>`;
+                    }
+                }
                 else if (exp.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
 
                 const isPending = exp.status === 'pending';
@@ -5150,7 +5165,12 @@
 
                 let statusBadge = '';
                 if (item.status === 'published') statusBadge = '<span class="status-badge bg-published" style="box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Yayında</span>';
-                else if (item.status === 'pending') statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                else if (item.status === 'pending') {
+                    statusBadge = '<span class="status-badge bg-pending">Onay Bekliyor</span>';
+                    if (item.campus_editor_id) {
+                        statusBadge += ` <span class="badge" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i class="ph-bold ph-shield-check"></i> Kampüs Editörü Onaylı (${escapeHtml(item.campus_editor_name || 'Kampüs Editörü')})</span>`;
+                    }
+                }
                 else if (item.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected">Reddedildi</span>';
 
                 const actions = `
