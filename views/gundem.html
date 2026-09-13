@@ -1050,19 +1050,19 @@
 
         .cd-logo-glow {
             position: absolute;
-            width: 180px;
-            height: 180px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(99, 102, 241, 0) 70%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 70%);
             border-radius: 50%;
-            filter: blur(25px);
+            filter: blur(18px);
             z-index: 0;
             pointer-events: none;
             animation: cdPulseGlow 4s ease-in-out infinite;
         }
 
         @keyframes cdPulseGlow {
-            0%, 100% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.15); opacity: 1; }
+            0%, 100% { transform: scale(0.92); opacity: 0.35; }
+            50% { transform: scale(1.08); opacity: 0.55; }
         }
 
         .cd-logo-img {
@@ -1072,13 +1072,13 @@
             width: auto;
             max-width: 280px;
             object-fit: contain;
-            filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.5));
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.25));
             animation: cdFloat 5s ease-in-out infinite;
         }
 
         @keyframes cdFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-5px); }
         }
 
         /* Status Badge */
@@ -1210,28 +1210,31 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.98rem;
+            gap: 7px;
+            padding: 9px 20px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 0.85rem;
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
 
         .cd-btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white;
-            box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .cd-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px -2px rgba(99, 102, 241, 0.7);
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #ffffff;
         }
 
         .cd-btn-secondary {
