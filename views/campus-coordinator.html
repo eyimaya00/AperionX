@@ -662,6 +662,74 @@
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 18px;
         }
+
+        /* TABLE & LIST STYLES */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .custom-table th {
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.02);
+            color: #64748b;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        body.dark-mode .custom-table th {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .custom-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 0.92rem;
+            vertical-align: middle;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(99, 102, 241, 0.02);
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .role-badge.author {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .role-badge.editor {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .role-badge.other {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
     </style>
 </head>
 
@@ -770,7 +838,7 @@
                     </div>
                     <div>
                         <div class="stat-label">Ekip Üyeleri</div>
-                        <div class="stat-value">0 Temsilci</div>
+                        <div class="stat-value" id="stat-team-count">0 Temsilci</div>
                     </div>
                 </div>
 
@@ -860,23 +928,133 @@
             </div>
         </section>
 
-        <!-- 2. EKİP BİLGİLERİ SECTION -->
+        <!-- 2. EKİP BİLGİLERİ SECTION (ANA EKİP YÖNETİMİ) -->
         <section id="coord-campus" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
+                        👥 Ana Ekip & Görev Yönetimi
+                    </h1>
+                    <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
+                        Ekibinize yeni yazar veya kampüs editörü tanımlayın; oluşturulan hesaplar kendi panellerine anında giriş yapabilir.
+                    </p>
+                </div>
+            </div>
+
+            <!-- YENİ EKİP ÜYESİ EKLEME FORMU -->
+            <div class="card" style="border-top: 4px solid var(--primary-accent);">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="ph ph-user-plus" style="color: var(--primary-accent);"></i>
+                        Yeni Ekip Üyesi Oluştur
+                    </h3>
+                    <span class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
+                        Yazar & Editör Tanımlama
+                    </span>
+                </div>
+
+                <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
+                <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                                <i class="ph-bold ph-check"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
+                                <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
+                                    Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
+                                </p>
+                                <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
+                                    <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
+                                    <div><strong style="color: #64748b;">E-posta:</strong> <span id="success-member-email" style="color: #065f46; font-weight: 700;">-</span></div>
+                                    <div><strong style="color: #64748b;">Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
+                                    <div><strong style="color: #64748b;">Görev:</strong> <span id="success-member-role" style="color: #4338ca; font-weight: 700;">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="copyMemberCredentials()" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.88rem; background: #059669;">
+                            <i class="ph ph-copy"></i> Bilgileri Kopyala
+                        </button>
+                    </div>
+                </div>
+
+                <form id="createTeamMemberForm" onsubmit="submitCreateTeamMember(event)">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="member_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                        </div>
+                        <div class="form-group">
+                            <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
+                            <input type="email" id="member_email" class="form-control" placeholder="yazar@ekip.org" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="margin: 0;">Giriş Şifresi <span style="color: #ef4444;">*</span></label>
+                                <button type="button" onclick="generateMemberPassword()" style="background: none; border: none; color: var(--primary-accent); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
+                                </button>
+                            </div>
+                            <input type="text" id="member_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
+                            <select id="member_campus_role" class="form-control" style="cursor: pointer;">
+                                <option value="Ekip Yazarı" selected>Ekip Yazarı (Yazar Paneline Giriş Yapar)</option>
+                                <option value="Kampüs Editörü">Kampüs Editörü (İçerik İnceleme & Yazar Paneli)</option>
+                                <option value="Araştırmacı">Araştırmacı Yazar</option>
+                                <option value="Proje Sorumlusu">Proje Sorumlusu</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
+                            <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- EKİP LİSTESİ TABLOSU -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-users-three"></i> Ekip Bilgileri</h3>
-                </div>
-                <div style="text-align: center; padding: 40px 20px;">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
-                        <i class="ph ph-users-three"></i>
+                    <h3 class="card-title">
+                        <i class="ph ph-users-three" style="color: #10b981;"></i>
+                        Mevcut Ekip Üyeleri (<span id="team-members-count">0</span>)
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Üye ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
+                        <button type="button" onclick="loadTeamMembers()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.88rem;">
+                            <i class="ph ph-arrows-clockwise"></i> Yenile
+                        </button>
                     </div>
-                    <h3 id="section-team-name" style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Yükleniyor...</h3>
-                    <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Bu ekibe ait üyeler, projeler ve faaliyet verileri entegrasyon aşamasındadır.
-                    </p>
-                    <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
-                        <i class="ph ph-clock"></i> Ekip Verileri Hazırlanıyor
-                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="team-members-table">
+                        <thead>
+                            <tr>
+                                <th>ÜYE BİLGİSİ</th>
+                                <th>GÖREV / ROL</th>
+                                <th>GİRİŞ PANELİ</th>
+                                <th>KAYIT TARİHİ</th>
+                                <th style="text-align: right;">İŞLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="team-members-tbody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    <i class="ph ph-spinner spinner" style="font-size: 1.6rem; display: block; margin-bottom: 8px;"></i>
+                                    Ekip üyeleri yükleniyor...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -1126,6 +1304,7 @@
         // Sayfa Başlatma
         document.addEventListener('DOMContentLoaded', () => {
             initCoordinatorProfile();
+            loadTeamMembers();
         });
 
         function initCoordinatorProfile() {
@@ -1326,7 +1505,7 @@
             // Update breadcrumb
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
-                'coord-campus': 'Ekip Bilgileri',
+                'coord-campus': 'Ekip Bilgileri & Üyeler',
                 'coord-team': 'Ekip Üyeleri',
                 'coord-contents': 'İçerik & Projeler',
                 'coord-events': 'Etkinlikler & Takvim',
@@ -1337,10 +1516,244 @@
                 breadcrumbTitle.innerText = titleMap[sectionId];
             }
 
+            // Load data when navigating to team section
+            if (sectionId === 'coord-campus' || sectionId === 'coord-team') {
+                loadTeamMembers();
+            }
+
             // Mobile: close sidebar on click
             if (window.innerWidth <= 991) {
                 const sidebar = document.getElementById('sidebar');
                 if (sidebar) sidebar.classList.remove('active');
+            }
+        }
+
+        // ================= TEAM MEMBER MANAGEMENT JS =================
+        let teamMembersList = [];
+        let lastCreatedMember = null;
+
+        async function loadTeamMembers() {
+            const tbody = document.getElementById('team-members-tbody');
+            const countEl = document.getElementById('team-members-count');
+            const statTeamCount = document.getElementById('stat-team-count');
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-members`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/index.html';
+                    return;
+                }
+
+                teamMembersList = await res.json();
+                if (countEl) countEl.innerText = teamMembersList.length;
+                if (statTeamCount) statTeamCount.innerText = `${teamMembersList.length} Temsilci / Üye`;
+                renderTeamMembers(teamMembersList);
+            } catch (err) {
+                console.error('[LOAD-TEAM-MEMBERS-ERROR]', err);
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: #ef4444;">
+                                <i class="ph ph-warning-circle" style="font-size: 1.4rem;"></i>
+                                Ekip üyeleri yüklenirken hata oluştu: ${escapeHtml(err.message)}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        function renderTeamMembers(members) {
+            const tbody = document.getElementById('team-members-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!members || members.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <i class="ph ph-users-three" style="font-size: 2.2rem; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
+                            Henüz ekibinize ait bir üye tanımlanmamış. Yukarıdaki formdan yeni üye ekleyebilirsiniz.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            members.forEach(member => {
+                const tr = document.createElement('tr');
+                const formattedDate = member.created_at ? new Date(member.created_at).toLocaleDateString('tr-TR') : '-';
+                const roleClass = member.role === 'editor' ? 'editor' : 'author';
+                const roleIcon = member.role === 'editor' ? 'ph-pencil-simple-line' : 'ph-newspaper';
+                const campusRoleText = member.campus_role || (member.role === 'editor' ? 'Kampüs Editörü' : 'Ekip Yazarı');
+
+                tr.innerHTML = `
+                    <td style="padding: 14px 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 38px; height: 38px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
+                                ${escapeHtml((member.fullname || 'Ü').charAt(0).toUpperCase())}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(member.fullname || '-')}</div>
+                                <div style="color: #64748b; font-size: 0.82rem;">${escapeHtml(member.email)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 14px 16px;">
+                        <span class="role-badge ${roleClass}">
+                            <i class="ph ${roleIcon}"></i> ${escapeHtml(campusRoleText)}
+                        </span>
+                    </td>
+                    <td style="padding: 14px 16px;">
+                        <span style="font-size: 0.85rem; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="ph ph-check-circle"></i> /author (Yazar Paneli)
+                        </span>
+                    </td>
+                    <td style="padding: 14px 16px; color: #64748b; font-size: 0.85rem;">
+                        ${formattedDate}
+                    </td>
+                    <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                        <button type="button" onclick="deleteTeamMember(${member.id}, '${escapeHtml(member.fullname || member.email)}')" class="btn" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;" title="Üyeyi Kaldır">
+                            <i class="ph ph-trash"></i> Sil
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTeamMembers() {
+            const input = document.getElementById('member-search-input');
+            if (!input) return;
+            const q = input.value.toLowerCase().trim();
+            const filtered = teamMembersList.filter(m =>
+                (m.fullname && m.fullname.toLowerCase().includes(q)) ||
+                (m.email && m.email.toLowerCase().includes(q)) ||
+                (m.campus_role && m.campus_role.toLowerCase().includes(q))
+            );
+            renderTeamMembers(filtered);
+        }
+
+        function generateMemberPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$%';
+            let randomPw = '';
+            for (let i = 0; i < 10; i++) {
+                randomPw += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const pwInput = document.getElementById('member_password');
+            if (pwInput) {
+                pwInput.value = randomPw;
+                pwInput.focus();
+            }
+            showToast(`Güçlü şifre üretildi: ${randomPw}`, 'success');
+        }
+
+        async function submitCreateTeamMember(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('member_fullname');
+            const emailInput = document.getElementById('member_email');
+            const pwInput = document.getElementById('member_password');
+            const roleSelect = document.getElementById('member_campus_role');
+            const submitBtn = document.getElementById('btn-submit-member');
+            const successBox = document.getElementById('member-success-box');
+
+            const fullname = nameInput ? nameInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = pwInput ? pwInput.value : '';
+            const campus_role = roleSelect ? roleSelect.value : 'Ekip Yazarı';
+
+            if (!fullname || !email || !password) {
+                return showToast('İsim, e-posta ve şifre zorunludur.', 'error');
+            }
+            if (password.length < 6) {
+                return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ph ph-spinner spinner"></i> Oluşturuluyor...';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-members`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fullname, email, password, campus_role })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Ekip üyesi başarıyla oluşturuldu.', 'success');
+
+                    // Show success box with credentials
+                    lastCreatedMember = { fullname, email, password, role: campus_role };
+                    if (successBox) {
+                        document.getElementById('success-member-name').innerText = fullname;
+                        document.getElementById('success-member-email').innerText = email;
+                        document.getElementById('success-member-pass').innerText = password;
+                        document.getElementById('success-member-role').innerText = campus_role;
+                        successBox.style.display = 'block';
+                    }
+
+                    // Reset form inputs
+                    if (nameInput) nameInput.value = '';
+                    if (emailInput) emailInput.value = '';
+                    if (pwInput) pwInput.value = '';
+
+                    // Reload team members list
+                    loadTeamMembers();
+                } else {
+                    showToast(data.error || 'Ekip üyesi oluşturulamadı.', 'error');
+                }
+            } catch (err) {
+                console.error('[SUBMIT-TEAM-MEMBER-ERROR]', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur';
+                }
+            }
+        }
+
+        function copyMemberCredentials() {
+            if (!lastCreatedMember) return;
+            const text = `AperionX Ekip Giriş Bilgileri:\nAd Soyad: ${lastCreatedMember.fullname}\nE-posta: ${lastCreatedMember.email}\nŞifre: ${lastCreatedMember.password}\nGörev: ${lastCreatedMember.role}\nGiriş: https://aperionx.com\n(Giriş yaptığınızda doğrudan yazar panelinize yönlendirileceksiniz)`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Giriş bilgileri panoya kopyalandı!', 'success');
+            }).catch(() => {
+                showToast('Kopyalama başarısız oldu.', 'error');
+            });
+        }
+
+        async function deleteTeamMember(id, name) {
+            if (!confirm(`"${name}" adlı ekip üyesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-members/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Ekip üyesi silindi.', 'success');
+                    loadTeamMembers();
+                } else {
+                    showToast(data.error || 'Silme işlemi başarısız.', 'error');
+                }
+            } catch (err) {
+                console.error('[DELETE-TEAM-MEMBER-ERROR]', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
             }
         }
 

@@ -3042,7 +3042,9 @@ async function ensureSchema() {
             { name: 'technical_skills', def: "TEXT DEFAULT NULL" },
             { name: 'linkedin_url', def: "VARCHAR(255) DEFAULT NULL" },
             { name: 'public_email', def: "VARCHAR(255) DEFAULT NULL" },
-            { name: 'show_email', def: "TINYINT(1) DEFAULT 1" }
+            { name: 'show_email', def: "TINYINT(1) DEFAULT 1" },
+            { name: 'coordinator_id', def: "INT DEFAULT NULL" },
+            { name: 'campus_role', def: "VARCHAR(100) DEFAULT NULL" }
         ];
         for (const col of userCols) {
             try {
@@ -4184,6 +4186,128 @@ app.delete('/api/admin/campus-coordinators/:id', authenticateToken, async (req, 
         res.json({ success: true, message: 'Kampüs koordinatörü başarıyla silindi.' });
     } catch (e) {
         console.error('[ADMIN-DELETE-CAMPUS-COORDINATOR-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// === Campus Coordinator: Team Members Management ===
+
+// 1. Get Coordinator's Team Members
+app.get('/api/coordinator/team-members', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+
+    try {
+        let query = `
+            SELECT id, fullname, username, email, role, campus_role, university, department, avatar_url, created_at, is_active
+            FROM users 
+            WHERE coordinator_id = ?
+            ORDER BY created_at DESC
+        `;
+        const [members] = await pool.query(query, [coordinatorId]);
+        res.json(members);
+    } catch (e) {
+        console.error('[COORDINATOR-GET-TEAM-MEMBERS-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 2. Create Coordinator Team Member (Ekip Yazarı, Kampüs Editörü vb.)
+app.post('/api/coordinator/team-members', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    const coordinatorId = req.user.id;
+    const { fullname, email, password, campus_role } = req.body;
+
+    if (!email || !email.trim() || !password || !fullname || !fullname.trim()) {
+        return res.status(400).json({ error: 'İsim, soyisim, e-posta ve şifre zorunludur.' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedFullname = fullname.trim();
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
+    }
+
+    // Role mapping:
+    // "Ekip Yazarı" -> system role 'author' (logs in directly to /author panel)
+    // "Kampüs Editörü" -> system role 'editor' (or 'author' with editor permissions)
+    const selectedCampusRole = (campus_role && campus_role.trim()) ? campus_role.trim() : 'Ekip Yazarı';
+    let systemRole = 'author';
+    if (selectedCampusRole.toLowerCase().includes('editör')) {
+        systemRole = 'editor';
+    }
+
+    try {
+        // Fetch coordinator's team/university name to assign to the member
+        const [coordRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const coordinatorTeam = (coordRows.length > 0 && coordRows[0].university) ? coordRows[0].university : null;
+
+        // Check existing email
+        const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [trimmedEmail]);
+        if (existing.length > 0) {
+            return res.status(400).json({ error: 'Bu e-posta adresiyle kayıtlı bir kullanıcı zaten mevcut.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const username = trimmedEmail.split('@')[0] + Math.floor(Math.random() * 1000);
+        const jobTitle = selectedCampusRole + (coordinatorTeam ? ` (${coordinatorTeam})` : '');
+
+        const [result] = await pool.query(
+            `INSERT INTO users (fullname, username, email, password, role, campus_role, coordinator_id, university, job_title) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [trimmedFullname, username, trimmedEmail, hashedPassword, systemRole, selectedCampusRole, coordinatorId, coordinatorTeam, jobTitle]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: `${selectedCampusRole} hesabı başarıyla oluşturuldu.`,
+            member: {
+                id: result.insertId,
+                fullname: trimmedFullname,
+                email: trimmedEmail,
+                username: username,
+                role: systemRole,
+                campus_role: selectedCampusRole,
+                university: coordinatorTeam
+            }
+        });
+    } catch (e) {
+        console.error('[COORDINATOR-CREATE-TEAM-MEMBER-ERROR]', e);
+        if (e.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Bu e-posta veya kullanıcı adı zaten kullanımda.' });
+        }
+        res.status(500).json({ error: 'Ekip üyesi oluşturulurken bir hata oluştu: ' + e.message });
+    }
+});
+
+// 3. Delete Team Member (only if belongs to this coordinator or admin)
+app.delete('/api/coordinator/team-members/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const memberId = req.params.id;
+
+    try {
+        const [rows] = await pool.query('SELECT id, coordinator_id, email, fullname FROM users WHERE id = ?', [memberId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Ekip üyesi bulunamadı.' });
+        }
+
+        const member = rows[0];
+        if (req.user.role !== 'admin' && member.coordinator_id !== coordinatorId) {
+            return res.status(403).json({ error: 'Bu ekip üyesini silme yetkiniz bulunmuyor.' });
+        }
+
+        await pool.query('DELETE FROM users WHERE id = ?', [memberId]);
+        res.json({ success: true, message: 'Ekip üyesi başarıyla silindi.' });
+    } catch (e) {
+        console.error('[COORDINATOR-DELETE-TEAM-MEMBER-ERROR]', e);
         res.status(500).json({ error: e.message });
     }
 });
