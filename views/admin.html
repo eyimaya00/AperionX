@@ -162,6 +162,57 @@
             font-size: 1.4rem;
         }
 
+        /* SUBMENU STYLES */
+        .menu-subgroup {
+            margin-bottom: 4px;
+        }
+
+        .menu-submenu {
+            display: none;
+            flex-direction: column;
+            padding-left: 14px;
+            gap: 4px;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+
+        .menu-submenu.open {
+            display: flex;
+        }
+
+        .menu-subitem {
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .menu-subitem:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: white;
+        }
+
+        .menu-subitem.active {
+            background: rgba(99, 102, 241, 0.25);
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        .sidebar.collapsed .menu-submenu {
+            display: none !important;
+        }
+
+        .sidebar.collapsed #coord-caret-icon {
+            display: none !important;
+        }
+
         /* CONTENT */
         .content {
             margin-left: var(--sidebar-width);
@@ -803,6 +854,24 @@
                 <i class="ph ph-key"></i>
                 <span>Yazar Şifre Değiştir</span>
             </a>
+            <!-- Kampüs Koordinatörü Menüsü -->
+            <div class="menu-subgroup">
+                <a href="javascript:void(0)" class="menu-item" id="menu-coord-parent" onclick="handleCoordinatorMenuClick(event, this)">
+                    <i class="ph ph-graduation-cap"></i>
+                    <span style="flex: 1;">Kampüs Koordinatörü</span>
+                    <i class="ph ph-caret-down" id="coord-caret-icon" style="font-size: 0.85rem; transition: transform 0.2s;"></i>
+                </a>
+                <div class="menu-submenu" id="coordinator-submenu">
+                    <a href="javascript:void(0)" class="menu-subitem" id="menu-coord-add" onclick="openCoordinatorAdd(event, this)">
+                        <i class="ph ph-user-plus" style="font-size: 1.1rem;"></i>
+                        <span>Kampüs Koordinatörü Ekle</span>
+                    </a>
+                    <a href="javascript:void(0)" class="menu-subitem" id="menu-coord-list" onclick="openCoordinatorList(event, this)">
+                        <i class="ph ph-list-bullets" style="font-size: 1.1rem;"></i>
+                        <span>Koordinatör Listesi</span>
+                    </a>
+                </div>
+            </div>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
                 <i class="ph ph-envelope-simple"></i>
                 <span>E-posta Şablonları</span>
@@ -2918,6 +2987,164 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Kampüs Koordinatörü Yönetim Bölümü -->
+        <div id="campus-coordinator-section" class="section">
+            <div class="header-row" style="margin-bottom: 24px;">
+                <div>
+                    <h1 class="page-title" style="margin-bottom: 6px;">
+                        <i class="ph ph-graduation-cap" style="color: var(--primary-accent, #6366f1);"></i> Kampüs Koordinatörü Yönetimi
+                    </h1>
+                    <p style="color: #64748b; margin: 0; font-size: 0.95rem;">
+                        Üniversite koordinatörleri oluşturun, e-posta ve şifrelerini belirleyin ve yetkili kampüs koordinatörlerini yönetin.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="openCoordinatorAdd()">
+                        <i class="ph ph-user-plus"></i> Kampüs Koordinatörü Ekle
+                    </button>
+                    <button class="btn" style="background: white; border: 1px solid #e2e8f0; color: #475569;" onclick="loadCampusCoordinators()">
+                        <i class="ph ph-arrows-clockwise"></i> Yenile
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; align-items: start;">
+                
+                <!-- 1. Kampüs Koordinatörü Ekle Form Kartı -->
+                <div class="card" id="card-add-coordinator" style="padding: 28px; border-top: 4px solid var(--primary-accent, #6366f1); transition: box-shadow 0.3s;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(99, 102, 241, 0.1); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="ph ph-user-plus"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b;">Kampüs Koordinatörü Ekle</h3>
+                                <small style="color: #64748b;">E-posta ve şifre belirleyerek yeni hesap oluşturun</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="campusCoordinatorForm" onsubmit="submitCreateCampusCoordinator(event)" style="display: flex; flex-direction: column; gap: 18px;">
+                        <!-- E-posta -->
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                Koordinatör E-posta Adresi <span style="color: #ef4444;">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <i class="ph ph-envelope" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="email" id="coord_email" class="form-control" placeholder="koordinator@universite.edu.tr" required style="padding-left: 42px;">
+                            </div>
+                            <small style="color: #94a3b8; font-size: 0.78rem; display: block; margin-top: 4px;">Giriş için kullanılacak benzersiz e-posta adresi.</small>
+                        </div>
+
+                        <!-- Şifre -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label style="font-size: 0.88rem; font-weight: 600; color: #475569; margin: 0;">
+                                    Giriş Şifresi <span style="color: #ef4444;">*</span>
+                                </label>
+                                <button type="button" onclick="generateCoordinatorPassword()" style="background: none; border: none; color: #6366f1; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                    <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
+                                </button>
+                            </div>
+                            <div style="position: relative;">
+                                <i class="ph ph-lock" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="password" id="coord_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required style="padding-left: 42px; padding-right: 42px;">
+                                <button type="button" onclick="togglePasswordVisibility('coord_password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem;" title="Şifreyi Göster/Gizle">
+                                    <i class="ph ph-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ad Soyad (Opsiyonel) -->
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                Ad Soyad <span style="color: #94a3b8; font-weight: 400;">(İsteğe bağlı)</span>
+                            </label>
+                            <div style="position: relative;">
+                                <i class="ph ph-user" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="text" id="coord_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" style="padding-left: 42px;">
+                            </div>
+                        </div>
+
+                        <!-- Üniversite / Kampüs (Opsiyonel) -->
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                Üniversite / Kampüs Adı <span style="color: #94a3b8; font-weight: 400;">(İsteğe bağlı)</span>
+                            </label>
+                            <div style="position: relative;">
+                                <i class="ph ph-buildings" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="text" id="coord_university" class="form-control" placeholder="Örn: Boğaziçi Üniversitesi" style="padding-left: 42px;">
+                            </div>
+                        </div>
+
+                        <!-- Başarı Bilgi Kartı (Credentials box) -->
+                        <div id="coord-success-box" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 4px;">
+                            <div style="display: flex; align-items: center; gap: 8px; color: #166534; font-weight: 700; margin-bottom: 8px;">
+                                <i class="ph ph-check-circle" style="font-size: 1.3rem;"></i> Kampüs Koordinatörü Oluşturuldu!
+                            </div>
+                            <div style="background: white; border: 1px solid #dcfce7; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.88rem; color: #1e293b; line-height: 1.6; margin-bottom: 10px;">
+                                <div><strong>E-posta:</strong> <span id="success-coord-email"></span></div>
+                                <div><strong>Şifre:</strong> <span id="success-coord-pass"></span></div>
+                                <div id="success-coord-uni-row" style="display: none;"><strong>Kampüs:</strong> <span id="success-coord-uni"></span></div>
+                            </div>
+                            <button type="button" onclick="copyCoordinatorCredentials()" class="btn" style="background: #166534; color: white; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; width: 100%; justify-content: center;">
+                                <i class="ph ph-copy"></i> Giriş Bilgilerini Kopyala
+                            </button>
+                        </div>
+
+                        <button type="submit" id="btn-submit-coord" class="btn btn-primary" style="padding: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
+                            <i class="ph ph-check-circle" style="font-size: 1.2rem;"></i>
+                            <span>Koordinatör Hesabı Oluştur</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. Kayıtlı Kampüs Koordinatörleri Listesi Kartı -->
+                <div class="card" id="card-coord-list" style="padding: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="ph ph-users-three"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b;">Kayıtlı Koordinatörler</h3>
+                                <small style="color: #64748b;">Mevcut kampüs koordinatörleri</small>
+                            </div>
+                        </div>
+                        <span id="coord-count-badge" class="badge" style="background: #e0e7ff; color: #4338ca; padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
+                            0 Koordinatör
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom: 16px; position: relative;">
+                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        <input type="text" id="coord-search-input" onkeyup="filterCampusCoordinators()" class="form-control" placeholder="İsim, e-posta veya üniversite ara..." style="padding-left: 38px; font-size: 0.9rem;">
+                    </div>
+
+                    <div style="max-height: 480px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                            <thead style="position: sticky; top: 0; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                <tr style="text-align: left; color: #64748b;">
+                                    <th style="padding: 12px 14px;">Koordinatör</th>
+                                    <th style="padding: 12px 14px;">Kampüs / Üniversite</th>
+                                    <th style="padding: 12px 14px; text-align: right;">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campus-coordinators-table-body">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 24px; color: #94a3b8;">
+                                        <i class="ph ph-spinner spinner"></i> Yükleniyor...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -5949,6 +6176,7 @@
                 if (sectionId === 'team-activity') loadTeamActivity();
                 if (sectionId === 'author-consents') loadAuthorConsents();
                 if (sectionId === 'change-author-password-section') loadAuthorsForPasswordReset();
+                if (sectionId === 'campus-coordinator-section') loadCampusCoordinators();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -6152,6 +6380,291 @@
                     submitBtn.innerHTML = '<i class="ph ph-check-circle" style="font-size: 1.2rem;"></i> <span>Şifreyi Değiştir</span>';
                 }
             }
+        }
+
+        // === KAMPÜS KOORDİNATÖRÜ YÖNETİMİ MANTIĞI ===
+        let campusCoordinatorsList = [];
+        let lastCreatedCoordinator = null;
+
+        function toggleCoordinatorSubmenu(e, linkEl) {
+            if (e) e.preventDefault();
+            const submenu = document.getElementById('coordinator-submenu');
+            const caret = document.getElementById('coord-caret-icon');
+            if (submenu) {
+                const isOpen = submenu.classList.toggle('open');
+                if (caret) {
+                    caret.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                }
+            }
+        }
+
+        function handleCoordinatorMenuClick(e, linkEl) {
+            toggleCoordinatorSubmenu(e, linkEl);
+            showSection('campus-coordinator-section', linkEl);
+            loadCampusCoordinators();
+        }
+
+        function openCoordinatorAdd(e, subitemEl) {
+            if (e) e.preventDefault();
+            const parentMenu = document.getElementById('menu-coord-parent');
+            showSection('campus-coordinator-section', parentMenu);
+            
+            // Subitem active class
+            document.querySelectorAll('.menu-subitem').forEach(el => el.classList.remove('active'));
+            const addSubitem = document.getElementById('menu-coord-add');
+            if (addSubitem) addSubitem.classList.add('active');
+            
+            // Submenu açık olsun
+            const submenu = document.getElementById('coordinator-submenu');
+            const caret = document.getElementById('coord-caret-icon');
+            if (submenu) submenu.classList.add('open');
+            if (caret) caret.style.transform = 'rotate(180deg)';
+
+            // Ekle formuna odaklan
+            const card = document.getElementById('card-add-coordinator');
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                card.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.35)';
+                setTimeout(() => {
+                    card.style.boxShadow = '';
+                }, 1200);
+            }
+            const emailInput = document.getElementById('coord_email');
+            if (emailInput) emailInput.focus();
+        }
+
+        function openCoordinatorList(e, subitemEl) {
+            if (e) e.preventDefault();
+            const parentMenu = document.getElementById('menu-coord-parent');
+            showSection('campus-coordinator-section', parentMenu);
+            
+            document.querySelectorAll('.menu-subitem').forEach(el => el.classList.remove('active'));
+            const listSubitem = document.getElementById('menu-coord-list');
+            if (listSubitem) listSubitem.classList.add('active');
+
+            const submenu = document.getElementById('coordinator-submenu');
+            const caret = document.getElementById('coord-caret-icon');
+            if (submenu) submenu.classList.add('open');
+            if (caret) caret.style.transform = 'rotate(180deg)';
+
+            const card = document.getElementById('card-coord-list');
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const searchInput = document.getElementById('coord-search-input');
+            if (searchInput) searchInput.focus();
+        }
+
+        async function loadCampusCoordinators() {
+            const tbody = document.getElementById('campus-coordinators-table-body');
+            const badge = document.getElementById('coord-count-badge');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 24px; color: #94a3b8;"><i class="ph ph-spinner spinner"></i> Yükleniyor...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-coordinators`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                campusCoordinatorsList = await res.json();
+
+                if (badge) badge.innerText = `${campusCoordinatorsList.length} Koordinatör`;
+                renderCampusCoordinators(campusCoordinatorsList);
+            } catch (e) {
+                console.error('[LOAD-CAMPUS-COORDINATORS-ERROR]', e);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #ef4444;">Yüklenemedi: ${escapeHtml(e.message)}</td></tr>`;
+            }
+        }
+
+        function renderCampusCoordinators(list) {
+            const tbody = document.getElementById('campus-coordinators-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 32px 16px; color: #94a3b8;">
+                            <i class="ph ph-graduation-cap" style="font-size: 2.2rem; display: block; margin-bottom: 8px; color: #cbd5e1;"></i>
+                            Henüz kayıtlı kampüs koordinatörü bulunmuyor.<br>
+                            <button onclick="openCoordinatorAdd()" class="btn btn-outline" style="margin-top: 12px; font-size: 0.85rem; padding: 6px 14px;">
+                                <i class="ph ph-user-plus"></i> Şimdi Ekle
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            list.forEach(coord => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #f1f5f9';
+
+                const formattedDate = coord.created_at ? new Date(coord.created_at).toLocaleDateString('tr-TR') : '-';
+                const uniText = coord.university ? escapeHtml(coord.university) : '<span style="color:#94a3b8; font-style:italic;">Belirtilmemiş</span>';
+
+                tr.innerHTML = `
+                    <td style="padding: 12px 14px;">
+                        <div style="font-weight: 600; color: #1e293b;">${escapeHtml(coord.fullname || 'Kampüs Koordinatörü')}</div>
+                        <div style="color: #64748b; font-size: 0.8rem;">${escapeHtml(coord.email)}</div>
+                        <small style="color: #94a3b8; font-size: 0.72rem;">Kayıt: ${formattedDate}</small>
+                    </td>
+                    <td style="padding: 12px 14px;">
+                        <div style="font-size: 0.88rem; color: #334155; font-weight: 500;">
+                            <i class="ph ph-buildings" style="color: #6366f1; vertical-align: middle;"></i> ${uniText}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 14px; text-align: right; white-space: nowrap;">
+                        <button type="button" onclick="quickResetCoordinatorPassword('${escapeHtml(coord.email)}')" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.78rem; border-radius: 6px; margin-right: 6px;" title="Şifre Değiştir">
+                            <i class="ph ph-key"></i> Şifre
+                        </button>
+                        <button type="button" onclick="deleteCampusCoordinator(${coord.id}, '${escapeHtml(coord.email)}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.78rem; border-radius: 6px; background: #fee2e2; color: #ef4444; border: 1px solid #fecaca;" title="Koordinatörü Sil">
+                            <i class="ph ph-trash"></i> Sil
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterCampusCoordinators() {
+            const input = document.getElementById('coord-search-input');
+            if (!input) return;
+            const q = input.value.toLowerCase().trim();
+            const filtered = campusCoordinatorsList.filter(c => 
+                (c.fullname && c.fullname.toLowerCase().includes(q)) || 
+                (c.email && c.email.toLowerCase().includes(q)) || 
+                (c.university && c.university.toLowerCase().includes(q))
+            );
+            renderCampusCoordinators(filtered);
+        }
+
+        function generateCoordinatorPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$%';
+            let randomPw = '';
+            for (let i = 0; i < 10; i++) {
+                randomPw += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const pwInput = document.getElementById('coord_password');
+            if (pwInput) {
+                pwInput.type = 'text';
+                pwInput.value = randomPw;
+                pwInput.focus();
+            }
+            showToast(`Güçlü şifre üretildi: ${randomPw}`, 'success');
+        }
+
+        async function submitCreateCampusCoordinator(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('coord_email');
+            const pwInput = document.getElementById('coord_password');
+            const nameInput = document.getElementById('coord_fullname');
+            const uniInput = document.getElementById('coord_university');
+            const submitBtn = document.getElementById('btn-submit-coord');
+            const successBox = document.getElementById('coord-success-box');
+
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = pwInput ? pwInput.value : '';
+            const fullname = nameInput ? nameInput.value.trim() : '';
+            const university = uniInput ? uniInput.value.trim() : '';
+
+            if (!email || !password) {
+                return showToast('E-posta ve şifre zorunludur.', 'error');
+            }
+            if (password.length < 6) {
+                return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ph ph-spinner spinner"></i> Oluşturuluyor...';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-coordinators`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ email, password, fullname, university })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Koordinatör başarıyla oluşturuldu.', 'success');
+
+                    // Show success credentials box
+                    lastCreatedCoordinator = { email, password, university, fullname };
+                    if (successBox) {
+                        document.getElementById('success-coord-email').innerText = email;
+                        document.getElementById('success-coord-pass').innerText = password;
+                        const uniRow = document.getElementById('success-coord-uni-row');
+                        if (university) {
+                            document.getElementById('success-coord-uni').innerText = university;
+                            if (uniRow) uniRow.style.display = 'block';
+                        } else {
+                            if (uniRow) uniRow.style.display = 'none';
+                        }
+                        successBox.style.display = 'block';
+                    }
+
+                    // Reset inputs
+                    if (emailInput) emailInput.value = '';
+                    if (pwInput) pwInput.value = '';
+                    if (nameInput) nameInput.value = '';
+                    if (uniInput) uniInput.value = '';
+
+                    // Reload list
+                    loadCampusCoordinators();
+                } else {
+                    showToast(data.error || 'Koordinatör oluşturulamadı.', 'error');
+                }
+            } catch (e) {
+                console.error('[CREATE-CAMPUS-COORD-ERROR]', e);
+                showToast('Sunucu hatası: ' + e.message, 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ph ph-check-circle" style="font-size: 1.2rem;"></i> <span>Koordinatör Hesabı Oluştur</span>';
+                }
+            }
+        }
+
+        function copyCoordinatorCredentials() {
+            if (!lastCreatedCoordinator) return;
+            const text = `AperionX Kampüs Koordinatörü Giriş Bilgileri:\nE-posta: ${lastCreatedCoordinator.email}\nŞifre: ${lastCreatedCoordinator.password}${lastCreatedCoordinator.university ? '\nKampüs: ' + lastCreatedCoordinator.university : ''}\nGiriş: https://aperionx.com`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Giriş bilgileri panoya kopyalandı!', 'success');
+            }).catch(() => {
+                showToast('Kopyalama başarısız oldu.', 'error');
+            });
+        }
+
+        async function deleteCampusCoordinator(id, email) {
+            if (!confirm(`"${email}" kampüs koordinatörünü silmek istediğinize emin misiniz?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-coordinators/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Koordinatör silindi.', 'success');
+                    loadCampusCoordinators();
+                } else {
+                    showToast(data.error || 'Silme işlemi başarısız.', 'error');
+                }
+            } catch (e) {
+                console.error('[DELETE-CAMPUS-COORD-ERROR]', e);
+                showToast('Sunucu hatası: ' + e.message, 'error');
+            }
+        }
+
+        function quickResetCoordinatorPassword(email) {
+            showSection('change-author-password-section', document.querySelector('a[onclick*="change-author-password-section"]'));
+            selectAuthorForReset(email);
         }
 
         // === MAINTENANCE MODE LOGIC ===

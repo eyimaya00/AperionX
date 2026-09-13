@@ -4100,8 +4100,93 @@ app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
     }
 });
 
+// === Admin: Campus Coordinators Management ===
 
+// 1. Get All Campus Coordinators
+app.get('/api/admin/campus-coordinators', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(
+            "SELECT id, fullname, username, email, role, university, is_active, created_at FROM users WHERE role = 'campus_coordinator' ORDER BY created_at DESC"
+        );
+        res.json(rows);
+    } catch (e) {
+        console.error('[ADMIN-GET-CAMPUS-COORDINATORS-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
+// 2. Create Campus Coordinator (email and password required)
+app.post('/api/admin/campus-coordinators', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { email, password, fullname, university } = req.body;
+
+    if (!email || !email.trim() || !password) {
+        return res.status(400).json({ error: 'E-posta ve şifre zorunludur.' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
+    }
+
+    try {
+        // Check if email already exists
+        const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [trimmedEmail]);
+        if (existing.length > 0) {
+            return res.status(400).json({ error: 'Bu e-posta adresiyle kayıtlı bir kullanıcı zaten mevcut.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const nameToUse = (fullname && fullname.trim()) ? fullname.trim() : trimmedEmail.split('@')[0];
+        const username = trimmedEmail.split('@')[0] + Math.floor(Math.random() * 1000);
+        const uniToUse = (university && university.trim()) ? university.trim() : null;
+
+        const [result] = await pool.query(
+            'INSERT INTO users (fullname, username, email, password, role, university) VALUES (?, ?, ?, ?, ?, ?)',
+            [nameToUse, username, trimmedEmail, hashedPassword, 'campus_coordinator', uniToUse]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Kampüs koordinatörü hesabı başarıyla oluşturuldu.',
+            coordinator: {
+                id: result.insertId,
+                fullname: nameToUse,
+                email: trimmedEmail,
+                username: username,
+                role: 'campus_coordinator',
+                university: uniToUse
+            }
+        });
+    } catch (e) {
+        console.error('[ADMIN-CREATE-CAMPUS-COORDINATOR-ERROR]', e);
+        if (e.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Bu e-posta veya kullanıcı adı zaten kullanımda.' });
+        }
+        res.status(500).json({ error: 'Koordinatör oluşturulurken bir hata oluştu: ' + e.message });
+    }
+});
+
+// 3. Delete Campus Coordinator
+app.delete('/api/admin/campus-coordinators/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [user] = await pool.query('SELECT id, role, email FROM users WHERE id = ?', [req.params.id]);
+        if (user.length === 0) {
+            return res.status(404).json({ error: 'Koordinatör bulunamadı.' });
+        }
+        if (user[0].role !== 'campus_coordinator') {
+            return res.status(400).json({ error: 'Bu kullanıcı kampüs koordinatörü rolünde değil.' });
+        }
+
+        await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: 'Kampüs koordinatörü başarıyla silindi.' });
+    } catch (e) {
+        console.error('[ADMIN-DELETE-CAMPUS-COORDINATOR-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
 app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
@@ -7186,6 +7271,7 @@ app.post('/api/login', async (req, res) => {
         if (user.role === 'admin') redirectUrl = 'admin';
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
+        else if (user.role === 'campus_coordinator') redirectUrl = 'author';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7268,6 +7354,7 @@ app.post('/api/auth/google', async (req, res) => {
         if (user.role === 'admin') redirectUrl = 'admin';
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
+        else if (user.role === 'campus_coordinator') redirectUrl = 'author';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
