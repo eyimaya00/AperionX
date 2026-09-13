@@ -2849,14 +2849,14 @@ async function ensureSchema() {
             console.error('[MIGRATION] Error updating experiment dates:', e);
         }
 
-        // Automatic slug repair for experiments
+        // Automatic slug repair for experiments (idempotent & conflict-safe)
         try {
-            const [expsToMigrate] = await pool.query("SELECT id, title, slug FROM experiments");
+            const [expsToMigrate] = await pool.query("SELECT id, title, slug FROM experiments WHERE slug IS NULL OR TRIM(slug) = ''");
             for (const exp of expsToMigrate) {
-                const cleanSlug = slugify(exp.title);
-                if (cleanSlug && exp.slug !== cleanSlug) {
-                    await pool.query("UPDATE experiments SET slug = ? WHERE id = ?", [cleanSlug, exp.id]);
-                    console.log(`[MIGRATION] Updated experiment slug ID ${exp.id}: ${cleanSlug}`);
+                if (exp.title && exp.title.trim()) {
+                    const uniqueSlug = await getUniqueSlug(pool, exp.title, exp.id, 'experiments');
+                    await pool.query("UPDATE experiments SET slug = ? WHERE id = ?", [uniqueSlug, exp.id]);
+                    console.log(`[MIGRATION] Assigned missing experiment slug ID ${exp.id}: ${uniqueSlug}`);
                 }
             }
         } catch(e) {
