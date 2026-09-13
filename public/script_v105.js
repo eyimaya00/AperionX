@@ -1786,8 +1786,13 @@ if (loginForm) {
                 checkAuthStatus(); // Update UI
 
                 // Role-based redirect logic
-                if (data.user.role === 'admin') {
+                if (data.redirectUrl) {
+                    const cleanUrl = data.redirectUrl.startsWith('/') ? data.redirectUrl : '/' + data.redirectUrl;
+                    setTimeout(() => window.location.href = cleanUrl, 1000);
+                } else if (data.user.role === 'admin') {
                     setTimeout(() => window.location.href = '/admin', 1000);
+                } else if (data.user.role === 'campus_coordinator') {
+                    setTimeout(() => window.location.href = '/campus-coordinator', 1000);
                 } else if (data.user.role === 'editor') {
                     setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
@@ -1829,8 +1834,13 @@ function handleGoogleCredentialResponse(response) {
         }
         checkAuthStatus();
         
-        if (data.user.role === 'admin') {
+        if (data.redirectUrl) {
+            const cleanUrl = data.redirectUrl.startsWith('/') ? data.redirectUrl : '/' + data.redirectUrl;
+            setTimeout(() => window.location.href = cleanUrl, 1000);
+        } else if (data.user.role === 'admin') {
             setTimeout(() => window.location.href = '/admin', 1000);
+        } else if (data.user.role === 'campus_coordinator') {
+            setTimeout(() => window.location.href = '/campus-coordinator', 1000);
         } else if (data.user.role === 'editor') {
             setTimeout(() => window.location.href = '/editor', 1000);
         } else if (data.user.role === 'author') {
@@ -1938,11 +1948,12 @@ function checkAuthStatus() {
                         <img src="${safeAvatar}" alt="User" onerror="this.onerror=null; this.src='${defaultAvatarFallback}'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
                         <div class="mobile-user-info">
                             <span class="name">${escapeHtml(user.fullname || user.username)}</span>
-                            <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye'))}</span>
+                            <span class="role">${user.role === 'admin' ? 'Yönetici' : (user.role === 'campus_coordinator' ? 'Kampüs Koordinatörü' : (user.role === 'editor' ? 'Editör' : (user.role === 'author' ? 'Yazar' : 'Üye')))}</span>
                         </div>
                     </div>
                     <div class="mobile-user-links">
                         ${user.role === 'admin' ? '<a href="/admin" class="btn btn-outline"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                        ${user.role === 'campus_coordinator' ? '<a href="/campus-coordinator" class="btn btn-outline"><i class="ph-bold ph-graduation-cap"></i> Kampüs Koordinatörü Paneli</a>' : ''}
                         ${user.role === 'author' || user.role === 'admin' ? '<a href="/author" class="btn btn-outline"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
                         ${user.role === 'editor' ? '<a href="/editor" class="btn btn-outline"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
                         <a href="${profileLink}" class="btn btn-outline"><i class="ph-bold ph-user"></i> Profilim</a>
@@ -1959,6 +1970,7 @@ function checkAuthStatus() {
                         </button>
                         <div class="dropdown-menu" id="user-dropdown-menu">
                             ${user.role === 'admin' ? '<a href="/admin"><i class="ph-bold ph-shield-check"></i> Admin Paneli</a>' : ''}
+                            ${user.role === 'campus_coordinator' ? '<a href="/campus-coordinator"><i class="ph-bold ph-graduation-cap"></i> Kampüs Koordinatörü Paneli</a>' : ''}
                             ${(user.role === 'author' || user.role === 'admin') ? '<a href="/author"><i class="ph-bold ph-pen-nib"></i> Yazar Paneli</a>' : ''}
                             ${user.role === 'editor' ? '<a href="/editor"><i class="ph-bold ph-pencil"></i> Editör Paneli</a>' : ''}
                             <a href="${profileLink}"><i class="ph-bold ph-user"></i> Profilim</a>

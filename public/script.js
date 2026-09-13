@@ -1210,9 +1210,12 @@ if (loginForm) {
                 checkAuthStatus(); // Update UI
 
                 if (data.redirectUrl) {
-                    setTimeout(() => window.location.href = '/' + data.redirectUrl, 1000);
+                    const cleanUrl = data.redirectUrl.startsWith('/') ? data.redirectUrl : '/' + data.redirectUrl;
+                    setTimeout(() => window.location.href = cleanUrl, 1000);
                 } else if (data.user.role === 'admin') {
                     setTimeout(() => window.location.href = '/admin', 1000);
+                } else if (data.user.role === 'campus_coordinator') {
+                    setTimeout(() => window.location.href = '/campus-coordinator', 1000);
                 } else if (data.user.role === 'editor') {
                     setTimeout(() => window.location.href = '/editor', 1000);
                 } else if (data.user.role === 'author') {
