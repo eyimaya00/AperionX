@@ -1124,7 +1124,7 @@
             font-weight: 800;
             letter-spacing: -0.5px;
             line-height: 1.18;
-            margin: 0 0 16px;
+            margin: 0 0 32px;
             background: linear-gradient(135deg, #ffffff 30%, #c7d2fe 70%, #818cf8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1370,11 +1370,8 @@
                 <span id="cdBadgeText">İLK YAYIN: 15 EYLÜL 20:00</span>
             </div>
 
-            <!-- Başlık & Açıklama -->
+            <!-- Başlık -->
             <h1 class="cd-main-title" id="cdMainTitle">AperionX Bilim Gündemi Çok Yakında!</h1>
-            <p class="cd-description" id="cdDescription">
-                İlk yayınımız 15 Eylül saat 20:00'da sizlerle buluşuyor. Bilimin ve geleceğin nabzını tutacağımız ilk yayın için geri sayım başladı.
-            </p>
 
             <!-- Geri Sayım Sayacı Kutuları -->
             <div class="cd-timer-grid" id="cdTimerGrid">
@@ -1399,12 +1396,9 @@
                 </div>
             </div>
 
-            <!-- Aksiyon Butonları (Geri Sayım Butonu) -->
+            <!-- Aksiyon Butonu -->
             <div class="cd-actions-row">
-                <a href="javascript:void(0)" id="cdCalendarBtn" class="cd-btn cd-btn-primary">
-                    <i class="ph-bold ph-calendar-plus"></i> <span id="cdBtnText">Google Takvime Ekle</span>
-                </a>
-                <a href="/articles" class="cd-btn cd-btn-secondary">
+                <a href="/articles" class="cd-btn cd-btn-primary">
                     <i class="ph-bold ph-compass"></i> Makaleleri Keşfet
                 </a>
             </div>
@@ -1786,18 +1780,10 @@
                         const logoEl = document.getElementById('cdLogoImg');
                         if (logoEl) logoEl.src = logoUrl;
 
-                        // Başlık ve Açıklama Güncelle
+                        // Başlık Güncelle
                         if (settings.gundem_countdown_title) {
                             const titleEl = document.getElementById('cdMainTitle');
                             if (titleEl) titleEl.textContent = settings.gundem_countdown_title;
-                        }
-                        if (settings.gundem_countdown_desc) {
-                            const descEl = document.getElementById('cdDescription');
-                            if (descEl) descEl.textContent = settings.gundem_countdown_desc;
-                        }
-                        if (settings.gundem_countdown_btn_text) {
-                            const btnTextEl = document.getElementById('cdBtnText');
-                            if (btnTextEl) btnTextEl.textContent = settings.gundem_countdown_btn_text;
                         }
 
                         // Hedef Tarih: 15 Eylül Saat 20:00
@@ -1820,26 +1806,6 @@
                                 if (badgeEl) badgeEl.textContent = `İLK YAYIN: ${dDay} ${dMonth.toUpperCase()} ${dHours}:${dMins}`;
                             }
                         } catch(e) {}
-
-                        // Google Takvim Butonu
-                        const calBtn = document.getElementById('cdCalendarBtn');
-                        if (calBtn) {
-                            calBtn.onclick = function(e) {
-                                e.preventDefault();
-                                try {
-                                    const sDate = new Date(targetStr);
-                                    const eDate = new Date(sDate.getTime() + (60 * 60 * 1000));
-                                    const toCalIso = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-                                    const title = encodeURIComponent(settings.gundem_countdown_title || 'AperionX Bilim Gündemi İlk Yayını');
-                                    const details = encodeURIComponent(settings.gundem_countdown_desc || 'AperionX Bilim Gündemi ilk yayını başlıyor! Canlı yayın ve detaylar için: https://aperionx.com/gundem');
-                                    const location = encodeURIComponent('https://aperionx.com/gundem');
-                                    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toCalIso(sDate)}/${toCalIso(eDate)}&details=${details}&location=${location}`;
-                                    window.open(url, '_blank');
-                                } catch(err) {
-                                    window.open('https://calendar.google.com', '_blank');
-                                }
-                            };
-                        }
 
                         // Sayaç Tıklama Motoru
                         const daysEl = document.getElementById('cdDays');
