@@ -855,23 +855,10 @@
                 <span>Yazar Şifre Değiştir</span>
             </a>
             <!-- Kampüs Koordinatörü Menüsü -->
-            <div class="menu-subgroup">
-                <a href="javascript:void(0)" class="menu-item" id="menu-coord-parent" onclick="handleCoordinatorMenuClick(event, this)">
-                    <i class="ph ph-graduation-cap"></i>
-                    <span style="flex: 1;">Kampüs Koordinatörü</span>
-                    <i class="ph ph-caret-down" id="coord-caret-icon" style="font-size: 0.85rem; transition: transform 0.2s;"></i>
-                </a>
-                <div class="menu-submenu" id="coordinator-submenu">
-                    <a href="javascript:void(0)" class="menu-subitem" id="menu-coord-add" onclick="openCoordinatorAdd(event, this)">
-                        <i class="ph ph-user-plus" style="font-size: 1.1rem;"></i>
-                        <span>Kampüs Koordinatörü Ekle</span>
-                    </a>
-                    <a href="javascript:void(0)" class="menu-subitem" id="menu-coord-list" onclick="openCoordinatorList(event, this)">
-                        <i class="ph ph-list-bullets" style="font-size: 1.1rem;"></i>
-                        <span>Koordinatör Listesi</span>
-                    </a>
-                </div>
-            </div>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('campus-coordinator-section', this); loadCampusCoordinators();">
+                <i class="ph ph-graduation-cap"></i>
+                <span>Kampüs Koordinatörü</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
                 <i class="ph ph-envelope-simple"></i>
                 <span>E-posta Şablonları</span>
@@ -6386,41 +6373,8 @@
         let campusCoordinatorsList = [];
         let lastCreatedCoordinator = null;
 
-        function toggleCoordinatorSubmenu(e, linkEl) {
-            if (e) e.preventDefault();
-            const submenu = document.getElementById('coordinator-submenu');
-            const caret = document.getElementById('coord-caret-icon');
-            if (submenu) {
-                const isOpen = submenu.classList.toggle('open');
-                if (caret) {
-                    caret.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-                }
-            }
-        }
-
-        function handleCoordinatorMenuClick(e, linkEl) {
-            toggleCoordinatorSubmenu(e, linkEl);
-            showSection('campus-coordinator-section', linkEl);
-            loadCampusCoordinators();
-        }
-
-        function openCoordinatorAdd(e, subitemEl) {
-            if (e) e.preventDefault();
-            const parentMenu = document.getElementById('menu-coord-parent');
-            showSection('campus-coordinator-section', parentMenu);
-            
-            // Subitem active class
-            document.querySelectorAll('.menu-subitem').forEach(el => el.classList.remove('active'));
-            const addSubitem = document.getElementById('menu-coord-add');
-            if (addSubitem) addSubitem.classList.add('active');
-            
-            // Submenu açık olsun
-            const submenu = document.getElementById('coordinator-submenu');
-            const caret = document.getElementById('coord-caret-icon');
-            if (submenu) submenu.classList.add('open');
-            if (caret) caret.style.transform = 'rotate(180deg)';
-
-            // Ekle formuna odaklan
+        function openCoordinatorAdd() {
+            showSection('campus-coordinator-section', document.querySelector('a[onclick*="campus-coordinator-section"]'));
             const card = document.getElementById('card-add-coordinator');
             if (card) {
                 card.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -6431,26 +6385,6 @@
             }
             const emailInput = document.getElementById('coord_email');
             if (emailInput) emailInput.focus();
-        }
-
-        function openCoordinatorList(e, subitemEl) {
-            if (e) e.preventDefault();
-            const parentMenu = document.getElementById('menu-coord-parent');
-            showSection('campus-coordinator-section', parentMenu);
-            
-            document.querySelectorAll('.menu-subitem').forEach(el => el.classList.remove('active'));
-            const listSubitem = document.getElementById('menu-coord-list');
-            if (listSubitem) listSubitem.classList.add('active');
-
-            const submenu = document.getElementById('coordinator-submenu');
-            const caret = document.getElementById('coord-caret-icon');
-            if (submenu) submenu.classList.add('open');
-            if (caret) caret.style.transform = 'rotate(180deg)';
-
-            const card = document.getElementById('card-coord-list');
-            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const searchInput = document.getElementById('coord-search-input');
-            if (searchInput) searchInput.focus();
         }
 
         async function loadCampusCoordinators() {

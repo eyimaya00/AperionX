@@ -7271,7 +7271,7 @@ app.post('/api/login', async (req, res) => {
         if (user.role === 'admin') redirectUrl = 'admin';
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
-        else if (user.role === 'campus_coordinator') redirectUrl = 'author';
+        else if (user.role === 'campus_coordinator') redirectUrl = 'campus-coordinator';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7354,7 +7354,7 @@ app.post('/api/auth/google', async (req, res) => {
         if (user.role === 'admin') redirectUrl = 'admin';
         else if (user.role === 'author') redirectUrl = 'author';
         else if (user.role === 'editor') redirectUrl = 'editor';
-        else if (user.role === 'campus_coordinator') redirectUrl = 'author';
+        else if (user.role === 'campus_coordinator') redirectUrl = 'campus-coordinator';
         else if (user.role === 'reader') redirectUrl = 'index.html';
 
         res.json({
@@ -7631,6 +7631,12 @@ app.get('/editor', (req, res) => {
     console.log('Serving editor_panel.html');
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile('editor_panel.html', { root: path.join(__dirname, 'views') });
+});
+
+// Campus Coordinator Panel Route
+app.get(['/campus-coordinator', '/campus-coordinator.html', '/kampus-koordinatoru'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('campus-coordinator.html', { root: path.join(__dirname, 'views') });
 });
 
 // === CATEGORIES MANAGEMENT ===
