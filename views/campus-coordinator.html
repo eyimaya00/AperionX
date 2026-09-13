@@ -571,11 +571,7 @@
         </button>
         <div style="display: flex; align-items: center; gap: 8px;">
             <img src="/uploads/logo.png" alt="AperionX" style="height: 28px;">
-            <span class="campus-badge">Kampüs Ağı</span>
         </div>
-        <button class="mobile-header-btn" onclick="toggleTheme()" aria-label="Tema Değiştir">
-            <i class="ph ph-moon" id="mobile-theme-icon"></i>
-        </button>
     </header>
 
     <!-- SIDEBAR -->
@@ -583,13 +579,6 @@
         <a href="/" class="logo-box">
             <img src="/uploads/logo.png" alt="AperionX Logo">
         </a>
-
-        <!-- BRANDING BADGE -->
-        <div style="margin-bottom: 16px; padding: 0 4px;">
-            <span class="campus-badge">
-                <i class="ph-fill ph-graduation-cap"></i> AperionX Kampüs Ağı
-            </span>
-        </div>
 
         <!-- COORDINATOR PROFILE PREVIEW -->
         <div class="sidebar-profile">
@@ -608,10 +597,10 @@
                 <i class="ph ph-house"></i> <span>Genel Bakış</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-campus', this)">
-                <i class="ph ph-buildings"></i> <span>Kampüs Bilgileri</span>
+                <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-team', this)">
-                <i class="ph ph-users-three"></i> <span>Temsilciler & Ekip</span>
+                <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-contents', this)">
                 <i class="ph ph-article"></i> <span>İçerik & Projeler</span>
@@ -640,12 +629,9 @@
             </div>
 
             <div class="top-actions">
-                <button class="icon-btn" onclick="toggleTheme()" title="Tema Değiştir">
-                    <i class="ph ph-moon" id="theme-toggle-icon"></i>
-                </button>
-                <div style="display: flex; align-items: center; gap: 8px; padding-left: 8px; border-left: 1px solid var(--border-color);">
-                    <span id="top-coord-university" class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
-                        <i class="ph ph-buildings"></i> Üniversite Yükleniyor...
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="top-coord-team" class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
+                        <i class="ph ph-users-three"></i> Ekip Yükleniyor...
                     </span>
                 </div>
             </div>
@@ -657,7 +643,7 @@
             <div class="hero-banner">
                 <h1 class="hero-title">AperionX Kampüs Ağına Hoş Geldiniz! 🎓</h1>
                 <p class="hero-subtitle">
-                    Sayın <strong id="hero-coord-name">Koordinatör</strong>, üniversitenizdeki bilim ve teknoloji faaliyetlerini koordine edeceğiniz resmi AperionX Kampüs Ağı yönetim paneline başarıyla giriş yaptınız.
+                    Sayın <strong id="hero-coord-name">Koordinatör</strong>, ekibinizdeki bilim ve teknoloji faaliyetlerini koordine edeceğiniz yönetim paneline başarıyla giriş yaptınız.
                 </p>
             </div>
 
@@ -665,11 +651,11 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                        <i class="ph ph-buildings"></i>
+                        <i class="ph ph-users-three"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Bağlı Kampüs / Üniversite</div>
-                        <div class="stat-value" id="stat-uni-name" style="font-size: 1.1rem;">Belirleniyor...</div>
+                        <div class="stat-label">Bağlı Ekip</div>
+                        <div class="stat-value" id="stat-team-name" style="font-size: 1.1rem;">Belirleniyor...</div>
                     </div>
                 </div>
 
@@ -678,7 +664,7 @@
                         <i class="ph ph-users-three"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Kampüs Ekibi</div>
+                        <div class="stat-label">Ekip Üyeleri</div>
                         <div class="stat-value">0 Temsilci</div>
                     </div>
                 </div>
@@ -688,7 +674,7 @@
                         <i class="ph ph-newspaper"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Kampüs İçerikleri</div>
+                        <div class="stat-label">Ekip İçerikleri</div>
                         <div class="stat-value">0 Yayın</div>
                     </div>
                 </div>
@@ -715,7 +701,7 @@
                 </div>
                 <div style="color: #475569; line-height: 1.7; font-size: 0.95rem;">
                     <p style="margin-top: 0;">
-                        Kampüs koordinatör hesabınız başarıyla tanımlanmıştır. Bu panel üzerinden üniversitenizdeki AperionX topluluk temsilcilerini, üniversite adına yayınlanacak bilimsel makaleleri ve kampüs içi etkinlikleri yönetebileceksiniz.
+                        Kampüs koordinatör hesabınız başarıyla tanımlanmıştır. Bu panel üzerinden ekibinizdeki AperionX temsilcilerini, ekibiniz adına yayınlanacak bilimsel makaleleri ve faaliyetleri yönetebileceksiniz.
                     </p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px;">
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
@@ -726,15 +712,15 @@
                         </div>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                             <div style="font-weight: 600; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                                <i class="ph ph-hourglass-high" style="color: #f59e0b;"></i> Kampüs Veritabanı Modülü
+                                <i class="ph ph-hourglass-high" style="color: #f59e0b;"></i> Ekip Veritabanı Modülü
                             </div>
-                            <small style="color: #64748b;">Kampüsünüzün temsilcilik ve kulüp verileri sisteme eklendiğinde burada listelenecektir.</small>
+                            <small style="color: #64748b;">Ekibinizin temsilcilik ve çalışma grubu verileri sisteme eklendiğinde burada listelenecektir.</small>
                         </div>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                             <div style="font-weight: 600; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
                                 <i class="ph ph-newspaper-clipping" style="color: #6366f1;"></i> İçerik & Yayın Süreci
                             </div>
-                            <small style="color: #64748b;">Kampüsünüz adına bilimsel içerikler onaylanıp AperionX portalında sergilenecektir.</small>
+                            <small style="color: #64748b;">Ekibiniz adına bilimsel içerikler onaylanıp AperionX portalında sergilenecektir.</small>
                         </div>
                     </div>
                 </div>
@@ -758,8 +744,8 @@
                         <div id="info-coord-email" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px;">-</div>
                     </div>
                     <div>
-                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">KAMPÜS / ÜNİVERSİTE</label>
-                        <div id="info-coord-uni" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px; color: var(--primary-accent);">-</div>
+                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">EKİP ADI</label>
+                        <div id="info-coord-team" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px; color: var(--primary-accent);">-</div>
                     </div>
                     <div>
                         <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">YETKİ ROLÜ</label>
@@ -769,22 +755,22 @@
             </div>
         </section>
 
-        <!-- 2. KAMPÜSÜM SECTION -->
+        <!-- 2. EKİP BİLGİLERİ SECTION -->
         <section id="coord-campus" class="section">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-buildings"></i> Kampüs & Üniversite Bilgileri</h3>
+                    <h3 class="card-title"><i class="ph ph-users-three"></i> Ekip Bilgileri</h3>
                 </div>
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="width: 72px; height: 72px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
-                        <i class="ph ph-buildings"></i>
+                        <i class="ph ph-users-three"></i>
                     </div>
-                    <h3 id="section-campus-name" style="margin: 0 0 8px 0; font-size: 1.3rem;">Üniversite Yükleniyor...</h3>
+                    <h3 id="section-team-name" style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Yükleniyor...</h3>
                     <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Bu kampüse ait fakülteler, öğrenci kulüpleri ve temsilcilik verileri entegrasyon aşamasındadır.
+                        Bu ekibe ait üyeler, projeler ve faaliyet verileri entegrasyon aşamasındadır.
                     </p>
                     <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
-                        <i class="ph ph-clock"></i> Kampüs Verileri Hazırlanıyor
+                        <i class="ph ph-clock"></i> Ekip Verileri Hazırlanıyor
                     </span>
                 </div>
             </div>
@@ -794,15 +780,15 @@
         <section id="coord-team" class="section">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-users-three"></i> Kampüs Temsilcileri ve Öğrenci Ekibi</h3>
+                    <h3 class="card-title"><i class="ph ph-users-three"></i> Ekip Üyeleri ve Temsilciler</h3>
                 </div>
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="width: 72px; height: 72px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
                         <i class="ph ph-users-three"></i>
                     </div>
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Kampüs Temsilci Ağı</h3>
+                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Temsilci Ağı</h3>
                     <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Kampüsünüz bünyesindeki bölüm temsilcileri ve ekip üyeleri listesi yakında buradan yönetilecektir.
+                        Ekibiniz bünyesindeki temsilciler ve ekip üyeleri listesi yakında buradan yönetilecektir.
                     </p>
                     <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
                         <i class="ph ph-hourglass-medium"></i> Temsilci Modülü Yakında
@@ -815,15 +801,15 @@
         <section id="coord-contents" class="section">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-article"></i> Kampüs İçerikleri ve Bilimsel Projeler</h3>
+                    <h3 class="card-title"><i class="ph ph-article"></i> Ekip İçerikleri ve Projeler</h3>
                 </div>
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="width: 72px; height: 72px; border-radius: 50%; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
                         <i class="ph ph-newspaper"></i>
                     </div>
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Kampüs Yayınları</h3>
+                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Yayınları</h3>
                     <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Üniversitenizden gelen bilimsel yazılar, araştırmalar ve projeler bu alanda incelenecektir.
+                        Ekibinizden gelen bilimsel yazılar, araştırmalar ve projeler bu alanda incelenecektir.
                     </p>
                     <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
                         <i class="ph ph-pen-nib"></i> İçerik Yönetimi Yakında
@@ -836,7 +822,7 @@
         <section id="coord-events" class="section">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-calendar-check"></i> Kampüs Etkinlikleri ve Duyurular</h3>
+                    <h3 class="card-title"><i class="ph ph-calendar-check"></i> Ekip Etkinlikleri ve Duyurular</h3>
                 </div>
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="width: 72px; height: 72px; border-radius: 50%; background: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
@@ -844,7 +830,7 @@
                     </div>
                     <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Etkinlik Takvimi</h3>
                     <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Üniversitenizde düzenlenecek seminer, çalıştay ve bilim günleri bu takvimden planlanacaktır.
+                        Ekibiniz bünyesinde düzenlenecek seminer, çalıştay ve bilim günleri bu takvimden planlanacaktır.
                     </p>
                     <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
                         <i class="ph ph-calendar-plus"></i> Takvim Entegrasyonu Yakında
@@ -892,7 +878,6 @@
         // Sayfa Başlatma
         document.addEventListener('DOMContentLoaded', () => {
             initCoordinatorProfile();
-            initThemeIcon();
         });
 
         function initCoordinatorProfile() {
@@ -900,7 +885,7 @@
 
             const name = user.fullname || user.username || 'Koordinatör';
             const email = user.email || '';
-            const university = user.university || 'Belirtilmemiş Üniversite';
+            const team = user.university || user.team_name || 'Belirtilmemiş Ekip';
 
             // Sidebar
             const sidebarName = document.getElementById('sidebar-coord-name');
@@ -911,24 +896,24 @@
             // Topbar & Hero
             const heroName = document.getElementById('hero-coord-name');
             if (heroName) heroName.innerText = name;
-            const topUni = document.getElementById('top-coord-university');
-            if (topUni) topUni.innerHTML = `<i class="ph ph-buildings"></i> ${escapeHtml(university)}`;
+            const topTeam = document.getElementById('top-coord-team');
+            if (topTeam) topTeam.innerHTML = `<i class="ph ph-users-three"></i> ${escapeHtml(team)}`;
 
             // Stats
-            const statUni = document.getElementById('stat-uni-name');
-            if (statUni) statUni.innerText = university;
+            const statTeam = document.getElementById('stat-team-name');
+            if (statTeam) statTeam.innerText = team;
 
             // Details card
             const infoName = document.getElementById('info-coord-name');
             if (infoName) infoName.innerText = name;
             const infoEmail = document.getElementById('info-coord-email');
             if (infoEmail) infoEmail.innerText = email;
-            const infoUni = document.getElementById('info-coord-uni');
-            if (infoUni) infoUni.innerText = university;
+            const infoTeam = document.getElementById('info-coord-team');
+            if (infoTeam) infoTeam.innerText = team;
 
-            // Campus section
-            const campusSecName = document.getElementById('section-campus-name');
-            if (campusSecName) campusSecName.innerText = university;
+            // Team section
+            const sectionTeamName = document.getElementById('section-team-name');
+            if (sectionTeamName) sectionTeamName.innerText = team;
 
             // Settings
             const settingsEmail = document.getElementById('settings-email');
@@ -949,8 +934,8 @@
             // Update breadcrumb
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
-                'coord-campus': 'Kampüs Bilgileri',
-                'coord-team': 'Temsilciler & Ekip',
+                'coord-campus': 'Ekip Bilgileri',
+                'coord-team': 'Ekip Üyeleri',
                 'coord-contents': 'İçerik & Projeler',
                 'coord-events': 'Etkinlikler & Takvim',
                 'coord-settings': 'Profil & Ayarlar'
@@ -971,29 +956,6 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             if (sidebar) sidebar.classList.toggle('active');
-        }
-
-        // Dark Mode Toggle
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark-mode');
-            if (isDark) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('darkMode', 'true');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('darkMode', 'false');
-                localStorage.setItem('theme', 'light');
-            }
-            initThemeIcon();
-        }
-
-        function initThemeIcon() {
-            const isDark = document.documentElement.classList.contains('dark-mode');
-            const icon = document.getElementById('theme-toggle-icon');
-            const mobileIcon = document.getElementById('mobile-theme-icon');
-            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
-            if (mobileIcon) mobileIcon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
         }
 
         // Password Change

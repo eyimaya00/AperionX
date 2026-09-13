@@ -3057,14 +3057,14 @@
                             </div>
                         </div>
 
-                        <!-- Üniversite / Kampüs (Opsiyonel) -->
+                        <!-- Ekip Adı (Opsiyonel) -->
                         <div>
                             <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px;">
-                                Üniversite / Kampüs Adı <span style="color: #94a3b8; font-weight: 400;">(İsteğe bağlı)</span>
+                                Ekip Adı <span style="color: #94a3b8; font-weight: 400;">(İsteğe bağlı)</span>
                             </label>
                             <div style="position: relative;">
-                                <i class="ph ph-buildings" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
-                                <input type="text" id="coord_university" class="form-control" placeholder="Örn: Boğaziçi Üniversitesi" style="padding-left: 42px;">
+                                <i class="ph ph-users-three" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                                <input type="text" id="coord_university" class="form-control" placeholder="Örn: İnovasyon ve Teknoloji Ekibi" style="padding-left: 42px;">
                             </div>
                         </div>
 
@@ -3076,7 +3076,7 @@
                             <div style="background: white; border: 1px solid #dcfce7; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.88rem; color: #1e293b; line-height: 1.6; margin-bottom: 10px;">
                                 <div><strong>E-posta:</strong> <span id="success-coord-email"></span></div>
                                 <div><strong>Şifre:</strong> <span id="success-coord-pass"></span></div>
-                                <div id="success-coord-uni-row" style="display: none;"><strong>Kampüs:</strong> <span id="success-coord-uni"></span></div>
+                                <div id="success-coord-uni-row" style="display: none;"><strong>Ekip:</strong> <span id="success-coord-uni"></span></div>
                             </div>
                             <button type="button" onclick="copyCoordinatorCredentials()" class="btn" style="background: #166534; color: white; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; width: 100%; justify-content: center;">
                                 <i class="ph ph-copy"></i> Giriş Bilgilerini Kopyala
@@ -3109,7 +3109,7 @@
 
                     <div style="margin-bottom: 16px; position: relative;">
                         <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                        <input type="text" id="coord-search-input" onkeyup="filterCampusCoordinators()" class="form-control" placeholder="İsim, e-posta veya üniversite ara..." style="padding-left: 38px; font-size: 0.9rem;">
+                        <input type="text" id="coord-search-input" onkeyup="filterCampusCoordinators()" class="form-control" placeholder="İsim, e-posta veya ekip ara..." style="padding-left: 38px; font-size: 0.9rem;">
                     </div>
 
                     <div style="max-height: 480px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -3117,7 +3117,7 @@
                             <thead style="position: sticky; top: 0; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                                 <tr style="text-align: left; color: #64748b;">
                                     <th style="padding: 12px 14px;">Koordinatör</th>
-                                    <th style="padding: 12px 14px;">Kampüs / Üniversite</th>
+                                    <th style="padding: 12px 14px;">Ekip Adı</th>
                                     <th style="padding: 12px 14px; text-align: right;">İşlemler</th>
                                 </tr>
                             </thead>
@@ -6565,7 +6565,7 @@
 
         function copyCoordinatorCredentials() {
             if (!lastCreatedCoordinator) return;
-            const text = `AperionX Kampüs Koordinatörü Giriş Bilgileri:\nE-posta: ${lastCreatedCoordinator.email}\nŞifre: ${lastCreatedCoordinator.password}${lastCreatedCoordinator.university ? '\nKampüs: ' + lastCreatedCoordinator.university : ''}\nGiriş: https://aperionx.com`;
+            const text = `AperionX Kampüs Koordinatörü Giriş Bilgileri:\nE-posta: ${lastCreatedCoordinator.email}\nŞifre: ${lastCreatedCoordinator.password}${lastCreatedCoordinator.university ? '\nEkip: ' + lastCreatedCoordinator.university : ''}\nGiriş: https://aperionx.com`;
             navigator.clipboard.writeText(text).then(() => {
                 showToast('Giriş bilgileri panoya kopyalandı!', 'success');
             }).catch(() => {
