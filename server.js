@@ -369,8 +369,9 @@ async function ensureGundemArticle(slug) {
 
 app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim-gundemi/:slug'], async (req, res, next) => {
     const slug = req.params.slug;
-    const origin = `${req.protocol}://${req.get('host')}`;
+    const origin = (req.get('host') && req.get('host').includes('aperionx.com')) ? 'https://aperionx.com' : `${req.protocol}://${req.get('host')}`;
     const canonicalUrl = `${origin}/gundem/${slug}`;
+    const enCanonicalUrl = `${origin}/en/gundem/${slug}`;
 
     try {
         let articleData = null;
@@ -439,16 +440,39 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     id: row.author_user_id
                 }], formattedDate);
 
+                let contentHtml = row.content || '';
+                if (!contentHtml && row.gundem_data) {
+                    try {
+                        const gd = typeof row.gundem_data === 'string' ? JSON.parse(row.gundem_data) : row.gundem_data;
+                        if (gd && gd.sections && Array.isArray(gd.sections) && gd.sections.length > 0) {
+                            contentHtml = gd.sections.map((s, idx) => `
+                                <section class="gundem-article-section" id="bolum-${idx + 1}">
+                                    <h2>${escapeHtml(s.title || ('Bölüm ' + (idx + 1)))}</h2>
+                                    <div class="gundem-section-content">${DOMPurify.sanitize(s.content || '')}</div>
+                                </section>
+                            `).join('');
+                            if (gd.sources && Array.isArray(gd.sources) && gd.sources.length > 0) {
+                                contentHtml += '<section class="gundem-sources-section" id="kaynakca"><h2>Kaynaklar ve Referanslar</h2><ul class="gundem-sources-list">' +
+                                    gd.sources.map(src => {
+                                        const txt = src.type === 'bilimsel_makale' ? [src.articleTitle, src.authors, src.journal, src.pubDate, src.doi].filter(Boolean).map(escapeHtml).join(' · ') : escapeHtml(src.url || 'Kaynak');
+                                        const safeUrl = src.url ? src.url.replace(/"/g, '&quot;') : '';
+                                        return `<li>${safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${txt}</a>` : txt}</li>`;
+                                    }).join('') + '</ul></section>';
+                            }
+                        }
+                    } catch (e) {}
+                }
+
                 articleData = {
                     id: row.id,
                     title: row.title,
                     category: row.category || 'Gündem',
                     excerpt: row.excerpt || row.title,
-                    content: row.content,
+                    content: contentHtml,
                     imageUrl: row.image_url ? (row.image_url.startsWith('http') ? row.image_url : `${origin}${row.image_url.startsWith('/') ? '' : '/'}${row.image_url}`) : `${origin}/uploads/logo.png`,
                     date: formattedDate,
                     dateIso: dateObj.toISOString(),
-                    readTime: Math.max(2, Math.ceil((row.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
+                    readTime: Math.max(2, Math.ceil((contentHtml || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
                     views: (row.views || 0) + 1,
                     tags: row.tags || row.category || 'Gündem',
                     authorName: authorName,
@@ -561,32 +585,57 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             </a>
         `).join('');
 
+        const jsonLdData = {
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            "headline": articleData.title,
+            "image": [articleData.imageUrl],
+            "datePublished": articleData.dateIso || new Date().toISOString(),
+            "dateModified": articleData.dateIso || new Date().toISOString(),
+            "author": [{
+                "@type": "Person",
+                "name": articleData.authorName || "AperionX Bilim Ekibi",
+                "url": `https://aperionx.com${articleData.authorProfileUrl || '/articles'}`
+            }],
+            "publisher": {
+                "@type": "Organization",
+                "name": "AperionX",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://aperionx.com/uploads/logo.png"
+                }
+            },
+            "description": articleData.excerpt || articleData.title
+        };
+
         // Template'i oku ve yer tutucuları değiştir
         const templatePath = path.join(__dirname, 'views', 'gundem-detail.html');
         let html = await fs.promises.readFile(templatePath, 'utf8');
 
         html = html
             .replace(/\{\{ARTICLE_ID\}\}/g, (articleData.id || 0).toString())
-            .replace(/\{\{TITLE\}\}/g, articleData.title)
-            .replace(/\{\{CATEGORY\}\}/g, articleData.category || 'Gündem')
-            .replace(/\{\{EXCERPT\}\}/g, articleData.excerpt)
+            .replace(/\{\{TITLE\}\}/g, escapeHtml(articleData.title))
+            .replace(/\{\{CATEGORY\}\}/g, escapeHtml(articleData.category || 'Gündem'))
+            .replace(/\{\{EXCERPT\}\}/g, escapeHtml(articleData.excerpt))
             .replace(/\{\{CONTENT\}\}/g, articleData.content)
-            .replace(/\{\{IMAGE_URL\}\}/g, articleData.imageUrl)
+            .replace(/\{\{IMAGE_URL\}\}/g, escapeHtml(articleData.imageUrl))
             .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
-            .replace(/\{\{DATE_FORMATTED\}\}/g, articleData.date)
+            .replace(/\{\{EN_CANONICAL_URL\}\}/g, enCanonicalUrl)
+            .replace(/\{\{JSON_LD_SCHEMA\}\}/g, JSON.stringify(jsonLdData, null, 2))
+            .replace(/\{\{DATE_FORMATTED\}\}/g, escapeHtml(articleData.date))
             .replace(/\{\{DATE_ISO\}\}/g, articleData.dateIso || new Date().toISOString())
             .replace(/\{\{READ_TIME\}\}/g, articleData.readTime.toString())
             .replace(/\{\{VIEWS\}\}/g, articleData.views.toString())
             .replace(/\{\{ENCODED_TITLE\}\}/g, encodeURIComponent(articleData.title))
             .replace(/\{\{ENCODED_URL\}\}/g, encodeURIComponent(canonicalUrl))
             .replace(/\{\{RELATED_NEWS_HTML\}\}/g, relatedNewsHtml)
-            .replace(/\{\{TAGS\}\}/g, articleData.tags || '')
+            .replace(/\{\{TAGS\}\}/g, escapeHtml(articleData.tags || ''))
             .replace(/\{\{AUTHOR_CARD_HTML\}\}/g, articleData.authorCardHtml || '')
-            .replace(/\{\{AUTHOR_NAME\}\}/g, articleData.authorName || 'AperionX Bilim Ekibi')
-            .replace(/\{\{AUTHOR_TITLE\}\}/g, articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası')
-            .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, articleData.authorAvatar || '/uploads/aperionx-a-transparent.png')
+            .replace(/\{\{AUTHOR_NAME\}\}/g, escapeHtml(articleData.authorName || 'AperionX Bilim Ekibi'))
+            .replace(/\{\{AUTHOR_TITLE\}\}/g, escapeHtml(articleData.authorTitle || 'Bilim, Teknoloji ve Analiz Masası'))
+            .replace(/\{\{AUTHOR_AVATAR_URL\}\}/g, escapeHtml(articleData.authorAvatar || '/uploads/aperionx-a-transparent.png'))
             .replace(/\{\{AUTHOR_AVATAR_STYLE\}\}/g, articleData.authorAvatarStyle || 'padding: 4px; object-fit: contain;')
-            .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, articleData.authorProfileUrl || '/articles');
+            .replace(/\{\{AUTHOR_PROFILE_URL\}\}/g, escapeHtml(articleData.authorProfileUrl || '/articles'));
 
         return res.send(html);
     } catch (err) {
@@ -1436,6 +1485,8 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     .replace(/\{\{CONTENT\}\}/g, contentHtml)
                     .replace(/\{\{IMAGE_URL\}\}/g, imageUrl)
                     .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+                    .replace(/\{\{EN_CANONICAL_URL\}\}/g, `${origin}/en/gundem/${article.slug || 'onizleme'}`)
+                    .replace(/\{\{JSON_LD_SCHEMA\}\}/g, '{}')
                     .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
                     .replace(/\{\{DATE_ISO\}\}/g, dateObj.toISOString())
                     .replace(/\{\{READ_TIME\}\}/g, '3')
@@ -2438,7 +2489,7 @@ app.get('/sitemap.xml', async (req, res) => {
         
         let baseUrl = `${req.protocol}://${req.get('host')}`;
         if (req.get('host').includes('aperionx.com')) {
-            baseUrl = 'https://www.aperionx.com';
+            baseUrl = 'https://aperionx.com';
         }
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -6507,8 +6558,8 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
 
         if (decision === 'approve') {
             status = 'published';
-            notifyMsg = `Bilim Gündemi yazınız yayına alındı: ${title}`;
-            notifyType = 'success';
+            msg = `Bilim Gündemi yazınız yayına alındı: ${title}`;
+            type = 'success';
             if (wasPublished && existingPubAt) {
                 updateQuery = "UPDATE articles SET status = 'published', rejection_reason = NULL, approved_by = ? WHERE id = ?";
                 queryParams = [req.user.id, articleId];
@@ -6534,6 +6585,14 @@ app.put('/api/editor/gundem/decide/:id', authenticateToken, async (req, res) => 
 
         await pool.query(updateQuery, queryParams);
         clearCache('articles');
+
+        // SEO: Ping search engines on approve
+        if (decision === 'approve') {
+            const [slugRow] = await pool.query('SELECT slug FROM articles WHERE id = ?', [articleId]);
+            if (slugRow && slugRow.length > 0 && slugRow[0].slug) {
+                pingSearchEngines(slugRow[0].slug, 'gundem').catch(err => console.error('[SEO-PING] Error:', err));
+            }
+        }
 
         // Notify primary author and all co-authors
         try {
@@ -6645,6 +6704,13 @@ app.put('/api/editor/gundem/:id', authenticateToken, upload.any(), optimizeImage
         updateParams.push(articleId);
         await pool.query(`UPDATE articles SET ${updateFields} WHERE id = ?`, updateParams);
         clearCache('articles');
+
+        // SEO: Ping search engines on approve
+        if (decision === 'approve') {
+            if (article.slug) {
+                pingSearchEngines(article.slug, 'gundem').catch(err => console.error('[SEO-PING] Error:', err));
+            }
+        }
 
         // Send notification to author if needed
         if (notifyMsg && authorId) {
@@ -6847,6 +6913,10 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
 
                 clearCache('articles');
 
+                if (status === 'published' && existing[0].status !== 'published') {
+                    pingSearchEngines(existing[0].slug, 'gundem').catch(err => console.error('[SEO-PING] Error:', err));
+                }
+
                 // Notify co-authors
                 if (coAuthorIds && coAuthorIds.length > 0) {
                     const currentAuthorName = req.user.fullname || req.user.username || 'Bir yazar';
@@ -6923,6 +6993,10 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
         }
 
         clearCache('articles');
+
+        if (status === 'published') {
+            pingSearchEngines(slug, 'gundem').catch(err => console.error('[SEO-PING] Error:', err));
+        }
 
         // Notify co-authors
         if (coAuthorIds && coAuthorIds.length > 0) {
@@ -10206,9 +10280,19 @@ app.get(`/${INDEXNOW_KEY}.txt`, (req, res) => {
     res.type('text/plain').send(INDEXNOW_KEY);
 });
 
-async function pingSearchEngines(articleSlug) {
+async function pingSearchEngines(articleSlug, type = 'article') {
     const https = require('https');
     const sitemapUrl = encodeURIComponent('https://aperionx.com/sitemap.xml');
+
+    let mainPath = `/makale/${articleSlug}`;
+    let enPath = `/en/makale/${articleSlug}`;
+    if (type === 'gundem') {
+        mainPath = `/gundem/${articleSlug}`;
+        enPath = `/en/gundem/${articleSlug}`;
+    } else if (type === 'experiment') {
+        mainPath = `/deney/${articleSlug}`;
+        enPath = `/en/deney/${articleSlug}`;
+    }
 
     // 1. IndexNow API Request (Fast indexing for Bing, Yandex, Seznam, Naver)
     try {
@@ -10217,8 +10301,8 @@ async function pingSearchEngines(articleSlug) {
             key: INDEXNOW_KEY,
             keyLocation: `https://aperionx.com/${INDEXNOW_KEY}.txt`,
             urlList: [
-                `https://aperionx.com/makale/${articleSlug}`,
-                `https://aperionx.com/en/makale/${articleSlug}`
+                `https://aperionx.com${mainPath}`,
+                `https://aperionx.com${enPath}`
             ]
         });
 

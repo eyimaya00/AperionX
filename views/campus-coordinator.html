@@ -2542,7 +2542,7 @@
             tbody.innerHTML = topItems.map(item => {
                 const views = Number(item.views || 0).toLocaleString('tr-TR');
                 let liveLink = `/makale/${item.slug || item.id}`;
-                if (item.is_gundem) liveLink = `/bilim-gundemi/${item.slug || item.id}`;
+                if (item.is_gundem) liveLink = `/gundem/${item.slug || item.id}`;
                 else if (item.item_type === 'experiment') liveLink = `/deney/${item.slug || item.id}`;
 
                 return `
