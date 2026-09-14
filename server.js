@@ -1649,6 +1649,8 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
                 .replace(/\{\{CONTENT\}\}/g, contentHtml)
                 .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
                 .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+                .replace(/\{\{EN_CANONICAL_URL\}\}/g, `${origin}/en/gundem/onizleme`)
+                .replace(/\{\{JSON_LD_SCHEMA\}\}/g, '{}')
                 .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
                 .replace(/\{\{DATE_ISO\}\}/g, dateObj.toISOString())
                 .replace(/\{\{READ_TIME\}\}/g, '3')
