@@ -4439,13 +4439,99 @@ app.delete('/api/coordinator/team-members/:id', authenticateToken, async (req, r
 
         const member = rows[0];
         if (req.user.role !== 'admin' && member.coordinator_id !== coordinatorId) {
-            return res.status(403).json({ error: 'Bu ekip üyesini silme yetkiniz bulunmuyor.' });
+            return res.status(403).json({ error: 'Bu ekip üyesini silme veya ekipten çıkarma yetkiniz bulunmuyor.' });
         }
 
-        await pool.query('DELETE FROM users WHERE id = ?', [memberId]);
-        res.json({ success: true, message: 'Ekip üyesi başarıyla silindi.' });
+        // Kullanıcıyı tamamen silmek yerine ekipten çıkar (coordinator_id ve campus_role temizle)
+        await pool.query('UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE id = ?', [memberId]);
+        res.json({ success: true, message: 'Ekip üyesi başarıyla ekibinizden çıkarıldı.' });
     } catch (e) {
         console.error('[COORDINATOR-DELETE-TEAM-MEMBER-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 4. Search Existing AperionX Users to invite/add to Coordinator's team
+app.get('/api/coordinator/search-users', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const q = (req.query.q || '').trim();
+
+    if (!q || q.length < 2) {
+        return res.json([]);
+    }
+
+    try {
+        const searchTerm = `%${q}%`;
+        const [users] = await pool.query(`
+            SELECT id, fullname, username, email, role, campus_role, coordinator_id, university, department, avatar_url
+            FROM users
+            WHERE (LOWER(email) LIKE LOWER(?) OR LOWER(fullname) LIKE LOWER(?) OR LOWER(username) LIKE LOWER(?))
+              AND id != ?
+            LIMIT 10
+        `, [searchTerm, searchTerm, searchTerm, coordinatorId]);
+
+        res.json(users);
+    } catch (e) {
+        console.error('[COORDINATOR-SEARCH-USERS-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 5. Add / Transfer Existing User into Coordinator's Team
+app.post('/api/coordinator/add-existing-member', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const { userId, campus_role } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'Kullanıcı seçilmelidir.' });
+    }
+
+    try {
+        // Fetch coordinator's team/university name
+        const [coordRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const coordinatorTeam = (coordRows.length > 0 && coordRows[0].university) ? coordRows[0].university : null;
+
+        const [userRows] = await pool.query('SELECT id, fullname, email, role, coordinator_id FROM users WHERE id = ?', [userId]);
+        if (userRows.length === 0) {
+            return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        }
+
+        const targetUser = userRows[0];
+        if (targetUser.coordinator_id === coordinatorId) {
+            return res.status(400).json({ error: 'Bu kullanıcı zaten ekibinizde yer alıyor.' });
+        }
+
+        const selectedCampusRole = (campus_role && campus_role.trim()) ? campus_role.trim() : 'Kampüs Yazarı';
+        let newRole = targetUser.role;
+        if (selectedCampusRole.toLowerCase().includes('editör')) {
+            newRole = 'campus_editor';
+        } else if (targetUser.role === 'user' || targetUser.role === 'reader') {
+            newRole = 'author';
+        }
+
+        await pool.query(`
+            UPDATE users 
+            SET coordinator_id = ?, campus_role = ?, role = ?, university = COALESCE(university, ?)
+            WHERE id = ?
+        `, [coordinatorId, selectedCampusRole, newRole, coordinatorTeam, userId]);
+
+        // Bildirim gönder
+        const [me] = await pool.query('SELECT fullname FROM users WHERE id = ?', [coordinatorId]);
+        const coordName = me[0]?.fullname || 'Kampüs Koordinatörü';
+        await createNotification(userId, `${coordName} sizi "${selectedCampusRole}" olarak kampüs ekibine dahil etti.`, 'info');
+
+        res.json({
+            success: true,
+            message: `${targetUser.fullname || targetUser.email} başarıyla ekibinize eklendi.`
+        });
+    } catch (e) {
+        console.error('[COORDINATOR-ADD-EXISTING-MEMBER-ERROR]', e);
         res.status(500).json({ error: e.message });
     }
 });

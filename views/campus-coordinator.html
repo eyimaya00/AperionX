@@ -737,6 +737,143 @@
         }
 
         /* RESPONSIVE ENHANCEMENTS (Mobile & Tablet) */
+        /* TEAM SHOWCASE CARDS (about.html inspired) */
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            width: 100%;
+        }
+
+        .showcase-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .showcase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .showcase-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px -8px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .showcase-card:hover::before {
+            opacity: 1;
+        }
+
+        .showcase-card.is-coordinator {
+            border: 2px solid rgba(99, 102, 241, 0.35);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.03) 0%, var(--card-bg) 100%);
+        }
+
+        .showcase-card.is-coordinator::before {
+            opacity: 1;
+        }
+
+        .showcase-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 16px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .showcase-avatar-fallback {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .showcase-card:hover .showcase-avatar,
+        .showcase-card:hover .showcase-avatar-fallback {
+            border-color: #6366f1;
+            transform: scale(1.05);
+        }
+
+        .showcase-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 6px 0;
+            line-height: 1.3;
+        }
+
+        .showcase-role {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--primary-accent);
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .showcase-dept {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 16px;
+            line-height: 1.4;
+            max-width: 90%;
+        }
+
+        .showcase-socials {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .showcase-social-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.08);
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
+        }
+
+        .showcase-social-btn:hover {
+            background: var(--primary-accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 991px) {
             .hero-banner {
                 padding: 24px 20px;
@@ -830,10 +967,10 @@
                 <i class="ph ph-house"></i> <span>Genel Bakış</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-campus', this)">
-                <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
+                <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-team', this)">
-                <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
+                <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-contents', this)">
                 <i class="ph ph-article"></i> <span>İçerik & Projeler</span>
@@ -1010,93 +1147,121 @@
         </section>
 
         <!-- 2. EKİP BİLGİLERİ SECTION (ANA EKİP YÖNETİMİ) -->
+        <!-- 2. EKİP ÜYELERİ SECTION (ÜYE OLUŞTURMA, MEVCUT KULLANICI EKLEME & YÖNETİM) -->
         <section id="coord-campus" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
-                        👥 Ana Ekip & Görev Yönetimi
+                        👥 Ekip Üyeleri Yönetimi
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        Ekibinize yeni yazar veya kampüs editörü tanımlayın; oluşturulan hesaplar kendi panellerine anında giriş yapabilir.
+                        Ekibinize sıfırdan yeni üye oluşturabilir veya daha önce AperionX'te hesabı olan kullanıcıları tek tıkla kendi kampüs ekibinize dahil edebilirsiniz.
                     </p>
                 </div>
             </div>
 
-            <!-- YENİ EKİP ÜYESİ EKLEME FORMU -->
-            <div class="card" style="border-top: 4px solid var(--primary-accent);">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="ph ph-user-plus" style="color: var(--primary-accent);"></i>
-                        Yeni Ekip Üyesi Oluştur
-                    </h3>
-                    <span class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
-                        Yazar & Editör Tanımlama
-                    </span>
+            <!-- ÜYE EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
+            <div class="card" style="border-top: 4px solid var(--primary-accent); padding: 24px;">
+                <div class="profile-tabs-strip" style="margin-bottom: 20px;">
+                    <button type="button" class="profile-tab-btn active" id="tab-btn-create-member" onclick="switchMemberAddMode('create')">
+                        <i class="ph-bold ph-user-plus"></i> Yeni Üye Oluştur
+                    </button>
+                    <button type="button" class="profile-tab-btn" id="tab-btn-search-member" onclick="switchMemberAddMode('search')">
+                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX Kullanıcısı Ekle / Davet Et
+                    </button>
                 </div>
 
-                <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
-                <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
-                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-                        <div style="display: flex; align-items: flex-start; gap: 12px;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-                                <i class="ph-bold ph-check"></i>
-                            </div>
-                            <div>
-                                <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
-                                <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
-                                    Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
-                                </p>
-                                <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
-                                    <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
-                                    <div><strong style="color: #64748b;">E-posta:</strong> <span id="success-member-email" style="color: #065f46; font-weight: 700;">-</span></div>
-                                    <div><strong style="color: #64748b;">Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
-                                    <div><strong style="color: #64748b;">Görev:</strong> <span id="success-member-role" style="color: #4338ca; font-weight: 700;">-</span></div>
+                <!-- MOD 1: YENİ ÜYE OLUŞTURMA FORMU -->
+                <div id="add-member-mode-create">
+                    <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
+                    <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                                    <i class="ph-bold ph-check"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
+                                    <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
+                                        Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
+                                    </p>
+                                    <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
+                                        <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
+                                        <div><strong style="color: #64748b;">E-posta:</strong> <span id="success-member-email" style="color: #065f46; font-weight: 700;">-</span></div>
+                                        <div><strong style="color: #64748b;">Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
+                                        <div><strong style="color: #64748b;">Görev:</strong> <span id="success-member-role" style="color: #4338ca; font-weight: 700;">-</span></div>
+                                    </div>
                                 </div>
                             </div>
+                            <button type="button" onclick="copyMemberCredentials()" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.88rem; background: #059669;">
+                                <i class="ph ph-copy"></i> Bilgileri Kopyala
+                            </button>
                         </div>
-                        <button type="button" onclick="copyMemberCredentials()" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.88rem; background: #059669;">
-                            <i class="ph ph-copy"></i> Bilgileri Kopyala
-                        </button>
                     </div>
+
+                    <form id="createTeamMemberForm" onsubmit="submitCreateTeamMember(event)">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="member_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                            </div>
+                            <div class="form-group">
+                                <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="member_email" class="form-control" placeholder="yazar@aperionx.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label style="margin: 0;">Giriş Şifresi <span style="color: #ef4444;">*</span></label>
+                                    <button type="button" onclick="generateMemberPassword()" style="background: none; border: none; color: var(--primary-accent); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
+                                    </button>
+                                </div>
+                                <input type="text" id="member_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
+                                <select id="member_campus_role" class="form-control" style="cursor: pointer;">
+                                    <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
+                                    <option value="Kampüs Editörü">Kampüs Editörü</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
+                                <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <form id="createTeamMemberForm" onsubmit="submitCreateTeamMember(event)">
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
-                            <input type="text" id="member_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
-                        </div>
-                        <div class="form-group">
-                            <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
-                            <input type="email" id="member_email" class="form-control" placeholder="yazar@aperionx.com" required>
-                        </div>
-                    </div>
+                <!-- MOD 2: DAHA ÖNCE APERIONX'TE OLAN BİRİNİ EKİBE EKLEME -->
+                <div id="add-member-mode-search" style="display: none;">
+                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 0; margin-bottom: 16px;">
+                        Kullanıcının adını, kullanıcı adını veya sisteme kayıtlı e-posta adresini yazarak arayın ve kampüs görevi atayarak ekibinize ekleyin.
+                    </p>
 
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <label style="margin: 0;">Giriş Şifresi <span style="color: #ef4444;">*</span></label>
-                                <button type="button" onclick="generateMemberPassword()" style="background: none; border: none; color: var(--primary-accent); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                    <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
-                                </button>
-                            </div>
-                            <input type="text" id="member_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required>
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="position: relative; flex: 1; min-width: 250px;">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                            <input type="text" id="existing-user-search-input" oninput="searchExistingUsers(this.value)" class="form-control" style="padding-left: 42px;" placeholder="Ad, soyad, e-posta veya kullanıcı adı ile arayın...">
                         </div>
-                        <div class="form-group">
-                            <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
-                            <select id="member_campus_role" class="form-control" style="cursor: pointer;">
-                                <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
-                                <option value="Kampüs Editörü">Kampüs Editörü</option>
+                        <div style="width: 200px;">
+                            <select id="existing-user-campus-role" class="form-control" style="cursor: pointer;">
+                                <option value="Kampüs Yazarı" selected>Kampüs Yazarı Olarak</option>
+                                <option value="Kampüs Editörü">Kampüs Editörü Olarak</option>
                             </select>
                         </div>
                     </div>
 
-                    <div style="margin-top: 10px;">
-                        <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
-                            <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
-                        </button>
+                    <!-- ARAMA SONUÇLARI KUTUSU -->
+                    <div id="search-users-results" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: none;">
+                        <!-- JS injects search results here -->
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- EKİP LİSTESİ TABLOSU -->
@@ -1138,24 +1303,42 @@
             </div>
         </section>
 
-        <!-- 3. TEMSİLCİLER & EKİP SECTION -->
+        <!-- 3. EKİP BİLGİLERİ SECTION (HAKKIMIZDA SAYFASI GİBİ ANA EKİP VİTRİNİ) -->
         <section id="coord-team" class="section">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-users-three"></i> Ekip Üyeleri ve Temsilciler</h3>
-                </div>
-                <div style="text-align: center; padding: 40px 20px;">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
-                        <i class="ph ph-users-three"></i>
-                    </div>
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Temsilci Ağı</h3>
-                    <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Ekibiniz bünyesindeki temsilciler ve ekip üyeleri listesi yakında buradan yönetilecektir.
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
+                        🏛️ Kampüs Ekip Bilgileri & Kadrosu
+                    </h1>
+                    <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
+                        AperionX portalında yakında yayınlanacak üniversite topluluk sayfanızın ekip vitrini. Siz ve bağlı tüm üyeleriniz burada kartlar halinde sergilenir.
                     </p>
-                    <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
-                        <i class="ph ph-hourglass-medium"></i> Temsilci Modülü Yakında
+                </div>
+                <button type="button" onclick="renderTeamShowcase()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 9px 16px;">
+                    <i class="ph ph-arrows-clockwise"></i> Vitrini Yenile
+                </button>
+            </div>
+
+            <!-- EKİP ÜST BİLGİ KARTI -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(168, 85, 247, 0.04) 100%); border-left: 5px solid var(--primary-accent); margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; font-size: 1.3rem; font-weight: 800; color: var(--text-main);" id="showcase-team-heading">
+                            AperionX Kampüs Ekibi
+                        </h3>
+                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;" id="showcase-team-desc">
+                            Üniversite bünyesinde bilimi yaygınlaştıran koordinatör, editör ve yazar kadromuz.
+                        </p>
+                    </div>
+                    <span class="campus-badge" id="showcase-total-badge" style="font-size: 0.9rem; padding: 6px 14px;">
+                        0 Ekip Üyesi
                     </span>
                 </div>
+            </div>
+
+            <!-- HAKKIMIZDA SAYFASI GİBİ EKİP KARTLARI GRİDİ -->
+            <div class="showcase-grid" id="showcase-team-grid">
+                <!-- JS injects coordinator & all team members here -->
             </div>
         </section>
 
@@ -1602,8 +1785,8 @@
             // Update breadcrumb
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
-                'coord-campus': 'Ekip Bilgileri & Üyeler',
-                'coord-team': 'Ekip Üyeleri',
+                'coord-campus': 'Ekip Üyeleri',
+                'coord-team': 'Ekip Bilgileri',
                 'coord-contents': 'İçerik & Projeler',
                 'coord-events': 'Etkinlikler & Takvim',
                 'coord-settings': 'Profil & Ayarlar'
@@ -1614,8 +1797,10 @@
             }
 
             // Load data when navigating to team section
-            if (sectionId === 'coord-campus' || sectionId === 'coord-team') {
+            if (sectionId === 'coord-campus') {
                 loadTeamMembers();
+            } else if (sectionId === 'coord-team') {
+                loadTeamMembers().then(() => renderTeamShowcase());
             }
 
             // Mobile: close sidebar on click
@@ -1648,6 +1833,7 @@
                 if (countEl) countEl.innerText = teamMembersList.length;
                 if (statTeamCount) statTeamCount.innerText = `${teamMembersList.length} Temsilci / Üye`;
                 renderTeamMembers(teamMembersList);
+                renderTeamShowcase();
             } catch (err) {
                 console.error('[LOAD-TEAM-MEMBERS-ERROR]', err);
                 if (tbody) {
@@ -1661,6 +1847,266 @@
                     `;
                 }
             }
+        }
+
+        // ================= MEMBER TAB SWITCH (CREATE vs SEARCH) =================
+        function switchMemberAddMode(mode) {
+            const tabCreate = document.getElementById('tab-btn-create-member');
+            const tabSearch = document.getElementById('tab-btn-search-member');
+            const secCreate = document.getElementById('add-member-mode-create');
+            const secSearch = document.getElementById('add-member-mode-search');
+
+            if (mode === 'create') {
+                if (tabCreate) tabCreate.classList.add('active');
+                if (tabSearch) tabSearch.classList.remove('active');
+                if (secCreate) secCreate.style.display = 'block';
+                if (secSearch) secSearch.style.display = 'none';
+            } else {
+                if (tabCreate) tabCreate.classList.remove('active');
+                if (tabSearch) tabSearch.classList.add('active');
+                if (secCreate) secCreate.style.display = 'none';
+                if (secSearch) secSearch.style.display = 'block';
+            }
+        }
+
+        // ================= SEARCH EXISTING APERIONX USERS =================
+        let searchDebounceTimer = null;
+
+        function searchExistingUsers(val) {
+            clearTimeout(searchDebounceTimer);
+            const query = (val || '').trim();
+            const resultsBox = document.getElementById('search-users-results');
+
+            if (!query || query.length < 2) {
+                if (resultsBox) {
+                    resultsBox.style.display = 'none';
+                    resultsBox.innerHTML = '';
+                }
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(async () => {
+                if (!resultsBox) return;
+                resultsBox.style.display = 'block';
+                resultsBox.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #64748b;">
+                        <i class="ph ph-spinner spinner" style="font-size: 1.3rem;"></i> AperionX kullanıcıları aranıyor...
+                    </div>
+                `;
+
+                try {
+                    const res = await fetch(`${API_URL}/coordinator/search-users?q=${encodeURIComponent(query)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('Arama başarısız');
+
+                    const users = await res.json();
+                    if (!users || users.length === 0) {
+                        resultsBox.innerHTML = `
+                            <div style="padding: 24px; text-align: center; color: #94a3b8;">
+                                <i class="ph ph-user-circle-gear" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.6;"></i>
+                                "<strong>${escapeHtml(query)}</strong>" kriterine uygun AperionX kullanıcısı bulunamadı.
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    resultsBox.innerHTML = users.map(u => {
+                        const initial = (u.fullname || u.username || 'U').charAt(0).toUpperCase();
+                        const isAlreadyInTeam = teamMembersList.some(m => m.id === u.id);
+                        const roleDesc = u.campus_role || (u.role === 'campus_editor' ? 'Kampüs Editörü' : u.role === 'author' ? 'Yazar' : 'Okur / Üye');
+                        const uniDept = [u.university, u.department].filter(Boolean).join(' - ');
+
+                        return `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border-color); gap: 14px; flex-wrap: wrap; background: var(--card-bg);">
+                                <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+                                    ${u.avatar_url ? `
+                                        <img src="${escapeHtml(u.avatar_url)}" alt="${escapeHtml(u.fullname || '')}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                                    ` : `
+                                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;">
+                                            ${initial}
+                                        </div>
+                                    `}
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+                                            ${escapeHtml(u.fullname || u.username)}
+                                            <span style="font-weight: 400; color: #64748b; font-size: 0.8rem; margin-left: 6px;">@${escapeHtml(u.username)}</span>
+                                        </div>
+                                        <div style="font-size: 0.82rem; color: #64748b;">
+                                            ${escapeHtml(u.email)} ${uniDept ? ` • ${escapeHtml(uniDept)}` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="role-badge" style="font-size: 0.76rem; background: #f1f5f9; color: #475569;">
+                                        Mevcut: ${escapeHtml(roleDesc)}
+                                    </span>
+                                    ${isAlreadyInTeam ? `
+                                        <button type="button" class="btn" disabled style="background: #e2e8f0; color: #94a3b8; padding: 8px 14px; font-size: 0.82rem; cursor: not-allowed;">
+                                            <i class="ph ph-check"></i> Ekibinizde
+                                        </button>
+                                    ` : `
+                                        <button type="button" onclick="addExistingUserToTeam(${u.id}, '${escapeHtml(u.fullname || u.username)}')" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+                                            <i class="ph ph-user-plus"></i> Ekibe Ekle
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } catch (err) {
+                    resultsBox.innerHTML = `
+                        <div style="padding: 18px; text-align: center; color: #ef4444; font-size: 0.9rem;">
+                            Arama sırasında hata oluştu: ${escapeHtml(err.message)}
+                        </div>
+                    `;
+                }
+            }, 300);
+        }
+
+        async function addExistingUserToTeam(userId, userName) {
+            const roleSelect = document.getElementById('existing-user-campus-role');
+            const campusRole = roleSelect ? roleSelect.value : 'Kampüs Yazarı';
+
+            if (!confirm(`"${userName}" adlı AperionX kullanıcısını ekibinize "${campusRole}" olarak eklemek istiyor musunuz?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/add-existing-member`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ userId, campus_role: campusRole })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Kullanıcı ekibinize eklendi!', 'success');
+                    const searchInput = document.getElementById('existing-user-search-input');
+                    const resultsBox = document.getElementById('search-users-results');
+                    if (searchInput) searchInput.value = '';
+                    if (resultsBox) {
+                        resultsBox.innerHTML = '';
+                        resultsBox.style.display = 'none';
+                    }
+                    loadTeamMembers();
+                } else {
+                    showToast(data.error || 'Kullanıcı eklenemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('[ADD-EXISTING-MEMBER-ERROR]', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            }
+        }
+
+        // ================= SHOWCASE VITRIN (EKİP BİLGİLERİ - HAKKIMIZDA GİBİ) =================
+        function renderTeamShowcase() {
+            const grid = document.getElementById('showcase-team-grid');
+            const heading = document.getElementById('showcase-team-heading');
+            const desc = document.getElementById('showcase-team-desc');
+            const badge = document.getElementById('showcase-total-badge');
+            if (!grid) return;
+
+            const currentUser = user || {};
+            const uniName = currentUser.university || 'Üniversite';
+            if (heading) heading.innerText = `${uniName} AperionX Kampüs Ekibi`;
+            if (desc) desc.innerText = `${uniName} bünyesinde bilimi topluma sevdiren ve içerik üreten resmi kampüs kadromuz.`;
+
+            const totalMembers = 1 + (teamMembersList ? teamMembersList.length : 0);
+            if (badge) badge.innerText = `${totalMembers} Ekip Üyesi`;
+
+            let cardsHtml = '';
+
+            // 1. KART: KOORDİNATÖR (KENDİSİ / EKİP LİDERİ)
+            const coordName = currentUser.fullname || 'Kampüs Koordinatörü';
+            const coordInitial = coordName.charAt(0).toUpperCase();
+            const coordDept = [currentUser.department, currentUser.university].filter(Boolean).join(' • ') || 'Kampüs Koordinatörlüğü';
+            const coordEmail = currentUser.public_email || currentUser.email || '';
+            const coordLinkedin = currentUser.linkedin_url || '';
+
+            cardsHtml += `
+                <div class="showcase-card is-coordinator">
+                    <div class="showcase-card-badge">
+                        <i class="ph-fill ph-crown"></i> Kampüs Koordinatörü (Lider)
+                    </div>
+                    <div class="showcase-avatar-wrapper">
+                        ${currentUser.avatar_url ? `
+                            <img src="${escapeHtml(currentUser.avatar_url)}" alt="${escapeHtml(coordName)}" class="showcase-avatar">
+                        ` : `
+                            <div class="showcase-avatar showcase-avatar-fallback" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white;">
+                                ${coordInitial}
+                            </div>
+                        `}
+                    </div>
+                    <h3 class="showcase-name">${escapeHtml(coordName)}</h3>
+                    <div class="showcase-role">Kampüs Koordinatörü</div>
+                    <div class="showcase-dept">${escapeHtml(coordDept)}</div>
+
+                    <div class="showcase-social-row">
+                        ${coordEmail ? `
+                            <a href="mailto:${encodeURIComponent(coordEmail)}" class="showcase-social-btn" title="E-posta: ${escapeHtml(coordEmail)}">
+                                <i class="ph-bold ph-envelope"></i>
+                            </a>
+                        ` : ''}
+                        ${coordLinkedin ? `
+                            <a href="${escapeHtml(coordLinkedin)}" target="_blank" rel="noopener noreferrer" class="showcase-social-btn" title="LinkedIn">
+                                <i class="ph-bold ph-linkedin-logo"></i>
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            // 2. KARTLAR: EKİP ÜYELERİ (YAZARLAR VE EDİTÖRLER)
+            if (teamMembersList && teamMembersList.length > 0) {
+                teamMembersList.forEach(m => {
+                    const name = m.fullname || m.username || 'Ekip Üyesi';
+                    const initial = name.charAt(0).toUpperCase();
+                    const isEditor = m.role === 'campus_editor' || m.campus_role === 'Kampüs Editörü';
+                    const roleTitle = m.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
+                    const deptInfo = [m.department, m.university || currentUser.university].filter(Boolean).join(' • ') || 'AperionX Ekip Üyesi';
+                    const memberEmail = m.public_email || m.email || '';
+                    const memberLinkedin = m.linkedin_url || '';
+
+                    cardsHtml += `
+                        <div class="showcase-card">
+                            <div class="showcase-avatar-wrapper">
+                                ${m.avatar_url ? `
+                                    <img src="${escapeHtml(m.avatar_url)}" alt="${escapeHtml(name)}" class="showcase-avatar">
+                                ` : `
+                                    <div class="showcase-avatar showcase-avatar-fallback">
+                                        ${initial}
+                                    </div>
+                                `}
+                            </div>
+                            <h3 class="showcase-name">${escapeHtml(name)}</h3>
+                            <div class="showcase-role" style="${isEditor ? 'color: #8b5cf6;' : 'color: #059669;'}">
+                                ${escapeHtml(roleTitle)}
+                            </div>
+                            <div class="showcase-dept">${escapeHtml(deptInfo)}</div>
+
+                            <div class="showcase-social-row">
+                                ${memberEmail ? `
+                                    <a href="mailto:${encodeURIComponent(memberEmail)}" class="showcase-social-btn" title="E-posta: ${escapeHtml(memberEmail)}">
+                                        <i class="ph-bold ph-envelope"></i>
+                                    </a>
+                                ` : ''}
+                                ${memberLinkedin ? `
+                                    <a href="${escapeHtml(memberLinkedin)}" target="_blank" rel="noopener noreferrer" class="showcase-social-btn" title="LinkedIn">
+                                        <i class="ph-bold ph-linkedin-logo"></i>
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            grid.innerHTML = cardsHtml;
         }
 
         function renderTeamMembers(members) {
