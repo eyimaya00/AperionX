@@ -1167,7 +1167,7 @@ app.get('/preview-article/:id', async (req, res, next) => {
         const article = rows[0];
 
         // Verify authorization
-        if (req.user.role !== 'admin' && req.user.role !== 'editor' && article.author_id !== req.user.id) {
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && article.author_id !== req.user.id) {
             const [coAuthors] = await pool.query('SELECT 1 FROM article_authors WHERE article_id = ? AND user_id = ?', [id, req.user.id]);
             if (coAuthors.length === 0) {
                 return res.status(403).send('Erişim Reddedildi');
@@ -7698,7 +7698,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
 // NEW: Validate Token / Get Current User
 app.get('/api/me', authenticateToken, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, linkedin_url, public_email, show_email FROM users WHERE id = ?', [req.user.id]);
+        const [rows] = await pool.query('SELECT id, fullname, username, email, role, avatar_url, bio, job_title, university, department, academic_level, scientific_interests, technical_skills, linkedin_url, public_email, show_email FROM users WHERE id = ?', [req.user.id]);
         if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
         res.json({
             ...rows[0],
