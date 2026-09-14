@@ -8143,6 +8143,148 @@ app.put('/api/campus-editor/decide/:type/:id', authenticateToken, async (req, re
     }
 });
 
+// 4. Campus Editor - Published Content Stats (Views, Likes, Comments)
+app.get('/api/campus-editor/published-stats', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    try {
+        const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+        const myCoordId = meRows[0]?.coordinator_id;
+        const myUniversity = meRows[0]?.university;
+
+        let userFilter = "";
+        let expUserFilter = "";
+        let filterParams = [];
+
+        if (req.user.role === 'admin') {
+            userFilter = "1=1";
+            expUserFilter = "1=1";
+        } else if (req.user.role === 'campus_coordinator') {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [req.user.id, myUniversity || ''];
+        } else {
+            userFilter = "(a.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            expUserFilter = "(e.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            filterParams = [req.user.id, myCoordId || 0, myUniversity || ''];
+        }
+
+        // Articles (and Gundem)
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.views, a.published_at, a.created_at, a.image_url, a.is_gundem,
+                   CASE WHEN a.is_gundem = 1 THEN 'gundem' ELSE 'article' END as item_type,
+                   u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar,
+                   (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE a.status = 'published' AND ${userFilter}
+            ORDER BY COALESCE(a.published_at, a.created_at) DESC
+        `, filterParams);
+
+        // Experiments
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.views, e.published_at, e.created_at, e.image_url, 0 as is_gundem,
+                   'experiment' as item_type,
+                   u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar,
+                   (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            WHERE e.status = 'published' AND e.deleted_at IS NULL AND ${expUserFilter}
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
+        `, filterParams);
+
+        const allItems = [...articles, ...experiments].sort((a, b) => new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at));
+
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+
+        allItems.forEach(item => {
+            totalViews += (Number(item.views) || 0);
+            totalLikes += (Number(item.like_count) || 0);
+            totalComments += (Number(item.comment_count) || 0);
+        });
+
+        res.json({
+            totals: {
+                totalViews,
+                totalLikes,
+                totalComments,
+                totalPublished: allItems.length,
+                articlesCount: articles.filter(a => !a.is_gundem).length,
+                experimentsCount: experiments.length,
+                gundemCount: articles.filter(a => a.is_gundem === 1).length
+            },
+            items: allItems
+        });
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-PUBLISHED-STATS-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 5. Campus Editor - Authors Leaderboard & Productivity
+app.get('/api/campus-editor/authors-leaderboard', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    try {
+        const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+        const myCoordId = meRows[0]?.coordinator_id;
+        const myUniversity = meRows[0]?.university;
+
+        let userFilter = "";
+        let filterParams = [];
+
+        if (req.user.role === 'admin') {
+            userFilter = "u.role = 'author'";
+        } else if (req.user.role === 'campus_coordinator') {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?)) AND u.id != ?";
+            filterParams = [req.user.id, myUniversity || '', req.user.id];
+        } else {
+            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?)) AND u.id != ?";
+            filterParams = [myCoordId || 0, myUniversity || '', req.user.id];
+        }
+
+        const [authors] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.email, u.public_email, u.university, u.department, u.academic_level, u.avatar_url, u.campus_role, u.created_at,
+                (
+                    (SELECT COUNT(*) FROM articles WHERE author_id = u.id AND status = 'published') +
+                    (SELECT COUNT(*) FROM experiments WHERE author_id = u.id AND status = 'published' AND deleted_at IS NULL)
+                ) as published_count,
+                (
+                    (SELECT COUNT(*) FROM articles WHERE author_id = u.id AND status = 'pending_campus') +
+                    (SELECT COUNT(*) FROM experiments WHERE author_id = u.id AND status = 'pending_campus' AND deleted_at IS NULL)
+                ) as pending_count,
+                (
+                    COALESCE((SELECT SUM(views) FROM articles WHERE author_id = u.id AND status = 'published'), 0) +
+                    COALESCE((SELECT SUM(views) FROM experiments WHERE author_id = u.id AND status = 'published' AND deleted_at IS NULL), 0)
+                ) as total_views,
+                (
+                    COALESCE((SELECT COUNT(*) FROM likes l JOIN articles a ON l.article_id = a.id WHERE a.author_id = u.id AND a.status = 'published'), 0) +
+                    COALESCE((SELECT COUNT(*) FROM likes l JOIN experiments e ON l.experiment_id = e.id WHERE e.author_id = u.id AND e.status = 'published' AND e.deleted_at IS NULL), 0)
+                ) as total_likes,
+                (
+                    COALESCE((SELECT COUNT(*) FROM comments c JOIN articles a ON c.article_id = a.id WHERE a.author_id = u.id AND a.status = 'published'), 0) +
+                    COALESCE((SELECT COUNT(*) FROM comments c JOIN experiments e ON c.experiment_id = e.id WHERE e.author_id = u.id AND e.status = 'published' AND e.deleted_at IS NULL), 0)
+                ) as total_comments
+            FROM users u
+            WHERE ${userFilter}
+            ORDER BY total_views DESC, published_count DESC, u.created_at DESC
+        `, filterParams);
+
+        res.json(authors);
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-AUTHORS-LEADERBOARD-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // === CATEGORIES MANAGEMENT ===
 app.get('/api/experiments/categories', async (req, res) => {
     try {
