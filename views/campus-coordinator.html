@@ -2426,6 +2426,150 @@
             renderDashboardRecentMembers(members);
         }
 
+        // Genel Bakış için son katılan üyeleri listele
+        function renderDashboardRecentMembers(members) {
+            const dashCount = document.getElementById('dashboard-team-count');
+            if (dashCount) dashCount.innerText = members.length;
+
+            const tbody = document.getElementById('dashboard-recent-members-tbody');
+            if (!tbody) return;
+
+            const recents = (members || []).slice(0, 5);
+            if (recents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
+                            Henüz ekibinize üye eklenmemiş.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = recents.map(m => {
+                const name = m.fullname || 'Üye';
+                const initial = name.charAt(0).toUpperCase();
+                const isEditor = m.role === 'campus_editor' || m.role === 'editor';
+                const roleClass = isEditor ? 'editor' : 'author';
+                const roleText = m.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
+                const contactEmail = m.email || '';
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                                    ${initial}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">${escapeHtml(name)}</div>
+                                    <div style="font-size: 0.74rem; color: #64748b;">${escapeHtml(contactEmail)}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge ${roleClass}" style="font-size: 0.75rem; padding: 2px 8px;">
+                                ${escapeHtml(roleText)}
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            ${contactEmail ? `
+                                <a href="mailto:${encodeURIComponent(contactEmail)}?subject=${encodeURIComponent('AperionX Kampüs Ekibi İletişim')}" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="E-posta Gönder">
+                                    <i class="ph-bold ph-envelope"></i>
+                                </a>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Genel Bakış: Yayınlanan içerikler ve performans istatistiklerini yükle
+        async function loadDashboardStats(showFeedback = false) {
+            const refreshIcon = document.getElementById('dash-refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('ph-spin');
+
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/published-stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const stats = await res.json();
+                    const totals = stats.totals || {};
+                    const items = stats.items || [];
+
+                    // Metrikleri yazdır
+                    const elPub = document.getElementById('dashboard-published-count');
+                    const elViews = document.getElementById('dashboard-total-views');
+                    const elLikes = document.getElementById('dashboard-total-likes');
+
+                    if (elPub) elPub.innerText = Number(totals.totalPublished || items.length).toLocaleString('tr-TR');
+                    if (elViews) elViews.innerText = Number(totals.totalViews || 0).toLocaleString('tr-TR');
+                    if (elLikes) elLikes.innerText = Number(totals.totalLikes || 0).toLocaleString('tr-TR');
+
+                    // En çok okunan ilk 5 içeriği doldur
+                    renderDashboardTopArticles(items);
+
+                    if (showFeedback) showToast('Genel bakış verileri güncellendi.', 'success');
+                }
+            } catch (err) {
+                console.error('[LOAD-DASHBOARD-STATS-ERROR]', err);
+                if (showFeedback) showToast('İstatistikler yüklenirken hata oluştu.', 'error');
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('ph-spin');
+            }
+        }
+
+        function renderDashboardTopArticles(items) {
+            const tbody = document.getElementById('dashboard-top-articles-tbody');
+            if (!tbody) return;
+
+            // Okunma sayısına göre en yüksek 5 içerik
+            const topItems = [...(items || [])].sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)).slice(0, 5);
+
+            if (topItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
+                            Henüz kampüsünüzden yayına çıkan bir içerik bulunmuyor.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = topItems.map(item => {
+                const views = Number(item.views || 0).toLocaleString('tr-TR');
+                let liveLink = `/makale/${item.slug || item.id}`;
+                if (item.is_gundem) liveLink = `/bilim-gundemi/${item.slug || item.id}`;
+                else if (item.item_type === 'experiment') liveLink = `/deney/${item.slug || item.id}`;
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 2px; line-height: 1.3;">
+                                ${escapeHtml(item.title)}
+                            </div>
+                            <div style="font-size: 0.74rem; color: #64748b;">
+                                Yazar: ${escapeHtml(item.author_name || 'Kampüs Yazarı')}
+                            </div>
+                        </td>
+                        <td style="text-align: center; font-weight: 700; color: #2563eb; font-size: 0.88rem; white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 3px;">
+                                <i class="ph-bold ph-eye"></i> ${views}
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a href="${liveLink}" target="_blank" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="Sitede Canlı Gör">
+                                <i class="ph ph-arrow-square-out"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         function filterTeamMembers() {
             const searchInput = document.getElementById('member-search-input');
             const roleFilter = document.getElementById('member-role-filter');
