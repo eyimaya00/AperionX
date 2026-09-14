@@ -735,6 +735,61 @@
             color: #d97706;
             border: 1px solid rgba(245, 158, 11, 0.25);
         }
+
+        /* RESPONSIVE ENHANCEMENTS (Mobile & Tablet) */
+        @media (max-width: 991px) {
+            .hero-banner {
+                padding: 24px 20px;
+                border-radius: 18px;
+            }
+            .hero-title {
+                font-size: 1.45rem;
+            }
+            .hero-subtitle {
+                font-size: 0.92rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .stat-card {
+                padding: 16px;
+                gap: 12px;
+                border-radius: 14px;
+            }
+            .stat-icon-wrap {
+                width: 44px;
+                height: 44px;
+                font-size: 1.3rem;
+            }
+            .stat-value {
+                font-size: 1.15rem;
+            }
+            .card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+            .dashboard-two-col {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-banner {
+                padding: 20px 16px;
+            }
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .hero-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 
@@ -817,117 +872,138 @@
 
         <!-- 1. GENEL BAKIŞ SECTION -->
         <section id="coord-dashboard" class="section active">
-            <!-- HERO WELCOME BANNER -->
+            <!-- HERO BANNER & QUICK ACTIONS -->
             <div class="hero-banner">
-                <h1 class="hero-title">AperionX Kampüs Ağına Hoş Geldiniz! 🎓</h1>
-                <p class="hero-subtitle">
-                    Sayın <strong id="hero-coord-name">Koordinatör</strong>, ekibinizdeki bilim ve teknoloji faaliyetlerini koordine edeceğiniz yönetim paneline başarıyla giriş yaptınız.
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 1;">
+                    <div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; margin-bottom: 10px;">
+                            <i class="ph ph-graduation-cap"></i> Kampüs Koordinatör Paneli
+                        </div>
+                        <h1 class="hero-title" style="margin-bottom: 6px;">
+                            Hoş Geldiniz, <span id="hero-coord-name">Koordinatör</span>! 👋
+                        </h1>
+                        <p class="hero-subtitle">
+                            <span id="hero-coord-team-subtitle" style="font-weight: 600; color: #fff;">Ekibiniz</span> bünyesindeki bilimsel faaliyetleri, yazar ve editör kadronuzu buradan yönetebilirsiniz.
+                        </p>
+                    </div>
+
+                    <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn" style="background: white; color: var(--primary-accent); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))">
+                            <i class="ph-bold ph-user-plus"></i> Yeni Üye Ekle
+                        </button>
+                        <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.18); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" onclick="showCoordSection('coord-settings', document.querySelector('.menu-item[onclick*=\'coord-settings\']'))">
+                            <i class="ph ph-gear"></i> Profil & Ayarlar
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- STATS CARDS -->
+            <!-- CANLI STATS METRIC KARTLARI -->
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))" title="Ekip Üyelerini Gör">
                     <div class="stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
                         <i class="ph ph-users-three"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Bağlı Ekip</div>
-                        <div class="stat-value" id="stat-team-name" style="font-size: 1.1rem;">Belirleniyor...</div>
+                        <div class="stat-label">Toplam Ekip Üyesi</div>
+                        <div class="stat-value" id="dashboard-team-count">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-contents', document.querySelector('.menu-item[onclick*=\'coord-contents\']'))" title="Yayınlanan İçerikleri Gör">
+                    <div class="stat-icon-wrap" style="background: #ecfdf5; color: #047857;">
+                        <i class="ph ph-article"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Yayındaki İçerik</div>
+                        <div class="stat-value" id="dashboard-published-count">0</div>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon-wrap" style="background: #dcfce7; color: #15803d;">
-                        <i class="ph ph-users-three"></i>
+                    <div class="stat-icon-wrap" style="background: #eff6ff; color: #2563eb;">
+                        <i class="ph ph-eye"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Ekip Üyeleri</div>
-                        <div class="stat-value" id="stat-team-count">0 Temsilci</div>
+                        <div class="stat-label">Toplam Okunma</div>
+                        <div class="stat-value" id="dashboard-total-views">0</div>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon-wrap" style="background: #fef3c7; color: #b45309;">
-                        <i class="ph ph-newspaper"></i>
+                    <div class="stat-icon-wrap" style="background: #fdf2f8; color: #db2777;">
+                        <i class="ph ph-heart"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Ekip İçerikleri</div>
-                        <div class="stat-value">0 Yayın</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon-wrap" style="background: #f3e8ff; color: #7e22ce;">
-                        <i class="ph ph-check-circle"></i>
-                    </div>
-                    <div>
-                        <div class="stat-label">Hesap Durumu</div>
-                        <div class="stat-value" style="color: #16a34a; font-size: 1.15rem;">Aktif Koordinatör</div>
+                        <div class="stat-label">Toplam Beğeni</div>
+                        <div class="stat-value" id="dashboard-total-likes">0</div>
                     </div>
                 </div>
             </div>
 
-            <!-- ENTEGRASYON BİLGİ KARTLARI -->
-            <div class="card" style="border-left: 5px solid var(--primary-accent);">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="ph ph-info" style="color: var(--primary-accent);"></i>
-                        AperionX Kampüs Ağı Yönetim Sistemi
-                    </h3>
-                    <span class="campus-badge">Faz 1 Aktif</span>
-                </div>
-                <div style="color: #475569; line-height: 1.7; font-size: 0.95rem;">
-                    <p style="margin-top: 0;">
-                        Kampüs koordinatör hesabınız başarıyla tanımlanmıştır. Bu panel üzerinden ekibinizdeki AperionX temsilcilerini, ekibiniz adına yayınlanacak bilimsel makaleleri ve faaliyetleri yönetebileceksiniz.
-                    </p>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px;">
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                            <div style="font-weight: 600; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                                <i class="ph ph-check-circle" style="color: #10b981;"></i> Koordinatör Girişi Tamamlandı
-                            </div>
-                            <small style="color: #64748b;">Hesabınız güvenli e-posta ve şifreniz ile sisteme bağlandı.</small>
-                        </div>
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                            <div style="font-weight: 600; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                                <i class="ph ph-hourglass-high" style="color: #f59e0b;"></i> Ekip Veritabanı Modülü
-                            </div>
-                            <small style="color: #64748b;">Ekibinizin temsilcilik ve çalışma grubu verileri sisteme eklendiğinde burada listelenecektir.</small>
-                        </div>
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                            <div style="font-weight: 600; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                                <i class="ph ph-newspaper-clipping" style="color: #6366f1;"></i> İçerik & Yayın Süreci
-                            </div>
-                            <small style="color: #64748b;">Ekibiniz adına bilimsel içerikler onaylanıp AperionX portalında sergilenecektir.</small>
-                        </div>
+            <!-- İKİ KOLONLU KOKPİT: SON KATILANLAR & EN ÇOK OKUNANLAR -->
+            <div class="dashboard-two-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <!-- 1. KAMPÜS EKİBİNDEN SON KATILANLAR -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title">
+                            <i class="ph ph-user-list" style="color: var(--primary-accent);"></i>
+                            Ekibe Son Katılanlar
+                        </h3>
+                        <a href="javascript:void(0)" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))" style="color: var(--primary-accent); font-size: 0.86rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            Tümünü Gör <i class="ph ph-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Üye</th>
+                                    <th>Görev</th>
+                                    <th style="text-align: right;">İletişim</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-recent-members-tbody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                        <i class="ph ph-spinner spinner" style="font-size: 1.4rem; display: block; margin-bottom: 6px;"></i>
+                                        Yükleniyor...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
 
-            <!-- KOORDİNATÖR HESAP BİLGİLERİ ÖZETİ -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="ph ph-user-circle" style="color: #10b981;"></i>
-                        Koordinatör Hesap Bilgileri
-                    </h3>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
-                    <div>
-                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">KOORDİNATÖR ADI</label>
-                        <div id="info-coord-name" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px;">-</div>
+                <!-- 2. KAMPÜSÜN EN ÇOK OKUNAN İÇERİKLERİ -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="card-title">
+                            <i class="ph ph-trend-up" style="color: #10b981;"></i>
+                            En Çok Okunan Kampüs İçerikleri
+                        </h3>
+                        <button type="button" onclick="loadDashboardStats(true)" class="icon-btn" style="width: 32px; height: 32px; font-size: 0.95rem;" title="Yenile">
+                            <i class="ph ph-arrows-clockwise" id="dash-refresh-icon"></i>
+                        </button>
                     </div>
-                    <div>
-                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">E-POSTA ADRESİ</label>
-                        <div id="info-coord-email" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px;">-</div>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">EKİP ADI</label>
-                        <div id="info-coord-team" style="font-size: 1.05rem; font-weight: 600; margin-top: 4px; color: var(--primary-accent);">-</div>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.82rem; color: #64748b; font-weight: 600;">YETKİ ROLÜ</label>
-                        <div style="font-size: 1.05rem; font-weight: 600; margin-top: 4px; color: #16a34a;">AperionX Kampüs Koordinatörü</div>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>İçerik Başlığı</th>
+                                    <th style="text-align: center;">Okunma</th>
+                                    <th style="text-align: right;">Gör</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-top-articles-tbody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                        <i class="ph ph-spinner spinner" style="font-size: 1.4rem; display: block; margin-bottom: 6px;"></i>
+                                        Yükleniyor...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1309,6 +1385,7 @@
             loadSiteSettings();
             initCoordinatorProfile();
             loadTeamMembers();
+            loadDashboardStats();
         });
 
         async function loadSiteSettings() {
@@ -1363,6 +1440,8 @@
             // Topbar & Hero
             const heroName = document.getElementById('hero-coord-name');
             if (heroName) heroName.innerText = name;
+            const heroTeamSub = document.getElementById('hero-coord-team-subtitle');
+            if (heroTeamSub) heroTeamSub.innerText = team;
             const topTeam = document.getElementById('top-coord-team');
             if (topTeam) topTeam.innerHTML = `<i class="ph ph-users-three"></i> ${escapeHtml(team)}`;
 
@@ -1643,6 +1722,153 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Genel Bakış Dashboard'unu Güncelle
+            renderDashboardRecentMembers(members);
+        }
+
+        // Genel Bakış için son katılan üyeleri listele
+        function renderDashboardRecentMembers(members) {
+            const dashCount = document.getElementById('dashboard-team-count');
+            if (dashCount) dashCount.innerText = members.length;
+
+            const tbody = document.getElementById('dashboard-recent-members-tbody');
+            if (!tbody) return;
+
+            const recents = (members || []).slice(0, 5);
+            if (recents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
+                            Henüz ekibinize üye eklenmemiş.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = recents.map(m => {
+                const name = m.fullname || 'Üye';
+                const initial = name.charAt(0).toUpperCase();
+                const isEditor = m.role === 'campus_editor' || m.role === 'editor';
+                const roleClass = isEditor ? 'editor' : 'author';
+                const roleText = m.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
+                const contactEmail = m.email || '';
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                                    ${initial}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">${escapeHtml(name)}</div>
+                                    <div style="font-size: 0.74rem; color: #64748b;">${escapeHtml(contactEmail)}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge ${roleClass}" style="font-size: 0.75rem; padding: 2px 8px;">
+                                ${escapeHtml(roleText)}
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            ${contactEmail ? `
+                                <a href="mailto:${encodeURIComponent(contactEmail)}?subject=${encodeURIComponent('AperionX Kampüs Ekibi İletişim')}" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="E-posta Gönder">
+                                    <i class="ph-bold ph-envelope"></i>
+                                </a>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Genel Bakış: Yayınlanan içerikler ve performans istatistiklerini yükle
+        async function loadDashboardStats(showFeedback = false) {
+            const refreshIcon = document.getElementById('dash-refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('ph-spin');
+
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/published-stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const stats = await res.json();
+                    const totals = stats.totals || {};
+                    const items = stats.items || [];
+
+                    // Metrikleri yazdır
+                    const elPub = document.getElementById('dashboard-published-count');
+                    const elViews = document.getElementById('dashboard-total-views');
+                    const elLikes = document.getElementById('dashboard-total-likes');
+
+                    if (elPub) elPub.innerText = Number(totals.totalPublished || items.length).toLocaleString('tr-TR');
+                    if (elViews) elViews.innerText = Number(totals.totalViews || 0).toLocaleString('tr-TR');
+                    if (elLikes) elLikes.innerText = Number(totals.totalLikes || 0).toLocaleString('tr-TR');
+
+                    // En çok okunan ilk 5 içeriği doldur
+                    renderDashboardTopArticles(items);
+
+                    if (showFeedback) showToast('Genel bakış verileri güncellendi.', 'success');
+                }
+            } catch (err) {
+                console.error('[LOAD-DASHBOARD-STATS-ERROR]', err);
+                if (showFeedback) showToast('İstatistikler yüklenirken hata oluştu.', 'error');
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('ph-spin');
+            }
+        }
+
+        function renderDashboardTopArticles(items) {
+            const tbody = document.getElementById('dashboard-top-articles-tbody');
+            if (!tbody) return;
+
+            // Okunma sayısına göre en yüksek 5 içerik
+            const topItems = [...(items || [])].sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)).slice(0, 5);
+
+            if (topItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
+                            Henüz kampüsünüzden yayına çıkan bir içerik bulunmuyor.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = topItems.map(item => {
+                const views = Number(item.views || 0).toLocaleString('tr-TR');
+                let liveLink = `/makale/${item.slug || item.id}`;
+                if (item.is_gundem) liveLink = `/bilim-gundemi/${item.slug || item.id}`;
+                else if (item.item_type === 'experiment') liveLink = `/deney/${item.slug || item.id}`;
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 2px; line-height: 1.3;">
+                                ${escapeHtml(item.title)}
+                            </div>
+                            <div style="font-size: 0.74rem; color: #64748b;">
+                                Yazar: ${escapeHtml(item.author_name || 'Kampüs Yazarı')}
+                            </div>
+                        </td>
+                        <td style="text-align: center; font-weight: 700; color: #2563eb; font-size: 0.88rem; white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 3px;">
+                                <i class="ph-bold ph-eye"></i> ${views}
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a href="${liveLink}" target="_blank" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="Sitede Canlı Gör">
+                                <i class="ph ph-arrow-square-out"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function filterTeamMembers() {
