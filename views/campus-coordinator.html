@@ -966,20 +966,14 @@
             <a href="javascript:void(0)" class="menu-item active" onclick="showCoordSection('coord-dashboard', this)">
                 <i class="ph ph-house"></i> <span>Genel Bakış</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-authors', this)">
+                <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-team', this)">
                 <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-authors', this)">
-                <i class="ph ph-feather"></i> <span>Yazarlar</span>
-            </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-contents', this)">
-                <i class="ph ph-article"></i> <span>İçerik & Projeler</span>
-            </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-events', this)">
-                <i class="ph ph-calendar-check"></i> <span>Etkinlikler & Takvim</span>
-            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-settings', this)">
-                <i class="ph ph-gear"></i> <span>Profil & Ayarlar</span>
+                <i class="ph ph-gear"></i> <span>Profil ve Ayarlar</span>
             </a>
         </nav>
 
@@ -990,17 +984,6 @@
 
     <!-- MAIN CONTENT -->
     <main class="content" id="main-content">
-        <!-- TOP BAR -->
-        <div class="top-bar" style="justify-content: flex-end;">
-            <div class="top-actions">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span id="top-coord-team" class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
-                        <i class="ph ph-users-three"></i> Ekip Yükleniyor...
-                    </span>
-                </div>
-            </div>
-        </div>
-
         <!-- 1. GENEL BAKIŞ SECTION -->
         <section id="coord-dashboard" class="section active">
             <!-- HERO BANNER & QUICK ACTIONS -->
@@ -1020,7 +1003,7 @@
 
                     <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn" style="background: white; color: var(--primary-accent); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))">
-                            <i class="ph-bold ph-feather"></i> Yazarları Yönet
+                            <i class="ph-bold ph-user-plus"></i> Ekip Üyelerini Yönet
                         </button>
                         <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.18); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" onclick="showCoordSection('coord-team', document.querySelector('.menu-item[onclick*=\'coord-team\']'))">
                             <i class="ph ph-users-three"></i> Ekip Bilgileri
@@ -1031,17 +1014,17 @@
 
             <!-- CANLI STATS METRIC KARTLARI -->
             <div class="stats-grid">
-                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))" title="Yazarları Gör">
+                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))" title="Ekip Üyelerini Gör">
                     <div class="stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                        <i class="ph ph-feather"></i>
+                        <i class="ph ph-user-list"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Kampüs Yazarları</div>
+                        <div class="stat-label">Toplam Ekip Üyesi</div>
                         <div class="stat-value" id="dashboard-team-count">0</div>
                     </div>
                 </div>
 
-                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-contents', document.querySelector('.menu-item[onclick*=\'coord-contents\']'))" title="Yayınlanan İçerikleri Gör">
+                <div class="stat-card">
                     <div class="stat-icon-wrap" style="background: #ecfdf5; color: #047857;">
                         <i class="ph ph-article"></i>
                     </div>
@@ -1140,33 +1123,31 @@
             </div>
         </section>
 
-        <!-- 2. EKİP BİLGİLERİ SECTION (ANA EKİP YÖNETİMİ) -->
-        <!-- 2. EKİP ÜYELERİ SECTION (ÜYE OLUŞTURMA, MEVCUT KULLANICI EKLEME & YÖNETİM) -->
-        <!-- 2. YAZARLAR SECTION (YAZAR OLUŞTURMA, MEVCUT KULLANICIYI YAZAR YAPMA & YAZAR YÖNETİMİ) -->
+        <!-- 2. EKİP ÜYELERİ SECTION (ÜYE OLUŞTURMA, MEVCUT KULLANICIYI EKİBE EKLEME & YÖNETİM) -->
         <section id="coord-authors" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
-                        ✍️ Kampüs Yazarları
+                        👥 Ekip Üyeleri
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        Kampüsünüze bağlı yazarları yönetin, yeni yazar hesabı açın veya sitede kayıtlı AperionX kullanıcılarını yazar kadronuza dahil edin.
+                        Kampüsünüze bağlı ekip üyelerini yönetin, yeni üye hesabı açın veya sitede kayıtlı AperionX kullanıcılarını ekibinize dahil edin.
                     </p>
                 </div>
             </div>
 
-            <!-- YAZAR EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
+            <!-- ÜYE EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
             <div class="card" style="border-top: 4px solid var(--primary-accent); padding: 24px;">
                 <div class="profile-tabs-strip" style="margin-bottom: 20px;">
                     <button type="button" class="profile-tab-btn active" id="tab-btn-create-member" onclick="switchMemberAddMode('create')">
-                        <i class="ph-bold ph-user-plus"></i> Yeni Yazar Oluştur
+                        <i class="ph-bold ph-user-plus"></i> Yeni Ekip Üyesi Oluştur
                     </button>
                     <button type="button" class="profile-tab-btn" id="tab-btn-search-member" onclick="switchMemberAddMode('search')">
-                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX'ten Yazar Ekle / Davet Et
+                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX'ten Üye Ekle / Davet Et
                     </button>
                 </div>
 
-                <!-- MOD 1: YENİ YAZAR OLUŞTURMA FORMU -->
+                <!-- MOD 1: YENİ EKİP ÜYESİ OLUŞTURMA FORMU -->
                 <div id="add-member-mode-create">
                     <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
                     <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
@@ -1176,9 +1157,9 @@
                                     <i class="ph-bold ph-check"></i>
                                 </div>
                                 <div>
-                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Yazar Hesabı Başarıyla Oluşturuldu!</h4>
+                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
                                     <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
-                                        Aşağıdaki giriş bilgilerini yazarınızla paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
+                                        Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan paneline giriş yapabilir:
                                     </p>
                                     <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
                                         <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
@@ -1227,7 +1208,7 @@
 
                         <div style="margin-top: 10px;">
                             <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
-                                <i class="ph ph-user-plus"></i> Yazarı Kaydet & Hesap Oluştur
+                                <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
                             </button>
                         </div>
                     </form>
@@ -1259,15 +1240,15 @@
                 </div>
             </div>
 
-            <!-- YAZAR LİSTESİ TABLOSU -->
+            <!-- EKİP ÜYELERİ LİSTESİ TABLOSU -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="ph ph-feather" style="color: #10b981;"></i>
-                        Mevcut Kampüs Yazarları (<span id="team-members-count">0</span>)
+                        <i class="ph ph-user-list" style="color: #10b981;"></i>
+                        Mevcut Ekip Üyeleri (<span id="team-members-count">0</span>)
                     </h3>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Yazar ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
+                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Üye ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
                         <button type="button" onclick="loadTeamMembers()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.88rem;">
                             <i class="ph ph-arrows-clockwise"></i> Yenile
                         </button>
@@ -1278,7 +1259,7 @@
                     <table class="custom-table" id="team-members-table">
                         <thead>
                             <tr>
-                                <th>YAZAR BİLGİSİ</th>
+                                <th>ÜYE BİLGİSİ</th>
                                 <th>GÖREV / ROL</th>
                                 <th>GİRİŞ PANELİ</th>
                                 <th>KAYIT TARİHİ</th>
@@ -1289,7 +1270,7 @@
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     <i class="ph ph-spinner spinner" style="font-size: 1.6rem; display: block; margin-bottom: 8px;"></i>
-                                    Yazarlar yükleniyor...
+                                    Ekip üyeleri yükleniyor...
                                 </td>
                             </tr>
                         </tbody>
@@ -1337,49 +1318,7 @@
             </div>
         </section>
 
-        <!-- 4. İÇERİK & PROJELER SECTION -->
-        <section id="coord-contents" class="section">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-article"></i> Ekip İçerikleri ve Projeler</h3>
-                </div>
-                <div style="text-align: center; padding: 40px 20px;">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
-                        <i class="ph ph-newspaper"></i>
-                    </div>
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Ekip Yayınları</h3>
-                    <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Ekibinizden gelen bilimsel yazılar, araştırmalar ve projeler bu alanda incelenecektir.
-                    </p>
-                    <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
-                        <i class="ph ph-pen-nib"></i> İçerik Yönetimi Yakında
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. ETKİNLİKLER SECTION -->
-        <section id="coord-events" class="section">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="ph ph-calendar-check"></i> Ekip Etkinlikleri ve Duyurular</h3>
-                </div>
-                <div style="text-align: center; padding: 40px 20px;">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 16px auto;">
-                        <i class="ph ph-calendar"></i>
-                    </div>
-                    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem;">Etkinlik Takvimi</h3>
-                    <p style="color: #64748b; max-width: 500px; margin: 0 auto 24px auto;">
-                        Ekibiniz bünyesinde düzenlenecek seminer, çalıştay ve bilim günleri bu takvimden planlanacaktır.
-                    </p>
-                    <span class="campus-badge" style="font-size: 0.85rem; padding: 6px 14px;">
-                        <i class="ph ph-calendar-plus"></i> Takvim Entegrasyonu Yakında
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        <!-- 6. PROFİL & AYARLAR SECTION -->
+        <!-- 4. PROFİL & AYARLAR SECTION -->
         <section id="coord-settings" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                 <div>
@@ -1848,14 +1787,12 @@
                 linkEl.classList.add('active');
             }
 
-            // Update breadcrumb / header title
+            // Update title
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
+                'coord-authors': 'Ekip Üyeleri',
                 'coord-team': 'Ekip Bilgileri',
-                'coord-authors': 'Yazarlar',
-                'coord-contents': 'İçerik & Projeler',
-                'coord-events': 'Etkinlikler & Takvim',
-                'coord-settings': 'Profil & Ayarlar'
+                'coord-settings': 'Profil ve Ayarlar'
             };
             const breadcrumbTitle = document.getElementById('breadcrumb-section-title');
             if (breadcrumbTitle && titleMap[sectionId]) {
