@@ -1123,134 +1123,74 @@
             </div>
         </section>
 
-        <!-- 2. EKİP ÜYELERİ SECTION (ÜYE OLUŞTURMA, MEVCUT KULLANICIYI EKİBE EKLEME & YÖNETİM) -->
+        <!-- 2. EKİP ÜYELERİ SECTION -->
         <section id="coord-authors" class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
                         👥 Ekip Üyeleri
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        Kampüsünüze bağlı ekip üyelerini yönetin, yeni üye hesabı açın veya sitede kayıtlı AperionX kullanıcılarını ekibinize dahil edin.
+                        Kampüsünüze bağlı yazarları ve editörleri görüntüleyin, yeni üye ekleyin veya ekipten çıkarın.
                     </p>
                 </div>
+                <button type="button" onclick="openAddMemberModal()" class="btn btn-primary" style="padding: 10px 22px; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-user-plus"></i> Yeni Üye Ekle
+                </button>
             </div>
 
-            <!-- ÜYE EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
-            <div class="card" style="border-top: 4px solid var(--primary-accent); padding: 24px;">
-                <div class="profile-tabs-strip" style="margin-bottom: 20px;">
-                    <button type="button" class="profile-tab-btn active" id="tab-btn-create-member" onclick="switchMemberAddMode('create')">
-                        <i class="ph-bold ph-user-plus"></i> Yeni Ekip Üyesi Oluştur
-                    </button>
-                    <button type="button" class="profile-tab-btn" id="tab-btn-search-member" onclick="switchMemberAddMode('search')">
-                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX'ten Üye Ekle / Davet Et
-                    </button>
+            <!-- KADRO METRİK PİLLERİ -->
+            <div style="display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap;">
+                <div class="card" style="margin-bottom: 0; padding: 14px 20px; flex: 1; min-width: 180px; display: flex; align-items: center; gap: 14px; border-left: 4px solid var(--primary-accent);">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="ph-bold ph-users"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">Toplam Kadro</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);" id="pill-total-members">0 Üye</div>
+                    </div>
                 </div>
 
-                <!-- MOD 1: YENİ EKİP ÜYESİ OLUŞTURMA FORMU -->
-                <div id="add-member-mode-create">
-                    <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
-                    <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: flex-start; gap: 12px;">
-                                <div style="width: 40px; height: 40px; border-radius: 10px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-                                    <i class="ph-bold ph-check"></i>
-                                </div>
-                                <div>
-                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
-                                    <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
-                                        Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan paneline giriş yapabilir:
-                                    </p>
-                                    <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
-                                        <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
-                                        <div><strong style="color: #64748b;">E-posta:</strong> <span id="success-member-email" style="color: #065f46; font-weight: 700;">-</span></div>
-                                        <div><strong style="color: #64748b;">Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
-                                        <div><strong style="color: #64748b;">Görev:</strong> <span id="success-member-role" style="color: #4338ca; font-weight: 700;">-</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" onclick="copyMemberCredentials()" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.88rem; background: #059669;">
-                                <i class="ph ph-copy"></i> Bilgileri Kopyala
-                            </button>
-                        </div>
+                <div class="card" style="margin-bottom: 0; padding: 14px 20px; flex: 1; min-width: 180px; display: flex; align-items: center; gap: 14px; border-left: 4px solid #8b5cf6;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="ph-bold ph-pencil-simple-line"></i>
                     </div>
-
-                    <form id="createTeamMemberForm" onsubmit="submitCreateTeamMember(event)">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="member_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
-                            </div>
-                            <div class="form-group">
-                                <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="member_email" class="form-control" placeholder="yazar@aperionx.com" required>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <label style="margin: 0;">Giriş Şifresi <span style="color: #ef4444;">*</span></label>
-                                    <button type="button" onclick="generateMemberPassword()" style="background: none; border: none; color: var(--primary-accent); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                        <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
-                                    </button>
-                                </div>
-                                <input type="text" id="member_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
-                                <select id="member_campus_role" class="form-control" style="cursor: pointer;">
-                                    <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
-                                    <option value="Kampüs Editörü">Kampüs Editörü</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 10px;">
-                            <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
-                                <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
-                            </button>
-                        </div>
-                    </form>
+                    <div>
+                        <div style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">Kampüs Editörleri</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);" id="pill-editors-count">0 Editör</div>
+                    </div>
                 </div>
 
-                <!-- MOD 2: DAHA ÖNCE APERIONX'TE OLAN BİRİNİ EKİBE EKLEME -->
-                <div id="add-member-mode-search" style="display: none;">
-                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 0; margin-bottom: 16px;">
-                        Kullanıcının adını, kullanıcı adını veya sisteme kayıtlı e-posta adresini yazarak arayın ve kampüs görevi atayarak ekibinize ekleyin.
-                    </p>
-
-                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-                        <div style="position: relative; flex: 1; min-width: 250px;">
-                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
-                            <input type="text" id="existing-user-search-input" oninput="searchExistingUsers(this.value)" class="form-control" style="padding-left: 42px;" placeholder="Ad, soyad, e-posta veya kullanıcı adı ile arayın...">
-                        </div>
-                        <div style="width: 200px;">
-                            <select id="existing-user-campus-role" class="form-control" style="cursor: pointer;">
-                                <option value="Kampüs Yazarı" selected>Kampüs Yazarı Olarak</option>
-                                <option value="Kampüs Editörü">Kampüs Editörü Olarak</option>
-                            </select>
-                        </div>
+                <div class="card" style="margin-bottom: 0; padding: 14px 20px; flex: 1; min-width: 180px; display: flex; align-items: center; gap: 14px; border-left: 4px solid #10b981;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="ph-bold ph-newspaper"></i>
                     </div>
-
-                    <!-- ARAMA SONUÇLARI KUTUSU -->
-                    <div id="search-users-results" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: none;">
-                        <!-- JS injects search results here -->
+                    <div>
+                        <div style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">Kampüs Yazarları</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);" id="pill-authors-count">0 Yazar</div>
                     </div>
                 </div>
             </div>
 
             <!-- EKİP ÜYELERİ LİSTESİ TABLOSU -->
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" style="flex-wrap: wrap; gap: 14px;">
                     <h3 class="card-title">
-                        <i class="ph ph-user-list" style="color: #10b981;"></i>
-                        Mevcut Ekip Üyeleri (<span id="team-members-count">0</span>)
+                        <i class="ph-bold ph-users-four" style="color: var(--primary-accent);"></i>
+                        Ekip Listesi (<span id="team-members-count">0</span>)
                     </h3>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Üye ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
-                        <button type="button" onclick="loadTeamMembers()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.88rem;">
-                            <i class="ph ph-arrows-clockwise"></i> Yenile
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <select id="member-role-filter" onchange="filterTeamMembers()" class="form-control" style="width: 160px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer;">
+                            <option value="all" selected>Tüm Roller</option>
+                            <option value="editor">Kampüs Editörleri</option>
+                            <option value="author">Kampüs Yazarları</option>
+                        </select>
+                        <div style="position: relative;">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                            <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Üye ara..." class="form-control" style="padding: 8px 14px 8px 32px; font-size: 0.85rem; width: 200px;">
+                        </div>
+                        <button type="button" onclick="loadTeamMembers()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.85rem;" title="Yenile">
+                            <i class="ph ph-arrows-clockwise"></i>
                         </button>
                     </div>
                 </div>
@@ -1259,11 +1199,11 @@
                     <table class="custom-table" id="team-members-table">
                         <thead>
                             <tr>
-                                <th>ÜYE BİLGİSİ</th>
+                                <th>ÜYE</th>
                                 <th>GÖREV / ROL</th>
-                                <th>GİRİŞ PANELİ</th>
-                                <th>KAYIT TARİHİ</th>
-                                <th style="text-align: right;">İŞLEM</th>
+                                <th>BÖLÜM / ÜNİVERSİTE</th>
+                                <th>KATILIM TARİHİ</th>
+                                <th style="text-align: right;">İŞLEMLER</th>
                             </tr>
                         </thead>
                         <tbody id="team-members-tbody">
@@ -1551,6 +1491,124 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- YENİ EKİP ÜYESİ EKLEME MODALI (POPUP) -->
+    <div id="addMemberModal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-card" style="background: var(--card-bg); width: 100%; max-width: 620px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-user-plus" style="color: var(--primary-accent);"></i>
+                    Ekibe Yeni Üye Ekle
+                </h3>
+                <button type="button" onclick="closeAddMemberModal()" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div style="padding: 22px 24px; overflow-y: auto; flex: 1;">
+                <!-- SEKMELER (YENİ OLUŞTUR vs APERIONX'TEN SEÇ) -->
+                <div class="profile-tabs-strip" style="margin-bottom: 20px;">
+                    <button type="button" class="profile-tab-btn active" id="tab-btn-create-member" onclick="switchMemberAddMode('create')">
+                        <i class="ph-bold ph-user-plus"></i> Yeni Hesap Oluştur
+                    </button>
+                    <button type="button" class="profile-tab-btn" id="tab-btn-search-member" onclick="switchMemberAddMode('search')">
+                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX'ten Seç & Ekle
+                    </button>
+                </div>
+
+                <!-- MOD 1: YENİ ÜYE OLUŞTURMA -->
+                <div id="add-member-mode-create">
+                    <!-- Kredensiyel Başarı Kutusu -->
+                    <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <i class="ph-bold ph-check-circle" style="color: #059669; font-size: 1.4rem; margin-top: 2px;"></i>
+                                <div>
+                                    <h4 style="margin: 0 0 4px 0; color: #065f46; font-size: 0.95rem; font-weight: 700;">Hesap Başarıyla Oluşturuldu!</h4>
+                                    <p style="margin: 0 0 8px 0; color: #047857; font-size: 0.82rem;">
+                                        Üyeniz doğrudan giriş yapabilir:
+                                    </p>
+                                    <div style="display: flex; gap: 12px; flex-wrap: wrap; background: white; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.86rem;">
+                                        <div><strong>Ad:</strong> <span id="success-member-name">-</span></div>
+                                        <div><strong>E-posta:</strong> <span id="success-member-email">-</span></div>
+                                        <div><strong>Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyMemberCredentials()" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #059669; color: white;">
+                                <i class="ph ph-copy"></i> Kopyala
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="createTeamMemberForm" onsubmit="submitCreateTeamMember(event)">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="member_fullname" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                            </div>
+                            <div class="form-group">
+                                <label>E-posta Adresi <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="member_email" class="form-control" placeholder="yazar@aperionx.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="margin: 0;">Giriş Şifresi <span style="color: #ef4444;">*</span></label>
+                                    <button type="button" onclick="generateMemberPassword()" style="background: none; border: none; color: var(--primary-accent); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="ph ph-magic-wand"></i> Şifre Üret
+                                    </button>
+                                </div>
+                                <input type="text" id="member_password" class="form-control" placeholder="En az 6 karakterli şifre" minlength="6" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Görev Tanımı <span style="color: #ef4444;">*</span></label>
+                                <select id="member_campus_role" class="form-control" style="cursor: pointer;">
+                                    <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
+                                    <option value="Kampüs Editörü">Kampüs Editörü</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
+                            <button type="button" onclick="closeAddMemberModal()" class="btn" style="background: #e2e8f0; color: #475569; padding: 9px 18px;">
+                                Kapat
+                            </button>
+                            <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 9px 22px;">
+                                <i class="ph ph-user-plus"></i> Hesabı Oluştur & Ekle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- MOD 2: MEVCUT APERIONX KULLANICISINI SEÇME -->
+                <div id="add-member-mode-search" style="display: none;">
+                    <p style="color: #64748b; font-size: 0.86rem; margin-top: 0; margin-bottom: 14px;">
+                        Kullanıcının adını veya e-postasını arayın ve rol atayarak ekibinize dahil edin.
+                    </p>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <div style="position: relative; flex: 1; min-width: 200px;">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                            <input type="text" id="existing-user-search-input" oninput="searchExistingUsers(this.value)" class="form-control" style="padding-left: 36px;" placeholder="Ad, e-posta veya kullanıcı adı...">
+                        </div>
+                        <div style="width: 170px;">
+                            <select id="existing-user-campus-role" class="form-control" style="cursor: pointer;">
+                                <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
+                                <option value="Kampüs Editörü">Kampüs Editörü</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="search-users-results" style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: none;">
+                        <!-- JS injects results -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1849,6 +1907,20 @@
                     `;
                 }
             }
+        }
+
+        // ================= MEMBER MODAL (OPEN / CLOSE) =================
+        function openAddMemberModal() {
+            const modal = document.getElementById('addMemberModal');
+            if (modal) modal.style.display = 'flex';
+            switchMemberAddMode('create');
+        }
+
+        function closeAddMemberModal() {
+            const modal = document.getElementById('addMemberModal');
+            if (modal) modal.style.display = 'none';
+            const successBox = document.getElementById('member-success-box');
+            if (successBox) successBox.style.display = 'none';
         }
 
         // ================= MEMBER TAB SWITCH (CREATE vs SEARCH) =================
@@ -2270,6 +2342,21 @@
         }
 
         function renderTeamMembers(members) {
+            // İstatistik pillerini güncelle
+            const total = (teamMembersList || []).length;
+            const editors = (teamMembersList || []).filter(m => m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör'))).length;
+            const authors = total - editors;
+
+            const pillTotal = document.getElementById('pill-total-members');
+            const pillEditors = document.getElementById('pill-editors-count');
+            const pillAuthors = document.getElementById('pill-authors-count');
+            const countEl = document.getElementById('team-members-count');
+
+            if (pillTotal) pillTotal.innerText = `${total} Üye`;
+            if (pillEditors) pillEditors.innerText = `${editors} Editör`;
+            if (pillAuthors) pillAuthors.innerText = `${authors} Yazar`;
+            if (countEl) countEl.innerText = (members || []).length;
+
             const tbody = document.getElementById('team-members-tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -2277,9 +2364,9 @@
             if (!members || members.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
-                            <i class="ph ph-users-three" style="font-size: 2.2rem; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
-                            Henüz ekibinize ait bir üye tanımlanmamış. Yukarıdaki formdan yeni üye ekleyebilirsiniz.
+                        <td colspan="5" style="text-align: center; padding: 45px 20px; color: #94a3b8;">
+                            <i class="ph ph-users-three" style="font-size: 2.4rem; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
+                            Kriterlere uygun ekip üyesi bulunamadı.
                         </td>
                     </tr>
                 `;
@@ -2289,20 +2376,21 @@
             members.forEach(member => {
                 const tr = document.createElement('tr');
                 const formattedDate = member.created_at ? new Date(member.created_at).toLocaleDateString('tr-TR') : '-';
-                const isEditor = member.role === 'campus_editor' || member.role === 'editor';
+                const isEditor = member.role === 'campus_editor' || member.role === 'editor' || (member.campus_role && member.campus_role.toLowerCase().includes('editör'));
                 const roleClass = isEditor ? 'editor' : 'author';
                 const roleIcon = isEditor ? 'ph-pencil-simple-line' : 'ph-newspaper';
                 const campusRoleText = member.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
-                const panelText = isEditor ? '/campus-editor (Kampüs Editörü Paneli)' : '/author (Yazar Paneli)';
+                const uniDept = [member.university, member.department].filter(Boolean).join(' / ') || '-';
+                const initial = (member.fullname || 'Ü').charAt(0).toUpperCase();
 
                 tr.innerHTML = `
                     <td style="padding: 14px 16px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 38px; height: 38px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
-                                ${escapeHtml((member.fullname || 'Ü').charAt(0).toUpperCase())}
+                            <div style="width: 38px; height: 38px; border-radius: 50%; background: ${isEditor ? 'rgba(139, 92, 246, 0.15)' : '#e0e7ff'}; color: ${isEditor ? '#7c3aed' : '#4338ca'}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
+                                ${escapeHtml(initial)}
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(member.fullname || '-')}</div>
+                                <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">${escapeHtml(member.fullname || '-')}</div>
                                 <div style="color: #64748b; font-size: 0.82rem;">${escapeHtml(member.email)}</div>
                             </div>
                         </div>
@@ -2312,18 +2400,23 @@
                             <i class="ph ${roleIcon}"></i> ${escapeHtml(campusRoleText)}
                         </span>
                     </td>
-                    <td style="padding: 14px 16px;">
-                        <span style="font-size: 0.85rem; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                            <i class="ph ph-check-circle"></i> ${escapeHtml(panelText)}
-                        </span>
+                    <td style="padding: 14px 16px; color: #475569; font-size: 0.88rem;">
+                        ${escapeHtml(uniDept)}
                     </td>
                     <td style="padding: 14px 16px; color: #64748b; font-size: 0.85rem;">
                         ${formattedDate}
                     </td>
                     <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
-                        <button type="button" onclick="deleteTeamMember(${member.id}, '${escapeHtml(member.fullname || member.email)}')" class="btn" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;" title="Üyeyi Kaldır">
-                            <i class="ph ph-trash"></i> Sil
-                        </button>
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            ${member.email ? `
+                                <a href="mailto:${encodeURIComponent(member.email)}?subject=${encodeURIComponent('AperionX Kampüs İletişim')}" class="btn" style="padding: 7px 11px; font-size: 0.82rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="E-posta Gönder">
+                                    <i class="ph-bold ph-envelope"></i>
+                                </a>
+                            ` : ''}
+                            <button type="button" onclick="deleteTeamMember(${member.id}, '${escapeHtml(member.fullname || member.email)}')" class="btn" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; padding: 7px 11px; font-size: 0.82rem; border-radius: 8px;" title="Üyeyi Kaldır">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2333,159 +2426,29 @@
             renderDashboardRecentMembers(members);
         }
 
-        // Genel Bakış için son katılan üyeleri listele
-        function renderDashboardRecentMembers(members) {
-            const dashCount = document.getElementById('dashboard-team-count');
-            if (dashCount) dashCount.innerText = members.length;
-
-            const tbody = document.getElementById('dashboard-recent-members-tbody');
-            if (!tbody) return;
-
-            const recents = (members || []).slice(0, 5);
-            if (recents.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
-                            Henüz ekibinize üye eklenmemiş.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = recents.map(m => {
-                const name = m.fullname || 'Üye';
-                const initial = name.charAt(0).toUpperCase();
-                const isEditor = m.role === 'campus_editor' || m.role === 'editor';
-                const roleClass = isEditor ? 'editor' : 'author';
-                const roleText = m.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
-                const contactEmail = m.email || '';
-
-                return `
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
-                                    ${initial}
-                                </div>
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main);">${escapeHtml(name)}</div>
-                                    <div style="font-size: 0.74rem; color: #64748b;">${escapeHtml(contactEmail)}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="role-badge ${roleClass}" style="font-size: 0.75rem; padding: 2px 8px;">
-                                ${escapeHtml(roleText)}
-                            </span>
-                        </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                            ${contactEmail ? `
-                                <a href="mailto:${encodeURIComponent(contactEmail)}?subject=${encodeURIComponent('AperionX Kampüs Ekibi İletişim')}" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="E-posta Gönder">
-                                    <i class="ph-bold ph-envelope"></i>
-                                </a>
-                            ` : '-'}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Genel Bakış: Yayınlanan içerikler ve performans istatistiklerini yükle
-        async function loadDashboardStats(showFeedback = false) {
-            const refreshIcon = document.getElementById('dash-refresh-icon');
-            if (refreshIcon) refreshIcon.classList.add('ph-spin');
-
-            try {
-                const res = await fetch(`${API_URL}/campus-editor/published-stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (res.ok) {
-                    const stats = await res.json();
-                    const totals = stats.totals || {};
-                    const items = stats.items || [];
-
-                    // Metrikleri yazdır
-                    const elPub = document.getElementById('dashboard-published-count');
-                    const elViews = document.getElementById('dashboard-total-views');
-                    const elLikes = document.getElementById('dashboard-total-likes');
-
-                    if (elPub) elPub.innerText = Number(totals.totalPublished || items.length).toLocaleString('tr-TR');
-                    if (elViews) elViews.innerText = Number(totals.totalViews || 0).toLocaleString('tr-TR');
-                    if (elLikes) elLikes.innerText = Number(totals.totalLikes || 0).toLocaleString('tr-TR');
-
-                    // En çok okunan ilk 5 içeriği doldur
-                    renderDashboardTopArticles(items);
-
-                    if (showFeedback) showToast('Genel bakış verileri güncellendi.', 'success');
-                }
-            } catch (err) {
-                console.error('[LOAD-DASHBOARD-STATS-ERROR]', err);
-                if (showFeedback) showToast('İstatistikler yüklenirken hata oluştu.', 'error');
-            } finally {
-                if (refreshIcon) refreshIcon.classList.remove('ph-spin');
-            }
-        }
-
-        function renderDashboardTopArticles(items) {
-            const tbody = document.getElementById('dashboard-top-articles-tbody');
-            if (!tbody) return;
-
-            // Okunma sayısına göre en yüksek 5 içerik
-            const topItems = [...(items || [])].sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)).slice(0, 5);
-
-            if (topItems.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 25px; color: #94a3b8;">
-                            Henüz kampüsünüzden yayına çıkan bir içerik bulunmuyor.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = topItems.map(item => {
-                const views = Number(item.views || 0).toLocaleString('tr-TR');
-                let liveLink = `/makale/${item.slug || item.id}`;
-                if (item.is_gundem) liveLink = `/bilim-gundemi/${item.slug || item.id}`;
-                else if (item.item_type === 'experiment') liveLink = `/deney/${item.slug || item.id}`;
-
-                return `
-                    <tr>
-                        <td>
-                            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 2px; line-height: 1.3;">
-                                ${escapeHtml(item.title)}
-                            </div>
-                            <div style="font-size: 0.74rem; color: #64748b;">
-                                Yazar: ${escapeHtml(item.author_name || 'Kampüs Yazarı')}
-                            </div>
-                        </td>
-                        <td style="text-align: center; font-weight: 700; color: #2563eb; font-size: 0.88rem; white-space: nowrap;">
-                            <span style="display: inline-flex; align-items: center; gap: 3px;">
-                                <i class="ph-bold ph-eye"></i> ${views}
-                            </span>
-                        </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                            <a href="${liveLink}" target="_blank" class="btn" style="padding: 5px 10px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent);" title="Sitede Canlı Gör">
-                                <i class="ph ph-arrow-square-out"></i>
-                            </a>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
         function filterTeamMembers() {
-            const input = document.getElementById('member-search-input');
-            if (!input) return;
-            const q = input.value.toLowerCase().trim();
-            const filtered = teamMembersList.filter(m =>
-                (m.fullname && m.fullname.toLowerCase().includes(q)) ||
-                (m.email && m.email.toLowerCase().includes(q)) ||
-                (m.campus_role && m.campus_role.toLowerCase().includes(q))
-            );
+            const searchInput = document.getElementById('member-search-input');
+            const roleFilter = document.getElementById('member-role-filter');
+
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const roleVal = roleFilter ? roleFilter.value : 'all';
+
+            const filtered = (teamMembersList || []).filter(m => {
+                const nameMatch = (m.fullname && m.fullname.toLowerCase().includes(q)) ||
+                                  (m.email && m.email.toLowerCase().includes(q)) ||
+                                  (m.university && m.university.toLowerCase().includes(q)) ||
+                                  (m.department && m.department.toLowerCase().includes(q));
+
+                if (!nameMatch) return false;
+
+                if (roleVal === 'editor') {
+                    return m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör'));
+                } else if (roleVal === 'author') {
+                    return !(m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör')));
+                }
+                return true;
+            });
+
             renderTeamMembers(filtered);
         }
 
