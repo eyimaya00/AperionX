@@ -966,11 +966,11 @@
             <a href="javascript:void(0)" class="menu-item active" onclick="showCoordSection('coord-dashboard', this)">
                 <i class="ph ph-house"></i> <span>Genel Bakış</span>
             </a>
-            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-campus', this)">
-                <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
-            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-team', this)">
                 <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-authors', this)">
+                <i class="ph ph-feather"></i> <span>Yazarlar</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-contents', this)">
                 <i class="ph ph-article"></i> <span>İçerik & Projeler</span>
@@ -991,13 +991,7 @@
     <!-- MAIN CONTENT -->
     <main class="content" id="main-content">
         <!-- TOP BAR -->
-        <div class="top-bar">
-            <div class="top-breadcrumb">
-                <i class="ph ph-graduation-cap" style="font-size: 1.2rem; color: var(--primary-accent);"></i>
-                AperionX Kampüs Ağı <i class="ph ph-caret-right" style="font-size: 0.8rem;"></i>
-                <span id="breadcrumb-section-title">Genel Bakış</span>
-            </div>
-
+        <div class="top-bar" style="justify-content: flex-end;">
             <div class="top-actions">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span id="top-coord-team" class="campus-badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-color: rgba(99, 102, 241, 0.25);">
@@ -1025,11 +1019,11 @@
                     </div>
 
                     <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button type="button" class="btn" style="background: white; color: var(--primary-accent); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))">
-                            <i class="ph-bold ph-user-plus"></i> Yeni Üye Ekle
+                        <button type="button" class="btn" style="background: white; color: var(--primary-accent); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))">
+                            <i class="ph-bold ph-feather"></i> Yazarları Yönet
                         </button>
-                        <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.18); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" onclick="showCoordSection('coord-settings', document.querySelector('.menu-item[onclick*=\'coord-settings\']'))">
-                            <i class="ph ph-gear"></i> Profil & Ayarlar
+                        <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.18); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" onclick="showCoordSection('coord-team', document.querySelector('.menu-item[onclick*=\'coord-team\']'))">
+                            <i class="ph ph-users-three"></i> Ekip Bilgileri
                         </button>
                     </div>
                 </div>
@@ -1037,12 +1031,12 @@
 
             <!-- CANLI STATS METRIC KARTLARI -->
             <div class="stats-grid">
-                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))" title="Ekip Üyelerini Gör">
+                <div class="stat-card" style="cursor: pointer;" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))" title="Yazarları Gör">
                     <div class="stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                        <i class="ph ph-users-three"></i>
+                        <i class="ph ph-feather"></i>
                     </div>
                     <div>
-                        <div class="stat-label">Toplam Ekip Üyesi</div>
+                        <div class="stat-label">Kampüs Yazarları</div>
                         <div class="stat-value" id="dashboard-team-count">0</div>
                     </div>
                 </div>
@@ -1084,10 +1078,10 @@
                 <div class="card" style="margin-bottom: 0;">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <h3 class="card-title">
-                            <i class="ph ph-user-list" style="color: var(--primary-accent);"></i>
-                            Ekibe Son Katılanlar
+                            <i class="ph ph-feather" style="color: var(--primary-accent);"></i>
+                            Son Eklenen Yazarlar
                         </h3>
-                        <a href="javascript:void(0)" onclick="showCoordSection('coord-campus', document.querySelector('.menu-item[onclick*=\'coord-campus\']'))" style="color: var(--primary-accent); font-size: 0.86rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        <a href="javascript:void(0)" onclick="showCoordSection('coord-authors', document.querySelector('.menu-item[onclick*=\'coord-authors\']'))" style="color: var(--primary-accent); font-size: 0.86rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                             Tümünü Gör <i class="ph ph-arrow-right"></i>
                         </a>
                     </div>
@@ -1148,30 +1142,31 @@
 
         <!-- 2. EKİP BİLGİLERİ SECTION (ANA EKİP YÖNETİMİ) -->
         <!-- 2. EKİP ÜYELERİ SECTION (ÜYE OLUŞTURMA, MEVCUT KULLANICI EKLEME & YÖNETİM) -->
-        <section id="coord-campus" class="section">
+        <!-- 2. YAZARLAR SECTION (YAZAR OLUŞTURMA, MEVCUT KULLANICIYI YAZAR YAPMA & YAZAR YÖNETİMİ) -->
+        <section id="coord-authors" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
-                        👥 Ekip Üyeleri Yönetimi
+                        ✍️ Kampüs Yazarları
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        Ekibinize sıfırdan yeni üye oluşturabilir veya daha önce AperionX'te hesabı olan kullanıcıları tek tıkla kendi kampüs ekibinize dahil edebilirsiniz.
+                        Kampüsünüze bağlı yazarları yönetin, yeni yazar hesabı açın veya sitede kayıtlı AperionX kullanıcılarını yazar kadronuza dahil edin.
                     </p>
                 </div>
             </div>
 
-            <!-- ÜYE EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
+            <!-- YAZAR EKLEME YÖNTEMLERİ SEKMESİ (TAB STRIP) -->
             <div class="card" style="border-top: 4px solid var(--primary-accent); padding: 24px;">
                 <div class="profile-tabs-strip" style="margin-bottom: 20px;">
                     <button type="button" class="profile-tab-btn active" id="tab-btn-create-member" onclick="switchMemberAddMode('create')">
-                        <i class="ph-bold ph-user-plus"></i> Yeni Üye Oluştur
+                        <i class="ph-bold ph-user-plus"></i> Yeni Yazar Oluştur
                     </button>
                     <button type="button" class="profile-tab-btn" id="tab-btn-search-member" onclick="switchMemberAddMode('search')">
-                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX Kullanıcısı Ekle / Davet Et
+                        <i class="ph-bold ph-magnifying-glass-plus"></i> AperionX'ten Yazar Ekle / Davet Et
                     </button>
                 </div>
 
-                <!-- MOD 1: YENİ ÜYE OLUŞTURMA FORMU -->
+                <!-- MOD 1: YENİ YAZAR OLUŞTURMA FORMU -->
                 <div id="add-member-mode-create">
                     <!-- Başarılı Oluşturma Kredensiyel Kutusu -->
                     <div id="member-success-box" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
@@ -1181,9 +1176,9 @@
                                     <i class="ph-bold ph-check"></i>
                                 </div>
                                 <div>
-                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Ekip Üyesi Hesabı Başarıyla Oluşturuldu!</h4>
+                                    <h4 style="margin: 0 0 6px 0; color: #065f46; font-size: 1.05rem;">Yazar Hesabı Başarıyla Oluşturuldu!</h4>
                                     <p style="margin: 0 0 10px 0; color: #047857; font-size: 0.88rem;">
-                                        Aşağıdaki giriş bilgilerini ekip üyenizle paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
+                                        Aşağıdaki giriş bilgilerini yazarınızla paylaşabilirsiniz. Bu bilgilerle doğrudan yazar paneline giriş yapabilir:
                                     </p>
                                     <div style="display: flex; gap: 20px; flex-wrap: wrap; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #d1fae5; font-family: monospace; font-size: 0.95rem;">
                                         <div><strong style="color: #64748b;">Ad Soyad:</strong> <span id="success-member-name" style="color: #065f46; font-weight: 700;">-</span></div>
@@ -1232,7 +1227,7 @@
 
                         <div style="margin-top: 10px;">
                             <button type="submit" id="btn-submit-member" class="btn btn-primary" style="padding: 12px 28px; font-size: 0.95rem;">
-                                <i class="ph ph-user-plus"></i> Ekip Üyesini Kaydet & Hesap Oluştur
+                                <i class="ph ph-user-plus"></i> Yazarı Kaydet & Hesap Oluştur
                             </button>
                         </div>
                     </form>
@@ -1264,15 +1259,15 @@
                 </div>
             </div>
 
-            <!-- EKİP LİSTESİ TABLOSU -->
+            <!-- YAZAR LİSTESİ TABLOSU -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="ph ph-users-three" style="color: #10b981;"></i>
-                        Mevcut Ekip Üyeleri (<span id="team-members-count">0</span>)
+                        <i class="ph ph-feather" style="color: #10b981;"></i>
+                        Mevcut Kampüs Yazarları (<span id="team-members-count">0</span>)
                     </h3>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Üye ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
+                        <input type="text" id="member-search-input" oninput="filterTeamMembers()" placeholder="Yazar ara..." class="form-control" style="padding: 8px 14px; font-size: 0.88rem; width: 220px;">
                         <button type="button" onclick="loadTeamMembers()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.88rem;">
                             <i class="ph ph-arrows-clockwise"></i> Yenile
                         </button>
@@ -1283,7 +1278,7 @@
                     <table class="custom-table" id="team-members-table">
                         <thead>
                             <tr>
-                                <th>ÜYE BİLGİSİ</th>
+                                <th>YAZAR BİLGİSİ</th>
                                 <th>GÖREV / ROL</th>
                                 <th>GİRİŞ PANELİ</th>
                                 <th>KAYIT TARİHİ</th>
@@ -1294,7 +1289,7 @@
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     <i class="ph ph-spinner spinner" style="font-size: 1.6rem; display: block; margin-bottom: 8px;"></i>
-                                    Ekip üyeleri yükleniyor...
+                                    Yazarlar yükleniyor...
                                 </td>
                             </tr>
                         </tbody>
@@ -1311,11 +1306,11 @@
                         🏛️ Kampüs Ekip Bilgileri & Kadrosu
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        AperionX portalında yakında yayınlanacak üniversite topluluk sayfanızın ekip vitrini. Siz ve bağlı tüm üyeleriniz burada kartlar halinde sergilenir.
+                        AperionX portalında üniversitenize özel yayınlanacak resmi ekip vitrini. Buradaki kartları düzenleyebilir, yeni ekip üyeleri ekleyebilirsiniz. (Yazarlarınız bu alanda yer almaz, "Yazarlar" menüsünden yönetilir.)
                     </p>
                 </div>
-                <button type="button" onclick="renderTeamShowcase()" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 9px 16px;">
-                    <i class="ph ph-arrows-clockwise"></i> Vitrini Yenile
+                <button type="button" onclick="openAddTeamCardModal()" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-plus-circle"></i> Yeni Ekip Kartı Ekle
                 </button>
             </div>
 
@@ -1327,18 +1322,18 @@
                             AperionX Kampüs Ekibi
                         </h3>
                         <p style="margin: 0; color: #64748b; font-size: 0.95rem;" id="showcase-team-desc">
-                            Üniversite bünyesinde bilimi yaygınlaştıran koordinatör, editör ve yazar kadromuz.
+                            Üniversite bünyesinde bilimi yaygınlaştıran koordinatör, editör ve temsilci kadromuz.
                         </p>
                     </div>
                     <span class="campus-badge" id="showcase-total-badge" style="font-size: 0.9rem; padding: 6px 14px;">
-                        0 Ekip Üyesi
+                        0 Ekip Kartı
                     </span>
                 </div>
             </div>
 
             <!-- HAKKIMIZDA SAYFASI GİBİ EKİP KARTLARI GRİDİ -->
             <div class="showcase-grid" id="showcase-team-grid">
-                <!-- JS injects coordinator & all team members here -->
+                <!-- JS injects campus team cards here -->
             </div>
         </section>
 
@@ -1550,6 +1545,76 @@
         </section>
     </main>
 
+    <!-- EKİP KARTI DÜZENLEME / EKLEME MODALI -->
+    <div id="teamCardModal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-card" style="background: var(--card-bg); width: 100%; max-width: 580px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="teamCardModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-identification-card" style="color: var(--primary-accent);"></i>
+                    Ekip Kartını Düzenle
+                </h3>
+                <button type="button" onclick="closeTeamCardModal()" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <form id="teamCardForm" onsubmit="saveTeamCard(event)" style="padding: 24px; overflow-y: auto; flex: 1;">
+                <input type="hidden" id="card-id">
+
+                <!-- FOTOĞRAF ALANI -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding: 14px 18px; background: rgba(99, 102, 241, 0.04); border-radius: 14px; border: 1px dashed rgba(99, 102, 241, 0.3);">
+                    <img id="card-avatar-preview" src="" alt="Önizleme" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-accent); display: none;">
+                    <div id="card-avatar-placeholder" style="width: 72px; height: 72px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700;">
+                        <i class="ph ph-user"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; color: var(--text-main);">
+                            Profil Fotoğrafı
+                        </label>
+                        <input type="file" id="card-image-file" accept="image/*" onchange="previewTeamCardPhoto(this)" style="font-size: 0.84rem; color: #64748b; width: 100%;">
+                        <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 4px;">PNG, JPG veya WEBP formatında görsel yükleyin.</div>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>İsim Soyisim <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="card-fullname" class="form-control" placeholder="Örn: Ayşe Yılmaz" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sitedeki Görevi <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="card-role" class="form-control" placeholder="Örn: Kampüs Koordinatörü, Editör, Temsilci..." required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Okulu / Üniversite</label>
+                    <input type="text" id="card-university" class="form-control" placeholder="Örn: İstanbul Teknik Üniversitesi">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Mail Adresi</label>
+                        <input type="email" id="card-email" class="form-control" placeholder="ornek@aperionx.com">
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn Bağlantısı</label>
+                        <input type="url" id="card-linkedin" class="form-control" placeholder="https://linkedin.com/in/kullanici">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="closeTeamCardModal()" class="btn" style="background: #e2e8f0; color: #475569; padding: 10px 20px;">
+                        Vazgeç
+                    </button>
+                    <button type="submit" id="btn-save-card" class="btn btn-primary" style="padding: 10px 24px;">
+                        <i class="ph-bold ph-floppy-disk"></i> Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toast-container"></div>
 
@@ -1567,6 +1632,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSiteSettings();
             initCoordinatorProfile();
+            loadTeamCards();
             loadTeamMembers();
             loadDashboardStats();
         });
@@ -1782,11 +1848,11 @@
                 linkEl.classList.add('active');
             }
 
-            // Update breadcrumb
+            // Update breadcrumb / header title
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
-                'coord-campus': 'Ekip Üyeleri',
                 'coord-team': 'Ekip Bilgileri',
+                'coord-authors': 'Yazarlar',
                 'coord-contents': 'İçerik & Projeler',
                 'coord-events': 'Etkinlikler & Takvim',
                 'coord-settings': 'Profil & Ayarlar'
@@ -1796,11 +1862,11 @@
                 breadcrumbTitle.innerText = titleMap[sectionId];
             }
 
-            // Load data when navigating to team section
-            if (sectionId === 'coord-campus') {
+            // Load data when navigating to sections
+            if (sectionId === 'coord-team') {
+                loadTeamCards();
+            } else if (sectionId === 'coord-authors') {
                 loadTeamMembers();
-            } else if (sectionId === 'coord-team') {
-                loadTeamMembers().then(() => renderTeamShowcase());
             }
 
             // Mobile: close sidebar on click
@@ -1810,7 +1876,7 @@
             }
         }
 
-        // ================= TEAM MEMBER MANAGEMENT JS =================
+        // ================= WRITERS & TEAM MEMBERS MANAGEMENT JS =================
         let teamMembersList = [];
         let lastCreatedMember = null;
 
@@ -1831,9 +1897,8 @@
 
                 teamMembersList = await res.json();
                 if (countEl) countEl.innerText = teamMembersList.length;
-                if (statTeamCount) statTeamCount.innerText = `${teamMembersList.length} Temsilci / Üye`;
+                if (statTeamCount) statTeamCount.innerText = `${teamMembersList.length} Yazar`;
                 renderTeamMembers(teamMembersList);
-                renderTeamShowcase();
             } catch (err) {
                 console.error('[LOAD-TEAM-MEMBERS-ERROR]', err);
                 if (tbody) {
@@ -2003,110 +2068,268 @@
             }
         }
 
-        // ================= SHOWCASE VITRIN (EKİP BİLGİLERİ - HAKKIMIZDA GİBİ) =================
-        function renderTeamShowcase() {
+        // ================= SHOWCASE VITRIN (EKİP BİLGİLERİ KARTLARI) =================
+        let teamCardsList = [];
+
+        async function loadTeamCards() {
             const grid = document.getElementById('showcase-team-grid');
+            const badge = document.getElementById('showcase-total-badge');
             const heading = document.getElementById('showcase-team-heading');
             const desc = document.getElementById('showcase-team-desc');
-            const badge = document.getElementById('showcase-total-badge');
-            if (!grid) return;
 
             const currentUser = user || {};
             const uniName = currentUser.university || 'Üniversite';
             if (heading) heading.innerText = `${uniName} AperionX Kampüs Ekibi`;
-            if (desc) desc.innerText = `${uniName} bünyesinde bilimi topluma sevdiren ve içerik üreten resmi kampüs kadromuz.`;
+            if (desc) desc.innerText = `${uniName} bünyesinde bilimi topluma sevdiren resmi koordinatör ve temsilci kadromuz.`;
 
-            const totalMembers = 1 + (teamMembersList ? teamMembersList.length : 0);
-            if (badge) badge.innerText = `${totalMembers} Ekip Üyesi`;
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-cards`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-            let cardsHtml = '';
-
-            // 1. KART: KOORDİNATÖR (KENDİSİ / EKİP LİDERİ)
-            const coordName = currentUser.fullname || 'Kampüs Koordinatörü';
-            const coordInitial = coordName.charAt(0).toUpperCase();
-            const coordDept = [currentUser.department, currentUser.university].filter(Boolean).join(' • ') || 'Kampüs Koordinatörlüğü';
-            const coordEmail = currentUser.public_email || currentUser.email || '';
-            const coordLinkedin = currentUser.linkedin_url || '';
-
-            cardsHtml += `
-                <div class="showcase-card is-coordinator">
-                    <div class="showcase-card-badge">
-                        <i class="ph-fill ph-crown"></i> Kampüs Koordinatörü (Lider)
-                    </div>
-                    <div class="showcase-avatar-wrapper">
-                        ${currentUser.avatar_url ? `
-                            <img src="${escapeHtml(currentUser.avatar_url)}" alt="${escapeHtml(coordName)}" class="showcase-avatar">
-                        ` : `
-                            <div class="showcase-avatar showcase-avatar-fallback" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white;">
-                                ${coordInitial}
-                            </div>
-                        `}
-                    </div>
-                    <h3 class="showcase-name">${escapeHtml(coordName)}</h3>
-                    <div class="showcase-role">Kampüs Koordinatörü</div>
-                    <div class="showcase-dept">${escapeHtml(coordDept)}</div>
-
-                    <div class="showcase-social-row">
-                        ${coordEmail ? `
-                            <a href="mailto:${encodeURIComponent(coordEmail)}" class="showcase-social-btn" title="E-posta: ${escapeHtml(coordEmail)}">
-                                <i class="ph-bold ph-envelope"></i>
-                            </a>
-                        ` : ''}
-                        ${coordLinkedin ? `
-                            <a href="${escapeHtml(coordLinkedin)}" target="_blank" rel="noopener noreferrer" class="showcase-social-btn" title="LinkedIn">
-                                <i class="ph-bold ph-linkedin-logo"></i>
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-
-            // 2. KARTLAR: EKİP ÜYELERİ (YAZARLAR VE EDİTÖRLER)
-            if (teamMembersList && teamMembersList.length > 0) {
-                teamMembersList.forEach(m => {
-                    const name = m.fullname || m.username || 'Ekip Üyesi';
-                    const initial = name.charAt(0).toUpperCase();
-                    const isEditor = m.role === 'campus_editor' || m.campus_role === 'Kampüs Editörü';
-                    const roleTitle = m.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
-                    const deptInfo = [m.department, m.university || currentUser.university].filter(Boolean).join(' • ') || 'AperionX Ekip Üyesi';
-                    const memberEmail = m.public_email || m.email || '';
-                    const memberLinkedin = m.linkedin_url || '';
-
-                    cardsHtml += `
-                        <div class="showcase-card">
-                            <div class="showcase-avatar-wrapper">
-                                ${m.avatar_url ? `
-                                    <img src="${escapeHtml(m.avatar_url)}" alt="${escapeHtml(name)}" class="showcase-avatar">
-                                ` : `
-                                    <div class="showcase-avatar showcase-avatar-fallback">
-                                        ${initial}
-                                    </div>
-                                `}
-                            </div>
-                            <h3 class="showcase-name">${escapeHtml(name)}</h3>
-                            <div class="showcase-role" style="${isEditor ? 'color: #8b5cf6;' : 'color: #059669;'}">
-                                ${escapeHtml(roleTitle)}
-                            </div>
-                            <div class="showcase-dept">${escapeHtml(deptInfo)}</div>
-
-                            <div class="showcase-social-row">
-                                ${memberEmail ? `
-                                    <a href="mailto:${encodeURIComponent(memberEmail)}" class="showcase-social-btn" title="E-posta: ${escapeHtml(memberEmail)}">
-                                        <i class="ph-bold ph-envelope"></i>
-                                    </a>
-                                ` : ''}
-                                ${memberLinkedin ? `
-                                    <a href="${escapeHtml(memberLinkedin)}" target="_blank" rel="noopener noreferrer" class="showcase-social-btn" title="LinkedIn">
-                                        <i class="ph-bold ph-linkedin-logo"></i>
-                                    </a>
-                                ` : ''}
-                            </div>
+                if (res.ok) {
+                    teamCardsList = await res.json();
+                    if (badge) badge.innerText = `${teamCardsList.length} Ekip Kartı`;
+                    renderTeamShowcase(teamCardsList);
+                } else {
+                    console.error('[LOAD-TEAM-CARDS-ERROR]', await res.text());
+                }
+            } catch (err) {
+                console.error('[LOAD-TEAM-CARDS-ERROR]', err);
+                if (grid) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #ef4444;">
+                            <i class="ph ph-warning-circle" style="font-size: 1.6rem; display: block; margin-bottom: 8px;"></i>
+                            Ekip kartları yüklenirken hata oluştu: ${escapeHtml(err.message)}
                         </div>
                     `;
-                });
+                }
+            }
+        }
+
+        function renderTeamShowcase(cards) {
+            const grid = document.getElementById('showcase-team-grid');
+            if (!grid) return;
+
+            if (!cards || cards.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: #94a3b8; background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--border-color);">
+                        <i class="ph ph-users-three" style="font-size: 2.2rem; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
+                        Henüz vitrin kartı bulunmuyor. Yukarıdaki "Yeni Ekip Kartı Ekle" butonundan ekleyebilirsiniz.
+                    </div>
+                `;
+                return;
             }
 
-            grid.innerHTML = cardsHtml;
+            grid.innerHTML = cards.map((card, idx) => {
+                const name = card.fullname || 'Ekip Üyesi';
+                const initial = name.charAt(0).toUpperCase();
+                const isLeader = idx === 0 || (card.role_title && card.role_title.toLowerCase().includes('koordinatör'));
+                const cardClass = isLeader ? 'showcase-card is-coordinator' : 'showcase-card';
+
+                return `
+                    <div class="${cardClass}">
+                        ${isLeader ? `
+                            <div class="showcase-card-badge">
+                                <i class="ph-fill ph-crown"></i> Lider / Koordinatör
+                            </div>
+                        ` : ''}
+
+                        <div class="showcase-avatar-wrapper">
+                            ${card.image_url ? `
+                                <img src="${escapeHtml(card.image_url)}" alt="${escapeHtml(name)}" class="showcase-avatar">
+                            ` : `
+                                <div class="showcase-avatar showcase-avatar-fallback" style="${isLeader ? 'background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white;' : ''}">
+                                    ${initial}
+                                </div>
+                            `}
+                        </div>
+
+                        <h3 class="showcase-name">${escapeHtml(name)}</h3>
+                        <div class="showcase-role">
+                            <i class="ph-bold ph-identification-badge"></i> ${escapeHtml(card.role_title)}
+                        </div>
+                        <div class="showcase-dept">${escapeHtml(card.university || '-')}</div>
+
+                        <div class="showcase-social-row">
+                            ${card.email ? `
+                                <a href="mailto:${encodeURIComponent(card.email)}" class="showcase-social-btn" title="E-posta: ${escapeHtml(card.email)}">
+                                    <i class="ph-bold ph-envelope"></i>
+                                </a>
+                            ` : ''}
+                            ${card.linkedin_url ? `
+                                <a href="${escapeHtml(card.linkedin_url)}" target="_blank" rel="noopener noreferrer" class="showcase-social-btn" title="LinkedIn">
+                                    <i class="ph-bold ph-linkedin-logo"></i>
+                                </a>
+                            ` : ''}
+                        </div>
+
+                        <!-- KART DÜZENLEME & SİLME BUTONLARI -->
+                        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); width: 100%; display: flex; gap: 8px; justify-content: center;">
+                            <button type="button" onclick="openEditTeamCardModal(${card.id})" class="btn" style="padding: 7px 16px; font-size: 0.84rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border: 1px solid rgba(99, 102, 241, 0.25); font-weight: 600; border-radius: 8px;">
+                                <i class="ph-bold ph-pencil-simple"></i> Düzenle
+                            </button>
+                            ${cards.length > 1 ? `
+                                <button type="button" onclick="deleteTeamCard(${card.id}, '${escapeHtml(name)}')" class="btn" style="padding: 7px 12px; font-size: 0.84rem; background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px;" title="Kartı Kaldır">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================= EKİP KARTI MODAL İŞLEMLERİ =================
+        function openAddTeamCardModal() {
+            const modal = document.getElementById('teamCardModal');
+            const title = document.getElementById('teamCardModalTitle');
+            const form = document.getElementById('teamCardForm');
+            if (form) form.reset();
+
+            document.getElementById('card-id').value = '';
+            document.getElementById('card-university').value = (user && user.university) ? user.university : '';
+            document.getElementById('card-avatar-preview').style.display = 'none';
+            document.getElementById('card-avatar-placeholder').style.display = 'flex';
+
+            if (title) title.innerHTML = '<i class="ph-bold ph-plus-circle" style="color: var(--primary-accent);"></i> Yeni Ekip Kartı Ekle';
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function openEditTeamCardModal(cardId) {
+            const card = teamCardsList.find(c => c.id == cardId);
+            if (!card) return;
+
+            const modal = document.getElementById('teamCardModal');
+            const title = document.getElementById('teamCardModalTitle');
+
+            document.getElementById('card-id').value = card.id;
+            document.getElementById('card-fullname').value = card.fullname || '';
+            document.getElementById('card-role').value = card.role_title || '';
+            document.getElementById('card-university').value = card.university || '';
+            document.getElementById('card-email').value = card.email || '';
+            document.getElementById('card-linkedin').value = card.linkedin_url || '';
+            document.getElementById('card-image-file').value = '';
+
+            const preview = document.getElementById('card-avatar-preview');
+            const placeholder = document.getElementById('card-avatar-placeholder');
+
+            if (card.image_url) {
+                preview.src = card.image_url;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
+                placeholder.innerText = (card.fullname || 'U').charAt(0).toUpperCase();
+            }
+
+            if (title) title.innerHTML = '<i class="ph-bold ph-pencil-simple" style="color: var(--primary-accent);"></i> Ekip Kartını Düzenle';
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeTeamCardModal() {
+            const modal = document.getElementById('teamCardModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function previewTeamCardPhoto(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const preview = document.getElementById('card-avatar-preview');
+                const placeholder = document.getElementById('card-avatar-placeholder');
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveTeamCard(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-card');
+            const cardId = document.getElementById('card-id').value;
+            const fullname = document.getElementById('card-fullname').value.trim();
+            const role_title = document.getElementById('card-role').value.trim();
+            const university = document.getElementById('card-university').value.trim();
+            const email = document.getElementById('card-email').value.trim();
+            const linkedin_url = document.getElementById('card-linkedin').value.trim();
+            const fileInput = document.getElementById('card-image-file');
+
+            if (!fullname || !role_title) {
+                return showToast('İsim Soyisim ve Sitedeki Görevi zorunludur.', 'error');
+            }
+
+            const formData = new FormData();
+            formData.append('fullname', fullname);
+            formData.append('role_title', role_title);
+            formData.append('university', university);
+            formData.append('email', email);
+            formData.append('linkedin_url', linkedin_url);
+
+            if (fileInput && fileInput.files[0]) {
+                formData.append('image', fileInput.files[0]);
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph ph-spinner spinner"></i> Kaydediliyor...';
+            }
+
+            try {
+                const url = cardId ? `${API_URL}/coordinator/team-cards/${cardId}` : `${API_URL}/coordinator/team-cards`;
+                const method = cardId ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Ekip kartı kaydedildi!', 'success');
+                    closeTeamCardModal();
+                    loadTeamCards();
+                } else {
+                    showToast(data.error || 'Kaydetme işlemi başarısız.', 'error');
+                }
+            } catch (err) {
+                console.error('[SAVE-TEAM-CARD-ERROR]', err);
+                showToast('Hata: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Değişiklikleri Kaydet';
+                }
+            }
+        }
+
+        async function deleteTeamCard(cardId, cardName) {
+            if (!confirm(`"${cardName}" kartını vitrinden kaldırmak istediğinize emin misiniz?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-cards/${cardId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast('Kart vitrinden kaldırıldı.', 'success');
+                    loadTeamCards();
+                } else {
+                    showToast(data.error || 'Kart kaldırılamadı.', 'error');
+                }
+            } catch (err) {
+                showToast('Hata: ' + err.message, 'error');
+            }
         }
 
         function renderTeamMembers(members) {

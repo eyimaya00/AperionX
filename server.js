@@ -3031,6 +3031,24 @@ async function ensureSchema() {
             )
         `);
 
+        // --- NEW: Kampüs Ekip Kartları Tablosu (Ekip Bilgileri Vitrini) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS campus_team_cards (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                coordinator_id INT NOT NULL,
+                fullname VARCHAR(255) NOT NULL,
+                university VARCHAR(255),
+                role_title VARCHAR(255) NOT NULL,
+                image_url VARCHAR(500),
+                email VARCHAR(255),
+                linkedin_url VARCHAR(500),
+                order_index INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_campus_team_coord (coordinator_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS content_plans (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -4533,6 +4551,150 @@ app.post('/api/coordinator/add-existing-member', authenticateToken, async (req, 
     } catch (e) {
         console.error('[COORDINATOR-ADD-EXISTING-MEMBER-ERROR]', e);
         res.status(500).json({ error: e.message });
+    }
+});
+
+// ================= KAMPÜS EKİP KARTLARI (EKİP BİLGİLERİ VİTRİNİ) =================
+// 1. Get Campus Team Cards (Coordinator)
+app.get('/api/coordinator/team-cards', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    try {
+        let [cards] = await pool.query(
+            'SELECT * FROM campus_team_cards WHERE coordinator_id = ? ORDER BY order_index ASC, id ASC',
+            [coordinatorId]
+        );
+
+        // If no cards exist yet, auto-seed the coordinator's own card from users table
+        if (cards.length === 0) {
+            const [userRows] = await pool.query(
+                'SELECT fullname, university, department, avatar_url, email, public_email, linkedin_url FROM users WHERE id = ?',
+                [coordinatorId]
+            );
+            if (userRows.length > 0) {
+                const u = userRows[0];
+                const initialRole = 'Kampüs Koordinatörü';
+                const initialUni = u.university || '';
+                const initialEmail = u.public_email || u.email || '';
+                const initialAvatar = u.avatar_url || null;
+                const initialLinkedin = u.linkedin_url || null;
+
+                const [insertRes] = await pool.query(
+                    'INSERT INTO campus_team_cards (coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, 0)',
+                    [coordinatorId, u.fullname || 'Kampüs Koordinatörü', initialUni, initialRole, initialAvatar, initialEmail, initialLinkedin]
+                );
+                [cards] = await pool.query(
+                    'SELECT * FROM campus_team_cards WHERE id = ?',
+                    [insertRes.insertId]
+                );
+            }
+        }
+
+        res.json(cards);
+    } catch (err) {
+        console.error('[GET-COORDINATOR-TEAM-CARDS-ERROR]', err);
+        res.status(500).json({ error: 'Ekip kartları alınamadı: ' + err.message });
+    }
+});
+
+// 2. Add New Campus Team Card
+app.post('/api/coordinator/team-cards', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const { fullname, university, role_title, email, linkedin_url, order_index } = req.body;
+
+    if (!fullname || !role_title) {
+        return res.status(400).json({ error: 'Ad Soyad ve Görev Tanımı zorunludur.' });
+    }
+
+    const image_url = req.file ? ('uploads/' + req.file.filename) : (req.body.image_url || null);
+
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO campus_team_cards (coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [coordinatorId, fullname.trim(), (university || '').trim(), role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0]
+        );
+        res.json({ success: true, message: 'Ekip kartı başarıyla eklendi.', id: result.insertId });
+    } catch (err) {
+        console.error('[ADD-COORDINATOR-TEAM-CARD-ERROR]', err);
+        res.status(500).json({ error: 'Ekip kartı eklenemedi: ' + err.message });
+    }
+});
+
+// 3. Update Existing Campus Team Card
+app.put('/api/coordinator/team-cards/:id', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const cardId = req.params.id;
+    const { fullname, university, role_title, email, linkedin_url, order_index } = req.body;
+
+    if (!fullname || !role_title) {
+        return res.status(400).json({ error: 'Ad Soyad ve Görev Tanımı zorunludur.' });
+    }
+
+    try {
+        const [existing] = await pool.query('SELECT * FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Düzenlenecek kart bulunamadı veya yetkiniz yok.' });
+        }
+
+        let image_url = existing[0].image_url;
+        if (req.file) {
+            image_url = 'uploads/' + req.file.filename;
+        } else if (req.body.image_url !== undefined && req.body.image_url !== '') {
+            image_url = req.body.image_url;
+        }
+
+        await pool.query(
+            'UPDATE campus_team_cards SET fullname = ?, university = ?, role_title = ?, image_url = ?, email = ?, linkedin_url = ?, order_index = ? WHERE id = ? AND coordinator_id = ?',
+            [fullname.trim(), (university || '').trim(), role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0, cardId, coordinatorId]
+        );
+
+        res.json({ success: true, message: 'Ekip kartı başarıyla güncellendi.' });
+    } catch (err) {
+        console.error('[UPDATE-COORDINATOR-TEAM-CARD-ERROR]', err);
+        res.status(500).json({ error: 'Ekip kartı güncellenemedi: ' + err.message });
+    }
+});
+
+// 4. Delete Campus Team Card
+app.delete('/api/coordinator/team-cards/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+    const coordinatorId = req.user.id;
+    const cardId = req.params.id;
+
+    try {
+        const [existing] = await pool.query('SELECT * FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Kart bulunamadı veya yetkiniz yok.' });
+        }
+
+        await pool.query('DELETE FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        res.json({ success: true, message: 'Ekip kartı silindi.' });
+    } catch (err) {
+        console.error('[DELETE-COORDINATOR-TEAM-CARD-ERROR]', err);
+        res.status(500).json({ error: 'Kart silinemedi: ' + err.message });
+    }
+});
+
+// 5. Public API for future use: Get Campus Team Cards
+app.get('/api/public/campus-team/:coordinatorId', async (req, res) => {
+    try {
+        const [cards] = await pool.query(
+            'SELECT id, fullname, university, role_title, image_url, email, linkedin_url, order_index FROM campus_team_cards WHERE coordinator_id = ? ORDER BY order_index ASC, id ASC',
+            [req.params.coordinatorId]
+        );
+        res.json(cards);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
