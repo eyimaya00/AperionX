@@ -117,7 +117,7 @@
             z-index: 250;
         }
 
-        /* SIDEBAR (Match editor_panel.html exactly) */
+        /* SIDEBAR */
         .sidebar {
             width: var(--sidebar-width);
             background: rgba(15, 23, 42, 0.95);
@@ -125,93 +125,109 @@
             -webkit-backdrop-filter: blur(20px);
             height: 100vh;
             position: fixed;
-            padding: 32px 20px;
+            padding: 26px 16px 20px 16px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             z-index: 300;
-            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), padding var(--transition-speed);
             border-right: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
-            scrollbar-width: none;
-            overflow-y: auto;
-        }
-
-        .sidebar::-webkit-scrollbar {
-            display: none;
+            overflow: visible !important;
         }
 
         .sidebar.collapsed {
             width: var(--sidebar-width-collapsed);
-            padding: 32px 12px;
+            padding: 26px 10px 20px 10px;
         }
 
-        .sidebar.collapsed .logo span,
-        .sidebar.collapsed .menu-item span,
-        .sidebar.collapsed .logout-btn span,
-        .sidebar.collapsed .sidebar-profile h3,
-        .sidebar.collapsed .sidebar-profile span.badge-role {
-            display: none;
-        }
-
-        .sidebar.collapsed .logo {
-            justify-content: center;
-            padding-left: 0;
-            margin-bottom: 30px;
-        }
-
-        .sidebar.collapsed .menu-item,
-        .sidebar.collapsed .logout-btn {
-            justify-content: center;
-            padding: 14px;
-        }
-
-        /* SIDEBAR TOGGLE BUTTON */
+        /* SIDEBAR TOGGLE BUTTON (Küçültme Butonu) */
         .sidebar-toggle {
             position: absolute;
-            top: 28px;
-            right: -15px;
+            top: 26px;
+            right: -13px;
             background: var(--primary-accent);
             color: white;
-            border: 4px solid var(--admin-bg);
+            border: 3px solid #0f172a;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            z-index: 301;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            padding: 0;
+            outline: none;
         }
 
-        /* LOGO */
+        .sidebar-toggle i {
+            font-size: 0.85rem;
+            line-height: 1;
+        }
+
+        .sidebar-toggle:hover {
+            background: #4f46e5;
+            transform: scale(1.15);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+        }
+
+        body.dark-mode .sidebar-toggle,
+        html.dark-mode .sidebar-toggle {
+            border-color: #060911;
+        }
+
+        /* LOGO (Yazısız, sadece AperionX logosu) */
         .logo {
-            font-size: 1.6rem;
-            font-weight: 800;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 25px;
-            padding-left: 8px;
+            justify-content: flex-start;
+            margin-bottom: 22px;
+            padding: 0 6px;
+            height: 42px;
             position: relative;
         }
 
-        .logo img {
-            height: 42px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .logo .logo-full {
+            height: 36px;
+            max-width: 180px;
+            object-fit: contain;
+            border-radius: 6px;
+            display: block;
         }
 
-        /* SIDEBAR PROFILE */
+        .logo .logo-collapsed {
+            display: none !important;
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .sidebar.collapsed .logo {
+            justify-content: center;
+            padding: 0;
+            margin-bottom: 22px;
+        }
+
+        .sidebar.collapsed .logo .logo-full {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .logo .logo-collapsed {
+            display: block !important;
+            margin: 0 auto;
+        }
+
+        /* SIDEBAR PROFILE & FOTO BOYUTU DÜZELTMESİ */
         .sidebar-profile {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             cursor: pointer;
             transition: opacity 0.2s;
         }
@@ -223,47 +239,51 @@
         .sidebar-avatar-wrap {
             position: relative;
             display: inline-block;
+            margin: 0 auto;
         }
 
         .sidebar-avatar-wrap img {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary-accent);
+            border: 2.5px solid var(--primary-accent);
             background: #1e293b;
             display: block;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
         }
 
         .sidebar-avatar-letter {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            border: 3px solid var(--primary-accent);
+            border: 2.5px solid var(--primary-accent);
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 1.8rem;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
         }
 
         .sidebar-online-indicator {
             position: absolute;
-            bottom: 3px;
-            right: 3px;
-            width: 14px;
-            height: 14px;
+            bottom: 2px;
+            right: 2px;
+            width: 11px;
+            height: 11px;
             background: #10b981;
             border: 2px solid var(--sidebar-bg);
             border-radius: 50%;
         }
 
         .sidebar-profile h3 {
-            margin: 10px 0 2px;
+            margin: 8px 0 2px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -271,13 +291,38 @@
 
         .sidebar-profile span.badge-role {
             display: inline-block;
-            padding: 3px 12px;
+            padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
             background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-            margin-top: 4px;
+            color: #a5b4fc;
+            margin-top: 3px;
+        }
+
+        /* Collapsed Sidebar Profile */
+        .sidebar.collapsed .sidebar-profile {
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+        }
+
+        .sidebar.collapsed .sidebar-avatar-wrap img,
+        .sidebar.collapsed .sidebar-avatar-letter {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .sidebar.collapsed .sidebar-online-indicator {
+            width: 9px;
+            height: 9px;
+            bottom: 0;
+            right: 0;
+        }
+
+        .sidebar.collapsed .sidebar-profile h3,
+        .sidebar.collapsed .sidebar-profile span.badge-role {
+            display: none !important;
         }
 
         /* MENU ITEMS */
@@ -286,21 +331,28 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+
+        .menu-nav::-webkit-scrollbar {
+            display: none;
         }
 
         .menu-item {
-            padding: 15px 18px;
+            padding: 12px 14px;
             color: #94a3b8;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
+            gap: 12px;
+            border-radius: 12px;
+            transition: all 0.25s ease;
             font-weight: 500;
             white-space: nowrap;
             position: relative;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             border: 1px solid transparent;
             cursor: pointer;
         }
@@ -309,7 +361,7 @@
             color: white;
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.05);
-            transform: translateX(6px);
+            transform: translateX(4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -317,13 +369,14 @@
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0.1) 100%);
             color: #818cf8;
             border: 1px solid rgba(99, 102, 241, 0.35);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+            box-shadow: 0 4px 18px rgba(99, 102, 241, 0.25);
             font-weight: 700;
         }
 
         .menu-item i {
             font-size: 1.35rem;
             transition: color 0.2s;
+            flex-shrink: 0;
         }
 
         .menu-item:hover i {
@@ -338,39 +391,67 @@
             margin-left: auto;
             background: rgba(99, 102, 241, 0.25);
             color: #a5b4fc;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 0.72rem;
             font-weight: 700;
         }
 
+        /* Collapsed Menu Items */
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 12px 0;
+            gap: 0;
+            border-radius: 10px;
+        }
+
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .menu-badge-count {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .menu-item:hover {
+            transform: none;
+        }
+
+        /* LOGOUT BUTTON */
         .logout-btn {
             margin-top: auto;
             color: #ef4444;
             background: rgba(239, 68, 68, 0.08);
             border: 1px solid rgba(239, 68, 68, 0.12);
             cursor: pointer;
-            padding: 14px 18px;
+            padding: 12px 14px;
             border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             font-weight: 600;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
             text-align: left;
             font-family: inherit;
             white-space: nowrap;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
+            margin-bottom: 4px;
+            font-size: 0.92rem;
         }
 
         .logout-btn:hover {
             background: rgba(239, 68, 68, 0.18);
             color: #fca5a5;
             border-color: rgba(239, 68, 68, 0.3);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .sidebar.collapsed .logout-btn {
+            justify-content: center;
+            padding: 12px 0;
+            gap: 0;
+        }
+
+        .sidebar.collapsed .logout-btn span {
+            display: none !important;
         }
 
         /* CONTENT */
@@ -1020,9 +1101,9 @@
         </button>
 
         <!-- APERIONX LOGO -->
-        <a href="/" class="logo">
-            <img src="/uploads/logo.png" alt="AperionX Logo">
-            <span>AperionX</span>
+        <a href="/" class="logo" title="AperionX">
+            <img src="/uploads/logo.png" alt="AperionX Logo" class="logo-full">
+            <img src="/uploads/aperionx-a-transparent.png" alt="AperionX Logo" class="logo-collapsed">
         </a>
 
         <!-- SIDEBAR PROFILE (Identical to editor_panel.html) -->
