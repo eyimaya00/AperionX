@@ -1255,6 +1255,89 @@ setInterval(() => {
     }
 }, 600000);
 
+// === TRUE PREVIEW ROUTE FOR EXPERIMENTS ===
+app.get('/preview-experiment/:id', async (req, res, next) => {
+    // Authenticate via query param token for iframes
+    const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+    if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+    } catch (e) {
+        return res.status(403).send('Yetkisiz Erişim (Geçersiz Token)');
+    }
+
+    const id = req.params.id;
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM experiments WHERE id = ? OR slug = ?', [id, id]);
+        if (rows.length === 0) return res.status(404).send('Deney bulunamadı (404)');
+
+        const experiment = rows[0];
+
+        // Verify authorization
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && Number(experiment.author_id) !== Number(req.user.id)) {
+            return res.status(403).send('Erişim Reddedildi');
+        }
+
+        let authors = [];
+        try {
+            authors = await getExperimentAuthors(pool, experiment.id);
+            if (!authors || authors.length === 0) {
+                const [uRows] = await pool.query('SELECT id, fullname, username, avatar_url, university FROM users WHERE id = ?', [experiment.author_id]);
+                authors = uRows.length > 0 ? [uRows[0]] : [{ fullname: 'AperionX Yazarı', id: experiment.author_id }];
+            }
+        } catch (e) {
+            authors = [{ fullname: 'AperionX Yazarı', id: experiment.author_id }];
+        }
+
+        let recentExperiments = [];
+        try {
+            const [sliderRows] = await pool.query('SELECT id, title, slug, image_url, category, excerpt FROM experiments WHERE status = "published" AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 6');
+            recentExperiments = sliderRows;
+        } catch (e) {
+            recentExperiments = [];
+        }
+
+        const filePath = path.join(__dirname, 'views', 'experiment-detail.html');
+        fs.readFile(filePath, 'utf8', async (err, htmlData) => {
+            if (err) return next(err);
+
+            try {
+                const origin = `${req.protocol}://${req.get('host')}`;
+                const title = experiment.title;
+                const summary = experiment.excerpt || experiment.title;
+                const safeTitle = (title || '').replace(/"/g, '&quot;');
+                const safeSummary = (summary || '').replace(/"/g, '&quot;');
+                const img = experiment.image_url
+                    ? (experiment.image_url.startsWith('http') ? experiment.image_url : `${origin}/${experiment.image_url.startsWith('/') ? experiment.image_url.slice(1) : experiment.image_url}`)
+                    : `${origin}/uploads/logo.png`;
+
+                let html = htmlData;
+                html = html.replace(/<title>.*?<\/title>/i, `<title>(ÖNİZLEME) ${safeTitle} - AperionX</title>`);
+
+                // Inject Preloaded Data Script WITH IS_PREVIEW FLAG
+                const scriptTag = `<script>window.SERVER_EXPERIMENT = ${JSON.stringify(experiment)}; window.SERVER_EXP_AUTHORS = ${JSON.stringify(authors)}; window.SERVER_EXPERIMENTS = ${JSON.stringify(recentExperiments)}; window.IS_PREVIEW = true;</script>`;
+                html = html.replace('</head>', `${scriptTag}\n</head>`);
+
+                // Disable AdSense and Analytics in preview mode for faster loading
+                html = html.replace(/<script[^>]*adsbygoogle[^>]*><\/script>/gi, '');
+                html = html.replace(/<script[^>]*googletagmanager[^>]*><\/script>/gi, '');
+
+                res.send(html);
+            } catch (parseErr) {
+                console.error('SSR Parse Error (Preview Experiment):', parseErr);
+                res.status(500).send(parseErr.toString());
+            }
+        });
+
+    } catch (e) {
+        console.error('DB Error (Preview Experiment):', e);
+        res.status(500).send('Sunucu Hatası');
+    }
+});
+
 app.get('/preview-gundem/:id', async (req, res, next) => {
     const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.token;
     if (!token) return res.status(401).send('Yetkisiz Erişim (Token Yok)');
@@ -1284,8 +1367,8 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
 
         const article = rows[0];
 
-        // Allow preview for admin, editor, author (and author matching)
-        if (req.user.role !== 'admin' && req.user.role !== 'editor' && req.user.role !== 'author' && Number(article.author_id) !== Number(req.user.id)) {
+        // Allow preview for admin, editor, campus_editor, campus_coordinator, author (and author matching)
+        if (req.user.role !== 'admin' && req.user.role !== 'editor' && req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'author' && Number(article.author_id) !== Number(req.user.id)) {
             return res.status(403).send('Erişim Reddedildi');
         }
 
@@ -7950,29 +8033,39 @@ app.get('/api/campus-editor/history', authenticateToken, async (req, res) => {
         const myUniversity = meRows[0]?.university;
 
         let userFilter = "";
+        let expUserFilter = "";
         let filterParams = [];
 
         if (req.user.role === 'admin') {
             userFilter = "1=1";
+            expUserFilter = "1=1";
         } else if (req.user.role === 'campus_coordinator') {
             userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
             filterParams = [req.user.id, myUniversity || ''];
         } else {
             userFilter = "(a.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+            expUserFilter = "(e.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
             filterParams = [req.user.id, myCoordId || 0, myUniversity || ''];
         }
 
-        const [articles] = await pool.query(`
-            SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.campus_reviewed_at, a.rejection_reason, a.is_gundem, 'article' as item_type,
+        const [items] = await pool.query(`
+            (SELECT a.id, a.title, a.slug, a.category, a.status, a.created_at, a.submitted_at, a.published_at, a.campus_reviewed_at, a.rejection_reason, a.is_gundem, 'article' as item_type,
             u.fullname as author_name, u.university as author_university
             FROM articles a
             JOIN users u ON a.author_id = u.id
-            WHERE (a.campus_editor_id IS NOT NULL OR a.status IN ('pending', 'published', 'rejected')) AND ${userFilter}
-            ORDER BY COALESCE(a.campus_reviewed_at, a.updated_at, a.created_at) DESC
+            WHERE (a.campus_editor_id IS NOT NULL OR a.status IN ('pending', 'published', 'rejected')) AND ${userFilter})
+            UNION ALL
+            (SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.created_at as submitted_at, NULL as published_at, e.campus_reviewed_at, e.rejection_reason, 0 as is_gundem, 'experiment' as item_type,
+            u.fullname as author_name, u.university as author_university
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            WHERE e.deleted_at IS NULL AND (e.campus_editor_id IS NOT NULL OR e.status IN ('pending', 'published', 'rejected')) AND ${expUserFilter})
+            ORDER BY COALESCE(campus_reviewed_at, created_at) DESC
             LIMIT 50
-        `, filterParams);
+        `, [...filterParams, ...filterParams]);
 
-        res.json(articles);
+        res.json(items);
     } catch (err) {
         console.error('[CAMPUS-EDITOR-HISTORY-ERROR]', err);
         res.status(500).json({ error: err.message });
