@@ -2280,10 +2280,11 @@
                 return;
             }
 
+            const hasAnyCoord = cards.some(c => c.role_title && c.role_title.toLowerCase().includes('koordinatör'));
             grid.innerHTML = cards.map((card, idx) => {
                 const name = card.fullname || 'Ekip Üyesi';
                 const initial = name.charAt(0).toUpperCase();
-                const isLeader = idx === 0 || (card.role_title && card.role_title.toLowerCase().includes('koordinatör'));
+                const isLeader = (card.role_title && card.role_title.toLowerCase().includes('koordinatör')) || (!hasAnyCoord && idx === 0);
                 const cardClass = isLeader ? 'showcase-card is-coordinator' : 'showcase-card';
 
                 return `

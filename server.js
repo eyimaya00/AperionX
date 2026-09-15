@@ -3854,13 +3854,13 @@ async function getCampusAuthorInfo(userId) {
 
 async function notifyCampusEditors(authorInfo, title, contentType = 'yazı') {
     try {
-        let ceQuery = "SELECT id FROM users WHERE role = 'campus_editor' AND (coordinator_id = ?";
-        let ceParams = [authorInfo.coordinatorId || 0];
+        let coordIds = authorInfo.coordinatorId ? [authorInfo.coordinatorId] : [];
         if (authorInfo.university) {
-            ceQuery += " OR (university IS NOT NULL AND university = ?)";
-            ceParams.push(authorInfo.university);
+            const extraCoordIds = await getTeamCoordinatorIds(authorInfo.coordinatorId || 0, authorInfo.university);
+            coordIds = Array.from(new Set([...coordIds, ...extraCoordIds]));
         }
-        ceQuery += ")";
+        let ceQuery = `SELECT id FROM users WHERE role = 'campus_editor' AND (coordinator_id IN (?) ${authorInfo.university ? 'OR (university IS NOT NULL AND university = ?)' : ''})`;
+        let ceParams = authorInfo.university ? [coordIds.length > 0 ? coordIds : [0], authorInfo.university] : [coordIds.length > 0 ? coordIds : [0]];
         const [destUsers] = await pool.query(ceQuery, ceParams);
         const authorName = authorInfo.fullname || 'Bir Kampüs Yazarı';
         const msg = `Yeni kampüs ${contentType} inceleme bekliyor: ${title.substring(0, 35)}... (${authorName})`;
@@ -4401,7 +4401,21 @@ app.delete('/api/admin/campus-coordinators/:id', authenticateToken, async (req, 
 
 // === Campus Coordinator: Team Members Management ===
 
-// 1. Get Coordinator's Team Members
+// Helper: Get All Coordinator IDs for a given University/Team
+async function getTeamCoordinatorIds(coordinatorId, universityName) {
+    if (universityName && universityName.trim() !== '') {
+        const [rows] = await pool.query(
+            "SELECT id FROM users WHERE role = 'campus_coordinator' AND university = ?",
+            [universityName.trim()]
+        );
+        const ids = rows.map(r => r.id);
+        if (!ids.includes(coordinatorId)) ids.push(coordinatorId);
+        return ids;
+    }
+    return [coordinatorId];
+}
+
+// 1. Get Coordinator's Team Members (Shared across all coordinators of the same university)
 app.get('/api/coordinator/team-members', authenticateToken, async (req, res) => {
     if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
         return res.sendStatus(403);
@@ -4409,13 +4423,20 @@ app.get('/api/coordinator/team-members', authenticateToken, async (req, res) => 
     const coordinatorId = req.user.id;
 
     try {
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
+
         let query = `
             SELECT id, fullname, username, email, role, campus_role, university, department, avatar_url, created_at, is_active
             FROM users 
-            WHERE coordinator_id = ?
+            WHERE (coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ?)' : ''})
+              AND id != ?
             ORDER BY created_at DESC
         `;
-        const [members] = await pool.query(query, [coordinatorId]);
+        const params = myUniversity ? [coordIds, myUniversity, coordinatorId] : [coordIds, coordinatorId];
+        const [members] = await pool.query(query, params);
         res.json(members);
     } catch (e) {
         console.error('[COORDINATOR-GET-TEAM-MEMBERS-ERROR]', e);
@@ -4442,9 +4463,6 @@ app.post('/api/coordinator/team-members', authenticateToken, async (req, res) =>
         return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
     }
 
-    // Role mapping:
-    // "Kampüs Yazarı" -> system role 'author' (logs in directly to /author panel)
-    // "Kampüs Editörü" -> system role 'campus_editor' (logs in to /campus-editor panel)
     const selectedCampusRole = (campus_role && campus_role.trim()) ? campus_role.trim() : 'Kampüs Yazarı';
     let systemRole = 'author';
     if (selectedCampusRole.toLowerCase().includes('editör')) {
@@ -4452,11 +4470,9 @@ app.post('/api/coordinator/team-members', authenticateToken, async (req, res) =>
     }
 
     try {
-        // Fetch coordinator's team/university name to assign to the member
         const [coordRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
         const coordinatorTeam = (coordRows.length > 0 && coordRows[0].university) ? coordRows[0].university : null;
 
-        // Check existing email
         const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [trimmedEmail]);
         if (existing.length > 0) {
             return res.status(400).json({ error: 'Bu e-posta adresiyle kayıtlı bir kullanıcı zaten mevcut.' });
@@ -4494,7 +4510,7 @@ app.post('/api/coordinator/team-members', authenticateToken, async (req, res) =>
     }
 });
 
-// 3. Delete Team Member (only if belongs to this coordinator or admin)
+// 3. Delete Team Member (Herhangi bir eş koordinatör veya admin ekipten çıkarabilir)
 app.delete('/api/coordinator/team-members/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
         return res.sendStatus(403);
@@ -4503,14 +4519,20 @@ app.delete('/api/coordinator/team-members/:id', authenticateToken, async (req, r
     const memberId = req.params.id;
 
     try {
-        const [rows] = await pool.query('SELECT id, coordinator_id, email, fullname FROM users WHERE id = ?', [memberId]);
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
+
+        const [rows] = await pool.query('SELECT id, coordinator_id, university, email, fullname FROM users WHERE id = ?', [memberId]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Ekip üyesi bulunamadı.' });
         }
 
         const member = rows[0];
-        if (req.user.role !== 'admin' && member.coordinator_id !== coordinatorId) {
-            return res.status(403).json({ error: 'Bu ekip üyesini silme veya ekipten çıkarma yetkiniz bulunmuyor.' });
+        const isOwner = coordIds.includes(member.coordinator_id) || (myUniversity && member.university === myUniversity);
+
+        if (req.user.role !== 'admin' && !isOwner) {
+            return res.status(403).json({ error: 'Bu ekip üyesini ekipten çıkarma yetkiniz bulunmuyor.' });
         }
 
         // Kullanıcıyı tamamen silmek yerine ekipten çıkar (coordinator_id ve campus_role temizle)
@@ -4564,17 +4586,17 @@ app.post('/api/coordinator/add-existing-member', authenticateToken, async (req, 
     }
 
     try {
-        // Fetch coordinator's team/university name
         const [coordRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
-        const coordinatorTeam = (coordRows.length > 0 && coordRows[0].university) ? coordRows[0].university : null;
+        const coordinatorTeam = (coordRows.length > 0 && coordRows[0].university) ? coordRows[0].university.trim() : null;
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, coordinatorTeam);
 
-        const [userRows] = await pool.query('SELECT id, fullname, email, role, coordinator_id FROM users WHERE id = ?', [userId]);
+        const [userRows] = await pool.query('SELECT id, fullname, email, role, coordinator_id, university FROM users WHERE id = ?', [userId]);
         if (userRows.length === 0) {
             return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         }
 
         const targetUser = userRows[0];
-        if (targetUser.coordinator_id === coordinatorId) {
+        if (coordIds.includes(targetUser.coordinator_id) || (coordinatorTeam && targetUser.university === coordinatorTeam && targetUser.campus_role)) {
             return res.status(400).json({ error: 'Bu kullanıcı zaten ekibinizde yer alıyor.' });
         }
 
@@ -4608,16 +4630,22 @@ app.post('/api/coordinator/add-existing-member', authenticateToken, async (req, 
 });
 
 // ================= KAMPÜS EKİP KARTLARI (EKİP BİLGİLERİ VİTRİNİ) =================
-// 1. Get Campus Team Cards (Coordinator)
+// 1. Get Campus Team Cards (Shared for all coordinators of the university)
 app.get('/api/coordinator/team-cards', authenticateToken, async (req, res) => {
     if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
         return res.sendStatus(403);
     }
     const coordinatorId = req.user.id;
     try {
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
+
         let [cards] = await pool.query(
-            'SELECT * FROM campus_team_cards WHERE coordinator_id = ? ORDER BY order_index ASC, id ASC',
-            [coordinatorId]
+            `SELECT * FROM campus_team_cards 
+             WHERE coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ?)' : ''} 
+             ORDER BY order_index ASC, id ASC`,
+            myUniversity ? [coordIds, myUniversity] : [coordIds]
         );
 
         // If no cards exist yet, auto-seed the coordinator's own card from users table
@@ -4664,12 +4692,15 @@ app.post('/api/coordinator/team-cards', authenticateToken, upload.single('image'
         return res.status(400).json({ error: 'Ad Soyad ve Görev Tanımı zorunludur.' });
     }
 
+    const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+    const myUniversity = (university && university.trim()) || meRows[0]?.university || '';
+
     const image_url = req.file ? ('uploads/' + req.file.filename) : (req.body.image_url || null);
 
     try {
         const [result] = await pool.query(
             'INSERT INTO campus_team_cards (coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [coordinatorId, fullname.trim(), (university || '').trim(), role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0]
+            [coordinatorId, fullname.trim(), myUniversity.trim(), role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0]
         );
         res.json({ success: true, message: 'Ekip kartı başarıyla eklendi.', id: result.insertId });
     } catch (err) {
@@ -4678,7 +4709,7 @@ app.post('/api/coordinator/team-cards', authenticateToken, upload.single('image'
     }
 });
 
-// 3. Update Existing Campus Team Card
+// 3. Update Existing Campus Team Card (Can be updated by any coordinator of the same university)
 app.put('/api/coordinator/team-cards/:id', authenticateToken, upload.single('image'), optimizeImageMiddleware, async (req, res) => {
     if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
         return res.sendStatus(403);
@@ -4692,7 +4723,14 @@ app.put('/api/coordinator/team-cards/:id', authenticateToken, upload.single('ima
     }
 
     try {
-        const [existing] = await pool.query('SELECT * FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
+
+        const [existing] = await pool.query(
+            `SELECT * FROM campus_team_cards WHERE id = ? AND (coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ?)' : ''})`,
+            myUniversity ? [cardId, coordIds, myUniversity] : [cardId, coordIds]
+        );
         if (existing.length === 0) {
             return res.status(404).json({ error: 'Düzenlenecek kart bulunamadı veya yetkiniz yok.' });
         }
@@ -4704,9 +4742,11 @@ app.put('/api/coordinator/team-cards/:id', authenticateToken, upload.single('ima
             image_url = req.body.image_url;
         }
 
+        const targetUniversity = (university && university.trim()) || myUniversity || existing[0].university;
+
         await pool.query(
-            'UPDATE campus_team_cards SET fullname = ?, university = ?, role_title = ?, image_url = ?, email = ?, linkedin_url = ?, order_index = ? WHERE id = ? AND coordinator_id = ?',
-            [fullname.trim(), (university || '').trim(), role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0, cardId, coordinatorId]
+            'UPDATE campus_team_cards SET fullname = ?, university = ?, role_title = ?, image_url = ?, email = ?, linkedin_url = ?, order_index = ? WHERE id = ?',
+            [fullname.trim(), targetUniversity, role_title.trim(), image_url, (email || '').trim() || null, (linkedin_url || '').trim() || null, parseInt(order_index) || 0, cardId]
         );
 
         res.json({ success: true, message: 'Ekip kartı başarıyla güncellendi.' });
@@ -4716,7 +4756,7 @@ app.put('/api/coordinator/team-cards/:id', authenticateToken, upload.single('ima
     }
 });
 
-// 4. Delete Campus Team Card
+// 4. Delete Campus Team Card (Can be deleted by any coordinator of the same university)
 app.delete('/api/coordinator/team-cards/:id', authenticateToken, async (req, res) => {
     if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
         return res.sendStatus(403);
@@ -4725,12 +4765,19 @@ app.delete('/api/coordinator/team-cards/:id', authenticateToken, async (req, res
     const cardId = req.params.id;
 
     try {
-        const [existing] = await pool.query('SELECT * FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
+
+        const [existing] = await pool.query(
+            `SELECT * FROM campus_team_cards WHERE id = ? AND (coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ?)' : ''})`,
+            myUniversity ? [cardId, coordIds, myUniversity] : [cardId, coordIds]
+        );
         if (existing.length === 0) {
             return res.status(404).json({ error: 'Kart bulunamadı veya yetkiniz yok.' });
         }
 
-        await pool.query('DELETE FROM campus_team_cards WHERE id = ? AND coordinator_id = ?', [cardId, coordinatorId]);
+        await pool.query('DELETE FROM campus_team_cards WHERE id = ?', [cardId]);
         res.json({ success: true, message: 'Ekip kartı silindi.' });
     } catch (err) {
         console.error('[DELETE-COORDINATOR-TEAM-CARD-ERROR]', err);
@@ -4739,12 +4786,30 @@ app.delete('/api/coordinator/team-cards/:id', authenticateToken, async (req, res
 });
 
 // 5. Public API for future use: Get Campus Team Cards
-app.get('/api/public/campus-team/:coordinatorId', async (req, res) => {
+app.get('/api/public/campus-team/:coordinatorIdOrUniversity', async (req, res) => {
     try {
-        const [cards] = await pool.query(
-            'SELECT id, fullname, university, role_title, image_url, email, linkedin_url, order_index FROM campus_team_cards WHERE coordinator_id = ? ORDER BY order_index ASC, id ASC',
-            [req.params.coordinatorId]
-        );
+        const param = req.params.coordinatorIdOrUniversity;
+        let query = '';
+        let queryParams = [];
+
+        if (/^\d+$/.test(param)) {
+            const [me] = await pool.query('SELECT university FROM users WHERE id = ?', [param]);
+            const uni = me[0]?.university ? me[0].university.trim() : '';
+            const coordIds = await getTeamCoordinatorIds(parseInt(param), uni);
+            query = `SELECT id, fullname, university, role_title, image_url, email, linkedin_url, order_index 
+                     FROM campus_team_cards 
+                     WHERE coordinator_id IN (?) ${uni ? 'OR (university IS NOT NULL AND university = ?)' : ''} 
+                     ORDER BY order_index ASC, id ASC`;
+            queryParams = uni ? [coordIds, uni] : [coordIds];
+        } else {
+            query = `SELECT id, fullname, university, role_title, image_url, email, linkedin_url, order_index 
+                     FROM campus_team_cards 
+                     WHERE university = ? 
+                     ORDER BY order_index ASC, id ASC`;
+            queryParams = [param];
+        }
+
+        const [cards] = await pool.query(query, queryParams);
         res.json(cards);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -4760,11 +4825,12 @@ app.get('/api/coordinator/publications', authenticateToken, async (req, res) => 
     try {
         const coordinatorId = req.user.id;
         const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
-        const myUniversity = meRows[0]?.university;
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+        const coordIds = await getTeamCoordinatorIds(coordinatorId, myUniversity);
 
-        let userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-        let expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-        let filterParams = [coordinatorId, myUniversity || ''];
+        let userFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+        let expUserFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+        let filterParams = myUniversity ? [coordIds, myUniversity] : [coordIds];
 
         if (req.user.role === 'admin') {
             userFilter = "1=1";
@@ -8384,19 +8450,18 @@ app.get('/api/campus-editor/pending', authenticateToken, async (req, res) => {
     try {
         const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
         const myCoordId = meRows[0]?.coordinator_id;
-        const myUniversity = meRows[0]?.university;
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
 
         let userFilter = "";
         let filterParams = [];
 
         if (req.user.role === 'admin') {
             userFilter = "1=1";
-        } else if (req.user.role === 'campus_coordinator') {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [req.user.id, myUniversity || ''];
         } else {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [myCoordId || 0, myUniversity || ''];
+            const rootCoordId = req.user.role === 'campus_coordinator' ? req.user.id : (myCoordId || 0);
+            const coordIds = await getTeamCoordinatorIds(rootCoordId, myUniversity);
+            userFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            filterParams = myUniversity ? [coordIds, myUniversity] : [coordIds];
         }
 
         // Articles (status = 'pending_campus' and is_gundem = 0)
@@ -8455,7 +8520,7 @@ app.get('/api/campus-editor/history', authenticateToken, async (req, res) => {
     try {
         const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
         const myCoordId = meRows[0]?.coordinator_id;
-        const myUniversity = meRows[0]?.university;
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
 
         let userFilter = "";
         let expUserFilter = "";
@@ -8465,13 +8530,15 @@ app.get('/api/campus-editor/history', authenticateToken, async (req, res) => {
             userFilter = "1=1";
             expUserFilter = "1=1";
         } else if (req.user.role === 'campus_coordinator') {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [req.user.id, myUniversity || ''];
+            const coordIds = await getTeamCoordinatorIds(req.user.id, myUniversity);
+            userFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            expUserFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            filterParams = myUniversity ? [coordIds, myUniversity] : [coordIds];
         } else {
-            userFilter = "(a.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            expUserFilter = "(e.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [req.user.id, myCoordId || 0, myUniversity || ''];
+            const coordIds = await getTeamCoordinatorIds(myCoordId || 0, myUniversity);
+            userFilter = `(a.campus_editor_id = ? OR u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            expUserFilter = `(e.campus_editor_id = ? OR u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            filterParams = myUniversity ? [req.user.id, coordIds, myUniversity] : [req.user.id, coordIds];
         }
 
         const [items] = await pool.query(`
@@ -8577,7 +8644,7 @@ app.get('/api/campus-editor/published-stats', authenticateToken, async (req, res
     try {
         const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
         const myCoordId = meRows[0]?.coordinator_id;
-        const myUniversity = meRows[0]?.university;
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
 
         let userFilter = "";
         let expUserFilter = "";
@@ -8587,13 +8654,15 @@ app.get('/api/campus-editor/published-stats', authenticateToken, async (req, res
             userFilter = "1=1";
             expUserFilter = "1=1";
         } else if (req.user.role === 'campus_coordinator') {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [req.user.id, myUniversity || ''];
+            const coordIds = await getTeamCoordinatorIds(req.user.id, myUniversity);
+            userFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            expUserFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            filterParams = myUniversity ? [coordIds, myUniversity] : [coordIds];
         } else {
-            userFilter = "(a.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            expUserFilter = "(e.campus_editor_id = ? OR u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
-            filterParams = [req.user.id, myCoordId || 0, myUniversity || ''];
+            const coordIds = await getTeamCoordinatorIds(myCoordId || 0, myUniversity);
+            userFilter = `(a.campus_editor_id = ? OR u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            expUserFilter = `(e.campus_editor_id = ? OR u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''})`;
+            filterParams = myUniversity ? [req.user.id, coordIds, myUniversity] : [req.user.id, coordIds];
         }
 
         // Articles (and Gundem)
@@ -8661,19 +8730,18 @@ app.get('/api/campus-editor/authors-leaderboard', authenticateToken, async (req,
     try {
         const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
         const myCoordId = meRows[0]?.coordinator_id;
-        const myUniversity = meRows[0]?.university;
+        const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
 
         let userFilter = "";
         let filterParams = [];
 
         if (req.user.role === 'admin') {
             userFilter = "u.role = 'author'";
-        } else if (req.user.role === 'campus_coordinator') {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?)) AND u.id != ?";
-            filterParams = [req.user.id, myUniversity || '', req.user.id];
         } else {
-            userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?)) AND u.id != ?";
-            filterParams = [myCoordId || 0, myUniversity || '', req.user.id];
+            const rootCoordId = req.user.role === 'campus_coordinator' ? req.user.id : (myCoordId || 0);
+            const coordIds = await getTeamCoordinatorIds(rootCoordId, myUniversity);
+            userFilter = `(u.coordinator_id IN (?) ${myUniversity ? 'OR (u.university IS NOT NULL AND u.university = ?)' : ''}) AND u.id != ?`;
+            filterParams = myUniversity ? [coordIds, myUniversity, req.user.id] : [coordIds, req.user.id];
         }
 
         const [authors] = await pool.query(`
