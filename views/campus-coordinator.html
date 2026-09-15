@@ -730,6 +730,12 @@
             border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
+        .role-badge.coordinator {
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
         .role-badge.other {
             background: rgba(245, 158, 11, 0.1);
             color: #d97706;
@@ -1225,8 +1231,9 @@
                         Ekip Listesi (<span id="team-members-count">0</span>)
                     </h3>
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <select id="member-role-filter" onchange="filterTeamMembers()" class="form-control" style="width: 160px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer;">
+                        <select id="member-role-filter" onchange="filterTeamMembers()" class="form-control" style="width: 175px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer;">
                             <option value="all" selected>Tüm Roller</option>
+                            <option value="coordinator">Kampüs Koordinatörleri</option>
                             <option value="editor">Kampüs Editörleri</option>
                             <option value="author">Kampüs Yazarları</option>
                         </select>
@@ -1716,6 +1723,7 @@
                                 <select id="member_campus_role" class="form-control" style="cursor: pointer;">
                                     <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
                                     <option value="Kampüs Editörü">Kampüs Editörü</option>
+                                    <option value="Eş Kampüs Koordinatörü">Eş Kampüs Koordinatörü</option>
                                 </select>
                             </div>
                         </div>
@@ -1746,6 +1754,7 @@
                             <select id="existing-user-campus-role" class="form-control" style="cursor: pointer;">
                                 <option value="Kampüs Yazarı" selected>Kampüs Yazarı</option>
                                 <option value="Kampüs Editörü">Kampüs Editörü</option>
+                                <option value="Eş Kampüs Koordinatörü">Eş Kampüs Koordinatörü</option>
                             </select>
                         </div>
                     </div>
@@ -2726,8 +2735,9 @@
         function renderTeamMembers(members) {
             // İstatistik pillerini güncelle
             const total = (teamMembersList || []).length;
-            const editors = (teamMembersList || []).filter(m => m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör'))).length;
-            const authors = total - editors;
+            const coordinators = (teamMembersList || []).filter(m => m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'))).length;
+            const editors = (teamMembersList || []).filter(m => !(m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'))) && (m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör')))).length;
+            const authors = Math.max(0, total - editors - coordinators);
 
             const pillTotal = document.getElementById('pill-total-members');
             const pillEditors = document.getElementById('pill-editors-count');
@@ -2758,17 +2768,21 @@
             members.forEach(member => {
                 const tr = document.createElement('tr');
                 const formattedDate = member.created_at ? new Date(member.created_at).toLocaleDateString('tr-TR') : '-';
-                const isEditor = member.role === 'campus_editor' || member.role === 'editor' || (member.campus_role && member.campus_role.toLowerCase().includes('editör'));
-                const roleClass = isEditor ? 'editor' : 'author';
-                const roleIcon = isEditor ? 'ph-pencil-simple-line' : 'ph-newspaper';
-                const campusRoleText = member.campus_role || (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı');
+                const isCoordinator = member.role === 'campus_coordinator' || (member.campus_role && member.campus_role.toLowerCase().includes('koordinatör'));
+                const isEditor = !isCoordinator && (member.role === 'campus_editor' || member.role === 'editor' || (member.campus_role && member.campus_role.toLowerCase().includes('editör')));
+                const roleClass = isCoordinator ? 'coordinator' : (isEditor ? 'editor' : 'author');
+                const roleIcon = isCoordinator ? 'ph-crown' : (isEditor ? 'ph-pencil-simple-line' : 'ph-newspaper');
+                const campusRoleText = member.campus_role || (isCoordinator ? 'Kampüs Koordinatörü' : (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı'));
                 const uniDept = [member.university, member.department].filter(Boolean).join(' / ') || '-';
                 const initial = (member.fullname || 'Ü').charAt(0).toUpperCase();
+
+                const avatarBg = isCoordinator ? 'rgba(245, 158, 11, 0.15)' : (isEditor ? 'rgba(139, 92, 246, 0.15)' : '#e0e7ff');
+                const avatarColor = isCoordinator ? '#d97706' : (isEditor ? '#7c3aed' : '#4338ca');
 
                 tr.innerHTML = `
                     <td style="padding: 14px 16px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 38px; height: 38px; border-radius: 50%; background: ${isEditor ? 'rgba(139, 92, 246, 0.15)' : '#e0e7ff'}; color: ${isEditor ? '#7c3aed' : '#4338ca'}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
+                            <div style="width: 38px; height: 38px; border-radius: 50%; background: ${avatarBg}; color: ${avatarColor}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
                                 ${escapeHtml(initial)}
                             </div>
                             <div>
@@ -2967,10 +2981,14 @@
 
                 if (!nameMatch) return false;
 
-                if (roleVal === 'editor') {
-                    return m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör'));
+                if (roleVal === 'coordinator') {
+                    return m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'));
+                } else if (roleVal === 'editor') {
+                    return !(m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'))) &&
+                           (m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör')));
                 } else if (roleVal === 'author') {
-                    return !(m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör')));
+                    return !(m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'))) &&
+                           !(m.role === 'campus_editor' || m.role === 'editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör')));
                 }
                 return true;
             });

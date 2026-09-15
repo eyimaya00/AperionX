@@ -4467,6 +4467,8 @@ app.post('/api/coordinator/team-members', authenticateToken, async (req, res) =>
     let systemRole = 'author';
     if (selectedCampusRole.toLowerCase().includes('editör')) {
         systemRole = 'campus_editor';
+    } else if (selectedCampusRole.toLowerCase().includes('koordinatör')) {
+        systemRole = 'campus_coordinator';
     }
 
     try {
@@ -4604,6 +4606,8 @@ app.post('/api/coordinator/add-existing-member', authenticateToken, async (req, 
         let newRole = targetUser.role;
         if (selectedCampusRole.toLowerCase().includes('editör')) {
             newRole = 'campus_editor';
+        } else if (selectedCampusRole.toLowerCase().includes('koordinatör')) {
+            newRole = 'campus_coordinator';
         } else if (targetUser.role === 'user' || targetUser.role === 'reader') {
             newRole = 'author';
         }

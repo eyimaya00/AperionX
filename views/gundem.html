@@ -1413,7 +1413,7 @@
     </section>
 
     <!-- === 1. BÖLÜM: BİLİM GÜNDEMİ TAM EKRAN HERO BÖLÜMÜ === -->
-    <section class="gundem-hero-slider" id="gundemHero">
+    <section class="gundem-hero-slider" id="gundemHero" style="display: none;">
         <!-- Arka Plan Katmanı (%80 belirgin ve şık blur) -->
         <div class="gundem-bg-layer" id="gundemBgLayer"></div>
         <div class="gundem-dark-overlay"></div>
@@ -1435,22 +1435,16 @@
                         <i class="ph-fill ph-newspaper"></i> <span id="gundemBadgeText">Gündem</span>
                     </span>
                     <a href="javascript:void(0)" class="gundem-title-link" id="gundemTitleLink">
-                        <h1 class="gundem-main-title" id="gundemTitle">
-                            James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti
-                        </h1>
+                        <h1 class="gundem-main-title" id="gundemTitle"></h1>
                     </a>
-                    <h2 class="gundem-sub-category" id="gundemSubtitle">
-                        Uzay ve Astrofizik
-                    </h2>
-                    <p class="gundem-description-text" id="gundemDesc">
-                        Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.
-                    </p>
+                    <h2 class="gundem-sub-category" id="gundemSubtitle"></h2>
+                    <p class="gundem-description-text" id="gundemDesc"></p>
                 </div>
 
                 <!-- Sağ Kolon: Tıklanabilir Net Ana Görsel -->
                 <div class="gundem-image-col">
                     <a href="javascript:void(0)" class="gundem-image-card" id="gundemImageLink">
-                        <img id="gundemMainImg" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" alt="Bilim Gündemi Ana Görsel">
+                        <img id="gundemMainImg" src="" alt="Bilim Gündemi Ana Görsel">
                     </a>
                 </div>
             </div>
@@ -1469,11 +1463,11 @@
 
     <!-- === 2. BÖLÜM: BİLİM GÜNDEMİ FEED (PREMIUM GLASSMORPHIC TASARIM) === -->
     <section class="gundem-feed-section" id="gundemFeed">
-        <div class="gundem-feed-container">
+        <div class="gundem-feed-container" id="gundemFeedContainer" style="display: none;">
             <!-- Sol Kolon: Sinematik Poster Vitrin Kartı -->
-            <a href="/gundem/akdeniz-derinliklerinde-yeni-bir-hidrotermal-ekosistem-kesfedildi" class="gundem-featured-card" id="gundemFeaturedCard">
+            <a href="javascript:void(0)" class="gundem-featured-card" id="gundemFeaturedCard">
                 <div class="gundem-poster-bg">
-                    <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop" alt="Derin Okyanus Hidrotermal Ekosistem Keşfi">
+                    <img src="" alt="" id="gundemFeaturedImg">
                     <div class="gundem-poster-overlay"></div>
                 </div>
 
@@ -1485,14 +1479,12 @@
                 </div>
 
                 <div class="gundem-featured-content">
-                    <h3 class="gundem-featured-title">Akdeniz Derinliklerinde Yeni Bir Hidrotermal Ekosistem Keşfedildi</h3>
-                    <p class="gundem-featured-desc">
-                        Denizaltı robotlarıyla 3000 metre derinlikte yapılan incelemelerde, sıfır ışıkta yaşayan gizemli mikrobiyal koloniler ve endemik canlı türleri tespit edildi.
-                    </p>
+                    <h3 class="gundem-featured-title"></h3>
+                    <p class="gundem-featured-desc"></p>
                     <div class="gundem-author-row">
                         <div class="gundem-author-left">
                             <img src="/uploads/favicon-48x48.png" class="gundem-author-avatar" alt="AperionX">
-                            <span class="gundem-author-name">AperionX Bilim Ekibi</span>
+                            <span class="gundem-author-name"></span>
                         </div>
                         <span class="gundem-read-btn">
                             Haberi Oku <i class="ph-bold ph-arrow-right"></i>
@@ -1503,76 +1495,22 @@
 
             <!-- Sağ Kolon: 4'lü Haber Izgarası (Tam Üst Hizadan Başlar) -->
             <div class="gundem-grid-col">
-                <div class="gundem-cards-grid" id="gundemCardsGrid">
-                    <!-- Kart 1 -->
-                    <a href="/gundem/optik-kuantum-cipleriyle-super-iletken-hizinda-veri-isleme-basarisi" class="gundem-item-card">
-                        <div class="gundem-item-poster-bg">
-                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" alt="Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                            <div class="gundem-item-poster-overlay"></div>
-                        </div>
-                        <div class="gundem-item-content">
-                            <h4 class="gundem-item-title">
-                                Optik Kuantum Çipleriyle Süper İletken Hızında Veri İşleme Başarısı
-                            </h4>
-                            <div class="gundem-item-author-row">
-                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
-                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Kart 2 -->
-                    <a href="/gundem/sentetik-biyolojide-donum-noktasi-yapay-hucre-zari-uretildi" class="gundem-item-card">
-                        <div class="gundem-item-poster-bg">
-                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop" alt="Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                            <div class="gundem-item-poster-overlay"></div>
-                        </div>
-                        <div class="gundem-item-content">
-                            <h4 class="gundem-item-title">
-                                Sentetik Biyolojide Dönüm Noktası: Yapay Hücre Zarı Üretildi
-                            </h4>
-                            <div class="gundem-item-author-row">
-                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
-                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Kart 3 -->
-                    <a href="/gundem/gunes-firtinalarini-48-saat-onceden-tahmin-eden-erken-uyari-uydusu-firlatildi" class="gundem-item-card">
-                        <div class="gundem-item-poster-bg">
-                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=800&auto=format&fit=crop" alt="Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyari Uydusu Fırlatıldı" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                            <div class="gundem-item-poster-overlay"></div>
-                        </div>
-                        <div class="gundem-item-content">
-                            <h4 class="gundem-item-title">
-                                Güneş Fırtınalarını 48 Saat Önceden Tahmin Eden Erken Uyarı Uydusu Fırlatıldı
-                            </h4>
-                            <div class="gundem-item-author-row">
-                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
-                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Kart 4 -->
-                    <a href="/gundem/kuantum-sonrasi-kriptografi-algoritmalari-kuresel-standart-olarak-onaylandi" class="gundem-item-card">
-                        <div class="gundem-item-poster-bg">
-                            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                            <div class="gundem-item-poster-overlay"></div>
-                        </div>
-                        <div class="gundem-item-content">
-                            <h4 class="gundem-item-title">
-                                Kuantum Sonrası Kriptografi Algoritmaları Küresel Standart Olarak Onaylandı
-                            </h4>
-                            <div class="gundem-item-author-row">
-                                <img src="/uploads/favicon-48x48.png" class="gundem-item-avatar" alt="AperionX Bilim Ekibi" onerror="this.src='/uploads/favicon-48x48.png'">
-                                <span class="gundem-item-author-name">AperionX Bilim Ekibi</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+                <div class="gundem-cards-grid" id="gundemCardsGrid"></div>
             </div>
+        </div>
+
+        <!-- Boş Durum (Empty State) -->
+        <div class="gundem-empty-state" id="gundemEmptyState" style="display: none; text-align: center; padding: 120px 20px; max-width: 600px; margin: 0 auto;">
+            <div style="width: 72px; height: 72px; margin: 0 auto 24px; border-radius: 50%; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); display: flex; align-items: center; justify-content: center;">
+                <i class="ph-bold ph-newspaper-clipping" style="font-size: 2.2rem; color: #818cf8;"></i>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; color: #f8fafc;">Henüz Yayınlanmış Gündem Haberi Bulunmuyor</h2>
+            <p style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
+                Bilim dünyasındaki son gelişmeler, teknolojik kırılımlar ve analizler editörlerimiz tarafından onaylandığında burada yayınlanacaktır.
+            </p>
+            <a href="/makaleler" class="cd-btn cd-btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                <i class="ph-bold ph-compass"></i> Makaleleri Keşfet
+            </a>
         </div>
     </section>
 
@@ -1864,33 +1802,7 @@
 
             /* === SLIDER VE YAYINLAR MANTIĞI === */
             function initSliderAndFeed() {
-            let gundemSlides = [
-                {
-                    badge: 'Gündem',
-                    title: "James Webb Teleskobu Evrenin En Yaşlı Galaksi Kümesini Keşfetti",
-                    subtitle: "Uzay ve Astrofizik",
-                    desc: "Büyük Patlama'dan yalnızca 350 milyon yıl sonra oluştuğu tespit edilen devasa galaksi kümesi, evrenin erken dönem yıldız oluşum teorilerini kökten değiştiriyor.",
-                    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
-                    link: "/gundem/james-webb-teleskobu-evrenin-en-yasli-galaksi-kumesini-kesfetti"
-                },
-                {
-                    badge: 'Gündem',
-                    title: "Kuantum Süper Bilgisayarları Klasik Şifreleme Sistemlerini Geride Bırakıyor",
-                    subtitle: "Yapay Zeka ve Kuantum",
-                    desc: "Yeni nesil 1000 kubitlik kuantum işlemciler, geleneksel süper bilgisayarların 10.000 yılda tamamlayabileceği karmaşık moleküler simülasyonları saniyeler içinde hesapladı.",
-                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
-                    link: "/gundem/kuantum-super-bilgisayarlari-klasik-sifreleme-sistemlerini-geride-birakiyor"
-                },
-                {
-                    badge: 'Gündem',
-                    title: "CRISPR 3.0 ile Kalıtsal Hastalıklara Yönelik İlk Klinik Başarı",
-                    subtitle: "Genetik ve Biyoteknoloji",
-                    desc: "DNA dizilimini kesmeden epigenetik modifikasyon sağlayan yeni nesil gen cerrahisi tekniği, ilk insanlı faz-1 klinik deneylerinde tam hedefe ulaşarak yüzde 98 başarı sağladı.",
-                    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
-                    link: "/gundem/crispr-30-ile-kalitsal-hastaliklara-yonelik-ilk-klinik-basari"
-                }
-            ];
-
+            let gundemSlides = [];
             let currentIndex = 0;
             let slideInterval = null;
 
@@ -1922,6 +1834,7 @@
             }
 
             function renderSlide(index) {
+                if (!gundemSlides || gundemSlides.length === 0) return;
                 const item = gundemSlides[index];
                 if (!item) return;
 
@@ -1952,6 +1865,7 @@
             }
 
             function goToSlide(index) {
+                if (!gundemSlides || gundemSlides.length === 0) return;
                 if (index < 0) {
                     currentIndex = gundemSlides.length - 1;
                 } else if (index >= gundemSlides.length) {
@@ -1963,10 +1877,11 @@
             }
 
             function startAutoplay() {
+                if (!gundemSlides || gundemSlides.length <= 1) return;
                 clearInterval(slideInterval);
                 slideInterval = setInterval(() => {
                     goToSlide(currentIndex + 1);
-                }, 3000);
+                }, 3500);
             }
 
             function resetAutoplay() {
@@ -2021,10 +1936,6 @@
                 }
             }
 
-            renderDots();
-            renderSlide(0);
-            startAutoplay();
-
             /* === DİNAMİK BİLİM GÜNDEMİ VERİLERİNİ ÇEK VE RENDER ET === */
             function escapeGundemHtml(str) {
                 const d = document.createElement('div');
@@ -2033,28 +1944,43 @@
             }
 
             async function fetchAndRenderGundemFeed() {
+                const heroEl = document.getElementById('gundemHero');
+                const feedContainer = document.getElementById('gundemFeedContainer');
+                const emptyState = document.getElementById('gundemEmptyState');
+
                 try {
                     const res = await fetch('/api/public/gundem');
-                    if (!res.ok) return;
+                    if (!res.ok) throw new Error('API Error');
                     const data = await res.json();
-                    if (!data || !data.success || !Array.isArray(data.articles) || data.articles.length === 0) return;
+
+                    if (!data || !data.success || !Array.isArray(data.articles) || data.articles.length === 0) {
+                        // Yayınlanmış haber yok: Slider ve kartları gizle, boş durum göster
+                        if (heroEl) heroEl.style.display = 'none';
+                        if (feedContainer) feedContainer.style.display = 'none';
+                        if (emptyState) emptyState.style.display = 'block';
+                        return;
+                    }
 
                     const articles = data.articles;
 
-                    // 1. Slider'ı Dinamik Güncelle (İlk 3-4 haber)
-                    if (articles.length > 0) {
-                        const sliderItems = articles.slice(0, 4);
-                        gundemSlides = sliderItems.map(item => ({
-                            badge: item.category || 'Gündem',
-                            title: item.title,
-                            subtitle: item.subtitle || item.category || 'Gündem',
-                            desc: item.desc || item.excerpt || item.title,
-                            image: item.image,
-                            link: item.link || `/gundem/${item.slug}`
-                        }));
-                        renderDots();
-                        renderSlide(0);
-                    }
+                    // Yayınlanmış haber var: Boş durumu gizle, bölümleri aç
+                    if (emptyState) emptyState.style.display = 'none';
+                    if (heroEl) heroEl.style.display = 'block';
+                    if (feedContainer) feedContainer.style.display = 'grid';
+
+                    // 1. Slider'ı Dinamik Güncelle (İlk 4 haber)
+                    const sliderItems = articles.slice(0, 4);
+                    gundemSlides = sliderItems.map(item => ({
+                        badge: item.category || 'Gündem',
+                        title: item.title,
+                        subtitle: item.subtitle || item.category || 'Gündem',
+                        desc: item.desc || item.excerpt || item.title,
+                        image: item.image,
+                        link: item.link || `/gundem/${item.slug}`
+                    }));
+                    renderDots();
+                    renderSlide(0);
+                    startAutoplay();
 
                     // 2. Sol Vitrin Kartı (Featured Card)
                     const featuredEl = document.getElementById('gundemFeaturedCard');
@@ -2062,7 +1988,7 @@
                         const feat = articles[0];
                         featuredEl.href = feat.link || `/gundem/${feat.slug}`;
                         
-                        const posterImg = featuredEl.querySelector('.gundem-poster-bg img');
+                        const posterImg = document.getElementById('gundemFeaturedImg') || featuredEl.querySelector('.gundem-poster-bg img');
                         if (posterImg) {
                             posterImg.src = feat.image;
                             posterImg.alt = feat.title;
@@ -2088,25 +2014,34 @@
 
                     // 3. Sağ 4'lü Kart Izgarası (Cards Grid)
                     const gridEl = document.getElementById('gundemCardsGrid');
-                    if (gridEl && articles.length > 1) {
-                        const gridArticles = articles.slice(1, 5);
-                        gridEl.innerHTML = gridArticles.map(item => `
-                            <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
-                                <div class="gundem-item-poster-bg">
-                                    <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                                    <div class="gundem-item-poster-overlay"></div>
-                                </div>
-                                <div class="gundem-item-content">
-                                    <h4 class="gundem-item-title">
-                                        ${escapeGundemHtml(item.title)}
-                                    </h4>
-                                    <div class="gundem-item-author-row">
-                                        <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
-                                        <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                    if (gridEl) {
+                        if (articles.length > 1) {
+                            feedContainer.style.gridTemplateColumns = '460px 1fr';
+                            gridEl.style.display = 'grid';
+                            const gridArticles = articles.slice(1, 5);
+                            gridEl.innerHTML = gridArticles.map(item => `
+                                <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
+                                    <div class="gundem-item-poster-bg">
+                                        <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                                        <div class="gundem-item-poster-overlay"></div>
                                     </div>
-                                </div>
-                            </a>
-                        `).join('');
+                                    <div class="gundem-item-content">
+                                        <h4 class="gundem-item-title">
+                                            ${escapeGundemHtml(item.title)}
+                                        </h4>
+                                        <div class="gundem-item-author-row">
+                                            <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
+                                            <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            `).join('');
+                        } else {
+                            // Tek haber varsa vitrin kartı tek başına gösterilir
+                            feedContainer.style.gridTemplateColumns = '1fr';
+                            gridEl.style.display = 'none';
+                            gridEl.innerHTML = '';
+                        }
                     }
 
                     // 4. Schema.org ItemList SEO Entegrasyonu
@@ -2133,7 +2068,10 @@
                         schemaEl.textContent = JSON.stringify(schemaData);
                     } catch (se) {}
                 } catch (err) {
-                    console.warn('Could not fetch dynamic gundem feed, fallback active:', err);
+                    console.warn('Could not fetch dynamic gundem feed, empty state active:', err);
+                    if (heroEl) heroEl.style.display = 'none';
+                    if (feedContainer) feedContainer.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'block';
                 }
             }
 
