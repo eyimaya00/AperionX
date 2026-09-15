@@ -231,7 +231,8 @@
             justify-content: center;
             overflow: hidden;
             background: #090b10;
-            padding-top: 60px;
+            padding-top: 80px;
+            padding-bottom: 80px;
             box-sizing: border-box;
         }
 
@@ -471,7 +472,7 @@
             align-items: center;
             gap: 8px;
             margin-top: 24px;
-            margin-bottom: 45px;
+            margin-bottom: 0;
             position: relative;
             z-index: 4;
         }
@@ -1965,7 +1966,7 @@
 
                     // Yayınlanmış haber var: Boş durumu gizle, bölümleri aç
                     if (emptyState) emptyState.style.display = 'none';
-                    if (heroEl) heroEl.style.display = 'block';
+                    if (heroEl) heroEl.style.display = 'flex';
                     if (feedContainer) feedContainer.style.display = 'grid';
 
                     // 1. Slider'ı Dinamik Güncelle (İlk 4 haber)
