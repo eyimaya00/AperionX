@@ -579,7 +579,7 @@
             color: #94a3b8;
         }
 
-        /* 1. Sen de Değerlendir (Yıldız Değerlendirmesi) */
+        /* 1. Sen de Değerlendir (AperionX A Logo Değerlendirmesi) */
         .sidebar-rating-stars {
             display: flex;
             align-items: center;
@@ -588,31 +588,32 @@
         }
 
         .sidebar-rating-star {
-            font-size: 1.65rem;
-            color: #475569;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0.35;
+            filter: grayscale(100%) brightness(0.65);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
+            -webkit-user-drag: none;
+            object-fit: contain;
+            border-radius: 6px;
+            padding: 2px;
         }
 
         .sidebar-rating-star:hover {
-            transform: scale(1.25) translateY(-2px);
-            color: #fbbf24;
+            transform: scale(1.22) translateY(-2px);
         }
 
         .sidebar-rating-star.active {
-            color: #f59e0b !important;
-            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+            opacity: 1;
+            filter: grayscale(0%) brightness(1.1) drop-shadow(0 0 8px rgba(99, 102, 241, 0.85));
             transform: scale(1.08);
         }
 
         .sidebar-rating-star.hovered {
-            color: #fbbf24 !important;
-            filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5));
+            opacity: 0.9;
+            filter: grayscale(0%) brightness(1);
         }
 
         .sidebar-rating-info {
@@ -1703,11 +1704,11 @@
                         <span class="sidebar-rating-badge" id="ratingScoreBadge" style="font-size: 0.76rem; font-weight: 700; color: #a5b4fc;">5.0</span>
                     </div>
                     <div class="sidebar-rating-stars" id="ratingStars">
-                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="1" title="1 Yıldız"></i>
-                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="2" title="2 Yıldız"></i>
-                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="3" title="3 Yıldız"></i>
-                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="4" title="4 Yıldız"></i>
-                        <i class="ph-fill ph-star sidebar-rating-star active" data-rating="5" title="5 Yıldız"></i>
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="1" alt="1" title="1 Puan">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="2" alt="2" title="2 Puan">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="3" alt="3" title="3 Puan">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="4" alt="4" title="4 Puan">
+                        <img src="/uploads/aperionx-a-transparent.png" class="sidebar-rating-star active" data-rating="5" alt="5" title="5 Puan">
                     </div>
                     <div class="sidebar-rating-info">
                         <span id="ratingStatusText">Habere oy verin</span>
