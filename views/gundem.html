@@ -1500,15 +1500,15 @@
         </div>
 
         <!-- Boş Durum (Empty State) -->
-        <div class="gundem-empty-state" id="gundemEmptyState" style="display: none; text-align: center; padding: 120px 20px; max-width: 600px; margin: 0 auto;">
-            <div style="width: 72px; height: 72px; margin: 0 auto 24px; border-radius: 50%; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); display: flex; align-items: center; justify-content: center;">
-                <i class="ph-bold ph-newspaper-clipping" style="font-size: 2.2rem; color: #818cf8;"></i>
+        <div class="gundem-empty-state" id="gundemEmptyState" style="display: none; width: 100%; min-height: 60vh; display: none; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 80px 20px;">
+            <div style="width: 80px; height: 80px; margin: 0 auto 28px; border-radius: 50%; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); display: flex; align-items: center; justify-content: center;">
+                <i class="ph-bold ph-newspaper-clipping" style="font-size: 2.4rem; color: #818cf8;"></i>
             </div>
-            <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; color: #f8fafc;">Henüz Yayınlanmış Gündem Haberi Bulunmuyor</h2>
-            <p style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6; margin-bottom: 24px;">
+            <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 14px; color: #f8fafc;">Henüz Yayınlanmış Gündem Haberi Bulunmuyor</h2>
+            <p style="font-size: 1rem; color: #94a3b8; line-height: 1.7; margin-bottom: 28px; max-width: 520px;">
                 Bilim dünyasındaki son gelişmeler, teknolojik kırılımlar ve analizler editörlerimiz tarafından onaylandığında burada yayınlanacaktır.
             </p>
-            <a href="/makaleler" class="cd-btn cd-btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+            <a href="/makaleler" style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; text-decoration: none; font-weight: 600; font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">
                 <i class="ph-bold ph-compass"></i> Makaleleri Keşfet
             </a>
         </div>
@@ -1957,7 +1957,7 @@
                         // Yayınlanmış haber yok: Slider ve kartları gizle, boş durum göster
                         if (heroEl) heroEl.style.display = 'none';
                         if (feedContainer) feedContainer.style.display = 'none';
-                        if (emptyState) emptyState.style.display = 'block';
+                        if (emptyState) emptyState.style.display = 'flex';
                         return;
                     }
 
@@ -2071,7 +2071,7 @@
                     console.warn('Could not fetch dynamic gundem feed, empty state active:', err);
                     if (heroEl) heroEl.style.display = 'none';
                     if (feedContainer) feedContainer.style.display = 'none';
-                    if (emptyState) emptyState.style.display = 'block';
+                    if (emptyState) emptyState.style.display = 'flex';
                 }
             }
 
