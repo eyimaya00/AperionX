@@ -736,6 +736,48 @@
             border: 1px solid rgba(245, 158, 11, 0.25);
         }
 
+        /* YAYIN DURUM ROZETLERİ (WORKFLOW PIPELINE BADGES) */
+        .pub-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .pub-status-badge.published {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .pub-status-badge.pending_campus {
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .pub-status-badge.pending_chief {
+            background: rgba(99, 102, 241, 0.12);
+            color: #4f46e5;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .pub-status-badge.revision {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .pub-status-badge.draft {
+            background: rgba(148, 163, 184, 0.15);
+            color: #475569;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
         /* RESPONSIVE ENHANCEMENTS (Mobile & Tablet) */
         /* TEAM SHOWCASE CARDS (about.html inspired) */
         .showcase-grid {
@@ -968,6 +1010,9 @@
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-authors', this)">
                 <i class="ph ph-user-list"></i> <span>Ekip Üyeleri</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-publications', this)">
+                <i class="ph ph-article"></i> <span>Kampüs Yayınları</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showCoordSection('coord-team', this)">
                 <i class="ph ph-users-three"></i> <span>Ekip Bilgileri</span>
@@ -1219,36 +1264,137 @@
             </div>
         </section>
 
-        <!-- 3. EKİP BİLGİLERİ SECTION (HAKKIMIZDA SAYFASI GİBİ ANA EKİP VİTRİNİ) -->
-        <section id="coord-team" class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <!-- 3. KAMPÜS YAYINLARI & SÜREÇ TAKİBİ SECTION -->
+        <section id="coord-publications" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1 class="page-title" style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 800;">
-                        🏛️ Kampüs Ekip Bilgileri & Kadrosu
+                        📚 Kampüs Yayınları & Süreç Takibi
                     </h1>
                     <p style="margin: 0; font-size: 0.92rem; color: #64748b;">
-                        AperionX portalında üniversitenize özel yayınlanacak resmi ekip vitrini. Buradaki kartları düzenleyebilir, yeni ekip üyeleri ekleyebilirsiniz. (Yazarlarınız bu alanda yer almaz, "Yazarlar" menüsünden yönetilir.)
+                        Kampüsünüzden çıkan tüm içerikleri, editör onay süreçlerini, okunma, beğeni ve yorum etkileşimlerini takip edin.
                     </p>
                 </div>
-                <button type="button" onclick="openAddTeamCardModal()" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="ph-bold ph-plus-circle"></i> Yeni Ekip Kartı Ekle
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" onclick="loadCoordinatorPublications(true)" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 9px 18px; font-size: 0.88rem; font-weight: 600;">
+                        <i class="ph ph-arrows-clockwise" id="pub-refresh-icon"></i> Verileri Yenile
+                    </button>
+                </div>
             </div>
 
-            <!-- EKİP ÜST BİLGİ KARTI -->
-            <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(168, 85, 247, 0.04) 100%); border-left: 5px solid var(--primary-accent); margin-bottom: 30px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <h3 style="margin: 0 0 6px 0; font-size: 1.3rem; font-weight: 800; color: var(--text-main);" id="showcase-team-heading">
-                            AperionX Kampüs Ekibi
-                        </h3>
-                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;" id="showcase-team-desc">
-                            Üniversite bünyesinde bilimi yaygınlaştıran koordinatör, editör ve temsilci kadromuz.
-                        </p>
+            <!-- PERFORMANS VE ETKİLEŞİM KARTLARI -->
+            <div style="display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap;">
+                <div class="card" style="margin-bottom: 0; padding: 14px 18px; flex: 1; min-width: 170px; display: flex; align-items: center; gap: 12px; border-left: 4px solid #10b981;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="ph-bold ph-check-circle"></i>
                     </div>
-                    <span class="campus-badge" id="showcase-total-badge" style="font-size: 0.9rem; padding: 6px 14px;">
-                        0 Ekip Kartı
-                    </span>
+                    <div>
+                        <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Yayındaki İçerik</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);" id="pub-stat-published">0</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 0; padding: 14px 18px; flex: 1; min-width: 170px; display: flex; align-items: center; gap: 12px; border-left: 4px solid #2563eb;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(37, 99, 235, 0.1); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="ph-bold ph-eye"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Toplam Okunma</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #2563eb;" id="pub-stat-views">0</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 0; padding: 14px 18px; flex: 1; min-width: 170px; display: flex; align-items: center; gap: 12px; border-left: 4px solid #ec4899;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(236, 72, 153, 0.1); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="ph-bold ph-heart"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Toplam Beğeni</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #ec4899;" id="pub-stat-likes">0</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 0; padding: 14px 18px; flex: 1; min-width: 170px; display: flex; align-items: center; gap: 12px; border-left: 4px solid #8b5cf6;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="ph-bold ph-chats-circle"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; color: #64748b;">Yorum Sayısı</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #8b5cf6;" id="pub-stat-comments">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YAYIN SÜREÇLERİ TABLO KARTI -->
+            <div class="card">
+                <!-- SÜREÇ FİLTRE SEKMELERİ -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="profile-tabs-strip" style="margin-bottom: 0;">
+                        <button type="button" class="profile-tab-btn active" onclick="filterPubPipeline('all', this)">
+                            <i class="ph-bold ph-stack"></i> Tümü (<span id="pub-tab-all-count">0</span>)
+                        </button>
+                        <button type="button" class="profile-tab-btn" onclick="filterPubPipeline('published', this)">
+                            <i class="ph-bold ph-check-circle" style="color: #10b981;"></i> Yayında (<span id="pub-tab-published-count">0</span>)
+                        </button>
+                        <button type="button" class="profile-tab-btn" onclick="filterPubPipeline('pending_campus', this)">
+                            <i class="ph-bold ph-hourglass-high" style="color: #f59e0b;"></i> Kampüs Editöründe (<span id="pub-tab-campus-count">0</span>)
+                        </button>
+                        <button type="button" class="profile-tab-btn" onclick="filterPubPipeline('pending_chief', this)">
+                            <i class="ph-bold ph-paper-plane-tilt" style="color: #6366f1;"></i> Baş Editörde (<span id="pub-tab-chief-count">0</span>)
+                        </button>
+                        <button type="button" class="profile-tab-btn" onclick="filterPubPipeline('revision', this)">
+                            <i class="ph-bold ph-arrow-counter-clockwise" style="color: #ef4444;"></i> Revizyon / Düzeltme (<span id="pub-tab-revision-count">0</span>)
+                        </button>
+                    </div>
+
+                    <div style="position: relative; min-width: 240px;">
+                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        <input type="text" id="publications-search-input" oninput="filterPublicationsSearch()" placeholder="Başlık veya yazar adı ara..." class="form-control" style="padding: 8px 14px 8px 36px; font-size: 0.86rem; width: 100%;">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="publications-table">
+                        <thead>
+                            <tr>
+                                <th>İÇERİK BİLGİSİ</th>
+                                <th>YAZAR</th>
+                                <th>SÜREÇ DURUMU</th>
+                                <th style="text-align: center;">ETKİLEŞİM</th>
+                                <th>TARİH</th>
+                                <th style="text-align: right;">İŞLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="publications-tbody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    <i class="ph ph-spinner spinner" style="font-size: 1.6rem; display: block; margin-bottom: 8px;"></i>
+                                    Yayınlar ve süreçler yükleniyor...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. EKİP BİLGİLERİ SECTION (HAKKIMIZDA SAYFASI GİBİ ANA EKİP VİTRİNİ) -->
+        <section id="coord-team" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 class="page-title" style="margin: 0 0 4px 0; font-size: 1.6rem; font-weight: 800;">
+                        🏛️ Kampüs Ekip Bilgileri
+                    </h1>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #64748b;">
+                        <span id="showcase-team-heading" style="font-weight: 700; color: var(--text-main);">AperionX Kampüs Ekibi</span>
+                        <span>•</span>
+                        <span id="showcase-total-badge" style="color: var(--primary-accent); font-weight: 600;">0 Ekip Kartı</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" onclick="openAddTeamCardModal()" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="ph-bold ph-plus-circle"></i> Yeni Ekip Kartı Ekle
+                    </button>
                 </div>
             </div>
 
@@ -1632,6 +1778,7 @@
             loadTeamCards();
             loadTeamMembers();
             loadDashboardStats();
+            loadCoordinatorPublications();
         });
 
         async function loadSiteSettings() {
@@ -1849,6 +1996,7 @@
             const titleMap = {
                 'coord-dashboard': 'Genel Bakış',
                 'coord-authors': 'Ekip Üyeleri',
+                'coord-publications': 'Kampüs Yayınları & Süreç Takibi',
                 'coord-team': 'Ekip Bilgileri',
                 'coord-settings': 'Profil ve Ayarlar'
             };
@@ -1862,6 +2010,8 @@
                 loadTeamCards();
             } else if (sectionId === 'coord-authors') {
                 loadTeamMembers();
+            } else if (sectionId === 'coord-publications') {
+                loadCoordinatorPublications();
             }
 
             // Mobile: close sidebar on click
@@ -2339,6 +2489,237 @@
             } catch (err) {
                 showToast('Hata: ' + err.message, 'error');
             }
+        }
+
+        // ================= KAMPÜS YAYINLARI & SÜREÇ TAKİBİ JS =================
+        let coordinatorPublicationsList = [];
+        let currentPubPipelineFilter = 'all';
+
+        async function loadCoordinatorPublications(showFeedback = false) {
+            const refreshIcon = document.getElementById('pub-refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('ph-spin');
+
+            const tbody = document.getElementById('publications-tbody');
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/publications`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/index.html';
+                    return;
+                }
+
+                if (!res.ok) throw new Error('Yayınlar alınamadı');
+
+                const data = await res.json();
+                coordinatorPublicationsList = data.items || [];
+                const stats = data.stats || {};
+
+                // Metrikleri Güncelle
+                const elPub = document.getElementById('pub-stat-published');
+                const elViews = document.getElementById('pub-stat-views');
+                const elLikes = document.getElementById('pub-stat-likes');
+                const elComments = document.getElementById('pub-stat-comments');
+
+                if (elPub) elPub.innerText = Number(stats.totalPublished || 0).toLocaleString('tr-TR');
+                if (elViews) elViews.innerText = Number(stats.totalViews || 0).toLocaleString('tr-TR');
+                if (elLikes) elLikes.innerText = Number(stats.totalLikes || 0).toLocaleString('tr-TR');
+                if (elComments) elComments.innerText = Number(stats.totalComments || 0).toLocaleString('tr-TR');
+
+                // Sekme Sayaçlarını Güncelle
+                const tabAll = document.getElementById('pub-tab-all-count');
+                const tabPub = document.getElementById('pub-tab-published-count');
+                const tabCampus = document.getElementById('pub-tab-campus-count');
+                const tabChief = document.getElementById('pub-tab-chief-count');
+                const tabRev = document.getElementById('pub-tab-revision-count');
+
+                if (tabAll) tabAll.innerText = stats.totalCount || 0;
+                if (tabPub) tabPub.innerText = stats.totalPublished || 0;
+                if (tabCampus) tabCampus.innerText = stats.countPendingCampus || 0;
+                if (tabChief) tabChief.innerText = stats.countPendingChief || 0;
+                if (tabRev) tabRev.innerText = stats.countRevision || 0;
+
+                // Tabloyu filtreye göre çiz
+                applyPubFilters();
+
+                if (showFeedback) showToast('Yayınlar ve etkileşim verileri güncellendi.', 'success');
+            } catch (err) {
+                console.error('[LOAD-COORDINATOR-PUBLICATIONS-ERROR]', err);
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #ef4444;">
+                                <i class="ph ph-warning-circle" style="font-size: 1.4rem;"></i>
+                                Yayınlar yüklenirken hata oluştu: ${escapeHtml(err.message)}
+                            </td>
+                        </tr>
+                    `;
+                }
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('ph-spin');
+            }
+        }
+
+        function filterPubPipeline(pipeline, btnEl) {
+            currentPubPipelineFilter = pipeline;
+            if (btnEl && btnEl.parentElement) {
+                btnEl.parentElement.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+            applyPubFilters();
+        }
+
+        function filterPublicationsSearch() {
+            applyPubFilters();
+        }
+
+        function applyPubFilters() {
+            const searchInput = document.getElementById('publications-search-input');
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            let filtered = coordinatorPublicationsList || [];
+
+            // Süreç Filtresi
+            if (currentPubPipelineFilter === 'published') {
+                filtered = filtered.filter(item => item.status === 'published');
+            } else if (currentPubPipelineFilter === 'pending_campus') {
+                filtered = filtered.filter(item => item.status === 'pending_campus');
+            } else if (currentPubPipelineFilter === 'pending_chief') {
+                filtered = filtered.filter(item => item.status === 'pending');
+            } else if (currentPubPipelineFilter === 'revision') {
+                filtered = filtered.filter(item => item.status === 'rejected');
+            }
+
+            // Arama Filtresi
+            if (q) {
+                filtered = filtered.filter(item =>
+                    (item.title && item.title.toLowerCase().includes(q)) ||
+                    (item.author_name && item.author_name.toLowerCase().includes(q)) ||
+                    (item.category && item.category.toLowerCase().includes(q))
+                );
+            }
+
+            renderCoordinatorPublications(filtered);
+        }
+
+        function renderCoordinatorPublications(items) {
+            const tbody = document.getElementById('publications-tbody');
+            if (!tbody) return;
+
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 45px 20px; color: #94a3b8;">
+                            <i class="ph ph-article" style="font-size: 2.2rem; display: block; margin-bottom: 8px; opacity: 0.4;"></i>
+                            Bu aşamada veya arama kriterine uygun bir yayın bulunamadı.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => {
+                const title = item.title || 'Başlıksız İçerik';
+                const author = item.author_name || 'Yazar';
+                const initial = author.charAt(0).toUpperCase();
+                const views = Number(item.views || 0).toLocaleString('tr-TR');
+                const likes = Number(item.like_count || 0).toLocaleString('tr-TR');
+                const comments = Number(item.comment_count || 0).toLocaleString('tr-TR');
+
+                const itemType = item.item_type || (item.is_gundem ? 'gundem' : 'article');
+                const typeBadge = itemType === 'experiment'
+                    ? '<span style="font-size: 0.72rem; padding: 2px 7px; background: rgba(16, 185, 129, 0.12); color: #059669; border-radius: 6px; font-weight: 700;">Deney</span>'
+                    : itemType === 'gundem'
+                    ? '<span style="font-size: 0.72rem; padding: 2px 7px; background: rgba(14, 165, 233, 0.12); color: #0284c7; border-radius: 6px; font-weight: 700;">Gündem</span>'
+                    : '<span style="font-size: 0.72rem; padding: 2px 7px; background: rgba(99, 102, 241, 0.12); color: #4f46e5; border-radius: 6px; font-weight: 700;">Makale</span>';
+
+                // Süreç Rozeti
+                let statusBadge = '';
+                if (item.status === 'published') {
+                    statusBadge = `<span class="pub-status-badge published"><i class="ph-bold ph-check-circle"></i> Yayında</span>`;
+                } else if (item.status === 'pending_campus') {
+                    statusBadge = `<span class="pub-status-badge pending_campus" title="Kampüs Editörünün incelemesini bekliyor"><i class="ph-bold ph-hourglass-high"></i> Kampüs Editöründe</span>`;
+                } else if (item.status === 'pending') {
+                    statusBadge = `<span class="pub-status-badge pending_chief" title="Kampüs editörü onayladı, Baş Editörün nihai onayını bekliyor"><i class="ph-bold ph-paper-plane-tilt"></i> Baş Editörde</span>`;
+                } else if (item.status === 'rejected') {
+                    const reason = item.rejection_reason ? `title="Gerekçe: ${escapeHtml(item.rejection_reason)}"` : '';
+                    statusBadge = `<span class="pub-status-badge revision" ${reason}><i class="ph-bold ph-arrow-counter-clockwise"></i> Düzeltme / Revizyon</span>`;
+                } else {
+                    statusBadge = `<span class="pub-status-badge draft"><i class="ph-bold ph-file-dashed"></i> Taslak</span>`;
+                }
+
+                // Canlı link
+                let liveLink = `/makale/${item.slug || item.id}`;
+                if (item.is_gundem) liveLink = `/bilim-gundemi/${item.slug || item.id}`;
+                else if (itemType === 'experiment') liveLink = `/deney/${item.slug || item.id}`;
+
+                const dateStr = item.published_at || item.submitted_at || item.created_at;
+                const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('tr-TR') : '-';
+
+                return `
+                    <tr>
+                        <td style="padding: 14px 16px; max-width: 340px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                ${typeBadge}
+                                <span style="font-size: 0.78rem; color: #94a3b8;">${escapeHtml(item.category || 'Genel')}</span>
+                            </div>
+                            <div style="font-weight: 700; color: var(--text-main); font-size: 0.94rem; line-height: 1.35; margin-bottom: 2px;">
+                                ${escapeHtml(title)}
+                            </div>
+                            ${item.status === 'rejected' && item.rejection_reason ? `
+                                <div style="font-size: 0.78rem; color: #dc2626; margin-top: 4px; background: #fef2f2; padding: 4px 8px; border-radius: 6px; border-left: 2px solid #ef4444;">
+                                    <strong>Revizyon Notu:</strong> ${escapeHtml(item.rejection_reason)}
+                                </div>
+                            ` : ''}
+                        </td>
+                        <td style="padding: 14px 16px; white-space: nowrap;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 34px; height: 34px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">
+                                    ${initial}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${escapeHtml(author)}</div>
+                                    <div style="font-size: 0.76rem; color: #64748b;">${escapeHtml(item.author_university || '-')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 16px; white-space: nowrap;">
+                            ${statusBadge}
+                        </td>
+                        <td style="padding: 14px 16px; text-align: center; white-space: nowrap;">
+                            ${item.status === 'published' ? `
+                                <div style="display: inline-flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 600;">
+                                    <span style="color: #2563eb; display: inline-flex; align-items: center; gap: 3px;" title="Okunma">
+                                        <i class="ph-bold ph-eye"></i> ${views}
+                                    </span>
+                                    <span style="color: #ec4899; display: inline-flex; align-items: center; gap: 3px;" title="Beğeni">
+                                        <i class="ph-bold ph-heart"></i> ${likes}
+                                    </span>
+                                    <span style="color: #8b5cf6; display: inline-flex; align-items: center; gap: 3px;" title="Yorum">
+                                        <i class="ph-bold ph-chats"></i> ${comments}
+                                    </span>
+                                </div>
+                            ` : `
+                                <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Süreçte</span>
+                            `}
+                        </td>
+                        <td style="padding: 14px 16px; color: #64748b; font-size: 0.85rem; white-space: nowrap;">
+                            ${formattedDate}
+                        </td>
+                        <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                            ${item.status === 'published' ? `
+                                <a href="${liveLink}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 0.82rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); display: inline-flex; align-items: center; gap: 4px;" title="Sitede Canlı Gör">
+                                    <i class="ph ph-arrow-square-out"></i> Canlı Gör
+                                </a>
+                            ` : `
+                                <span style="font-size: 0.8rem; color: #94a3b8;">-</span>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderTeamMembers(members) {

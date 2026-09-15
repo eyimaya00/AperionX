@@ -4751,6 +4751,107 @@ app.get('/api/public/campus-team/:coordinatorId', async (req, res) => {
     }
 });
 
+// 6. Coordinator Publications & Workflow Tracking
+app.get('/api/coordinator/publications', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    try {
+        const coordinatorId = req.user.id;
+        const [meRows] = await pool.query('SELECT university FROM users WHERE id = ?', [coordinatorId]);
+        const myUniversity = meRows[0]?.university;
+
+        let userFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+        let expUserFilter = "(u.coordinator_id = ? OR (u.university IS NOT NULL AND u.university = ?))";
+        let filterParams = [coordinatorId, myUniversity || ''];
+
+        if (req.user.role === 'admin') {
+            userFilter = "1=1";
+            expUserFilter = "1=1";
+            filterParams = [];
+        }
+
+        // 1. Articles (and Bilim Gündemi)
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.published_at, a.created_at, a.submitted_at, a.campus_reviewed_at, a.rejection_reason, a.is_gundem,
+                   CASE WHEN a.is_gundem = 1 THEN 'gundem' ELSE 'article' END as item_type,
+                   u.id as author_id, u.fullname as author_name, u.email as author_email, u.university as author_university, u.avatar_url as author_avatar,
+                   (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE ${userFilter}
+            ORDER BY COALESCE(a.published_at, a.submitted_at, a.created_at) DESC
+        `, filterParams);
+
+        // 2. Experiments
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.views, e.published_at, e.created_at, e.created_at as submitted_at, e.campus_reviewed_at, e.rejection_reason, 0 as is_gundem,
+                   'experiment' as item_type,
+                   u.id as author_id, u.fullname as author_name, u.email as author_email, u.university as author_university, u.avatar_url as author_avatar,
+                   (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            WHERE e.deleted_at IS NULL AND ${expUserFilter}
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
+        `, filterParams);
+
+        const allItems = [...articles, ...experiments].sort((a, b) => {
+            const dateA = new Date(a.published_at || a.submitted_at || a.created_at || 0);
+            const dateB = new Date(b.published_at || b.submitted_at || b.created_at || 0);
+            return dateB - dateA;
+        });
+
+        // Pipeline stage counts & stats
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+
+        let countPendingCampus = 0;   // Kampüs Editöründe İncelemede
+        let countPendingChief = 0;    // Baş Editörde Onay Bekliyor
+        let countPublished = 0;       // Yayında
+        let countRevision = 0;        // Revizyon / Düzeltme İstenen
+        let countDraft = 0;           // Taslak
+
+        allItems.forEach(item => {
+            if (item.status === 'published') {
+                countPublished++;
+                totalViews += (Number(item.views) || 0);
+                totalLikes += (Number(item.like_count) || 0);
+                totalComments += (Number(item.comment_count) || 0);
+            } else if (item.status === 'pending_campus') {
+                countPendingCampus++;
+            } else if (item.status === 'pending') {
+                countPendingChief++;
+            } else if (item.status === 'rejected') {
+                countRevision++;
+            } else {
+                countDraft++;
+            }
+        });
+
+        res.json({
+            stats: {
+                totalCount: allItems.length,
+                totalPublished: countPublished,
+                totalViews,
+                totalLikes,
+                totalComments,
+                countPendingCampus,
+                countPendingChief,
+                countRevision,
+                countDraft
+            },
+            items: allItems
+        });
+    } catch (err) {
+        console.error('[COORDINATOR-PUBLICATIONS-ERROR]', err);
+        res.status(500).json({ error: 'Yayınlar listelenirken hata: ' + err.message });
+    }
+});
+
 app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
     try {
