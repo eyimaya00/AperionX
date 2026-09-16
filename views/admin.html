@@ -7111,8 +7111,9 @@
             }
 
             try {
-                const res = await fetch(`${API_URL}/admin/campus-teams-overview`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const res = await fetch(`${API_URL}/admin/campus-teams-overview?t=${Date.now()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 campusTeamsData = await res.json();
@@ -8021,7 +8022,20 @@
                 if (res.ok) {
                     showToast(data.message || 'Ekip başarıyla silindi.', 'success');
                     closeDeleteCampusTeamModal();
-                    loadCampusTeamsOverview();
+
+                    // Anında yerel listeden kaldır ve UI'ı güncelle
+                    if (campusTeamsData && campusTeamsData.teams) {
+                        const targetNorm = university.toLowerCase().trim();
+                        campusTeamsData.teams = campusTeamsData.teams.filter(t => (t.university || '').toLowerCase().trim() !== targetNorm);
+                        if (campusTeamsData.summary) {
+                            campusTeamsData.summary.total_teams = campusTeamsData.teams.length;
+                            const kpiTeams = document.getElementById('kpi-total-teams');
+                            if (kpiTeams) kpiTeams.innerText = campusTeamsData.teams.length;
+                        }
+                        renderCampusTeams(campusTeamsData.teams);
+                    }
+
+                    await loadCampusTeamsOverview();
                 } else {
                     showToast(data.error || 'Ekip silinemedi.', 'error');
                 }

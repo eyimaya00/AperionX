@@ -4299,7 +4299,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             WHERE u.role != 'admin' AND (
                 u.coordinator_id IS NOT NULL 
                 OR (u.campus_role IS NOT NULL AND u.campus_role != '')
-                OR (u.university IS NOT NULL AND u.university != '' AND u.role IN ('author', 'campus_editor'))
+                OR u.role = 'campus_editor'
             )
             ORDER BY u.created_at DESC
         `);
@@ -4349,7 +4349,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             return `coord_${coordId}`;
         };
 
-        // 1. Önce koordinatörlerden ekipleri oluştur
+        // 1. Önce koordinatörlerden ekipleri oluştur (Bir ekip koordinatörle var olur)
         for (const coord of coordinators) {
             const key = getTeamKey(coord.university, coord.id);
             if (!teamsMap.has(key)) {
@@ -4393,7 +4393,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             }
         }
 
-        // 2. Üyeleri ekiplere dağıt
+        // 2. Üyeleri yalnızca VAR OLAN ekiplere dağıt
         const coordIdsSet = new Set(coordinators.map(c => c.id));
         for (const member of members) {
             if (coordIdsSet.has(member.id)) continue; // Koordinatör zaten eklendi
@@ -4405,39 +4405,10 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
                 targetTeam = teamsMap.get(coordIdToTeamKey.get(member.coordinator_id));
             }
 
-            // coordinator_id yoksa veya bulunamadıysa university ile eşleştir
+            // coordinator_id yoksa veya bulunamadıysa university ile eşleştir (yalnızca mevcut bir koordinatör ekibi varsa!)
             if (!targetTeam && member.university && member.university.trim()) {
                 const uniKey = member.university.trim().toLowerCase();
                 if (teamsMap.has(uniKey)) {
-                    targetTeam = teamsMap.get(uniKey);
-                } else {
-                    // Bu üniversiteye ait henüz koordinatör hesabı açılmamış olabilir, ekip olarak aç
-                    teamsMap.set(uniKey, {
-                        key: uniKey,
-                        university: member.university.trim(),
-                        is_custom_name: false,
-                        coordinators: [],
-                        coordinator_ids: new Set(),
-                        members: [],
-                        member_ids: new Set(),
-                        cards: [],
-                        publications: [],
-                        stats: {
-                            total_coordinators: 0,
-                            total_members: 0,
-                            total_editors: 0,
-                            total_authors: 0,
-                            total_cards: 0,
-                            total_publications: 0,
-                            published_count: 0,
-                            pending_campus_count: 0,
-                            pending_chief_count: 0,
-                            revision_count: 0,
-                            total_views: 0,
-                            total_likes: 0,
-                            total_comments: 0
-                        }
-                    });
                     targetTeam = teamsMap.get(uniKey);
                 }
             }
@@ -4489,7 +4460,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             }
         }
 
-        // 5. İstatistikleri hesapla & Set nesnelerini temizle
+        // 5. İstatistikleri hesapla & Sadece koordinatörü olan gerçek ekipleri listele
         let grandTotalCoordinators = 0;
         let grandTotalMembers = 0;
         let grandTotalEditors = 0;
@@ -4498,7 +4469,9 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
         let grandTotalPublished = 0;
         let grandTotalViews = 0;
 
-        const teamsArray = Array.from(teamsMap.values()).map(team => {
+        const teamsArray = Array.from(teamsMap.values())
+            .filter(team => team.coordinators && team.coordinators.length > 0)
+            .map(team => {
             const editorsCount = team.members.filter(m => 
                 m.role === 'campus_editor' || 
                 (m.campus_role && m.campus_role.toLowerCase().includes('editör'))
@@ -4745,32 +4718,46 @@ app.delete('/api/admin/campus-teams/:university', authenticateToken, async (req,
     }
 
     try {
-        // 1. Vitrin kartlarını sil
-        await pool.query('DELETE FROM campus_team_cards WHERE LOWER(university) = LOWER(?)', [university]);
-
-        // 2. Bu üniversitenin koordinatör ID'lerini bul
+        // 1. Bu üniversitenin koordinatör ID'lerini bul
         const [coordRows] = await pool.query(
-            "SELECT id FROM users WHERE role = 'campus_coordinator' AND LOWER(university) = LOWER(?)",
+            "SELECT id FROM users WHERE role = 'campus_coordinator' AND LOWER(TRIM(university)) = LOWER(TRIM(?))",
             [university]
         );
         const coordIds = coordRows.map(c => c.id);
 
-        // 3. Ekip üyelerini ekipten çıkar (hesaplarını silme, ekip bağını ve campus_role'ü kaldır)
+        // 2. Vitrin kartlarını sil (hem üniversite adına hem de koordinatör ID'lerine göre)
+        await pool.query('DELETE FROM campus_team_cards WHERE LOWER(TRIM(university)) = LOWER(TRIM(?))', [university]);
+        if (coordIds.length > 0) {
+            await pool.query('DELETE FROM campus_team_cards WHERE coordinator_id IN (?)', [coordIds]);
+        }
+
+        // 3. Ekip üyelerini ekipten çıkar (hesaplarını silme, ekip bağını, üniversite bilgisini ve campus_role'ü kaldır)
         await pool.query(
-            "UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE LOWER(university) = LOWER(?) AND role != 'campus_coordinator' AND role != 'admin'",
+            "UPDATE users SET coordinator_id = NULL, campus_role = NULL, university = NULL, role = CASE WHEN role = 'campus_editor' THEN 'author' ELSE role END WHERE LOWER(TRIM(university)) = LOWER(TRIM(?)) AND role != 'campus_coordinator' AND role != 'admin'",
             [university]
         );
 
         if (coordIds.length > 0) {
             await pool.query(
-                "UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE coordinator_id IN (?)",
+                "UPDATE users SET coordinator_id = NULL, campus_role = NULL, university = NULL, role = CASE WHEN role = 'campus_editor' THEN 'author' ELSE role END WHERE coordinator_id IN (?)",
                 [coordIds]
             );
         }
 
-        // 4. Koordinatör hesaplarını sil
+        // 4. Koordinatör hesaplarını sil (foreign key varsa rolünü author yapıp ekiple bağını kes)
+        for (const cId of coordIds) {
+            try {
+                await pool.query("DELETE FROM users WHERE id = ? AND role = 'campus_coordinator'", [cId]);
+            } catch (err) {
+                await pool.query("UPDATE users SET role = 'author', campus_role = NULL, university = NULL WHERE id = ?", [cId]);
+            }
+        }
         await pool.query(
-            "DELETE FROM users WHERE role = 'campus_coordinator' AND LOWER(university) = LOWER(?)",
+            "DELETE FROM users WHERE role = 'campus_coordinator' AND LOWER(TRIM(university)) = LOWER(TRIM(?))",
+            [university]
+        );
+        await pool.query(
+            "UPDATE users SET role = 'author', campus_role = NULL, university = NULL WHERE role = 'campus_coordinator' AND LOWER(TRIM(university)) = LOWER(TRIM(?))",
             [university]
         );
 
