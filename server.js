@@ -4561,6 +4561,122 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
     }
 });
 
+// Admin: Campus Publications Overview & Workflow Tracking
+app.get('/api/admin/campus-publications', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    try {
+        const campusFilter = `(
+            u.coordinator_id IS NOT NULL 
+            OR u.role IN ('campus_coordinator', 'campus_editor') 
+            OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+        )`;
+
+        // 1. Makaleler & Bilim Gündemi
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.published_at, a.created_at, a.submitted_at,
+                   a.campus_reviewed_at, a.rejection_reason, a.excerpt, a.image_url, a.is_gundem,
+                   CASE WHEN a.is_gundem = 1 THEN 'gundem' ELSE 'article' END as item_type,
+                   u.id as author_id, u.fullname as author_name, u.email as author_email, 
+                   u.university as author_university, u.campus_role as author_campus_role, u.avatar_url as author_avatar,
+                   ce.fullname as campus_editor_name,
+                   ap.fullname as approver_name,
+                   (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            LEFT JOIN users ce ON a.campus_editor_id = ce.id
+            LEFT JOIN users ap ON a.approved_by = ap.id
+            WHERE a.deleted_at IS NULL AND ${campusFilter}
+            ORDER BY COALESCE(a.published_at, a.submitted_at, a.created_at) DESC
+        `);
+
+        // 2. Deneyler
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.views, e.published_at, e.created_at, e.created_at as submitted_at,
+                   e.campus_reviewed_at, e.rejection_reason, e.objective as excerpt, e.image_url, 0 as is_gundem,
+                   'experiment' as item_type,
+                   u.id as author_id, u.fullname as author_name, u.email as author_email, 
+                   u.university as author_university, u.campus_role as author_campus_role, u.avatar_url as author_avatar,
+                   ce.fullname as campus_editor_name,
+                   ap.fullname as approver_name,
+                   (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            LEFT JOIN users ce ON e.campus_editor_id = ce.id
+            LEFT JOIN users ap ON e.approved_by = ap.id
+            WHERE e.deleted_at IS NULL AND ${campusFilter}
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
+        `);
+
+        const allItems = [...articles, ...experiments].sort((a, b) => {
+            const dateA = new Date(a.published_at || a.submitted_at || a.created_at || 0);
+            const dateB = new Date(b.published_at || b.submitted_at || b.created_at || 0);
+            return dateB - dateA;
+        });
+
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+
+        let countPublished = 0;
+        let countPendingChief = 0;
+        let countPendingCampus = 0;
+        let countRevision = 0;
+        let countDraft = 0;
+
+        const universitySet = new Set();
+
+        allItems.forEach(item => {
+            const v = Number(item.views) || 0;
+            const l = Number(item.like_count) || 0;
+            const c = Number(item.comment_count) || 0;
+
+            totalViews += v;
+            totalLikes += l;
+            totalComments += c;
+
+            if (item.status === 'published') {
+                countPublished++;
+            } else if (item.status === 'pending') {
+                countPendingChief++;
+            } else if (item.status === 'pending_campus') {
+                countPendingCampus++;
+            } else if (item.status === 'rejected' || item.status === 'revision') {
+                countRevision++;
+            } else {
+                countDraft++;
+            }
+
+            if (item.author_university && item.author_university.trim()) {
+                universitySet.add(item.author_university.trim());
+            }
+        });
+
+        const universities = Array.from(universitySet).sort((a, b) => a.localeCompare(b, 'tr'));
+
+        res.json({
+            stats: {
+                totalCount: allItems.length,
+                totalPublished: countPublished,
+                totalPendingChief: countPendingChief,
+                totalPendingCampus: countPendingCampus,
+                totalRevision: countRevision,
+                totalDraft: countDraft,
+                totalViews,
+                totalLikes,
+                totalComments
+            },
+            universities,
+            publications: allItems
+        });
+    } catch (e) {
+        console.error('[ADMIN-CAMPUS-PUBLICATIONS-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 5. Admin: Create a New Campus Team (with initial coordinator)
 app.post('/api/admin/campus-teams', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
