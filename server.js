@@ -9165,9 +9165,9 @@ app.get('/api/campus-editor/content/:type/:id', authenticateToken, async (req, r
         const tableName = isExp ? 'experiments' : 'articles';
         const [rows] = await pool.query(`
             SELECT t.*, u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
-            FROM \${tableName} t
+            FROM ${tableName} t
             LEFT JOIN users u ON t.author_id = u.id
-            WHERE t.id = ? \${isExp ? 'AND t.deleted_at IS NULL' : ''}
+            WHERE t.id = ? ${isExp ? 'AND t.deleted_at IS NULL' : ''}
         `, [id]);
 
         if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
@@ -9212,7 +9212,7 @@ app.put('/api/campus-editor/content/:type/:id', authenticateToken, async (req, r
     try {
         const isExp = (type === 'experiment');
         const tableName = isExp ? 'experiments' : 'articles';
-        const [rows] = await pool.query(`SELECT * FROM \${tableName} WHERE id = ? \${isExp ? 'AND deleted_at IS NULL' : ''}`, [id]);
+        const [rows] = await pool.query(`SELECT * FROM ${tableName} WHERE id = ? ${isExp ? 'AND deleted_at IS NULL' : ''}`, [id]);
         if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
         const item = rows[0];
 
@@ -9337,7 +9337,7 @@ app.put('/api/campus-editor/content/:type/:id', authenticateToken, async (req, r
 
         if (updates.length > 0) {
             params.push(id);
-            await pool.query(`UPDATE \${tableName} SET \${updates.join(', ')} WHERE id = ?`, params);
+            await pool.query(`UPDATE ${tableName} SET ${updates.join(', ')} WHERE id = ?`, params);
         }
 
         if (isExp) clearCache('experiments');
@@ -9349,13 +9349,13 @@ app.put('/api/campus-editor/content/:type/:id', authenticateToken, async (req, r
 
             // Notify Chief Editors & Admins
             const [chiefs] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
-            const chiefMsg = `Kampüs Editörü (\${editorName}) içeriği düzenleyip Baş Editör onayına gönderdi: \${displayTitle}`;
+            const chiefMsg = `Kampüs Editörü (${editorName}) içeriği düzenleyip Baş Editör onayına gönderdi: ${displayTitle}`;
             for (const c of chiefs) {
                 await createNotification(c.id, chiefMsg, 'info');
             }
 
             // Notify Author
-            const authorMsg = `Kampüs editörünüz (\${editorName}) "\${displayTitle}" başlıklı içeriğinizi düzenleyip Baş Editör onayına iletti.`;
+            const authorMsg = `Kampüs editörünüz (${editorName}) "${displayTitle}" başlıklı içeriğinizi düzenleyip Baş Editör onayına iletti.`;
             await createNotification(item.author_id, authorMsg, 'success');
 
             return res.json({ success: true, message: 'İçerik düzenlendi ve Baş Editör incelemesine başarıyla iletildi.' });
