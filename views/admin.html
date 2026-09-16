@@ -859,6 +859,11 @@
                 <i class="ph ph-graduation-cap"></i>
                 <span>Kampüs Koordinatörü</span>
             </a>
+            <!-- Kampüs Ekipleri Menüsü -->
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('campus-teams-section', this); loadCampusTeamsOverview();">
+                <i class="ph ph-buildings"></i>
+                <span>Kampüs Ekipleri</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
                 <i class="ph ph-envelope-simple"></i>
                 <span>E-posta Şablonları</span>
@@ -3132,6 +3137,292 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- Kampüs Ekipleri Yönetim ve Detay Bölümü -->
+        <div id="campus-teams-section" class="section">
+            <style>
+                .campus-teams-hero {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+                    border-radius: 20px;
+                    padding: 28px 32px;
+                    margin-bottom: 24px;
+                    color: white;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 10px 25px -5px rgba(30, 27, 75, 0.3);
+                }
+                .campus-teams-hero::after {
+                    content: '';
+                    position: absolute;
+                    top: -60px;
+                    right: -60px;
+                    width: 260px;
+                    height: 260px;
+                    background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
+                    border-radius: 50%;
+                }
+                .campus-kpi-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                    gap: 14px;
+                    margin-top: 20px;
+                    position: relative;
+                    z-index: 2;
+                }
+                .campus-kpi-card {
+                    background: rgba(255, 255, 255, 0.08);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    border-radius: 14px;
+                    padding: 14px 18px;
+                    transition: transform 0.2s, background 0.2s;
+                }
+                .campus-kpi-card:hover {
+                    transform: translateY(-2px);
+                    background: rgba(255, 255, 255, 0.12);
+                }
+                .campus-kpi-num {
+                    font-size: 1.75rem;
+                    font-weight: 800;
+                    color: #ffffff;
+                    line-height: 1.1;
+                }
+                .campus-kpi-label {
+                    font-size: 0.78rem;
+                    color: #cbd5e1;
+                    font-weight: 500;
+                    margin-top: 4px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .campus-team-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 18px;
+                    margin-bottom: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+                    transition: all 0.25s ease;
+                }
+                .campus-team-card:hover {
+                    box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.08);
+                    border-color: #cbd5e1;
+                }
+                .campus-team-header {
+                    padding: 20px 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 16px;
+                    cursor: pointer;
+                    user-select: none;
+                    background: var(--card-bg, #ffffff);
+                    transition: background 0.2s;
+                }
+                .campus-team-header:hover {
+                    background: rgba(248, 250, 252, 0.7);
+                }
+                body.dark-mode .campus-team-header:hover {
+                    background: rgba(30, 41, 59, 0.4);
+                }
+                .campus-team-uni-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 14px;
+                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    flex-shrink: 0;
+                    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+                }
+                .campus-team-badges {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .c-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 12px;
+                    border-radius: 20px;
+                    font-size: 0.78rem;
+                    font-weight: 600;
+                    letter-spacing: -0.01em;
+                }
+                .c-badge-coord { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25); }
+                .c-badge-editor { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
+                .c-badge-author { background: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.25); }
+                .c-badge-card { background: rgba(6, 182, 212, 0.12); color: #0891b2; border: 1px solid rgba(6, 182, 212, 0.25); }
+                .c-badge-pub { background: rgba(147, 51, 234, 0.12); color: #9333ea; border: 1px solid rgba(147, 51, 234, 0.25); }
+                .c-badge-view { background: rgba(100, 116, 139, 0.12); color: #475569; border: 1px solid rgba(100, 116, 139, 0.25); }
+
+                .campus-team-body {
+                    border-top: 1px solid var(--border-color, #e2e8f0);
+                    padding: 22px 24px;
+                    background: rgba(248, 250, 252, 0.4);
+                }
+                body.dark-mode .campus-team-body {
+                    background: rgba(15, 23, 42, 0.3);
+                }
+
+                .team-nav-tabs {
+                    display: flex;
+                    gap: 8px;
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid var(--border-color, #e2e8f0);
+                    padding-bottom: 8px;
+                    flex-wrap: wrap;
+                }
+                .team-nav-tab {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    background: transparent;
+                    border: none;
+                    font-size: 0.86rem;
+                    font-weight: 600;
+                    color: #64748b;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s;
+                }
+                .team-nav-tab:hover {
+                    color: var(--primary-accent, #6366f1);
+                    background: rgba(99, 102, 241, 0.06);
+                }
+                .team-nav-tab.active {
+                    color: var(--primary-accent, #6366f1);
+                    background: rgba(99, 102, 241, 0.12);
+                }
+
+                .team-tab-pane {
+                    display: none;
+                }
+                .team-tab-pane.active {
+                    display: block;
+                    animation: fadeInTeam 0.25s ease;
+                }
+                @keyframes fadeInTeam {
+                    from { opacity: 0; transform: translateY(4px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .mini-showcase-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                    gap: 16px;
+                }
+                .mini-showcase-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 14px;
+                    padding: 16px;
+                    text-align: center;
+                    position: relative;
+                }
+                .mini-showcase-avatar {
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    margin: 0 auto 10px;
+                    display: block;
+                    border: 2px solid var(--primary-accent, #6366f1);
+                }
+                .mini-showcase-fallback {
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                    color: white;
+                    font-weight: 700;
+                    font-size: 1.3rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 10px;
+                }
+            </style>
+
+            <!-- Hero & KPI Banner -->
+            <div class="campus-teams-hero">
+                <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h1 style="margin: 0 0 8px 0; font-size: 1.7rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px;">
+                            <i class="ph ph-buildings" style="color: #a5b4fc;"></i> Kampüs Ekipleri Yönetimi
+                        </h1>
+                        <p style="margin: 0; color: #cbd5e1; font-size: 0.92rem; max-width: 680px;">
+                            Koordinatörlerin kurduğu tüm üniversite ekiplerini, üyelerini (yazar & editör), vitrin kartlarını ve yayın üretim süreçlerini ekip bazında inceleyin.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="toggleAllTeams()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: white; font-size: 0.85rem; padding: 8px 16px;">
+                            <i class="ph ph-arrows-out-line" id="btn-toggle-all-icon"></i> <span id="btn-toggle-all-text">Tümünü Genişlet</span>
+                        </button>
+                        <button class="btn" onclick="loadCampusTeamsOverview()" style="background: white; color: #1e1b4b; font-weight: 600; font-size: 0.85rem; padding: 8px 18px;">
+                            <i class="ph ph-arrows-clockwise"></i> Yenile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Kartları -->
+                <div class="campus-kpi-grid">
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-teams">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-buildings"></i> Toplam Ekip</div>
+                    </div>
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-coords">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-crown"></i> Koordinatör</div>
+                    </div>
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-members">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-users-three"></i> Yazar & Editör</div>
+                    </div>
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-pubs">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-article"></i> Toplam Yayın</div>
+                    </div>
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-views">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-eye"></i> Toplam Okunma</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtreler & Arama -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="position: relative; flex: 1; min-width: 260px;">
+                    <i class="ph ph-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
+                    <input type="text" id="campus-team-search-input" oninput="filterCampusTeams()" placeholder="Üniversite, koordinatör veya ekip üyesi ara..." class="form-control" style="padding-left: 42px; font-size: 0.9rem; border-radius: 12px;">
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="campus-team-filter-select" onchange="filterCampusTeams()" class="form-control" style="width: 200px; font-size: 0.88rem; border-radius: 12px; cursor: pointer;">
+                        <option value="all">Tüm Ekipler</option>
+                        <option value="has_members">Üyesi Olan Ekipler</option>
+                        <option value="has_pubs">Yayını Olan Ekipler</option>
+                        <option value="multi_coord">Çoklu Koordinatörlü</option>
+                        <option value="has_cards">Vitrini Olan Ekipler</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ekipler Listesi -->
+            <div id="campus-teams-container">
+                <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <i class="ph ph-spinner spinner" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                    Kampüs ekipleri yükleniyor...
+                </div>
             </div>
         </div>
 
@@ -6164,6 +6455,7 @@
                 if (sectionId === 'author-consents') loadAuthorConsents();
                 if (sectionId === 'change-author-password-section') loadAuthorsForPasswordReset();
                 if (sectionId === 'campus-coordinator-section') loadCampusCoordinators();
+                if (sectionId === 'campus-teams-section') loadCampusTeamsOverview();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -6599,6 +6891,567 @@
         function quickResetCoordinatorPassword(email) {
             showSection('change-author-password-section', document.querySelector('a[onclick*="change-author-password-section"]'));
             selectAuthorForReset(email);
+        }
+
+        // === KAMPÜS EKİPLERİ DETAYLI YÖNETİM & GENEL BAKIŞ ===
+        let campusTeamsData = null;
+        let allTeamsExpanded = false;
+
+        async function loadCampusTeamsOverview() {
+            const container = document.getElementById('campus-teams-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <i class="ph ph-spinner spinner" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                        Kampüs ekipleri ve detayları yükleniyor...
+                    </div>
+                `;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-teams-overview`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                campusTeamsData = await res.json();
+
+                // KPI değerlerini güncelle
+                const s = campusTeamsData.summary || {};
+                const kpiTeams = document.getElementById('kpi-total-teams');
+                const kpiCoords = document.getElementById('kpi-total-coords');
+                const kpiMembers = document.getElementById('kpi-total-members');
+                const kpiPubs = document.getElementById('kpi-total-pubs');
+                const kpiViews = document.getElementById('kpi-total-views');
+
+                if (kpiTeams) kpiTeams.innerText = s.total_teams || 0;
+                if (kpiCoords) kpiCoords.innerText = s.total_coordinators || 0;
+                if (kpiMembers) kpiMembers.innerText = s.total_members || 0;
+                if (kpiPubs) kpiPubs.innerText = s.total_publications || 0;
+                if (kpiViews) kpiViews.innerText = (s.total_views || 0).toLocaleString('tr-TR');
+
+                renderCampusTeams(campusTeamsData.teams || []);
+            } catch (err) {
+                console.error('[LOAD-CAMPUS-TEAMS-ERROR]', err);
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 36px; color: #ef4444; background: var(--card-bg); border-radius: 16px; border: 1px dashed #fecaca;">
+                            <i class="ph ph-warning-circle" style="font-size: 2.2rem; display: block; margin-bottom: 8px;"></i>
+                            Kampüs ekipleri verisi alınamadı: ${escapeHtml(err.message)}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function filterCampusTeams() {
+            if (!campusTeamsData || !campusTeamsData.teams) return;
+            const searchInput = document.getElementById('campus-team-search-input');
+            const filterSelect = document.getElementById('campus-team-filter-select');
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const f = filterSelect ? filterSelect.value : 'all';
+
+            const filtered = campusTeamsData.teams.filter(team => {
+                // Arama filtresi: Üniversite adı, koordinatör adları/epostaları veya üye adları/epostaları
+                const matchUni = team.university && team.university.toLowerCase().includes(q);
+                const matchCoord = team.coordinators.some(c => 
+                    (c.fullname && c.fullname.toLowerCase().includes(q)) ||
+                    (c.email && c.email.toLowerCase().includes(q))
+                );
+                const matchMember = team.members.some(m => 
+                    (m.fullname && m.fullname.toLowerCase().includes(q)) ||
+                    (m.email && m.email.toLowerCase().includes(q)) ||
+                    (m.department && m.department.toLowerCase().includes(q))
+                );
+                if (q && !matchUni && !matchCoord && !matchMember) return false;
+
+                // Seçim filtresi
+                if (f === 'has_members' && team.stats.total_members === 0) return false;
+                if (f === 'has_pubs' && team.stats.total_publications === 0) return false;
+                if (f === 'multi_coord' && team.stats.total_coordinators <= 1) return false;
+                if (f === 'has_cards' && team.stats.total_cards === 0) return false;
+
+                return true;
+            });
+
+            renderCampusTeams(filtered);
+        }
+
+        function renderCampusTeams(teams) {
+            const container = document.getElementById('campus-teams-container');
+            if (!container) return;
+
+            if (!teams || teams.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 20px; background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--border-color); color: #94a3b8;">
+                        <i class="ph ph-buildings" style="font-size: 2.8rem; display: block; margin-bottom: 12px; color: #cbd5e1;"></i>
+                        <h3 style="margin: 0 0 6px 0; color: #475569; font-size: 1.1rem;">Kriterlere Uygun Ekip Bulunamadı</h3>
+                        <p style="margin: 0; font-size: 0.88rem;">Arama kriterlerinizi değiştirmeyi deneyebilirsiniz.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = teams.map((team, idx) => {
+                const safeKey = escapeHtml(team.key.replace(/[^a-zA-Z0-9_-]/g, '_'));
+                const coordNames = team.coordinators.map(c => escapeHtml(c.fullname || c.email)).join(', ') || 'Koordinatör Atanmamış';
+                const coordCount = team.stats.total_coordinators;
+                const membersCount = team.stats.total_members;
+                const editorsCount = team.stats.total_editors;
+                const authorsCount = team.stats.total_authors;
+                const cardsCount = team.stats.total_cards;
+                const pubsCount = team.stats.total_publications;
+                const viewsCount = (team.stats.total_views || 0).toLocaleString('tr-TR');
+
+                return `
+                    <div class="campus-team-card" id="team-card-${safeKey}">
+                        <!-- Ekip Başlığı (Tıklanabilir Header) -->
+                        <div class="campus-team-header" onclick="toggleTeamDetails('${safeKey}')">
+                            <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;">
+                                <div class="campus-team-uni-icon">
+                                    <i class="ph ph-buildings"></i>
+                                </div>
+                                <div style="min-width: 0;">
+                                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <h3 style="margin: 0; font-size: 1.12rem; font-weight: 700; color: var(--text-main); line-height: 1.3;">
+                                            ${escapeHtml(team.university)}
+                                        </h3>
+                                        ${coordCount > 1 ? `
+                                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                                <i class="ph-fill ph-crown"></i> ${coordCount} Eş Koordinatör
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.84rem; margin-top: 4px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <i class="ph ph-user-circle" style="color: #94a3b8;"></i>
+                                        <span>Koordinatör: <strong>${coordNames}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rozetler & Toggle Butonu -->
+                            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: flex-end;">
+                                <div class="campus-team-badges">
+                                    <span class="c-badge c-badge-coord" title="Koordinatör Sayısı">
+                                        <i class="ph-bold ph-crown"></i> ${coordCount} Koordinatör
+                                    </span>
+                                    <span class="c-badge c-badge-editor" title="Editör Sayısı">
+                                        <i class="ph-bold ph-pencil-simple"></i> ${editorsCount} Editör
+                                    </span>
+                                    <span class="c-badge c-badge-author" title="Yazar Sayısı">
+                                        <i class="ph-bold ph-newspaper"></i> ${authorsCount} Yazar
+                                    </span>
+                                    <span class="c-badge c-badge-card" title="Vitrin Kartı">
+                                        <i class="ph-bold ph-identification-card"></i> ${cardsCount} Vitrin Kartı
+                                    </span>
+                                    <span class="c-badge c-badge-pub" title="Yayın Sayısı">
+                                        <i class="ph-bold ph-article"></i> ${pubsCount} Yayın
+                                    </span>
+                                    <span class="c-badge c-badge-view" title="Toplam Okunma">
+                                        <i class="ph-bold ph-eye"></i> ${viewsCount} Okunma
+                                    </span>
+                                </div>
+                                <button type="button" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.82rem; border-radius: 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" onclick="event.stopPropagation(); toggleTeamDetails('${safeKey}')">
+                                    <span>Detaylar</span>
+                                    <i class="ph ph-caret-down" id="chevron-${safeKey}" style="transition: transform 0.25s;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Açılır Kapanır Detay Gövdesi -->
+                        <div class="campus-team-body" id="team-body-${safeKey}" style="display: ${allTeamsExpanded ? 'block' : 'none'};">
+                            <!-- Tab Butonları -->
+                            <div class="team-nav-tabs">
+                                <button type="button" class="team-nav-tab active" onclick="switchTeamTab('${safeKey}', 'members', this)">
+                                    <i class="ph ph-users-three"></i> Ekip Üyeleri (${team.members.length})
+                                </button>
+                                <button type="button" class="team-nav-tab" onclick="switchTeamTab('${safeKey}', 'coordinators', this)">
+                                    <i class="ph ph-crown"></i> Koordinatörler (${team.coordinators.length})
+                                </button>
+                                <button type="button" class="team-nav-tab" onclick="switchTeamTab('${safeKey}', 'cards', this)">
+                                    <i class="ph ph-identification-card"></i> Ekip Vitrin Kartları (${team.cards.length})
+                                </button>
+                                <button type="button" class="team-nav-tab" onclick="switchTeamTab('${safeKey}', 'pubs', this)">
+                                    <i class="ph ph-article"></i> Yayınlar & Süreç (${team.publications.length})
+                                </button>
+                            </div>
+
+                            <!-- TAB 1: EKİP ÜYELERİ (YAZARLAR VE EDİTÖRLER) -->
+                            <div class="team-tab-pane active" id="tab-${safeKey}-members">
+                                ${renderTeamMembersTable(team.members, team.university)}
+                            </div>
+
+                            <!-- TAB 2: KOORDİNATÖRLER -->
+                            <div class="team-tab-pane" id="tab-${safeKey}-coordinators">
+                                ${renderTeamCoordinatorsList(team.coordinators, team.university)}
+                            </div>
+
+                            <!-- TAB 3: EKİP VİTRİN KARTLARI -->
+                            <div class="team-tab-pane" id="tab-${safeKey}-cards">
+                                ${renderTeamCardsList(team.cards)}
+                            </div>
+
+                            <!-- TAB 4: YAYINLAR & İSTATİSTİKLER -->
+                            <div class="team-tab-pane" id="tab-${safeKey}-pubs">
+                                ${renderTeamPublicationsList(team.publications, team.stats)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Tablo 1: Ekip Üyeleri Tablosu
+        function renderTeamMembersTable(members, university) {
+            if (!members || members.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 28px; color: #94a3b8; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="ph ph-users-three" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.5;"></i>
+                        Bu üniversite ekibine henüz kampüs yazarı veya editörü eklenmemiş.
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="overflow-x: auto;">
+                    <table class="custom-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: rgba(241, 245, 249, 0.6); text-align: left; font-size: 0.8rem; color: #64748b;">
+                                <th style="padding: 10px 14px;">Üye</th>
+                                <th style="padding: 10px 14px;">Görev Tanımı</th>
+                                <th style="padding: 10px 14px;">Bölüm / Alan</th>
+                                <th style="padding: 10px 14px;">Yayınlar</th>
+                                <th style="padding: 10px 14px;">Katılma Tarihi</th>
+                                <th style="padding: 10px 14px; text-align: right;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${members.map(m => {
+                                const initial = (m.fullname || 'Ü').charAt(0).toUpperCase();
+                                const isEditor = m.role === 'campus_editor' || (m.campus_role && m.campus_role.toLowerCase().includes('editör'));
+                                const isCoord = m.role === 'campus_coordinator' || (m.campus_role && m.campus_role.toLowerCase().includes('koordinatör'));
+                                const roleBadgeClass = isCoord ? 'c-badge-coord' : (isEditor ? 'c-badge-editor' : 'c-badge-author');
+                                const roleIcon = isCoord ? 'ph-crown' : (isEditor ? 'ph-pencil-simple' : 'ph-newspaper');
+                                const roleTitle = m.campus_role || (isCoord ? 'Eş Koordinatör' : (isEditor ? 'Kampüs Editörü' : 'Kampüs Yazarı'));
+                                const dateStr = m.created_at ? new Date(m.created_at).toLocaleDateString('tr-TR') : '-';
+                                const totalPubs = (Number(m.published_articles) || 0) + (Number(m.published_experiments) || 0);
+
+                                return `
+                                    <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.88rem;">
+                                        <td style="padding: 10px 14px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <div style="width: 34px; height: 34px; border-radius: 50%; background: ${isCoord ? 'rgba(245, 158, 11, 0.15)' : (isEditor ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)')}; color: ${isCoord ? '#d97706' : (isEditor ? '#059669' : '#6366f1')}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">
+                                                    ${escapeHtml(initial)}
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(m.fullname || '-')}</div>
+                                                    <div style="color: #64748b; font-size: 0.78rem;">${escapeHtml(m.email)}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 10px 14px;">
+                                            <span class="c-badge ${roleBadgeClass}">
+                                                <i class="ph-bold ${roleIcon}"></i> ${escapeHtml(roleTitle)}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 10px 14px; color: #475569; font-size: 0.84rem;">
+                                            ${escapeHtml(m.department || '-')}
+                                        </td>
+                                        <td style="padding: 10px 14px;">
+                                            <span style="font-weight: 600; color: var(--text-main);">${totalPubs}</span>
+                                            <small style="color: #94a3b8; font-size: 0.76rem;">(${m.published_articles || 0} makale, ${m.published_experiments || 0} deney)</small>
+                                        </td>
+                                        <td style="padding: 10px 14px; color: #64748b; font-size: 0.82rem;">
+                                            ${dateStr}
+                                        </td>
+                                        <td style="padding: 10px 14px; text-align: right;">
+                                            <div style="display: inline-flex; align-items: center; gap: 6px;">
+                                                ${m.email ? `
+                                                    <a href="mailto:${encodeURIComponent(m.email)}" class="btn" style="padding: 5px 9px; font-size: 0.78rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-radius: 6px;" title="E-posta Gönder">
+                                                        <i class="ph-bold ph-envelope"></i>
+                                                    </a>
+                                                ` : ''}
+                                                <button type="button" onclick="quickResetCoordinatorPassword('${escapeHtml(m.email)}')" class="btn" style="padding: 5px 9px; font-size: 0.78rem; background: #f1f5f9; color: #475569; border-radius: 6px;" title="Şifre Sıfırla">
+                                                    <i class="ph-bold ph-key"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Tablo 2: Koordinatörler Listesi
+        function renderTeamCoordinatorsList(coordinators, university) {
+            if (!coordinators || coordinators.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 28px; color: #94a3b8; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="ph ph-graduation-cap" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.5;"></i>
+                        Bu üniversiteye atanmış koordinatör bulunmuyor.
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    ${coordinators.map(c => {
+                        const initial = (c.fullname || 'K').charAt(0).toUpperCase();
+                        const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('tr-TR') : '-';
+
+                        return `
+                            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25);">
+                                        ${escapeHtml(initial)}
+                                    </div>
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 700; color: var(--text-main); font-size: 0.98rem; display: flex; align-items: center; gap: 6px;">
+                                            <span>${escapeHtml(c.fullname || 'Kampüs Koordinatörü')}</span>
+                                            <i class="ph-fill ph-crown" style="color: #f59e0b;" title="Koordinatör"></i>
+                                        </div>
+                                        <div style="color: #64748b; font-size: 0.82rem; margin-top: 2px;">${escapeHtml(c.email)}</div>
+                                        <small style="color: #94a3b8; font-size: 0.74rem;">Kayıt: ${dateStr}</small>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+                                    <a href="mailto:${encodeURIComponent(c.email)}" class="btn" style="flex: 1; justify-content: center; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); font-size: 0.82rem; padding: 7px 12px; border-radius: 8px;">
+                                        <i class="ph-bold ph-envelope"></i> E-posta
+                                    </a>
+                                    <button type="button" onclick="quickResetCoordinatorPassword('${escapeHtml(c.email)}')" class="btn" style="background: #f1f5f9; color: #475569; font-size: 0.82rem; padding: 7px 12px; border-radius: 8px;" title="Şifre Sıfırla">
+                                        <i class="ph-bold ph-key"></i> Şifre
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Tablo 3: Ekip Vitrin Kartları (Hakkımızda Vitrini)
+        function renderTeamCardsList(cards) {
+            if (!cards || cards.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 28px; color: #94a3b8; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="ph ph-identification-card" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.5;"></i>
+                        Bu ekip için henüz genel sitede sergilenen vitrin kartı eklenmemiş.
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="mini-showcase-grid">
+                    ${cards.map(card => {
+                        const initial = (card.fullname || 'K').charAt(0).toUpperCase();
+                        const isLeader = card.role_title && card.role_title.toLowerCase().includes('koordinatör');
+
+                        return `
+                            <div class="mini-showcase-card">
+                                ${isLeader ? `
+                                    <div style="position: absolute; top: 10px; right: 10px; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700;">
+                                        <i class="ph-fill ph-crown"></i> Lider
+                                    </div>
+                                ` : ''}
+
+                                ${card.image_url ? `
+                                    <img src="/${escapeHtml(card.image_url.replace(/^\//, ''))}" alt="${escapeHtml(card.fullname)}" class="mini-showcase-avatar">
+                                ` : `
+                                    <div class="mini-showcase-fallback">${initial}</div>
+                                `}
+
+                                <div style="font-weight: 700; color: var(--text-main); font-size: 0.92rem; margin-bottom: 3px;">
+                                    ${escapeHtml(card.fullname)}
+                                </div>
+                                <div style="color: var(--primary-accent); font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">
+                                    ${escapeHtml(card.role_title || '-')}
+                                </div>
+                                <div style="color: #64748b; font-size: 0.75rem; margin-bottom: 8px;">
+                                    ${escapeHtml(card.university || '-')}
+                                </div>
+
+                                <div style="display: flex; justify-content: center; gap: 8px;">
+                                    ${card.email ? `
+                                        <a href="mailto:${encodeURIComponent(card.email)}" style="color: #64748b; font-size: 1.05rem;" title="${escapeHtml(card.email)}">
+                                            <i class="ph ph-envelope"></i>
+                                        </a>
+                                    ` : ''}
+                                    ${card.linkedin_url ? `
+                                        <a href="${escapeHtml(card.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color: #0077b5; font-size: 1.05rem;" title="LinkedIn">
+                                            <i class="ph ph-linkedin-logo"></i>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Tablo 4: Kampüs Yayınları ve Süreç Takibi
+        function renderTeamPublicationsList(publications, stats) {
+            if (!publications || publications.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 28px; color: #94a3b8; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="ph ph-article" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.5;"></i>
+                        Bu ekibe ait henüz içerik (makale veya deney) gönderilmemiş.
+                    </div>
+                `;
+            }
+
+            return `
+                <div>
+                    <!-- Süreç İstatistik Barları -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <span class="c-badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <i class="ph-bold ph-check-circle"></i> Yayında: ${stats.published_count || 0}
+                        </span>
+                        <span class="c-badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3);">
+                            <i class="ph-bold ph-clock"></i> Baş Editörde: ${stats.pending_chief_count || 0}
+                        </span>
+                        <span class="c-badge" style="background: rgba(99, 102, 241, 0.15); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3);">
+                            <i class="ph-bold ph-magnifying-glass"></i> Kampüs İncelemesinde: ${stats.pending_campus_count || 0}
+                        </span>
+                        <span class="c-badge" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <i class="ph-bold ph-arrows-clockwise"></i> Revizyon / İptal: ${stats.revision_count || 0}
+                        </span>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="custom-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(241, 245, 249, 0.6); text-align: left; font-size: 0.8rem; color: #64748b;">
+                                    <th style="padding: 10px 14px;">Başlık</th>
+                                    <th style="padding: 10px 14px;">Tür</th>
+                                    <th style="padding: 10px 14px;">Yazar</th>
+                                    <th style="padding: 10px 14px;">Durum</th>
+                                    <th style="padding: 10px 14px;">Etkileşim</th>
+                                    <th style="padding: 10px 14px;">Tarih</th>
+                                    <th style="padding: 10px 14px; text-align: right;">Görüntüle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${publications.slice(0, 15).map(pub => {
+                                    const dateStr = pub.published_at ? new Date(pub.published_at).toLocaleDateString('tr-TR') : 
+                                                   (pub.submitted_at ? new Date(pub.submitted_at).toLocaleDateString('tr-TR') : '-');
+                                    let statusLabel = 'Taslak';
+                                    let statusBg = '#f1f5f9';
+                                    let statusColor = '#64748b';
+
+                                    if (pub.status === 'published') {
+                                        statusLabel = 'Yayında';
+                                        statusBg = 'rgba(16, 185, 129, 0.15)';
+                                        statusColor = '#059669';
+                                    } else if (pub.status === 'pending') {
+                                        statusLabel = 'Baş Editörde';
+                                        statusBg = 'rgba(245, 158, 11, 0.15)';
+                                        statusColor = '#d97706';
+                                    } else if (pub.status === 'pending_campus') {
+                                        statusLabel = 'Kampüs Editöründe';
+                                        statusBg = 'rgba(99, 102, 241, 0.15)';
+                                        statusColor = '#6366f1';
+                                    } else if (pub.status === 'revision' || pub.status === 'rejected') {
+                                        statusLabel = 'Revizyon İstendi';
+                                        statusBg = 'rgba(239, 68, 68, 0.15)';
+                                        statusColor = '#dc2626';
+                                    }
+
+                                    const typeName = pub.item_type === 'experiment' ? 'Deney' : (pub.is_gundem ? 'Gündem' : 'Makale');
+                                    const linkUrl = pub.status === 'published' ? 
+                                        (pub.item_type === 'experiment' ? `/deney/${pub.slug}` : `/makale/${pub.slug}`) :
+                                        (pub.item_type === 'experiment' ? `/preview-experiment/${pub.id}` : `/preview-article/${pub.id}`);
+
+                                    return `
+                                        <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.86rem;">
+                                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-main); max-width: 260px;">
+                                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(pub.title)}">
+                                                    ${escapeHtml(pub.title)}
+                                                </div>
+                                            </td>
+                                            <td style="padding: 10px 14px;">
+                                                <span style="font-size: 0.76rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #475569;">
+                                                    ${typeName}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 10px 14px; color: #334155;">
+                                                ${escapeHtml(pub.author_name || '-')}
+                                            </td>
+                                            <td style="padding: 10px 14px;">
+                                                <span style="font-size: 0.76rem; font-weight: 600; padding: 3px 9px; border-radius: 12px; background: ${statusBg}; color: ${statusColor};">
+                                                    ${statusLabel}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 10px 14px; color: #64748b; font-size: 0.8rem;">
+                                                <i class="ph ph-eye"></i> ${pub.views || 0} · 
+                                                <i class="ph ph-heart"></i> ${pub.like_count || 0}
+                                            </td>
+                                            <td style="padding: 10px 14px; color: #64748b; font-size: 0.8rem;">
+                                                ${dateStr}
+                                            </td>
+                                            <td style="padding: 10px 14px; text-align: right;">
+                                                <a href="${linkUrl}" target="_blank" class="btn" style="padding: 4px 8px; font-size: 0.75rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-radius: 6px;">
+                                                    <i class="ph ph-arrow-square-out"></i> İncele
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Ekip Aç / Kapa
+        function toggleTeamDetails(safeKey) {
+            const body = document.getElementById(`team-body-${safeKey}`);
+            const chevron = document.getElementById(`chevron-${safeKey}`);
+            if (!body) return;
+
+            const isHidden = body.style.display === 'none';
+            body.style.display = isHidden ? 'block' : 'none';
+            if (chevron) {
+                chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        // Tüm Ekipleri Aç / Kapa
+        function toggleAllTeams() {
+            allTeamsExpanded = !allTeamsExpanded;
+            const bodies = document.querySelectorAll('.campus-team-body');
+            const chevrons = document.querySelectorAll('[id^="chevron-"]');
+            const toggleIcon = document.getElementById('btn-toggle-all-icon');
+            const toggleText = document.getElementById('btn-toggle-all-text');
+
+            bodies.forEach(b => {
+                b.style.display = allTeamsExpanded ? 'block' : 'none';
+            });
+            chevrons.forEach(c => {
+                c.style.transform = allTeamsExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+            });
+
+            if (toggleText) toggleText.innerText = allTeamsExpanded ? 'Tümünü Daralt' : 'Tümünü Genişlet';
+            if (toggleIcon) toggleIcon.className = allTeamsExpanded ? 'ph ph-arrows-in-line' : 'ph ph-arrows-out-line';
+        }
+
+        // Ekip İçi Sekme Değiştirici
+        function switchTeamTab(safeKey, tabName, btn) {
+            const parent = document.getElementById(`team-body-${safeKey}`);
+            if (!parent) return;
+
+            // Tab butonlarını güncelle
+            parent.querySelectorAll('.team-nav-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            // Panelleri güncelle
+            parent.querySelectorAll('.team-tab-pane').forEach(p => p.classList.remove('active'));
+            const targetPane = document.getElementById(`tab-${safeKey}-${tabName}`);
+            if (targetPane) targetPane.classList.add('active');
         }
 
         // === MAINTENANCE MODE LOGIC ===

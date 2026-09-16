@@ -4275,6 +4275,319 @@ app.delete('/api/admin/campus-coordinators/:id', authenticateToken, async (req, 
     }
 });
 
+// 4. Admin: Campus Teams Overview (Tüm Ekiplerin, Koordinatörlerin, Üyelerin ve Yayınların Özeti)
+app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    try {
+        // 1. Koordinatörleri getir
+        const [coordinators] = await pool.query(`
+            SELECT id, fullname, username, email, public_email, role, campus_role, university, department, avatar_url, is_active, created_at
+            FROM users
+            WHERE role = 'campus_coordinator'
+            ORDER BY university ASC, created_at ASC
+        `);
+
+        // 2. Ekip üyelerini getir (yazarlar, kampüs editörleri vb.)
+        const [members] = await pool.query(`
+            SELECT u.id, u.fullname, u.username, u.email, u.public_email, u.role, u.campus_role, u.coordinator_id, u.university, u.department, u.avatar_url, u.is_active, u.created_at,
+                   (SELECT COUNT(*) FROM articles WHERE author_id = u.id AND status = 'published') as published_articles,
+                   (SELECT COUNT(*) FROM experiments WHERE author_id = u.id AND status = 'published' AND deleted_at IS NULL) as published_experiments,
+                   (SELECT COUNT(*) FROM articles WHERE author_id = u.id) as total_articles,
+                   (SELECT COUNT(*) FROM experiments WHERE author_id = u.id AND deleted_at IS NULL) as total_experiments
+            FROM users u
+            WHERE u.role != 'admin' AND (
+                u.coordinator_id IS NOT NULL 
+                OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+                OR (u.university IS NOT NULL AND u.university != '' AND u.role IN ('author', 'campus_editor'))
+            )
+            ORDER BY u.created_at DESC
+        `);
+
+        // 3. Ekip vitrin kartlarını getir
+        const [cards] = await pool.query(`
+            SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index, created_at
+            FROM campus_team_cards
+            ORDER BY order_index ASC, id ASC
+        `);
+
+        // 4. Kampüs içeriklerini getir
+        const [articles] = await pool.query(`
+            SELECT a.id, a.title, a.slug, a.category, a.status, a.views, a.published_at, a.created_at, a.submitted_at, a.author_id, a.is_gundem,
+                   u.fullname as author_name, u.email as author_email, u.university as author_university,
+                   (SELECT COUNT(*) FROM likes WHERE article_id = a.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count
+            FROM articles a
+            JOIN users u ON a.author_id = u.id
+            WHERE u.coordinator_id IS NOT NULL 
+               OR u.role IN ('campus_coordinator', 'campus_editor') 
+               OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+            ORDER BY COALESCE(a.published_at, a.submitted_at, a.created_at) DESC
+        `);
+
+        const [experiments] = await pool.query(`
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.views, e.published_at, e.created_at, e.author_id, 0 as is_gundem,
+                   u.fullname as author_name, u.email as author_email, u.university as author_university,
+                   (SELECT COUNT(*) FROM likes WHERE experiment_id = e.id) as like_count,
+                   (SELECT COUNT(*) FROM comments WHERE experiment_id = e.id) as comment_count
+            FROM experiments e
+            JOIN users u ON e.author_id = u.id
+            WHERE e.deleted_at IS NULL AND (
+                u.coordinator_id IS NOT NULL 
+                OR u.role IN ('campus_coordinator', 'campus_editor') 
+                OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+            )
+            ORDER BY COALESCE(e.published_at, e.created_at) DESC
+        `);
+
+        // Ekipleri haritada grupla
+        const teamsMap = new Map();
+
+        // Fonksiyon: Güvenli ekip anahtarı oluştur
+        const getTeamKey = (uni, coordId) => {
+            if (uni && uni.trim()) return uni.trim().toLowerCase();
+            return `coord_${coordId}`;
+        };
+
+        // 1. Önce koordinatörlerden ekipleri oluştur
+        for (const coord of coordinators) {
+            const key = getTeamKey(coord.university, coord.id);
+            if (!teamsMap.has(key)) {
+                teamsMap.set(key, {
+                    key: key,
+                    university: coord.university ? coord.university.trim() : (coord.fullname + ' Ekibi'),
+                    is_custom_name: !coord.university,
+                    coordinators: [],
+                    coordinator_ids: new Set(),
+                    members: [],
+                    member_ids: new Set(),
+                    cards: [],
+                    publications: [],
+                    stats: {
+                        total_coordinators: 0,
+                        total_members: 0,
+                        total_editors: 0,
+                        total_authors: 0,
+                        total_cards: 0,
+                        total_publications: 0,
+                        published_count: 0,
+                        pending_campus_count: 0,
+                        pending_chief_count: 0,
+                        revision_count: 0,
+                        total_views: 0,
+                        total_likes: 0,
+                        total_comments: 0
+                    }
+                });
+            }
+            const team = teamsMap.get(key);
+            team.coordinators.push(coord);
+            team.coordinator_ids.add(coord.id);
+        }
+
+        // Koordinatör ID'den takım anahtarı eşleme tablosu
+        const coordIdToTeamKey = new Map();
+        for (const [key, team] of teamsMap.entries()) {
+            for (const cId of team.coordinator_ids) {
+                coordIdToTeamKey.set(cId, key);
+            }
+        }
+
+        // 2. Üyeleri ekiplere dağıt
+        const coordIdsSet = new Set(coordinators.map(c => c.id));
+        for (const member of members) {
+            if (coordIdsSet.has(member.id)) continue; // Koordinatör zaten eklendi
+
+            let targetTeam = null;
+
+            // Önce coordinator_id ile eşleştir
+            if (member.coordinator_id && coordIdToTeamKey.has(member.coordinator_id)) {
+                targetTeam = teamsMap.get(coordIdToTeamKey.get(member.coordinator_id));
+            }
+
+            // coordinator_id yoksa veya bulunamadıysa university ile eşleştir
+            if (!targetTeam && member.university && member.university.trim()) {
+                const uniKey = member.university.trim().toLowerCase();
+                if (teamsMap.has(uniKey)) {
+                    targetTeam = teamsMap.get(uniKey);
+                } else {
+                    // Bu üniversiteye ait henüz koordinatör hesabı açılmamış olabilir, ekip olarak aç
+                    teamsMap.set(uniKey, {
+                        key: uniKey,
+                        university: member.university.trim(),
+                        is_custom_name: false,
+                        coordinators: [],
+                        coordinator_ids: new Set(),
+                        members: [],
+                        member_ids: new Set(),
+                        cards: [],
+                        publications: [],
+                        stats: {
+                            total_coordinators: 0,
+                            total_members: 0,
+                            total_editors: 0,
+                            total_authors: 0,
+                            total_cards: 0,
+                            total_publications: 0,
+                            published_count: 0,
+                            pending_campus_count: 0,
+                            pending_chief_count: 0,
+                            revision_count: 0,
+                            total_views: 0,
+                            total_likes: 0,
+                            total_comments: 0
+                        }
+                    });
+                    targetTeam = teamsMap.get(uniKey);
+                }
+            }
+
+            if (targetTeam) {
+                targetTeam.members.push(member);
+                targetTeam.member_ids.add(member.id);
+            }
+        }
+
+        // 3. Vitrin Kartlarını ekiplere dağıt
+        for (const card of cards) {
+            let targetTeam = null;
+            if (card.university && card.university.trim()) {
+                const uniKey = card.university.trim().toLowerCase();
+                if (teamsMap.has(uniKey)) targetTeam = teamsMap.get(uniKey);
+            }
+            if (!targetTeam && card.coordinator_id && coordIdToTeamKey.has(card.coordinator_id)) {
+                targetTeam = teamsMap.get(coordIdToTeamKey.get(card.coordinator_id));
+            }
+            if (targetTeam) {
+                targetTeam.cards.push(card);
+            }
+        }
+
+        // 4. Yayınları ekiplere dağıt
+        const allContent = [
+            ...articles.map(a => ({ ...a, item_type: a.is_gundem ? 'gundem' : 'article' })),
+            ...experiments.map(e => ({ ...e, item_type: 'experiment' }))
+        ];
+
+        for (const item of allContent) {
+            let targetTeam = null;
+            // Yazar ID'sine göre takımı bul
+            for (const team of teamsMap.values()) {
+                if (team.coordinator_ids.has(item.author_id) || team.member_ids.has(item.author_id)) {
+                    targetTeam = team;
+                    break;
+                }
+            }
+            // Üniversite adına göre eşleştir
+            if (!targetTeam && item.author_university && item.author_university.trim()) {
+                const uniKey = item.author_university.trim().toLowerCase();
+                if (teamsMap.has(uniKey)) targetTeam = teamsMap.get(uniKey);
+            }
+
+            if (targetTeam) {
+                targetTeam.publications.push(item);
+            }
+        }
+
+        // 5. İstatistikleri hesapla & Set nesnelerini temizle
+        let grandTotalCoordinators = 0;
+        let grandTotalMembers = 0;
+        let grandTotalEditors = 0;
+        let grandTotalAuthors = 0;
+        let grandTotalPublications = 0;
+        let grandTotalPublished = 0;
+        let grandTotalViews = 0;
+
+        const teamsArray = Array.from(teamsMap.values()).map(team => {
+            const editorsCount = team.members.filter(m => 
+                m.role === 'campus_editor' || 
+                (m.campus_role && m.campus_role.toLowerCase().includes('editör'))
+            ).length;
+            const authorsCount = team.members.length - editorsCount;
+
+            let viewsCount = 0;
+            let likesCount = 0;
+            let commentsCount = 0;
+            let publishedCount = 0;
+            let pendingCampusCount = 0;
+            let pendingChiefCount = 0;
+            let revisionCount = 0;
+
+            team.publications.forEach(p => {
+                viewsCount += (Number(p.views) || 0);
+                likesCount += (Number(p.like_count) || 0);
+                commentsCount += (Number(p.comment_count) || 0);
+                if (p.status === 'published') publishedCount++;
+                else if (p.status === 'pending_campus') pendingCampusCount++;
+                else if (p.status === 'pending') pendingChiefCount++;
+                else if (p.status === 'revision' || p.status === 'rejected') revisionCount++;
+            });
+
+            team.stats = {
+                total_coordinators: team.coordinators.length,
+                total_members: team.members.length,
+                total_editors: editorsCount,
+                total_authors: authorsCount,
+                total_cards: team.cards.length,
+                total_publications: team.publications.length,
+                published_count: publishedCount,
+                pending_campus_count: pendingCampusCount,
+                pending_chief_count: pendingChiefCount,
+                revision_count: revisionCount,
+                total_views: viewsCount,
+                total_likes: likesCount,
+                total_comments: commentsCount
+            };
+
+            grandTotalCoordinators += team.coordinators.length;
+            grandTotalMembers += team.members.length;
+            grandTotalEditors += editorsCount;
+            grandTotalAuthors += authorsCount;
+            grandTotalPublications += team.publications.length;
+            grandTotalPublished += publishedCount;
+            grandTotalViews += viewsCount;
+
+            // Sort publications by date desc
+            team.publications.sort((a, b) => {
+                const dateA = new Date(a.published_at || a.submitted_at || a.created_at || 0);
+                const dateB = new Date(b.published_at || b.submitted_at || b.created_at || 0);
+                return dateB - dateA;
+            });
+
+            // Set nesnelerini serialize edilemez olduğu için kaldır
+            delete team.coordinator_ids;
+            delete team.member_ids;
+
+            return team;
+        });
+
+        // Ekipleri üye sayısına ve isme göre sırala
+        teamsArray.sort((a, b) => {
+            const sumA = a.stats.total_members + a.stats.total_coordinators;
+            const sumB = b.stats.total_members + b.stats.total_coordinators;
+            if (sumB !== sumA) return sumB - sumA;
+            return a.university.localeCompare(b.university, 'tr');
+        });
+
+        res.json({
+            summary: {
+                total_teams: teamsArray.length,
+                total_coordinators: grandTotalCoordinators,
+                total_members: grandTotalMembers,
+                total_editors: grandTotalEditors,
+                total_authors: grandTotalAuthors,
+                total_publications: grandTotalPublications,
+                total_published: grandTotalPublished,
+                total_views: grandTotalViews
+            },
+            teams: teamsArray
+        });
+    } catch (e) {
+        console.error('[ADMIN-CAMPUS-TEAMS-OVERVIEW-ERROR]', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // === Campus Coordinator: Team Members Management ===
 
 // Helper: Get All Coordinator IDs for a given University/Team
