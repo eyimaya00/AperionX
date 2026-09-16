@@ -3366,6 +3366,9 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="openCreateCampusTeamModal()" style="font-size: 0.88rem; padding: 8px 18px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);">
+                            <i class="ph ph-plus-circle" style="font-size: 1.1rem;"></i> Yeni Kampüs Ekibi Ekle
+                        </button>
                         <button class="btn" onclick="toggleAllTeams()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: white; font-size: 0.85rem; padding: 8px 16px;">
                             <i class="ph ph-arrows-out-line" id="btn-toggle-all-icon"></i> <span id="btn-toggle-all-text">Tümünü Genişlet</span>
                         </button>
@@ -3422,6 +3425,205 @@
                 <div style="text-align: center; padding: 40px; color: #94a3b8;">
                     <i class="ph ph-spinner spinner" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
                     Kampüs ekipleri yükleniyor...
+                </div>
+            </div>
+
+            <!-- MODAL: YENİ KAMPÜS EKİBİ OLUŞTUR -->
+            <div id="modal-create-campus-team" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+                <div class="card" style="width: 100%; max-width: 520px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="ph ph-buildings"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main);">Yeni Kampüs Ekibi Ekle</h3>
+                                <small style="color: #64748b;">Üniversite ekibini ve ilk koordinatörünü tanımlayın</small>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeCreateCampusTeamModal()" style="background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+
+                    <form id="formCreateCampusTeam" onsubmit="submitCreateCampusTeam(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Üniversite Adı -->
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                Üniversite / Ekip Adı <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" id="new_team_university" class="form-control" placeholder="Örn: Ege Üniversitesi" required style="border-radius: 10px;">
+                        </div>
+
+                        <!-- Koordinatör Atama Seçeneği -->
+                        <div>
+                            <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                                Koordinatör Belirleme Yöntemi
+                            </label>
+                            <div style="display: flex; gap: 10px;">
+                                <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; background: var(--card-bg); font-size: 0.85rem; font-weight: 600;">
+                                    <input type="radio" name="coord_mode" value="new" checked onchange="toggleCoordMode('new')">
+                                    Yeni Hesap Aç
+                                </label>
+                                <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; background: var(--card-bg); font-size: 0.85rem; font-weight: 600;">
+                                    <input type="radio" name="coord_mode" value="existing" onchange="toggleCoordMode('existing')">
+                                    Mevcut Üyeyi Seç
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- MOD 1: Yeni Hesap -->
+                        <div id="coord-mode-new" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.84rem; font-weight: 600; color: #475569; margin-bottom: 4px;">
+                                    Koordinatör Adı Soyadı
+                                </label>
+                                <input type="text" id="new_team_coord_name" class="form-control" placeholder="Örn: Mehmet Özkan">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.84rem; font-weight: 600; color: #475569; margin-bottom: 4px;">
+                                    Koordinatör E-posta Adresi <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="email" id="new_team_coord_email" class="form-control" placeholder="koordinator@universite.edu.tr">
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <label style="font-size: 0.84rem; font-weight: 600; color: #475569; margin: 0;">
+                                        Giriş Şifresi <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <button type="button" onclick="generateTeamCoordPassword()" style="background: none; border: none; color: #6366f1; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                        <i class="ph ph-magic-wand"></i> Güçlü Şifre Üret
+                                    </button>
+                                </div>
+                                <input type="text" id="new_team_coord_password" class="form-control" placeholder="En az 6 karakterli şifre">
+                            </div>
+                        </div>
+
+                        <!-- MOD 2: Mevcut Kullanıcı -->
+                        <div id="coord-mode-existing" style="display: none; flex-direction: column; gap: 10px;">
+                            <label style="display: block; font-size: 0.84rem; font-weight: 600; color: #475569; margin-bottom: 2px;">
+                                Kullanıcı Ara & Koordinatör Ata
+                            </label>
+                            <div style="position: relative;">
+                                <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                                <input type="text" id="existing_user_search_team" oninput="searchUsersForTeamCoord(this.value)" class="form-control" style="padding-left: 36px;" placeholder="Ad veya e-posta ile arayın...">
+                            </div>
+                            <input type="hidden" id="selected_existing_user_id" value="">
+                            <div id="existing-user-selected-badge" style="display: none; padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #059669; font-size: 0.85rem; font-weight: 600;">
+                                <span id="selected-user-name"></span>
+                            </div>
+                            <div id="existing-users-team-results" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; display: none;"></div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                            <button type="button" onclick="closeCreateCampusTeamModal()" class="btn" style="background: #e2e8f0; color: #475569;">
+                                İptal
+                            </button>
+                            <button type="submit" id="btn-submit-create-team" class="btn btn-primary" style="padding: 10px 22px;">
+                                <i class="ph ph-check"></i> Ekibi & Koordinatörü Oluştur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MODAL: EKİBE KOORDİNATÖR EKLE -->
+            <div id="modal-add-team-coordinator" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+                <div class="card" style="width: 100%; max-width: 500px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="ph ph-crown"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Ekibe Koordinatör Ekle</h3>
+                                <small style="color: #64748b;" id="add-coord-target-uni-text">Üniversite</small>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeAddCoordinatorToTeamModal()" style="background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer;">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+
+                    <form id="formAddCoordinatorToTeam" onsubmit="submitAddCoordinatorToTeam(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                        <input type="hidden" id="add_coord_university_input" value="">
+
+                        <!-- Mod Seçimi -->
+                        <div style="display: flex; gap: 10px;">
+                            <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; background: var(--card-bg); font-size: 0.85rem; font-weight: 600;">
+                                <input type="radio" name="add_coord_mode" value="new" checked onchange="toggleAddCoordMode('new')">
+                                Yeni Hesap Aç
+                            </label>
+                            <label style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; background: var(--card-bg); font-size: 0.85rem; font-weight: 600;">
+                                <input type="radio" name="add_coord_mode" value="existing" onchange="toggleAddCoordMode('existing')">
+                                Mevcut Üyeyi Seç
+                            </label>
+                        </div>
+
+                        <!-- MOD 1: Yeni Hesap -->
+                        <div id="add-coord-mode-new" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.84rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Adı Soyadı</label>
+                                <input type="text" id="add_coord_name" class="form-control" placeholder="Örn: Ayşe Demir">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.84rem; font-weight: 600; color: #475569; margin-bottom: 4px;">E-posta Adresi <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="add_coord_email" class="form-control" placeholder="koordinator@universite.edu.tr">
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <label style="font-size: 0.84rem; font-weight: 600; color: #475569; margin: 0;">Şifre <span style="color: #ef4444;">*</span></label>
+                                    <button type="button" onclick="generateAddCoordPassword()" style="background: none; border: none; color: #6366f1; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                        <i class="ph ph-magic-wand"></i> Şifre Üret
+                                    </button>
+                                </div>
+                                <input type="text" id="add_coord_password" class="form-control" placeholder="En az 6 karakterli şifre">
+                            </div>
+                        </div>
+
+                        <!-- MOD 2: Mevcut Kullanıcı -->
+                        <div id="add-coord-mode-existing" style="display: none; flex-direction: column; gap: 10px;">
+                            <div style="position: relative;">
+                                <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                                <input type="text" id="search_user_for_add_coord" oninput="searchUsersForAddCoord(this.value)" class="form-control" style="padding-left: 36px;" placeholder="Ad veya e-posta arayın...">
+                            </div>
+                            <input type="hidden" id="add_coord_selected_user_id" value="">
+                            <div id="add-coord-selected-badge" style="display: none; padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #059669; font-size: 0.85rem; font-weight: 600;">
+                                <span id="add-coord-selected-name"></span>
+                            </div>
+                            <div id="add-coord-search-results" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; display: none;"></div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                            <button type="button" onclick="closeAddCoordinatorToTeamModal()" class="btn" style="background: #e2e8f0; color: #475569;">
+                                İptal
+                            </button>
+                            <button type="submit" id="btn-submit-add-coord" class="btn btn-primary" style="padding: 10px 22px;">
+                                <i class="ph ph-user-plus"></i> Koordinatörü Ekle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MODAL: EKİP SİLME ONAY MODALI -->
+            <div id="modal-confirm-delete-team" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+                <div class="card" style="width: 100%; max-width: 440px; padding: 28px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px;">
+                        <i class="ph ph-warning-circle"></i>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; color: #1e293b;">Ekibi Silmek İstiyor musunuz?</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0 0 20px 0;" id="delete-team-modal-desc">
+                        Bu kampüs ekibi ve koordinatörleri silinecektir.
+                    </p>
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" onclick="closeDeleteCampusTeamModal()" class="btn" style="flex: 1; background: #e2e8f0; color: #475569; padding: 11px;">
+                            Vazgeç
+                        </button>
+                        <button type="button" id="btn-confirm-delete-team" class="btn" style="flex: 1; background: #ef4444; color: white; padding: 11px; font-weight: 600;">
+                            Evet, Ekibi Sil
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -7050,10 +7252,20 @@
                                         <i class="ph-bold ph-eye"></i> ${viewsCount} Okunma
                                     </span>
                                 </div>
-                                <button type="button" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 8px 14px; font-size: 0.82rem; border-radius: 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" onclick="event.stopPropagation(); toggleTeamDetails('${safeKey}')">
-                                    <span>Detaylar</span>
-                                    <i class="ph ph-caret-down" id="chevron-${safeKey}" style="transition: transform 0.25s;"></i>
-                                </button>
+                                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;" onclick="event.stopPropagation();">
+                                    <button type="button" class="btn" style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 7px 12px; font-size: 0.8rem; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px;" onclick="openAddCoordinatorToTeamModal('${escapeHtml(team.university)}')" title="Bu ekibe eş koordinatör ekle">
+                                        <i class="ph-bold ph-user-plus"></i>
+                                        <span>+ Koordinatör</span>
+                                    </button>
+                                    <button type="button" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; padding: 7px 12px; font-size: 0.8rem; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px;" onclick="confirmDeleteCampusTeam('${escapeHtml(team.university)}', ${team.members.length}, ${team.coordinators.length})" title="Ekibi ve koordinatörlerini sil">
+                                        <i class="ph-bold ph-trash"></i>
+                                        <span>Ekibi Sil</span>
+                                    </button>
+                                    <button type="button" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); padding: 7px 13px; font-size: 0.82rem; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px;" onclick="toggleTeamDetails('${safeKey}')">
+                                        <span>Detaylar</span>
+                                        <i class="ph ph-caret-down" id="chevron-${safeKey}" style="transition: transform 0.25s;"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -7173,6 +7385,9 @@
                                                 <button type="button" onclick="quickResetCoordinatorPassword('${escapeHtml(m.email)}')" class="btn" style="padding: 5px 9px; font-size: 0.78rem; background: #f1f5f9; color: #475569; border-radius: 6px;" title="Şifre Sıfırla">
                                                     <i class="ph-bold ph-key"></i>
                                                 </button>
+                                                <button type="button" onclick="detachMemberFromTeam(${m.id}, '${escapeHtml(m.fullname || '')}', '${escapeHtml(university)}')" class="btn" style="padding: 5px 9px; font-size: 0.78rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border-radius: 6px;" title="Ekipten Çıkar">
+                                                    <i class="ph-bold ph-user-minus"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -7223,6 +7438,9 @@
                                     </a>
                                     <button type="button" onclick="quickResetCoordinatorPassword('${escapeHtml(c.email)}')" class="btn" style="background: #f1f5f9; color: #475569; font-size: 0.82rem; padding: 7px 12px; border-radius: 8px;" title="Şifre Sıfırla">
                                         <i class="ph-bold ph-key"></i> Şifre
+                                    </button>
+                                    <button type="button" onclick="deleteCoordinatorFromTeam(${c.id}, '${escapeHtml(c.fullname || 'Koordinatör')}', '${escapeHtml(university)}')" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; font-size: 0.82rem; padding: 7px 12px; border-radius: 8px;" title="Bu koordinatörü sil">
+                                        <i class="ph-bold ph-trash"></i> Sil
                                     </button>
                                 </div>
                             </div>
@@ -7452,6 +7670,446 @@
             parent.querySelectorAll('.team-tab-pane').forEach(p => p.classList.remove('active'));
             const targetPane = document.getElementById(`tab-${safeKey}-${tabName}`);
             if (targetPane) targetPane.classList.add('active');
+        }
+
+        // ==========================================
+        // KAMPÜS EKİPLERİ YÖNETİMİ (EKLEME / SİLME / ATAMA)
+        // ==========================================
+
+        let teamCoordSearchTimer = null;
+        let addCoordSearchTimer = null;
+
+        // 1. Yeni Kampüs Ekibi Modal İşlemleri
+        function openCreateCampusTeamModal() {
+            const form = document.getElementById('formCreateCampusTeam');
+            if (form) form.reset();
+            const rNew = document.querySelector('input[name="coord_mode"][value="new"]');
+            if (rNew) rNew.checked = true;
+            toggleCoordMode('new');
+
+            document.getElementById('selected_existing_user_id').value = '';
+            document.getElementById('existing-user-selected-badge').style.display = 'none';
+            document.getElementById('existing-users-team-results').style.display = 'none';
+            document.getElementById('existing-users-team-results').innerHTML = '';
+            generateTeamCoordPassword();
+
+            const modal = document.getElementById('modal-create-campus-team');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeCreateCampusTeamModal() {
+            const modal = document.getElementById('modal-create-campus-team');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function toggleCoordMode(mode) {
+            const elNew = document.getElementById('coord-mode-new');
+            const elExisting = document.getElementById('coord-mode-existing');
+            if (elNew) elNew.style.display = (mode === 'new') ? 'flex' : 'none';
+            if (elExisting) elExisting.style.display = (mode === 'existing') ? 'flex' : 'none';
+        }
+
+        function generateTeamCoordPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let pass = '';
+            for (let i = 0; i < 10; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const inp = document.getElementById('new_team_coord_password');
+            if (inp) inp.value = pass;
+        }
+
+        function searchUsersForTeamCoord(q) {
+            clearTimeout(teamCoordSearchTimer);
+            const resultsBox = document.getElementById('existing-users-team-results');
+            if (!q || q.trim().length < 2) {
+                if (resultsBox) { resultsBox.innerHTML = ''; resultsBox.style.display = 'none'; }
+                return;
+            }
+
+            teamCoordSearchTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${API_URL}/coordinator/search-users?q=${encodeURIComponent(q.trim())}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+                    const users = await res.json();
+                    if (!resultsBox) return;
+
+                    if (users.length === 0) {
+                        resultsBox.innerHTML = '<div style="padding: 10px; font-size: 0.82rem; color: #94a3b8; text-align: center;">Kullanıcı bulunamadı</div>';
+                        resultsBox.style.display = 'block';
+                        return;
+                    }
+
+                    resultsBox.innerHTML = users.map(u => `
+                        <div style="padding: 9px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" 
+                             onmouseover="this.style.background='rgba(99,102,241,0.06)'" 
+                             onmouseout="this.style.background='transparent'" 
+                             onclick="selectExistingUserForTeam(${u.id}, '${escapeHtml(u.fullname || u.username || 'Kullanıcı')}', '${escapeHtml(u.email)}')">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">${escapeHtml(u.fullname || u.username || '-')}</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">${escapeHtml(u.email)} ${u.university ? `· ${escapeHtml(u.university)}` : ''}</div>
+                            </div>
+                            <span class="btn" style="padding: 3px 8px; font-size: 0.72rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-radius: 6px;">Seç</span>
+                        </div>
+                    `).join('');
+                    resultsBox.style.display = 'block';
+                } catch (e) {
+                    console.error('searchUsersForTeamCoord error:', e);
+                }
+            }, 300);
+        }
+
+        function selectExistingUserForTeam(id, fullname, email) {
+            document.getElementById('selected_existing_user_id').value = id;
+            document.getElementById('selected-user-name').innerText = `Seçildi: ${fullname} (${email})`;
+            document.getElementById('existing-user-selected-badge').style.display = 'block';
+            const resultsBox = document.getElementById('existing-users-team-results');
+            if (resultsBox) { resultsBox.innerHTML = ''; resultsBox.style.display = 'none'; }
+            const searchInput = document.getElementById('existing_user_search_team');
+            if (searchInput) searchInput.value = '';
+        }
+
+        async function submitCreateCampusTeam(e) {
+            e.preventDefault();
+            const uniInput = document.getElementById('new_team_university');
+            const university = uniInput ? uniInput.value.trim() : '';
+            if (!university) return showToast('Lütfen üniversite adını giriniz.', 'error');
+
+            const mode = document.querySelector('input[name="coord_mode"]:checked')?.value || 'new';
+            const payload = { university };
+
+            if (mode === 'new') {
+                const name = document.getElementById('new_team_coord_name').value.trim();
+                const email = document.getElementById('new_team_coord_email').value.trim();
+                const password = document.getElementById('new_team_coord_password').value;
+
+                if (!email) return showToast('Koordinatör e-posta adresi zorunludur.', 'error');
+                if (!password || password.length < 6) return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+
+                payload.coordinator_name = name;
+                payload.coordinator_email = email;
+                payload.coordinator_password = password;
+            } else {
+                const userId = document.getElementById('selected_existing_user_id').value;
+                if (!userId) return showToast('Lütfen bir kullanıcı seçin veya yeni hesap modunu kullanın.', 'error');
+                payload.existing_user_id = userId;
+            }
+
+            const btn = document.getElementById('btn-submit-create-team');
+            if (btn) { btn.disabled = true; btn.innerText = 'Oluşturuluyor...'; }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-teams`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Ekip başarıyla oluşturuldu.', 'success');
+                    closeCreateCampusTeamModal();
+                    loadCampusTeamsOverview();
+                } else {
+                    showToast(data.error || 'Ekip oluşturulamadı.', 'error');
+                }
+            } catch (err) {
+                console.error('submitCreateCampusTeam error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-check"></i> Ekibi & Koordinatörü Oluştur';
+                }
+            }
+        }
+
+        // 2. Ekibe Eş Koordinatör Ekleme Modal İşlemleri
+        function openAddCoordinatorToTeamModal(university) {
+            document.getElementById('add_coord_university_input').value = university;
+            const titleEl = document.getElementById('add-coord-target-uni-text');
+            if (titleEl) titleEl.innerText = university;
+
+            const form = document.getElementById('formAddCoordinatorToTeam');
+            if (form) form.reset();
+            const rNew = document.querySelector('input[name="add_coord_mode"][value="new"]');
+            if (rNew) rNew.checked = true;
+            toggleAddCoordMode('new');
+
+            document.getElementById('add_coord_selected_user_id').value = '';
+            document.getElementById('add-coord-selected-badge').style.display = 'none';
+            document.getElementById('add-coord-search-results').style.display = 'none';
+            document.getElementById('add-coord-search-results').innerHTML = '';
+            generateAddCoordPassword();
+
+            const modal = document.getElementById('modal-add-team-coordinator');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeAddCoordinatorToTeamModal() {
+            const modal = document.getElementById('modal-add-team-coordinator');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function toggleAddCoordMode(mode) {
+            const elNew = document.getElementById('add-coord-mode-new');
+            const elExisting = document.getElementById('add-coord-mode-existing');
+            if (elNew) elNew.style.display = (mode === 'new') ? 'flex' : 'none';
+            if (elExisting) elExisting.style.display = (mode === 'existing') ? 'flex' : 'none';
+        }
+
+        function generateAddCoordPassword() {
+            const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+            let pass = '';
+            for (let i = 0; i < 10; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const inp = document.getElementById('add_coord_password');
+            if (inp) inp.value = pass;
+        }
+
+        function searchUsersForAddCoord(q) {
+            clearTimeout(addCoordSearchTimer);
+            const resultsBox = document.getElementById('add-coord-search-results');
+            if (!q || q.trim().length < 2) {
+                if (resultsBox) { resultsBox.innerHTML = ''; resultsBox.style.display = 'none'; }
+                return;
+            }
+
+            addCoordSearchTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${API_URL}/coordinator/search-users?q=${encodeURIComponent(q.trim())}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+                    const users = await res.json();
+                    if (!resultsBox) return;
+
+                    if (users.length === 0) {
+                        resultsBox.innerHTML = '<div style="padding: 10px; font-size: 0.82rem; color: #94a3b8; text-align: center;">Kullanıcı bulunamadı</div>';
+                        resultsBox.style.display = 'block';
+                        return;
+                    }
+
+                    resultsBox.innerHTML = users.map(u => `
+                        <div style="padding: 9px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; justify-content: space-between;" 
+                             onmouseover="this.style.background='rgba(99,102,241,0.06)'" 
+                             onmouseout="this.style.background='transparent'" 
+                             onclick="selectUserForAddCoord(${u.id}, '${escapeHtml(u.fullname || u.username || 'Kullanıcı')}', '${escapeHtml(u.email)}')">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">${escapeHtml(u.fullname || u.username || '-')}</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">${escapeHtml(u.email)} ${u.university ? `· ${escapeHtml(u.university)}` : ''}</div>
+                            </div>
+                            <span class="btn" style="padding: 3px 8px; font-size: 0.72rem; background: rgba(99, 102, 241, 0.1); color: var(--primary-accent); border-radius: 6px;">Seç</span>
+                        </div>
+                    `).join('');
+                    resultsBox.style.display = 'block';
+                } catch (e) {
+                    console.error('searchUsersForAddCoord error:', e);
+                }
+            }, 300);
+        }
+
+        function selectUserForAddCoord(id, fullname, email) {
+            document.getElementById('add_coord_selected_user_id').value = id;
+            document.getElementById('add-coord-selected-name').innerText = `Seçildi: ${fullname} (${email})`;
+            document.getElementById('add-coord-selected-badge').style.display = 'block';
+            const resultsBox = document.getElementById('add-coord-search-results');
+            if (resultsBox) { resultsBox.innerHTML = ''; resultsBox.style.display = 'none'; }
+            const searchInput = document.getElementById('search_user_for_add_coord');
+            if (searchInput) searchInput.value = '';
+        }
+
+        async function submitAddCoordinatorToTeam(e) {
+            e.preventDefault();
+            const university = document.getElementById('add_coord_university_input').value;
+            if (!university) return showToast('Üniversite bulunamadı.', 'error');
+
+            const mode = document.querySelector('input[name="add_coord_mode"]:checked')?.value || 'new';
+            const payload = {};
+
+            if (mode === 'new') {
+                const name = document.getElementById('add_coord_name').value.trim();
+                const email = document.getElementById('add_coord_email').value.trim();
+                const password = document.getElementById('add_coord_password').value;
+
+                if (!email) return showToast('E-posta adresi zorunludur.', 'error');
+                if (!password || password.length < 6) return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+
+                payload.fullname = name;
+                payload.email = email;
+                payload.password = password;
+            } else {
+                const userId = document.getElementById('add_coord_selected_user_id').value;
+                if (!userId) return showToast('Lütfen bir kullanıcı seçin.', 'error');
+                payload.existing_user_id = userId;
+            }
+
+            const btn = document.getElementById('btn-submit-add-coord');
+            if (btn) { btn.disabled = true; btn.innerText = 'Ekleniyor...'; }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-teams/${encodeURIComponent(university)}/coordinators`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Koordinatör başarıyla eklendi.', 'success');
+                    closeAddCoordinatorToTeamModal();
+                    loadCampusTeamsOverview();
+                } else {
+                    showToast(data.error || 'Koordinatör eklenemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('submitAddCoordinatorToTeam error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-user-plus"></i> Koordinatörü Ekle';
+                }
+            }
+        }
+
+        // 3. Ekibi Silme Modal & İşlemleri
+        function confirmDeleteCampusTeam(university, membersCount, coordsCount) {
+            const desc = document.getElementById('delete-team-modal-desc');
+            if (desc) {
+                desc.innerHTML = `
+                    <div style="font-size: 1rem; margin-bottom: 12px; color: var(--text-main);">
+                        <strong>${escapeHtml(university)}</strong> kampüs ekibini tamamen silmek istediğinize emin misiniz?
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; text-align: left; font-size: 0.82rem; color: #475569; line-height: 1.6;">
+                        <div>• <strong>${coordsCount}</strong> koordinatör hesabı silinecektir.</div>
+                        <div>• <strong>${membersCount}</strong> ekip üyesinin kampüs ekip bağı kaldırılacak (hesapları ve içerikleri silinmeyecektir).</div>
+                        <div>• Bu ekibin vitrin tanıtım kartları silinecektir.</div>
+                    </div>
+                `;
+            }
+            const confirmBtn = document.getElementById('btn-confirm-delete-team');
+            if (confirmBtn) {
+                confirmBtn.onclick = () => executeDeleteCampusTeam(university);
+            }
+            const modal = document.getElementById('modal-confirm-delete-team');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDeleteCampusTeamModal() {
+            const modal = document.getElementById('modal-confirm-delete-team');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function executeDeleteCampusTeam(university) {
+            const confirmBtn = document.getElementById('btn-confirm-delete-team');
+            if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.innerText = 'Siliniyor...'; }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-teams/${encodeURIComponent(university)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Ekip başarıyla silindi.', 'success');
+                    closeDeleteCampusTeamModal();
+                    loadCampusTeamsOverview();
+                } else {
+                    showToast(data.error || 'Ekip silinemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('executeDeleteCampusTeam error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            } finally {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerText = 'Evet, Ekibi Sil';
+                }
+            }
+        }
+
+        // 4. Ekip Üyesini Ekipten Çıkar
+        async function detachMemberFromTeam(memberId, memberName, university) {
+            const confirmed = confirm(`"${memberName || 'Bu üyeyi'}" ${university} ekibinden çıkarmak istediğinize emin misiniz?\n\n(Üyenin kullanıcı hesabı ve içerikleri silinmez, yalnızca bu ekiple olan bağı kaldırılır.)`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_URL}/coordinator/team-members/${memberId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Üye ekipten çıkarıldı.', 'success');
+                    loadCampusTeamsOverview();
+                } else {
+                    showToast(data.error || 'Üye ekipten çıkarılamadı.', 'error');
+                }
+            } catch (err) {
+                console.error('detachMemberFromTeam error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            }
+        }
+
+        // 5. Belirli Bir Koordinatörü Ekipten Sil
+        async function deleteCoordinatorFromTeam(coordId, coordName, university) {
+            const confirmed = confirm(`"${coordName || 'Bu koordinatörü'}" ${university} ekibinden silmek istediğinize emin misiniz?`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-teams/${encodeURIComponent(university)}/coordinators/${coordId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Koordinatör silindi.', 'success');
+                    loadCampusTeamsOverview();
+                } else {
+                    showToast(data.error || 'Koordinatör silinemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('deleteCoordinatorFromTeam error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            }
+        }
+
+        // 6. Hızlı Şifre Sıfırlama
+        async function quickResetCoordinatorPassword(email) {
+            if (!email) return showToast('E-posta adresi bulunamadı.', 'error');
+            const defaultPass = Math.random().toString(36).slice(-6) + 'Ax9!';
+            const newPass = prompt(`"${email}" hesabı için yeni şifre belirleyin (en az 6 karakter):`, defaultPass);
+            if (!newPass) return;
+            if (newPass.length < 6) return showToast('Şifre en az 6 karakter olmalıdır.', 'error');
+
+            try {
+                const res = await fetch(`${API_URL}/admin/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ email, password: newPass })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Şifre başarıyla güncellendi!\n\nE-posta: ${email}\nYeni Şifre: ${newPass}\n\nBu şifreyi kullanıcı ile paylaşabilirsiniz.`);
+                    showToast('Şifre güncellendi.', 'success');
+                } else {
+                    showToast(data.error || 'Şifre güncellenemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('quickResetCoordinatorPassword error:', err);
+                showToast('Sunucu hatası: ' + err.message, 'error');
+            }
         }
 
         // === MAINTENANCE MODE LOGIC ===

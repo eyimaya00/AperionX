@@ -4588,6 +4588,224 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
     }
 });
 
+// 5. Admin: Create a New Campus Team (with initial coordinator)
+app.post('/api/admin/campus-teams', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    const { university, coordinator_name, coordinator_email, coordinator_password, existing_user_id } = req.body;
+
+    if (!university || !university.trim()) {
+        return res.status(400).json({ error: 'Üniversite adı zorunludur.' });
+    }
+
+    const uniTrimmed = university.trim();
+
+    try {
+        let coordinatorUser = null;
+
+        if (existing_user_id) {
+            // Mevcut kullanıcıyı kampüs koordinatörü yap
+            const [userRows] = await pool.query('SELECT id, fullname, email FROM users WHERE id = ?', [existing_user_id]);
+            if (userRows.length === 0) {
+                return res.status(404).json({ error: 'Seçilen kullanıcı bulunamadı.' });
+            }
+            await pool.query(
+                "UPDATE users SET role = 'campus_coordinator', university = ?, campus_role = 'Kampüs Koordinatörü' WHERE id = ?",
+                [uniTrimmed, existing_user_id]
+            );
+            coordinatorUser = userRows[0];
+        } else {
+            // Yeni koordinatör hesabı aç
+            if (!coordinator_email || !coordinator_email.trim() || !coordinator_password) {
+                return res.status(400).json({ error: 'Koordinatör e-posta ve şifresi zorunludur.' });
+            }
+            const emailTrimmed = coordinator_email.trim().toLowerCase();
+            if (coordinator_password.length < 6) {
+                return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
+            }
+
+            const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [emailTrimmed]);
+            if (existing.length > 0) {
+                return res.status(400).json({ error: 'Bu e-posta adresiyle kayıtlı bir kullanıcı zaten mevcut.' });
+            }
+
+            const hashedPassword = await bcrypt.hash(coordinator_password, 10);
+            const nameToUse = (coordinator_name && coordinator_name.trim()) ? coordinator_name.trim() : emailTrimmed.split('@')[0];
+            const username = emailTrimmed.split('@')[0] + Math.floor(Math.random() * 1000);
+
+            const [result] = await pool.query(
+                "INSERT INTO users (fullname, username, email, password, role, campus_role, university) VALUES (?, ?, ?, ?, 'campus_coordinator', 'Kampüs Koordinatörü', ?)",
+                [nameToUse, username, emailTrimmed, hashedPassword, uniTrimmed]
+            );
+
+            coordinatorUser = {
+                id: result.insertId,
+                fullname: nameToUse,
+                email: emailTrimmed
+            };
+        }
+
+        // Otomatik olarak vitrin kartı oluştur (eğer yoksa)
+        if (coordinatorUser) {
+            await pool.query(
+                "INSERT INTO campus_team_cards (coordinator_id, fullname, university, role_title, email, order_index) VALUES (?, ?, ?, 'Kampüs Koordinatörü', ?, 0)",
+                [coordinatorUser.id, coordinatorUser.fullname || 'Kampüs Koordinatörü', uniTrimmed, coordinatorUser.email]
+            );
+        }
+
+        res.status(201).json({
+            success: true,
+            message: `"${uniTrimmed}" kampüs ekibi ve koordinatörü başarıyla oluşturuldu.`
+        });
+    } catch (e) {
+        console.error('[ADMIN-CREATE-CAMPUS-TEAM-ERROR]', e);
+        res.status(500).json({ error: 'Ekip oluşturulurken bir hata oluştu: ' + e.message });
+    }
+});
+
+// 6. Admin: Add Co-coordinator to Existing Campus Team
+app.post('/api/admin/campus-teams/:university/coordinators', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    const targetUniversity = decodeURIComponent(req.params.university || '').trim();
+    const { fullname, email, password, existing_user_id } = req.body;
+
+    if (!targetUniversity) {
+        return res.status(400).json({ error: 'Üniversite adı geçersiz.' });
+    }
+
+    try {
+        let coordinatorUser = null;
+
+        if (existing_user_id) {
+            const [userRows] = await pool.query('SELECT id, fullname, email FROM users WHERE id = ?', [existing_user_id]);
+            if (userRows.length === 0) {
+                return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+            }
+            await pool.query(
+                "UPDATE users SET role = 'campus_coordinator', university = ?, campus_role = 'Eş Kampüs Koordinatörü' WHERE id = ?",
+                [targetUniversity, existing_user_id]
+            );
+            coordinatorUser = userRows[0];
+        } else {
+            if (!email || !email.trim() || !password) {
+                return res.status(400).json({ error: 'E-posta ve şifre zorunludur.' });
+            }
+            const emailTrimmed = email.trim().toLowerCase();
+            if (password.length < 6) {
+                return res.status(400).json({ error: 'Şifre en az 6 karakter olmalıdır.' });
+            }
+
+            const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [emailTrimmed]);
+            if (existing.length > 0) {
+                return res.status(400).json({ error: 'Bu e-posta adresiyle kayıtlı bir kullanıcı zaten mevcut.' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const nameToUse = (fullname && fullname.trim()) ? fullname.trim() : emailTrimmed.split('@')[0];
+            const username = emailTrimmed.split('@')[0] + Math.floor(Math.random() * 1000);
+
+            const [result] = await pool.query(
+                "INSERT INTO users (fullname, username, email, password, role, campus_role, university) VALUES (?, ?, ?, ?, 'campus_coordinator', 'Eş Kampüs Koordinatörü', ?)",
+                [nameToUse, username, emailTrimmed, hashedPassword, targetUniversity]
+            );
+
+            coordinatorUser = {
+                id: result.insertId,
+                fullname: nameToUse,
+                email: emailTrimmed
+            };
+        }
+
+        // Vitrin kartı da ekle
+        if (coordinatorUser) {
+            await pool.query(
+                "INSERT INTO campus_team_cards (coordinator_id, fullname, university, role_title, email, order_index) VALUES (?, ?, ?, 'Eş Kampüs Koordinatörü', ?, 0)",
+                [coordinatorUser.id, coordinatorUser.fullname || 'Eş Kampüs Koordinatörü', targetUniversity, coordinatorUser.email]
+            );
+        }
+
+        res.status(201).json({
+            success: true,
+            message: `"${targetUniversity}" ekibine yeni koordinatör başarıyla eklendi.`
+        });
+    } catch (e) {
+        console.error('[ADMIN-ADD-TEAM-COORDINATOR-ERROR]', e);
+        res.status(500).json({ error: 'Koordinatör eklenirken bir hata oluştu: ' + e.message });
+    }
+});
+
+// 7. Admin: Delete an Entire Campus Team
+app.delete('/api/admin/campus-teams/:university', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    const university = decodeURIComponent(req.params.university || '').trim();
+    if (!university) {
+        return res.status(400).json({ error: 'Üniversite adı belirtilmelidir.' });
+    }
+
+    try {
+        // 1. Vitrin kartlarını sil
+        await pool.query('DELETE FROM campus_team_cards WHERE LOWER(university) = LOWER(?)', [university]);
+
+        // 2. Bu üniversitenin koordinatör ID'lerini bul
+        const [coordRows] = await pool.query(
+            "SELECT id FROM users WHERE role = 'campus_coordinator' AND LOWER(university) = LOWER(?)",
+            [university]
+        );
+        const coordIds = coordRows.map(c => c.id);
+
+        // 3. Ekip üyelerini ekipten çıkar (hesaplarını silme, ekip bağını ve campus_role'ü kaldır)
+        await pool.query(
+            "UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE LOWER(university) = LOWER(?) AND role != 'campus_coordinator' AND role != 'admin'",
+            [university]
+        );
+
+        if (coordIds.length > 0) {
+            await pool.query(
+                "UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE coordinator_id IN (?)",
+                [coordIds]
+            );
+        }
+
+        // 4. Koordinatör hesaplarını sil
+        await pool.query(
+            "DELETE FROM users WHERE role = 'campus_coordinator' AND LOWER(university) = LOWER(?)",
+            [university]
+        );
+
+        res.json({
+            success: true,
+            message: `"${university}" kampüs ekibi ve koordinatörleri başarıyla silindi. Ekip üyelerinin hesapları genel üye olarak korundu.`
+        });
+    } catch (e) {
+        console.error('[ADMIN-DELETE-CAMPUS-TEAM-ERROR]', e);
+        res.status(500).json({ error: 'Ekip silinirken bir hata oluştu: ' + e.message });
+    }
+});
+
+// 8. Admin: Delete / Remove a specific coordinator from a Campus Team
+app.delete('/api/admin/campus-teams/:university/coordinators/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+
+    const coordinatorId = req.params.id;
+    try {
+        // Vitrin kartını sil
+        await pool.query('DELETE FROM campus_team_cards WHERE coordinator_id = ?', [coordinatorId]);
+
+        // Bu koordinatöre bağlı üyelerin coordinator_id'sini null yap (başka bir koordinatör varsa ona bağlanabilir veya serbest kalır)
+        await pool.query('UPDATE users SET coordinator_id = NULL WHERE coordinator_id = ?', [coordinatorId]);
+
+        // Koordinatörün kendisini sil
+        await pool.query("DELETE FROM users WHERE id = ? AND role = 'campus_coordinator'", [coordinatorId]);
+
+        res.json({ success: true, message: 'Koordinatör başarıyla silindi.' });
+    } catch (e) {
+        console.error('[ADMIN-DELETE-COORDINATOR-ERROR]', e);
+        res.status(500).json({ error: 'Koordinatör silinirken bir hata oluştu: ' + e.message });
+    }
+});
+
 // === Campus Coordinator: Team Members Management ===
 
 // Helper: Get All Coordinator IDs for a given University/Team
