@@ -9149,6 +9149,225 @@ app.put('/api/campus-editor/decide/:type/:id', authenticateToken, async (req, re
     }
 });
 
+// 3.1 Get Content Details for Editing (Campus Editor)
+app.get('/api/campus-editor/content/:type/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    const { type, id } = req.params;
+    if (!['article', 'experiment', 'gundem'].includes(type)) {
+        return res.status(400).json({ error: 'Geçersiz içerik türü.' });
+    }
+
+    try {
+        const isExp = (type === 'experiment');
+        const tableName = isExp ? 'experiments' : 'articles';
+        const [rows] = await pool.query(`
+            SELECT t.*, u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
+            FROM \${tableName} t
+            LEFT JOIN users u ON t.author_id = u.id
+            WHERE t.id = ? \${isExp ? 'AND t.deleted_at IS NULL' : ''}
+        `, [id]);
+
+        if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+        const item = rows[0];
+
+        // Campus authorization check
+        if (req.user.role !== 'admin') {
+            const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+            const myCoordId = meRows[0]?.coordinator_id;
+            const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+            const rootCoordId = req.user.role === 'campus_coordinator' ? req.user.id : (myCoordId || 0);
+            const coordIds = await getTeamCoordinatorIds(rootCoordId, myUniversity);
+
+            const [authorRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [item.author_id]);
+            const authorData = authorRows[0] || {};
+            const matchesCoord = coordIds.includes(authorData.coordinator_id);
+            const matchesUni = myUniversity && authorData.university && (authorData.university.trim().toLowerCase() === myUniversity.toLowerCase());
+
+            if (!matchesCoord && !matchesUni) {
+                return res.status(403).json({ error: 'Bu içeriğe erişim yetkiniz bulunmuyor.' });
+            }
+        }
+
+        res.json(item);
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-GET-CONTENT-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3.2 Update Content by Campus Editor (Direct Edit)
+app.put('/api/campus-editor/content/:type/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'campus_editor' && req.user.role !== 'admin') {
+        return res.sendStatus(403);
+    }
+
+    const { type, id } = req.params;
+    if (!['article', 'experiment', 'gundem'].includes(type)) {
+        return res.status(400).json({ error: 'Geçersiz içerik türü.' });
+    }
+
+    try {
+        const isExp = (type === 'experiment');
+        const tableName = isExp ? 'experiments' : 'articles';
+        const [rows] = await pool.query(`SELECT * FROM \${tableName} WHERE id = ? \${isExp ? 'AND deleted_at IS NULL' : ''}`, [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'İçerik bulunamadı.' });
+        const item = rows[0];
+
+        // Campus authorization check
+        if (req.user.role !== 'admin') {
+            const [meRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [req.user.id]);
+            const myCoordId = meRows[0]?.coordinator_id;
+            const myUniversity = meRows[0]?.university ? meRows[0].university.trim() : '';
+            const coordIds = await getTeamCoordinatorIds(myCoordId || 0, myUniversity);
+
+            const [authorRows] = await pool.query('SELECT coordinator_id, university FROM users WHERE id = ?', [item.author_id]);
+            const authorData = authorRows[0] || {};
+            const matchesCoord = coordIds.includes(authorData.coordinator_id);
+            const matchesUni = myUniversity && authorData.university && (authorData.university.trim().toLowerCase() === myUniversity.toLowerCase());
+
+            if (!matchesCoord && !matchesUni) {
+                return res.status(403).json({ error: 'Bu içeriği düzenleme yetkiniz bulunmuyor.' });
+            }
+        }
+
+        const {
+            title,
+            category,
+            excerpt,
+            content,
+            tags,
+            references_list,
+            visual_references_list,
+            objective,
+            materials,
+            procedure_steps,
+            results,
+            conclusion,
+            safety_notes,
+            youtube_url,
+            forward_to_chief
+        } = req.body;
+
+        let updates = [];
+        let params = [];
+
+        if (title && title.trim() !== '') {
+            updates.push('title = ?');
+            params.push(title.trim());
+            if (title.trim() !== item.title) {
+                const newSlug = await getUniqueSlug(pool, title.trim(), id, tableName);
+                updates.push('slug = ?');
+                params.push(newSlug);
+            }
+        }
+
+        if (category !== undefined) {
+            updates.push('category = ?');
+            params.push(category);
+        }
+
+        if (excerpt !== undefined) {
+            updates.push('excerpt = ?');
+            params.push(excerpt);
+        }
+
+        if (tags !== undefined) {
+            updates.push('tags = ?');
+            params.push(tags);
+        }
+
+        if (references_list !== undefined) {
+            updates.push('references_list = ?');
+            params.push(references_list ? DOMPurify.sanitize(references_list) : '');
+        }
+
+        if (visual_references_list !== undefined) {
+            updates.push('visual_references_list = ?');
+            params.push(visual_references_list ? DOMPurify.sanitize(visual_references_list) : '');
+        }
+
+        if (!isExp) {
+            if (content !== undefined) {
+                updates.push('content = ?');
+                params.push(DOMPurify.sanitize(content));
+            }
+        } else {
+            if (objective !== undefined) {
+                updates.push('objective = ?');
+                params.push(objective);
+            }
+            if (materials !== undefined) {
+                updates.push('materials = ?');
+                params.push(materials);
+            }
+            if (procedure_steps !== undefined) {
+                updates.push('procedure_steps = ?');
+                params.push(DOMPurify.sanitize(procedure_steps));
+            }
+            if (results !== undefined) {
+                updates.push('results = ?');
+                params.push(DOMPurify.sanitize(results));
+            }
+            if (conclusion !== undefined) {
+                updates.push('conclusion = ?');
+                params.push(conclusion);
+            }
+            if (safety_notes !== undefined) {
+                updates.push('safety_notes = ?');
+                params.push(safety_notes);
+            }
+            if (youtube_url !== undefined) {
+                updates.push('youtube_url = ?');
+                params.push(youtube_url);
+            }
+        }
+
+        // If forwarding to Chief Editor directly
+        if (forward_to_chief) {
+            updates.push("status = 'pending'");
+            updates.push('campus_editor_id = ?');
+            params.push(req.user.id);
+            updates.push('campus_reviewed_at = NOW()');
+            updates.push('rejection_reason = NULL');
+            updates.push('submitted_at = NOW()');
+        }
+
+        if (updates.length > 0) {
+            params.push(id);
+            await pool.query(`UPDATE \${tableName} SET \${updates.join(', ')} WHERE id = ?`, params);
+        }
+
+        if (isExp) clearCache('experiments');
+        else clearCache('articles');
+
+        if (forward_to_chief) {
+            const editorName = req.user.fullname || 'Kampüs Editörü';
+            const displayTitle = (title && title.trim()) || item.title;
+
+            // Notify Chief Editors & Admins
+            const [chiefs] = await pool.query("SELECT id FROM users WHERE role IN ('editor', 'admin')");
+            const chiefMsg = `Kampüs Editörü (\${editorName}) içeriği düzenleyip Baş Editör onayına gönderdi: \${displayTitle}`;
+            for (const c of chiefs) {
+                await createNotification(c.id, chiefMsg, 'info');
+            }
+
+            // Notify Author
+            const authorMsg = `Kampüs editörünüz (\${editorName}) "\${displayTitle}" başlıklı içeriğinizi düzenleyip Baş Editör onayına iletti.`;
+            await createNotification(item.author_id, authorMsg, 'success');
+
+            return res.json({ success: true, message: 'İçerik düzenlendi ve Baş Editör incelemesine başarıyla iletildi.' });
+        }
+
+        return res.json({ success: true, message: 'Değişiklikler başarıyla kaydedildi.' });
+    } catch (err) {
+        console.error('[CAMPUS-EDITOR-UPDATE-CONTENT-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 4. Campus Editor - Published Content Stats (Views, Likes, Comments)
 app.get('/api/campus-editor/published-stats', authenticateToken, async (req, res) => {
     if (req.user.role !== 'campus_editor' && req.user.role !== 'campus_coordinator' && req.user.role !== 'admin') {

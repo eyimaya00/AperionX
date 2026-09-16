@@ -35,6 +35,10 @@
     <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css?v=288"></noscript>
     <link rel="preload" as="style" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css?v=288" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css?v=288"></noscript>
 
+    <!-- Quill Rich Text Editor -->
+    <link href="https://unpkg.com/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://unpkg.com/quill@2.0.2/dist/quill.js"></script>
+
     <script>
         // Instant Dark Mode Initialization
         (function () {
@@ -1037,6 +1041,49 @@
         .toast.error { border-left-color: #ef4444; }
         .toast.warning { border-left-color: #f59e0b; }
 
+        /* QUILL EDITOR STYLES & DARK MODE */
+        .ql-toolbar.ql-snow {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            border-color: var(--border-color);
+            background: rgba(15, 23, 42, 0.02);
+            font-family: inherit;
+        }
+        .ql-container.ql-snow {
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            border-color: var(--border-color);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.98rem;
+            line-height: 1.7;
+        }
+        html.dark-mode .ql-toolbar.ql-snow {
+            background: #1e293b;
+            border-color: var(--border-color);
+        }
+        html.dark-mode .ql-toolbar .ql-stroke {
+            stroke: #94a3b8;
+        }
+        html.dark-mode .ql-toolbar .ql-fill {
+            fill: #94a3b8;
+        }
+        html.dark-mode .ql-toolbar .ql-picker {
+            color: #94a3b8;
+        }
+        html.dark-mode .ql-toolbar .ql-picker-options {
+            background-color: #1e293b;
+            border-color: var(--border-color);
+            color: #f1f5f9;
+        }
+        html.dark-mode .ql-container.ql-snow {
+            background: #0f172a;
+            color: #f1f5f9;
+            border-color: var(--border-color);
+        }
+        html.dark-mode .ql-editor.ql-blank::before {
+            color: #64748b;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .mobile-toggle-btn {
@@ -1690,14 +1737,180 @@
                     <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">
                         <i class="ph ph-x"></i> Kapat
                     </button>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="button" class="btn btn-warning" onclick="showRevisionBox()">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-warning" onclick="openEditFromReviewModal()" title="İçeriği Doğrudan Düzenle">
+                            <i class="ph-bold ph-pencil-simple"></i> Düzenle
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="showRevisionBox()" style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3);">
                             <i class="ph ph-arrow-u-up-left"></i> Düzeltme İste
                         </button>
                         <button type="button" class="btn btn-success" onclick="confirmForwardToChief()">
                             <i class="ph-bold ph-paper-plane-tilt"></i> Baş Editöre Gönder
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. DOĞRUDAN DÜZENLEME MODALI (Kampüs Editörü için İçerik Düzenleme) -->
+    <div class="modal-overlay" id="campusEditorEditModal">
+        <div class="modal-box" style="max-width: 1200px; height: 94vh;">
+            <div class="modal-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                        <span class="status-badge bg-warning" id="ce-edit-type-badge"><i class="ph-bold ph-pencil-simple"></i> Makale Düzenleme</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);" id="ce-edit-author-meta">Yazar: -</span>
+                    </div>
+                    <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;" id="ce-edit-modal-title">İçeriği Düzenle</h2>
+                </div>
+                <button class="icon-btn" onclick="closeCampusEditorEditModal()" title="Kapat">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="modal-content" style="padding: 24px; overflow-y: auto;">
+                <form id="campus-editor-edit-form" onsubmit="event.preventDefault();">
+                    <input type="hidden" id="ce-edit-id">
+                    <input type="hidden" id="ce-edit-type">
+
+                    <!-- Ortak Üst Bilgiler -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                Başlık <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" id="ce-edit-title" class="form-control" placeholder="İçerik başlığını girin..." required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                Kategori <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="ce-edit-category" class="form-control" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                            Özet / Kısa Açıklama (Listeleme ve vitrinde görünür)
+                        </label>
+                        <textarea id="ce-edit-excerpt" class="form-control" rows="2" placeholder="Kısa bir özet girin..."></textarea>
+                    </div>
+
+                    <!-- Makale & Bilim Gündemi Alanları -->
+                    <div id="ce-article-gundem-fields">
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                İçerik Metni (Zengin Metin Editörü) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <div id="ce-quill-editor" style="min-height: 360px; background: var(--card-bg);"></div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-books"></i> Kaynakça / Referanslar
+                                </label>
+                                <textarea id="ce-edit-references" class="form-control" rows="3" placeholder="Her satıra bir kaynak veya referans formatı..."></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-image"></i> Görsel Kaynakçası
+                                </label>
+                                <textarea id="ce-edit-visual-references" class="form-control" rows="3" placeholder="Kullanılan görsellerin telif/kaynak bağlantıları..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                <i class="ph-bold ph-tag"></i> Etiketler (Virgülle ayırın)
+                            </label>
+                            <input type="text" id="ce-edit-tags" class="form-control" placeholder="örn: genetik, biyoloji, dna, crıspr">
+                        </div>
+                    </div>
+
+                    <!-- Deney Alanları -->
+                    <div id="ce-experiment-fields" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-target"></i> Deney Amacı
+                                </label>
+                                <textarea id="ce-exp-objective" class="form-control" rows="3" placeholder="Deneyin amacı nedir?"></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-flask"></i> Materyaller
+                                </label>
+                                <textarea id="ce-exp-materials" class="form-control" rows="3" placeholder="Kullanılan malzemeler..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                <i class="ph-bold ph-list-numbers"></i> Deney Adımları / Prosedür
+                            </label>
+                            <div id="ce-quill-procedure" style="min-height: 220px; background: var(--card-bg);"></div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                <i class="ph-bold ph-chart-line-up"></i> Sonuçlar ve Gözlemler
+                            </label>
+                            <div id="ce-quill-results" style="min-height: 180px; background: var(--card-bg);"></div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-check-square"></i> Değerlendirme & Yorum
+                                </label>
+                                <textarea id="ce-exp-conclusion" class="form-control" rows="3" placeholder="Sonuç değerlendirmesi..."></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-shield-warning"></i> Güvenlik & Dikkat Edilecekler
+                                </label>
+                                <textarea id="ce-exp-safety" class="form-control" rows="3" placeholder="Örn: Koruyucu eldiven ve gözlük takılmalıdır..."></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-youtube-logo"></i> YouTube Video URL (Opsiyonel)
+                                </label>
+                                <input type="url" id="ce-exp-youtube" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                    <i class="ph-bold ph-tag"></i> Etiketler (Virgülle ayırın)
+                                </label>
+                                <input type="text" id="ce-exp-tags" class="form-control" placeholder="kimya, asit-baz, titrasyon">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-main);">
+                                <i class="ph-bold ph-books"></i> Kaynakça / Referanslar
+                            </label>
+                            <textarea id="ce-exp-references" class="form-control" rows="2" placeholder="Kaynaklar..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCampusEditorEditModal()">
+                    <i class="ph ph-x"></i> Vazgeç
+                </button>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-warning" id="ce-btn-save-draft" onclick="saveCampusEditorEdit(false)">
+                        <i class="ph-bold ph-floppy-disk"></i> Değişiklikleri Kaydet
+                    </button>
+                    <button type="button" class="btn btn-success" id="ce-btn-save-forward" onclick="saveCampusEditorEdit(true)">
+                        <i class="ph-bold ph-paper-plane-tilt"></i> Kaydet ve Baş Editöre Gönder
+                    </button>
                 </div>
             </div>
         </div>
@@ -1875,6 +2088,9 @@
                             <button class="btn btn-secondary" style="padding: 6px 12px;" onclick="openPreviewModal('${item._type}', ${item.id})" title="Sitede Nasıl Görüneceğini Gör">
                                 <i class="ph ph-eye"></i> Ön İzleme
                             </button>
+                            <button class="btn btn-warning" style="padding: 6px 12px;" onclick="openCampusEditorEditModal('${item._type}', ${item.id})" title="İçeriği Düzenle">
+                                <i class="ph-bold ph-pencil-simple"></i> Düzenle
+                            </button>
                             <button class="btn btn-primary" style="padding: 6px 14px;" onclick="openReviewModal('${item._type}', ${item.id})">
                                 <i class="ph ph-checks"></i> İncele
                             </button>
@@ -1922,6 +2138,9 @@
                         <td style="text-align: right; white-space: nowrap;">
                             <button type="button" class="btn btn-secondary" onclick="openPreviewModal('${typeKey}', ${item.id})" title="Sitede yayınlanacak gibi ön izle">
                                 <i class="ph-bold ph-eye"></i> Ön İzleme
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="openCampusEditorEditModal('${typeKey}', ${item.id})" title="İçeriği Düzenle">
+                                <i class="ph-bold ph-pencil-simple"></i> Düzenle
                             </button>
                             <button type="button" class="btn btn-primary" onclick="openReviewModal('${typeKey}', ${item.id})" title="İçeriği incele ve karar ver">
                                 <i class="ph-bold ph-checks"></i> İncele
@@ -2058,6 +2277,275 @@
         function hideRevisionBox() {
             document.getElementById('modal-revision-box').style.display = 'none';
             document.getElementById('modal-main-actions').style.display = 'flex';
+        }
+
+        function openEditFromReviewModal() {
+            if (!currentActiveItem) return;
+            const type = currentActiveItem._type;
+            const id = currentActiveItem.id;
+            closeReviewModal();
+            openCampusEditorEditModal(type, id);
+        }
+
+        // --- 3. KAMPÜS EDİTÖRÜ DOĞRUDAN DÜZENLEME İŞLEMLERİ ---
+        let ceQuillEditor = null;
+        let ceQuillProcedure = null;
+        let ceQuillResults = null;
+        let ceCategoriesLoaded = false;
+
+        function initCampusEditorQuills() {
+            if (typeof Quill === 'undefined') return;
+
+            const toolbarOptions = [
+                [{ 'header': [1, 2, 3, 4, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link', 'image'],
+                ['clean']
+            ];
+
+            if (!ceQuillEditor && document.getElementById('ce-quill-editor')) {
+                ceQuillEditor = new Quill('#ce-quill-editor', {
+                    theme: 'snow',
+                    placeholder: 'İçerik detaylarını buraya yazın veya düzenleyin...',
+                    modules: { toolbar: toolbarOptions }
+                });
+            }
+
+            if (!ceQuillProcedure && document.getElementById('ce-quill-procedure')) {
+                ceQuillProcedure = new Quill('#ce-quill-procedure', {
+                    theme: 'snow',
+                    placeholder: 'Adım adım deney prosedürünü girin...',
+                    modules: { toolbar: toolbarOptions }
+                });
+            }
+
+            if (!ceQuillResults && document.getElementById('ce-quill-results')) {
+                ceQuillResults = new Quill('#ce-quill-results', {
+                    theme: 'snow',
+                    placeholder: 'Gözlemler, elde edilen bulgular ve veriler...',
+                    modules: { toolbar: toolbarOptions }
+                });
+            }
+        }
+
+        async function loadCampusEditorCategories(selectedCategory = '') {
+            const select = document.getElementById('ce-edit-category');
+            if (!select) return;
+
+            if (!ceCategoriesLoaded || select.options.length === 0) {
+                try {
+                    const res = await fetch(`${API_URL}/categories`);
+                    let categories = [];
+                    if (res.ok) {
+                        categories = await res.json();
+                    }
+                    if (!categories || categories.length === 0) {
+                        categories = [
+                            { name: 'Genel' },
+                            { name: 'Fizik' },
+                            { name: 'Kimya' },
+                            { name: 'Biyoloji' },
+                            { name: 'Astronomi' },
+                            { name: 'Teknoloji' },
+                            { name: 'Yapay Zeka' },
+                            { name: 'Tıp & Sağlık' },
+                            { name: 'Bilim Tarihi' },
+                            { name: 'Bilim Gündemi' }
+                        ];
+                    }
+                    select.innerHTML = categories.map(c => {
+                        const name = c.name || c.title || c;
+                        return `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+                    }).join('');
+                    ceCategoriesLoaded = true;
+                } catch (e) {
+                    console.error('Error loading categories:', e);
+                    select.innerHTML = `
+                        <option value="Genel">Genel</option>
+                        <option value="Fizik">Fizik</option>
+                        <option value="Kimya">Kimya</option>
+                        <option value="Biyoloji">Biyoloji</option>
+                        <option value="Astronomi">Astronomi</option>
+                        <option value="Teknoloji">Teknoloji</option>
+                        <option value="Yapay Zeka">Yapay Zeka</option>
+                        <option value="Tıp & Sağlık">Tıp & Sağlık</option>
+                        <option value="Bilim Gündemi">Bilim Gündemi</option>
+                    `;
+                }
+            }
+
+            if (selectedCategory) {
+                let exists = Array.from(select.options).some(o => o.value === selectedCategory);
+                if (!exists) {
+                    const opt = document.createElement('option');
+                    opt.value = selectedCategory;
+                    opt.textContent = selectedCategory;
+                    select.appendChild(opt);
+                }
+                select.value = selectedCategory;
+            }
+        }
+
+        async function openCampusEditorEditModal(type, id) {
+            initCampusEditorQuills();
+            showToast('İçerik bilgileri yükleniyor...', 'info');
+
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/content/${type}/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast(errData.error || 'İçerik detayları yüklenemedi.', 'error');
+                    return;
+                }
+
+                const data = await res.json();
+
+                document.getElementById('ce-edit-id').value = data.id;
+                document.getElementById('ce-edit-type').value = type;
+
+                // Başlık ve Rozetler
+                const titleEl = document.getElementById('ce-edit-modal-title');
+                const badgeEl = document.getElementById('ce-edit-type-badge');
+                const authorMeta = document.getElementById('ce-edit-author-meta');
+
+                titleEl.textContent = `Düzenle: ${data.title || 'İçerik'}`;
+                const typeLabels = { article: 'Makale Düzenleme', experiment: 'Deney Düzenleme', gundem: 'Bilim Gündemi Düzenleme' };
+                badgeEl.innerHTML = `<i class="ph-bold ph-pencil-simple"></i> ${typeLabels[type] || 'İçerik Düzenleme'}`;
+                authorMeta.textContent = `Yazar: ${data.author_name || 'Kampüs Yazarı'} (${data.author_university || 'Kampüs Ekibi'})`;
+
+                // Ortak Alanlar
+                document.getElementById('ce-edit-title').value = data.title || '';
+                document.getElementById('ce-edit-excerpt').value = data.excerpt || '';
+                await loadCampusEditorCategories(data.category || (type === 'gundem' ? 'Bilim Gündemi' : 'Genel'));
+
+                const artFields = document.getElementById('ce-article-gundem-fields');
+                const expFields = document.getElementById('ce-experiment-fields');
+
+                if (type === 'experiment') {
+                    artFields.style.display = 'none';
+                    expFields.style.display = 'block';
+
+                    document.getElementById('ce-exp-objective').value = data.objective || '';
+                    document.getElementById('ce-exp-materials').value = data.materials || '';
+                    document.getElementById('ce-exp-conclusion').value = data.conclusion || '';
+                    document.getElementById('ce-exp-safety').value = data.safety_notes || '';
+                    document.getElementById('ce-exp-youtube').value = data.youtube_url || '';
+                    document.getElementById('ce-exp-tags').value = data.tags || '';
+                    document.getElementById('ce-exp-references').value = data.references_list || '';
+
+                    if (ceQuillProcedure) {
+                        ceQuillProcedure.root.innerHTML = data.procedure_steps || '';
+                    }
+                    if (ceQuillResults) {
+                        ceQuillResults.root.innerHTML = data.results || '';
+                    }
+                } else {
+                    artFields.style.display = 'block';
+                    expFields.style.display = 'none';
+
+                    document.getElementById('ce-edit-references').value = data.references_list || '';
+                    document.getElementById('ce-edit-visual-references').value = data.visual_references_list || '';
+                    document.getElementById('ce-edit-tags').value = data.tags || '';
+
+                    if (ceQuillEditor) {
+                        ceQuillEditor.root.innerHTML = data.content || '';
+                    }
+                }
+
+                const modal = document.getElementById('campusEditorEditModal');
+                modal.classList.add('show');
+            } catch (err) {
+                console.error('Failed to load item for editing:', err);
+                showToast('İçerik yüklenirken bir bağlantı hatası oluştu.', 'error');
+            }
+        }
+
+        function closeCampusEditorEditModal() {
+            const modal = document.getElementById('campusEditorEditModal');
+            modal.classList.remove('show');
+            const form = document.getElementById('campus-editor-edit-form');
+            if (form) form.reset();
+        }
+
+        async function saveCampusEditorEdit(forwardToChief = false) {
+            const id = document.getElementById('ce-edit-id').value;
+            const type = document.getElementById('ce-edit-type').value;
+
+            if (!id || !type) return showToast('Düzenlenen içerik bilgisi eksik.', 'error');
+
+            const title = document.getElementById('ce-edit-title').value.trim();
+            const category = document.getElementById('ce-edit-category').value;
+            const excerpt = document.getElementById('ce-edit-excerpt').value.trim();
+
+            if (!title) {
+                showToast('Lütfen içerik başlığını boş bırakmayın.', 'warning');
+                document.getElementById('ce-edit-title').focus();
+                return;
+            }
+
+            const payload = {
+                title,
+                category,
+                excerpt,
+                forward_to_chief: forwardToChief
+            };
+
+            if (type === 'experiment') {
+                payload.objective = document.getElementById('ce-exp-objective').value.trim();
+                payload.materials = document.getElementById('ce-exp-materials').value.trim();
+                payload.procedure_steps = ceQuillProcedure ? ceQuillProcedure.root.innerHTML : '';
+                payload.results = ceQuillResults ? ceQuillResults.root.innerHTML : '';
+                payload.conclusion = document.getElementById('ce-exp-conclusion').value.trim();
+                payload.safety_notes = document.getElementById('ce-exp-safety').value.trim();
+                payload.youtube_url = document.getElementById('ce-exp-youtube').value.trim();
+                payload.tags = document.getElementById('ce-exp-tags').value.trim();
+                payload.references_list = document.getElementById('ce-exp-references').value.trim();
+            } else {
+                payload.content = ceQuillEditor ? ceQuillEditor.root.innerHTML : '';
+                payload.references_list = document.getElementById('ce-edit-references').value.trim();
+                payload.visual_references_list = document.getElementById('ce-edit-visual-references').value.trim();
+                payload.tags = document.getElementById('ce-edit-tags').value.trim();
+            }
+
+            const saveDraftBtn = document.getElementById('ce-btn-save-draft');
+            const saveForwardBtn = document.getElementById('ce-btn-save-forward');
+            if (saveDraftBtn) saveDraftBtn.disabled = true;
+            if (saveForwardBtn) saveForwardBtn.disabled = true;
+
+            showToast(forwardToChief ? 'Kaydediliyor ve Baş Editöre iletiliyor...' : 'Kaydediliyor...', 'info');
+
+            try {
+                const res = await fetch(`${API_URL}/campus-editor/content/${type}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(result.message || 'Değişiklikler başarıyla kaydedildi.', 'success');
+                    closeCampusEditorEditModal();
+                    fetchData();
+                    if (typeof loadPublishedStats === 'function') loadPublishedStats();
+                } else {
+                    showToast(result.error || 'Kaydetme sırasında bir hata oluştu.', 'error');
+                }
+            } catch (err) {
+                console.error('Error updating content:', err);
+                showToast('Sunucu bağlantısı sırasında bir hata oluştu.', 'error');
+            } finally {
+                if (saveDraftBtn) saveDraftBtn.disabled = false;
+                if (saveForwardBtn) saveForwardBtn.disabled = false;
+            }
         }
 
         // Yardımcı HTML Oluşturucular
