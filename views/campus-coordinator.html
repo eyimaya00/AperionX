@@ -1765,6 +1765,31 @@
                 </div>
             </div>
         </div>
+    <!-- EKİP ÜYESİ SİLME ONAY MODALI (MODERN CONFIRM MODAL) -->
+    <div id="deleteMemberConfirmModal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-card" style="background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden; text-align: center; padding: 32px 24px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 16px;">
+                <i class="ph-bold ph-warning-circle"></i>
+            </div>
+            <h3 style="margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+                Ekip Üyesini Çıkar
+            </h3>
+            <p style="margin: 0 0 24px 0; color: #64748b; font-size: 0.92rem; line-height: 1.5;">
+                <strong id="confirm-delete-member-name" style="color: var(--text-main);">-</strong> adlı üyeyi ekibinizden çıkarmak istediğinize emin misiniz?
+                <br>
+                <span style="font-size: 0.82rem; color: #94a3b8; display: block; margin-top: 8px;">
+                    (Bu işlem kullanıcının AperionX hesabını silmez, yalnızca ekibinizden ayırır.)
+                </span>
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" onclick="closeDeleteMemberModal()" class="btn" style="background: #e2e8f0; color: #475569; padding: 10px 22px; font-weight: 600; border-radius: 10px;">
+                    Vazgeç
+                </button>
+                <button type="button" id="btn-confirm-delete-member" onclick="executeDeleteTeamMember()" class="btn" style="background: #ef4444; color: white; padding: 10px 22px; font-weight: 600; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="ph-bold ph-trash"></i> Ekipten Çıkar
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- TOAST CONTAINER -->
@@ -3092,9 +3117,31 @@
             });
         }
 
-        async function deleteTeamMember(id, name) {
-            if (!confirm(`"${name}" adlı ekip üyesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
-                return;
+        let pendingDeleteMemberId = null;
+
+        function deleteTeamMember(id, nameFallback = '') {
+            pendingDeleteMemberId = id;
+            const member = (teamMembersList || []).find(m => m.id == id);
+            const displayName = member ? (member.fullname || member.email) : nameFallback;
+            const nameEl = document.getElementById('confirm-delete-member-name');
+            if (nameEl) nameEl.textContent = displayName || 'Ekip üyesi';
+            const modal = document.getElementById('deleteMemberConfirmModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDeleteMemberModal() {
+            pendingDeleteMemberId = null;
+            const modal = document.getElementById('deleteMemberConfirmModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function executeDeleteTeamMember() {
+            if (!pendingDeleteMemberId) return;
+            const id = pendingDeleteMemberId;
+            const btn = document.getElementById('btn-confirm-delete-member');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Çıkarılıyor...';
             }
 
             try {
@@ -3105,14 +3152,21 @@
 
                 const data = await res.json();
                 if (res.ok && data.success) {
-                    showToast(data.message || 'Ekip üyesi silindi.', 'success');
+                    showToast(data.message || 'Ekip üyesi başarıyla ekibinizden çıkarıldı.', 'success');
+                    closeDeleteMemberModal();
                     loadTeamMembers();
+                    if (typeof loadDashboardStats === 'function') loadDashboardStats();
                 } else {
-                    showToast(data.error || 'Silme işlemi başarısız.', 'error');
+                    showToast(data.error || 'Silme işlemi başarısız oldu.', 'error');
                 }
             } catch (err) {
                 console.error('[DELETE-TEAM-MEMBER-ERROR]', err);
                 showToast('Sunucu hatası: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph-bold ph-trash"></i> Ekipten Çıkar';
+                }
             }
         }
 

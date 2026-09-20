@@ -4941,7 +4941,7 @@ app.get('/api/coordinator/team-members', authenticateToken, async (req, res) => 
         let query = `
             SELECT id, fullname, username, email, role, campus_role, university, department, avatar_url, created_at, is_active
             FROM users 
-            WHERE (coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ?)' : ''})
+            WHERE (coordinator_id IN (?) ${myUniversity ? 'OR (university IS NOT NULL AND university = ? AND (coordinator_id IS NOT NULL OR campus_role IS NOT NULL))' : ''})
               AND id != ?
             ORDER BY created_at DESC
         `;
@@ -5047,8 +5047,16 @@ app.delete('/api/coordinator/team-members/:id', authenticateToken, async (req, r
             return res.status(403).json({ error: 'Bu ekip üyesini ekipten çıkarma yetkiniz bulunmuyor.' });
         }
 
-        // Kullanıcıyı tamamen silmek yerine ekipten çıkar (coordinator_id ve campus_role temizle)
-        await pool.query('UPDATE users SET coordinator_id = NULL, campus_role = NULL WHERE id = ?', [memberId]);
+        // Kullanıcıyı tamamen silmek yerine ekipten çıkar (coordinator_id, campus_role, university ve job_title temizle)
+        await pool.query(`
+            UPDATE users 
+            SET coordinator_id = NULL, 
+                campus_role = NULL, 
+                university = NULL,
+                job_title = NULL,
+                role = CASE WHEN role IN ('campus_editor', 'campus_coordinator') THEN 'user' ELSE role END
+            WHERE id = ?
+        `, [memberId]);
         res.json({ success: true, message: 'Ekip üyesi başarıyla ekibinizden çıkarıldı.' });
     } catch (e) {
         console.error('[COORDINATOR-DELETE-TEAM-MEMBER-ERROR]', e);
