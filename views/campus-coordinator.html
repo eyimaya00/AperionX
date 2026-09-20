@@ -1687,6 +1687,7 @@
                                         <div><strong>Ad:</strong> <span id="success-member-name">-</span></div>
                                         <div><strong>E-posta:</strong> <span id="success-member-email">-</span></div>
                                         <div><strong>Şifre:</strong> <span id="success-member-pass" style="color: #065f46; font-weight: 700;">-</span></div>
+                                        <div><strong>Görev:</strong> <span id="success-member-role" style="color: #065f46; font-weight: 600;">-</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -2413,9 +2414,11 @@
                 preview.style.display = 'block';
                 placeholder.style.display = 'none';
             } else {
-                preview.style.display = 'none';
-                placeholder.style.display = 'flex';
-                placeholder.innerText = (card.fullname || 'U').charAt(0).toUpperCase();
+                if (preview) preview.style.display = 'none';
+                if (placeholder) {
+                    placeholder.style.display = 'flex';
+                    placeholder.innerText = (card.fullname || 'U').charAt(0).toUpperCase();
+                }
             }
 
             if (title) title.innerHTML = '<i class="ph-bold ph-pencil-simple" style="color: var(--primary-accent);"></i> Ekip Kartını Düzenle';
@@ -3079,10 +3082,14 @@
                     // Show success box with credentials
                     lastCreatedMember = { fullname, email, password, role: campus_role };
                     if (successBox) {
-                        document.getElementById('success-member-name').innerText = fullname;
-                        document.getElementById('success-member-email').innerText = email;
-                        document.getElementById('success-member-pass').innerText = password;
-                        document.getElementById('success-member-role').innerText = campus_role;
+                        const elName = document.getElementById('success-member-name');
+                        const elEmail = document.getElementById('success-member-email');
+                        const elPass = document.getElementById('success-member-pass');
+                        const elRole = document.getElementById('success-member-role');
+                        if (elName) elName.innerText = fullname;
+                        if (elEmail) elEmail.innerText = email;
+                        if (elPass) elPass.innerText = password;
+                        if (elRole) elRole.innerText = campus_role;
                         successBox.style.display = 'block';
                     }
 
