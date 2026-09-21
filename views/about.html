@@ -233,6 +233,350 @@
                 font-size: 2rem !important;
             }
         }
+
+        /* === KAMPÜS AĞI BÖLÜMÜ STİLLERİ === */
+        .campus-network-section {
+            padding: 40px 0 80px 0;
+            position: relative;
+        }
+
+        .campus-tabs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .campus-team-card {
+            background: var(--card-bg, #ffffff);
+            border: 2px solid rgba(99, 102, 241, 0.12);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            user-select: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .campus-team-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+        }
+
+        .campus-team-card.active {
+            border-color: #6366f1;
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%), var(--card-bg, #ffffff);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.18);
+        }
+
+        .campus-team-card.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #6366f1;
+        }
+
+        .campus-card-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.2));
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .campus-team-card:hover .campus-card-icon-wrap,
+        .campus-team-card.active .campus-card-icon-wrap {
+            transform: scale(1.08);
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: #ffffff;
+        }
+
+        .campus-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .campus-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-color, #1e293b);
+            margin: 0 0 6px 0;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .campus-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .campus-card-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .campus-team-card.active .campus-card-badge {
+            background: #6366f1;
+            color: #ffffff;
+        }
+
+        .campus-coord-name {
+            font-size: 0.75rem;
+            color: var(--text-secondary, #64748b);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .campus-coord-name i {
+            color: #f59e0b;
+        }
+
+        .campus-card-arrow {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .campus-team-card:hover .campus-card-arrow,
+        .campus-team-card.active .campus-card-arrow {
+            color: #6366f1;
+            transform: translateX(3px);
+        }
+
+        /* Üye Vitrin Kartları Izgarası */
+        .campus-members-panel {
+            background: var(--card-bg, #ffffff);
+            border-radius: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 36px 32px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .campus-members-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed rgba(99, 102, 241, 0.2);
+        }
+
+        .campus-members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 24px;
+            justify-content: center;
+        }
+
+        /* Vitrin Kartı */
+        .cn-member-card {
+            background: var(--card-bg, #ffffff);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: 18px;
+            padding: 28px 18px 22px 18px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cn-member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 18px 18px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cn-member-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 14px 30px rgba(99, 102, 241, 0.12);
+        }
+
+        .cn-member-card:hover::before {
+            opacity: 1;
+        }
+
+        .cn-member-card.is-leader {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.03) 0%, transparent 100%), var(--card-bg, #ffffff);
+        }
+
+        .cn-member-card.is-leader::before {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+            opacity: 1;
+        }
+
+        .cn-leader-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cn-avatar-wrapper {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 16px auto;
+            position: relative;
+        }
+
+        .cn-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .cn-member-card:hover .cn-avatar {
+            transform: scale(1.06);
+            border-color: #6366f1;
+        }
+
+        .cn-avatar-fallback {
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.8rem;
+            border: 3px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .cn-member-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-color, #1e293b);
+            margin-bottom: 4px;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.3;
+        }
+
+        .cn-member-role {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 6px;
+        }
+
+        .cn-member-uni {
+            font-size: 0.74rem;
+            color: var(--text-secondary, #64748b);
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .cn-socials-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: auto;
+        }
+
+        .cn-social-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--text-secondary, #64748b);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .cn-social-btn:hover {
+            background: #6366f1;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* Dark mode */
+        body.dark-mode .campus-team-card {
+            background: #1e293b;
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+        body.dark-mode .campus-team-card.active {
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 100%), #1e293b;
+        }
+        body.dark-mode .campus-card-title {
+            color: #f1f5f9;
+        }
+        body.dark-mode .campus-members-panel {
+            background: #1e293b;
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+        body.dark-mode .cn-member-card {
+            background: #0f172a;
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+        body.dark-mode .cn-member-name {
+            color: #f1f5f9;
+        }
+
+        @media (max-width: 768px) {
+            .campus-tabs-grid {
+                grid-template-columns: 1fr;
+            }
+            .campus-members-panel {
+                padding: 24px 16px;
+            }
+            .campus-members-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 16px;
+            }
+        }
     </style>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -370,6 +714,63 @@
             <div id="team-grid" class="team-grid">
                 <!-- Cards will be loaded dynamically by script_v105.js -->
                 <p style="text-align: center; color: var(--text-secondary, #94a3b8);">Yükleniyor...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campus Network Section -->
+    <section class="campus-network-section" id="campus-network-section">
+        <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto;">
+            <!-- Section Header -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <div style="
+                    width: 64px; 
+                    height: 64px; 
+                    background: rgba(99, 102, 241, 0.1); 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    margin: 0 auto 24px auto;
+                ">
+                    <i class="ph ph-buildings" style="font-size: 32px; color: #6366f1;"></i>
+                </div>
+                <h2 id="campus-network-title" style="
+                    font-size: 2.5rem; 
+                    font-weight: 700; 
+                    margin-bottom: 16px; 
+                    font-family: 'Inter', sans-serif;
+                    color: var(--text-color);
+                ">Kampüs Ağı</h2>
+                <p id="campus-network-desc" style="
+                    font-size: 1.1rem; 
+                    line-height: 1.6; 
+                    max-width: 650px; 
+                    margin: 0 auto;
+                    color: var(--text-secondary, #94a3b8);
+                ">Türkiye'nin dört bir yanındaki üniversitelerde bilimi temsil eden ve topluma ulaştıran kampüs ekiplerimizle tanışın.</p>
+            </div>
+
+            <!-- Kampüs Ekipleri Seçici Kartları -->
+            <div id="campus-network-tabs" class="campus-tabs-grid">
+                <!-- Dinamik olarak yüklenecek -->
+                <p style="text-align: center; color: var(--text-secondary, #94a3b8); grid-column: 1 / -1;">Kampüs ekipleri yükleniyor...</p>
+            </div>
+
+            <!-- Seçilen Kampüsün Ekip Vitrin Kartları Paneli -->
+            <div class="campus-members-panel" id="campus-members-panel" style="display: none;">
+                <div class="campus-members-header">
+                    <h3 id="selected-campus-title" style="font-size: 1.6rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px; font-family: 'Inter', sans-serif;">
+                        Kampüs Ekibi
+                    </h3>
+                    <p id="selected-campus-desc" style="font-size: 0.95rem; color: var(--text-secondary, #94a3b8); margin: 0; max-width: 600px; margin: 0 auto;">
+                        Kampüs ekibimizin vitrin üyeleri.
+                    </p>
+                </div>
+
+                <div id="campus-network-members" class="campus-members-grid">
+                    <!-- Dinamik vitrin kartları -->
+                </div>
             </div>
         </div>
     </section>
@@ -644,6 +1045,13 @@
     </div>
 
     <script defer src="/script_v105.js?v=327"></script>
+    <script>
+        window.addEventListener('load', () => {
+            if (typeof loadCampusNetwork === 'function') {
+                loadCampusNetwork();
+            }
+        });
+    </script>
 </body>
 
 </html>

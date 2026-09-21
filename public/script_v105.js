@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.location.pathname.includes('/about')) {
         loadTeam();
+        loadCampusNetwork();
     }
 
     // Header Scroll Effect (Performance Optimized via RAF & Passive Event)
@@ -542,6 +543,141 @@ async function loadTeam() {
     } catch (e) {
         console.error('Team Load Error:', e);
         if (teamGrid) teamGrid.innerHTML = '';
+    }
+}
+
+// === CAMPUS NETWORK LOADER (Hakkımızda Sayfası Kampüs Ağı ve Vitrin Kartları) ===
+let campusNetworkData = [];
+let activeCampusIndex = 0;
+
+async function loadCampusNetwork() {
+    const tabs = document.getElementById('campus-network-tabs');
+    if (!tabs) return;
+
+    try {
+        const res = await fetch(`${API_URL}/public/campus-network?t=${Date.now()}`);
+        if (!res.ok) throw new Error('Campus network fetch failed');
+        campusNetworkData = await res.json();
+
+        if (!campusNetworkData || campusNetworkData.length === 0) {
+            const section = document.getElementById('campus-network-section');
+            if (section) section.style.display = 'none';
+            return;
+        }
+
+        renderCampusNetworkTabs();
+        selectCampus(0, false);
+    } catch (err) {
+        console.error('Campus Network Load Error:', err);
+        if (tabs) tabs.innerHTML = '';
+    }
+}
+
+function renderCampusNetworkTabs() {
+    const tabs = document.getElementById('campus-network-tabs');
+    if (!tabs) return;
+
+    tabs.innerHTML = campusNetworkData.map((campus, idx) => {
+        const isActive = idx === activeCampusIndex;
+        const uniName = campus.university;
+        const memberCount = campus.member_count || (campus.cards ? campus.cards.length : 0);
+        const coordName = campus.coordinators && campus.coordinators.length > 0 ? campus.coordinators[0] : '';
+
+        return `
+            <div class="campus-team-card ${isActive ? 'active' : ''}" onclick="selectCampus(${idx}, true)" tabindex="0" role="button" aria-label="${escapeHtml(uniName)} Ekibi">
+                <div class="campus-card-icon-wrap">
+                    <i class="ph ph-buildings"></i>
+                </div>
+                <div class="campus-card-info">
+                    <h3 class="campus-card-title" title="${escapeHtml(uniName)}">${escapeHtml(uniName)}</h3>
+                    <div class="campus-card-meta">
+                        <span class="campus-card-badge">${memberCount} Üye</span>
+                        ${coordName ? `<span class="campus-coord-name" title="Koordinatör: ${escapeHtml(coordName)}"><i class="ph-fill ph-crown"></i> ${escapeHtml(coordName)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="campus-card-arrow">
+                    <i class="ph ph-caret-right"></i>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function selectCampus(index, shouldScroll) {
+    if (!campusNetworkData || !campusNetworkData[index]) return;
+    activeCampusIndex = index;
+    const campus = campusNetworkData[index];
+
+    // Aktif sekme sınıfını güncelle
+    const cardEls = document.querySelectorAll('.campus-team-card');
+    cardEls.forEach((el, idx) => {
+        if (idx === index) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+
+    const panel = document.getElementById('campus-members-panel');
+    const titleEl = document.getElementById('selected-campus-title');
+    const descEl = document.getElementById('selected-campus-desc');
+    const grid = document.getElementById('campus-network-members');
+
+    if (panel) panel.style.display = 'block';
+    if (titleEl) titleEl.innerText = `${campus.university} Ekibi`;
+    if (descEl) descEl.innerText = `${campus.university} bünyesinde AperionX bilim ve teknoloji faaliyetlerini yürüten resmi ekibimiz (${(campus.cards || []).length} üye).`;
+
+    if (grid) {
+        const cards = campus.cards || [];
+        if (cards.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary, #94a3b8);">
+                    <i class="ph ph-users-three" style="font-size: 2.2rem; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
+                    Bu kampüs için henüz vitrin kartı eklenmemiş.
+                </div>
+            `;
+        } else {
+            grid.innerHTML = cards.map((card, idx) => {
+                const name = card.fullname || 'Ekip Üyesi';
+                const initial = name.charAt(0).toUpperCase();
+                const isLeader = card.role_title && card.role_title.toLowerCase().includes('koordinatör');
+                const avatarSrc = card.image_url 
+                    ? (card.image_url.startsWith('http') || card.image_url.startsWith('/') ? card.image_url : '/' + card.image_url)
+                    : null;
+
+                const emailLink = card.email ? `<a href="mailto:${encodeURIComponent(card.email)}" class="cn-social-btn" title="E-posta: ${escapeHtml(card.email)}" aria-label="E-posta gönder"><i class="ph-bold ph-envelope"></i></a>` : '';
+                const linkedinLink = card.linkedin_url ? `<a href="${escapeHtml(card.linkedin_url)}" target="_blank" rel="noopener noreferrer" class="cn-social-btn" title="LinkedIn" aria-label="LinkedIn profili"><i class="ph-bold ph-linkedin-logo"></i></a>` : '';
+
+                return `
+                    <div class="cn-member-card ${isLeader ? 'is-leader' : ''}">
+                        ${isLeader ? `
+                            <div class="cn-leader-badge">
+                                <i class="ph-fill ph-crown"></i> Lider
+                            </div>
+                        ` : ''}
+
+                        <div class="cn-avatar-wrapper">
+                            ${avatarSrc ? `
+                                <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(name)}" class="cn-avatar" loading="lazy">
+                            ` : `
+                                <div class="cn-avatar cn-avatar-fallback">
+                                    ${initial}
+                                </div>
+                            `}
+                        </div>
+
+                        <div class="cn-member-name">${escapeHtml(name)}</div>
+                        <div class="cn-member-role">${escapeHtml(card.role_title || '-')}</div>
+                        <div class="cn-member-uni">${escapeHtml(card.university || campus.university)}</div>
+
+                        ${(emailLink || linkedinLink) ? `
+                            <div class="cn-socials-row">${emailLink}${linkedinLink}</div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    if (shouldScroll && panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 

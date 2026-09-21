@@ -2978,6 +2978,18 @@ async function ensureSchema() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
+        // --- NEW: Kampüs Vitrin Ayarları (Hangi kampüs ekiplerinin vitrinde gözükeceği) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS campus_showcase_settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                university VARCHAR(255) NOT NULL UNIQUE,
+                is_active TINYINT(1) DEFAULT 1,
+                order_index INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS content_plans (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -5334,6 +5346,217 @@ app.get('/api/public/campus-team/:coordinatorIdOrUniversity', async (req, res) =
         const [cards] = await pool.query(query, queryParams);
         res.json(cards);
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- NEW: Public Campus Network (Hakkımızda Sayfası İçin Vitrinde Aktif Kampüsler ve Üyeleri) ---
+app.get('/api/public/campus-network', async (req, res) => {
+    try {
+        const [settingsRows] = await pool.query(`
+            SELECT university, is_active, order_index 
+            FROM campus_showcase_settings 
+            ORDER BY order_index ASC, university ASC
+        `);
+
+        const settingsMap = new Map();
+        for (const s of settingsRows) {
+            settingsMap.set(s.university.trim().toLowerCase(), s);
+        }
+
+        const [coordUnis] = await pool.query(`
+            SELECT DISTINCT university FROM users 
+            WHERE role = 'campus_coordinator' AND university IS NOT NULL AND TRIM(university) != ''
+        `);
+        const [cardUnis] = await pool.query(`
+            SELECT DISTINCT university FROM campus_team_cards 
+            WHERE university IS NOT NULL AND TRIM(university) != ''
+        `);
+
+        const allUniSet = new Set();
+        coordUnis.forEach(r => allUniSet.add(r.university.trim()));
+        cardUnis.forEach(r => allUniSet.add(r.university.trim()));
+
+        const [allCards] = await pool.query(`
+            SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index
+            FROM campus_team_cards
+            ORDER BY order_index ASC, id ASC
+        `);
+
+        const cardsByUni = new Map();
+        for (const card of allCards) {
+            const uKey = (card.university || '').trim().toLowerCase();
+            if (!cardsByUni.has(uKey)) cardsByUni.set(uKey, []);
+            cardsByUni.get(uKey).push(card);
+        }
+
+        const [coordinators] = await pool.query(`
+            SELECT id, fullname, university, department, avatar_url, email, public_email, linkedin_url
+            FROM users
+            WHERE role = 'campus_coordinator'
+        `);
+        const coordsByUni = new Map();
+        for (const coord of coordinators) {
+            const uKey = (coord.university || '').trim().toLowerCase();
+            if (!coordsByUni.has(uKey)) coordsByUni.set(uKey, []);
+            coordsByUni.get(uKey).push(coord);
+        }
+
+        const result = [];
+        for (const uniName of allUniSet) {
+            const uKey = uniName.toLowerCase();
+            const setting = settingsMap.get(uKey);
+            const isActive = setting ? (setting.is_active === 1 || setting.is_active === true) : true;
+            if (!isActive) continue;
+
+            const order = setting ? setting.order_index : 0;
+            let cards = cardsByUni.get(uKey) || [];
+
+            if (cards.length === 0 && coordsByUni.has(uKey)) {
+                cards = coordsByUni.get(uKey).map(c => ({
+                    id: 'coord_' + c.id,
+                    fullname: c.fullname,
+                    university: uniName,
+                    role_title: 'Kampüs Koordinatörü',
+                    image_url: c.avatar_url,
+                    email: c.public_email || c.email,
+                    linkedin_url: c.linkedin_url,
+                    order_index: 0
+                }));
+            }
+
+            result.push({
+                university: uniName,
+                order_index: order,
+                member_count: cards.length,
+                coordinators: (coordsByUni.get(uKey) || []).map(c => c.fullname),
+                cards: cards
+            });
+        }
+
+        result.sort((a, b) => a.order_index - b.order_index || a.university.localeCompare(b.university, 'tr'));
+
+        res.json(result);
+    } catch (err) {
+        console.error('[GET-CAMPUS-NETWORK-PUBLIC-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- NEW: Admin Campus Showcase List (Admin Vitrin Yönetimi) ---
+app.get('/api/admin/campus-showcase', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [settingsRows] = await pool.query('SELECT * FROM campus_showcase_settings');
+        const settingsMap = new Map();
+        settingsRows.forEach(s => settingsMap.set(s.university.trim().toLowerCase(), s));
+
+        const [coordUnis] = await pool.query(`
+            SELECT DISTINCT university FROM users 
+            WHERE role = 'campus_coordinator' AND university IS NOT NULL AND TRIM(university) != ''
+        `);
+        const [cardUnis] = await pool.query(`
+            SELECT DISTINCT university FROM campus_team_cards 
+            WHERE university IS NOT NULL AND TRIM(university) != ''
+        `);
+
+        const allUniSet = new Set();
+        coordUnis.forEach(r => allUniSet.add(r.university.trim()));
+        cardUnis.forEach(r => allUniSet.add(r.university.trim()));
+        settingsRows.forEach(s => allUniSet.add(s.university.trim()));
+
+        const [coordinators] = await pool.query(`
+            SELECT id, fullname, email, university, avatar_url 
+            FROM users WHERE role = 'campus_coordinator'
+        `);
+        const coordsByUni = new Map();
+        coordinators.forEach(c => {
+            const k = (c.university || '').trim().toLowerCase();
+            if (!coordsByUni.has(k)) coordsByUni.set(k, []);
+            coordsByUni.get(k).push(c);
+        });
+
+        const [allCards] = await pool.query(`
+            SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index
+            FROM campus_team_cards
+            ORDER BY order_index ASC, id ASC
+        `);
+        const cardsByUni = new Map();
+        allCards.forEach(c => {
+            const k = (c.university || '').trim().toLowerCase();
+            if (!cardsByUni.has(k)) cardsByUni.set(k, []);
+            cardsByUni.get(k).push(c);
+        });
+
+        const list = [];
+        for (const uni of allUniSet) {
+            const k = uni.toLowerCase();
+            const s = settingsMap.get(k);
+            const cards = cardsByUni.get(k) || [];
+            const coords = coordsByUni.get(k) || [];
+
+            list.push({
+                university: uni,
+                is_active: s ? (s.is_active ? 1 : 0) : 1,
+                order_index: s ? s.order_index : 0,
+                total_cards: cards.length,
+                coordinators: coords.map(c => ({ id: c.id, fullname: c.fullname, email: c.email })),
+                cards: cards
+            });
+        }
+
+        list.sort((a, b) => a.order_index - b.order_index || a.university.localeCompare(b.university, 'tr'));
+
+        res.json({
+            total_campuses: list.length,
+            active_campuses: list.filter(x => x.is_active === 1).length,
+            total_cards: allCards.length,
+            items: list
+        });
+    } catch (err) {
+        console.error('[GET-ADMIN-CAMPUS-SHOWCASE-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- NEW: Admin Campus Showcase Toggle (Vitrinde Göster / Gizle) ---
+app.post('/api/admin/campus-showcase/toggle', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { university, is_active } = req.body;
+    if (!university) return res.status(400).json({ error: 'Üniversite adı zorunludur.' });
+
+    const activeVal = (is_active === 1 || is_active === true || is_active === '1') ? 1 : 0;
+    try {
+        await pool.query(`
+            INSERT INTO campus_showcase_settings (university, is_active, order_index)
+            VALUES (?, ?, 0)
+            ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)
+        `, [university.trim(), activeVal]);
+
+        res.json({ success: true, message: `"${university}" vitrin durumu güncellendi.`, is_active: activeVal });
+    } catch (err) {
+        console.error('[TOGGLE-CAMPUS-SHOWCASE-ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- NEW: Admin Campus Showcase Order (Vitrin Sırası Güncelle) ---
+app.post('/api/admin/campus-showcase/order', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { university, order_index } = req.body;
+    if (!university) return res.status(400).json({ error: 'Üniversite adı zorunludur.' });
+
+    const orderVal = parseInt(order_index) || 0;
+    try {
+        await pool.query(`
+            INSERT INTO campus_showcase_settings (university, is_active, order_index)
+            VALUES (?, 1, ?)
+            ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
+        `, [university.trim(), orderVal]);
+
+        res.json({ success: true, message: `"${university}" vitrin sırası güncellendi.`, order_index: orderVal });
+    } catch (err) {
+        console.error('[ORDER-CAMPUS-SHOWCASE-ERROR]', err);
         res.status(500).json({ error: err.message });
     }
 });

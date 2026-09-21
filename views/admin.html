@@ -869,6 +869,11 @@
                 <i class="ph ph-newspaper-clipping"></i>
                 <span>Kampüs Yayınları</span>
             </a>
+            <!-- Kampüs Ağı Vitrin Menüsü -->
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('campus-network-section', this); loadCampusNetworkShowcase();">
+                <i class="ph ph-tree-structure"></i>
+                <span>Kampüs Ağı</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('email-settings', this); loadEmailSettings();">
                 <i class="ph ph-envelope-simple"></i>
                 <span>E-posta Şablonları</span>
@@ -3896,6 +3901,228 @@
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; border-top: 1px solid var(--border-color); padding-top: 16px;" id="cpd-actions">
                         <!-- Aksiyon butonları -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kampüs Ağı Vitrin Yönetimi Section -->
+        <div id="campus-network-section" class="section">
+            <style>
+                .cn-hero {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #4338ca 80%, #6366f1 100%);
+                    border-radius: 20px;
+                    padding: 32px 36px;
+                    margin-bottom: 24px;
+                    color: white;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.35);
+                }
+                .cn-hero::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    right: -10%;
+                    width: 320px;
+                    height: 320px;
+                    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+                .cn-kpi-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin-bottom: 24px;
+                }
+                .cn-kpi-card {
+                    background: var(--card-bg, #ffffff);
+                    border: 1px solid var(--border-color, #e2e8f0);
+                    border-radius: 16px;
+                    padding: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+                }
+                .cn-kpi-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                }
+                .cn-switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 48px;
+                    height: 26px;
+                }
+                .cn-switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+                .cn-slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background-color: #cbd5e1;
+                    transition: .3s;
+                    border-radius: 26px;
+                }
+                .cn-slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 20px;
+                    width: 20px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: white;
+                    transition: .3s;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+                .cn-switch input:checked + .cn-slider {
+                    background-color: #10b981;
+                }
+                .cn-switch input:checked + .cn-slider:before {
+                    transform: translateX(22px);
+                }
+            </style>
+
+            <!-- Hero Banner -->
+            <div class="cn-hero">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; z-index: 2;">
+                    <div>
+                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 5px 12px; border-radius: 30px; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px;">
+                            <i class="ph-fill ph-tree-structure"></i> Vitrin & Ağ Yönetimi
+                        </div>
+                        <h2 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">Kampüs Ağı Vitrin Yönetimi</h2>
+                        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 650px; line-height: 1.5; margin: 0;">
+                            Hakkımızda sayfasında ("Yönetim Ekibimiz"in altında) sergilenecek kampüs ekiplerini ve üyelerinin vitrin kartlarını buradan yönetin. Hangi kampüsün sitede görüneceğini tek tıkla belirleyin.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/about" target="_blank" class="btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; padding: 10px 18px; border-radius: 12px;">
+                            <i class="ph ph-arrow-square-out"></i> Hakkımızda'da Gör
+                        </a>
+                        <button class="btn" onclick="loadCampusNetworkShowcase()" style="background: white; color: #1e1b4b; font-weight: 600; font-size: 0.88rem; padding: 10px 18px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="ph ph-arrows-clockwise"></i> Yenile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Kartları -->
+            <div class="cn-kpi-grid">
+                <div class="cn-kpi-card">
+                    <div class="cn-kpi-icon" style="background: rgba(99, 102, 241, 0.12); color: #6366f1;">
+                        <i class="ph-fill ph-buildings"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Toplam Kampüs</div>
+                        <div id="cn-kpi-total" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">0</div>
+                    </div>
+                </div>
+                <div class="cn-kpi-card">
+                    <div class="cn-kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                        <i class="ph-fill ph-check-circle"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Vitrinde Gösterilen</div>
+                        <div id="cn-kpi-active" style="font-size: 1.5rem; font-weight: 800; color: #10b981;">0</div>
+                    </div>
+                </div>
+                <div class="cn-kpi-card">
+                    <div class="cn-kpi-icon" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">
+                        <i class="ph-fill ph-identification-card"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Toplam Vitrin Kartı</div>
+                        <div id="cn-kpi-cards" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtreler & Arama -->
+            <div class="card" style="margin-bottom: 20px; padding: 16px 20px; border-radius: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+                        <div style="position: relative; width: 100%; max-width: 360px;">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                            <input type="text" id="cn-search-input" onkeyup="filterCampusShowcase()" placeholder="Üniversite veya koordinatör ara..." class="form-control" style="padding-left: 36px; border-radius: 10px; font-size: 0.88rem;">
+                        </div>
+                        <select id="cn-filter-select" onchange="filterCampusShowcase()" class="form-control" style="width: auto; border-radius: 10px; font-size: 0.88rem;">
+                            <option value="all">Tüm Kampüsler</option>
+                            <option value="active">Sadece Vitrinde Olanlar</option>
+                            <option value="inactive">Vitrinde Olmayanlar</option>
+                            <option value="has_cards">Vitrin Kartı Olanlar</option>
+                        </select>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #64748b;" id="cn-table-count">
+                        Yükleniyor...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kampüsler Tablosu -->
+            <div class="card" style="border-radius: 16px; overflow: hidden; padding: 0;">
+                <div class="table-responsive">
+                    <table class="table" style="margin: 0; width: 100%;">
+                        <thead>
+                            <tr style="background: var(--admin-bg, #f8fafc); border-bottom: 1px solid var(--border-color);">
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Kampüs / Üniversite</th>
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Koordinatör(ler)</th>
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Vitrin Kartları</th>
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center; width: 100px;">Sıra</th>
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center; width: 150px;">Vitrinde Göster</th>
+                                <th style="padding: 16px 20px; font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: right;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cn-table-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    <i class="ph ph-spinner spinner" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                                    Kampüs vitrin verileri yükleniyor...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODAL: KAMPÜS EKİP KARTLARI ÖNİZLEME MODALI -->
+            <div id="modal-cn-preview" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+                <div class="card" style="width: 100%; max-width: 820px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+                        <div>
+                            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 8px; background: rgba(99, 102, 241, 0.12); color: #6366f1; margin-bottom: 6px;">
+                                <i class="ph ph-buildings"></i> Vitrin Kartları Önizleme
+                            </div>
+                            <h3 id="cn-preview-title" style="margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--text-main);">
+                                Kampüs Ekip Kartları
+                            </h3>
+                            <p id="cn-preview-subtitle" style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                                Bu kampüs ekibinin sitede sergilenecek vitrin kartları.
+                            </p>
+                        </div>
+                        <button type="button" onclick="closeCnPreviewModal()" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">
+                            <i class="ph ph-x"></i>
+                        </button>
+                    </div>
+
+                    <div id="cn-preview-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; padding: 10px 0;">
+                        <!-- Dinamik kartlar -->
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                        <button type="button" onclick="closeCnPreviewModal()" class="btn" style="background: #e2e8f0; color: #475569; padding: 9px 20px; border-radius: 10px;">
+                            Kapat
+                        </button>
                     </div>
                 </div>
             </div>
@@ -6932,6 +7159,7 @@
                 if (sectionId === 'campus-coordinator-section') loadCampusCoordinators();
                 if (sectionId === 'campus-teams-section') loadCampusTeamsOverview();
                 if (sectionId === 'campus-publications-section') loadAdminCampusPublications();
+                if (sectionId === 'campus-network-section') loadCampusNetworkShowcase();
 
             } else {
                 console.error('Section not found:', sectionId);
@@ -8838,6 +9066,306 @@
 
         function closeCampusPublicationDetailModal() {
             const modal = document.getElementById('modal-campus-publication-detail');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // =========================================================
+        // === KAMPÜS AĞI VİTRİN YÖNETİMİ JAVASCRIPT FONKSİYONLARI ===
+        // =========================================================
+        let campusShowcaseData = null;
+
+        async function loadCampusNetworkShowcase() {
+            const tbody = document.getElementById('cn-table-body');
+            const countEl = document.getElementById('cn-table-count');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <i class="ph ph-spinner spinner" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                            Kampüs vitrin verileri yükleniyor...
+                        </td>
+                    </tr>
+                `;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-showcase?t=${Date.now()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                campusShowcaseData = await res.json();
+
+                // KPI güncelle
+                const totalEl = document.getElementById('cn-kpi-total');
+                const activeEl = document.getElementById('cn-kpi-active');
+                const cardsEl = document.getElementById('cn-kpi-cards');
+
+                if (totalEl) totalEl.innerText = campusShowcaseData.total_campuses || 0;
+                if (activeEl) activeEl.innerText = campusShowcaseData.active_campuses || 0;
+                if (cardsEl) cardsEl.innerText = campusShowcaseData.total_cards || 0;
+
+                renderCampusShowcaseTable(campusShowcaseData.items || []);
+            } catch (err) {
+                console.error('[LOAD-CAMPUS-SHOWCASE-ERROR]', err);
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #ef4444;">
+                                <i class="ph ph-warning-circle" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>
+                                Kampüs verileri yüklenemedi: ${escapeHtml(err.message)}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        function renderCampusShowcaseTable(items) {
+            const tbody = document.getElementById('cn-table-body');
+            const countEl = document.getElementById('cn-table-count');
+            if (!tbody) return;
+
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 36px; color: #94a3b8;">
+                            <i class="ph ph-info" style="font-size: 1.8rem; display: block; margin-bottom: 6px; opacity: 0.6;"></i>
+                            Kayıtlı kampüs ekibi bulunamadı.
+                        </td>
+                    </tr>
+                `;
+                if (countEl) countEl.innerText = '0 kampüs listelendi';
+                return;
+            }
+
+            if (countEl) countEl.innerText = `${items.length} kampüs listelendi`;
+
+            tbody.innerHTML = items.map(item => {
+                const uniSafe = escapeHtml(item.university);
+                const coordsList = item.coordinators && item.coordinators.length > 0 
+                    ? item.coordinators.map(c => `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; background: rgba(99, 102, 241, 0.08); color: #4338ca; font-size: 0.8rem; font-weight: 600;"><i class="ph-fill ph-crown" style="color: #f59e0b; font-size: 0.75rem;"></i> ${escapeHtml(c.fullname)}</span>`).join(' ')
+                    : '<span style="color: #94a3b8; font-size: 0.8rem;">Koordinatör atanmamış</span>';
+
+                const cardBadgeColor = item.total_cards > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.15)';
+                const cardTextColor = item.total_cards > 0 ? '#059669' : '#64748b';
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;" onmouseover="this.style.background='var(--admin-bg, #f8fafc)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 16px 20px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15)); display: flex; align-items: center; justify-content: center; color: #6366f1; font-size: 1.25rem;">
+                                    <i class="ph ph-buildings"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+                                        ${uniSafe}
+                                    </div>
+                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                        ${item.total_cards} Üye Kartı • ${item.is_active ? '<span style="color: #10b981; font-weight: 600;">Vitrinde Aktif</span>' : '<span style="color: #94a3b8;">Gizli</span>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 16px 20px;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                ${coordsList}
+                            </div>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center;">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; background: ${cardBadgeColor}; color: ${cardTextColor}; font-size: 0.82rem; font-weight: 700;">
+                                ${item.total_cards} Kart
+                            </span>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center;">
+                            <input type="number" min="0" value="${item.order_index || 0}" 
+                                onchange="updateCampusOrder('${uniSafe.replace(/'/g, "\\'")}', this.value)" 
+                                title="Gösterim sırası (küçük sayı önce gösterilir)"
+                                style="width: 55px; text-align: center; padding: 6px 4px; border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; font-size: 0.85rem; background: var(--card-bg); color: var(--text-main);">
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center;">
+                            <label class="cn-switch" title="Vitrinde Göster / Gizle">
+                                <input type="checkbox" ${item.is_active ? 'checked' : ''} onchange="toggleCampusShowcase('${uniSafe.replace(/'/g, "\\'")}', this.checked)">
+                                <span class="cn-slider"></span>
+                            </label>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: right;">
+                            <button type="button" onclick="openCnPreviewModal('${uniSafe.replace(/'/g, "\\'")}')" class="btn" style="padding: 7px 14px; font-size: 0.82rem; background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="ph ph-eye"></i> Kartları Gör
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterCampusShowcase() {
+            if (!campusShowcaseData || !campusShowcaseData.items) return;
+            const searchInput = document.getElementById('cn-search-input');
+            const filterSelect = document.getElementById('cn-filter-select');
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const f = filterSelect ? filterSelect.value : 'all';
+
+            const filtered = campusShowcaseData.items.filter(item => {
+                const matchUni = item.university && item.university.toLowerCase().includes(q);
+                const matchCoord = item.coordinators && item.coordinators.some(c => c.fullname && c.fullname.toLowerCase().includes(q));
+                if (q && !matchUni && !matchCoord) return false;
+
+                if (f === 'active' && !item.is_active) return false;
+                if (f === 'inactive' && item.is_active) return false;
+                if (f === 'has_cards' && item.total_cards === 0) return false;
+
+                return true;
+            });
+
+            renderCampusShowcaseTable(filtered);
+        }
+
+        async function toggleCampusShowcase(university, isActive) {
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-showcase/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        university: university,
+                        is_active: isActive ? 1 : 0
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Vitrin durumu güncellendi.', 'success');
+                    // Veriyi yerel güncelle
+                    if (campusShowcaseData && campusShowcaseData.items) {
+                        const target = campusShowcaseData.items.find(x => x.university === university);
+                        if (target) target.is_active = isActive ? 1 : 0;
+                        const activeCount = campusShowcaseData.items.filter(x => x.is_active === 1).length;
+                        const activeEl = document.getElementById('cn-kpi-active');
+                        if (activeEl) activeEl.innerText = activeCount;
+                    }
+                } else {
+                    showToast(data.error || 'Güncelleme başarısız.', 'error');
+                    loadCampusNetworkShowcase(); // Eski durumuna geri al
+                }
+            } catch (err) {
+                console.error('[TOGGLE-CAMPUS-ERROR]', err);
+                showToast('Hata: ' + err.message, 'error');
+                loadCampusNetworkShowcase();
+            }
+        }
+
+        async function updateCampusOrder(university, newOrder) {
+            try {
+                const res = await fetch(`${API_URL}/admin/campus-showcase/order`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        university: university,
+                        order_index: parseInt(newOrder) || 0
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Sıralama güncellendi.', 'success');
+                    if (campusShowcaseData && campusShowcaseData.items) {
+                        const target = campusShowcaseData.items.find(x => x.university === university);
+                        if (target) target.order_index = parseInt(newOrder) || 0;
+                    }
+                } else {
+                    showToast(data.error || 'Sıralama güncellenemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('[ORDER-CAMPUS-ERROR]', err);
+                showToast('Hata: ' + err.message, 'error');
+            }
+        }
+
+        function openCnPreviewModal(university) {
+            if (!campusShowcaseData || !campusShowcaseData.items) return;
+            const item = campusShowcaseData.items.find(x => x.university === university);
+            if (!item) return;
+
+            const modal = document.getElementById('modal-cn-preview');
+            const titleEl = document.getElementById('cn-preview-title');
+            const subEl = document.getElementById('cn-preview-subtitle');
+            const container = document.getElementById('cn-preview-cards-container');
+
+            if (titleEl) titleEl.innerText = `${item.university} Ekibi`;
+            if (subEl) subEl.innerText = `${item.total_cards} üye vitrin kartı sergileniyor.`;
+
+            if (container) {
+                if (!item.cards || item.cards.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 36px; color: #94a3b8; background: var(--admin-bg, #f8fafc); border-radius: 14px; border: 1px dashed var(--border-color);">
+                            <i class="ph ph-identification-card" style="font-size: 2rem; display: block; margin-bottom: 6px; opacity: 0.5;"></i>
+                            Bu ekip için henüz eklenmiş vitrin kartı bulunmuyor.<br>
+                            <small style="color: #64748b;">Kampüs Ekipleri veya Kampüs Koordinatörü menüsünden kart eklenebilir.</small>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = item.cards.map(card => {
+                        const initial = (card.fullname || 'K').charAt(0).toUpperCase();
+                        const isLeader = card.role_title && card.role_title.toLowerCase().includes('koordinatör');
+                        const avatarSrc = card.image_url 
+                            ? (card.image_url.startsWith('http') || card.image_url.startsWith('/') ? card.image_url : '/' + card.image_url)
+                            : null;
+
+                        return `
+                            <div style="background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 14px; padding: 18px 14px; text-align: center; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                                ${isLeader ? `
+                                    <div style="position: absolute; top: 10px; right: 10px; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 7px; border-radius: 8px; font-size: 0.68rem; font-weight: 700;">
+                                        <i class="ph-fill ph-crown"></i> Lider
+                                    </div>
+                                ` : ''}
+
+                                <div style="width: 64px; height: 64px; margin: 0 auto 12px auto;">
+                                    ${avatarSrc ? `
+                                        <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(card.fullname)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid rgba(99,102,241,0.2);">
+                                    ` : `
+                                        <div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem;">
+                                            ${initial}
+                                        </div>
+                                    `}
+                                </div>
+
+                                <div style="font-weight: 700; color: var(--text-main); font-size: 0.92rem; margin-bottom: 3px;">
+                                    ${escapeHtml(card.fullname)}
+                                </div>
+                                <div style="color: #6366f1; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">
+                                    ${escapeHtml(card.role_title || '-')}
+                                </div>
+                                <div style="color: #64748b; font-size: 0.74rem; margin-bottom: 10px;">
+                                    ${escapeHtml(card.university || item.university)}
+                                </div>
+
+                                <div style="display: flex; justify-content: center; gap: 8px;">
+                                    ${card.email ? `
+                                        <a href="mailto:${encodeURIComponent(card.email)}" style="color: #64748b; font-size: 1.05rem;" title="${escapeHtml(card.email)}">
+                                            <i class="ph ph-envelope"></i>
+                                        </a>
+                                    ` : ''}
+                                    ${card.linkedin_url ? `
+                                        <a href="${escapeHtml(card.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color: #0077b5; font-size: 1.05rem;" title="LinkedIn">
+                                            <i class="ph ph-linkedin-logo"></i>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeCnPreviewModal() {
+            const modal = document.getElementById('modal-cn-preview');
             if (modal) modal.style.display = 'none';
         }
 
