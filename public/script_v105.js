@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.location.pathname.includes('/about')) {
         loadTeam();
-        loadCampusNetwork();
+        // loadCampusNetwork(); // Geçici olarak devre dışı bırakıldı
     }
 
     // Header Scroll Effect (Performance Optimized via RAF & Passive Event)
