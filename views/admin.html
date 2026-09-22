@@ -5588,11 +5588,16 @@
                             tbody.innerHTML += `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding:16px; font-weight:500;">${monthName}</td>
-                                    <td style="padding:16px;">${m.views}</td>
-                                    <td style="padding:16px;">${m.likes}</td>
-                                    <td style="padding:16px;">${m.comments}</td>
-                                    <td style="padding:16px;">${m.users}</td>
-                                    <td style="padding:16px;">${m.articles} Makale / ${m.experiments || 0} Deney / ${m.gundem || 0} Gündem</td>
+                                    <td style="padding:16px;">
+                                        <div style="font-weight:600; font-size:1.05rem; color:#1e293b;">${(m.views || 0).toLocaleString('tr-TR')}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; margin-top:3px;">
+                                            ${(m.article_views || 0).toLocaleString('tr-TR')} Makale · ${(m.experiment_views || 0).toLocaleString('tr-TR')} Deney · ${(m.gundem_views || 0).toLocaleString('tr-TR')} Gündem
+                                        </div>
+                                    </td>
+                                    <td style="padding:16px;">${(m.likes || 0).toLocaleString('tr-TR')}</td>
+                                    <td style="padding:16px;">${(m.comments || 0).toLocaleString('tr-TR')}</td>
+                                    <td style="padding:16px;">${(m.users || 0).toLocaleString('tr-TR')}</td>
+                                    <td style="padding:16px;">${m.articles || 0} Makale / ${m.experiments || 0} Deney / ${m.gundem || 0} Gündem</td>
                                 </tr>
                             `;
                         });

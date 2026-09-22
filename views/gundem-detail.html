@@ -2609,6 +2609,17 @@
                 if (text) text.innerText = 'Kaydedildi';
             }
         }
+
+        // Sayfa okunma kaydı (Botları filtreleyip article_views tablosuna ve analitiklere aktarma)
+        (function() {
+            const articleId = Number('{{ARTICLE_ID}}');
+            if (articleId && articleId > 0) {
+                fetch('/api/articles/' + articleId + '/view', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => console.log('[VIEW-TRACKING] Gundem view logged:', data))
+                    .catch(err => console.error('[VIEW-TRACKING] Failed to log gundem view:', err));
+            }
+        })();
     </script>
     <script src="/lightbox.js"></script>
 </body>

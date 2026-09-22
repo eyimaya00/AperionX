@@ -349,7 +349,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     date: formattedDate,
                     dateIso: dateObj.toISOString(),
                     readTime: Math.max(2, Math.ceil((contentHtml || '').replace(/<[^>]+>/g, '').split(/\s+/).length / 200)),
-                    views: (row.views || 0) + 1,
+                    views: row.views || 0,
                     tags: row.tags || row.category || 'Gündem',
                     authorName: authorName,
                     authorTitle: authorTitle,
@@ -358,9 +358,6 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     authorProfileUrl: authorProfileUrl,
                     authorCardHtml: authorCardHtml
                 };
-
-                // Asenkron okunma artırımı
-                pool.query('UPDATE articles SET views = views + 1 WHERE id = ?', [row.id]).catch(() => {});
             }
         } catch (dbErr) {
             console.error('DB fetch error for gundem slug:', dbErr.message);
