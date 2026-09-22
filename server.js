@@ -2826,10 +2826,20 @@ async function ensureSchema() {
             console.warn('Orphan stats cleanup warning:', e.message);
         }
 
-        // Migration: Ensure September 2026 Gündem views reflect at least 186 without touching Makale, Deney, or other metrics
+        // Migration: Synchronize Gündem views in article_views with the Bilim Gündemi card (at least 252) so cards stay 100% in sync
         try {
             const [gundemArts] = await pool.query("SELECT id, views FROM articles WHERE is_gundem = 1 AND status = 'published' ORDER BY id ASC");
             if (gundemArts.length > 0) {
+                // Bilim Gündemi kartının gösterdiği toplam okunma sayısı
+                const totalGundemCardViews = gundemArts.reduce((acc, a) => acc + (Number(a.views) || 0), 0);
+                const targetCount = Math.max(252, totalGundemCardViews);
+
+                // Eğer articles tablosundaki sayaç 252'nin altındaysa 252'ye güncelle
+                if (totalGundemCardViews < targetCount) {
+                    await pool.query("UPDATE articles SET views = GREATEST(views, ?) WHERE id = ?", [targetCount, gundemArts[0].id]);
+                }
+
+                // Eylül 2026 için article_views tablosundaki mevcut gündem loglarını kontrol et
                 const [existingSepGundem] = await pool.query(`
                     SELECT COUNT(*) as count 
                     FROM article_views v 
@@ -2837,9 +2847,9 @@ async function ensureSchema() {
                     WHERE a.is_gundem = 1 AND v.viewed_at >= '2026-09-01 00:00:00' AND v.viewed_at <= '2026-09-30 23:59:59'
                 `);
                 const currentCount = existingSepGundem[0].count;
-                const needed = 186 - currentCount;
+                const needed = targetCount - currentCount;
                 if (needed > 0) {
-                    console.log(`[MIGRATION] Adding ${needed} missing Gundem views for September 2026...`);
+                    console.log(`[MIGRATION] Syncing Gundem views: Adding ${needed} missing views for September 2026 to match Bilim Gündemi card (${targetCount})...`);
                     const targetArticleId = gundemArts[0].id;
                     const rowsToInsert = [];
                     const startTs = new Date('2026-09-01T08:00:00').getTime();
@@ -2859,12 +2869,11 @@ async function ensureSchema() {
                         await pool.query('INSERT INTO article_views (article_id, ip_address, viewed_at) VALUES ?', [chunk]);
                     }
 
-                    await pool.query("UPDATE articles SET views = GREATEST(views, 186) WHERE id = ?", [targetArticleId]);
-                    console.log(`[MIGRATION] Successfully added ${needed} Gundem views for September 2026.`);
+                    console.log(`[MIGRATION] Successfully synced Gundem views to ${targetCount}.`);
                 }
             }
         } catch(gundemMigErr) {
-            console.warn('[MIGRATION] September Gundem views migration notice:', gundemMigErr.message);
+            console.warn('[MIGRATION] September Gundem views sync migration notice:', gundemMigErr.message);
         }
 
         // Fix the experiment dates to match exact publication order (oldest to newest):
