@@ -15,7 +15,7 @@
             if (darkBg && darkBg.toUpperCase() === '#090B10') {
                 var s = document.createElement('style');
                 s.id = 'dynamic-dark-theme-style';
-                s.textContent = 'html[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; --comment-bg: #161b26 !important; --comment-border: rgba(255, 255, 255, 0.08) !important; } html[data-theme="dark"] body { background-color: #090b10 !important; } html[data-theme="dark"] #global-loader { background-color: #090b10 !important; } html[data-theme="dark"] .footer { background: #090b10 !important; }';
+                s.textContent = '#global-loader { background-color: #090b10 !important; } #global-loader .loader-text { color: #f1f5f9 !important; } html[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; --comment-bg: #161b26 !important; --comment-border: rgba(255, 255, 255, 0.08) !important; } html[data-theme="dark"] body { background-color: #090b10 !important; } html[data-theme="dark"] .footer { background: #090b10 !important; }';
                 document.head.appendChild(s);
             }
         })();

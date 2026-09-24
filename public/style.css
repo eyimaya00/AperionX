@@ -5277,12 +5277,16 @@ html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
     /* Make icon pop */
 }
 
-/* --- Global Page Loader --- */
-#global-loader {
+/* --- Global Page Loader (Always Deep Space Black #090b10 for smooth transitions) --- */
+#global-loader,
+[data-theme="dark"] #global-loader,
+html[data-theme="dark"] #global-loader,
+[data-theme="light"] #global-loader,
+html:not([data-theme="dark"]) #global-loader {
     position: fixed;
     inset: 0;
     z-index: 999999 !important;
-    background-color: var(--bg-color, #090b10);
+    background-color: #090b10 !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -5292,14 +5296,8 @@ html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
     overflow: hidden;
 }
 
-[data-theme="dark"] #global-loader,
-html[data-theme="dark"] #global-loader {
-    background-color: var(--bg-color, #090b10) !important;
-}
-
-[data-theme="light"] #global-loader,
-html:not([data-theme="dark"]) #global-loader {
-    background-color: #ffffff !important;
+#global-loader .loader-text {
+    color: #f1f5f9 !important;
 }
 
 body.loader-active,

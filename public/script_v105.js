@@ -87,8 +87,11 @@ function applySiteThemeColor(color) {
                 --sidebar-bg: #090b10 !important;
                 --card-bg: #11141c !important;
             }
-            html[data-theme="dark"] #global-loader {
+            #global-loader {
                 background-color: #090b10 !important;
+            }
+            #global-loader .loader-text {
+                color: #f1f5f9 !important;
             }
             html[data-theme="dark"]::-webkit-scrollbar-track,
             body[data-theme="dark"]::-webkit-scrollbar-track {
