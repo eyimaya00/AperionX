@@ -7301,21 +7301,19 @@
             const isCosmicDark = (color.toUpperCase() === '#090B10');
             if (isCosmicDark) {
                 styleEl.textContent = `
-                    :root, [data-theme="dark"], html[data-theme="dark"], body[data-theme="dark"] {
+                    html[data-theme="dark"], body.dark-mode {
                         --bg-color: #090b10 !important;
                         --header-bg: rgba(9, 11, 16, 0.88) !important;
                         --footer-bg: #090b10 !important;
                         --card-bg: #11141c !important;
                         --nav-hover-bg: #161b26 !important;
                         --comment-bg: #161b26 !important;
+                        --comment-border: rgba(255, 255, 255, 0.08) !important;
                         --border-color: rgba(255, 255, 255, 0.08) !important;
-                    }
-                    body.dark-mode {
                         --admin-bg: #090b10 !important;
                         --sidebar-bg: #090b10 !important;
-                        --card-bg: #11141c !important;
                     }
-                    .sidebar {
+                    body.dark-mode .sidebar {
                         background: #090b10 !important;
                     }
                 `;

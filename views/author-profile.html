@@ -2,6 +2,24 @@
 <html lang="tr">
 
 <head>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('theme');
+            var isDark = saved === 'dark' || (!saved && !window.location.pathname.includes('author'));
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            var darkBg = localStorage.getItem('dark_theme_bg');
+            if (darkBg && darkBg.toUpperCase() === '#090B10') {
+                var s = document.createElement('style');
+                s.id = 'dynamic-dark-theme-style';
+                s.textContent = 'html[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; --comment-bg: #161b26 !important; --comment-border: rgba(255, 255, 255, 0.08) !important; } html[data-theme="dark"] body { background-color: #090b10 !important; } html[data-theme="dark"] .footer { background: #090b10 !important; }';
+                document.head.appendChild(s);
+            }
+        })();
+    </script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1081044478679454"
      crossorigin="anonymous"></script>
@@ -39,11 +57,13 @@
         }
         .profile-hero {
             position: relative;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             padding: 80px 0;
-            color: white;
+            color: var(--text-color, #0f172a);
             margin-bottom: 60px;
             overflow: hidden;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .profile-hero-content {
@@ -56,12 +76,13 @@
             position: relative;
             z-index: 2;
             padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.85);
             /* Glass Effect */
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
 
         /* Spinner Animation */
@@ -74,8 +95,8 @@
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: white;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary-color, #6366f1);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -88,18 +109,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
         }
 
         .profile-avatar-large {
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            border: 4px solid #ffffff;
             object-fit: cover;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            background: #1e293b;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: #ffffff;
             flex-shrink: 0;
             /* Prevent shrinking */
         }
@@ -115,11 +136,12 @@
             line-height: 1.2;
             position: relative;
             z-index: 2;
+            color: var(--text-color, #0f172a);
         }
 
         .profile-job {
             font-size: 1.2rem;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 500;
             letter-spacing: 0.5px;
             margin-bottom: 15px;
@@ -129,7 +151,7 @@
         }
 
         .profile-bio {
-            color: #cbd5e1;
+            color: #475569;
             line-height: 1.6;
             font-size: 1.05rem;
             max-width: 600px;
@@ -144,9 +166,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #94a3b8;
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #475569;
             font-size: 1.35rem;
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -155,10 +177,64 @@
         }
 
         .social-circle-btn:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #4f46e5;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* DARK MODE HERO STYLES */
+        [data-theme="dark"] .profile-hero {
+            background: linear-gradient(135deg, var(--bg-color, #0f172a) 0%, var(--card-bg, #1e293b) 100%);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        [data-theme="dark"] .profile-hero-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: white;
+        }
+
+        [data-theme="dark"] .profile-hero::before {
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+        }
+
+        [data-theme="dark"] .profile-avatar-large {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            background: #1e293b;
+        }
+
+        [data-theme="dark"] .profile-name {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .profile-job {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .profile-bio {
+            color: #cbd5e1;
+        }
+
+        [data-theme="dark"] .social-circle-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .social-circle-btn:hover {
             background: rgba(255, 255, 255, 0.18);
             border-color: rgba(255, 255, 255, 0.3);
             color: #ffffff;
-            transform: translateY(-3px) scale(1.05);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
 

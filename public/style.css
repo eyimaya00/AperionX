@@ -3041,15 +3041,11 @@ i[class*=" ph"] {
     }
 
     [data-theme="dark"] .comment-item {
-        background: #334155;
-        /* Existing dark theme bg */
-        border-color: #475569;
+        background: var(--comment-bg, #334155);
+        border-color: var(--comment-border, #475569);
         padding: 16px;
-        /* Ensure padding is consistent or defined for dark mode */
         border-radius: 12px;
-        /* Ensure border-radius is consistent or defined for dark mode */
         margin-bottom: 16px;
-        /* Ensure margin-bottom is consistent or defined for dark mode */
     }
 
     .user-menu-item {

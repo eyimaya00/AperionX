@@ -41,71 +41,103 @@ function applySiteThemeColor(color) {
     const isCosmicDark = (color.toUpperCase() === '#090B10');
     if (isCosmicDark) {
         styleEl.textContent = `
-            :root, [data-theme="dark"], html[data-theme="dark"], body[data-theme="dark"] {
+            /* DARK MODE OVERRIDES (ONLY APPLIES WHEN data-theme="dark") */
+            html[data-theme="dark"] {
                 --bg-color: #090b10 !important;
                 --header-bg: rgba(9, 11, 16, 0.88) !important;
                 --footer-bg: #090b10 !important;
                 --card-bg: #11141c !important;
                 --nav-hover-bg: #161b26 !important;
                 --comment-bg: #161b26 !important;
+                --comment-border: rgba(255, 255, 255, 0.08) !important;
                 --border-color: rgba(255, 255, 255, 0.08) !important;
             }
-            body[data-theme="dark"], body[data-theme="dark"] body {
+            html[data-theme="dark"] body {
                 background-color: #090b10 !important;
             }
-            .footer {
+            html[data-theme="dark"] .footer {
                 background: #090b10 !important;
             }
-            [data-theme="dark"] .header {
+            html[data-theme="dark"] .header {
                 background: rgba(9, 11, 16, 0.88) !important;
             }
-            [data-theme="dark"] .header.scrolled {
+            html[data-theme="dark"] .header.scrolled {
                 background: rgba(9, 11, 16, 0.96) !important;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             }
-            [data-theme="dark"] .nav-dropdown-content,
-            [data-theme="dark"] .mobile-menu {
+            html[data-theme="dark"] .nav-dropdown-content,
+            html[data-theme="dark"] .mobile-menu {
                 background: rgba(9, 11, 16, 0.95) !important;
             }
-            .hero-overlay,
-            [data-theme="dark"] .articles-hero-section .hero-overlay,
-            [data-theme="dark"] .hero-slider .hero-overlay {
+            html[data-theme="dark"] .hero-overlay,
+            html[data-theme="dark"] .articles-hero-section .hero-overlay,
+            html[data-theme="dark"] .hero-slider .hero-overlay {
                 background: linear-gradient(to bottom, rgba(9, 11, 16, 0.35) 0%, rgba(9, 11, 16, 0.92) 100%) !important;
             }
-            [data-theme="dark"] .newsletter-section,
-            [data-theme="dark"] .newsletter-box,
-            [data-theme="dark"] .team-section {
+            html[data-theme="dark"] .newsletter-section,
+            html[data-theme="dark"] .newsletter-box,
+            html[data-theme="dark"] .team-section {
                 background: #090b10 !important;
             }
-            .sidebar {
+            html[data-theme="dark"] .sidebar {
                 background: #090b10 !important;
             }
-            body.dark-mode {
+            html[data-theme="dark"] body.dark-mode {
                 --admin-bg: #090b10 !important;
                 --sidebar-bg: #090b10 !important;
                 --card-bg: #11141c !important;
             }
-            #global-loader, html[data-theme="dark"] #global-loader {
+            html[data-theme="dark"] #global-loader {
                 background-color: #090b10 !important;
             }
             html[data-theme="dark"]::-webkit-scrollbar-track,
             body[data-theme="dark"]::-webkit-scrollbar-track {
                 background: #090b10 !important;
             }
-            [data-theme="dark"] .categories-section {
+            html[data-theme="dark"] .categories-section {
                 background: linear-gradient(-45deg, #090b10, #0c101a, #131131, #090b10) !important;
             }
-            [data-theme="dark"] .category-card {
+            html[data-theme="dark"] .category-card,
+            html[data-theme="dark"] .tool-card,
+            html[data-theme="dark"] .unified-article-card {
                 background: #11141c !important;
                 border-color: rgba(255, 255, 255, 0.08) !important;
             }
-            [data-theme="dark"] .tool-card {
-                background: #11141c !important;
+            html[data-theme="dark"] .comment-item {
+                background: #161b26 !important;
                 border-color: rgba(255, 255, 255, 0.08) !important;
             }
-            [data-theme="dark"] .unified-article-card {
+            html[data-theme="dark"] .comment-item.placeholder {
+                background: #161b26 !important;
+                color: #94a3b8 !important;
+            }
+            html[data-theme="dark"] #comment-form-container textarea,
+            html[data-theme="dark"] .comment-form-wrapper textarea,
+            html[data-theme="dark"] .comment-form textarea,
+            html[data-theme="dark"] #comment-input,
+            html[data-theme="dark"] textarea.edit-area {
                 background: #11141c !important;
-                border-color: rgba(255, 255, 255, 0.08) !important;
+                border-color: rgba(255, 255, 255, 0.12) !important;
+                color: #f1f5f9 !important;
+            }
+            html[data-theme="dark"] #comment-form-container textarea::placeholder,
+            html[data-theme="dark"] .comment-form-wrapper textarea::placeholder,
+            html[data-theme="dark"] .comment-form textarea::placeholder,
+            html[data-theme="dark"] #comment-input::placeholder,
+            html[data-theme="dark"] textarea.edit-area::placeholder {
+                color: #64748b !important;
+                opacity: 0.8 !important;
+            }
+            html[data-theme="dark"] .profile-hero {
+                background: linear-gradient(135deg, #090b10 0%, #11141c 100%) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+            }
+            html[data-theme="dark"] .profile-hero-content {
+                background: rgba(17, 20, 28, 0.8) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            html[data-theme="dark"] .profile-avatar-large {
+                background: #11141c !important;
             }
         `;
     } else {
