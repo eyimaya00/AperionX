@@ -15,7 +15,7 @@
             if (darkBg && darkBg.toUpperCase() === '#090B10') {
                 var s = document.createElement('style');
                 s.id = 'dynamic-dark-theme-style';
-                s.textContent = 'html[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; --comment-bg: #161b26 !important; --comment-border: rgba(255, 255, 255, 0.08) !important; } html[data-theme="dark"] body { background-color: #090b10 !important; } html[data-theme="dark"] .footer { background: #090b10 !important; }';
+                s.textContent = 'html[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; --comment-bg: #161b26 !important; --comment-border: rgba(255, 255, 255, 0.08) !important; } html[data-theme="dark"] body { background-color: #090b10 !important; } html[data-theme="dark"] #global-loader { background-color: #090b10 !important; } html[data-theme="dark"] .footer { background: #090b10 !important; }';
                 document.head.appendChild(s);
             }
         })();
@@ -285,31 +285,83 @@
             padding-bottom: 120px;
         }
 
-        /* Filter Tabs */
+        /* Filter Tabs Container & Chips */
+        .author-filter-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
         .author-filter-tab {
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 0.88rem;
-            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
             cursor: pointer;
-            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            background: transparent;
             color: #94a3b8;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
         .author-filter-tab:hover {
-            color: #f8fafc;
-            border-color: #64748b;
-            background: rgba(255, 255, 255, 0.08);
+            color: #f1f5f9;
+            background: rgba(255, 255, 255, 0.06);
         }
         .author-filter-tab.active {
             background: #6366f1;
             color: #ffffff;
-            border-color: #6366f1;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+        }
+        .author-filter-tab .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.08);
+            color: inherit;
+            line-height: 1;
+        }
+        .author-filter-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.24);
+            color: #ffffff;
+        }
+
+        /* Filter Tabs in Light Mode */
+        html:not([data-theme="dark"]) .author-filter-tabs {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+        html:not([data-theme="dark"]) .author-filter-tab {
+            color: #64748b;
+        }
+        html:not([data-theme="dark"]) .author-filter-tab:hover {
+            color: #0f172a;
+            background: rgba(0, 0, 0, 0.04);
+        }
+        html:not([data-theme="dark"]) .author-filter-tab.active {
+            background: #6366f1;
+            color: #ffffff;
+        }
+        html:not([data-theme="dark"]) .author-filter-tab .tab-count {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        html:not([data-theme="dark"]) .author-filter-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.24);
+            color: #ffffff;
         }
 
         /* ISOLATED STYLE FOR AUTHOR PROFILE CARDS */
@@ -372,20 +424,24 @@
 
         .card-category {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 50px;
-            font-size: 0.75rem;
+            top: 14px;
+            left: 14px;
+            background: rgba(9, 11, 16, 0.72);
+            color: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.68rem;
             font-weight: 700;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             z-index: 3;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.2;
         }
 
         .card-content {
@@ -576,11 +632,11 @@
         <div class="container-custom">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                 <h2 class="section-title" style="margin-bottom: 0;">Yazarın İçerikleri</h2>
-                <div class="author-filter-tabs" id="author-filter-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="author-filter-tab active" data-filter="all" onclick="filterAuthorContent('all')">Tümü (<span id="cnt-all">0</span>)</button>
-                    <button class="author-filter-tab" data-filter="article" onclick="filterAuthorContent('article')">Makaleler (<span id="cnt-article">0</span>)</button>
-                    <button class="author-filter-tab" data-filter="gundem" onclick="filterAuthorContent('gundem')">Bilim Gündemi (<span id="cnt-gundem">0</span>)</button>
-                    <button class="author-filter-tab" data-filter="experiment" onclick="filterAuthorContent('experiment')">Deneyler (<span id="cnt-experiment">0</span>)</button>
+                <div class="author-filter-tabs" id="author-filter-tabs">
+                    <button class="author-filter-tab active" data-filter="all" onclick="filterAuthorContent('all')">Tümü <span class="tab-count" id="cnt-all">0</span></button>
+                    <button class="author-filter-tab" data-filter="article" onclick="filterAuthorContent('article')">Makaleler <span class="tab-count" id="cnt-article">0</span></button>
+                    <button class="author-filter-tab" data-filter="gundem" onclick="filterAuthorContent('gundem')">Bilim Gündemi <span class="tab-count" id="cnt-gundem">0</span></button>
+                    <button class="author-filter-tab" data-filter="experiment" onclick="filterAuthorContent('experiment')">Deneyler <span class="tab-count" id="cnt-experiment">0</span></button>
                 </div>
             </div>
             <div class="articles-grid" id="articles-grid">
@@ -943,8 +999,8 @@
                         const badgeLabel = item.category || (isGundem ? 'Gündem' : 'Genel');
                         const typeLabel = isExperiment ? 'Deney' : (isGundem ? 'Gündem' : 'Makale');
                         const typeBadgeStyle = isGundem 
-                            ? 'background: #0284c7; border-color: transparent;' 
-                            : (isExperiment ? 'background: #10b981; border-color: transparent;' : 'background: #6366f1; border-color: transparent;');
+                            ? 'background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid rgba(255, 255, 255, 0.2);' 
+                            : (isExperiment ? 'background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);' : 'background: linear-gradient(135deg, #4f46e5, #4338ca); border: 1px solid rgba(255, 255, 255, 0.2);');
 
                         const fallbackImg = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop';
                         let rawImg = item.image_url;
@@ -967,8 +1023,8 @@
                         <a href="${linkPath}" class="author-article-card">
                             <div class="card-image-wrapper">
                                 <img src="${finalImgSrc}" alt="${item.title}" class="card-image" onerror="this.onerror=null; this.src='${fallbackImg}';">
-                                <span class="card-category" style="top: 20px; left: 20px;">${badgeLabel}</span>
-                                <span class="card-category" style="top: 20px; right: 20px; left: auto; ${typeBadgeStyle}">${typeLabel}</span>
+                                <span class="card-category">${badgeLabel}</span>
+                                <span class="card-category" style="right: 14px; left: auto; ${typeBadgeStyle}">${typeLabel}</span>
                             </div>
                             <div class="card-content">
                                 <h3 class="card-title">${item.title}</h3>

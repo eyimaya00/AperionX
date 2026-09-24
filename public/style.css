@@ -5282,7 +5282,7 @@ html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
     position: fixed;
     inset: 0;
     z-index: 999999 !important;
-    background-color: #0f172a;
+    background-color: var(--bg-color, #090b10);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -5294,12 +5294,12 @@ html[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
 
 [data-theme="dark"] #global-loader,
 html[data-theme="dark"] #global-loader {
-    background-color: #0f172a;
+    background-color: var(--bg-color, #090b10) !important;
 }
 
 [data-theme="light"] #global-loader,
-html[data-theme="light"] #global-loader {
-    background-color: #ffffff;
+html:not([data-theme="dark"]) #global-loader {
+    background-color: #ffffff !important;
 }
 
 body.loader-active,
