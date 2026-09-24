@@ -761,7 +761,7 @@
     </div>
 
     <!-- Script logic directly embedded for standalone robustness -->
-    <script defer src="/script_v105.js?v=327"></script>
+    <script defer src="/script_v105.js?v=328"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Data definition for Liquids
@@ -1045,83 +1045,6 @@
                         }, remainingTime);
                     }
                 }
-            }
-
-            // 4. Login form handler
-            const loginForm = document.getElementById('lab-login-form');
-            if (loginForm) {
-                loginForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('login-email').value;
-                    const password = document.getElementById('login-password').value;
-                    const btn = loginForm.querySelector('button[type="submit"]');
-
-                    btn.disabled = true;
-                    btn.innerHTML = 'Giriş Yapılıyor...';
-
-                    try {
-                        const res = await fetch('/api/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            localStorage.setItem('token', data.token);
-                            localStorage.setItem('user', JSON.stringify(data.user));
-                            if (trialTimer) clearTimeout(trialTimer);
-                            if (blockOverlay) blockOverlay.classList.remove('active');
-                            closeModal('loginModal');
-                            window.location.reload();
-                        } else {
-                            alert(data.message || 'Giriş başarısız');
-                        }
-                    } catch (err) {
-                        alert('Sunucu hatası');
-                    } finally {
-                        btn.disabled = false;
-                        btn.innerHTML = 'Giriş Yap';
-                    }
-                });
-            }
-
-            // 5. Signup form handler
-            const signupForm = document.getElementById('lab-signup-form');
-            if (signupForm) {
-                signupForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const fullName = document.getElementById('signup-fullname').value;
-                    const username = document.getElementById('signup-username').value;
-                    const email = document.getElementById('signup-email').value;
-                    const password = document.getElementById('signup-password').value;
-                    const confirmPassword = document.getElementById('signup-confirm').value;
-
-                    if (password !== confirmPassword) return alert("Şifreler eşleşmiyor");
-
-                    const btn = signupForm.querySelector('button[type="submit"]');
-                    btn.disabled = true;
-                    btn.innerHTML = 'Kayıt Olunuyor...';
-
-                    try {
-                        const res = await fetch('/api/register', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ fullname: fullName, username, email, password, source: TOOL_NAME })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-                            switchModal('signupModal', 'loginModal');
-                        } else {
-                            alert(data.message || 'Kayıt başarısız');
-                        }
-                    } catch (err) {
-                        alert('Sunucu hatası');
-                    } finally {
-                        btn.disabled = false;
-                        btn.innerHTML = 'Üye Ol';
-                    }
-                });
             }
         });
 

@@ -8879,7 +8879,7 @@ app.post('/api/login', async (req, res) => {
 
 // Google OAuth Login
 app.post('/api/auth/google', async (req, res) => {
-    const { credential } = req.body;
+    const { credential, source } = req.body;
     
     if (!credential) {
         return res.status(400).json({ message: 'Google token gerekli.' });
@@ -8906,8 +8906,8 @@ app.post('/api/auth/google', async (req, res) => {
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
             const [result] = await pool.query(
-                'INSERT INTO users (fullname, email, username, password, role, avatar_url) VALUES (?, ?, ?, ?, ?, ?)', 
-                [name, email, username, hashedPassword, 'reader', picture]
+                'INSERT INTO users (fullname, email, username, password, role, avatar_url, source) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                [name, email, username, hashedPassword, 'reader', picture, source || null]
             );
             
             user = {
@@ -8999,6 +8999,18 @@ app.get('/api/auth/google/callback', async (req, res) => {
         
         const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
         let user;
+
+        let detectedSource = null;
+        if (req.query.state) {
+            const decodedState = decodeURIComponent(req.query.state).toLowerCase();
+            const toolMatches = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab', 'mendel-lab'];
+            for (const t of toolMatches) {
+                if (decodedState.includes(t)) {
+                    detectedSource = t;
+                    break;
+                }
+            }
+        }
         
         if (rows.length === 0) {
             const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
@@ -9007,8 +9019,8 @@ app.get('/api/auth/google/callback', async (req, res) => {
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
             const [result] = await pool.query(
-                'INSERT INTO users (fullname, email, username, password, role, avatar_url) VALUES (?, ?, ?, ?, ?, ?)', 
-                [name, email, username, hashedPassword, 'reader', picture]
+                'INSERT INTO users (fullname, email, username, password, role, avatar_url, source) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                [name, email, username, hashedPassword, 'reader', picture, detectedSource || null]
             );
             
             user = { id: result.insertId, fullname: name, email, username, role: 'reader', avatar_url: picture, bio: null, job_title: null };

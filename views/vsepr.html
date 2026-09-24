@@ -2139,6 +2139,16 @@
     </div>
 
     <script>
+        // Google Sign-In Trigger for VSEPR
+        window.triggerGoogleSignIn = function() {
+            const clientId = "181445432661-0i7m20n5leci7raa45o249a86tnb53cn.apps.googleusercontent.com";
+            const redirectUri = window.location.origin + '/api/auth/google/callback';
+            const scope = 'email profile openid';
+            const state = encodeURIComponent(window.location.pathname + window.location.search);
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+            window.location.href = authUrl;
+        };
+
         // Modal & Sub-Menu Logic Functions
         function openModal(modalId, e) {
             if (e) e.preventDefault();
@@ -2296,6 +2306,7 @@
                         });
                         const data = await res.json();
                         if (res.ok) {
+                            alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
                             switchModal('signupModal', 'loginModal');
                         } else {
                             alert(data.message || 'Kayıt başarısız');

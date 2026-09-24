@@ -1853,18 +1853,40 @@ if (signupForm) {
         const username = document.getElementById('signup-username').value; // Added
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
-        const confirm = document.getElementById('signup-confirm').value;
+        const confirmEl = document.getElementById('signup-confirm');
+        const confirm = confirmEl ? confirmEl.value : password;
 
         if (password !== confirm) {
             showToast('Şifreler eşleşmiyor!', 'error');
             return;
         }
 
+        // Detect tool/page source
+        let source = null;
+        if (typeof TOOL_NAME !== 'undefined' && TOOL_NAME) {
+            source = TOOL_NAME;
+        } else {
+            const path = window.location.pathname.toLowerCase();
+            const toolMatches = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab', 'mendel-lab'];
+            for (const t of toolMatches) {
+                if (path.includes(t)) {
+                    source = t;
+                    break;
+                }
+            }
+        }
+
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Kayıt Olunuyor...';
+        }
+
         try {
             const res = await fetch(`${API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullname, username, email, password })
+                body: JSON.stringify({ fullname, username, email, password, source })
             });
 
             const data = await res.json();
@@ -1878,6 +1900,11 @@ if (signupForm) {
         } catch (error) {
             console.error(error);
             showToast('Bir hata oluştu.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Üye Ol';
+            }
         }
     });
 }
@@ -1904,7 +1931,6 @@ if (loginForm) {
                 showToast(data.message || 'Giriş başarısız.', 'error');
             } else {
                 // DEBUG: Verify Token
-                // alert('Login Response: ' + JSON.stringify(data));
                 if (!data.token) {
                     alert('HATA: Sunucu token göndermedi! Giriş başarısız sayılıyor.');
                     return;
@@ -1915,14 +1941,19 @@ if (loginForm) {
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 console.log('Login Success. Token saved:', data.token);
-                // alert('Giriş Başarılı! Token kaydedildi: ' + data.token.substring(0, 10) + '...');
 
                 showToast('Giriş başarılı!', 'success');
                 closeModal('loginModal');
                 checkAuthStatus(); // Update UI
 
+                const blockOverlay = document.getElementById('trial-block-overlay');
+                if (blockOverlay) blockOverlay.classList.remove('active');
+
                 // Role-based redirect logic
-                if (data.redirectUrl) {
+                if (data.user.role === 'reader') {
+                    // Reader: Stay on current page, reload to refresh unlock & UI
+                    setTimeout(() => window.location.reload(), 600);
+                } else if (data.redirectUrl) {
                     const cleanUrl = data.redirectUrl.startsWith('/') ? data.redirectUrl : '/' + data.redirectUrl;
                     setTimeout(() => window.location.href = cleanUrl, 1000);
                 } else if (data.user.role === 'admin') {
@@ -1936,7 +1967,6 @@ if (loginForm) {
                 } else if (data.user.role === 'author') {
                     setTimeout(() => window.location.href = '/author', 1000);
                 } else {
-                    // Reader: Stay on current page, reload to refresh comment forms & UI
                     setTimeout(() => window.location.reload(), 800);
                 }
             }
@@ -1949,10 +1979,24 @@ if (loginForm) {
 
 // Google Identity Services callback
 function handleGoogleCredentialResponse(response) {
+    let source = null;
+    if (typeof TOOL_NAME !== 'undefined' && TOOL_NAME) {
+        source = TOOL_NAME;
+    } else {
+        const path = window.location.pathname.toLowerCase();
+        const toolMatches = ['vsepr', 'ph-lab', 'dna-lab', 'periodic-table', 'blood-lab', 'mendel-lab'];
+        for (const t of toolMatches) {
+            if (path.includes(t)) {
+                source = t;
+                break;
+            }
+        }
+    }
+
     fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential })
+        body: JSON.stringify({ credential: response.credential, source })
     })
     .then(res => res.json())
     .then(data => {
@@ -1972,7 +2016,12 @@ function handleGoogleCredentialResponse(response) {
         }
         checkAuthStatus();
         
-        if (data.redirectUrl) {
+        const blockOverlay = document.getElementById('trial-block-overlay');
+        if (blockOverlay) blockOverlay.classList.remove('active');
+
+        if (data.user.role === 'reader') {
+            setTimeout(() => window.location.reload(), 600);
+        } else if (data.redirectUrl) {
             const cleanUrl = data.redirectUrl.startsWith('/') ? data.redirectUrl : '/' + data.redirectUrl;
             setTimeout(() => window.location.href = cleanUrl, 1000);
         } else if (data.user.role === 'admin') {
