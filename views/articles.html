@@ -10,6 +10,13 @@
             } else if (saved === 'light') {
                 document.documentElement.setAttribute('data-theme', 'light');
             }
+            var darkBg = localStorage.getItem('dark_theme_bg');
+            if (darkBg && darkBg.toUpperCase() === '#090B10') {
+                var s = document.createElement('style');
+                s.id = 'dynamic-dark-theme-style';
+                s.textContent = ':root, [data-theme="dark"], html[data-theme="dark"], body[data-theme="dark"] { --bg-color: #090b10 !important; --header-bg: rgba(9, 11, 16, 0.88) !important; --footer-bg: #090b10 !important; --card-bg: #11141c !important; } .footer { background: #090b10 !important; } body[data-theme="dark"], body[data-theme="dark"] body { background-color: #090b10 !important; }';
+                document.head.appendChild(s);
+            }
         })();
     </script>
     <!-- Google AdSense -->

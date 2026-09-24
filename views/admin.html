@@ -815,6 +815,9 @@
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('site-settings', this); loadSettings();">
                 <i class="ph ph-gear"></i> <span>Site Ayarları</span>
             </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('theme-color-settings', this); loadThemeColorSettings();">
+                <i class="ph-bold ph-palette"></i> <span>Tema & Renk Paleti</span>
+            </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('maintenance-mode', this); loadMaintenanceSettings();">
                 <i class="ph ph-wrench"></i> <span>Bakım Modu</span>
             </a>
@@ -1722,7 +1725,111 @@
             </div>
         </div>
 
-        <!-- Site Settings -->
+        <!-- Theme & Color Palette Management Section -->
+        <div id="theme-color-settings" class="section" style="display:none">
+            <div class="header-section" style="margin-bottom: 24px;">
+                <h1 class="page-title"><i class="ph-bold ph-palette" style="color: var(--primary-accent); margin-right: 8px;"></i> Tema & Renk Paleti Yönetimi</h1>
+                <p class="section-subtitle">Sitenin genel karanlık modu, footer'ı, navigasyon panelleri ve arka planında kullanılan ana koyu tonu tek tıkla yapılandırın.</p>
+            </div>
+
+            <!-- Current Active Status Banner -->
+            <div class="card" style="margin-bottom: 24px; border-left: 5px solid var(--primary-accent);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Mevcut Aktif Zemin Rengi</div>
+                        <div id="current-theme-badge" style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+                            <span id="current-theme-swatch" style="width: 24px; height: 24px; border-radius: 6px; display: inline-block; border: 1px solid rgba(255,255,255,0.2); background: #0F172A;"></span>
+                            <span id="current-theme-name" style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Klasik Gece Mavisi (#0F172A)</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-secondary" onclick="saveThemeColor('#0F172A')" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px;">
+                            <span style="width: 14px; height: 14px; border-radius: 50%; background: #0F172A; border: 1px solid #94a3b8; display: inline-block;"></span>
+                            Klasik Mavi (#0F172A)
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="saveThemeColor('#090B10')" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px;">
+                            <span style="width: 14px; height: 14px; border-radius: 50%; background: #090B10; border: 1px solid #818cf8; display: inline-block; box-shadow: 0 0 6px rgba(99,102,241,0.6);"></span>
+                            Kozmik Siyah (#090B10)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Interactive Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 28px;">
+                <!-- CARD 1: #0F172A -->
+                <div class="card theme-choice-card" id="theme-card-0F172A" style="cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onclick="saveThemeColor('#0F172A')">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #0F172A; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="ph-bold ph-moon"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Klasik Gece Mavisi</h3>
+                                <code style="font-size: 0.85rem; color: #64748b;">#0F172A (Slate 900)</code>
+                            </div>
+                        </div>
+                        <span class="theme-status-tag" id="tag-0F172A" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #64748b;">Pasif</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+                        AperionX'in orijinal koyu lacivert tonu. Derin kurumsal koyuluk, gözü yormayan yumuşak antrasit-lacivert hissi.
+                    </p>
+                    <!-- Mini visual preview simulation -->
+                    <div style="background: #0F172A; border-radius: 10px; padding: 14px; border: 1px solid #334155; margin-bottom: 16px;">
+                        <div style="height: 12px; width: 40%; background: #6366f1; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="height: 8px; width: 85%; background: rgba(255,255,255,0.15); border-radius: 4px; margin-bottom: 6px;"></div>
+                        <div style="height: 8px; width: 60%; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="event.stopPropagation(); saveThemeColor('#0F172A')">
+                        Bu Rengi Uygula
+                    </button>
+                </div>
+
+                <!-- CARD 2: #090B10 -->
+                <div class="card theme-choice-card" id="theme-card-090B10" style="cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onclick="saveThemeColor('#090B10')">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #090B10; border: 2px solid #6366f1; display: flex; align-items: center; justify-content: center; color: #818cf8; box-shadow: 0 0 12px rgba(99,102,241,0.4);">
+                                <i class="ph-bold ph-planet"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Kozmik Uzay Siyahı</h3>
+                                <code style="font-size: 0.85rem; color: #818cf8;">#090B10 (Midnight Space)</code>
+                            </div>
+                        </div>
+                        <span class="theme-status-tag" id="tag-090B10" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #64748b;">Pasif</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+                        Bilim Gündemi sayfasının o sinematik, derin uzay siyahı. OLED ve modern bilim temaları için maksimum kontrast ve canlı neon parlamalar.
+                    </p>
+                    <!-- Mini visual preview simulation -->
+                    <div style="background: #090B10; border-radius: 10px; padding: 14px; border: 1px solid rgba(99,102,241,0.3); box-shadow: inset 0 0 15px rgba(0,0,0,0.8); margin-bottom: 16px;">
+                        <div style="height: 12px; width: 40%; background: #6366f1; border-radius: 4px; margin-bottom: 8px; box-shadow: 0 0 8px rgba(99,102,241,0.6);"></div>
+                        <div style="height: 8px; width: 85%; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 6px;"></div>
+                        <div style="height: 8px; width: 60%; background: rgba(255,255,255,0.12); border-radius: 4px;"></div>
+                    </div>
+                    <button type="button" class="btn btn-primary" style="width: 100%;" onclick="event.stopPropagation(); saveThemeColor('#090B10')">
+                        Bu Rengi Uygula
+                    </button>
+                </div>
+            </div>
+
+            <!-- Informational Explanation Box -->
+            <div class="card" style="background: rgba(99, 102, 241, 0.04); border: 1px solid rgba(99, 102, 241, 0.15);">
+                <h4 style="margin: 0 0 12px 0; font-size: 1rem; color: var(--primary-accent); display: flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-info"></i> Bu Değişiklik Sitede Nereleri Etkiler?
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-size: 0.88rem; color: #64748b;">
+                    <div>✓ <strong>Karanlık Mod Ana Zemini</strong> (<code style="font-size:0.8rem">--bg-color</code>)</div>
+                    <div>✓ <strong>Sabit Footer Arka Planı</strong> (Tüm sayfalarda)</div>
+                    <div>✓ <strong>Buzlu Cam Header & Mobil Menü</strong></div>
+                    <div>✓ <strong>Hero Slider Karartma Katmanları</strong></div>
+                    <div>✓ <strong>Admin & Yazar Sol Menüsü</strong> (Sidebar)</div>
+                    <div>✓ <strong>Sayfa Açılış Yükleyicisi</strong> (<code style="font-size:0.8rem">#global-loader</code>)</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Site Settings -->
         <div id="site-settings" class="section" style="display:none">
             <h1 class="page-title">Site Ayarları</h1>
@@ -5008,6 +5115,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
+            loadThemeColorSettings();
             loadStats();
             loadUsers();
             loadHeroSlides();
@@ -7152,6 +7260,7 @@
                 if (sectionId === 'hero-slider') loadHeroSliderData();
                 if (sectionId === 'likes-management') loadLikes();
                 if (sectionId === 'site-settings') loadSettings();
+                if (sectionId === 'theme-color-settings') loadThemeColorSettings();
                 if (sectionId === 'charts-section') loadCharts();
                 if (sectionId === 'email-settings') loadEmailSettings();
                 if (sectionId === 'maintenance-mode') loadMaintenanceSettings();
@@ -7176,6 +7285,161 @@
                 linkEl.classList.add('active');
             }
         };
+
+        /* === TEMA & RENK PALETİ (#0F172A <-> #090B10) YÖNETİMİ === */
+        function applySiteThemeColor(color) {
+            if (!color) return;
+            try { localStorage.setItem('dark_theme_bg', color); } catch(e){}
+            
+            let styleEl = document.getElementById('dynamic-dark-theme-style');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'dynamic-dark-theme-style';
+                document.head.appendChild(styleEl);
+            }
+            
+            const isCosmicDark = (color.toUpperCase() === '#090B10');
+            if (isCosmicDark) {
+                styleEl.textContent = `
+                    :root, [data-theme="dark"], html[data-theme="dark"], body[data-theme="dark"] {
+                        --bg-color: #090b10 !important;
+                        --header-bg: rgba(9, 11, 16, 0.88) !important;
+                        --footer-bg: #090b10 !important;
+                        --card-bg: #11141c !important;
+                        --nav-hover-bg: #161b26 !important;
+                        --comment-bg: #161b26 !important;
+                        --border-color: rgba(255, 255, 255, 0.08) !important;
+                    }
+                    body.dark-mode {
+                        --admin-bg: #090b10 !important;
+                        --sidebar-bg: #090b10 !important;
+                        --card-bg: #11141c !important;
+                    }
+                    .sidebar {
+                        background: #090b10 !important;
+                    }
+                `;
+            } else {
+                styleEl.textContent = '';
+            }
+        }
+
+        // Sayfa açıldığında localStorage'dan anında uygula
+        (function() {
+            try {
+                const storedColor = localStorage.getItem('dark_theme_bg');
+                if (storedColor) applySiteThemeColor(storedColor);
+            } catch(e){}
+        })();
+
+        async function loadThemeColorSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings`);
+                if (res.ok) {
+                    const settings = await res.json();
+                    const activeColor = (settings.dark_theme_bg || localStorage.getItem('dark_theme_bg') || '#0F172A').toUpperCase();
+                    updateThemeCardsUI(activeColor);
+                    applySiteThemeColor(activeColor);
+                } else {
+                    updateThemeCardsUI('#0F172A');
+                }
+            } catch(e) {
+                console.error('loadThemeColorSettings Error:', e);
+                updateThemeCardsUI('#0F172A');
+            }
+        }
+
+        function updateThemeCardsUI(color) {
+            const isCosmic = (color.toUpperCase() === '#090B10');
+            const card09 = document.getElementById('theme-card-090B10');
+            const card0F = document.getElementById('theme-card-0F172A');
+            const tag09 = document.getElementById('tag-090B10');
+            const tag0F = document.getElementById('tag-0F172A');
+            const swatch = document.getElementById('current-theme-swatch');
+            const nameEl = document.getElementById('current-theme-name');
+
+            if (isCosmic) {
+                if (card09) {
+                    card09.style.borderColor = '#6366f1';
+                    card09.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.25)';
+                }
+                if (card0F) {
+                    card0F.style.borderColor = 'transparent';
+                    card0F.style.boxShadow = 'none';
+                }
+                if (tag09) {
+                    tag09.style.background = '#dcfce7';
+                    tag09.style.color = '#15803d';
+                    tag09.innerText = 'Aktif ✓';
+                }
+                if (tag0F) {
+                    tag0F.style.background = '#f1f5f9';
+                    tag0F.style.color = '#64748b';
+                    tag0F.innerText = 'Pasif';
+                }
+                if (swatch) {
+                    swatch.style.background = '#090B10';
+                    swatch.style.borderColor = '#6366f1';
+                    swatch.style.boxShadow = '0 0 8px rgba(99,102,241,0.6)';
+                }
+                if (nameEl) {
+                    nameEl.innerText = 'Kozmik Uzay Siyahı (#090B10)';
+                }
+            } else {
+                if (card0F) {
+                    card0F.style.borderColor = '#3b82f6';
+                    card0F.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.25)';
+                }
+                if (card09) {
+                    card09.style.borderColor = 'transparent';
+                    card09.style.boxShadow = 'none';
+                }
+                if (tag0F) {
+                    tag0F.style.background = '#dcfce7';
+                    tag0F.style.color = '#15803d';
+                    tag0F.innerText = 'Aktif ✓';
+                }
+                if (tag09) {
+                    tag09.style.background = '#f1f5f9';
+                    tag09.style.color = '#64748b';
+                    tag09.innerText = 'Pasif';
+                }
+                if (swatch) {
+                    swatch.style.background = '#0F172A';
+                    swatch.style.borderColor = '#334155';
+                    swatch.style.boxShadow = 'none';
+                }
+                if (nameEl) {
+                    nameEl.innerText = 'Klasik Gece Mavisi (#0F172A)';
+                }
+            }
+        }
+
+        async function saveThemeColor(color) {
+            try {
+                const token = localStorage.getItem('token');
+                const formData = new FormData();
+                formData.append('dark_theme_bg', color);
+
+                const res = await fetch(`${API_URL}/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    applySiteThemeColor(color);
+                    updateThemeCardsUI(color);
+                    const colorName = (color.toUpperCase() === '#090B10') ? 'Kozmik Uzay Siyahı (#090B10)' : 'Klasik Gece Mavisi (#0F172A)';
+                    showToast(`Tema başarıyla güncellendi! Tüm site artık ${colorName} olarak görüntülenecek.`, 'success');
+                } else {
+                    showToast('Tema kaydedilirken bir hata oluştu.', 'error');
+                }
+            } catch(e) {
+                console.error('saveThemeColor Error:', e);
+                showToast('Sunucu bağlantı hatası.', 'error');
+            }
+        }
 
         // --- YAZAR ŞİFRE DEĞİŞTİRME MANTIĞI ---
         let authorsResetList = [];

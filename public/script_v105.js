@@ -26,6 +26,103 @@ var API_URL = '/api';
     document.head.appendChild(style);
 })();
 
+/* === DYNAMIC GLOBAL DARK THEME BACKGROUND SWITCHER (#0F172A <-> #090B10) === */
+function applySiteThemeColor(color) {
+    if (!color) return;
+    try { localStorage.setItem('dark_theme_bg', color); } catch(e){}
+    
+    let styleEl = document.getElementById('dynamic-dark-theme-style');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamic-dark-theme-style';
+        document.head.appendChild(styleEl);
+    }
+    
+    const isCosmicDark = (color.toUpperCase() === '#090B10');
+    if (isCosmicDark) {
+        styleEl.textContent = `
+            :root, [data-theme="dark"], html[data-theme="dark"], body[data-theme="dark"] {
+                --bg-color: #090b10 !important;
+                --header-bg: rgba(9, 11, 16, 0.88) !important;
+                --footer-bg: #090b10 !important;
+                --card-bg: #11141c !important;
+                --nav-hover-bg: #161b26 !important;
+                --comment-bg: #161b26 !important;
+                --border-color: rgba(255, 255, 255, 0.08) !important;
+            }
+            body[data-theme="dark"], body[data-theme="dark"] body {
+                background-color: #090b10 !important;
+            }
+            .footer {
+                background: #090b10 !important;
+            }
+            [data-theme="dark"] .header {
+                background: rgba(9, 11, 16, 0.88) !important;
+            }
+            [data-theme="dark"] .header.scrolled {
+                background: rgba(9, 11, 16, 0.96) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            [data-theme="dark"] .nav-dropdown-content,
+            [data-theme="dark"] .mobile-menu {
+                background: rgba(9, 11, 16, 0.95) !important;
+            }
+            .hero-overlay,
+            [data-theme="dark"] .articles-hero-section .hero-overlay,
+            [data-theme="dark"] .hero-slider .hero-overlay {
+                background: linear-gradient(to bottom, rgba(9, 11, 16, 0.35) 0%, rgba(9, 11, 16, 0.92) 100%) !important;
+            }
+            [data-theme="dark"] .newsletter-section,
+            [data-theme="dark"] .newsletter-box,
+            [data-theme="dark"] .team-section {
+                background: #090b10 !important;
+            }
+            .sidebar {
+                background: #090b10 !important;
+            }
+            body.dark-mode {
+                --admin-bg: #090b10 !important;
+                --sidebar-bg: #090b10 !important;
+                --card-bg: #11141c !important;
+            }
+            #global-loader, html[data-theme="dark"] #global-loader {
+                background-color: #090b10 !important;
+            }
+            html[data-theme="dark"]::-webkit-scrollbar-track,
+            body[data-theme="dark"]::-webkit-scrollbar-track {
+                background: #090b10 !important;
+            }
+            [data-theme="dark"] .categories-section {
+                background: linear-gradient(-45deg, #090b10, #0c101a, #131131, #090b10) !important;
+            }
+            [data-theme="dark"] .category-card {
+                background: #11141c !important;
+                border-color: rgba(255, 255, 255, 0.08) !important;
+            }
+            [data-theme="dark"] .tool-card {
+                background: #11141c !important;
+                border-color: rgba(255, 255, 255, 0.08) !important;
+            }
+            [data-theme="dark"] .unified-article-card {
+                background: #11141c !important;
+                border-color: rgba(255, 255, 255, 0.08) !important;
+            }
+        `;
+    } else {
+        styleEl.textContent = '';
+    }
+}
+
+// Self-invoking immediate check on script load from localStorage
+(function() {
+    try {
+        var cachedColor = localStorage.getItem('dark_theme_bg');
+        if (cachedColor) {
+            applySiteThemeColor(cachedColor);
+        }
+    } catch(e) {}
+})();
+
 // --- HELPER: Slugify Text for Author Profile URLs ---
 function slugifyText(text) {
     if (!text) return '';
@@ -1090,6 +1187,11 @@ async function loadSettings() {
         }
 
         const settings = await fetchSettingsCached();
+
+        // Apply Global Dark Theme Color (#0F172A <-> #090B10)
+        if (settings.dark_theme_bg) {
+            applySiteThemeColor(settings.dark_theme_bg);
+        }
 
         // Update Title - Safe Check
         const siteTitle = settings.site_title || '';
