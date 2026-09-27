@@ -724,7 +724,7 @@ function renderCampusNetworkTabs() {
                     <h3 class="campus-card-title" title="${escapeHtml(uniName)}">${escapeHtml(uniName)}</h3>
                     <div class="campus-card-meta">
                         <span class="campus-card-badge">${memberCount} Üye</span>
-                        ${coordName ? `<span class="campus-coord-name" title="Koordinatör: ${escapeHtml(coordName)}"><i class="ph-fill ph-crown"></i> ${escapeHtml(coordName)}</span>` : ''}
+                        ${coordName ? `<span class="campus-coord-name" title="Koordinatör: ${escapeHtml(coordName)}"><i class="ph ph-user"></i> ${escapeHtml(coordName)}</span>` : ''}
                     </div>
                 </div>
                 <div class="campus-card-arrow">
@@ -754,7 +754,7 @@ function selectCampus(index, shouldScroll) {
 
     if (panel) panel.style.display = 'block';
     if (titleEl) titleEl.innerText = `${campus.university} Ekibi`;
-    if (descEl) descEl.innerText = `${campus.university} bünyesinde AperionX bilim ve teknoloji faaliyetlerini yürüten resmi ekibimiz (${(campus.cards || []).length} üye).`;
+    if (descEl) descEl.innerText = `${campus.university} bünyesinde AperionX bilim ve teknoloji faaliyetlerini yürüten kampüs ekibimiz.`;
 
     if (grid) {
         const cards = campus.cards || [];
@@ -769,7 +769,6 @@ function selectCampus(index, shouldScroll) {
             grid.innerHTML = cards.map((card, idx) => {
                 const name = card.fullname || 'Ekip Üyesi';
                 const initial = name.charAt(0).toUpperCase();
-                const isLeader = card.role_title && card.role_title.toLowerCase().includes('koordinatör');
                 const avatarSrc = card.image_url 
                     ? (card.image_url.startsWith('http') || card.image_url.startsWith('/') ? card.image_url : '/' + card.image_url)
                     : null;
@@ -778,13 +777,7 @@ function selectCampus(index, shouldScroll) {
                 const linkedinLink = card.linkedin_url ? `<a href="${escapeHtml(card.linkedin_url)}" target="_blank" rel="noopener noreferrer" class="cn-social-btn" title="LinkedIn" aria-label="LinkedIn profili"><i class="ph-bold ph-linkedin-logo"></i></a>` : '';
 
                 return `
-                    <div class="cn-member-card ${isLeader ? 'is-leader' : ''}">
-                        ${isLeader ? `
-                            <div class="cn-leader-badge">
-                                <i class="ph-fill ph-crown"></i> Lider
-                            </div>
-                        ` : ''}
-
+                    <div class="cn-member-card">
                         <div class="cn-avatar-wrapper">
                             ${avatarSrc ? `
                                 <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(name)}" class="cn-avatar" loading="lazy">

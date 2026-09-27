@@ -252,23 +252,24 @@
             }
         }
 
-        /* === KAMPÜS AĞI BÖLÜMÜ STİLLERİ === */
+        /* === KAMPÜS AĞI BÖLÜMÜ STİLLERİ (MODERN & TEMA UYUMLU) === */
         .campus-network-section {
             padding: 40px 0 80px 0;
             position: relative;
         }
 
+        /* Kampüs Seçici Kartları */
         .campus-tabs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
         }
 
         .campus-team-card {
             background: var(--card-bg, #ffffff);
-            border: 2px solid rgba(99, 102, 241, 0.12);
-            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.14);
+            border-radius: 18px;
             padding: 18px 20px;
             display: flex;
             align-items: center;
@@ -278,52 +279,51 @@
             position: relative;
             user-select: none;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
         }
 
         .campus-team-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.35);
             box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
         }
 
         .campus-team-card.active {
             border-color: #6366f1;
-            background: linear-gradient(145deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%), var(--card-bg, #ffffff);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.18);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.07) 0%, rgba(168, 85, 247, 0.04) 100%), var(--card-bg, #ffffff);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.16);
         }
 
-        .campus-team-card.active::after {
+        .campus-team-card.active::before {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #6366f1;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #6366f1, #a855f7);
+            border-radius: 18px 0 0 18px;
         }
 
         .campus-card-icon-wrap {
-            width: 48px;
-            height: 48px;
+            width: 46px;
+            height: 46px;
             border-radius: 12px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.2));
+            background: rgba(99, 102, 241, 0.09);
             color: #6366f1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             flex-shrink: 0;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .campus-team-card:hover .campus-card-icon-wrap,
         .campus-team-card.active .campus-card-icon-wrap {
-            transform: scale(1.08);
-            background: linear-gradient(135deg, #6366f1, #a855f7);
+            background: #6366f1;
             color: #ffffff;
+            transform: scale(1.05);
         }
 
         .campus-card-info {
@@ -332,14 +332,15 @@
         }
 
         .campus-card-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
-            color: var(--text-color, #1e293b);
-            margin: 0 0 6px 0;
+            color: var(--text-color, #0f172a);
+            margin: 0 0 5px 0;
             font-family: 'Inter', sans-serif;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: color 0.2s ease;
         }
 
         .campus-card-meta {
@@ -352,10 +353,11 @@
         .campus-card-badge {
             font-size: 0.72rem;
             font-weight: 700;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 12px;
             background: rgba(99, 102, 241, 0.1);
             color: #6366f1;
+            transition: all 0.2s ease;
         }
 
         .campus-team-card.active .campus-card-badge {
@@ -364,21 +366,23 @@
         }
 
         .campus-coord-name {
-            font-size: 0.75rem;
+            font-size: 0.76rem;
             color: var(--text-secondary, #64748b);
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
+            font-weight: 500;
         }
 
         .campus-coord-name i {
-            color: #f59e0b;
+            color: #6366f1;
+            font-size: 0.85rem;
         }
 
         .campus-card-arrow {
             color: #94a3b8;
-            font-size: 1.1rem;
-            transition: transform 0.2s ease, color 0.2s ease;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
         }
 
         .campus-team-card:hover .campus-card-arrow,
@@ -387,43 +391,45 @@
             transform: translateX(3px);
         }
 
-        /* Üye Vitrin Kartları Izgarası */
+        /* Seçilen Ekip Vitrin Paneli */
         .campus-members-panel {
             background: var(--card-bg, #ffffff);
             border-radius: 24px;
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            padding: 36px 32px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
-            animation: fadeIn 0.4s ease;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            padding: 40px 32px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.03);
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .campus-members-header {
             text-align: center;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 1px dashed rgba(99, 102, 241, 0.2);
+            margin-bottom: 36px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
         }
 
         .campus-members-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px;
             justify-content: center;
         }
 
-        /* Vitrin Kartı */
+        /* Vitrin Kartı (Yönetim Ekibi Kartı Kalitesinde) */
         .cn-member-card {
             background: var(--card-bg, #ffffff);
             border: 1px solid rgba(99, 102, 241, 0.12);
-            border-radius: 18px;
-            padding: 28px 18px 22px 18px;
+            border-radius: 20px;
+            padding: 32px 22px 26px 22px;
             text-align: center;
             position: relative;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease, border-color 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: hidden;
         }
 
         .cn-member-card::before {
@@ -433,51 +439,25 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #6366f1, #a855f7);
-            border-radius: 18px 18px 0 0;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .cn-member-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-8px);
             border-color: rgba(99, 102, 241, 0.35);
-            box-shadow: 0 14px 30px rgba(99, 102, 241, 0.12);
+            box-shadow: 0 18px 40px rgba(99, 102, 241, 0.16);
         }
 
         .cn-member-card:hover::before {
             opacity: 1;
         }
 
-        .cn-member-card.is-leader {
-            border-color: rgba(245, 158, 11, 0.3);
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.03) 0%, transparent 100%), var(--card-bg, #ffffff);
-        }
-
-        .cn-member-card.is-leader::before {
-            background: linear-gradient(90deg, #f59e0b, #ef4444);
-            opacity: 1;
-        }
-
-        .cn-leader-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(245, 158, 11, 0.15);
-            color: #d97706;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.68rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
         .cn-avatar-wrapper {
-            width: 88px;
-            height: 88px;
-            margin: 0 auto 16px auto;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 18px auto;
             position: relative;
         }
 
@@ -487,11 +467,12 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid rgba(99, 102, 241, 0.2);
-            transition: transform 0.3s ease;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+            display: block;
         }
 
         .cn-member-card:hover .cn-avatar {
-            transform: scale(1.06);
+            transform: scale(1.05);
             border-color: #6366f1;
         }
 
@@ -502,47 +483,50 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 1.8rem;
-            border: 3px solid rgba(99, 102, 241, 0.25);
+            font-weight: 700;
+            font-size: 2rem;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            width: 100%;
+            height: 100%;
         }
 
         .cn-member-name {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            color: var(--text-color, #1e293b);
-            margin-bottom: 4px;
+            color: var(--text-color, #0f172a);
+            margin-bottom: 6px;
             font-family: 'Inter', sans-serif;
-            line-height: 1.3;
+            line-height: 1.35;
         }
 
         .cn-member-role {
-            font-size: 0.82rem;
+            font-size: 0.88rem;
             font-weight: 600;
             color: #6366f1;
             margin-bottom: 6px;
         }
 
         .cn-member-uni {
-            font-size: 0.74rem;
+            font-size: 0.78rem;
             color: var(--text-secondary, #64748b);
-            margin-bottom: 14px;
+            margin-bottom: 18px;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            font-weight: 500;
         }
 
         .cn-socials-row {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
             margin-top: auto;
         }
 
         .cn-social-btn {
-            width: 34px;
-            height: 34px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -550,8 +534,8 @@
             background: rgba(99, 102, 241, 0.08);
             color: var(--text-secondary, #64748b);
             text-decoration: none;
-            font-size: 1rem;
-            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            transition: all 0.25s ease;
         }
 
         .cn-social-btn:hover {
@@ -560,39 +544,154 @@
             transform: scale(1.1);
         }
 
-        /* Dark mode */
-        body.dark-mode .campus-team-card {
+        /* === DARK MODE UYUMU (Tam Kapsamlı) === */
+        [data-theme="dark"] .campus-team-card,
+        body.dark-mode .campus-team-card,
+        .dark-theme .campus-team-card {
             background: #1e293b;
-            border-color: rgba(99, 102, 241, 0.2);
-        }
-        body.dark-mode .campus-team-card.active {
-            background: linear-gradient(145deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 100%), #1e293b;
-        }
-        body.dark-mode .campus-card-title {
-            color: #f1f5f9;
-        }
-        body.dark-mode .campus-members-panel {
-            background: #1e293b;
-            border-color: rgba(99, 102, 241, 0.25);
-        }
-        body.dark-mode .cn-member-card {
-            background: #0f172a;
-            border-color: rgba(99, 102, 241, 0.2);
-        }
-        body.dark-mode .cn-member-name {
-            color: #f1f5f9;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
         }
 
+        [data-theme="dark"] .campus-team-card:hover,
+        body.dark-mode .campus-team-card:hover,
+        .dark-theme .campus-team-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        [data-theme="dark"] .campus-team-card.active,
+        body.dark-mode .campus-team-card.active,
+        .dark-theme .campus-team-card.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 100%), #1e293b;
+            border-color: #6366f1;
+        }
+
+        [data-theme="dark"] .campus-card-title,
+        body.dark-mode .campus-card-title,
+        .dark-theme .campus-card-title {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .campus-coord-name,
+        body.dark-mode .campus-coord-name,
+        .dark-theme .campus-coord-name {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .campus-coord-name i,
+        body.dark-mode .campus-coord-name i,
+        .dark-theme .campus-coord-name i {
+            color: #818cf8;
+        }
+
+        [data-theme="dark"] .campus-members-panel,
+        body.dark-mode .campus-members-panel,
+        .dark-theme .campus-members-panel {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .campus-members-header,
+        body.dark-mode .campus-members-header,
+        .dark-theme .campus-members-header {
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="dark"] #selected-campus-title,
+        body.dark-mode #selected-campus-title,
+        .dark-theme #selected-campus-title {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .cn-member-card,
+        body.dark-mode .cn-member-card,
+        .dark-theme .cn-member-card {
+            background: #0f172a;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .cn-member-card:hover,
+        body.dark-mode .cn-member-card:hover,
+        .dark-theme .cn-member-card:hover {
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.22);
+        }
+
+        [data-theme="dark"] .cn-member-name,
+        body.dark-mode .cn-member-name,
+        .dark-theme .cn-member-name {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .cn-member-role,
+        body.dark-mode .cn-member-role,
+        .dark-theme .cn-member-role {
+            color: #818cf8;
+        }
+
+        [data-theme="dark"] .cn-member-uni,
+        body.dark-mode .cn-member-uni,
+        .dark-theme .cn-member-uni {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .cn-social-btn,
+        body.dark-mode .cn-social-btn,
+        .dark-theme .cn-social-btn {
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .cn-social-btn:hover,
+        body.dark-mode .cn-social-btn:hover,
+        .dark-theme .cn-social-btn:hover {
+            background: #6366f1;
+            color: #ffffff;
+        }
+
+        /* Mobil Uyumluluk */
         @media (max-width: 768px) {
             .campus-tabs-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 24px;
             }
+
+            .campus-team-card {
+                padding: 14px 16px;
+            }
+
             .campus-members-panel {
-                padding: 24px 16px;
+                padding: 28px 18px;
+                border-radius: 18px;
             }
+
             .campus-members-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 16px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 18px;
+            }
+
+            .cn-member-card {
+                padding: 24px 16px 20px 16px;
+            }
+
+            .cn-avatar-wrapper {
+                width: 86px;
+                height: 86px;
+                margin-bottom: 14px;
+            }
+
+            #selected-campus-title {
+                font-size: 1.35rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .campus-members-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
