@@ -716,7 +716,7 @@ function renderCampusNetworkTabs() {
         const coordName = campus.coordinators && campus.coordinators.length > 0 ? campus.coordinators[0] : '';
 
         return `
-            <div class="campus-team-card ${isActive ? 'active' : ''}" onclick="selectCampus(${idx}, true)" tabindex="0" role="button" aria-label="${escapeHtml(uniName)} Ekibi">
+            <div class="campus-team-card ${isActive ? 'active' : ''}" onclick="selectCampus(${idx}, true)" onkeydown="if(event.key==='Enter'||event.key===' '){selectCampus(${idx}, true); event.preventDefault();}" tabindex="0" role="button" aria-label="${escapeHtml(uniName)} Ekibi">
                 <div class="campus-card-icon-wrap">
                     <i class="ph ph-buildings"></i>
                 </div>
@@ -802,7 +802,13 @@ function selectCampus(index, shouldScroll) {
     }
 
     if (shouldScroll && panel) {
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const navHeight = 90;
+        const rect = panel.getBoundingClientRect();
+        const targetY = window.pageYOffset + rect.top - navHeight;
+        window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+        });
     }
 }
 
