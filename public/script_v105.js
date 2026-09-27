@@ -705,6 +705,22 @@ async function loadCampusNetwork() {
     }
 }
 
+function getCleanTeamTitle(rawName) {
+    if (!rawName) return 'Kampüs Ekibi';
+    const name = rawName.trim();
+    if (/(\sekibi|\sekip)$/i.test(name)) {
+        return name;
+    }
+    return `${name} Ekibi`;
+}
+
+function getCleanBaseCampusName(rawName) {
+    if (!rawName) return 'Kampüsümüz';
+    let name = rawName.trim();
+    name = name.replace(/(\sekibi|\sekip|\stakımı)$/i, '').trim();
+    return name;
+}
+
 function renderCampusNetworkTabs() {
     const tabs = document.getElementById('campus-network-tabs');
     if (!tabs) return;
@@ -713,7 +729,9 @@ function renderCampusNetworkTabs() {
         const isActive = idx === activeCampusIndex;
         const uniName = campus.university;
         const memberCount = campus.member_count || (campus.cards ? campus.cards.length : 0);
-        const coordName = campus.coordinators && campus.coordinators.length > 0 ? campus.coordinators[0] : '';
+        const coordsList = campus.coordinators && campus.coordinators.length > 0 ? campus.coordinators : [];
+        const coordLabel = coordsList.length > 1 ? 'Koordinatörler' : 'Koordinatör';
+        const coordNames = coordsList.join(', ');
 
         return `
             <div class="campus-team-card ${isActive ? 'active' : ''}" onclick="selectCampus(${idx}, true)" onkeydown="if(event.key==='Enter'||event.key===' '){selectCampus(${idx}, true); event.preventDefault();}" tabindex="0" role="button" aria-label="${escapeHtml(uniName)} Ekibi">
@@ -724,7 +742,7 @@ function renderCampusNetworkTabs() {
                     <h3 class="campus-card-title" title="${escapeHtml(uniName)}">${escapeHtml(uniName)}</h3>
                     <div class="campus-card-meta">
                         <span class="campus-card-badge">${memberCount} Üye</span>
-                        ${coordName ? `<span class="campus-coord-name" title="Koordinatör: ${escapeHtml(coordName)}"><i class="ph ph-user"></i> ${escapeHtml(coordName)}</span>` : ''}
+                        ${coordsList.length > 0 ? `<span class="campus-coord-name" title="${coordLabel}: ${escapeHtml(coordNames)}"><i class="ph ph-user"></i> ${escapeHtml(coordNames)}</span>` : ''}
                     </div>
                 </div>
                 <div class="campus-card-arrow">
@@ -752,9 +770,12 @@ function selectCampus(index, shouldScroll) {
     const descEl = document.getElementById('selected-campus-desc');
     const grid = document.getElementById('campus-network-members');
 
+    const displayTeamTitle = getCleanTeamTitle(campus.university);
+    const displayBaseName = getCleanBaseCampusName(campus.university);
+
     if (panel) panel.style.display = 'block';
-    if (titleEl) titleEl.innerText = `${campus.university} Ekibi`;
-    if (descEl) descEl.innerText = `${campus.university} bünyesinde AperionX bilim ve teknoloji faaliyetlerini yürüten kampüs ekibimiz.`;
+    if (titleEl) titleEl.innerText = displayTeamTitle;
+    if (descEl) descEl.innerText = `${displayBaseName} bünyesinde AperionX bilim ve teknoloji faaliyetlerini yürüten kampüs ekibimiz.`;
 
     if (grid) {
         const cards = campus.cards || [];
