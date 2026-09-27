@@ -877,7 +877,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 180px;
+            max-height: 380px;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
@@ -888,6 +888,10 @@
             background: rgba(9, 11, 16, 0.45);
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        .sidebar-comment-item:hover {
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
         .sidebar-comment-author {
@@ -911,6 +915,52 @@
             line-height: 1.45;
             color: rgba(255, 255, 255, 0.72);
             margin: 0;
+            word-break: break-word;
+        }
+
+        .sidebar-comment-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 5px;
+            padding-top: 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .sidebar-reply-btn {
+            background: transparent;
+            border: none;
+            color: #818cf8;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.2s ease;
+        }
+        .sidebar-reply-btn:hover {
+            color: #ffffff;
+            background: rgba(99, 102, 241, 0.25);
+        }
+
+        .sidebar-replies-list {
+            margin-top: 6px;
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 2px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar-reply-item {
+            padding: 6px 8px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
         }
 
         .sidebar-no-comments {
@@ -2210,16 +2260,48 @@
                     }
 
                     const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-                    commentListEl.innerHTML = comments.map(c => {
-                        const d = c.created_at ? new Date(c.created_at) : new Date();
-                        const dateStr = `${d.getDate()} ${trMonths[d.getMonth()]} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                    const formatCommentDate = (dStr) => {
+                        const d = dStr ? new Date(dStr) : new Date();
+                        return `${d.getDate()} ${trMonths[d.getMonth()]} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                    };
+
+                    let rootComments = comments.filter(c => !c.parent_id).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                    if (rootComments.length === 0 && comments.length > 0) rootComments = comments;
+
+                    commentListEl.innerHTML = rootComments.map(c => {
+                        const dateStr = formatCommentDate(c.created_at);
+                        const authorSafe = escapeHtml(c.fullname || 'AperionX Okuru');
+                        const authorBadge = c.is_article_author ? `<span style="font-size:0.65rem; background:rgba(99,102,241,0.2); color:#a5b4fc; padding:1px 5px; border-radius:4px; margin-left:4px;">Yazar</span>` : '';
+
+                        const replies = comments.filter(r => r.parent_id === c.id).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+                        const repliesHtml = replies.length > 0 ? `
+                            <div class="sidebar-replies-list">
+                                ${replies.map(r => `
+                                    <div class="sidebar-reply-item">
+                                        <div class="sidebar-comment-author">
+                                            <span><i class="ph-fill ph-arrow-bend-down-right" style="font-size:0.75rem; color:#818cf8; margin-right:2px;"></i> ${escapeHtml(r.fullname || 'Okur')} ${r.is_article_author ? '<span style="font-size:0.62rem; color:#a5b4fc;">(Yazar)</span>' : ''}</span>
+                                            <span class="sidebar-comment-date">${formatCommentDate(r.created_at)}</span>
+                                        </div>
+                                        <p class="sidebar-comment-text">${escapeHtml(r.content)}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '';
+
                         return `
-                            <div class="sidebar-comment-item">
+                            <div class="sidebar-comment-item" id="gundem-comm-${c.id}">
                                 <div class="sidebar-comment-author">
-                                    <span><i class="ph-fill ph-user-circle"></i> ${escapeHtml(c.fullname || 'AperionX Okuru')}</span>
-                                    <span class="sidebar-comment-date">${dateStr}</span>
+                                    <span><i class="ph-fill ph-user-circle"></i> ${authorSafe} ${authorBadge}</span>
                                 </div>
                                 <p class="sidebar-comment-text">${escapeHtml(c.content)}</p>
+                                <div class="sidebar-comment-footer">
+                                    <span class="sidebar-comment-date">${dateStr}</span>
+                                    <button type="button" class="sidebar-reply-btn" onclick="toggleGundemReply(${c.id}, '${authorSafe.replace(/'/g, "\\'")}')">
+                                        <i class="ph-bold ph-arrow-bend-up-left"></i> Yanıtla
+                                    </button>
+                                </div>
+                                <div id="gundem-reply-box-${c.id}" style="display:none;"></div>
+                                ${repliesHtml}
                             </div>
                         `;
                     }).join('');
@@ -2247,6 +2329,79 @@
                     <p class="sidebar-comment-text">${escapeHtml(c.text)}</p>
                 </div>
             `).join('');
+        }
+
+        function toggleGundemReply(commentId, targetAuthor) {
+            if (!isUserLoggedIn()) {
+                showGundemToast('Cevap yazabilmek için lütfen üye girişi yapın.', 'ph-fill ph-warning-circle', '#f59e0b');
+                if (typeof openModal === 'function') openModal('loginModal');
+                return;
+            }
+            const box = document.getElementById(`gundem-reply-box-${commentId}`);
+            if (!box) return;
+
+            if (box.style.display === 'block') {
+                box.style.display = 'none';
+                box.innerHTML = '';
+                return;
+            }
+
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 8px; padding: 8px; margin-top: 6px;">
+                    <textarea id="gundem-reply-input-${commentId}" class="sidebar-comment-textarea" style="min-height: 52px; font-size: 0.78rem; padding: 6px 8px; margin-bottom: 6px;" placeholder="@${targetAuthor} yanıtınızı yazın..."></textarea>
+                    <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                        <button type="button" onclick="cancelGundemReply(${commentId})" style="background: transparent; border: none; color: #94a3b8; font-size: 0.72rem; cursor: pointer; padding: 3px 8px;">Vazgeç</button>
+                        <button type="button" id="btn-submit-gundem-reply-${commentId}" onclick="submitGundemReply(${commentId})" class="sidebar-comment-btn" style="padding: 3px 10px; font-size: 0.72rem;">
+                            <i class="ph-bold ph-paper-plane-tilt"></i> Gönder
+                        </button>
+                    </div>
+                </div>
+            `;
+            const ta = document.getElementById(`gundem-reply-input-${commentId}`);
+            if (ta) ta.focus();
+        }
+
+        function cancelGundemReply(commentId) {
+            const box = document.getElementById(`gundem-reply-box-${commentId}`);
+            if (box) {
+                box.style.display = 'none';
+                box.innerHTML = '';
+            }
+        }
+
+        async function submitGundemReply(commentId) {
+            const input = document.getElementById(`gundem-reply-input-${commentId}`);
+            if (!input || !input.value.trim()) return;
+            const content = input.value.trim();
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const btn = document.getElementById(`btn-submit-gundem-reply-${commentId}`);
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/comments/${commentId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showGundemToast('Cevabınız yayınlandı!');
+                    cancelGundemReply(commentId);
+                    await loadSidebarComments();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showGundemToast(data.error || 'Cevap gönderilemedi.', 'ph-fill ph-warning-circle', '#ef4444');
+                }
+            } catch (err) {
+                console.error('submitGundemReply error:', err);
+                showGundemToast('Bir hata oluştu.', 'ph-fill ph-warning-circle', '#ef4444');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
         function initCommentAuthCheck() {

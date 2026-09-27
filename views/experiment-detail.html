@@ -894,6 +894,135 @@
             flex: 1;
         }
 
+        /* Comment Replies Styling */
+        .comment-replies-list {
+            margin-top: 16px;
+            padding-left: 18px;
+            border-left: 2.5px solid rgba(99, 102, 241, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .comment-reply-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        [data-theme="dark"] .comment-reply-item {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(255, 255, 255, 0.07) !important;
+        }
+        .comment-reply-item:hover {
+            border-color: var(--primary-accent);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+        .reply-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .reply-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .comment-badge-author {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(99, 102, 241, 0.12);
+            color: #6366f1;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 6px;
+        }
+        [data-theme="dark"] .comment-badge-author {
+            background: rgba(129, 140, 248, 0.2);
+            color: #a5b4fc;
+        }
+        .action-link.reply-link {
+            color: var(--primary-accent);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .action-link.reply-link:hover {
+            text-decoration: underline;
+        }
+        .inline-reply-box {
+            margin-top: 12px;
+            margin-bottom: 8px;
+            animation: fadeInReply 0.2s ease-out;
+        }
+        @keyframes fadeInReply {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .inline-reply-form {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+        }
+        [data-theme="dark"] .inline-reply-form {
+            background: #11141c !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .reply-textarea {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.92rem;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+            background: #f8fafc;
+            color: var(--text-color);
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        [data-theme="dark"] .reply-textarea {
+            background: #0d1017 !important;
+            color: #f1f5f9 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+        .reply-textarea:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+        .reply-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-sm {
+            padding: 6px 14px !important;
+            font-size: 0.82rem !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+        }
+
+
         /* Custom Box Styles for Experiments */
         .section-header-custom {
             font-size: 1.3rem;
@@ -1991,45 +2120,46 @@
             } catch (e) { console.error(e); }
         }
 
+        function escapeCommentHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function renderCommentsList(limit) {
             const list = document.getElementById('comments-list');
-            const visibleComments = (limit && limit < allComments.length)
-                ? allComments.slice(0, limit)
-                : allComments;
-
-            if (allComments.length === 0) {
+            if (!Array.isArray(allComments) || allComments.length === 0) {
                 list.innerHTML = '<div class="comment-item placeholder" style="justify-content:center; color:#94a3b8; font-style:italic;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>';
                 return;
             }
 
-            let html = visibleComments.map(com => {
-                const initials = com.fullname ? com.fullname.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'U';
-                const isMine = com.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === com.user_id);
-                return `
-                    <div class="comment-item" id="comment-${com.id}">
-                        <div class="comment-avatar">${initials}</div>
-                        <div class="comment-content-wrapper">
-                            <div class="comment-header">
-                                <span class="comment-author">${com.fullname || 'Kullanıcı'}</span>
-                                ${com.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
-                                <div class="comment-actions">
-                                    <span class="comment-date">${new Date(com.created_at).toLocaleDateString('tr-TR')}</span>
-                                    ${isMine ? `
-                                        <span style="margin: 0 8px; color:#cbd5e1;">|</span>
-                                        <span class="action-link" onclick="startEdit(${com.id})"><i class="ph ph-pencil"></i> Düzenle</span>
-                                        <span class="action-link delete" onclick="deleteComment(${com.id})"><i class="ph ph-trash"></i> Sil</span>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <div class="comment-body" id="body-${com.id}">${com.content}</div>
-                            <div id="edit-form-${com.id}" style="display:none;"></div>
-                        </div>
-                    </div>
-                `;
+            // Separate root comments and sort newest first
+            let rootComments = allComments
+                .filter(c => !c.parent_id)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (rootComments.length === 0 && allComments.length > 0) {
+                rootComments = allComments;
+            }
+
+            const visibleRootComments = (limit && limit < rootComments.length)
+                ? rootComments.slice(0, limit)
+                : rootComments;
+
+            let html = visibleRootComments.map(c => {
+                const replies = allComments
+                    .filter(r => r.parent_id === c.id)
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                return generateCommentHTML(c, replies);
             }).join('');
 
-            if (limit && allComments.length > limit) {
-                const remaining = allComments.length - limit;
+            // Append "Show More" button if needed
+            if (limit && rootComments.length > limit) {
+                const remaining = rootComments.length - limit;
                 html += `
                     <div style="text-align: center; margin-top: 20px;">
                         <button onclick="renderCommentsList(null)" class="btn-show-more-comments">
@@ -2037,7 +2167,7 @@
                         </button>
                     </div>
                 `;
-            } else if (!limit && allComments.length > COMMENT_INITIAL_LIMIT) {
+            } else if (!limit && rootComments.length > COMMENT_INITIAL_LIMIT) {
                 html += `
                     <div style="text-align: center; margin-top: 20px;">
                         <button onclick="renderCommentsList(COMMENT_INITIAL_LIMIT)" class="btn-show-more-comments">
@@ -2048,6 +2178,176 @@
             }
 
             list.innerHTML = html;
+        }
+
+        function generateCommentHTML(c, replies = []) {
+            let avatarHtml = '';
+            if (c.avatar_url) {
+                const cleanUrl = c.avatar_url.startsWith('http') || c.avatar_url.startsWith('/') ? c.avatar_url : '/' + c.avatar_url;
+                avatarHtml = `<div class="comment-avatar" style="padding:0; overflow:hidden;"><img src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.parentElement.innerHTML='${(c.fullname || 'U').charAt(0).toUpperCase()}'"></div>`;
+            } else {
+                const initials = c.fullname ? c.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+                avatarHtml = `<div class="comment-avatar">${initials}</div>`;
+            }
+
+            const isMine = c.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === c.user_id);
+            const authorBadge = c.is_experiment_author ? `<span class="comment-badge-author"><i class="ph-fill ph-pen-nib"></i> Yazar</span>` : (c.role === 'admin' ? `<span class="comment-badge-author" style="background:rgba(239,68,68,0.12); color:#ef4444;"><i class="ph-fill ph-shield-check"></i> Yönetici</span>` : '');
+
+            const repliesHtml = replies.length > 0 ? `
+                <div class="comment-replies-list" id="replies-list-${c.id}">
+                    ${replies.map(r => generateReplyHTML(r, c.id)).join('')}
+                </div>
+            ` : `<div class="comment-replies-list" id="replies-list-${c.id}" style="display:none;"></div>`;
+
+            const authorNameSafe = escapeCommentHtml(c.fullname || 'Kullanıcı');
+
+            return `
+                <div class="comment-item" id="comment-${c.id}">
+                    ${avatarHtml}
+                    <div class="comment-content-wrapper">
+                        <div class="comment-header">
+                            <span class="comment-author">${authorNameSafe} ${authorBadge}</span>
+                            ${c.is_approved === 0 ? '<span class="comment-status-pending"><i class="ph ph-clock" style="margin-right:4px;"></i> Onay Bekliyor</span>' : ''}
+                            <div class="comment-actions">
+                                <span class="comment-date">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                                <span style="margin: 0 4px; color:#cbd5e1;">•</span>
+                                <span class="action-link reply-link" onclick="toggleReplyBox(${c.id}, '${authorNameSafe.replace(/'/g, "\\'")}')"><i class="ph-bold ph-arrow-bend-up-left"></i> Yanıtla</span>
+                                ${isMine ? `
+                                    <span style="margin: 0 4px; color:#cbd5e1;">|</span>
+                                    <span class="action-link" onclick="startEdit(${c.id})"><i class="ph ph-pencil"></i> Düzenle</span>
+                                    <span class="action-link delete" onclick="deleteComment(${c.id})"><i class="ph ph-trash"></i> Sil</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="comment-body" id="body-${c.id}">${escapeCommentHtml(c.content)}</div>
+                        <div id="edit-form-${c.id}" style="display:none;"></div>
+
+                        <!-- Inline Reply Box -->
+                        <div id="reply-box-${c.id}" class="inline-reply-box" style="display:none;"></div>
+
+                        <!-- Replies -->
+                        ${repliesHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateReplyHTML(r, parentId) {
+            let avatarHtml = '';
+            if (r.avatar_url) {
+                const cleanUrl = r.avatar_url.startsWith('http') || r.avatar_url.startsWith('/') ? r.avatar_url : '/' + r.avatar_url;
+                avatarHtml = `<div class="reply-avatar"><img src="${cleanUrl}" onerror="this.parentElement.innerHTML='${(r.fullname || 'U').charAt(0).toUpperCase()}'"></div>`;
+            } else {
+                const initials = r.fullname ? r.fullname.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+                avatarHtml = `<div class="reply-avatar">${initials}</div>`;
+            }
+
+            const isMine = r.is_mine || (JSON.parse(localStorage.getItem('user') || '{}').id === r.user_id);
+            const authorBadge = r.is_experiment_author ? `<span class="comment-badge-author"><i class="ph-fill ph-pen-nib"></i> Yazar</span>` : (r.role === 'admin' ? `<span class="comment-badge-author" style="background:rgba(239,68,68,0.12); color:#ef4444;"><i class="ph-fill ph-shield-check"></i> Yönetici</span>` : '');
+            const replyAuthorSafe = escapeCommentHtml(r.fullname || 'Kullanıcı');
+
+            return `
+                <div class="comment-reply-item" id="comment-${r.id}">
+                    ${avatarHtml}
+                    <div style="flex: 1;">
+                        <div class="comment-header" style="margin-bottom: 4px;">
+                            <span class="comment-author" style="font-size:0.92rem;">${replyAuthorSafe} ${authorBadge}</span>
+                            <div class="comment-actions">
+                                <span class="comment-date" style="font-size:0.8rem;">${new Date(r.created_at).toLocaleDateString('tr-TR')}</span>
+                                <span style="margin: 0 4px; color:#cbd5e1;">•</span>
+                                <span class="action-link reply-link" style="font-size:0.8rem;" onclick="toggleReplyBox(${parentId}, '${replyAuthorSafe.replace(/'/g, "\\'")}')"><i class="ph-bold ph-arrow-bend-up-left"></i> Yanıtla</span>
+                                ${isMine ? `
+                                    <span style="margin: 0 4px; color:#cbd5e1;">|</span>
+                                    <span class="action-link" style="font-size:0.8rem;" onclick="startEdit(${r.id})"><i class="ph ph-pencil"></i></span>
+                                    <span class="action-link delete" style="font-size:0.8rem;" onclick="deleteComment(${r.id})"><i class="ph ph-trash"></i></span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="comment-body" id="body-${r.id}" style="font-size:0.92rem;">${escapeCommentHtml(r.content)}</div>
+                        <div id="edit-form-${r.id}" style="display:none;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleReplyBox(commentId, targetAuthor) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                if (typeof openModal === 'function') openModal('loginModal');
+                else showToast('Yanıt yazabilmek için lütfen giriş yapın.', 'info');
+                return;
+            }
+            const box = document.getElementById(`reply-box-${commentId}`);
+            if (!box) return;
+
+            if (box.style.display === 'block') {
+                box.style.display = 'none';
+                box.innerHTML = '';
+                return;
+            }
+
+            const placeholderText = targetAuthor ? `@${targetAuthor} kullanıcısına yanıt verin...` : 'Yanıtınızı yazın...';
+            const initialPrefill = targetAuthor ? `@${targetAuthor} ` : '';
+
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div class="inline-reply-form">
+                    <textarea id="reply-input-${commentId}" class="reply-textarea" rows="2" placeholder="${placeholderText}">${initialPrefill}</textarea>
+                    <div class="reply-form-actions">
+                        <button class="btn btn-login btn-sm" onclick="cancelReplyBox(${commentId})">Vazgeç</button>
+                        <button class="btn btn-primary btn-sm" id="btn-submit-reply-${commentId}" onclick="submitReply(${commentId})">
+                            <i class="ph-bold ph-paper-plane-tilt"></i> Yanıtla
+                        </button>
+                    </div>
+                </div>
+            `;
+            const ta = document.getElementById(`reply-input-${commentId}`);
+            if (ta) {
+                ta.focus();
+                ta.setSelectionRange(ta.value.length, ta.value.length);
+            }
+        }
+
+        function cancelReplyBox(commentId) {
+            const box = document.getElementById(`reply-box-${commentId}`);
+            if (box) {
+                box.style.display = 'none';
+                box.innerHTML = '';
+            }
+        }
+
+        async function submitReply(commentId) {
+            const input = document.getElementById(`reply-input-${commentId}`);
+            if (!input || !input.value.trim()) return showToast('Lütfen bir yanıt yazın.', 'error');
+            const content = input.value.trim();
+            const token = localStorage.getItem('token');
+            const btn = document.getElementById(`btn-submit-reply-${commentId}`);
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/comments/${commentId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showToast('Yanıtınız başarıyla yayınlandı!', 'success');
+                    cancelReplyBox(commentId);
+                    if (window.currentExperimentId) loadComments(window.currentExperimentId);
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.error || 'Yanıt gönderilemedi.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Bir hata oluştu.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
         async function postComment() {

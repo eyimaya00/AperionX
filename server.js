@@ -2711,6 +2711,17 @@ async function ensureSchema() {
             }
         } catch (e) { console.error('Migration Error (Comments is_approved):', e); }
 
+        try {
+            const [pCols] = await pool.query("SHOW COLUMNS FROM comments LIKE 'parent_id'");
+            if (pCols.length === 0) {
+                console.log('Migrating: Adding parent_id to comments...');
+                await pool.query("ALTER TABLE comments ADD COLUMN parent_id INT NULL AFTER experiment_id");
+                try {
+                    await pool.query("ALTER TABLE comments ADD CONSTRAINT fk_comments_parent FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE");
+                } catch (eFk) { }
+            }
+        } catch (e) { console.error('Migration Error (Comments parent_id):', e); }
+
 
         try {
             await pool.query("SELECT bio, avatar_url, reset_token FROM users LIMIT 1");
@@ -3358,11 +3369,14 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
             SELECT 
                 c.id,
                 c.article_id,
+                c.parent_id,
+                c.user_id,
                 c.content,
                 c.created_at,
                 COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
-                a.title as article_title
+                a.title as article_title,
+                a.slug as article_slug
             FROM comments c
             JOIN articles a ON c.article_id = a.id
             LEFT JOIN article_authors aa ON a.id = aa.article_id
@@ -3382,11 +3396,14 @@ app.get('/api/author/article-comments', authenticateToken, async (req, res) => {
                 SELECT 
                     c.id,
                     c.article_id,
+                    c.parent_id,
+                    c.user_id,
                     c.content,
                     c.created_at,
                     COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                     u.avatar_url as user_avatar,
-                    a.title as article_title
+                    a.title as article_title,
+                    a.slug as article_slug
                 FROM comments c
                 JOIN articles a ON c.article_id = a.id
                 JOIN users u ON c.user_id = u.id
@@ -3414,6 +3431,8 @@ app.get('/api/author/gundem-comments', authenticateToken, async (req, res) => {
             SELECT 
                 c.id,
                 c.article_id,
+                c.parent_id,
+                c.user_id,
                 c.content,
                 c.created_at,
                 COALESCE(u.fullname, u.username, 'Okur') AS user_name,
@@ -3588,11 +3607,14 @@ app.get('/api/author/experiment-comments', authenticateToken, async (req, res) =
             SELECT 
                 c.id,
                 c.experiment_id,
+                c.parent_id,
+                c.user_id,
                 c.content,
                 c.created_at,
                 COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                 u.avatar_url as user_avatar,
-                e.title as experiment_title
+                e.title as experiment_title,
+                e.slug as experiment_slug
             FROM comments c
             JOIN experiments e ON c.experiment_id = e.id
             LEFT JOIN experiment_authors ea ON e.id = ea.experiment_id
@@ -3612,11 +3634,14 @@ app.get('/api/author/experiment-comments', authenticateToken, async (req, res) =
                 SELECT 
                     c.id,
                     c.experiment_id,
+                    c.parent_id,
+                    c.user_id,
                     c.content,
                     c.created_at,
                     COALESCE(u.fullname, u.username, 'Kullanıcı') AS user_name,
                     u.avatar_url as user_avatar,
-                    e.title as experiment_title
+                    e.title as experiment_title,
+                    e.slug as experiment_slug
                 FROM comments c
                 JOIN experiments e ON c.experiment_id = e.id
                 JOIN users u ON c.user_id = u.id
@@ -10992,9 +11017,11 @@ app.get('/api/articles/:id/comments', async (req, res) => {
         }
 
         let query = `
-            SELECT c.*, u.fullname 
+            SELECT c.*, u.fullname, u.avatar_url, u.role,
+                   (CASE WHEN a.author_id = c.user_id THEN 1 ELSE 0 END) as is_article_author
             FROM comments c 
             JOIN users u ON c.user_id = u.id 
+            LEFT JOIN articles a ON c.article_id = a.id
             WHERE c.article_id = ? AND (c.is_approved = 1`;
 
         const params = [articleId];
@@ -11006,7 +11033,7 @@ app.get('/api/articles/:id/comments', async (req, res) => {
             query += `)`;
         }
 
-        query += ` ORDER BY c.created_at DESC`;
+        query += ` ORDER BY c.created_at ASC`;
 
         const [comments] = await pool.query(query, params);
 
@@ -11035,13 +11062,34 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
         } else {
             articleId = parseInt(articleId, 10);
         }
-        const { content } = req.body;
-        if (!content) return res.status(400).json({ error: 'Yorum boş olamaz' });
+        const { content, parent_id } = req.body;
+        if (!content || !content.trim()) return res.status(400).json({ error: 'Yorum boş olamaz' });
+
+        let validParentId = null;
+        if (parent_id) {
+            const [pCheck] = await pool.query('SELECT id, user_id, parent_id FROM comments WHERE id = ?', [parent_id]);
+            if (pCheck.length > 0) {
+                validParentId = pCheck[0].parent_id ? pCheck[0].parent_id : pCheck[0].id;
+                if (pCheck[0].user_id !== req.user.id) {
+                    try {
+                        const replierName = req.user.fullname || req.user.username || 'Bir okur';
+                        await pool.query('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)', [
+                            pCheck[0].user_id,
+                            `${replierName} yorumunuza cevap verdi.`,
+                            'info'
+                        ]);
+                    } catch (notifErr) { console.error('Notification Error:', notifErr); }
+                }
+            }
+        }
 
         // Default is_approved = 1 (Auto-approve)
-        const cleanContent = DOMPurify.sanitize(content);
-        await pool.query('INSERT INTO comments (article_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [articleId, req.user.id, cleanContent]);
-        res.json({ message: 'Yorum gönderildi.' });
+        const cleanContent = DOMPurify.sanitize(content.trim());
+        const [insertRes] = await pool.query(
+            'INSERT INTO comments (article_id, user_id, content, parent_id, is_approved) VALUES (?, ?, ?, ?, 1)',
+            [articleId, req.user.id, cleanContent, validParentId]
+        );
+        res.json({ message: 'Yorum gönderildi.', id: insertRes.insertId, parent_id: validParentId });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -11104,9 +11152,11 @@ app.get('/api/experiments/:id/comments', async (req, res) => {
         }
 
         let query = `
-            SELECT c.*, u.fullname 
+            SELECT c.*, u.fullname, u.avatar_url, u.role,
+                   (CASE WHEN e.author_id = c.user_id THEN 1 ELSE 0 END) as is_experiment_author
             FROM comments c 
             JOIN users u ON c.user_id = u.id 
+            LEFT JOIN experiments e ON c.experiment_id = e.id
             WHERE c.experiment_id = ? AND (c.is_approved = 1`;
 
         const params = [experimentId];
@@ -11118,7 +11168,7 @@ app.get('/api/experiments/:id/comments', async (req, res) => {
             query += `)`;
         }
 
-        query += ` ORDER BY c.created_at DESC`;
+        query += ` ORDER BY c.created_at ASC`;
 
         const [comments] = await pool.query(query, params);
 
@@ -11133,13 +11183,71 @@ app.get('/api/experiments/:id/comments', async (req, res) => {
 
 app.post('/api/experiments/:id/comments', authenticateToken, async (req, res) => {
     try {
-        const { content } = req.body;
-        if (!content) return res.status(400).json({ error: 'Yorum boş olamaz' });
+        const { content, parent_id } = req.body;
+        if (!content || !content.trim()) return res.status(400).json({ error: 'Yorum boş olamaz' });
 
-        const cleanContent = DOMPurify.sanitize(content);
-        await pool.query('INSERT INTO comments (experiment_id, user_id, content, is_approved) VALUES (?, ?, ?, 1)', [req.params.id, req.user.id, cleanContent]);
-        res.json({ message: 'Yorum gönderildi.' });
+        let validParentId = null;
+        if (parent_id) {
+            const [pCheck] = await pool.query('SELECT id, user_id, parent_id FROM comments WHERE id = ?', [parent_id]);
+            if (pCheck.length > 0) {
+                validParentId = pCheck[0].parent_id ? pCheck[0].parent_id : pCheck[0].id;
+                if (pCheck[0].user_id !== req.user.id) {
+                    try {
+                        const replierName = req.user.fullname || req.user.username || 'Bir okur';
+                        await pool.query('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)', [
+                            pCheck[0].user_id,
+                            `${replierName} deney yorumunuza cevap verdi.`,
+                            'info'
+                        ]);
+                    } catch (notifErr) { console.error('Notification Error:', notifErr); }
+                }
+            }
+        }
+
+        const cleanContent = DOMPurify.sanitize(content.trim());
+        const [insertRes] = await pool.query(
+            'INSERT INTO comments (experiment_id, user_id, content, parent_id, is_approved) VALUES (?, ?, ?, ?, 1)',
+            [req.params.id, req.user.id, cleanContent, validParentId]
+        );
+        res.json({ message: 'Yorum gönderildi.', id: insertRes.insertId, parent_id: validParentId });
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// === REPLY TO A COMMENT (Direct Reply Route for Articles, Gundem, Experiments) ===
+app.post('/api/comments/:id/reply', authenticateToken, async (req, res) => {
+    try {
+        const commentId = parseInt(req.params.id, 10);
+        const { content } = req.body;
+        if (!content || !content.trim()) return res.status(400).json({ error: 'Cevap boş olamaz' });
+
+        const [pRows] = await pool.query('SELECT * FROM comments WHERE id = ?', [commentId]);
+        if (pRows.length === 0) return res.status(404).json({ error: 'Cevaplanacak yorum bulunamadı' });
+
+        const parent = pRows[0];
+        const rootParentId = parent.parent_id ? parent.parent_id : parent.id;
+
+        const cleanContent = DOMPurify.sanitize(content.trim());
+        const [ins] = await pool.query(
+            'INSERT INTO comments (article_id, experiment_id, user_id, content, parent_id, is_approved) VALUES (?, ?, ?, ?, ?, 1)',
+            [parent.article_id, parent.experiment_id, req.user.id, cleanContent, rootParentId]
+        );
+
+        if (parent.user_id !== req.user.id) {
+            try {
+                const replierName = req.user.fullname || req.user.username || 'Bir kullanıcı';
+                await pool.query('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)', [
+                    parent.user_id,
+                    `${replierName} yorumunuza cevap verdi: "${cleanContent.substring(0, 45)}${cleanContent.length > 45 ? '...' : ''}"`,
+                    'info'
+                ]);
+            } catch (notifErr) { console.error('Reply notification error:', notifErr); }
+        }
+
+        res.json({ success: true, message: 'Cevabınız yayınlandı.', id: ins.insertId, parent_id: rootParentId });
+    } catch (e) {
+        console.error('Comment reply error:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // User Manage Own Comments (Edit/Delete)

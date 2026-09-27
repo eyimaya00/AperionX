@@ -73,13 +73,18 @@ CREATE TABLE IF NOT EXISTS showcase_items (
 -- 7. Comments Table
 CREATE TABLE IF NOT EXISTS comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL,
+    article_id INT NULL,
+    experiment_id INT NULL,
+    parent_id INT NULL,
     user_id INT NOT NULL,
     content TEXT NOT NULL,
+    is_approved BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );
+
 
 -- 8. Newsletter Subscribers Table
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (

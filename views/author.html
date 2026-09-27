@@ -10013,7 +10013,7 @@
                     return;
                 }
 
-                listEl.innerHTML = comments.map(comm => {
+                listEl.innerHTML = rootComments.map(comm => {
                     let avatarUrl = comm.user_avatar;
                     if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
 
@@ -10025,10 +10025,25 @@
                     const artTitle = comm.article_title || 'Makale Çalışması';
                     const commentText = comm.content || comm.comment || comm.text || '';
 
+                    const replies = comments.filter(r => r.parent_id === comm.id);
+                    const repliesHtml = replies.length > 0 ? `
+                        <div style="margin-top: 8px; padding-left: 12px; border-left: 2px solid rgba(139,92,246,0.3); display: flex; flex-direction: column; gap: 6px;">
+                            ${replies.map(r => `
+                                <div style="background: rgba(99,102,241,0.04); border-radius: 8px; padding: 6px 10px; font-size: 0.82rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                        <span style="font-weight: 700; color: #8b5cf6;"><i class="ph-fill ph-arrow-bend-down-right" style="margin-right:2px;"></i> ${escapeHtml(r.user_name || 'Okur')}</span>
+                                        <span style="font-size: 0.72rem; color: #94a3b8;">${r.created_at ? new Date(r.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                    </div>
+                                    <div style="color: var(--text-main);">${escapeHtml(r.content || '')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '';
+
                     return `
                         <div class="exp-user-item" style="align-items: flex-start;">
                             ${avatarHtml}
-                            <div class="exp-user-info">
+                            <div class="exp-user-info" style="flex: 1;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                                     <div class="exp-user-name">
                                         ${escapeHtml(comm.user_name || 'Kullanıcı')}
@@ -10037,6 +10052,13 @@
                                 </div>
                                 <div class="exp-user-exp-title" title="${escapeHtml(artTitle)}"><i class="ph-bold ph-books" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(artTitle)}</div>
                                 <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                                <div style="margin-top: 6px;">
+                                    <button type="button" onclick="toggleAuthorModalReply(${comm.id}, '${escapeHtml(comm.user_name || 'Kullanıcı').replace(/'/g, "\\'")}', 'art')" style="background: rgba(139,92,246,0.1); border: none; color: #8b5cf6; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                        <i class="ph-bold ph-arrow-bend-up-left"></i> Cevap Yaz
+                                    </button>
+                                </div>
+                                <div id="author-reply-box-${comm.id}" style="display: none;"></div>
+                                ${repliesHtml}
                             </div>
                         </div>
                     `;
@@ -10106,7 +10128,10 @@
                     return;
                 }
 
-                listEl.innerHTML = comments.map(comm => {
+                let rootComments = comments.filter(c => !c.parent_id);
+                if (rootComments.length === 0 && comments.length > 0) rootComments = comments;
+
+                listEl.innerHTML = rootComments.map(comm => {
                     let avatarUrl = comm.user_avatar;
                     if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
 
@@ -10118,10 +10143,25 @@
                     const artTitle = comm.article_title || 'Bilim Gündemi Haberi';
                     const commentText = comm.content || comm.comment || comm.text || '';
 
+                    const replies = comments.filter(r => r.parent_id === comm.id);
+                    const repliesHtml = replies.length > 0 ? `
+                        <div style="margin-top: 8px; padding-left: 12px; border-left: 2px solid rgba(139,92,246,0.3); display: flex; flex-direction: column; gap: 6px;">
+                            ${replies.map(r => `
+                                <div style="background: rgba(99,102,241,0.04); border-radius: 8px; padding: 6px 10px; font-size: 0.82rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                        <span style="font-weight: 700; color: #8b5cf6;"><i class="ph-fill ph-arrow-bend-down-right" style="margin-right:2px;"></i> ${escapeHtml(r.user_name || 'Okur')}</span>
+                                        <span style="font-size: 0.72rem; color: #94a3b8;">${r.created_at ? new Date(r.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                    </div>
+                                    <div style="color: var(--text-main);">${escapeHtml(r.content || '')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '';
+
                     return `
                         <div class="exp-user-item" style="align-items: flex-start;">
                             ${avatarHtml}
-                            <div class="exp-user-info">
+                            <div class="exp-user-info" style="flex: 1;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                                     <div class="exp-user-name">
                                         ${escapeHtml(comm.user_name || 'Okur')}
@@ -10130,6 +10170,13 @@
                                 </div>
                                 <div class="exp-user-exp-title" title="${escapeHtml(artTitle)}"><i class="ph-bold ph-newspaper" style="color:#8b5cf6; margin-right:4px;"></i> ${escapeHtml(artTitle)}</div>
                                 <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                                <div style="margin-top: 6px;">
+                                    <button type="button" onclick="toggleAuthorModalReply(${comm.id}, '${escapeHtml(comm.user_name || 'Okur').replace(/'/g, "\\'")}', 'gundem')" style="background: rgba(139,92,246,0.1); border: none; color: #8b5cf6; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                        <i class="ph-bold ph-arrow-bend-up-left"></i> Cevap Yaz
+                                    </button>
+                                </div>
+                                <div id="author-reply-box-${comm.id}" style="display: none;"></div>
+                                ${repliesHtml}
                             </div>
                         </div>
                     `;
@@ -10155,6 +10202,74 @@
             document.body.style.overflow = '';
         }
         window.closeGundemCommentsModal = closeGundemCommentsModal;
+
+        // Modal Reply Handlers
+        window.toggleAuthorModalReply = function(commentId, targetName, modalType) {
+            const box = document.getElementById(`author-reply-box-${commentId}`);
+            if (!box) return;
+
+            if (box.style.display === 'block') {
+                box.style.display = 'none';
+                box.innerHTML = '';
+                return;
+            }
+
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 10px; padding: 10px; margin-top: 8px;">
+                    <textarea id="author-reply-input-${commentId}" rows="2" style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; font-family: inherit; resize: vertical; box-sizing: border-box; background: var(--card-bg, #fff); color: var(--text-main, #333); outline: none;" placeholder="@${targetName} yanıtınızı yazın..."></textarea>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                        <button type="button" style="padding: 4px 10px; font-size: 0.75rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; border-radius: 6px;" onclick="cancelAuthorModalReply(${commentId})">Vazgeç</button>
+                        <button type="button" id="btn-author-reply-${commentId}" style="padding: 4px 12px; font-size: 0.75rem; background: var(--primary-accent); color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: 600;" onclick="submitAuthorModalReply(${commentId}, '${modalType}')"><i class="ph-bold ph-paper-plane-tilt"></i> Gönder</button>
+                    </div>
+                </div>
+            `;
+            const ta = document.getElementById(`author-reply-input-${commentId}`);
+            if (ta) ta.focus();
+        };
+
+        window.cancelAuthorModalReply = function(commentId) {
+            const box = document.getElementById(`author-reply-box-${commentId}`);
+            if (box) {
+                box.style.display = 'none';
+                box.innerHTML = '';
+            }
+        };
+
+        window.submitAuthorModalReply = async function(commentId, modalType) {
+            const input = document.getElementById(`author-reply-input-${commentId}`);
+            if (!input || !input.value.trim()) return;
+            const content = input.value.trim();
+            const authToken = (typeof token !== 'undefined' && token) ? token : localStorage.getItem('token');
+            const btn = document.getElementById(`btn-author-reply-${commentId}`);
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/comments/${commentId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (res.ok) {
+                    showAuthorToast('Cevabınız okura iletildi!', 'success');
+                    if (modalType === 'art') openArtCommentsModal();
+                    else if (modalType === 'gundem') openGundemCommentsModal();
+                    else if (modalType === 'exp') openExpCommentsModal();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showAuthorToast(data.error || 'Cevap gönderilemedi.', 'error');
+                }
+            } catch (err) {
+                console.error('submitAuthorModalReply error:', err);
+                showAuthorToast('Bir hata oluştu.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
 
         // ================= ARTICLE RATINGS MODAL LOGIC (Kim Kaç Yıldız Verdi?) =================
         async function openArtRatingsModal() {
@@ -11398,7 +11513,10 @@
                     return;
                 }
 
-                listEl.innerHTML = comments.map(comm => {
+                let rootComments = comments.filter(c => !c.parent_id);
+                if (rootComments.length === 0 && comments.length > 0) rootComments = comments;
+
+                listEl.innerHTML = rootComments.map(comm => {
                     let avatarUrl = comm.user_avatar;
                     if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
 
@@ -11410,10 +11528,25 @@
                     const expTitle = comm.experiment_title || comm.article_title || 'Deney Çalışması';
                     const commentText = comm.content || comm.comment || comm.text || '';
 
+                    const replies = comments.filter(r => r.parent_id === comm.id);
+                    const repliesHtml = replies.length > 0 ? `
+                        <div style="margin-top: 8px; padding-left: 12px; border-left: 2px solid rgba(139,92,246,0.3); display: flex; flex-direction: column; gap: 6px;">
+                            ${replies.map(r => `
+                                <div style="background: rgba(99,102,241,0.04); border-radius: 8px; padding: 6px 10px; font-size: 0.82rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                        <span style="font-weight: 700; color: #8b5cf6;"><i class="ph-fill ph-arrow-bend-down-right" style="margin-right:2px;"></i> ${escapeHtml(r.user_name || 'Okur')}</span>
+                                        <span style="font-size: 0.72rem; color: #94a3b8;">${r.created_at ? new Date(r.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                    </div>
+                                    <div style="color: var(--text-main);">${escapeHtml(r.content || '')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '';
+
                     return `
                         <div class="exp-user-item" style="align-items: flex-start;">
                             ${avatarHtml}
-                            <div class="exp-user-info">
+                            <div class="exp-user-info" style="flex: 1;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                                     <div class="exp-user-name">
                                         ${escapeHtml(comm.user_name || 'Kullanıcı')}
@@ -11422,6 +11555,13 @@
                                 </div>
                                 <div class="exp-user-exp-title" title="${escapeHtml(expTitle)}"><i class="ph-bold ph-flask" style="color:var(--primary-accent); margin-right:4px;"></i> ${escapeHtml(expTitle)}</div>
                                 <div class="exp-comment-balloon">${escapeHtml(commentText)}</div>
+                                <div style="margin-top: 6px;">
+                                    <button type="button" onclick="toggleAuthorModalReply(${comm.id}, '${escapeHtml(comm.user_name || 'Kullanıcı').replace(/'/g, "\\'")}', 'exp')" style="background: rgba(139,92,246,0.1); border: none; color: #8b5cf6; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                        <i class="ph-bold ph-arrow-bend-up-left"></i> Cevap Yaz
+                                    </button>
+                                </div>
+                                <div id="author-reply-box-${comm.id}" style="display: none;"></div>
+                                ${repliesHtml}
                             </div>
                         </div>
                     `;
