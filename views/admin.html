@@ -3506,8 +3506,12 @@
                         <div class="campus-kpi-label"><i class="ph ph-crown"></i> Koordinatör</div>
                     </div>
                     <div class="campus-kpi-card">
-                        <div class="campus-kpi-num" id="kpi-total-members">0</div>
-                        <div class="campus-kpi-label"><i class="ph ph-users-three"></i> Yazar & Editör</div>
+                        <div class="campus-kpi-num" id="kpi-total-editors">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-pencil-simple"></i> Editör</div>
+                    </div>
+                    <div class="campus-kpi-card">
+                        <div class="campus-kpi-num" id="kpi-total-authors">0</div>
+                        <div class="campus-kpi-label"><i class="ph ph-newspaper"></i> Yazar</div>
                     </div>
                     <div class="campus-kpi-card">
                         <div class="campus-kpi-num" id="kpi-total-pubs">0</div>
@@ -7891,13 +7895,15 @@
                 const s = campusTeamsData.summary || {};
                 const kpiTeams = document.getElementById('kpi-total-teams');
                 const kpiCoords = document.getElementById('kpi-total-coords');
-                const kpiMembers = document.getElementById('kpi-total-members');
+                const kpiEditors = document.getElementById('kpi-total-editors');
+                const kpiAuthors = document.getElementById('kpi-total-authors');
                 const kpiPubs = document.getElementById('kpi-total-pubs');
                 const kpiViews = document.getElementById('kpi-total-views');
 
                 if (kpiTeams) kpiTeams.innerText = s.total_teams || 0;
                 if (kpiCoords) kpiCoords.innerText = s.total_coordinators || 0;
-                if (kpiMembers) kpiMembers.innerText = s.total_members || 0;
+                if (kpiEditors) kpiEditors.innerText = s.total_editors || 0;
+                if (kpiAuthors) kpiAuthors.innerText = s.total_authors || 0;
                 if (kpiPubs) kpiPubs.innerText = s.total_publications || 0;
                 if (kpiViews) kpiViews.innerText = (s.total_views || 0).toLocaleString('tr-TR');
 

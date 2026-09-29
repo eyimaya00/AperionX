@@ -3048,6 +3048,18 @@ async function ensureSchema() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
+        try {
+            await pool.query(`
+                UPDATE campus_team_cards c 
+                JOIN users u ON c.coordinator_id = u.id 
+                SET c.university = u.university 
+                WHERE u.university IS NOT NULL AND TRIM(u.university) != '' 
+                  AND (c.university IS NULL OR TRIM(c.university) = '' OR LOWER(TRIM(c.university)) != LOWER(TRIM(u.university)))
+            `);
+        } catch (syncErr) {
+            console.warn('[CAMPUS-CARDS-SYNC-WARN]', syncErr.message);
+        }
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS content_plans (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -4359,6 +4371,38 @@ app.delete('/api/admin/campus-coordinators/:id', authenticateToken, async (req, 
     }
 });
 
+// Helper: Üniversite isimlerini normalize edip standart eşleme anahtarı üretir
+function getCanonicalUniversityKey(name) {
+    if (!name) return '';
+    let n = name.trim().toLowerCase()
+        .replace(/ı/g, 'i')
+        .replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ö/g, 'o')
+        .replace(/ç/g, 'c');
+    
+    n = n.replace(/^(t\.?c\.?\s*)/i, '').trim();
+
+    if (n.includes('biruni')) {
+        return 'biruni universitesi';
+    }
+
+    const cityUniversities = [
+        'istanbul universitesi',
+        'istanbul teknik universitesi',
+        'istanbul medeniyet universitesi',
+        'ankara universitesi',
+        'izmir universitesi',
+        'izmir yuksek teknoloji enstitusu'
+    ];
+    if (n.startsWith('istanbul ') && !cityUniversities.includes(n)) {
+        return n.replace(/^istanbul\s+/, '').trim();
+    }
+
+    return n;
+}
+
 // 4. Admin: Campus Teams Overview (Tüm Ekiplerin, Koordinatörlerin, Üyelerin ve Yayınların Özeti)
 app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.sendStatus(403);
@@ -4383,7 +4427,8 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             WHERE u.role != 'admin' AND (
                 u.coordinator_id IS NOT NULL 
                 OR (u.campus_role IS NOT NULL AND u.campus_role != '')
-                OR u.role = 'campus_editor'
+                OR u.role IN ('campus_editor', 'campus_coordinator')
+                OR (u.university IS NOT NULL AND TRIM(u.university) != '')
             )
             ORDER BY u.created_at DESC
         `);
@@ -4406,6 +4451,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             WHERE u.coordinator_id IS NOT NULL 
                OR u.role IN ('campus_coordinator', 'campus_editor') 
                OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+               OR (u.university IS NOT NULL AND TRIM(u.university) != '')
             ORDER BY COALESCE(a.published_at, a.submitted_at, a.created_at) DESC
         `);
 
@@ -4420,6 +4466,7 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
                 u.coordinator_id IS NOT NULL 
                 OR u.role IN ('campus_coordinator', 'campus_editor') 
                 OR (u.campus_role IS NOT NULL AND u.campus_role != '')
+                OR (u.university IS NOT NULL AND TRIM(u.university) != '')
             )
             ORDER BY COALESCE(e.published_at, e.created_at) DESC
         `);
@@ -4427,19 +4474,21 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
         // Ekipleri haritada grupla
         const teamsMap = new Map();
 
-        // Fonksiyon: Güvenli ekip anahtarı oluştur
+        // Fonksiyon: Güvenli ve kanonik ekip anahtarı oluştur
         const getTeamKey = (uni, coordId) => {
-            if (uni && uni.trim()) return uni.trim().toLowerCase();
+            if (uni && uni.trim()) return getCanonicalUniversityKey(uni);
             return `coord_${coordId}`;
         };
 
-        // 1. Önce koordinatörlerden ekipleri oluştur (Bir ekip koordinatörle var olur)
+        // 1. Önce koordinatörlerden ekipleri oluştur
         for (const coord of coordinators) {
             const key = getTeamKey(coord.university, coord.id);
+            const uniName = coord.university ? coord.university.trim() : (coord.fullname + ' Ekibi');
+
             if (!teamsMap.has(key)) {
                 teamsMap.set(key, {
                     key: key,
-                    university: coord.university ? coord.university.trim() : (coord.fullname + ' Ekibi'),
+                    university: uniName,
                     is_custom_name: !coord.university,
                     coordinators: [],
                     coordinator_ids: new Set(),
@@ -4463,6 +4512,12 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
                         total_comments: 0
                     }
                 });
+            } else {
+                // Eğer ekipte daha uzun/resmi bir üniversite adı varsa onu koru (Örn: "İstanbul Biruni Üniversitesi")
+                const cur = teamsMap.get(key);
+                if (uniName && uniName.length > cur.university.length) {
+                    cur.university = uniName;
+                }
             }
             const team = teamsMap.get(key);
             team.coordinators.push(coord);
@@ -4489,11 +4544,11 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
                 targetTeam = teamsMap.get(coordIdToTeamKey.get(member.coordinator_id));
             }
 
-            // coordinator_id yoksa veya bulunamadıysa university ile eşleştir (yalnızca mevcut bir koordinatör ekibi varsa!)
+            // coordinator_id yoksa veya bulunamadıysa university ile eşleştir (kanonik anahtarla)
             if (!targetTeam && member.university && member.university.trim()) {
-                const uniKey = member.university.trim().toLowerCase();
-                if (teamsMap.has(uniKey)) {
-                    targetTeam = teamsMap.get(uniKey);
+                const canKey = getCanonicalUniversityKey(member.university);
+                if (teamsMap.has(canKey)) {
+                    targetTeam = teamsMap.get(canKey);
                 }
             }
 
@@ -4503,15 +4558,15 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
             }
         }
 
-        // 3. Vitrin Kartlarını ekiplere dağıt
+        // 3. Vitrin Kartlarını ekiplere dağıt (coordinator_id veya kanonik üniversite anahtarı ile)
         for (const card of cards) {
             let targetTeam = null;
-            if (card.university && card.university.trim()) {
-                const uniKey = card.university.trim().toLowerCase();
-                if (teamsMap.has(uniKey)) targetTeam = teamsMap.get(uniKey);
-            }
-            if (!targetTeam && card.coordinator_id && coordIdToTeamKey.has(card.coordinator_id)) {
+            if (card.coordinator_id && coordIdToTeamKey.has(card.coordinator_id)) {
                 targetTeam = teamsMap.get(coordIdToTeamKey.get(card.coordinator_id));
+            }
+            if (!targetTeam && card.university && card.university.trim()) {
+                const canKey = getCanonicalUniversityKey(card.university);
+                if (teamsMap.has(canKey)) targetTeam = teamsMap.get(canKey);
             }
             if (targetTeam) {
                 targetTeam.cards.push(card);
@@ -4533,10 +4588,10 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
                     break;
                 }
             }
-            // Üniversite adına göre eşleştir
+            // Üniversite adına göre eşleştir (kanonik anahtarla)
             if (!targetTeam && item.author_university && item.author_university.trim()) {
-                const uniKey = item.author_university.trim().toLowerCase();
-                if (teamsMap.has(uniKey)) targetTeam = teamsMap.get(uniKey);
+                const canKey = getCanonicalUniversityKey(item.author_university);
+                if (teamsMap.has(canKey)) targetTeam = teamsMap.get(canKey);
             }
 
             if (targetTeam) {
@@ -4556,11 +4611,24 @@ app.get('/api/admin/campus-teams-overview', authenticateToken, async (req, res) 
         const teamsArray = Array.from(teamsMap.values())
             .filter(team => team.coordinators && team.coordinators.length > 0)
             .map(team => {
-            const editorsCount = team.members.filter(m => 
-                m.role === 'campus_editor' || 
-                (m.campus_role && m.campus_role.toLowerCase().includes('editör'))
-            ).length;
-            const authorsCount = team.members.length - editorsCount;
+            let editorsCount = 0;
+            let authorsCount = 0;
+
+            team.members.forEach(m => {
+                const roleLower = (m.role || '').toLowerCase();
+                const campusRoleLower = (m.campus_role || '').toLowerCase();
+
+                const isEditor = roleLower === 'campus_editor' || 
+                                 roleLower === 'editor' || 
+                                 campusRoleLower.includes('editör') || 
+                                 campusRoleLower.includes('editor');
+
+                if (isEditor) {
+                    editorsCount++;
+                } else {
+                    authorsCount++;
+                }
+            });
 
             let viewsCount = 0;
             let likesCount = 0;
@@ -5433,33 +5501,8 @@ app.get('/api/public/campus-network', async (req, res) => {
 
         const settingsMap = new Map();
         for (const s of settingsRows) {
+            settingsMap.set(getCanonicalUniversityKey(s.university), s);
             settingsMap.set(s.university.trim().toLowerCase(), s);
-        }
-
-        const [coordUnis] = await pool.query(`
-            SELECT DISTINCT university FROM users 
-            WHERE role = 'campus_coordinator' AND university IS NOT NULL AND TRIM(university) != ''
-        `);
-        const [cardUnis] = await pool.query(`
-            SELECT DISTINCT university FROM campus_team_cards 
-            WHERE university IS NOT NULL AND TRIM(university) != ''
-        `);
-
-        const allUniSet = new Set();
-        coordUnis.forEach(r => allUniSet.add(r.university.trim()));
-        cardUnis.forEach(r => allUniSet.add(r.university.trim()));
-
-        const [allCards] = await pool.query(`
-            SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index
-            FROM campus_team_cards
-            ORDER BY order_index ASC, id ASC
-        `);
-
-        const cardsByUni = new Map();
-        for (const card of allCards) {
-            const uKey = (card.university || '').trim().toLowerCase();
-            if (!cardsByUni.has(uKey)) cardsByUni.set(uKey, []);
-            cardsByUni.get(uKey).push(card);
         }
 
         const [coordinators] = await pool.query(`
@@ -5467,25 +5510,80 @@ app.get('/api/public/campus-network', async (req, res) => {
             FROM users
             WHERE role = 'campus_coordinator'
         `);
-        const coordsByUni = new Map();
+
+        const [allCards] = await pool.query(`
+            SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index
+            FROM campus_team_cards
+            ORDER BY order_index ASC, id ASC
+        `);
+
+        // Ekipleri haritada grupla
+        const teamsMap = new Map();
+        const coordIdToTeamKey = new Map();
+
+        // 1. Koordinatörlerden takımları oluştur
         for (const coord of coordinators) {
-            const uKey = (coord.university || '').trim().toLowerCase();
-            if (!coordsByUni.has(uKey)) coordsByUni.set(uKey, []);
-            coordsByUni.get(uKey).push(coord);
+            const uniName = (coord.university || '').trim();
+            const key = getCanonicalUniversityKey(uniName) || `coord_${coord.id}`;
+            coordIdToTeamKey.set(coord.id, key);
+
+            if (!teamsMap.has(key)) {
+                teamsMap.set(key, {
+                    university: uniName || (coord.fullname + ' Ekibi'),
+                    coordinators: [],
+                    cards: []
+                });
+            } else {
+                const cur = teamsMap.get(key);
+                if (uniName && uniName.length > cur.university.length) {
+                    cur.university = uniName;
+                }
+            }
+            teamsMap.get(key).coordinators.push(coord);
+        }
+
+        // 2. Vitrin kartlarını takımlara dağıt
+        for (const card of allCards) {
+            let targetTeam = null;
+
+            // Önce coordinator_id ile eşleştir
+            if (card.coordinator_id && coordIdToTeamKey.has(card.coordinator_id)) {
+                targetTeam = teamsMap.get(coordIdToTeamKey.get(card.coordinator_id));
+            }
+
+            // coordinator_id ile bulunamadıysa card.university kanonik anahtarı ile eşleştir
+            if (!targetTeam && card.university && card.university.trim()) {
+                const cKey = getCanonicalUniversityKey(card.university);
+                if (teamsMap.has(cKey)) {
+                    targetTeam = teamsMap.get(cKey);
+                } else {
+                    targetTeam = {
+                        university: card.university.trim(),
+                        coordinators: [],
+                        cards: []
+                    };
+                    teamsMap.set(cKey, targetTeam);
+                }
+            }
+
+            if (targetTeam) {
+                targetTeam.cards.push(card);
+            }
         }
 
         const result = [];
-        for (const uniName of allUniSet) {
-            const uKey = uniName.toLowerCase();
-            const setting = settingsMap.get(uKey);
+        for (const [key, team] of teamsMap.entries()) {
+            const uniName = team.university;
+            const setting = settingsMap.get(key) || settingsMap.get(uniName.toLowerCase());
             const isActive = setting ? (setting.is_active === 1 || setting.is_active === true) : true;
             if (!isActive) continue;
 
-            const order = setting ? setting.order_index : 0;
-            let cards = cardsByUni.get(uKey) || [];
+            const order = setting ? (setting.order_index || 0) : 0;
+            let cards = team.cards || [];
 
-            if (cards.length === 0 && coordsByUni.has(uKey)) {
-                cards = coordsByUni.get(uKey).map(c => ({
+            // Eğer özel kart eklenmemişse ve koordinatör varsa otomatik kart üret
+            if (cards.length === 0 && team.coordinators.length > 0) {
+                cards = team.coordinators.map(c => ({
                     id: 'coord_' + c.id,
                     fullname: c.fullname,
                     university: uniName,
@@ -5501,7 +5599,7 @@ app.get('/api/public/campus-network', async (req, res) => {
                 university: uniName,
                 order_index: order,
                 member_count: cards.length,
-                coordinators: (coordsByUni.get(uKey) || []).map(c => c.fullname),
+                coordinators: team.coordinators.map(c => c.fullname),
                 cards: cards
             });
         }
@@ -5521,54 +5619,89 @@ app.get('/api/admin/campus-showcase', authenticateToken, async (req, res) => {
     try {
         const [settingsRows] = await pool.query('SELECT * FROM campus_showcase_settings');
         const settingsMap = new Map();
-        settingsRows.forEach(s => settingsMap.set(s.university.trim().toLowerCase(), s));
-
-        const [coordUnis] = await pool.query(`
-            SELECT DISTINCT university FROM users 
-            WHERE role = 'campus_coordinator' AND university IS NOT NULL AND TRIM(university) != ''
-        `);
-        const [cardUnis] = await pool.query(`
-            SELECT DISTINCT university FROM campus_team_cards 
-            WHERE university IS NOT NULL AND TRIM(university) != ''
-        `);
-
-        const allUniSet = new Set();
-        coordUnis.forEach(r => allUniSet.add(r.university.trim()));
-        cardUnis.forEach(r => allUniSet.add(r.university.trim()));
-        settingsRows.forEach(s => allUniSet.add(s.university.trim()));
+        settingsRows.forEach(s => {
+            settingsMap.set(getCanonicalUniversityKey(s.university), s);
+            settingsMap.set(s.university.trim().toLowerCase(), s);
+        });
 
         const [coordinators] = await pool.query(`
             SELECT id, fullname, email, university, avatar_url 
             FROM users WHERE role = 'campus_coordinator'
         `);
-        const coordsByUni = new Map();
-        coordinators.forEach(c => {
-            const k = (c.university || '').trim().toLowerCase();
-            if (!coordsByUni.has(k)) coordsByUni.set(k, []);
-            coordsByUni.get(k).push(c);
-        });
 
         const [allCards] = await pool.query(`
             SELECT id, coordinator_id, fullname, university, role_title, image_url, email, linkedin_url, order_index
             FROM campus_team_cards
             ORDER BY order_index ASC, id ASC
         `);
-        const cardsByUni = new Map();
-        allCards.forEach(c => {
-            const k = (c.university || '').trim().toLowerCase();
-            if (!cardsByUni.has(k)) cardsByUni.set(k, []);
-            cardsByUni.get(k).push(c);
-        });
+
+        const teamsMap = new Map();
+        const coordIdToTeamKey = new Map();
+
+        for (const coord of coordinators) {
+            const uniName = (coord.university || '').trim();
+            const key = getCanonicalUniversityKey(uniName) || `coord_${coord.id}`;
+            coordIdToTeamKey.set(coord.id, key);
+
+            if (!teamsMap.has(key)) {
+                teamsMap.set(key, {
+                    university: uniName || (coord.fullname + ' Ekibi'),
+                    coordinators: [],
+                    cards: []
+                });
+            } else {
+                const cur = teamsMap.get(key);
+                if (uniName && uniName.length > cur.university.length) {
+                    cur.university = uniName;
+                }
+            }
+            teamsMap.get(key).coordinators.push(coord);
+        }
+
+        for (const card of allCards) {
+            let targetTeam = null;
+            if (card.coordinator_id && coordIdToTeamKey.has(card.coordinator_id)) {
+                targetTeam = teamsMap.get(coordIdToTeamKey.get(card.coordinator_id));
+            }
+            if (!targetTeam && card.university && card.university.trim()) {
+                const cKey = getCanonicalUniversityKey(card.university);
+                if (teamsMap.has(cKey)) {
+                    targetTeam = teamsMap.get(cKey);
+                } else {
+                    targetTeam = {
+                        university: card.university.trim(),
+                        coordinators: [],
+                        cards: []
+                    };
+                    teamsMap.set(cKey, targetTeam);
+                }
+            }
+            if (targetTeam) {
+                targetTeam.cards.push(card);
+            }
+        }
+
+        // Showcase settings listesinde olup henüz ekibi olmayan üniversiteleri de ekle
+        for (const s of settingsRows) {
+            const sKey = getCanonicalUniversityKey(s.university);
+            if (!teamsMap.has(sKey)) {
+                teamsMap.set(sKey, {
+                    university: s.university.trim(),
+                    coordinators: [],
+                    cards: []
+                });
+            }
+        }
 
         const list = [];
-        for (const uni of allUniSet) {
-            const k = uni.toLowerCase();
-            const s = settingsMap.get(k);
-            const cards = cardsByUni.get(k) || [];
-            const coords = coordsByUni.get(k) || [];
+        for (const [key, team] of teamsMap.entries()) {
+            const uniName = team.university;
+            const s = settingsMap.get(key) || settingsMap.get(uniName.toLowerCase());
+            const cards = team.cards || [];
+            const coords = team.coordinators || [];
 
             list.push({
-                university: uni,
+                university: uniName,
                 is_active: s ? (s.is_active ? 1 : 0) : 1,
                 order_index: s ? s.order_index : 0,
                 total_cards: cards.length,
