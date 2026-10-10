@@ -588,6 +588,13 @@
             grid-template-columns: 460px 1fr;
             gap: 24px;
             align-items: stretch;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .gundem-feed-container.single-article {
+            grid-template-columns: 1fr !important;
+            max-width: 800px;
         }
 
         /* === SOL KOLON: SİNEMATİK POSTER VİTRİN KARTI === */
@@ -891,11 +898,11 @@
         /* === MOBİL VE TABLET UYUMLULUĞU (RESPONSIVE) === */
         @media (max-width: 1024px) {
             .gundem-feed-container {
-                grid-template-columns: 1fr;
-                gap: 36px;
+                grid-template-columns: 1fr !important;
+                gap: 28px;
             }
             .gundem-featured-card {
-                max-width: 580px;
+                max-width: 100%;
                 margin: 0 auto;
                 width: 100%;
                 box-sizing: border-box;
@@ -953,15 +960,41 @@
             }
 
             /* Alt Grid Mobil Düzen */
+            .gundem-feed-container {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .gundem-featured-card {
+                max-width: 100%;
+                width: 100%;
+                min-height: 380px;
+                padding: 20px 18px;
+                border-radius: 18px;
+            }
+            .gundem-featured-title {
+                font-size: 1.25rem;
+                line-height: 1.38;
+            }
+            .gundem-featured-desc {
+                font-size: 0.88rem;
+                line-height: 1.5;
+                -webkit-line-clamp: 3;
+            }
+            .gundem-grid-col {
+                width: 100%;
+            }
             .gundem-cards-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
                 gap: 16px;
+                width: 100%;
             }
             .gundem-feed-section {
-                padding: 35px 16px 60px;
+                padding: 30px 16px 60px;
             }
             .gundem-item-card {
-                min-height: 200px;
+                min-height: 190px;
+                padding: 18px 16px;
+                border-radius: 16px;
             }
             .gundem-scroll-down-bar {
                 bottom: 16px;
@@ -970,6 +1003,28 @@
                 width: 36px;
                 height: 36px;
                 font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gundem-feed-section {
+                padding: 25px 12px 50px;
+            }
+            .gundem-featured-card {
+                min-height: 340px;
+                padding: 16px 14px;
+                border-radius: 16px;
+            }
+            .gundem-featured-title {
+                font-size: 1.15rem;
+            }
+            .gundem-item-card {
+                min-height: 170px;
+                padding: 14px 12px;
+                border-radius: 14px;
+            }
+            .gundem-item-title {
+                font-size: 0.92rem;
             }
         }
 
@@ -1967,7 +2022,10 @@
                     // Yayınlanmış haber var: Boş durumu gizle, bölümleri aç
                     if (emptyState) emptyState.style.display = 'none';
                     if (heroEl) heroEl.style.display = 'flex';
-                    if (feedContainer) feedContainer.style.display = 'grid';
+                    if (feedContainer) {
+                        feedContainer.style.display = 'grid';
+                        feedContainer.style.gridTemplateColumns = '';
+                    }
 
                     // 1. Slider'ı Dinamik Güncelle (İlk 4 haber)
                     const sliderItems = articles.slice(0, 4);
@@ -2017,7 +2075,8 @@
                     const gridEl = document.getElementById('gundemCardsGrid');
                     if (gridEl) {
                         if (articles.length > 1) {
-                            feedContainer.style.gridTemplateColumns = '460px 1fr';
+                            feedContainer.classList.remove('single-article');
+                            feedContainer.style.gridTemplateColumns = '';
                             gridEl.style.display = 'grid';
                             const gridArticles = articles.slice(1, 5);
                             gridEl.innerHTML = gridArticles.map(item => `
@@ -2039,7 +2098,8 @@
                             `).join('');
                         } else {
                             // Tek haber varsa vitrin kartı tek başına gösterilir
-                            feedContainer.style.gridTemplateColumns = '1fr';
+                            feedContainer.classList.add('single-article');
+                            feedContainer.style.gridTemplateColumns = '';
                             gridEl.style.display = 'none';
                             gridEl.innerHTML = '';
                         }
