@@ -816,7 +816,10 @@
                 <i class="ph ph-gear"></i> <span>Site Ayarları</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('popup-ad-management', this); loadPopupAdSettings();">
-                <i class="ph ph-megaphone"></i> <span>Açılır Reklam / Popup</span>
+                <i class="ph-bold ph-megaphone" style="color: var(--primary-accent, #6366f1);"></i> <span>Açılır Reklam / Popup</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('popup-ad-management', this); loadPopupAdSettings(); openPopupAdStatsModal();">
+                <i class="ph-bold ph-chart-line-up" style="color: #0ea5e9;"></i> <span>Reklam İstatistikleri</span>
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('theme-color-settings', this); loadThemeColorSettings();">
                 <i class="ph-bold ph-palette"></i> <span>Tema & Renk Paleti</span>
@@ -1827,6 +1830,21 @@
                         <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Toplam Okunma</p>
                     </div>
                 </div>
+
+                <!-- Popup Ad Clicks -->
+                <div class="stat-card"
+                    onclick="showSection('popup-ad-management', document.querySelector('a[onclick*=\'popup-ad-management\']')); loadPopupAdSettings(); openPopupAdStatsModal();"
+                    style="cursor: pointer; background: white; padding: 32px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: transform 0.2s;">
+                    <div
+                        style="width: 72px; height: 72px; border-radius: 16px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                        <i class="ph-bold ph-cursor-click"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size: 2.5rem; font-weight: 800; color: #0284c7;" id="stat-popup-ad-clicks">0</h3>
+                        <p style="margin:0; color: #64748b; font-weight: 600; font-size: 1.1rem;">Reklam Tıklanma</p>
+                    </div>
+                </div>
+
 
                 <!-- Published Articles -->
                 <div class="stat-card"
@@ -5897,6 +5915,14 @@
                 document.getElementById('stat-views').innerText = stats.views;
                 document.getElementById('stat-likes').innerText = stats.likes;
                 document.getElementById('stat-comments').innerText = stats.comments;
+
+                // Load popup ad click stat for dashboard
+                fetchWithAuth('/api/popup-ad/stats')
+                    .then(r => r.json())
+                    .then(d => {
+                        const el = document.getElementById('stat-popup-ad-clicks');
+                        if (el) el.innerText = Number(d.clicks || 0).toLocaleString('tr-TR');
+                    }).catch(() => {});
 
                 loadDetailedStats();
                 loadCharts(); // New: Load Charts
