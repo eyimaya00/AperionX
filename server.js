@@ -11681,6 +11681,85 @@ app.post('/api/settings', authenticateToken, upload.any(), async (req, res) => {
     }
 });
 
+// ==========================================
+// POPUP AD ANALYTICS & CLICK TRACKING
+// ==========================================
+
+// Track click on popup ad (Public)
+app.post('/api/popup-ad/click', async (req, res) => {
+    try {
+        await pool.query(`
+            INSERT INTO site_settings (setting_key, setting_value) 
+            VALUES ('popup_ad_clicks', '1')
+            ON DUPLICATE KEY UPDATE setting_value = CAST(COALESCE(NULLIF(setting_value, ''), '0') AS UNSIGNED) + 1
+        `);
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Popup ad click tracking error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Track view/impression on popup ad (Public)
+app.post('/api/popup-ad/view', async (req, res) => {
+    try {
+        await pool.query(`
+            INSERT INTO site_settings (setting_key, setting_value) 
+            VALUES ('popup_ad_views', '1')
+            ON DUPLICATE KEY UPDATE setting_value = CAST(COALESCE(NULLIF(setting_value, ''), '0') AS UNSIGNED) + 1
+        `);
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Popup ad view tracking error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Get popup ad stats (Admin only)
+app.get('/api/popup-ad/stats', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query(
+            "SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('popup_ad_clicks', 'popup_ad_views', 'popup_ad_link', 'popup_ad_title', 'popup_ad_active')"
+        );
+        const stats = {
+            clicks: 0,
+            views: 0,
+            ctr: '0.0%',
+            link: '',
+            title: '',
+            active: false
+        };
+        rows.forEach(r => {
+            if (r.setting_key === 'popup_ad_clicks') stats.clicks = parseInt(r.setting_value, 10) || 0;
+            if (r.setting_key === 'popup_ad_views') stats.views = parseInt(r.setting_value, 10) || 0;
+            if (r.setting_key === 'popup_ad_link') stats.link = r.setting_value || '';
+            if (r.setting_key === 'popup_ad_title') stats.title = r.setting_value || '';
+            if (r.setting_key === 'popup_ad_active') stats.active = r.setting_value === 'true' || r.setting_value === '1';
+        });
+        if (stats.views > 0) {
+            stats.ctr = ((stats.clicks / stats.views) * 100).toFixed(1) + '%';
+        }
+        res.json(stats);
+    } catch (e) {
+        console.error('Popup ad stats fetch error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Reset popup ad stats (Admin only)
+app.post('/api/popup-ad/reset-stats', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        await pool.query(
+            "UPDATE site_settings SET setting_value = '0' WHERE setting_key IN ('popup_ad_clicks', 'popup_ad_views')"
+        );
+        res.json({ message: 'İstatistikler başarıyla sıfırlandı' });
+    } catch (e) {
+        console.error('Popup ad reset stats error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
 // Helper: Get Article Authors
 async function getArticleAuthors(pool, articleId) {

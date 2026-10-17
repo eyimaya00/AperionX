@@ -4387,11 +4387,34 @@ window.initPopupAd = function(settings, isPreview = false) {
             overlay.classList.add('popup-ad-visible');
         });
 
-        // Record impression
+        // Record impression & view analytics
         if (!isPreview) {
             sessionStorage.setItem('popup_ad_session_shown', 'true');
             localStorage.setItem('popup_ad_last_shown_time', Date.now().toString());
+            
+            // Server-side impression tracking
+            try {
+                fetch('/api/popup-ad/view', { method: 'POST', keepalive: true }).catch(() => {});
+            } catch (_) {}
         }
+
+        // Click tracking function
+        const trackPopupAdClick = () => {
+            if (isPreview) return;
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon('/api/popup-ad/click');
+                } else {
+                    fetch('/api/popup-ad/click', { method: 'POST', keepalive: true }).catch(() => {});
+                }
+            } catch (_) {}
+        };
+
+        const ctaBtn = overlay.querySelector('.popup-ad-cta-btn');
+        if (ctaBtn) ctaBtn.addEventListener('click', trackPopupAdClick);
+
+        const imgLink = overlay.querySelector('.popup-ad-img-link');
+        if (imgLink) imgLink.addEventListener('click', trackPopupAdClick);
 
         // Close logic
         const closeModal = () => {
