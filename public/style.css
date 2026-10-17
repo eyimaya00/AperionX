@@ -7487,28 +7487,43 @@ body.has-spotify-announcement .mobile-menu {
     line-height: 1.5;
 }
 
-/* Call to Action Button */
+/* Call to Action Button — overlays on the image */
 .popup-ad-cta-btn {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(135deg, var(--primary-color, #6366f1), var(--primary-hover, #4f46e5));
+    background: rgba(99, 102, 241, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: #ffffff !important;
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
-    padding: 10px 24px;
-    border-radius: 12px;
-    margin-top: 6px;
-    box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.45);
-    transition: all 0.25s ease;
+    padding: 11px 28px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    max-width: 88%;
 }
 
 .popup-ad-cta-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px -2px rgba(99, 102, 241, 0.6);
-    filter: brightness(1.06);
+    background: rgba(99, 102, 241, 0.88);
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 10px 32px -4px rgba(99, 102, 241, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.popup-ad-cta-btn:active {
+    transform: translateX(-50%) translateY(-1px);
+    background: rgba(99, 102, 241, 0.95);
 }
 
 /* Footer & Don't show again checkbox */
@@ -7632,9 +7647,11 @@ body.has-spotify-announcement .mobile-menu {
     }
 
     .popup-ad-cta-btn {
-        width: 100%;
-        padding: 10px 18px;
+        max-width: 90%;
+        padding: 10px 20px;
         font-size: 0.86rem;
+        bottom: 14px;
+        border-radius: 12px;
     }
 }
 

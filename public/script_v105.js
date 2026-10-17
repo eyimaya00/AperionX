@@ -4337,18 +4337,24 @@ window.initPopupAd = function(settings, isPreview = false) {
 
         // Image element (or wrapped in link)
         let imgHtml = `<img src="${imgSrc}" alt="${title || 'Reklam / Duyuru'}" class="popup-ad-img" id="popup-ad-img-element">`;
-        if (link) {
+        if (link && !btnText) {
+            // Only wrap image in link if there's no separate CTA button
             imgHtml = `<a href="${link}" ${targetAttr} class="popup-ad-img-link">${imgHtml}</a>`;
         }
 
-        // Body content if title, desc or button exists
+        // CTA button (will overlay on image)
+        let ctaHtml = '';
+        if (link && btnText) {
+            ctaHtml = `<a href="${link}" ${targetAttr} class="popup-ad-cta-btn">${btnText} <i class="ph-bold ph-arrow-up-right"></i></a>`;
+        }
+
+        // Body content if title or desc exists (button is now in media overlay)
         let bodyHtml = '';
-        if (title || desc || (link && btnText)) {
+        if (title || desc) {
             bodyHtml = `
                 <div class="popup-ad-body">
                     ${title ? `<h3 class="popup-ad-title">${title}</h3>` : ''}
                     ${desc ? `<p class="popup-ad-desc">${desc}</p>` : ''}
-                    ${(link && btnText) ? `<a href="${link}" ${targetAttr} class="popup-ad-cta-btn">${btnText} <i class="ph-bold ph-arrow-up-right"></i></a>` : ''}
                 </div>
             `;
         }
@@ -4360,6 +4366,7 @@ window.initPopupAd = function(settings, isPreview = false) {
                 </button>
                 <div class="popup-ad-media">
                     ${imgHtml}
+                    ${ctaHtml}
                 </div>
                 ${bodyHtml}
                 ${showDontShowAgain ? `
