@@ -42,6 +42,17 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'gizli_anahtar';
 const cookieParser = require('cookie-parser'); // Import cookie-parser
 
+// Ensure sendFile works seamlessly even if directory contains dotfiles (like .gemini)
+const origSendFile = express.response.sendFile;
+express.response.sendFile = function (filePath, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = {};
+    }
+    options = Object.assign({ dotfiles: 'allow' }, options);
+    return origSendFile.call(this, filePath, options, callback);
+};
+
 
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -169,7 +180,7 @@ app.get('/maintenance-access', async (req, res) => {
 });
 
 // === SECRET ROMANTIC ROUTE (ISOLATED STATIC MOUNT) ===
-app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-1508')));
+app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-1508'), { dotfiles: 'allow' }));
 
 // === ROOT REDIRECT & FAVICON ===
 app.get('/favicon.ico', (req, res) => {
@@ -2518,7 +2529,7 @@ app.get('/article-detail.html', async (req, res, next) => {
         next();
     } catch (e) { next(); }
 });
-app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) => { 
+app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow', setHeaders: (res, p) => { 
     if (p.endsWith('.js') || p.endsWith('.css')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
@@ -2527,8 +2538,8 @@ app.use(express.static(path.join(__dirname, 'public'), { setHeaders: (res, p) =>
         res.setHeader('Cache-Control', 'public, max-age=86400');
     }
 } }));
-app.use(express.static(path.join(__dirname, 'views'), { extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
+app.use(express.static(path.join(__dirname, 'views'), { dotfiles: 'allow', extensions: ['html'], setHeaders: (res, p) => { if (p.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); res.setHeader('Expires', '0'); } } }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { dotfiles: 'allow', maxAge: '7d' }));
 
 
 

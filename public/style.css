@@ -7326,3 +7326,315 @@ body.has-spotify-announcement .mobile-menu {
         transform: translateY(0);
     }
 }
+
+/* ================================================
+   POPUP AD & ANNOUNCEMENT MODAL (Açılır Reklam / Popup)
+   ================================================ */
+
+.popup-ad-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup-ad-overlay.popup-ad-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-ad-overlay.popup-ad-closing {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Container adapts dynamically to the uploaded photo */
+.popup-ad-container {
+    position: relative;
+    max-width: min(92vw, 520px);
+    max-height: 90vh;
+    width: max-content;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.92) translateY(12px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popup-ad-visible .popup-ad-container {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.popup-ad-closing .popup-ad-container {
+    transform: scale(0.94) translateY(10px);
+    opacity: 0;
+}
+
+/* Close Button (X) */
+.popup-ad-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1e293b;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 19px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.popup-ad-close:hover {
+    background: #ffffff;
+    transform: scale(1.1) rotate(90deg);
+    color: #ef4444;
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.3);
+}
+
+.popup-ad-close:active {
+    transform: scale(0.95);
+}
+
+/* Media wrapper & Image */
+.popup-ad-media {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    overflow: hidden;
+}
+
+.popup-ad-img-link {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.popup-ad-img {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    max-height: 64vh;
+    object-fit: contain;
+    border-radius: 18px 18px 0 0;
+    margin: 0 auto;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+/* If no body or footer, keep border radius on all corners */
+.popup-ad-container:not(:has(.popup-ad-body)):not(:has(.popup-ad-footer)) .popup-ad-img {
+    border-radius: 19px;
+}
+
+.popup-ad-img-link:hover .popup-ad-img {
+    filter: brightness(1.02);
+}
+
+/* Body / Text section */
+.popup-ad-body {
+    padding: 16px 20px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: inherit;
+}
+
+.popup-ad-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+.popup-ad-desc {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Call to Action Button */
+.popup-ad-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--primary-color, #6366f1), var(--primary-hover, #4f46e5));
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 12px;
+    margin-top: 6px;
+    box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.45);
+    transition: all 0.25s ease;
+}
+
+.popup-ad-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px -2px rgba(99, 102, 241, 0.6);
+    filter: brightness(1.06);
+}
+
+/* Footer & Don't show again checkbox */
+.popup-ad-footer {
+    padding: 10px 18px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background: inherit;
+}
+
+.popup-ad-dont-show-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #64748b;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.popup-ad-dont-show-label:hover {
+    color: #1e293b;
+}
+
+.popup-ad-dont-show-label input[type="checkbox"] {
+    accent-color: var(--primary-color, #6366f1);
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+}
+
+/* ================================================
+   DARK THEME OVERRIDES (Gece Modu)
+   ================================================ */
+[data-theme="dark"] .popup-ad-overlay {
+    background: rgba(0, 0, 0, 0.78);
+}
+
+[data-theme="dark"] .popup-ad-container {
+    background: #11141c;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .popup-ad-close {
+    background: rgba(22, 27, 38, 0.9);
+    color: #f1f5f9;
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .popup-ad-close:hover {
+    background: #1e2433;
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .popup-ad-title {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .popup-ad-desc {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .popup-ad-footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .popup-ad-dont-show-label {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .popup-ad-dont-show-label:hover {
+    color: #f1f5f9;
+}
+
+/* ================================================
+   RESPONSIVE DESIGN (Mobil, Masaüstü, Tablet)
+   ================================================ */
+@media (max-width: 640px) {
+    .popup-ad-overlay {
+        padding: 14px;
+    }
+
+    .popup-ad-container {
+        max-width: 94vw;
+        border-radius: 18px;
+    }
+
+    .popup-ad-img {
+        max-height: 56vh;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .popup-ad-container:not(:has(.popup-ad-body)):not(:has(.popup-ad-footer)) .popup-ad-img {
+        border-radius: 17px;
+    }
+
+    .popup-ad-close {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 17px;
+    }
+
+    .popup-ad-body {
+        padding: 14px 16px 10px;
+    }
+
+    .popup-ad-title {
+        font-size: 1.05rem;
+    }
+
+    .popup-ad-desc {
+        font-size: 0.82rem;
+    }
+
+    .popup-ad-cta-btn {
+        width: 100%;
+        padding: 10px 18px;
+        font-size: 0.86rem;
+    }
+}
+

@@ -1559,6 +1559,9 @@ async function loadSettings() {
         initSpotifyAnnouncement(settings);
         initSpotifyPodcastShowcase(settings);
 
+        // Popup Ad / Açılır Reklam & Duyuru Modalı
+        initPopupAd(settings);
+
     } catch (error) {
         console.error('Settings load error:', error);
     }
@@ -4255,6 +4258,155 @@ function initSpotifyPodcastShowcase(settings) {
         section.style.display = 'none';
     }
 }
+
+// === POPUP AD / AÇILIR REKLAM & DUYURU MODALI ===
+window.initPopupAd = function(settings, isPreview = false) {
+    if (!settings) return;
+
+    // Check if active (or preview mode)
+    const isActive = settings.popup_ad_active === 'true' || settings.popup_ad_active === '1' || settings.popup_ad_active === 1 || settings.popup_ad_active === true;
+    if (!isActive && !isPreview) return;
+
+    // Must have an image
+    const imageUrl = settings.popup_ad_image;
+    if (!imageUrl || imageUrl.trim() === '') {
+        if (isPreview) alert('Lütfen önce bir reklam görseli yükleyin veya seçin.');
+        return;
+    }
+
+    // Do not show on admin or login/register pages if not in preview mode
+    if (!isPreview) {
+        const path = window.location.pathname.toLowerCase();
+        if (path.includes('admin') || path.includes('author') || path.includes('campus-coordinator') || path.includes('campus-editor')) {
+            return;
+        }
+
+        // Check if user chose "Bugün bir daha gösterme" (24h cooldown)
+        const hideUntil = localStorage.getItem('popup_ad_hide_today_until');
+        if (hideUntil && Date.now() < parseInt(hideUntil, 10)) {
+            return;
+        }
+
+        // Check frequency setting
+        const frequency = settings.popup_ad_frequency || 'session';
+        if (frequency === 'session') {
+            if (sessionStorage.getItem('popup_ad_session_shown') === 'true') {
+                return;
+            }
+        } else if (frequency === 'once_a_day') {
+            const lastShown = localStorage.getItem('popup_ad_last_shown_time');
+            if (lastShown && Date.now() - parseInt(lastShown, 10) < 24 * 60 * 60 * 1000) {
+                return;
+            }
+        }
+    }
+
+    // Existing popup check (prevent duplicate modals)
+    const existing = document.getElementById('aperionx-popup-ad-overlay');
+    if (existing) existing.remove();
+
+    // Delay before opening (default 1000ms, configurable)
+    const delaySec = parseFloat(settings.popup_ad_delay || '1');
+    const delayMs = isPreview ? 80 : Math.max(200, isNaN(delaySec) ? 1000 : delaySec * 1000);
+
+    setTimeout(() => {
+        // Create Overlay & Modal
+        const overlay = document.createElement('div');
+        overlay.id = 'aperionx-popup-ad-overlay';
+        overlay.className = 'popup-ad-overlay';
+
+        const imgSrc = (imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:')) ? imageUrl : '/' + imageUrl;
+        const link = (settings.popup_ad_link || '').trim();
+        const targetBlank = settings.popup_ad_target_blank === 'true' || settings.popup_ad_target_blank === '1' || settings.popup_ad_target_blank === 1 || settings.popup_ad_target_blank === true;
+        const targetAttr = targetBlank ? 'target="_blank" rel="noopener noreferrer"' : '';
+        const title = (settings.popup_ad_title || '').trim();
+        const desc = (settings.popup_ad_desc || '').trim();
+        const btnText = (settings.popup_ad_btn_text || '').trim();
+        const showDontShowAgain = settings.popup_ad_show_dont_show !== 'false' && settings.popup_ad_show_dont_show !== false;
+
+        // Image element (or wrapped in link)
+        let imgHtml = `<img src="${imgSrc}" alt="${title || 'Reklam / Duyuru'}" class="popup-ad-img" id="popup-ad-img-element">`;
+        if (link) {
+            imgHtml = `<a href="${link}" ${targetAttr} class="popup-ad-img-link">${imgHtml}</a>`;
+        }
+
+        // Body content if title, desc or button exists
+        let bodyHtml = '';
+        if (title || desc || (link && btnText)) {
+            bodyHtml = `
+                <div class="popup-ad-body">
+                    ${title ? `<h3 class="popup-ad-title">${title}</h3>` : ''}
+                    ${desc ? `<p class="popup-ad-desc">${desc}</p>` : ''}
+                    ${(link && btnText) ? `<a href="${link}" ${targetAttr} class="popup-ad-cta-btn">${btnText} <i class="ph-bold ph-arrow-up-right"></i></a>` : ''}
+                </div>
+            `;
+        }
+
+        overlay.innerHTML = `
+            <div class="popup-ad-container" role="dialog" aria-modal="true" aria-label="${title || 'Duyuru'}">
+                <button type="button" class="popup-ad-close" id="popup-ad-close-btn" aria-label="Kapat" title="Kapat (ESC)">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+                <div class="popup-ad-media">
+                    ${imgHtml}
+                </div>
+                ${bodyHtml}
+                ${showDontShowAgain ? `
+                <div class="popup-ad-footer">
+                    <label class="popup-ad-dont-show-label">
+                        <input type="checkbox" id="popup-ad-dont-show-cb">
+                        <span>Bugün bir daha gösterme</span>
+                    </label>
+                </div>
+                ` : ''}
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Force reflow and add active class for smooth entrance animation
+        requestAnimationFrame(() => {
+            overlay.classList.add('popup-ad-visible');
+        });
+
+        // Record impression
+        if (!isPreview) {
+            sessionStorage.setItem('popup_ad_session_shown', 'true');
+            localStorage.setItem('popup_ad_last_shown_time', Date.now().toString());
+        }
+
+        // Close logic
+        const closeModal = () => {
+            const cb = document.getElementById('popup-ad-dont-show-cb');
+            if (cb && cb.checked) {
+                localStorage.setItem('popup_ad_hide_today_until', (Date.now() + 24 * 60 * 60 * 1000).toString());
+            }
+
+            overlay.classList.remove('popup-ad-visible');
+            overlay.classList.add('popup-ad-closing');
+            setTimeout(() => {
+                overlay.remove();
+            }, 350);
+            document.removeEventListener('keydown', handleKey);
+        };
+
+        const handleKey = (e) => {
+            if (e.key === 'Escape') closeModal();
+        };
+        document.addEventListener('keydown', handleKey);
+
+        const closeBtn = document.getElementById('popup-ad-close-btn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        // Click outside (backdrop click) closes
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+    }, delayMs);
+};
+
 
 // ============================================================================
 // SYSTEM GUARD & CACHE MANAGEMENT (Kalıcı Önbellek ve Oturum Koruma Sistemi)
