@@ -4299,9 +4299,24 @@ window.initPopupAd = function(settings, isPreview = false) {
         }
 
         // Check frequency setting
-        const frequency = settings.popup_ad_frequency || 'session';
+        const frequency = settings.popup_ad_frequency || '6_hours';
         if (frequency === 'session') {
             if (sessionStorage.getItem('popup_ad_session_shown') === 'true') {
+                return;
+            }
+        } else if (frequency === '4_hours') {
+            const lastShown = localStorage.getItem('popup_ad_last_shown_time');
+            if (lastShown && Date.now() - parseInt(lastShown, 10) < 4 * 60 * 60 * 1000) {
+                return;
+            }
+        } else if (frequency === '6_hours') {
+            const lastShown = localStorage.getItem('popup_ad_last_shown_time');
+            if (lastShown && Date.now() - parseInt(lastShown, 10) < 6 * 60 * 60 * 1000) {
+                return;
+            }
+        } else if (frequency === '12_hours') {
+            const lastShown = localStorage.getItem('popup_ad_last_shown_time');
+            if (lastShown && Date.now() - parseInt(lastShown, 10) < 12 * 60 * 60 * 1000) {
                 return;
             }
         } else if (frequency === 'once_a_day') {

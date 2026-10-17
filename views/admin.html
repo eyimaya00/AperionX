@@ -1662,8 +1662,11 @@
                             <div class="form-group">
                                 <label style="font-weight: 600; color: var(--text-color, #1e293b);">Gösterim Sıklığı</label>
                                 <select id="popup_ad_frequency" class="form-control" style="margin-top: 6px;">
-                                    <option value="session">Oturum Başına 1 Kez (Önerilen - Kullanıcıyı yormaz)</option>
-                                    <option value="once_a_day">Günde 1 Kez (24 saatte bir)</option>
+                                    <option value="4_hours">4 Saatte 1 Kez (Çok Dengeli & Etkili)</option>
+                                    <option value="6_hours" selected>6 Saatte 1 Kez (Önerilen - Sabah / Akşam)</option>
+                                    <option value="12_hours">12 Saatte 1 Kez (Günde 2 Kez)</option>
+                                    <option value="session">Oturum Başına 1 Kez (Sekme kapandığında sıfırlanır)</option>
+                                    <option value="once_a_day">24 Saatte 1 Kez (Günde 1 Kez)</option>
                                     <option value="always">Her Sayfa Yenilemede (Test amaçlı)</option>
                                 </select>
                                 <small style="color: #64748b;">Ziyaretçinin site sayfaları arasında gezinirken rahatsız olmaması için ayarlanır.</small>
@@ -10308,7 +10311,7 @@
             if (icon) icon.className = 'ph ph-moon';
         }
     </script>
-    <script defer src="/script_v105.js?v=330"></script>
+    <script defer src="/script_v105.js?v=331"></script>
     <script>
         // Helper: Fetch with Auth Token
         async function fetchWithAuth(url, options = {}) {
