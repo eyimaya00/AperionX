@@ -863,6 +863,17 @@ function initTheme() {
         return;
     }
 
+    // Admin paneli kendi tema yöneticisine sahiptir ve varsayılan olarak Gündüz Modundadır
+    if (window.location.pathname.includes('/admin')) {
+        const adminDark = localStorage.getItem('admin_darkMode') === 'true';
+        if (adminDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        return;
+    }
+
     // Mobil Menü içine Gece Modu Butonunu Al (En altta yer alsın)
     const mobileMenu = document.querySelector('.mobile-menu');
     let mobileThemeBtn = document.getElementById('mobileThemeToggle');
