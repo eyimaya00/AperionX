@@ -9,8 +9,8 @@
   <!-- Google Fonts: Cormorant Garamond, Montserrat, Great Vibes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <!-- Arka Plan Animasyonlu Mesh Gradient Katmanı -->
@@ -24,7 +24,7 @@
   <!-- Parçacıklar (Yıldızlar, Kalpler, Çilekler, Işıltılar) Canvas Katmanı -->
   <canvas id="dream-canvas"></canvas>
 
-  <!-- Zarif Merkez İsimler -->
+  <!-- Zarif Merkez İsimler & Sayaç -->
   <main class="hero-container">
     <div class="center-content">
       <h1 class="romantic-title">
@@ -32,9 +32,20 @@
         <span class="heart-pulse">❤️</span>
         <span class="name-text">Yasin</span>
       </h1>
-      <div class="counter-container">
-        <span class="counter-days" id="days-count">0</span>
-        <span class="counter-label">gündür birlikteyiz ✨</span>
+      
+      <!-- Modern & Şık Romantik Sayaç -->
+      <div class="love-counter-wrapper">
+        <div class="counter-header-tag">Birlikteliğimizin</div>
+        <div class="counter-card-glass">
+          <div class="counter-value-box">
+            <span class="counter-number" id="days-count">0</span>
+          </div>
+          <div class="counter-sub-info">
+            <span class="counter-unit">GÜNÜ</span>
+            <span class="counter-sparkle-dot">•</span>
+            <span class="counter-date-since">15.08.2026'dan beri</span>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -48,6 +59,6 @@
   <!-- Statik Gerçek Ses Dosyası (Tüm Telefonlarla %100 Uyumlu) -->
   <audio id="bg-audio" src="melody.wav" preload="auto" loop playsinline webkit-playsinline></audio>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>

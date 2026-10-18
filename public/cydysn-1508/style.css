@@ -176,53 +176,116 @@ html, body {
 }
 
 /* ==========================================================================
-   Romantik Gün Sayacı
+   Modern & Zarif Romantik Gün Sayacı Kartı
    ========================================================================== */
 
-.counter-container {
-  margin-top: 0.8rem;
-  display: inline-flex;
+.love-counter-wrapper {
+  margin-top: 1.6rem;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  animation: counterEntrance 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+}
+
+@keyframes counterEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.counter-header-tag {
+  font-family: var(--font-sans);
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 214, 224, 0.8);
+  margin-bottom: 0.55rem;
+  text-shadow: 0 0 10px rgba(248, 180, 200, 0.4);
+}
+
+.counter-card-glass {
+  position: relative;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  padding: 0.6rem 1.6rem;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 214, 224, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 15px rgba(248, 180, 200, 0.15);
-  transition: all 0.4s ease;
+  padding: 1rem 2.4rem;
+  min-width: 200px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(248, 180, 200, 0.04) 100%);
+  border: 1px solid rgba(255, 214, 224, 0.28);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(255, 214, 224, 0.08),
+    0 0 25px rgba(248, 180, 200, 0.18);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.counter-container:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 214, 224, 0.4);
-  box-shadow: 0 6px 25px rgba(248, 180, 200, 0.25);
-  transform: translateY(-2px);
+.counter-card-glass:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 214, 224, 0.5);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.35),
+    inset 0 0 25px rgba(255, 214, 224, 0.15),
+    0 0 35px rgba(248, 180, 200, 0.35);
 }
 
-.counter-days {
+.counter-value-box {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.counter-number {
   font-family: var(--font-serif);
-  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-size: clamp(3rem, 9vw, 4.8rem);
   font-weight: 600;
   line-height: 1;
-  background: linear-gradient(135deg, #ffffff 20%, #f8b4c8 80%, #ffd6e0 100%);
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #ffffff 10%, #ffe6ee 40%, #f8b4c8 85%, #ffd6e0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 20px rgba(248, 180, 200, 0.5);
-  letter-spacing: 0.05em;
+  filter: drop-shadow(0 0 25px rgba(248, 180, 200, 0.6));
 }
 
-.counter-label {
+.counter-sub-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.counter-unit {
   font-family: var(--font-sans);
-  font-size: clamp(0.75rem, 2.2vw, 0.95rem);
+  font-size: clamp(0.75rem, 2.2vw, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.counter-sparkle-dot {
+  color: rgba(255, 214, 224, 0.6);
+  font-size: 0.8rem;
+}
+
+.counter-date-since {
+  font-family: var(--font-sans);
+  font-size: clamp(0.7rem, 2vw, 0.82rem);
   font-weight: 300;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 0 10px rgba(248, 180, 200, 0.3);
+  letter-spacing: 0.08em;
+  color: rgba(255, 214, 224, 0.75);
 }
 
 @keyframes textEntrance {
