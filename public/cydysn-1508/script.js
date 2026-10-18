@@ -439,7 +439,6 @@
   window.addEventListener('touchend', onUserScreenInteraction, { passive: true });
   window.addEventListener('click', onUserScreenInteraction);
 
-  // İmleç Hareketi
   let lastMove = 0;
   window.addEventListener('pointermove', (e) => {
     const now = performance.now();
@@ -448,5 +447,27 @@
       lastMove = now;
     }
   });
+
+  // ==========================================================================
+  // Romantik Gün Sayacı (15 Ağustos 2026 Başlangıçlı)
+  // ==========================================================================
+  function updateDaysCounter() {
+    const daysElement = document.getElementById('days-count');
+    if (!daysElement) return;
+
+    // 15 Ağustos 2026, 00:00:00 yerel saat
+    const startDate = new Date(2026, 7, 15, 0, 0, 0);
+    const now = new Date();
+
+    const diffTime = now.getTime() - startDate.getTime();
+    // Milisaniyeyi güne çevirme
+    const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+
+    daysElement.innerText = diffDays;
+  }
+
+  updateDaysCounter();
+  // Gece yarısı geçişlerinde otomatik güncelleme için her saat başı kontrol
+  setInterval(updateDaysCounter, 1000 * 60 * 60);
 
 })();
