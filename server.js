@@ -2809,6 +2809,7 @@ async function ensureSchema() {
                 approved_by INT,
                 views INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                submitted_at TIMESTAMP NULL DEFAULT NULL,
                 published_at TIMESTAMP NULL,
                 deleted_at TIMESTAMP NULL,
                 FOREIGN KEY (author_id) REFERENCES users(id)
@@ -2822,6 +2823,7 @@ async function ensureSchema() {
         // Add published_at to existing tables if missing
         try { await pool.query('ALTER TABLE experiments ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE experiments ADD COLUMN visual_references_list TEXT'); } catch(e) {}
+        try { await pool.query('ALTER TABLE experiments ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN published_at TIMESTAMP NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL'); } catch(e) {}
         try { await pool.query('ALTER TABLE articles ADD COLUMN updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'); } catch(e) {}
@@ -2836,6 +2838,7 @@ async function ensureSchema() {
         try { await pool.query("UPDATE experiments SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 1:', e); }
         try { await pool.query("UPDATE articles SET published_at = created_at WHERE status = 'published' AND published_at IS NULL"); } catch(e) { console.error('Migration Error 2:', e); }
         try { await pool.query("UPDATE articles SET submitted_at = created_at WHERE status = 'pending' AND submitted_at IS NULL"); } catch(e) { console.error('Migration Error 3:', e); }
+        try { await pool.query("UPDATE experiments SET submitted_at = created_at WHERE submitted_at IS NULL"); } catch(e) { console.error('Migration Error 4:', e); }
 
         // Clean orphaned stats from previously deleted articles
         try {
@@ -3184,7 +3187,8 @@ async function ensureSchema() {
             { table: 'articles', name: 'campus_editor_id', def: 'INT DEFAULT NULL' },
             { table: 'articles', name: 'campus_reviewed_at', def: 'TIMESTAMP NULL DEFAULT NULL' },
             { table: 'experiments', name: 'campus_editor_id', def: 'INT DEFAULT NULL' },
-            { table: 'experiments', name: 'campus_reviewed_at', def: 'TIMESTAMP NULL DEFAULT NULL' }
+            { table: 'experiments', name: 'campus_reviewed_at', def: 'TIMESTAMP NULL DEFAULT NULL' },
+            { table: 'experiments', name: 'submitted_at', def: 'TIMESTAMP NULL DEFAULT NULL' }
         ];
         for (const col of campusCols) {
             try {
@@ -6890,16 +6894,17 @@ app.post('/api/experiments', authenticateToken, upload.fields([{ name: 'image' }
         const cleanVisualReferences = visual_references_list ? DOMPurify.sanitize(visual_references_list) : null;
 
         const publishedAt = finalStatus === 'published' ? new Date() : null;
+        const submittedAt = (finalStatus === 'pending' || finalStatus === 'pending_campus') ? new Date() : null;
         const wasPublishedVal = finalStatus === 'published' ? 1 : 0;
 
         const [insertResult] = await pool.query(
             `INSERT INTO experiments (
                 title, slug, excerpt, objective, materials, procedure_steps, results, conclusion, 
-                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, visual_references_list, published_at, was_published
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                image_url, youtube_url, category, safety_notes, tags, pdf_url, author_id, status, references_list, visual_references_list, published_at, was_published, submitted_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, slug, excerpt, cleanObjective, cleanMaterials, cleanProcedure, cleanResults, cleanConclusion,
-                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, cleanVisualReferences, publishedAt, wasPublishedVal
+                image_url, youtube_url, category, cleanSafety, tags, pdf_url, author_id, finalStatus, cleanReferences, cleanVisualReferences, publishedAt, wasPublishedVal, submittedAt
             ]
         );
 
@@ -6986,6 +6991,9 @@ app.put('/api/experiments/:id', authenticateToken, upload.fields([{ name: 'image
         if (finalStatus === 'published' && (!check[0] || !check[0].was_published)) {
             updates.push('published_at = NOW()');
             updates.push('was_published = 1');
+        }
+        if (finalStatus === 'pending' || finalStatus === 'pending_campus') {
+            updates.push('submitted_at = NOW()');
         }
         if (finalStatus === 'pending' || finalStatus === 'pending_campus' || finalStatus === 'draft') {
             updates.push('rejection_reason = NULL');
@@ -7144,13 +7152,13 @@ app.get('/api/editor/pending-experiments', authenticateToken, async (req, res) =
     if (req.user.role !== 'editor' && req.user.role !== 'admin') return res.sendStatus(403);
     try {
         const [rows] = await pool.query(`
-            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, e.campus_editor_id,
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, COALESCE(e.submitted_at, e.created_at) as submitted_at, e.published_at, e.author_id, e.image_url, e.pdf_url, e.rejection_reason, e.views, e.campus_editor_id,
             (SELECT fullname FROM users WHERE id = e.campus_editor_id) as campus_editor_name,
             LEFT(e.excerpt, 200) as excerpt, u.fullname as author_name, u.university as author_university
             FROM experiments e
             LEFT JOIN users u ON e.author_id = u.id
             WHERE e.status = 'pending' AND e.deleted_at IS NULL
-            ORDER BY e.created_at ASC
+            ORDER BY COALESCE(e.submitted_at, e.created_at) ASC
         `);
 
         const expIds = rows.map(r => r.id);
@@ -9449,12 +9457,12 @@ app.get('/api/campus-editor/pending', authenticateToken, async (req, res) => {
 
         // Experiments (status = 'pending_campus')
         const [experiments] = await pool.query(`
-            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.author_id, e.image_url, e.pdf_url, e.excerpt, e.objective, e.materials, e.procedure_steps, e.results, e.conclusion,
+            SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, COALESCE(e.submitted_at, e.created_at) as submitted_at, e.author_id, e.image_url, e.pdf_url, e.excerpt, e.objective, e.materials, e.procedure_steps, e.results, e.conclusion,
             u.fullname as author_name, u.university as author_university, u.avatar_url as author_avatar
             FROM experiments e
             JOIN users u ON e.author_id = u.id
             WHERE e.status = 'pending_campus' AND e.deleted_at IS NULL AND ${userFilter}
-            ORDER BY e.created_at ASC
+            ORDER BY COALESCE(e.submitted_at, e.created_at) ASC
         `, filterParams);
 
         // Gundem (status = 'pending_campus' and is_gundem = 1)
@@ -9521,7 +9529,7 @@ app.get('/api/campus-editor/history', authenticateToken, async (req, res) => {
             JOIN users u ON a.author_id = u.id
             WHERE (a.campus_editor_id IS NOT NULL OR a.status IN ('pending', 'published', 'rejected')) AND ${userFilter})
             UNION ALL
-            (SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, e.created_at as submitted_at, NULL as published_at, e.campus_reviewed_at, e.rejection_reason, 0 as is_gundem, 'experiment' as item_type,
+            (SELECT e.id, e.title, e.slug, e.category, e.status, e.created_at, COALESCE(e.submitted_at, e.created_at) as submitted_at, NULL as published_at, e.campus_reviewed_at, e.rejection_reason, 0 as is_gundem, 'experiment' as item_type,
             u.fullname as author_name, u.university as author_university
             FROM experiments e
             JOIN users u ON e.author_id = u.id
@@ -9561,11 +9569,32 @@ app.put('/api/campus-editor/decide/:type/:id', authenticateToken, async (req, re
         const editorName = req.user.fullname || 'Kampüs Editörü';
 
         if (decision === 'forward') {
-            await pool.query(`
-                UPDATE ${tableName} 
-                SET status = 'pending', campus_editor_id = ?, campus_reviewed_at = NOW(), rejection_reason = NULL, submitted_at = NOW() 
-                WHERE id = ?
-            `, [req.user.id, id]);
+            try {
+                await pool.query(`
+                    UPDATE ${tableName} 
+                    SET status = 'pending', campus_editor_id = ?, campus_reviewed_at = NOW(), rejection_reason = NULL, submitted_at = NOW() 
+                    WHERE id = ?
+                `, [req.user.id, id]);
+            } catch (updateErr) {
+                if (updateErr.code === 'ER_BAD_FIELD_ERROR' && String(updateErr.message).includes('submitted_at')) {
+                    try {
+                        await pool.query(`ALTER TABLE ${tableName} ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL`);
+                        await pool.query(`
+                            UPDATE ${tableName} 
+                            SET status = 'pending', campus_editor_id = ?, campus_reviewed_at = NOW(), rejection_reason = NULL, submitted_at = NOW() 
+                            WHERE id = ?
+                        `, [req.user.id, id]);
+                    } catch (fallbackErr) {
+                        await pool.query(`
+                            UPDATE ${tableName} 
+                            SET status = 'pending', campus_editor_id = ?, campus_reviewed_at = NOW(), rejection_reason = NULL 
+                            WHERE id = ?
+                        `, [req.user.id, id]);
+                    }
+                } else {
+                    throw updateErr;
+                }
+            }
 
             if (type === 'experiment') clearCache('experiments');
             else clearCache('articles');
@@ -9796,7 +9825,21 @@ app.put('/api/campus-editor/content/:type/:id', authenticateToken, async (req, r
 
         if (updates.length > 0) {
             params.push(id);
-            await pool.query(`UPDATE ${tableName} SET ${updates.join(', ')} WHERE id = ?`, params);
+            try {
+                await pool.query(`UPDATE ${tableName} SET ${updates.join(', ')} WHERE id = ?`, params);
+            } catch (updateErr) {
+                if (updateErr.code === 'ER_BAD_FIELD_ERROR' && String(updateErr.message).includes('submitted_at')) {
+                    try {
+                        await pool.query(`ALTER TABLE ${tableName} ADD COLUMN submitted_at TIMESTAMP NULL DEFAULT NULL`);
+                        await pool.query(`UPDATE ${tableName} SET ${updates.join(', ')} WHERE id = ?`, params);
+                    } catch (fallbackErr) {
+                        const fallbackUpdates = updates.filter(u => !u.includes('submitted_at'));
+                        await pool.query(`UPDATE ${tableName} SET ${fallbackUpdates.join(', ')} WHERE id = ?`, params);
+                    }
+                } else {
+                    throw updateErr;
+                }
+            }
         }
 
         if (isExp) clearCache('experiments');

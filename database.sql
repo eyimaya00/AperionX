@@ -137,3 +137,49 @@ CREATE TABLE IF NOT EXISTS category_cards (
     link_url VARCHAR(255) NOT NULL,
     order_index INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 13. Experiments Table
+CREATE TABLE IF NOT EXISTS experiments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE,
+    excerpt TEXT,
+    objective TEXT,
+    materials TEXT,
+    procedure_steps LONGTEXT,
+    results LONGTEXT,
+    conclusion TEXT,
+    image_url VARCHAR(255),
+    youtube_url VARCHAR(500),
+    category VARCHAR(100),
+    safety_notes TEXT,
+    tags TEXT,
+    references_list TEXT,
+    visual_references_list TEXT,
+    pdf_url VARCHAR(255),
+    author_id INT,
+    status VARCHAR(50) DEFAULT 'pending',
+    rejection_reason TEXT,
+    approved_by INT,
+    campus_editor_id INT DEFAULT NULL,
+    campus_reviewed_at TIMESTAMP NULL DEFAULT NULL,
+    views INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    submitted_at TIMESTAMP NULL DEFAULT NULL,
+    published_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14. Experiment Authors Table
+CREATE TABLE IF NOT EXISTS experiment_authors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    experiment_id INT NOT NULL,
+    user_id INT NOT NULL,
+    order_index INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_exp_author (experiment_id, user_id),
+    FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
