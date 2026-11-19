@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '.env') });
 const pool = require('./config/db');
 const { stampPdfFile } = require('./utils/stamp_pdf');
+const { buildSmartSEO } = require('./utils/smart_seo');
 
 
 
@@ -469,10 +470,18 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             </a>
         `).join('');
 
+        const smartSEO = buildSmartSEO({
+            type: 'gundem',
+            title: articleData.title,
+            excerpt: articleData.excerpt,
+            category: articleData.category,
+            tags: articleData.tags
+        });
+
         const jsonLdData = {
             "@context": "https://schema.org",
             "@type": "NewsArticle",
-            "headline": articleData.title,
+            "headline": smartSEO.schemaTitle || articleData.title,
             "image": [articleData.imageUrl],
             "datePublished": articleData.dateIso || new Date().toISOString(),
             "dateModified": articleData.dateIso || new Date().toISOString(),
@@ -489,7 +498,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                     "url": "https://aperionx.com/uploads/logo.png"
                 }
             },
-            "description": articleData.excerpt || articleData.title
+            "description": smartSEO.schemaDescription || articleData.excerpt || articleData.title
         };
 
         // Template'i oku ve yer tutucuları değiştir
@@ -497,6 +506,9 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
         let html = await fs.promises.readFile(templatePath, 'utf8');
 
         html = html
+            .replace(/\{\{SEO_TITLE\}\}/g, escapeHtml(smartSEO.seoTitle))
+            .replace(/\{\{SEO_DESCRIPTION\}\}/g, escapeHtml(smartSEO.seoDescription))
+            .replace(/\{\{SEO_KEYWORDS\}\}/g, escapeHtml(smartSEO.seoKeywords))
             .replace(/\{\{ARTICLE_ID\}\}/g, (articleData.id || 0).toString())
             .replace(/\{\{TITLE\}\}/g, escapeHtml(articleData.title))
             .replace(/\{\{CATEGORY\}\}/g, escapeHtml(articleData.category || 'Gündem'))
@@ -902,7 +914,15 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
 
                 const authorName = authorNames.join(', ');
 
-                // Prepare Content
+                // Prepare Content & Smart SEO
+                const smartSEO = buildSmartSEO({
+                    type: 'article',
+                    title: article.title,
+                    excerpt: article.excerpt,
+                    category: article.category,
+                    tags: article.tags
+                });
+
                 const title = article.title;
                 const summary = article.excerpt || article.title;
                 let rawImg = article.image_url || '/uploads/logo.png';
@@ -917,7 +937,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 const urlPrefix = isEnglish ? `${origin}/en` : origin;
                 const url = `${urlPrefix}/makale/${article.slug}`;
 
-                // Fix: Sanitize potential nulls
+                // Fix: Sanitize potential nulls (use smartSEO for metadata)
+                const seoTitle = (smartSEO.seoTitle || title || '').replace(/"/g, '&quot;');
+                const seoSummary = (smartSEO.seoDescription || summary || '').replace(/"/g, '&quot;');
                 const safeTitle = (title || '').replace(/"/g, '&quot;');
                 const safeSummary = (summary || '').replace(/"/g, '&quot;');
                 const safeImg = (img || '').replace(/"/g, '&quot;');
@@ -930,7 +952,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 let html = htmlData;
 
                 // Title
-                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX</title>`);
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${seoTitle}</title>`);
 
                 let imgType = 'image/jpeg';
                 if (safeImg.toLowerCase().includes('.png')) {
@@ -947,9 +969,9 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                     html = html.replace(regex, `$1${content}$3`);
                 };
 
-                replaceMeta('description', safeSummary);
-                replaceMeta('og:title', safeTitle);
-                replaceMeta('og:description', safeSummary);
+                replaceMeta('description', seoSummary);
+                replaceMeta('og:title', seoTitle);
+                replaceMeta('og:description', seoSummary);
                 replaceMeta('og:image', safeImg);
                 replaceMeta('og:image:secure_url', safeImg);
                 replaceMeta('og:image:type', imgType);
@@ -962,15 +984,15 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                 }
 
                 // Add Dynamic Keywords
-                const tags = article.tags || 'bilim, teknoloji, makale, aperionx';
-                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, makale">`);
+                const tags = smartSEO.seoKeywords || article.tags || 'bilim, teknoloji, makale, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}">`);
                 if (!html.includes('<meta name="keywords"')) {
-                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, makale">\n</head>`);
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}">\n</head>`);
                 }
 
 
-                replaceMeta('twitter:title', safeTitle);
-                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:title', seoTitle);
+                replaceMeta('twitter:description', seoSummary);
                 replaceMeta('twitter:image', safeImg);
 
                 // Canonical Replacement
@@ -987,7 +1009,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                         "@type": "WebPage",
                         "@id": safeUrl
                     },
-                    "headline": safeTitle,
+                    "headline": smartSEO.schemaTitle || seoTitle,
                     "image": [safeImg],
                     "datePublished": isoDate,
                     "dateModified": isoDate, // Should ideally be updated_at if available
@@ -1004,7 +1026,7 @@ app.get(['/makale/:slug', '/article/:slug', '/en/makale/:slug', '/en/article/:sl
                             "url": `${origin}/uploads/logo.png`
                         }
                     },
-                    "description": safeSummary
+                    "description": smartSEO.schemaDescription || seoSummary
                 };
 
                 const breadcrumbData = {
@@ -2099,7 +2121,15 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
 
                 const authorName = authorNames.join(', ');
 
-                // Prepare Content
+                // Prepare Content & Smart SEO
+                const smartSEO = buildSmartSEO({
+                    type: 'experiment',
+                    title: experiment.title,
+                    excerpt: experiment.excerpt || experiment.objective,
+                    category: experiment.category,
+                    tags: experiment.tags
+                });
+
                 const title = experiment.title;
                 const summary = experiment.excerpt || experiment.title;
                 const img = experiment.image_url
@@ -2111,6 +2141,8 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 const urlPrefix = isEnglish ? `${origin}/en` : origin;
                 const url = `${urlPrefix}/deney/${experiment.slug}`;
 
+                const seoTitle = (smartSEO.seoTitle || title || '').replace(/"/g, '&quot;');
+                const seoSummary = (smartSEO.seoDescription || summary || '').replace(/"/g, '&quot;');
                 const safeTitle = (title || '').replace(/"/g, '&quot;');
                 const safeSummary = (summary || '').replace(/"/g, '&quot;');
                 const safeImg = (img || '').replace(/"/g, '&quot;');
@@ -2123,7 +2155,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 let html = htmlData;
 
                 // Title
-                html = html.replace(/<title>.*?<\/title>/i, `<title>${safeTitle} - AperionX Deneyler</title>`);
+                html = html.replace(/<title>.*?<\/title>/i, `<title>${seoTitle}</title>`);
 
                 let imgType = 'image/jpeg';
                 if (safeImg.toLowerCase().includes('.png')) {
@@ -2140,9 +2172,9 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                     html = html.replace(regex, `$1${content}$3`);
                 };
 
-                replaceMeta('description', safeSummary);
-                replaceMeta('og:title', safeTitle);
-                replaceMeta('og:description', safeSummary);
+                replaceMeta('description', seoSummary);
+                replaceMeta('og:title', seoTitle);
+                replaceMeta('og:description', seoSummary);
                 replaceMeta('og:image', safeImg);
                 replaceMeta('og:image:secure_url', safeImg);
                 replaceMeta('og:image:type', imgType);
@@ -2160,14 +2192,14 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                 }
 
                 // Add Dynamic Keywords
-                const tags = experiment.tags || 'bilimsel deney, fen deneyleri, laboratuvar, bilim, aperionx';
-                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}, aperion, aperionx, deney">`);
+                const tags = smartSEO.seoKeywords || experiment.tags || 'bilimsel deney, fen deneyleri, laboratuvar, bilim, aperionx';
+                html = html.replace(/<meta name="keywords" content=".*?">/i, `<meta name="keywords" content="${tags}">`);
                 if (!html.includes('<meta name="keywords"')) {
-                    html = html.replace('</head>', `<meta name="keywords" content="${tags}, aperion, aperionx, deney">\n</head>`);
+                    html = html.replace('</head>', `<meta name="keywords" content="${tags}">\n</head>`);
                 }
 
-                replaceMeta('twitter:title', safeTitle);
-                replaceMeta('twitter:description', safeSummary);
+                replaceMeta('twitter:title', seoTitle);
+                replaceMeta('twitter:description', seoSummary);
                 replaceMeta('twitter:image', safeImg);
 
                 // Canonical Replacement
@@ -2184,7 +2216,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                         "@type": "WebPage",
                         "@id": safeUrl
                     },
-                    "headline": safeTitle,
+                    "headline": smartSEO.schemaTitle || seoTitle,
                     "image": [safeImg],
                     "datePublished": isoDate,
                     "dateModified": isoDate,
@@ -2201,7 +2233,7 @@ app.get(['/deney/:slug', '/experiment/:slug', '/en/deney/:slug', '/en/experiment
                             "url": `${origin}/uploads/logo.png`
                         }
                     },
-                    "description": safeSummary
+                    "description": smartSEO.schemaDescription || seoSummary
                 };
 
                 const breadcrumbData = {
@@ -2441,7 +2473,6 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `    <url>
         <loc>${baseUrl}${itemPath}</loc>
         <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}${itemPath}"/>
-        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${enItemPath}"/>
         <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${itemPath}"/>
         <lastmod>${date}</lastmod>
         <changefreq>weekly</changefreq>
@@ -2483,7 +2514,6 @@ app.get('/sitemap.xml', async (req, res) => {
             xml += `    <url>
         <loc>${baseUrl}/deney/${exp.slug}</loc>
         <xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/deney/${exp.slug}"/>
-        <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/deney/${exp.slug}"/>
         <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/deney/${exp.slug}"/>
         <lastmod>${date}</lastmod>
         <changefreq>weekly</changefreq>
