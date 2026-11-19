@@ -6746,9 +6746,9 @@ body.has-spotify-announcement .mobile-menu {
     width: 30px;
     height: 30px;
     border-radius: 8px;
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color, #6366f1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6757,9 +6757,9 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-icon {
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    color: #fbbf24;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #818cf8;
 }
 
 .ccb-title {
@@ -6874,16 +6874,16 @@ body.has-spotify-announcement .mobile-menu {
 
 .ccb-btn-accept {
     flex: 1;
-    background: #0f172a;
+    background: var(--primary-color, #6366f1);
     color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
 }
 
 .ccb-btn-accept:hover {
     transform: translateY(-1px);
-    background: #1e293b;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: var(--primary-hover, #4f46e5);
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
 }
 
 .ccb-btn-accept:active {
@@ -6891,17 +6891,17 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-btn-accept {
-    background: #ffffff;
-    color: #090b10;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+    background: #6366f1;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
 }
 
 [data-theme="dark"] .ccb-btn-accept:hover {
-    background: #f1f5f9;
-    color: #000000;
-    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+    background: #4f46e5;
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
     filter: none;
 }
 
@@ -7184,15 +7184,15 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .csm-switch input:checked + .csm-slider {
-    background: #0f172a;
+    background: var(--primary-color, #6366f1);
 }
 
 [data-theme="dark"] .csm-switch input:checked + .csm-slider {
-    background: #ffffff;
+    background: #6366f1;
 }
 
 [data-theme="dark"] .csm-switch input:checked + .csm-slider::before {
-    background: #090b10;
+    background: #ffffff;
 }
 
 .csm-switch input:checked + .csm-slider::before {
@@ -7261,28 +7261,28 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 .csm-btn-accept {
-    background: #0f172a;
+    background: var(--primary-color, #6366f1);
     color: #ffffff;
-    box-shadow: 0 4px 14px -3px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.35);
 }
 
 [data-theme="dark"] .csm-btn-accept {
-    background: #ffffff;
-    color: #090b10;
-    font-weight: 700;
-    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+    background: #6366f1;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
 }
 
 .csm-btn-accept:hover {
     transform: translateY(-1px);
-    background: #1e293b;
-    box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.35);
+    background: var(--primary-hover, #4f46e5);
+    box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.5);
 }
 
 [data-theme="dark"] .csm-btn-accept:hover {
-    background: #f1f5f9;
-    color: #000000;
-    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+    background: #4f46e5;
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
     filter: none;
 }
 
