@@ -6726,10 +6726,12 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-card {
-    background: rgba(30, 41, 59, 0.97);
-    border-color: rgba(71, 85, 105, 0.6);
-    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5),
-                0 4px 16px -6px rgba(0, 0, 0, 0.3);
+    background: rgba(14, 18, 26, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.75),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 /* Banner Header */
@@ -6754,8 +6756,9 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-icon {
-    background: rgba(129, 140, 248, 0.2);
-    color: #818cf8;
+    background: rgba(99, 102, 241, 0.16);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #a5b4fc;
 }
 
 .ccb-title {
@@ -6819,6 +6822,14 @@ body.has-spotify-announcement .mobile-menu {
     transition: opacity 0.2s ease;
 }
 
+[data-theme="dark"] .ccb-links a {
+    color: #a5b4fc;
+}
+
+[data-theme="dark"] .ccb-links a:hover {
+    color: #c7d2fe;
+}
+
 .ccb-links a:hover {
     opacity: 0.8;
     text-decoration: underline;
@@ -6828,6 +6839,11 @@ body.has-spotify-announcement .mobile-menu {
     font-size: 0.65rem;
     color: var(--text-color);
     opacity: 0.35;
+}
+
+[data-theme="dark"] .ccb-link-dot {
+    color: #64748b;
+    opacity: 0.6;
 }
 
 /* Banner Action Buttons */
@@ -6857,15 +6873,16 @@ body.has-spotify-announcement .mobile-menu {
 
 .ccb-btn-accept {
     flex: 1;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     color: #ffffff;
-    box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
 }
 
 .ccb-btn-accept:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.55);
-    filter: brightness(1.08);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    filter: brightness(1.1);
 }
 
 .ccb-btn-accept:active {
@@ -6885,8 +6902,9 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-btn-settings {
-    background: rgba(129, 140, 248, 0.15);
-    color: #818cf8;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
 }
 
 .ccb-btn-settings:hover {
@@ -6895,7 +6913,9 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .ccb-btn-settings:hover {
-    background: rgba(129, 140, 248, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
 }
 
 .ccb-btn-reject {
@@ -6913,8 +6933,17 @@ body.has-spotify-announcement .mobile-menu {
     background: rgba(99, 102, 241, 0.04);
 }
 
+[data-theme="dark"] .ccb-btn-reject {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    opacity: 1;
+}
+
 [data-theme="dark"] .ccb-btn-reject:hover {
-    background: rgba(129, 140, 248, 0.08);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
 }
 
 /* ================================================
@@ -6955,9 +6984,12 @@ body.has-spotify-announcement .mobile-menu {
 }
 
 [data-theme="dark"] .csm-modal {
-    background: #1e293b;
-    border-color: rgba(71, 85, 105, 0.6);
-    box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.6);
+    background: rgba(14, 18, 26, 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 /* Modal scrollbar */
@@ -7247,7 +7279,7 @@ body.has-spotify-announcement .mobile-menu {
     }
 
     [data-theme="dark"] .ccb-card {
-        border-color: rgba(71, 85, 105, 0.6);
+        border-color: rgba(255, 255, 255, 0.1);
     }
 
     .ccb-icon {
