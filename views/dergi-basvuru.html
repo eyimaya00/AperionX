@@ -102,7 +102,7 @@
         }
 
         .header-logo img {
-            height: 34px;
+            height: 32px;
             width: auto;
             object-fit: contain;
         }
@@ -142,9 +142,23 @@
             position: relative;
             z-index: 10;
             text-align: center;
-            padding: 48px 20px 32px;
+            padding: 40px 20px 28px;
             max-width: 700px;
             margin: 0 auto;
+        }
+
+        .hero-logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hero-brand-logo {
+            height: 64px;
+            width: auto;
+            max-width: 90%;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 20px rgba(99, 102, 241, 0.35));
         }
 
         .hero-badge {
@@ -154,13 +168,13 @@
             background: rgba(99, 102, 241, 0.12);
             border: 1px solid rgba(99, 102, 241, 0.28);
             color: var(--primary-light);
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .hero-title {
@@ -568,7 +582,7 @@
 <header class="site-header">
     <div class="header-container">
         <a href="/" class="header-logo" title="AperionX Ana Sayfa">
-            <img src="/uploads/logo.png" alt="AperionX Logo" class="site-logo-img" onerror="this.onerror=null; this.src='/aperionx-a-transparent.png';">
+            <img src="/aperionx-dergi-logo.png" alt="AperionX Logo" class="site-logo-img" onerror="this.onerror=null; this.src='/uploads/logo.png';">
         </a>
         <a href="/" class="header-back-btn">
             <i class="ph-bold ph-arrow-left"></i>
@@ -579,8 +593,11 @@
 
 <!-- PAGE HERO -->
 <section class="hero-section">
+    <div class="hero-logo-container">
+        <img src="/aperionx-dergi-logo.png" alt="AperionX" class="hero-brand-logo" onerror="this.onerror=null; this.src='/uploads/logo.png';">
+    </div>
     <div class="hero-badge">
-        <i class="ph-bold ph-newspaper"></i> AperionX Basılı Sayı
+        <i class="ph-bold ph-newspaper"></i> Basılı Sayı Başvuru Formu
     </div>
     <h1 class="hero-title">Dergi Ekibi <span>Başvuru Formu</span></h1>
     <p class="hero-desc">
@@ -604,14 +621,14 @@
 
         <hr class="section-divider">
 
-        <!-- 2. İletişim -->
+        <!-- 2. Telefon (WhatsApp) -->
         <div class="form-group">
             <label class="form-label">
                 <span class="section-number">2</span>
-                İletişim Numaran / Kullanıcı Adın <span class="required">*</span>
+                Telefon Numaran (WhatsApp) <span class="required">*</span>
             </label>
-            <span class="form-hint">Gruptan hızlıca eşleştirmek için — Telegram kullanıcı adı veya telefon numarası</span>
-            <input type="text" class="form-input" name="contact" placeholder="Örn: @kullaniciadi veya 05XX XXX XX XX" required>
+            <span class="form-hint">WhatsApp üzerinden hızlıca iletişime geçebilmemiz için telefon numaran</span>
+            <input type="tel" class="form-input" name="contact" placeholder="Örn: 05XX XXX XX XX" required autocomplete="tel">
         </div>
 
         <hr class="section-divider">
@@ -622,7 +639,7 @@
                 <span class="section-number">3</span>
                 Dergi sürecinde hangi rolde yer almak istersin? <span class="required">*</span>
             </label>
-            <span class="form-hint">Birden fazla rol seçebilirsin</span>
+            <span class="form-hint">Birden fazla rol seçebilir veya kendi alanını belirtebilirsin</span>
             <div class="options-grid">
                 <label class="option-card">
                     <input type="checkbox" name="roles" value="Dergi Yazarı">
@@ -668,6 +685,21 @@
                         <div class="custom-check"></div>
                     </div>
                 </label>
+                <!-- Kullanıcının Kendi Belirteceği Rol -->
+                <label class="option-card">
+                    <input type="checkbox" name="roles" value="Diğer" id="roleOtherCheckbox" onchange="toggleCustomRoleInput()">
+                    <div class="option-content">
+                        <span class="option-icon">💡</span>
+                        <div>
+                            <div class="option-label-text">Farklı Bir Alan / Kendi Belirteceğim Rol</div>
+                            <div class="option-desc">Yukarıdakiler dışında katkı sağlamak istediğin özel bir alan varsa</div>
+                        </div>
+                        <div class="custom-check"></div>
+                    </div>
+                </label>
+                <div id="customRoleWrap" style="display: none; margin-top: 4px;">
+                    <input type="text" class="form-input" id="customRoleInput" placeholder="Katkı sağlamak istediğin rolü / alanı buraya yaz..." style="border-color: var(--primary-color); background: rgba(99, 102, 241, 0.08);">
+                </div>
             </div>
         </div>
 
@@ -778,16 +810,17 @@
 </div>
 
 <script>
-    // Dinamik logo kontrolü (admin ayarlarında farklı logo varsa çeker)
-    fetch('/api/settings')
-        .then(r => r.json())
-        .then(settings => {
-            if (settings && settings.site_logo && settings.site_logo.trim() !== '') {
-                const img = document.querySelector('.site-logo-img');
-                if (img) img.src = settings.site_logo;
-            }
-        })
-        .catch(() => {});
+    function toggleCustomRoleInput() {
+        const chk = document.getElementById('roleOtherCheckbox');
+        const wrap = document.getElementById('customRoleWrap');
+        const inp = document.getElementById('customRoleInput');
+        if (chk.checked) {
+            wrap.style.display = 'block';
+            inp.focus();
+        } else {
+            wrap.style.display = 'none';
+        }
+    }
 
     const form = document.getElementById('applicationForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -798,16 +831,30 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const roles = form.querySelectorAll('input[name="roles"]:checked');
-        if (roles.length === 0) {
+        const checkedBoxes = Array.from(form.querySelectorAll('input[name="roles"]:checked'));
+        if (checkedBoxes.length === 0) {
             alert('Lütfen dergi sürecinde yer almak istediğin en az bir rol seç.');
             return;
         }
 
+        const selectedRoles = [];
+        checkedBoxes.forEach(r => {
+            if (r.value === 'Diğer') {
+                const customVal = document.getElementById('customRoleInput').value.trim();
+                if (customVal) {
+                    selectedRoles.push(`Diğer: ${customVal}`);
+                } else {
+                    selectedRoles.push('Farklı Bir Alan');
+                }
+            } else {
+                selectedRoles.push(r.value);
+            }
+        });
+
         const formData = {
             fullName: form.fullName.value.trim(),
             contact: form.contact.value.trim(),
-            roles: Array.from(roles).map(r => r.value),
+            roles: selectedRoles,
             experience: form.experience.value.trim() || 'Belirtilmedi',
             weeklyHours: form.weeklyHours.value,
             workStyle: form.workStyle.value.trim(),
@@ -827,6 +874,7 @@
             if (response.ok) {
                 successOverlay.classList.add('show');
                 form.reset();
+                document.getElementById('customRoleWrap').style.display = 'none';
             } else {
                 throw new Error('Server error');
             }

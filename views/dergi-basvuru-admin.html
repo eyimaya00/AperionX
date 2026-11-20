@@ -125,11 +125,13 @@
         .role-badge.editor { background: #f0fdf4; color: #22c55e; }
         .role-badge.designer { background: #eef2ff; color: #6366f1; }
         .role-badge.promo { background: #fffbeb; color: #f59e0b; }
+        .role-badge.custom { background: #faf5ff; color: #a855f7; }
 
         body.dark-mode .role-badge.writer { background: rgba(59,130,246,0.15); }
         body.dark-mode .role-badge.editor { background: rgba(34,197,94,0.15); }
         body.dark-mode .role-badge.designer { background: rgba(99,102,241,0.15); }
         body.dark-mode .role-badge.promo { background: rgba(245,158,11,0.15); }
+        body.dark-mode .role-badge.custom { background: rgba(168,85,247,0.15); }
 
         .hours-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .hours-badge.low { background: #fffbeb; color: #f59e0b; }
@@ -312,6 +314,7 @@
         if (role.includes('Editör')) return 'editor';
         if (role.includes('Grafik')) return 'designer';
         if (role.includes('Tanıtım')) return 'promo';
+        if (role.includes('Diğer') || role.includes('Farklı')) return 'custom';
         return '';
     }
 
