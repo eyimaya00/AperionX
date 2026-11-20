@@ -13039,17 +13039,10 @@ app.get('/dergi-basvuru', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'dergi-basvuru.html'));
 });
 
-// Admin: başvuruları görüntüleme sayfası (sadece admin erişebilir)
-app.get('/admin/dergi-basvurular', authenticateToken, async (req, res) => {
-    try {
-        const [user] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
-        if (!user.length || user[0].role !== 'admin') {
-            return res.status(403).json({ message: 'Yetkisiz erişim.' });
-        }
-        res.sendFile(path.join(__dirname, 'views', 'dergi-basvuru-admin.html'));
-    } catch (err) {
-        res.status(500).json({ message: 'Sunucu hatası.' });
-    }
+// Admin: başvuruları görüntüleme sayfası (istemci tarafında admin token kontrolü yapılır)
+app.get('/admin/dergi-basvurular', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile(path.join(__dirname, 'views', 'dergi-basvuru-admin.html'));
 });
 
 // API: Yeni başvuru gönder

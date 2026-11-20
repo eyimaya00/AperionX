@@ -283,17 +283,38 @@
 </div>
 
 <script>
+    const token = localStorage.getItem('token');
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('user'));
+    } catch (e) {}
+
+    // Admin oturumu kontrolü (admin panelinden gelmiyorsa yönlendir)
+    if (!token || !user || user.role !== 'admin') {
+        alert('Bu sayfayı görüntülemek için lütfen önce Admin Paneline giriş yapın.');
+        window.location.href = '/admin';
+    }
+
     let allSubmissions = [];
     let currentViewId = null;
 
     // Apply dark mode from admin panel preference
-    if (document.cookie.includes('dark_mode=true') || localStorage.getItem('theme') === 'dark') {
+    if (document.cookie.includes('dark_mode=true') || localStorage.getItem('theme') === 'dark' || localStorage.getItem('admin_darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
 
     async function loadSubmissions() {
         try {
-            const res = await fetch('/api/dergi-basvuru');
+            const res = await fetch('/api/dergi-basvuru', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            if (res.status === 401 || res.status === 403) {
+                alert('Oturumunuz sona ermiş veya yetkiniz yetersiz. Lütfen tekrar giriş yapın.');
+                window.location.href = '/admin';
+                return;
+            }
             allSubmissions = await res.json();
             updateStats();
             renderTable(allSubmissions);
@@ -402,7 +423,12 @@
         if (!currentViewId) return;
         if (!confirm('Bu başvuruyu silmek istediğinize emin misiniz?')) return;
         try {
-            await fetch('/api/dergi-basvuru/' + currentViewId, { method: 'DELETE' });
+            await fetch('/api/dergi-basvuru/' + currentViewId, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
             closeModal();
             loadSubmissions();
         } catch (err) { alert('Silme işlemi başarısız.'); }
