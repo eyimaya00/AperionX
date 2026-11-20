@@ -13030,6 +13030,101 @@ app.get('/api/admin/author-consents/:id/pdf', authenticateToken, async (req, res
 });
 
 
+// =============================================
+// DERGI EKIBI BASVURU SISTEMI
+// =============================================
+
+// Başvuru formu sayfası
+app.get('/dergi-basvuru', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'dergi-basvuru.html'));
+});
+
+// Admin: başvuruları görüntüleme sayfası (sadece admin erişebilir)
+app.get('/admin/dergi-basvurular', authenticateToken, async (req, res) => {
+    try {
+        const [user] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
+        if (!user.length || user[0].role !== 'admin') {
+            return res.status(403).json({ message: 'Yetkisiz erişim.' });
+        }
+        res.sendFile(path.join(__dirname, 'views', 'dergi-basvuru-admin.html'));
+    } catch (err) {
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+// API: Yeni başvuru gönder
+app.post('/api/dergi-basvuru', async (req, res) => {
+    try {
+        const { fullName, contact, roles, experience, weeklyHours, workStyle, topicIdea } = req.body;
+
+        if (!fullName || !contact || !roles || !Array.isArray(roles) || roles.length === 0 || !weeklyHours || !workStyle) {
+            return res.status(400).json({ message: 'Eksik bilgi.' });
+        }
+
+        await pool.query(
+            `INSERT INTO magazine_applications (full_name, contact, roles, experience, weekly_hours, work_style, topic_idea)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                fullName.trim(),
+                contact.trim(),
+                JSON.stringify(roles),
+                (experience || '').trim() || 'Belirtilmedi',
+                weeklyHours,
+                workStyle.trim(),
+                (topicIdea || '').trim() || 'Belirtilmedi'
+            ]
+        );
+
+        console.log(`[DERGI] Yeni başvuru: ${fullName} (${contact})`);
+        res.status(201).json({ success: true });
+    } catch (err) {
+        console.error('[DERGI] Başvuru kayıt hatası:', err.message);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+// API: Tüm başvuruları listele (admin only)
+app.get('/api/dergi-basvuru', authenticateToken, async (req, res) => {
+    try {
+        const [user] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
+        if (!user.length || user[0].role !== 'admin') {
+            return res.status(403).json({ message: 'Yetkisiz erişim.' });
+        }
+
+        const [rows] = await pool.query('SELECT * FROM magazine_applications ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error('[DERGI] Listeleme hatası:', err.message);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+// API: Başvuru sil (admin only)
+app.delete('/api/dergi-basvuru/:id', authenticateToken, async (req, res) => {
+    try {
+        const [user] = await pool.query('SELECT role FROM users WHERE id = ?', [req.user.id]);
+        if (!user.length || user[0].role !== 'admin') {
+            return res.status(403).json({ message: 'Yetkisiz erişim.' });
+        }
+
+        const [result] = await pool.query('DELETE FROM magazine_applications WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Başvuru bulunamadı.' });
+        }
+
+        console.log(`[DERGI] Başvuru silindi: #${req.params.id}`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[DERGI] Silme hatası:', err.message);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+// =============================================
+// END DERGI EKIBI BASVURU SISTEMI
+// =============================================
+
+
 app.use((req, res) => {
     // Check if it looks like an API call first
     if (req.originalUrl.startsWith('/api')) {
@@ -13114,6 +13209,24 @@ app.listen(PORT, async () => {
         console.log('[MIGRATION] Author consents table ready.');
     } catch(consentMigErr) {
         console.error('[MIGRATION] Author consents error:', consentMigErr.message);
+    }
+
+    // === AUTO MIGRATION: Magazine Applications Table ===
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS magazine_applications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            full_name VARCHAR(255) NOT NULL,
+            contact VARCHAR(255) NOT NULL,
+            roles JSON NOT NULL,
+            experience TEXT,
+            weekly_hours VARCHAR(50) NOT NULL,
+            work_style TEXT NOT NULL,
+            topic_idea TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+        console.log('[MIGRATION] Magazine applications table ready.');
+    } catch(magMigErr) {
+        console.error('[MIGRATION] Magazine applications error:', magMigErr.message);
     }
 
     // Check and Send Latest Article Notification if missed

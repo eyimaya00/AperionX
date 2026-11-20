@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('theme');
+            var isDark = saved === 'dark' || (!saved);
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dergi Ekibi Başvuru — AperionX</title>
+    <meta name="description" content="AperionX dergisinin kurucu ekibine katıl. Yazar, editör, tasarımcı veya tanıtım ekibinde yer al.">
+    <link rel="icon" type="image/png" href="/uploads/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-input: #1c1c28;
+            --border: #2a2a3a;
+            --border-focus: #6366f1;
+            --accent: #6366f1;
+            --accent-light: #a5b4fc;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-primary: #f0f0f5;
+            --text-secondary: #9090a0;
+            --text-muted: #606070;
+            --success: #00cec9;
+            --success-glow: rgba(0, 206, 201, 0.3);
+            --danger: #ff6b6b;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #a5b4fc 50%, #00cec9 100%);
+            --gradient-2: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        .bg-orbs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); animation: float 20s ease-in-out infinite; }
+        .orb-1 { width: 400px; height: 400px; background: rgba(99, 102, 241, 0.12); top: -100px; left: -100px; }
+        .orb-2 { width: 350px; height: 350px; background: rgba(0, 206, 201, 0.08); bottom: -50px; right: -50px; animation-delay: -7s; }
+        .orb-3 { width: 250px; height: 250px; background: rgba(165, 180, 252, 0.06); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -14s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
+        }
+
+        /* Back Button */
+        .back-link {
+            position: fixed; top: 20px; left: 20px; z-index: 100;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; background: rgba(22, 22, 31, 0.8);
+            border: 1px solid var(--border); border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none; font-size: 13px;
+            backdrop-filter: blur(10px); transition: all 0.2s;
+        }
+        .back-link:hover { border-color: var(--accent); color: var(--accent-light); }
+
+        .header {
+            position: relative; z-index: 10;
+            text-align: center; padding: 60px 20px 30px;
+        }
+
+        .logo-container {
+            display: inline-flex; align-items: center; gap: 14px; margin-bottom: 16px;
+        }
+
+        .logo-img { width: 52px; height: 52px; border-radius: 12px; object-fit: contain; }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .header-subtitle {
+            font-size: 16px; color: var(--text-secondary); font-weight: 400;
+            letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px;
+        }
+
+        .header-desc {
+            font-size: 14px; color: var(--text-muted);
+            max-width: 500px; margin: 0 auto; line-height: 1.6;
+        }
+
+        .divider {
+            width: 80px; height: 2px; background: var(--gradient-2);
+            margin: 24px auto; border-radius: 2px;
+        }
+
+        .form-container {
+            position: relative; z-index: 10;
+            max-width: 680px; margin: 0 auto 60px; padding: 0 20px;
+        }
+
+        .form-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 40px;
+            backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group { margin-bottom: 32px; }
+        .form-group:last-of-type { margin-bottom: 0; }
+
+        .form-label { display: block; font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .form-hint { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+        .form-label .required { color: var(--danger); margin-left: 3px; }
+        .form-label .optional-badge {
+            display: inline-block; font-size: 10px; font-weight: 500; color: var(--text-muted);
+            background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;
+            margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%; background: var(--bg-input);
+            border: 1.5px solid var(--border); border-radius: 12px;
+            padding: 14px 18px; font-size: 14px; font-family: 'Inter', sans-serif;
+            color: var(--text-primary); transition: all 0.3s ease; outline: none;
+        }
+        .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+        .form-input:focus, .form-textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .form-textarea { resize: vertical; min-height: 100px; }
+
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .option-card { position: relative; cursor: pointer; }
+        .option-card input { position: absolute; opacity: 0; pointer-events: none; }
+        .option-card .option-content {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 18px; background: var(--bg-input);
+            border: 1.5px solid var(--border); border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .option-card:hover .option-content { border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.05); }
+        .option-card input:checked + .option-content { border-color: var(--accent); background: rgba(99, 102, 241, 0.1); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        .option-icon { font-size: 22px; flex-shrink: 0; width: 32px; text-align: center; }
+        .option-label-text { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .option-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .custom-check {
+            width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 6px;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; margin-left: auto;
+        }
+        .custom-radio-mark {
+            width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; margin-left: auto;
+        }
+        .option-card input:checked + .option-content .custom-check { background: var(--accent); border-color: var(--accent); }
+        .option-card input:checked + .option-content .custom-check::after { content: '✓'; color: white; font-size: 12px; font-weight: 700; }
+        .option-card input:checked + .option-content .custom-radio-mark { border-color: var(--accent); }
+        .option-card input:checked + .option-content .custom-radio-mark::after { content: ''; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
+
+        .section-divider { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+        .section-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; background: var(--gradient-2); border-radius: 8px;
+            font-size: 13px; font-weight: 700; color: white; margin-right: 10px;
+        }
+
+        .submit-section { margin-top: 40px; text-align: center; }
+        .submit-btn {
+            position: relative; display: inline-flex; align-items: center; gap: 10px;
+            padding: 16px 48px; background: var(--gradient-2); color: white; border: none;
+            border-radius: 14px; font-size: 16px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all 0.3s ease; overflow: hidden;
+        }
+        .submit-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+        .submit-btn:hover::before { left: 100%; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .submit-btn:active { transform: translateY(0); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .spinner {
+            display: none; width: 20px; height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white;
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .success-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(10px);
+            z-index: 1000; align-items: center; justify-content: center;
+        }
+        .success-overlay.show { display: flex; }
+
+        .success-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 50px; text-align: center;
+            max-width: 450px; margin: 20px;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .success-icon {
+            width: 80px; height: 80px; background: var(--success-glow); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px; font-size: 36px; border: 2px solid var(--success);
+        }
+        .success-title {
+            font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700;
+            margin-bottom: 12px; background: var(--gradient-1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .success-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+        .footer {
+            position: relative; z-index: 10; text-align: center;
+            padding: 20px; font-size: 12px; color: var(--text-muted);
+        }
+        .footer a { color: var(--accent-light); text-decoration: none; }
+
+        .form-group {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeUp 0.6s ease forwards;
+        }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.15s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.25s; }
+        .form-group:nth-child(5) { animation-delay: 0.3s; }
+        .form-group:nth-child(6) { animation-delay: 0.35s; }
+        .form-group:nth-child(7) { animation-delay: 0.4s; }
+        .form-group:nth-child(8) { animation-delay: 0.45s; }
+
+        @media (max-width: 600px) {
+            .header { padding: 50px 16px 20px; }
+            .logo-text { font-size: 30px; }
+            .form-card { padding: 24px; border-radius: 16px; }
+            .header-subtitle { font-size: 13px; letter-spacing: 2px; }
+            .back-link { top: 12px; left: 12px; padding: 8px 14px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<a href="/" class="back-link">← Ana Sayfa</a>
+
+<header class="header">
+    <div class="logo-container">
+        <img src="/aperionx-a-transparent.png" alt="AperionX" class="logo-img" onerror="this.style.display='none'">
+        <span class="logo-text">AperionX</span>
+    </div>
+    <div class="header-subtitle">Dergi Ekibi Başvuru Formu</div>
+    <div class="divider"></div>
+    <p class="header-desc">
+        AperionX dergisinin kurucu ekibinde yer almak için aşağıdaki formu doldurman yeterli. Seninle birlikte harika işler çıkaracağız! 🚀
+    </p>
+</header>
+
+<div class="form-container">
+    <form class="form-card" id="applicationForm">
+
+        <!-- 1. Ad Soyad -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">1</span>
+                Adın Soyadın <span class="required">*</span>
+            </label>
+            <span class="form-hint">Lütfen tam adını ve soyadını yaz.</span>
+            <input type="text" class="form-input" name="fullName" placeholder="Örn: Ali Yılmaz" required>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 2. İletişim -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">2</span>
+                İletişim Numaran / Kullanıcı Adın <span class="required">*</span>
+            </label>
+            <span class="form-hint">Gruptan hızlıca eşleştirmek için — Telegram, WhatsApp veya telefon numarası</span>
+            <input type="text" class="form-input" name="contact" placeholder="Örn: @kullaniciadi veya 05XX XXX XX XX" required>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 3. Rol Seçimi -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">3</span>
+                Dergi sürecinde hangi rolde yer almak istersin? <span class="required">*</span>
+            </label>
+            <span class="form-hint">Birden fazla seçebilirsin</span>
+            <div class="options-grid">
+                <label class="option-card">
+                    <input type="checkbox" name="roles" value="Dergi Yazarı">
+                    <div class="option-content">
+                        <span class="option-icon">✍️</span>
+                        <div>
+                            <div class="option-label-text">Dergi Yazarı</div>
+                            <div class="option-desc">Sadece basılı sayıya özel dosya konusu / makale üretimi</div>
+                        </div>
+                        <div class="custom-check"></div>
+                    </div>
+                </label>
+                <label class="option-card">
+                    <input type="checkbox" name="roles" value="Editör / Redaktör">
+                    <div class="option-content">
+                        <span class="option-icon">🔍</span>
+                        <div>
+                            <div class="option-label-text">Editör / Redaktör</div>
+                            <div class="option-desc">Metin kontrolü, bilimsel doğruluk ve dil düzenlemesi</div>
+                        </div>
+                        <div class="custom-check"></div>
+                    </div>
+                </label>
+                <label class="option-card">
+                    <input type="checkbox" name="roles" value="Grafik Tasarım & Mizanpaj">
+                    <div class="option-content">
+                        <span class="option-icon">🎨</span>
+                        <div>
+                            <div class="option-label-text">Grafik Tasarım & Mizanpaj</div>
+                            <div class="option-desc">Sayfa tasarımı, görsel düzenleme, illüstrasyon</div>
+                        </div>
+                        <div class="custom-check"></div>
+                    </div>
+                </label>
+                <label class="option-card">
+                    <input type="checkbox" name="roles" value="Tanıtım & Dağıtım">
+                    <div class="option-content">
+                        <span class="option-icon">📢</span>
+                        <div>
+                            <div class="option-label-text">Tanıtım & Dağıtım</div>
+                            <div class="option-desc">Ön sipariş süreci, sosyal medya ve duyuru operasyonu</div>
+                        </div>
+                        <div class="custom-check"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 4. Deneyim -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">4</span>
+                Daha önce bir deneyimin veya göstermek istediğin bir çalışman var mı?
+                <span class="optional-badge">Opsiyonel</span>
+            </label>
+            <span class="form-hint">"Yok, öğrenmeye hevesliyim" bile yeterli 😊</span>
+            <textarea class="form-textarea" name="experience" placeholder="Deneyimlerini veya portfolyo linkini paylaşabilirsin..."></textarea>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 5. Haftalık Saat -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">5</span>
+                Haftalık ortalama kaç saatini bu sürece ayırabilirsin? <span class="required">*</span>
+            </label>
+            <span class="form-hint">Önümüzdeki 1 ay boyunca</span>
+            <div class="options-grid">
+                <label class="option-card">
+                    <input type="radio" name="weeklyHours" value="1–3 saat" required>
+                    <div class="option-content">
+                        <span class="option-icon">⏱️</span>
+                        <div class="option-label-text">1 – 3 saat</div>
+                        <div class="custom-radio-mark"></div>
+                    </div>
+                </label>
+                <label class="option-card">
+                    <input type="radio" name="weeklyHours" value="3–5 saat">
+                    <div class="option-content">
+                        <span class="option-icon">⏰</span>
+                        <div class="option-label-text">3 – 5 saat</div>
+                        <div class="custom-radio-mark"></div>
+                    </div>
+                </label>
+                <label class="option-card">
+                    <input type="radio" name="weeklyHours" value="5+ saat">
+                    <div class="option-content">
+                        <span class="option-icon">🔥</span>
+                        <div class="option-label-text">5+ saat</div>
+                        <div class="custom-radio-mark"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 6. Çalışma Tarzı -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">6</span>
+                Ekip içindeki çalışma tarzını nasıl tanımlarsın? <span class="required">*</span>
+            </label>
+            <span class="form-hint">Bireysel mi çalışırsın, ekip içinde mi? Deadline'lara nasıl yaklaşırsın?</span>
+            <textarea class="form-textarea" name="workStyle" placeholder="Çalışma tarzını birkaç cümleyle tanımla..." required></textarea>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 7. Konu/Köşe Fikri -->
+        <div class="form-group">
+            <label class="form-label">
+                <span class="section-number">7</span>
+                İlk sayımız için aklında "kesin olmalı" dediğin bir konu veya köşe fikri var mı?
+                <span class="optional-badge">Opsiyonel</span>
+            </label>
+            <span class="form-hint">Her türlü fikir çok değerli — çekinmeden yaz!</span>
+            <textarea class="form-textarea" name="topicIdea" placeholder="Aklındaki konu veya köşe fikrini paylaş..."></textarea>
+        </div>
+
+        <div class="submit-section">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-icon">🚀</span>
+                <span id="btnText">Başvurumu Gönder</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
+        </div>
+    </form>
+</div>
+
+<footer class="footer">
+    <p>AperionX © 2026 — Bilginin sınırlarını aşmak için.</p>
+</footer>
+
+<div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Başvurun Alındı! 🎉</h2>
+        <p class="success-text">
+            Başvurun başarıyla iletildi. En kısa sürede seninle iletişime geçeceğiz.<br><br>
+            AperionX ekibinde seni görmek için sabırsızlanıyoruz!
+        </p>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('applicationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    const successOverlay = document.getElementById('successOverlay');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const roles = form.querySelectorAll('input[name="roles"]:checked');
+        if (roles.length === 0) {
+            alert('Lütfen en az bir rol seçin.');
+            return;
+        }
+
+        const formData = {
+            fullName: form.fullName.value.trim(),
+            contact: form.contact.value.trim(),
+            roles: Array.from(roles).map(r => r.value),
+            experience: form.experience.value.trim() || 'Belirtilmedi',
+            weeklyHours: form.weeklyHours.value,
+            workStyle: form.workStyle.value.trim(),
+            topicIdea: form.topicIdea.value.trim() || 'Belirtilmedi'
+        };
+
+        submitBtn.disabled = true;
+        btnText.textContent = 'Gönderiliyor...';
+        spinner.style.display = 'block';
+
+        try {
+            const response = await fetch('/api/dergi-basvuru', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            if (response.ok) {
+                successOverlay.classList.add('show');
+                form.reset();
+            } else {
+                throw new Error('Server error');
+            }
+        } catch (err) {
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+        } finally {
+            submitBtn.disabled = false;
+            btnText.textContent = 'Başvurumu Gönder';
+            spinner.style.display = 'none';
+        }
+    });
+
+    successOverlay.addEventListener('click', () => {
+        successOverlay.classList.remove('show');
+    });
+</script>
+</body>
+</html>
