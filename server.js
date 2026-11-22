@@ -187,6 +187,7 @@ app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-15
 // === SANAL OFIS (APERIONX SANAL OFIS) ===
 const { registerSanalOfisRoutes, attachSanalOfisWebSocket } = require('./sanalofis_backend');
 registerSanalOfisRoutes(app);
+app.get('/sanalofis-test', (req, res) => res.send('SANALOFIS_SERVER_ACTIVE'));
 
 // === ROOT REDIRECT & FAVICON ===
 app.get('/favicon.ico', (req, res) => {

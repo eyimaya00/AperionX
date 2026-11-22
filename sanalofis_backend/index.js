@@ -25,6 +25,19 @@ function registerSanalOfisRoutes(app) {
     }
   }));
 
+  // Debug rotası
+  app.get('/sanalofis-debug', (req, res) => {
+    const fs = require('fs');
+    res.json({
+      status: 'active',
+      dir: __dirname,
+      sanalOfisPublic,
+      exists: fs.existsSync(sanalOfisPublic),
+      hasIndex: fs.existsSync(path.join(sanalOfisPublic, 'index.html')),
+      files: fs.existsSync(sanalOfisPublic) ? fs.readdirSync(sanalOfisPublic) : []
+    });
+  });
+
   // Hem /sanalofis hem de /sanalofis/ çağrılarında doğrudan index.html sun
   app.get(['/sanalofis', '/sanalofis/'], (req, res) => {
     res.sendFile(path.join(sanalOfisPublic, 'index.html'));
