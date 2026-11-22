@@ -15,12 +15,7 @@ function getHub() {
 function registerSanalOfisRoutes(app) {
   const sanalOfisPublic = path.join(__dirname, '..', 'public', 'sanalofis');
 
-  // /sanalofis isteklerini /sanalofis/ adresine yönlendir
-  app.get('/sanalofis', (req, res) => {
-    res.redirect(301, '/sanalofis/');
-  });
-
-  // Statik dosyaları sun
+  // Statik dosyaları sun (css, js, img vb.)
   app.use('/sanalofis', express.static(sanalOfisPublic, {
     dotfiles: 'ignore',
     setHeaders: (res, p) => {
@@ -29,6 +24,11 @@ function registerSanalOfisRoutes(app) {
       }
     }
   }));
+
+  // Hem /sanalofis hem de /sanalofis/ çağrılarında doğrudan index.html sun
+  app.get(['/sanalofis', '/sanalofis/'], (req, res) => {
+    res.sendFile(path.join(sanalOfisPublic, 'index.html'));
+  });
 
   console.log('[SanalOfis] Web rotaları başarıyla bağlandı: /sanalofis');
 }
