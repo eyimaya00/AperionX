@@ -13117,6 +13117,11 @@ app.delete('/api/dergi-basvuru/:id', authenticateToken, async (req, res) => {
 // END DERGI EKIBI BASVURU SISTEMI
 // =============================================
 
+// =============================================
+// SANAL OFIS ENTEGRASYONU (aperionx.com/sanalofis)
+// =============================================
+const { registerSanalOfisRoutes, attachSanalOfisWebSocket } = require('./sanalofis_backend');
+registerSanalOfisRoutes(app);
 
 app.use((req, res) => {
     // Check if it looks like an API call first
@@ -13130,11 +13135,11 @@ app.use((req, res) => {
 });
 
 // Start Server
-// Start Server
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     console.log('SERVER RESTARTING WITH LATEST CODE...');
     console.log(`Server running on http://localhost:${PORT}`);
+    attachSanalOfisWebSocket(server);
 
     // === AUTO MIGRATION: User Activity Tracking ===
     try {

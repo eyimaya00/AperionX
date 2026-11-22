@@ -1,0 +1,169 @@
+:root {
+  --bg: #0f172a; --panel: #1e293b; --accent: #6366f1; --signal: #00ff41;
+  --text: #e2e8f0; --muted: #94a3b8; --line: rgba(148, 163, 184, .18);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.glass {
+  background: rgba(30, 41, 59, .88); backdrop-filter: blur(8px);
+  border: 1px solid var(--line); border-radius: 14px;
+}
+
+/* Düğmeler ve girdiler */
+.btn {
+  background: rgba(99, 102, 241, .16); color: var(--text); border: 1px solid var(--line);
+  border-radius: 10px; padding: 6px 10px; cursor: pointer; font: inherit; transition: .15s;
+}
+.btn:hover:not(:disabled) { background: rgba(99, 102, 241, .35); }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn.ico { width: 38px; height: 34px; padding: 0; font-size: 17px; }
+.btn.ico.off { opacity: .45; filter: grayscale(1); }
+.btn.ico.on { border-color: var(--signal); box-shadow: 0 0 10px rgba(0, 255, 65, .4); }
+.btn.mini { padding: 2px 7px; font-size: 12px; border-radius: 8px; }
+.btn.primary { background: var(--accent); width: 100%; padding: 10px; font-weight: 700; font-size: 15px; }
+.btn.primary:hover { background: #818cf8; }
+input, select, textarea {
+  background: #0b1220; color: var(--text); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 10px; font: inherit; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input.err { border-color: #ef4444; }
+
+/* Giriş ekranı */
+#login {
+  position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 30%, #1e1b4b, var(--bg) 70%);
+}
+#login:empty { display: none; }
+.login-card { width: min(380px, 92vw); padding: 22px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.login-card h1 { margin: 0; font-size: 22px; }
+.login-card p { margin: 0; }
+.logo { color: var(--accent); font-weight: 800; letter-spacing: .15em; font-size: 12px; }
+.preview { align-self: center; background: #122038; border-radius: 14px; cursor: pointer; border: 1px solid var(--line); }
+.field { text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; color: var(--muted); }
+.swatches { display: flex; gap: 8px; }
+.sw { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+.sw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+.hint { font-size: 11px; color: var(--muted); }
+
+/* Alt çubuk */
+#hud {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 5;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 96vw;
+}
+.bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; flex-wrap: wrap; justify-content: center; }
+.chip { padding: 5px 10px; border-radius: 999px; background: rgba(99, 102, 241, .18); font-size: 12px; white-space: nowrap; }
+.status { width: auto; max-width: 210px; padding: 6px 8px; }
+.sep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
+.prompt {
+  background: rgba(15, 23, 42, .92); border: 1px solid var(--accent); border-radius: 999px;
+  padding: 6px 16px; font-weight: 600;
+}
+.toast { background: #7f1d1d; border-radius: 999px; padding: 6px 14px; font-size: 12px; }
+
+/* Ekip listesi */
+#roster { position: fixed; top: 14px; right: 14px; width: 260px; max-height: 66vh; overflow: auto; z-index: 5; padding: 10px; }
+.r-title { font-weight: 700; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.r-row { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 10px; }
+.r-row:hover { background: rgba(99, 102, 241, .12); }
+.r-row.me { background: rgba(99, 102, 241, .16); }
+.r-info { flex: 1; min-width: 0; display: flex; flex-direction: column; cursor: pointer; }
+.r-info small { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-info .st { color: #cbd5e1; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.live { color: var(--signal); font-size: 11px; }
+
+/* Video kutuları */
+#tiles { position: fixed; top: 14px; left: 14px; z-index: 5; display: flex; flex-direction: column; gap: 8px; max-height: 90vh; overflow: auto; }
+.tile {
+  position: relative; width: 176px; height: 132px; border-radius: 12px; overflow: hidden; cursor: pointer;
+  background: #0b1220; border: 2px solid var(--signal); box-shadow: 0 0 12px rgba(0, 255, 65, .25);
+}
+.tile.self { width: 120px; height: 90px; border-color: var(--accent); box-shadow: none; }
+.tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile.sharing { border-color: #f59e0b; }
+.tile.big { width: min(560px, 80vw); height: min(380px, 60vh); z-index: 8; }
+.tile.big video { object-fit: contain; }
+.tname { position: absolute; left: 6px; bottom: 6px; font-size: 11px; background: rgba(15, 23, 42, .8); padding: 2px 8px; border-radius: 999px; }
+
+/* Görev panosu */
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(2, 6, 23, .6); padding: 12px; }
+.panel { width: min(980px, 94vw); max-height: 88vh; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.p-head { display: flex; justify-content: space-between; align-items: center; }
+.p-head h2 { margin: 0; font-size: 18px; }
+.ann { min-height: 62px; resize: vertical; border-color: rgba(99, 102, 241, .5); }
+.cols { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 12px; }
+.col { background: rgba(15, 23, 42, .6); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.col h3 { margin: 0; font-size: 13px; }
+.cards { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+.card { background: var(--panel); border-left: 3px solid var(--accent); border-radius: 8px; padding: 8px 10px; }
+.card p { margin: 0 0 6px; word-break: break-word; }
+.meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+.acts button { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 2px 5px; }
+.acts button:hover { color: var(--signal); }
+@media (max-width: 760px) {
+  .cols { grid-template-columns: 1fr !important; }
+  #roster { width: 200px; }
+  .tile { width: 120px; height: 90px; }
+}
+
+/* --- Yeni: logo, Peri kartı, yönetim paneli, sunum, duyuru --- */
+.logo-img { height: 38px; width: auto; margin: 0 auto 2px; display: block; }
+canvas#game { touch-action: none; }
+.addrow { display: flex; gap: 6px; }
+.addrow input.when, .card input.when { width: 42%; }
+.card input { margin-bottom: 6px; }
+.chip-when { display: inline-block; font-size: 11px; background: rgba(99, 102, 241, .22); border-radius: 999px; padding: 1px 8px; margin-bottom: 4px; }
+.cards { max-height: 46vh; overflow: auto; }
+
+.peri-card { width: min(640px, 94vw); display: flex; gap: 18px; padding: 18px; align-items: flex-end; }
+.peri-img { width: 150px; height: auto; flex: none; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .4)); }
+.peri-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.peri-head { display: flex; align-items: center; gap: 8px; }
+.peri-head b { font-size: 18px; color: #c7d2fe; }
+.peri-head .btn { margin-left: auto; }
+.say { margin: 0; background: #fff; color: #1e293b; border-radius: 14px 14px 14px 2px; padding: 10px 14px; font-weight: 500; }
+.stat { display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 8px var(--signal); }
+.rooms { display: flex; flex-wrap: wrap; gap: 6px; }
+.room-chip { display: flex; gap: 6px; font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(148, 163, 184, .14); color: var(--muted); }
+.room-chip.has { background: rgba(99, 102, 241, .28); color: var(--text); }
+.ann { border-left: 3px solid var(--accent); padding-left: 10px; }
+.ann small { color: var(--muted); letter-spacing: .08em; font-size: 10px; }
+.ann p { margin: 2px 0 0; }
+
+.admin { width: min(960px, 95vw); }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.admin h3 { margin: 6px 0; font-size: 13px; color: #a5b4fc; text-transform: uppercase; letter-spacing: .06em; }
+.admin .field { margin-bottom: 8px; }
+.colsrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; }
+.bf { margin-bottom: 10px; }
+.live-box { max-height: 160px; overflow: auto; margin-bottom: 8px; }
+.live-room { display: flex; flex-direction: column; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.foot { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.foot .btn.primary { width: auto; padding: 8px 18px; }
+.saved { color: var(--signal); font-size: 13px; }
+.err-text { color: #fca5a5; margin: 0; }
+.present { width: min(480px, 94vw); }
+.btn.on { border-color: var(--signal); box-shadow: 0 0 10px rgba(0, 255, 65, .4); }
+
+.notice {
+  background: rgba(99, 102, 241, .95); border-radius: 12px; padding: 10px 18px; font-weight: 600;
+  max-width: min(640px, 92vw); text-align: center; box-shadow: 0 6px 20px rgba(0, 0, 0, .4);
+}
+@media (max-width: 760px) { .admin-grid { grid-template-columns: 1fr; } .peri-card { flex-direction: column; align-items: center; } }
+.admin .foot { position: sticky; bottom: -16px; margin: 0 -16px -16px; padding: 12px 16px; background: rgba(30, 41, 59, .97); border-top: 1px solid var(--line); border-radius: 0 0 14px 14px; }
+.status { max-width: 150px; }
+.present.wide { width: min(940px, 96vw); }
+.present-video { width: 100%; max-height: 58vh; background: #000; border-radius: 10px; object-fit: contain; }
+.present { width: min(780px, 95vw); }
+.stage { margin: 6px 0; }
+.stage video { width: 100%; max-height: 46vh; object-fit: contain; background: #000; border-radius: 10px; display: block; }
+.stage-cap { font-size: 12px; color: #fbbf24; margin-bottom: 4px; }
