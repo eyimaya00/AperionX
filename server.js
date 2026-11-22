@@ -105,6 +105,7 @@ app.use(async (req, res, next) => {
         '/api/login',    // Allow login API
         '/api/register', // Allow register API
         '/cydysn-1508',  // Secret Romantic Route
+        '/sanalofis',    // Sanal Ofis
     ];
 
     // Check if path starts with whitelist item
@@ -182,6 +183,10 @@ app.get('/maintenance-access', async (req, res) => {
 
 // === SECRET ROMANTIC ROUTE (ISOLATED STATIC MOUNT) ===
 app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-1508'), { dotfiles: 'allow' }));
+
+// === SANAL OFIS (APERIONX SANAL OFIS) ===
+const { registerSanalOfisRoutes, attachSanalOfisWebSocket } = require('./sanalofis_backend');
+registerSanalOfisRoutes(app);
 
 // === ROOT REDIRECT & FAVICON ===
 app.get('/favicon.ico', (req, res) => {
@@ -13116,12 +13121,6 @@ app.delete('/api/dergi-basvuru/:id', authenticateToken, async (req, res) => {
 // =============================================
 // END DERGI EKIBI BASVURU SISTEMI
 // =============================================
-
-// =============================================
-// SANAL OFIS ENTEGRASYONU (aperionx.com/sanalofis)
-// =============================================
-const { registerSanalOfisRoutes, attachSanalOfisWebSocket } = require('./sanalofis_backend');
-registerSanalOfisRoutes(app);
 
 app.use((req, res) => {
     // Check if it looks like an API call first
