@@ -36,6 +36,7 @@ export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
 
   function form() {
     const cfg = getCfg(), boards = getBoards();
+    const officePass = h('input', { type: 'text', maxlength: 30, placeholder: 'Giriş Şifresi (Örn: 1965)', value: cfg.officePass || '1965' });
     const msg = h('textarea', { rows: 3, maxlength: 400 }); msg.value = cfg.peri.msg;
     const ann = h('textarea', { rows: 3, maxlength: 400 }); ann.value = cfg.peri.announce;
     const lobby = h('input', { maxlength: 200, value: cfg.lobby });
@@ -54,6 +55,7 @@ export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
 
     const save = () => {
       send('admin_set', { patch: {
+        officePass: officePass.value.trim() || '1965',
         peri: { msg: msg.value, announce: ann.value }, lobby: lobby.value,
         signs: Object.fromEntries(signs.map(([id, el]) => [id, el.value])),
         boards: Object.fromEntries(bf.map(b => [b.id, { title: b.title.value, cols: b.cols.map(c => c.value) }])),
@@ -64,6 +66,11 @@ export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
 
     panel.replaceChildren(head('🛠️ Ofis Yönetim & Kontrol Paneli'),
       h('div', { class: 'admin-grid' },
+        h('section', {},
+          h('h3', { text: '🔐 Giriş Şifresi' }),
+          field('Sanal Ofis Giriş Şifresi', officePass),
+          h('p', { class: 'hint', text: 'Kullanıcıların ofise girmek için yazması gereken şifredir. Değiştirip Kaydet dediğinizde hemen aktif olur.' })
+        ),
         h('section', {}, h('h3', { text: 'Peri' }), field('Karşılama mesajı', msg), field('Genel durum duyurusu', ann)),
         h('section', {}, h('h3', { text: 'Canlı İstatistik' }), live,
           h('h3', { text: 'Duyuru Gönder' }), h('div', { class: 'addrow' }, notice, h('button', { class: 'btn', onclick: sendNotice, text: 'Gönder' }))),

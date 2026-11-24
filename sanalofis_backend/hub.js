@@ -39,7 +39,7 @@ function createHub() {
   }
 
   function join(id, conn, m) {
-    const requiredPass = (process.env.OFFICE_PASS || '1965').trim();
+    const requiredPass = (state.config?.officePass || process.env.OFFICE_PASS || '1965').trim();
     if (requiredPass && String(m.pass || '').trim() !== requiredPass) {
       console.warn(`[SanalOfis] Giriş reddedildi: Şifre eşleşmedi (Verilen: "${m.pass}", Beklenen: "${requiredPass}")`);
       conn.send(JSON.stringify({ t: 'error', msg: 'Hatalı giriş şifresi!' }));

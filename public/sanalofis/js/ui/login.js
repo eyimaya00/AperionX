@@ -60,10 +60,10 @@ export function showLogin(root) {
         if (errEl) { errEl.innerText = 'Lütfen adını yaz.'; errEl.style.display = 'block'; }
         return;
       }
-      if (p !== '1965') {
+      if (!p) {
         pass.focus();
         pass.classList.add('err');
-        if (errEl) { errEl.innerText = 'Hatalı giriş şifresi!'; errEl.style.display = 'block'; }
+        if (errEl) { errEl.innerText = 'Lütfen giriş şifresini yaz.'; errEl.style.display = 'block'; }
         return;
       }
 

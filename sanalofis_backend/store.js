@@ -32,6 +32,7 @@ const defaults = () => ({
     lobby: 'AperionX Sanal Ofis’e hoş geldiniz!',
     season: 'auto',
     closed: [],
+    officePass: '1965',
   },
   boards: {
     yayin: { title: 'Dergi Yayın Akışı', cols: ['Taslak', 'Editör Kontrolü', 'Dizgi', 'Yayına Hazır'], cards: [] },
@@ -51,6 +52,10 @@ function applyAdminPatch(state, p) {
     for (const id of ROOM_IDS) if (id in p.signs) c.signs[id] = clean(p.signs[id], 32) || c.signs[id];
   }
   if ('lobby' in p) c.lobby = clean(p.lobby, 200);
+  if (typeof p.officePass === 'string') {
+    const op = p.officePass.trim();
+    if (op.length >= 1 && op.length <= 32) c.officePass = op;
+  }
   if (SEASONS.includes(p.season)) c.season = p.season;
   if (Array.isArray(p.closed)) c.closed = CLOSABLE.filter(id => p.closed.includes(id));
   if (p.boards && typeof p.boards === 'object') {

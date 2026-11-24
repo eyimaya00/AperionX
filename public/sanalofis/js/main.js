@@ -74,6 +74,7 @@ const hud = createHud($('#hud'), {
   onDnd: () => toggleDnd(), onLook: () => look.open(), onLock: () => toggleLock(),
   onLight: () => { lightMode = LIGHTS[(LIGHTS.indexOf(lightMode) + 1) % 3]; S.lightMode = lightMode; hud.setLight(lightMode); try { localStorage.setItem(LIGHT_KEY, lightMode); } catch { /* yok */ } },
   onMic: () => media.toggleMic(), onCam: () => media.toggleCam(), onShare: () => media.toggleShare(),
+  onAdmin: () => admin.open(),
 });
 const media = createMedia({ send, tiles, onChange: () => hud.setMedia(media.state()) });
 const present = createPresent($('#present'), {
@@ -236,7 +237,15 @@ function applyClosed(cfg) {
 }
 net.on('open', () => { hud.setConn(true); send('join', profile); });
 net.on('close', () => hud.setConn(false));
-net.on('error', m => { alert(m.msg || 'Giriş hatası!'); location.reload(); });
+net.on('error', m => {
+  try {
+    const p = JSON.parse(localStorage.getItem('aperionx-profile') || '{}');
+    delete p.pass;
+    localStorage.setItem('aperionx-profile', JSON.stringify(p));
+  } catch {}
+  alert(m.msg || 'Giriş hatası!');
+  location.reload();
+});
 net.on('welcome', m => {
   remotes.clear(); media.closeAll(); prevWant = new Set();
   media.setSelf(m.id);

@@ -21,10 +21,11 @@ export function createHud(root, cb) {
   const look = ico('👕', 'Görünümü değiştir', cb.onLook);
   const LIGHT = { auto: ['🌗', 'Işık: otomatik (saate göre)'], day: ['☀️', 'Işık: hep gündüz'], night: ['🌙', 'Işık: hep gece'] };
   const light = ico('🌗', LIGHT.auto[1], cb.onLight);
+  const adminBtn = ico('⚙️', 'Ofis Yönetim Paneli (Şifre & Ayarlar)', cb.onAdmin);
 
   root.append(notice, prompt, toast, h('div', { class: 'bar glass' },
     zone, sel, h('span', { class: 'sep' }), h('span', { class: 'grp emo' }, emotes), h('span', { class: 'sep' }), mic, cam, share,
-    h('span', { class: 'sep' }), dnd, lock, look, light,
+    h('span', { class: 'sep' }), dnd, lock, look, light, adminBtn,
     h('button', { class: 'btn ico roster-toggle', title: 'Ekip listesi', onclick: () => document.body.classList.toggle('roster-open') }, '👥')));
 
   let lastPrompt = null, noticeTimer = null;
