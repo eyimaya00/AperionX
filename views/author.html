@@ -9458,9 +9458,12 @@
                         </div>
                     `;
                 } else {
+                    const editAction = art.is_gundem 
+                        ? `showSection('bilim-gundemi', document.querySelector('a[title=\\'Bilim Gündemi\\']')); bgeOpenEditor(${art.id});` 
+                        : `editArticle(${art.id});`;
                     actionsHtml = `
                         <div style="display:flex; gap:6px; justify-content:center;">
-                            <button class="art-action-btn edit" onclick="editArticle(${art.id})" title="Düzenle">
+                            <button class="art-action-btn edit" onclick="${editAction}" title="Düzenle">
                                 <i class="ph ph-pencil-simple"></i> Düzenle
                             </button>
                             <button class="art-action-btn delete" onclick="confirmDelete(${art.id})" title="Çöpe Taşı">
@@ -14439,6 +14442,7 @@
                                 sources: structured.sources || [],
                                 coAuthors: structured.coAuthors || row.co_authors || [],
                                 imageDataUrl: row.image_url,
+                                content: row.content || '',
                                 status: row.status,
                                 rejection_reason: row.rejection_reason || null
                             };

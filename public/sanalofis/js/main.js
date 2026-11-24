@@ -44,7 +44,15 @@ const input = createInput();
 const canvas = $('#game');
 const renderer = createRenderer(canvas, S.assets, cats);
 const send = (t, d) => net.send(t, d);
-let P = null, started = false, prevWant = new Set(), lastProx = 0, last = performance.now(), hover = null;
+
+// Karakteri ve sahneyi hemen başlat (ağ gecikmesinden kaynaklı siyah ekranı önle)
+let P = createPlayer({
+  id: 'me', name: profile.name, role: profile.role, look: profile.look,
+  x: 770 + Math.random() * 60, y: 275 + Math.random() * 20,
+  d: 'down', m: false, s: false, z: 'lobi', isMe: true
+});
+let started = true, prevWant = new Set(), lastProx = 0, last = performance.now(), hover = null;
+requestAnimationFrame(loop);
 
 const census = () => {
   const all = [P.me, ...remotes.all()];
@@ -230,14 +238,18 @@ net.on('error', m => { alert(m.msg || 'Giriş hatası!'); location.reload(); });
 net.on('welcome', m => {
   remotes.clear(); media.closeAll(); prevWant = new Set();
   media.setSelf(m.id);
-  P = createPlayer(m.me);
+  if (m.me) {
+    P.me.id = m.id;
+    if (m.me.x != null && m.me.y != null) {
+      P.me.x = m.me.x; P.me.y = m.me.y; P.me.z = m.me.z || 'lobi';
+    }
+  }
   m.players.forEach(p => remotes.add(p));
   applyClosed(m.config); S.cfg = m.config; S.boards = m.boards; S.present.note = m.present.note; S.season = seasonOf(m.config.season);
   clockOff = m.ts - Date.now(); S.games = m.games; chat.history(m.chat || []);
   S.locks.forEach(r => setLocked(r, false)); (m.locks || []).forEach(r => setLocked(r, true));
   hud.setLight(lightMode); hud.setDnd(false);
   hud.setStatus(P.me.status);
-  if (!started) { started = true; requestAnimationFrame(loop); }
 });
 net.on('joined', m => remotes.add(m.p));
 net.on('left', m => { remotes.remove(m.id); media.drop(m.id); });

@@ -315,6 +315,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 FROM articles a 
                 LEFT JOIN users u ON a.author_id = u.id 
                 WHERE a.slug = ?
+                ORDER BY (a.status = 'published') DESC, a.id DESC
             `, [slug]);
             if (rows && rows.length > 0) {
                 const row = rows[0];
@@ -368,7 +369,8 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
                 }], formattedDate);
 
                 let contentHtml = row.content || '';
-                if (!contentHtml && row.gundem_data) {
+                const hasVisibleContent = contentHtml && contentHtml.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '').trim().length > 0;
+                if (!hasVisibleContent && row.gundem_data) {
                     try {
                         const gd = typeof row.gundem_data === 'string' ? JSON.parse(row.gundem_data) : row.gundem_data;
                         if (gd && gd.sections && Array.isArray(gd.sections) && gd.sections.length > 0) {
@@ -1383,7 +1385,8 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                 const imageUrl = article.image_url ? (article.image_url.startsWith('http') ? article.image_url : `${origin}${article.image_url.startsWith('/') ? '' : '/'}${article.image_url}`) : `${origin}/uploads/logo.png`;
 
                 let contentHtml = article.content || '';
-                if (!contentHtml && article.gundem_data) {
+                const hasVisiblePreview = contentHtml && contentHtml.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '').trim().length > 0;
+                if (!hasVisiblePreview && article.gundem_data) {
                     try {
                         const gd = typeof article.gundem_data === 'string' ? JSON.parse(article.gundem_data) : article.gundem_data;
                         if (gd && gd.sections && Array.isArray(gd.sections) && gd.sections.length > 0) {

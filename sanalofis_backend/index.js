@@ -53,8 +53,8 @@ function attachSanalOfisWebSocket(server) {
     server.on('upgrade', (req, socket, head) => {
       try {
         const pathname = new URL(req.url, 'http://x').pathname;
-        if (pathname === '/ws' || pathname === '/sanalofis/ws') {
-          acceptUpgrade(req, socket, conn => hub.connect(conn));
+        if (pathname === '/ws' || pathname === '/sanalofis/ws' || pathname.endsWith('/ws')) {
+          acceptUpgrade(req, socket, head, conn => hub.connect(conn));
         }
       } catch (err) {
         console.error('[SanalOfis WS Upgrade Hatası]:', err.message);
