@@ -9,7 +9,7 @@ import { drawCat } from './cat-draw.js';
 import { lightOf, drawLight, drawGlows, createParticles } from './ambient.js';
 import { signPill } from './labels.js';
 
-const SS = 2, MAX_ZOOM = 1.15, MARGIN = 260;
+const SS = 1, MAX_ZOOM = 1.15, MARGIN = 260;
 
 export function createRenderer(canvas, assets, cats) {
   const ctx = canvas.getContext('2d');

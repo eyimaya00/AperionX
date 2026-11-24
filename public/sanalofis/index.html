@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>AperionX Sanal Ofis</title>
   <link rel="icon" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=712">
+  <link rel="stylesheet" href="css/style.css?v=715">
 </head>
 <body>
   <canvas id="game"></canvas>
@@ -21,7 +21,39 @@
   <div id="look" class="modal hidden"></div>
   <div id="chat"></div>
   <div id="joy"></div>
-  <div id="login"></div>
-  <script type="module" src="js/main.js?v=712"></script>
+  <div id="login">
+    <div class="login-card glass">
+      <img src="img/logo.png" class="logo-img" alt="AperionX">
+      <h1>Sanal Ofis</h1>
+      <p class="muted">Karakterini oluştur, giriş şifreni yaz ve ofise katıl.</p>
+      <div class="field">
+        <label>İsim</label>
+        <input type="text" id="login-name" maxlength="20" placeholder="Adın">
+      </div>
+      <div class="field">
+        <label>Giriş Şifresi</label>
+        <input type="password" id="login-pass" maxlength="30" placeholder="Giriş Şifresi">
+      </div>
+      <p class="err-text" id="login-err" style="display:none; color:#ef4444; font-size:12px; margin-top:-4px;"></p>
+      <div class="field">
+        <label>Rol</label>
+        <select id="login-role">
+          <option value="Kurucu">Kurucu</option>
+          <option value="Yönetici">Yönetici</option>
+          <option value="Editör">Editör</option>
+          <option value="Yazar">Yazar</option>
+          <option value="Tasarım">Tasarım</option>
+          <option value="Yazılım">Yazılım</option>
+          <option value="Sosyal Medya">Sosyal Medya</option>
+          <option value="Stajyer">Stajyer</option>
+          <option value="Misafir">Misafir</option>
+        </select>
+      </div>
+      <div id="login-look"></div>
+      <button class="btn primary" id="login-btn">Ofise Gir</button>
+      <p class="hint">Yürü: WASD / ok tuşları ya da haritaya tıkla · Etkileşim: E · Mikrofon: M</p>
+    </div>
+  </div>
+  <script type="module" src="js/main.js?v=715"></script>
 </body>
 </html>

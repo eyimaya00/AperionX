@@ -28,15 +28,34 @@ export function drawLight(ctx, w, h, light) {
   if (light.dusk > 0.1) { ctx.fillStyle = `rgba(255,130,60,${0.1 * light.dusk})`; ctx.fillRect(0, 0, w, h); }
 }
 
+const glowCanvases = new Map();
+function getGlowCanvas(col) {
+  if (glowCanvases.has(col)) return glowCanvases.get(col);
+  const size = 160, half = size / 2;
+  const cv = document.createElement('canvas');
+  cv.width = size; cv.height = size;
+  const c = cv.getContext('2d');
+  const g = c.createRadialGradient(half, half, 0, half, half, half);
+  g.addColorStop(0, `rgba(${col},0.42)`);
+  g.addColorStop(1, `rgba(${col},0)`);
+  c.fillStyle = g;
+  c.fillRect(0, 0, size, size);
+  glowCanvases.set(col, cv);
+  return cv;
+}
+
 export function drawGlows(ctx, light, t) {
   if (light.dark < 0.08) return;
   const a = Math.min(1, light.dark / 0.42);
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = a;
   for (const [x, y, z, r, col, area] of GLOWS) {
     if (area && isClosed(area)) continue;
-    const sx = px(x, y), sy = py(x, y, z), k = 1 + Math.sin(t * 2 + x) * 0.03, g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * k);
-    g.addColorStop(0, `rgba(${col},${0.42 * a})`); g.addColorStop(1, `rgba(${col},0)`);
-    ctx.fillStyle = g; ctx.fillRect(sx - r * 1.1, sy - r * 1.1, r * 2.2, r * 2.2);
+    const sx = px(x, y), sy = py(x, y, z);
+    const k = (1 + Math.sin(t * 2 + x) * 0.03) * r;
+    const gCv = getGlowCanvas(col);
+    ctx.drawImage(gCv, sx - k, sy - k, k * 2, k * 2);
   }
   ctx.restore();
 }
