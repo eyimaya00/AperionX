@@ -2173,8 +2173,32 @@
                 formData.append('references_list', document.getElementById('references').value);
                 formData.append('visual_references_list', document.getElementById('visual_references').value);
 
+                function cleanPastedInlineStyles(html) {
+                    if (!html) return '';
+                    return html.replace(/style="([^"]*)"/gi, (match, styles) => {
+                        let cleaned = styles
+                            .split(';')
+                            .map(s => s.trim())
+                            .filter(s => {
+                                if (!s) return false;
+                                const l = s.toLowerCase();
+                                if (l.startsWith('color:') && (
+                                    l.includes('#0') || l.includes('#1') || l.includes('#2') || l.includes('#3') || l.includes('#4') || l.includes('#5') ||
+                                    l.includes('rgb(0') || l.includes('rgb(1') || l.includes('rgb(2') || l.includes('rgb(3') ||
+                                    l.includes('black') || l.includes('windowtext')
+                                )) return false;
+                                if (l.startsWith('background') && (
+                                    l.includes('#fff') || l.includes('rgb(255') || l.includes('white')
+                                )) return false;
+                                return true;
+                            })
+                            .join('; ');
+                        return cleaned ? `style="${cleaned}"` : '';
+                    }).replace(/<font\b([^>]*)\bcolor=["']?(#[0-5][0-9a-f]{2,5}|black|windowtext|rgb\([0-5][^)]*\))["']?([^>]*)>/gi, '<font$1$3>');
+                }
+
                 if (quill && quill.root) {
-                    formData.append('content', quill.root.innerHTML);
+                    formData.append('content', cleanPastedInlineStyles(quill.root.innerHTML));
                 } else {
                     console.error('Quill editor not initialized');
                     showToast('Editör hatası. Sayfayı yenileyin.', 'error');

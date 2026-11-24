@@ -8997,7 +8997,7 @@
                 formData.append('visual_references_list', imgRefs);
 
                 if (quill && quill.root) {
-                    formData.append('content', quill.root.innerHTML);
+                    formData.append('content', typeof cleanPastedInlineStyles === 'function' ? cleanPastedInlineStyles(quill.root.innerHTML) : quill.root.innerHTML);
                 } else {
                     console.error('Quill editor not initialized');
                     showAuthorToast('Editör hatası. Sayfayı yenileyin.', 'error');
@@ -10527,10 +10527,10 @@
                 formData.append('youtube_url', document.getElementById('exp-youtube').value);
 
                 if (expProcedureQuill && expProcedureQuill.root) {
-                    formData.append('procedure_steps', expProcedureQuill.root.innerHTML);
+                    formData.append('procedure_steps', typeof cleanPastedInlineStyles === 'function' ? cleanPastedInlineStyles(expProcedureQuill.root.innerHTML) : expProcedureQuill.root.innerHTML);
                 }
                 if (expResultsQuill && expResultsQuill.root) {
-                    formData.append('results', expResultsQuill.root.innerHTML);
+                    formData.append('results', typeof cleanPastedInlineStyles === 'function' ? cleanPastedInlineStyles(expResultsQuill.root.innerHTML) : expResultsQuill.root.innerHTML);
                 }
 
                 // New fields: References & Co-authors

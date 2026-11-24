@@ -30,8 +30,8 @@ const sharp = require('sharp');
 const jwt = require('jsonwebtoken');
 const DOMPurify = require('isomorphic-dompurify');
 
-// Sanitize Gundem content and strip dark inline colors & bright backgrounds pasted from Word/Docs
-function sanitizeGundemContent(html) {
+// Sanitize article and gundem content, stripping dark inline colors & bright backgrounds pasted from Word/Docs
+function sanitizeArticleContent(html) {
     if (!html) return '';
     let clean = DOMPurify.sanitize(html);
     clean = clean.replace(/style="([^"]*)"/gi, (match, styles) => {
@@ -42,8 +42,8 @@ function sanitizeGundemContent(html) {
                 if (!s) return false;
                 const lower = s.toLowerCase();
                 if (lower.startsWith('color:') && (
-                    lower.includes('#0') || lower.includes('#1') || lower.includes('#2') || lower.includes('#3') || lower.includes('#4') ||
-                    lower.includes('rgb(0') || lower.includes('rgb(1') || lower.includes('rgb(2') || lower.includes('rgb(3') ||
+                    lower.includes('#0') || lower.includes('#1') || lower.includes('#2') || lower.includes('#3') || lower.includes('#4') || lower.includes('#5') ||
+                    lower.includes('rgb(0') || lower.includes('rgb(1') || lower.includes('rgb(2') || lower.includes('rgb(3') || lower.includes('rgb(4') || lower.includes('rgb(5') ||
                     lower.includes('black') || lower.includes('windowtext')
                 )) {
                     return false;
@@ -58,8 +58,11 @@ function sanitizeGundemContent(html) {
             .join('; ');
         return cleanedStyles ? `style="${cleanedStyles}"` : '';
     });
+    // Strip dark <font color="..."> wrappers from pasted Word / Google Docs content
+    clean = clean.replace(/<font\b([^>]*)\bcolor=["']?(#[0-5][0-9a-f]{2,5}|black|windowtext|rgb\([0-5][^)]*\))["']?([^>]*)>/gi, '<font$1$3>');
     return clean;
 }
+const sanitizeGundemContent = sanitizeArticleContent;
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
@@ -1213,7 +1216,11 @@ app.get('/preview-article/:id', async (req, res, next) => {
                 replaceMeta('og:image', safeImg);
 
                 // Inject Preloaded Data Script WITH IS_PREVIEW FLAG
-                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(article)}; window.SERVER_AUTHORS = ${JSON.stringify(authors)}; window.IS_PREVIEW = true;</script>`;
+                const previewArticle = { ...article };
+                if (previewArticle.content) {
+                    previewArticle.content = sanitizeArticleContent(previewArticle.content);
+                }
+                const scriptTag = `<script>window.SERVER_ARTICLE = ${JSON.stringify(previewArticle)}; window.SERVER_AUTHORS = ${JSON.stringify(authors)}; window.IS_PREVIEW = true;</script>`;
 
                 html = html.replace('</head>', `${scriptTag}\n</head>`);
 
@@ -6733,8 +6740,8 @@ app.post('/api/articles', authenticateToken, upload.any(), optimizeImageMiddlewa
     }
 
     try {
-        // Sanitize Content
-        const cleanContent = DOMPurify.sanitize(content);
+        // Sanitize Content & strip pasted dark inline styles
+        const cleanContent = sanitizeArticleContent(content);
 
         // Generate Slug
         const slug = await getUniqueSlug(pool, title);
@@ -6848,7 +6855,7 @@ app.put('/api/articles/:id', authenticateToken, upload.fields([{ name: 'image' }
     if (category) { updates.push('category = ?'); params.push(category); }
     if (content) {
         updates.push('content = ?');
-        params.push(DOMPurify.sanitize(content));
+        params.push(sanitizeArticleContent(content));
     }
     if (excerpt) { updates.push('excerpt = ?'); params.push(excerpt); }
     if (finalStatus === 'published') {
@@ -7688,6 +7695,9 @@ app.get('/api/editor/articles/:id', authenticateToken, async (req, res) => {
         if (rows.length === 0) return res.status(404).json({ message: 'Makale bulunamadı.' });
 
         const article = rows[0];
+        if (article && article.content) {
+            article.content = sanitizeArticleContent(article.content);
+        }
         article.authors = await getArticleAuthors(pool, article.id);
         res.json(article);
     } catch (e) {
@@ -7739,7 +7749,11 @@ app.get('/api/editor/gundem/:id', authenticateToken, async (req, res) => {
         `, [req.params.id]);
 
         if (rows.length === 0) return res.status(404).json({ message: 'Gündem yazısı bulunamadı.' });
-        res.json(rows[0]);
+        const art = rows[0];
+        if (art && art.content) {
+            art.content = sanitizeArticleContent(art.content);
+        }
+        res.json(art);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -9415,7 +9429,11 @@ app.get('/api/articles/:id', async (req, res) => {
         // View counting is handled by the SSR /makale/:slug route only
         // No view increment here to prevent double counting
 
-        res.json(rows[0]);
+        const art = rows[0];
+        if (art && art.content) {
+            art.content = sanitizeArticleContent(art.content);
+        }
+        res.json(art);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });

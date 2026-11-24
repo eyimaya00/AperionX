@@ -385,6 +385,38 @@
             /* Slate 200 */
         }
 
+        /* Nuclear override: prevents Word / Google Docs pasted inline black text or white background from hiding paragraphs on dark theme */
+        [data-theme="dark"] .article-content [style*="color: rgb(0"],
+        [data-theme="dark"] .article-content [style*="color: rgb(1"],
+        [data-theme="dark"] .article-content [style*="color: rgb(2"],
+        [data-theme="dark"] .article-content [style*="color: rgb(3"],
+        [data-theme="dark"] .article-content [style*="color: rgb(4"],
+        [data-theme="dark"] .article-content [style*="color: rgb(5"],
+        [data-theme="dark"] .article-content [style*="color: #0"],
+        [data-theme="dark"] .article-content [style*="color: #1"],
+        [data-theme="dark"] .article-content [style*="color: #2"],
+        [data-theme="dark"] .article-content [style*="color: #3"],
+        [data-theme="dark"] .article-content [style*="color: #4"],
+        [data-theme="dark"] .article-content [style*="color: #5"],
+        [data-theme="dark"] .article-content [style*="color: black"],
+        [data-theme="dark"] .article-content [style*="color:black"],
+        [data-theme="dark"] .article-content [style*="color: windowtext"],
+        [data-theme="dark"] .article-content [style*="color:windowtext"],
+        [data-theme="dark"] .article-content span:not([class*="badge"]):not([class*="tag"]):not([class*="btn"]),
+        [data-theme="dark"] .article-content font {
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .article-content [style*="background-color: rgb(255"],
+        [data-theme="dark"] .article-content [style*="background-color: #fff"],
+        [data-theme="dark"] .article-content [style*="background-color: white"],
+        [data-theme="dark"] .article-content [style*="background: rgb(255"],
+        [data-theme="dark"] .article-content [style*="background: #fff"],
+        [data-theme="dark"] .article-content [style*="background: white"] {
+            background-color: transparent !important;
+            background: transparent !important;
+        }
+
         /* Meta Footer */
         .article-footer-meta {
             margin-top: 10px;
