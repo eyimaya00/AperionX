@@ -36,7 +36,7 @@ export function createRenderer(canvas, assets, cats) {
     const s = zoom * dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = COLORS.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(s, 0, 0, s, -cam.x * s, -cam.y * s);
+    ctx.setTransform(s, 0, 0, s, Math.round(-cam.x * s), Math.round(-cam.y * s));
     ctx.drawImage(stat, 0, 0, SW, SH);
 
     if (hint) drawPulse(ctx, hint.x, hint.y, t);
@@ -61,7 +61,7 @@ export function createRenderer(canvas, assets, cats) {
     // Gün/gece: ekran üstüne karartma, sonra dünyada ışık hâleleri (yalnızca gece görünür).
     const light = lightOf(S.lightMode || 'auto');
     ctx.setTransform(1, 0, 0, 1, 0, 0); drawLight(ctx, canvas.width, canvas.height, light);
-    ctx.setTransform(s, 0, 0, s, -cam.x * s, -cam.y * s); drawGlows(ctx, light, t);
+    ctx.setTransform(s, 0, 0, s, Math.round(-cam.x * s), Math.round(-cam.y * s)); drawGlows(ctx, light, t);
 
     for (const z of ZONES) {
       const txt = z.sign && S.cfg?.signs?.[z.id];

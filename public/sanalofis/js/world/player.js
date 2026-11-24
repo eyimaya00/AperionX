@@ -9,11 +9,28 @@ export function createPlayer(init) {
   const half = PLAYER.half;
   let path = [], goal = null, onArrive = null, stuck = 0, inited = false;
 
+  function moveAxis(amt, isX) {
+    if (!amt) return false;
+    const test = isX ? (d) => !collides(me.x + d, me.y, half) : (d) => !collides(me.x, me.y + d, half);
+    if (test(amt)) {
+      if (isX) me.x += amt; else me.y += amt;
+      return true;
+    }
+    // Engellere takılmadan pürüzsüz kayma (partial sliding step)
+    for (const frac of [0.75, 0.5, 0.25]) {
+      const part = amt * frac;
+      if (Math.abs(part) >= 0.4 && test(part)) {
+        if (isX) me.x += part; else me.y += part;
+        return true;
+      }
+    }
+    return false;
+  }
+
   function step(dx, dy) {
-    let ok = false;
-    if (dx && !collides(me.x + dx, me.y, half)) { me.x += dx; ok = true; }
-    if (dy && !collides(me.x, me.y + dy, half)) { me.y += dy; ok = true; }
-    return ok;
+    const ox = moveAxis(dx, true);
+    const oy = moveAxis(dy, false);
+    return ox || oy;
   }
   // Bölge değişince kapı kilidi "içeridekiler çıkabilir" kuralı için güncellenir.
   function zoneSync() {
@@ -31,9 +48,18 @@ export function createPlayer(init) {
     let dx = ax, dy = ay;
     if (dx || dy) cancel();
     else if (path.length) {
-      const t = path[0], tx = t.x - me.x, ty = t.y - me.y, dist = Math.hypot(tx, ty);
-      if (dist < 5) { path.shift(); if (!path.length) arrive(); }
-      else { dx = tx / dist; dy = ty / dist; }
+      // Waypoint'leri aynı karede tüketerek donma ve teklemeyi önle
+      while (path.length) {
+        const t = path[0], tx = t.x - me.x, ty = t.y - me.y, dist = Math.hypot(tx, ty);
+        if (dist < 6) {
+          path.shift();
+          if (!path.length) { arrive(); break; }
+        } else {
+          dx = tx / dist;
+          dy = ty / dist;
+          break;
+        }
+      }
     }
     me.m = false;
     if (me.s) { if (!dx && !dy) return; me.s = false; }
@@ -41,9 +67,10 @@ export function createPlayer(init) {
       const len = Math.hypot(dx, dy) || 1, sp = PLAYER.speed * dt, ox = me.x, oy = me.y;
       me.m = step((dx / len) * sp, (dy / len) * sp);
       me.d = dir4(dx, dy);
-      if (path.length) { // takıldıysa yolu yeniden hesapla, olmazsa vazgeç
-        stuck = Math.hypot(me.x - ox, me.y - oy) < sp * 0.25 ? stuck + dt : 0;
-        if (stuck > 0.6) {
+      if (path.length) { // takıldıysa yolu yeniden hesapla
+        const moved = Math.hypot(me.x - ox, me.y - oy);
+        stuck = moved < sp * 0.15 ? stuck + dt : 0;
+        if (stuck > 0.4) {
           const g = goal, cb = onArrive;
           cancel();
           if (g) walkTo(g.x, g.y, cb, true);

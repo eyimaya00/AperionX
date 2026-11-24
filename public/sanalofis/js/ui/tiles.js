@@ -6,7 +6,15 @@ export function createTiles(root, info) {
   let selfBox = null;
 
   function box(el, label) {
-    const b = h('div', { class: 'tile', onclick: () => b.classList.toggle('big') }, el, h('span', { class: 'tname', text: label }));
+    const flipBtn = h('button', {
+      class: 'tile-flip-btn',
+      title: 'Kamera Aynasını Çevir (Ters/Düz)',
+      onclick: (e) => {
+        e.stopPropagation();
+        el.classList.toggle('flip-toggle');
+      }
+    }, '⇄');
+    const b = h('div', { class: 'tile', onclick: () => b.classList.toggle('big') }, el, flipBtn, h('span', { class: 'tname', text: label }));
     return b;
   }
 
