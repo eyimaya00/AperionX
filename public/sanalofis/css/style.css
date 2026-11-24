@@ -2,7 +2,35 @@
   --bg: #0f172a; --panel: #1e293b; --accent: #6366f1; --signal: #00ff41;
   --text: #e2e8f0; --muted: #94a3b8; --line: rgba(148, 163, 184, .18);
 }
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, .45) transparent;
+}
+
+/* Şık karanlık kaydırma çubuğu (Windows beyaz native scrollbar'ını kaldırır) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, .4);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, .75);
+}
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
 html, body {
   margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden;
   font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
