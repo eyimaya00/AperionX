@@ -226,6 +226,7 @@ function applyClosed(cfg) {
 }
 net.on('open', () => { hud.setConn(true); send('join', profile); });
 net.on('close', () => hud.setConn(false));
+net.on('error', m => { alert(m.msg || 'Giriş hatası!'); location.reload(); });
 net.on('welcome', m => {
   remotes.clear(); media.closeAll(); prevWant = new Set();
   media.setSelf(m.id);

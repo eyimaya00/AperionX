@@ -39,6 +39,12 @@ function createHub() {
   }
 
   function join(id, conn, m) {
+    const requiredPass = process.env.OFFICE_PASS || '1965';
+    if (String(m.pass || '').trim() !== requiredPass) {
+      conn.send(JSON.stringify({ t: 'error', msg: 'Hatalı giriş şifresi!' }));
+      setTimeout(() => conn.close(), 100);
+      return null;
+    }
     const look = m.look || {};
     const p = {
       id, conn,
