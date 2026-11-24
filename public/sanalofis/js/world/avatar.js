@@ -1,6 +1,7 @@
 // Hacimli sade karakter figürü, rol rozeti, etkileşim halkası, ipucu işareti ve emoji.
 import { COLORS } from '../config.js';
 import { px, py, shade, floorRing } from './iso.js';
+import { drawHair, drawAcc, drawTop } from './avatar-parts.js';
 
 const TAU = Math.PI * 2;
 const FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif';
@@ -14,7 +15,7 @@ const dot = (c, x, y, r, fill) => { c.fillStyle = fill; c.beginPath(); c.arc(x, 
 
 // Ayakların bulunduğu nokta (0,0) olacak şekilde figürü çizer (giriş ekranı önizlemesi de bunu kullanır).
 export function drawFigure(c, p, t) {
-  const look = p.look || {}, skin = look.skin || '#e0a97a', hair = look.hair || '#1f2937', outfit = look.outfit || '#6366f1';
+  const look = p.look || {}, skin = look.skin || '#e0a97a', hair = look.hair || '#1f2937', outfit = look.outfit || '#6366f1', pants = look.pants || '#334155';
   const walking = !!(p.m || p.walk) && !p.s, ph = t * 12;
   const sw = walking ? Math.sin(ph) : 0, bob = walking ? -Math.abs(Math.sin(ph)) * 1.8 : 0;
   const d = p.d || 'down', back = d === 'up', side = d === 'left' || d === 'right', fl = d === 'left' ? -1 : 1;
@@ -27,7 +28,7 @@ export function drawFigure(c, p, t) {
   else {
     for (const i of [-1, 1]) {
       const lx = i * 3.6, sy = side ? sw * i * 2.5 : 0;
-      c.fillStyle = '#334155'; c.beginPath(); c.roundRect(lx - 2.6 + sy, -14, 5.2, 13, 2); c.fill();
+      c.fillStyle = pants; c.beginPath(); c.roundRect(lx - 2.6 + sy, -14, 5.2, 13, 2); c.fill();
       c.fillStyle = '#f8fafc'; c.beginPath(); c.ellipse(lx + sy + (side ? fl * 1.5 : 0), -0.5, 3.6, 2.2, 0, 0, TAU); c.fill();
     }
   }
@@ -35,6 +36,7 @@ export function drawFigure(c, p, t) {
   c.fillStyle = grad(c, -8, 0, 8, 0, shade(outfit, 1.2), shade(outfit, 0.74));
   c.beginPath(); c.roundRect(-8, -32 + bob, 16, 21, 6); c.fill();
   c.fillStyle = 'rgba(255,255,255,.18)'; c.beginPath(); c.roundRect(-6, -30 + bob, 5, 14, 3); c.fill();
+  drawTop(c, look.top | 0, outfit, back, bob);
   // kollar ve eller
   const handY = -15 + bob;
   for (const i of [-1, 1]) {
@@ -54,12 +56,7 @@ export function drawFigure(c, p, t) {
   const hg = c.createRadialGradient(hx - 3.5, hy - 4, 1, hx, hy, 11);
   hg.addColorStop(0, shade(skin, 1.15)); hg.addColorStop(1, shade(skin, 0.8));
   c.fillStyle = hg; c.beginPath(); c.arc(hx, hy, 10.5, 0, TAU); c.fill();
-  c.fillStyle = grad(c, 0, hy - 11, 0, hy + 6, shade(hair, 1.25), shade(hair, 0.75));
-  c.beginPath();
-  if (back) c.arc(hx, hy, 11, 0, TAU);
-  else if (side) { c.arc(hx, hy, 11, Math.PI * 0.55, Math.PI * 2.05, fl > 0); c.arc(hx - fl * 3, hy + 1, 9, 0, TAU); }
-  else { c.arc(hx, hy, 11, Math.PI, 0); c.lineTo(hx + 9, hy - 2); c.quadraticCurveTo(hx, hy - 8, hx - 9, hy - 2); }
-  c.fill();
+  drawHair(c, look.hairStyle | 0, hair, hx, hy, d);
   if (!back) {
     if (side) { dot(c, fl * 5, hy + 0.5, 1.7, '#111827'); dot(c, fl * 5.5, hy, 0.6, '#fff'); }
     else {
@@ -67,6 +64,7 @@ export function drawFigure(c, p, t) {
       c.strokeStyle = shade(skin, 0.6); c.lineWidth = 1; c.beginPath(); c.arc(hx, hy + 4.2, 2.2, 0.2, Math.PI - 0.2); c.stroke();
     }
   }
+  drawAcc(c, look.acc | 0, hx, hy, d, bob);
   c.restore();
 }
 
@@ -89,12 +87,20 @@ export function drawLabel(c, p, t) {
   c.fillStyle = '#fff'; c.beginPath(); c.roundRect(sx - w / 2, y - h / 2, w, h, h / 2); c.fill();
   c.shadowColor = 'transparent';
   c.strokeStyle = p.live ? COLORS.signal : 'rgba(99,102,241,.45)'; c.lineWidth = p.live ? 2 : 1; c.stroke();
-  dot(c, sx - w / 2 + 9, y, 3, STATUS_COLOR[p.status] || '#94a3b8');
+  dot(c, sx - w / 2 + 9, y, 3, p.dnd ? '#ef4444' : STATUS_COLOR[p.status] || '#94a3b8');
   c.fillStyle = '#334155'; c.textAlign = 'left'; c.fillText(role, sx - w / 2 + 15, y + 0.5);
   c.textAlign = 'center'; c.font = `700 12px ${FONT}`;
   c.lineWidth = 3.5; c.strokeStyle = 'rgba(255,255,255,.92)'; c.lineJoin = 'round';
   c.strokeText(name, sx, y - 15); c.fillStyle = '#1e293b'; c.fillText(name, sx, y - 15);
   if (p.sharing) { c.font = '12px system-ui'; c.fillText('🖥️', sx + w / 2 + 8, y); }
+  if (p.dnd) { c.font = '12px system-ui'; c.fillText('🔕', sx - w / 2 - 8, y); }
+  if (p.say && t - p.say.t0 < 7) { // yazılı sohbet balonu
+    c.font = `500 11px ${FONT}`;
+    const txt = p.say.text.length > 46 ? `${p.say.text.slice(0, 45)}…` : p.say.text, bw = Math.min(190, c.measureText(txt).width + 18), by = y - 58;
+    c.globalAlpha = Math.min(1, (7 - (t - p.say.t0)) / 0.6);
+    c.fillStyle = '#fff'; c.beginPath(); c.roundRect(sx - bw / 2, by - 11, bw, 20, 9); c.moveTo(sx - 4, by + 9); c.lineTo(sx, by + 15); c.lineTo(sx + 4, by + 9); c.fill();
+    c.fillStyle = '#1e293b'; c.fillText(txt, sx, by); c.globalAlpha = 1;
+  }
   if (p.emote) {
     const age = t - p.emote.t0;
     if (age < 2.6) {

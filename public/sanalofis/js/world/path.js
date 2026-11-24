@@ -5,7 +5,11 @@ import { collides } from './map.js';
 const CELL = 20, R = 10;
 const GW = Math.ceil(WORLD.w / CELL), GH = Math.ceil(WORLD.h / CELL), N = GW * GH;
 const open = new Uint8Array(N);
-for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) open[j * GW + i] = collides(i * CELL + CELL / 2, j * CELL + CELL / 2, R) ? 0 : 1;
+// Izgara kilit durumuna göre yeniden hesaplanır (kapı kilitlenince/açılınca ya da oda değişince).
+export function refreshGrid() {
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) open[j * GW + i] = collides(i * CELL + CELL / 2, j * CELL + CELL / 2, R) ? 0 : 1;
+}
+refreshGrid();
 
 const cellOf = (x, y) => Math.max(0, Math.min(GH - 1, Math.floor(y / CELL))) * GW + Math.max(0, Math.min(GW - 1, Math.floor(x / CELL)));
 const center = i => ({ x: (i % GW) * CELL + CELL / 2, y: Math.floor(i / GW) * CELL + CELL / 2 });

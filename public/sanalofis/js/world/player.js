@@ -1,20 +1,24 @@
 // Yerel oyuncu: klavye ve tıkla-yürü hareketi, çarpışma, oturma ve ışınlanma.
 import { PLAYER, PROX } from '../config.js';
-import { collides, CHAIRS, SPOTS, zoneAt, freeSpotNear } from './map.js';
-import { findPath } from './path.js';
+import { collides, CHAIRS, SPOTS, zoneAt, freeSpotNear, setInside, anyLock } from './map.js';
+import { findPath, refreshGrid } from './path.js';
 import { dir4, seatDir } from './iso.js';
 
 export function createPlayer(init) {
   const me = { ...init, d: 'down', m: false, s: false, emote: null, live: false, isMe: true };
-  me.z = zoneAt(me.x, me.y).id;
   const half = PLAYER.half;
-  let path = [], goal = null, onArrive = null, stuck = 0;
+  let path = [], goal = null, onArrive = null, stuck = 0, inited = false;
 
   function step(dx, dy) {
     let ok = false;
     if (dx && !collides(me.x + dx, me.y, half)) { me.x += dx; ok = true; }
     if (dy && !collides(me.x, me.y + dy, half)) { me.y += dy; ok = true; }
     return ok;
+  }
+  // Bölge değişince kapı kilidi "içeridekiler çıkabilir" kuralı için güncellenir.
+  function zoneSync() {
+    const z = zoneAt(me.x, me.y).id;
+    if (z !== me.z || !inited) { me.z = z; inited = true; setInside(z); if (anyLock()) refreshGrid(); }
   }
   function cancel() { path = []; goal = null; onArrive = null; stuck = 0; }
   function arrive() {
@@ -46,7 +50,7 @@ export function createPlayer(init) {
         }
       }
     }
-    me.z = zoneAt(me.x, me.y).id;
+    zoneSync();
   }
 
   function walkTo(x, y, cb, retry = false) {
@@ -60,12 +64,12 @@ export function createPlayer(init) {
     const p = freeSpotNear(x, y, half);
     cancel();
     me.x = p.x; me.y = p.y; me.s = false; me.m = false;
-    me.z = zoneAt(me.x, me.y).id;
+    zoneSync();
   }
   function sit(ch) {
     cancel();
     me.x = ch.x; me.y = ch.y; me.d = seatDir(ch.f); me.s = true; me.m = false;
-    me.z = zoneAt(me.x, me.y).id;
+    zoneSync();
   }
 
   // E tuşu için yakındaki etkileşim: sandalye ya da tıklanabilir nokta.
@@ -85,5 +89,8 @@ export function createPlayer(init) {
     return best;
   }
 
-  return { me, update, sit, teleport, walkTo, cancel, nearest, target: () => goal };
+  // Sunucu kilitli odaya girişi reddedince eski konuma döner.
+  function snap(x, y) { cancel(); me.x = x; me.y = y; me.s = false; me.m = false; zoneSync(); }
+  zoneSync();
+  return { me, update, sit, teleport, snap, walkTo, cancel, nearest, target: () => goal };
 }

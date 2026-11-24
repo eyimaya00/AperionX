@@ -2,7 +2,9 @@
 import { h } from '../dom.js';
 import { zoneName } from '../world/map.js';
 
-const SIGN_IDS = ['lobi', 'yayin', 'sosyal', 'toplanti', 'mola', 'yonetim'];
+const SEASON_OPTS = [['auto', 'Otomatik (takvime göre)'], ['off', 'Kapalı (süs ve efekt yok)'], ['autumn', 'Sonbahar 🍂'], ['winter', 'Kış ❄️'], ['spring', 'İlkbahar 🌸'], ['summer', 'Yaz ☀️']];
+const CLOSABLE = [['mutfak', 'Mutfak'], ['aktivite', 'Aktivite Alanı']];
+const SIGN_IDS = ['lobi', 'yayin', 'sosyal', 'toplanti', 'mola', 'yonetim', 'mutfak', 'aktivite'];
 
 export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
   let opened = false, authed = false, timer = null, msgEl = null, live = null;
@@ -41,6 +43,11 @@ export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
     const bf = Object.entries(boards).map(([id, b]) => ({
       id, title: h('input', { maxlength: 50, value: b.title }), cols: b.cols.map(n => h('input', { maxlength: 24, value: n })),
     }));
+    const season = h('select', { onchange: () => send('admin_set', { patch: { season: season.value } }) },
+      SEASON_OPTS.map(([v, n]) => h('option', { value: v, text: n, selected: (cfg.season || 'auto') === v })));
+    const closed = new Set(cfg.closed || []);
+    const roomBoxes = CLOSABLE.map(([id, n]) => h('label', { class: 'chk' },
+      h('input', { type: 'checkbox', checked: !closed.has(id), onchange: e => { if (e.target.checked) closed.delete(id); else closed.add(id); send('admin_set', { patch: { closed: [...closed] } }); } }), ` ${n} açık`));
     const notice = h('input', { maxlength: 200, placeholder: 'Tüm ofise duyuru metni…' });
     msgEl = h('span', { class: 'saved' });
     live = h('div', { class: 'live-box' });
@@ -62,6 +69,8 @@ export function createAdmin(root, { send, getCfg, getBoards, getCensus }) {
           h('h3', { text: 'Duyuru Gönder' }), h('div', { class: 'addrow' }, notice, h('button', { class: 'btn', onclick: sendNotice, text: 'Gönder' }))),
         h('section', {}, h('h3', { text: 'Oda Tabelaları' }),
           ...signs.map(([id, el]) => field(zoneName(id), el)), field('Lobi duyuru ekranı', lobby)),
+        h('section', {}, h('h3', { text: 'Mevsim Modu' }), field('Süsler ve yağan yaprak/kar (anında uygulanır)', season)),
+        h('section', {}, h('h3', { text: 'Bölgeler' }), h('p', { class: 'muted', text: 'Kapatılan bölge herkes için anında kaybolur (süsler, duvarlar, mobilya). Tekrar açabilirsin.' }), ...roomBoxes),
         h('section', {}, h('h3', { text: 'Pano Yazıları' }),
           ...bf.map(b => h('div', { class: 'bf' }, field('Başlık', b.title), h('div', { class: 'colsrow' }, b.cols))))),
       h('div', { class: 'foot' }, msgEl, h('button', { class: 'btn primary', onclick: save, text: 'Kaydet' })));

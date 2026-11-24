@@ -4,6 +4,7 @@ const GAME_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'S
 
 export function createInput() {
   const keys = new Set();
+  let stick = { x: 0, y: 0 }; // dokunmatik joystick (ekran yönü)
   const once = [];
 
   addEventListener('keydown', e => {
@@ -21,8 +22,9 @@ export function createInput() {
     axis() {
       const x = (any('KeyD', 'ArrowRight') ? 1 : 0) - (any('KeyA', 'ArrowLeft') ? 1 : 0);
       const y = (any('KeyS', 'ArrowDown') ? 1 : 0) - (any('KeyW', 'ArrowUp') ? 1 : 0);
-      return { x, y };
+      return x || y ? { x, y } : stick;
     },
     take: () => once.splice(0),
+    setStick: (x, y) => { stick = { x, y }; },
   };
 }

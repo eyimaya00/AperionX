@@ -11,6 +11,7 @@ export function computePeers(me, others, prev) {
   const myPriv = isPrivate(me.z);
   for (const o of others) {
     const oPriv = isPrivate(o.z), d = dist(me, o);
+    if (!(myPriv && oPriv && me.z === o.z) && (me.dnd || o.dnd)) continue; // rahatsız etme: açık alan bağlantısı kurulmaz
     if (myPriv || oPriv) {
       // Özel oda: yalnızca aynı odadakiler, tam ses. Dışarıyla tam izolasyon.
       if (myPriv && oPriv && me.z === o.z) cand.push({ id: o.id, gain: 1, d });
@@ -28,7 +29,7 @@ export function computePeers(me, others, prev) {
 // Açık alanda birbirine yaklaşmış oyuncuların id'leri (etkileşim halkası için).
 export function ringIds(me, others) {
   const set = new Set();
-  const all = [me, ...others].filter(p => !isPrivate(p.z));
+  const all = [me, ...others].filter(p => !isPrivate(p.z) && !p.dnd);
   for (let i = 0; i < all.length; i++) {
     for (let j = i + 1; j < all.length; j++) {
       if (dist(all[i], all[j]) <= PROX.connect) { set.add(all[i].id); set.add(all[j].id); }

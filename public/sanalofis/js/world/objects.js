@@ -1,10 +1,13 @@
 // Derinliğe göre sıralanan sahne nesneleri: cam duvar parçaları, mobilya, sandalyeler. Karakterler çizimde araya katılır.
-import { WALLS, FURN, CHAIRS } from './map.js';
+import { WALLS, FURN, CHAIRS, DOORS } from './map.js';
 import { P, px, py, poly, ROOM_H } from './iso.js';
 import { FDRAW, FPARTS, chairSeat, chairBack, chairBackKey } from './furniture.js';
 import { PROPS } from './props.js';
+import { PROPS2 } from './props2.js';
+import { drawPond } from './pond.js';
+import { SEASON_PROPS } from './season.js';
 
-const DRAW = { ...FDRAW, ...PROPS };
+const DRAW = { ...FDRAW, ...PROPS, ...PROPS2, pond: drawPond, ...SEASON_PROPS };
 export const OBJECTS = [];
 const add = (key, cx, cy, draw, nocull = false) => OBJECTS.push({ key, sx: px(cx, cy), sy: py(cx, cy), draw, nocull });
 
@@ -29,6 +32,8 @@ function glass(c, s) {
 }
 
 const STEP = 36;
+export function buildObjects() {
+OBJECTS.length = 0;
 for (const w of WALLS.slice(4)) {
   const alongX = w.w >= w.h, len = alongX ? w.w : w.h;
   add(w.x + w.w / 2 + w.y + w.h / 2 - 2, w.x + w.w / 2, w.y + w.h / 2, c => glassFill(c, w.x, w.y, w.w, w.h), true);
@@ -51,4 +56,15 @@ for (const ch of CHAIRS) {
   add(chairBackKey(ch), ch.x, ch.y, c => chairBack(c, ch));
 }
 
+// Kilitli oda kapısı: kırmızı camlı panel ve kilit simgesi (S.locks içinde ise).
+for (const d of DOORS.filter(x => x.room)) {
+  add(d.x + d.w / 2 + d.y + d.h / 2 + 1, d.x + d.w / 2, d.y + d.h / 2, (c, S) => {
+    if (!S.locks?.has(d.room)) return;
+    poly(c, [P(d.x, d.y + d.h, 0), P(d.x + d.w, d.y + d.h, 0), P(d.x + d.w, d.y + d.h, ROOM_H), P(d.x, d.y + d.h, ROOM_H)], 'rgba(239,68,68,.30)', '#b91c1c', 1.5);
+    c.font = '20px system-ui'; c.textAlign = 'center'; c.fillText('🔒', ...P(d.x + d.w / 2, d.y + d.h, 38));
+  });
+}
+
 OBJECTS.sort((a, b) => a.key - b.key);
+}
+buildObjects();

@@ -1,13 +1,22 @@
-// Ofis durumu (Peri mesajı, tabelalar, panolar) ve yönetici PIN'i. data/sanalofis/office.json içinde saklanır.
+// Ofis durumu (Peri mesajı, tabelalar, panolar) ve yönetici PIN'i. Kalıcı veri data/sanalofis/ içinde durur.
+// Eski sürümlerin data/ içindeki dosyaları yalnızca OKUNUR (silinmez, üzerine yazılmaz); kayıtlar data/sanalofis/ içine yapılır.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const dir = path.join(__dirname, '..', 'data', 'sanalofis');
+const root = path.join(__dirname, '..', 'data');
+const dir = path.join(root, 'sanalofis');
 const file = path.join(dir, 'office.json');
 const pinFile = path.join(dir, 'admin-pin.txt');
+const readFirst = names => {
+  for (const f of names) { try { return fs.readFileSync(f, 'utf8'); } catch { /* sıradaki */ } }
+  return null;
+};
 const clean = (s, n) => String(s ?? '').replace(/[<>]/g, '').trim().slice(0, n);
-const ROOM_IDS = ['lobi', 'yayin', 'sosyal', 'toplanti', 'mola', 'yonetim'];
+// Mevsim modu: auto = takvime göre, off = mevsim süsleri/efektleri kapalı, diğerleri sabit mevsim.
+const CLOSABLE = ['mutfak', 'aktivite'];
+const SEASONS = ['auto', 'off', 'autumn', 'winter', 'spring', 'summer'];
+const ROOM_IDS = ['lobi', 'yayin', 'sosyal', 'toplanti', 'mola', 'yonetim', 'mutfak', 'aktivite'];
 let timer = null;
 
 const defaults = () => ({
@@ -18,9 +27,11 @@ const defaults = () => ({
     },
     signs: {
       lobi: 'LOBİ', yayin: 'YAYIN KURULU & DERGİ', sosyal: 'SOSYAL MEDYA',
-      toplanti: 'TOPLANTI SALONU', mola: 'MOLA ALANI', yonetim: 'YÖNETİM OFİSİ',
+      toplanti: 'TOPLANTI SALONU', mola: 'MOLA ALANI', yonetim: 'YÖNETİM OFİSİ', mutfak: 'MUTFAK', aktivite: 'AKTİVİTE ALANI',
     },
     lobby: 'AperionX Sanal Ofis’e hoş geldiniz!',
+    season: 'auto',
+    closed: [],
   },
   boards: {
     yayin: { title: 'Dergi Yayın Akışı', cols: ['Taslak', 'Editör Kontrolü', 'Dizgi', 'Yayına Hazır'], cards: [] },
@@ -40,6 +51,8 @@ function applyAdminPatch(state, p) {
     for (const id of ROOM_IDS) if (id in p.signs) c.signs[id] = clean(p.signs[id], 32) || c.signs[id];
   }
   if ('lobby' in p) c.lobby = clean(p.lobby, 200);
+  if (SEASONS.includes(p.season)) c.season = p.season;
+  if (Array.isArray(p.closed)) c.closed = CLOSABLE.filter(id => p.closed.includes(id));
   if (p.boards && typeof p.boards === 'object') {
     for (const [id, b] of Object.entries(state.boards)) {
       const q = p.boards[id];
@@ -73,15 +86,18 @@ function applyBoardOp(state, who, m) {
 function loadState() {
   const st = defaults();
   try {
-    const s = JSON.parse(fs.readFileSync(file, 'utf8'));
-    applyAdminPatch(st, { ...s.config, boards: s.boards });
-    for (const [id, b] of Object.entries(st.boards)) {
-      const cards = s.boards?.[id]?.cards;
-      if (!Array.isArray(cards)) continue;
-      b.cards = cards.slice(0, 100).map(c => ({
-        id: clean(c.id, 12) || crypto.randomBytes(3).toString('hex'), text: clean(c.text, 140),
-        col: Math.min(b.cols.length - 1, Math.max(0, +c.col | 0)), by: clean(c.by, 20), when: clean(c.when, 24),
-      })).filter(c => c.text);
+    const raw = readFirst([file, path.join(root, 'office.json')]);
+    if (raw) {
+      const s = JSON.parse(raw);
+      applyAdminPatch(st, { ...s.config, boards: s.boards });
+      for (const [id, b] of Object.entries(st.boards)) {
+        const cards = s.boards?.[id]?.cards;
+        if (!Array.isArray(cards)) continue;
+        b.cards = cards.slice(0, 100).map(c => ({
+          id: clean(c.id, 12) || crypto.randomBytes(3).toString('hex'), text: clean(c.text, 140),
+          col: Math.min(b.cols.length - 1, Math.max(0, +c.col | 0)), by: clean(c.by, 20), when: clean(c.when, 24),
+        })).filter(c => c.text);
+      }
     }
   } catch { /* ilk çalıştırma */ }
   return st;
@@ -97,13 +113,11 @@ function saveState(state) {
   }, 300);
 }
 
-// PIN: ADMIN_PIN ortam değişkeni > data/sanalofis/admin-pin.txt > yeni üretilir ve dosyaya yazılır.
+// PIN: ADMIN_PIN ortam değişkeni > data/admin-pin.txt > yeni üretilir ve dosyaya yazılır.
 function loadPin() {
   if (process.env.ADMIN_PIN) return { pin: String(process.env.ADMIN_PIN), src: 'ADMIN_PIN ortam değişkeni' };
-  try {
-    const p = fs.readFileSync(pinFile, 'utf8').trim();
-    if (p) return { pin: p, src: 'data/sanalofis/admin-pin.txt' };
-  } catch { /* yok */ }
+  const old = readFirst([pinFile, path.join(root, 'admin-pin.txt')]);
+  if (old && old.trim()) return { pin: old.trim(), src: 'data/sanalofis/admin-pin.txt' };
   const pin = String(crypto.randomInt(100000, 1000000));
   try { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(pinFile, pin); } catch { /* yazılamadı */ }
   return { pin, src: 'yeni üretildi → data/sanalofis/admin-pin.txt' };
@@ -115,6 +129,7 @@ function pinMatches(a, b) {
 }
 
 module.exports = {
+  SEASONS,
   ROOM_IDS,
   applyAdminPatch,
   applyBoardOp,

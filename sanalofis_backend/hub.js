@@ -1,24 +1,36 @@
 // Oyuncu durumu, mesaj aktarımı (relay), WebRTC sinyalleşmesi, panolar, sunum notu ve yönetici işlemleri.
 const crypto = require('crypto');
 const { loadState, saveState, applyAdminPatch, applyBoardOp, loadPin, pinMatches } = require('./store');
+const { privateAt, PRIVATE_IDS } = require('./zones');
+const { createChat } = require('./chat');
+const { createGames } = require('./games');
 
 const DIRS = ['up', 'down', 'left', 'right'];
-const EMOTES = ['👋', '☕', '👍', '🎉'];
+const EMOTES = ['👋', '☕', '👍', '🎉', '🐱', '🥪', '🧋', '🎯', '💡', '🎮'];
 const COLOR = /^#[0-9a-f]{6}$/i;
 const clean = (s, n) => String(s ?? '').replace(/[<>]/g, '').trim().slice(0, n);
 const num = (v, lo, hi) => (Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : lo);
 const color = (v, d) => (COLOR.test(String(v)) ? v : d);
+const idx = (v, n) => (Number.isFinite(+v) ? Math.min(n - 1, Math.max(0, +v | 0)) : 0);
+// Görünüm: renkler ve stil numaraları doğrulanır (bilinmeyen alan yok sayılır).
+const lookOf = l => ({
+  skin: color(l?.skin, '#e0a97a'), hair: color(l?.hair, '#1f2937'), outfit: color(l?.outfit, '#6366f1'), pants: color(l?.pants, '#334155'),
+  hairStyle: idx(l?.hairStyle, 5), acc: idx(l?.acc, 5), top: idx(l?.top, 3),
+});
 
 function createHub() {
   const players = new Map();
   const state = loadState();
   const present = { note: '' };
+  const locks = new Set(); // kilitli özel odalar (bellekte; oda boşalınca kendiliğinden açılır)
+  const chat = createChat(players);
+  const games = createGames();
   const { pin, src } = loadPin();
   console.log(`[SanalOfis] Yönetici PIN'i: ${pin} (${src})`);
 
   const pub = p => ({
     id: p.id, name: p.name, role: p.role, look: p.look, status: p.status,
-    x: p.x, y: p.y, d: p.d, m: p.m, s: p.s, z: p.z, sharing: p.sharing,
+    x: p.x, y: p.y, d: p.d, m: p.m, s: p.s, z: p.z, sharing: p.sharing, dnd: p.dnd,
   });
 
   function broadcast(obj, exceptId) {
@@ -32,7 +44,7 @@ function createHub() {
       id, conn,
       name: clean(m.name, 20) || 'Misafir',
       role: clean(m.role, 28) || 'Ekip',
-      look: { skin: color(look.skin, '#e0a97a'), hair: color(look.hair, '#1f2937'), outfit: color(look.outfit, '#6366f1') },
+      look: lookOf(look), dnd: false,
       status: 'Müsait',
       x: 730 + Math.random() * 140, y: 262 + Math.random() * 38, // Lobi girişi
       d: 'down', m: false, s: false, z: 'lobi', sharing: false, lastMove: 0,
@@ -43,6 +55,7 @@ function createHub() {
       t: 'welcome', id, me: pub(p),
       players: [...players.values()].filter(q => q.id !== id).map(pub),
       config: state.config, boards: state.boards, present,
+      ts: Date.now(), locks: [...locks], chat: chat.history(), games: games.pub(),
     }));
     broadcast({ t: 'joined', p: pub(p) }, id);
     return p;
@@ -54,6 +67,15 @@ function createHub() {
     if ([...players.values()].some(q => q.z === 'toplanti')) return;
     present.note = '';
     broadcast({ t: 'present', note: '' });
+  }
+
+  // Boşalan odanın kilidi kendiliğinden açılır.
+  function checkLocks() {
+    for (const r of [...locks]) {
+      if ([...players.values()].some(q => q.z === r)) continue;
+      locks.delete(r);
+      broadcast({ t: 'lock', room: r, on: false });
+    }
   }
 
   function adminLogin(p, m) {
@@ -70,17 +92,43 @@ function createHub() {
         const now = Date.now();
         if (now - p.lastMove < 30) return; // istemci zaten 50 ms'de bir gönderir; taşkını kes
         p.lastMove = now;
-        const prevZ = p.z;
-        p.x = num(m.x, 0, 1600); p.y = num(m.y, 0, 1000);
+        const prevZ = p.z, nx = num(m.x, 0, 1600), ny = num(m.y, 0, 1470);
+        // Bölgeyi sunucu konumdan bulur; özel oda iddiası konumla uyuşmuyorsa ortak alan sayılır.
+        const claimed = clean(m.z, 12) || 'koridor';
+        const nz = privateAt(nx, ny) || (PRIVATE_IDS.has(claimed) ? 'koridor' : claimed);
+        if (nz !== prevZ && locks.has(nz)) { // kilitli odaya giriş reddedilir, eski konuma döndürülür
+          p.conn.send(JSON.stringify({ t: 'deny', room: nz, x: p.x, y: p.y }));
+          return;
+        }
+        p.x = nx; p.y = ny; p.z = nz;
         p.d = DIRS.includes(m.d) ? m.d : 'down';
-        p.m = !!m.m; p.s = !!m.s; p.z = clean(m.z, 12) || 'koridor';
+        p.m = !!m.m; p.s = !!m.s;
         broadcast({ t: 'move', id: p.id, x: p.x, y: p.y, d: p.d, m: p.m, s: p.s, z: p.z }, p.id);
-        if (prevZ === 'toplanti' && p.z !== 'toplanti') checkPresent();
+        if (prevZ !== p.z) { if (prevZ === 'toplanti') checkPresent(); checkLocks(); }
         break;
       }
       case 'status':
         p.status = clean(m.status, 40) || 'Müsait';
         broadcast({ t: 'status', id: p.id, status: p.status }, p.id);
+        break;
+      case 'dnd':
+        p.dnd = !!m.on;
+        broadcast({ t: 'dnd', id: p.id, on: p.dnd }, p.id);
+        break;
+      case 'look':
+        p.look = lookOf(m.look);
+        broadcast({ t: 'look', id: p.id, look: p.look }, p.id);
+        break;
+      case 'lock': // yalnızca odanın içindeki biri kilitleyip açabilir
+        if (!PRIVATE_IDS.has(p.z) || p.z !== m.room) break;
+        if (m.on) locks.add(p.z); else locks.delete(p.z);
+        broadcast({ t: 'lock', room: p.z, on: !!m.on });
+        break;
+      case 'chat':
+        chat.handle(p, m);
+        break;
+      case 'game':
+        if (games.handle(p, m)) broadcast({ t: 'games', games: games.pub() });
         break;
       case 'emote':
         if (EMOTES.includes(m.e)) broadcast({ t: 'emote', id: p.id, e: m.e }, p.id);
@@ -131,7 +179,9 @@ function createHub() {
       if (me) handle(me, msg);
     });
     conn.on('close', () => {
-      if (me) { players.delete(id); broadcast({ t: 'left', id }); checkPresent(); }
+      if (!me) return;
+      players.delete(id); broadcast({ t: 'left', id }); checkPresent(); checkLocks();
+      games.drop(id); broadcast({ t: 'games', games: games.pub() });
     });
   }
 

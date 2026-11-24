@@ -1,5 +1,6 @@
 // Temel mobilya çizimleri (izometrik, kutu tabanlı) ve çok parçalı nesneler (kanepe, sandalye).
 import { px, py, P, box, poly } from './iso.js';
+import { LEAF } from './season.js';
 
 const TAU = Math.PI * 2;
 export const shadow = (c, x, y, w, h, a = 0.16) =>
@@ -34,13 +35,14 @@ export const FDRAW = {
     box(c, x, y, w, h, 0, 16, '#8a5a3a', { top: '#b9855a' });
     box(c, x + 14, y + 8, 6, 6, 16, 22, '#ffffff', { top: '#6b3f26' });
   },
-  plant(c, f) {
+  plant(c, f, S) {
+    const L = LEAF[S?.season] || LEAF.summer;
     const cx = f.x + f.w / 2, cy = f.y + f.h / 2;
     shadow(c, f.x + 4, f.y + 4, f.w - 8, f.h - 8, 0.2);
     box(c, cx - 8, cy - 8, 16, 16, 0, 13, '#b45f3a', { top: '#8a4a2d' });
     box(c, cx - 2, cy - 2, 4, 4, 13, 26, '#7c4a2d');
-    ball(c, cx + 3, cy + 3, 36, 15, '#1b8a4c');
-    ball(c, cx, cy, 38, 15, '#22a05a', '#6fdc98');
+    ball(c, cx + 3, cy + 3, 36, 15, L[0]);
+    ball(c, cx, cy, 38, 15, L[1], L[2]);
   },
   beanbag(c, f) {
     const sx = px(f.x + f.w / 2, f.y + f.h / 2), sy = py(f.x + f.w / 2, f.y + f.h / 2, 0), col = f.alt ? '#06b6d4' : '#f43f5e';
