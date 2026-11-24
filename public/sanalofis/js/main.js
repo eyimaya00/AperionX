@@ -45,13 +45,13 @@ const canvas = $('#game');
 const renderer = createRenderer(canvas, S.assets, cats);
 const send = (t, d) => net.send(t, d);
 
-// Karakteri ve sahneyi hemen başlat (ağ gecikmesinden kaynaklı siyah ekranı önle)
+// Karakteri hazırla ve sahneyi hemen başlat (siyah ekranı önle)
 let P = createPlayer({
   id: 'me', name: profile.name, role: profile.role, look: profile.look,
   x: 770 + Math.random() * 60, y: 275 + Math.random() * 20,
   d: 'down', m: false, s: false, z: 'lobi', isMe: true
 });
-let started = true, prevWant = new Set(), lastProx = 0, last = performance.now(), hover = null;
+let prevWant = new Set(), lastProx = 0, last = performance.now(), hover = null;
 requestAnimationFrame(loop);
 
 const census = () => {
@@ -210,10 +210,12 @@ function tick(dt, t, ms) {
   const { x, y } = input.axis();
   input.take().forEach(onKey);
   P.update(dt, isModal ? 0 : x + y, isModal ? 0 : y - x); // ekran yönü → dünya yönü
-  net.sendMove(me);
-  remotes.step(dt); cats.update();
   const others = remotes.all();
-  if (ms - lastProx > 200) { lastProx = ms; proximityTick(me, others); }
+  if (P.me.id !== 'me') {
+    net.sendMove(me);
+    if (ms - lastProx > 200) { lastProx = ms; proximityTick(me, others); }
+  }
+  remotes.step(dt); cats.update();
   const near = isModal ? null : P.nearest(others);
   const label = hover ? `Tıkla · ${hover.label}` : near ? `E · ${near.label}` : '';
   hud.setPrompt(me.s ? 'Kalkmak için bir yön tuşuna bas' : label);

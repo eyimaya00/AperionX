@@ -36,9 +36,9 @@ function encode(op, payload) {
 }
 
 class Connection {
-  constructor(socket, head) {
+  constructor(socket) {
     this.socket = socket;
-    this.buf = head && head.length ? Buffer.from(head) : Buffer.alloc(0);
+    this.buf = Buffer.alloc(0);
     this.frags = [];
     this.open = true;
     this.handlers = { message: [], close: [] };
@@ -88,11 +88,7 @@ class Connection {
   }
 }
 
-function acceptUpgrade(req, socket, head, onConnection) {
-  if (typeof head === 'function') {
-    onConnection = head;
-    head = null;
-  }
+function acceptUpgrade(req, socket, onConnection) {
   const key = req.headers['sec-websocket-key'];
   if (!key || String(req.headers.upgrade).toLowerCase() !== 'websocket') { socket.destroy(); return; }
   const accept = crypto.createHash('sha1').update(key + GUID).digest('base64');
@@ -104,11 +100,7 @@ function acceptUpgrade(req, socket, head, onConnection) {
     '', '',
   ].join('\r\n'));
   socket.setNoDelay(true);
-  const conn = new Connection(socket, head);
-  onConnection(conn);
-  if (conn.buf.length > 0) {
-    conn._read(Buffer.alloc(0));
-  }
+  onConnection(new Connection(socket));
 }
 
 module.exports = {

@@ -7,19 +7,10 @@ export function createSocket() {
 
   const emit = (t, m) => (handlers.get(t) || []).forEach(fn => fn(m));
   const keyOf = s => `${Math.round(s.x)}|${Math.round(s.y)}|${s.d}|${s.m ? 1 : 0}|${s.s ? 1 : 0}|${s.z}`;
-  const wsPaths = ['/sanalofis/ws', '/ws'];
-  let pathIdx = 0;
 
   function connect() {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const curPath = wsPaths[pathIdx % wsPaths.length];
-    try {
-      ws = new WebSocket(`${proto}://${location.host}${curPath}`);
-    } catch {
-      pathIdx++;
-      setTimeout(connect, 500);
-      return;
-    }
+    ws = new WebSocket(`${proto}://${location.host}/ws`);
     ws.onopen = () => { retry = 0; lastKey = ''; emit('open', {}); };
     ws.onmessage = e => {
       let m;
@@ -28,11 +19,7 @@ export function createSocket() {
     };
     ws.onclose = () => {
       emit('close', {});
-      pathIdx++;
-      setTimeout(connect, Math.min(3000, 600 * ++retry));
-    };
-    ws.onerror = () => {
-      try { ws.close(); } catch {}
+      setTimeout(connect, Math.min(4000, 800 * ++retry));
     };
   }
 

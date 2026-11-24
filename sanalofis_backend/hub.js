@@ -39,10 +39,11 @@ function createHub() {
   }
 
   function join(id, conn, m) {
-    const requiredPass = process.env.OFFICE_PASS || '1965';
-    if (String(m.pass || '').trim() !== requiredPass) {
+    const requiredPass = (process.env.OFFICE_PASS || '1965').trim();
+    if (requiredPass && String(m.pass || '').trim() !== requiredPass) {
+      console.warn(`[SanalOfis] Giriş reddedildi: Şifre eşleşmedi (Verilen: "${m.pass}", Beklenen: "${requiredPass}")`);
       conn.send(JSON.stringify({ t: 'error', msg: 'Hatalı giriş şifresi!' }));
-      setTimeout(() => conn.close(), 100);
+      setTimeout(() => conn.close(), 200);
       return null;
     }
     const look = m.look || {};
