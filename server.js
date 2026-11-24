@@ -29,6 +29,37 @@ const multer = require('multer');
 const sharp = require('sharp');
 const jwt = require('jsonwebtoken');
 const DOMPurify = require('isomorphic-dompurify');
+
+// Sanitize Gundem content and strip dark inline colors & bright backgrounds pasted from Word/Docs
+function sanitizeGundemContent(html) {
+    if (!html) return '';
+    let clean = DOMPurify.sanitize(html);
+    clean = clean.replace(/style="([^"]*)"/gi, (match, styles) => {
+        let cleanedStyles = styles
+            .split(';')
+            .map(s => s.trim())
+            .filter(s => {
+                if (!s) return false;
+                const lower = s.toLowerCase();
+                if (lower.startsWith('color:') && (
+                    lower.includes('#0') || lower.includes('#1') || lower.includes('#2') || lower.includes('#3') || lower.includes('#4') ||
+                    lower.includes('rgb(0') || lower.includes('rgb(1') || lower.includes('rgb(2') || lower.includes('rgb(3') ||
+                    lower.includes('black') || lower.includes('windowtext')
+                )) {
+                    return false;
+                }
+                if (lower.startsWith('background') && (
+                    lower.includes('#fff') || lower.includes('rgb(255') || lower.includes('white')
+                )) {
+                    return false;
+                }
+                return true;
+            })
+            .join('; ');
+        return cleanedStyles ? `style="${cleanedStyles}"` : '';
+    });
+    return clean;
+}
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
@@ -518,7 +549,7 @@ app.get(['/gundem/:slug', '/bilim-gundemi/:slug', '/en/gundem/:slug', '/en/bilim
             .replace(/\{\{TITLE\}\}/g, escapeHtml(articleData.title))
             .replace(/\{\{CATEGORY\}\}/g, escapeHtml(articleData.category || 'Gündem'))
             .replace(/\{\{EXCERPT\}\}/g, escapeHtml(articleData.excerpt))
-            .replace(/\{\{CONTENT\}\}/g, articleData.content)
+            .replace(/\{\{CONTENT\}\}/g, () => sanitizeGundemContent(articleData.content))
             .replace(/\{\{IMAGE_URL\}\}/g, escapeHtml(articleData.imageUrl))
             .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
             .replace(/\{\{EN_CANONICAL_URL\}\}/g, enCanonicalUrl)
@@ -1366,6 +1397,8 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     } catch (e) {}
                 }
 
+                contentHtml = sanitizeGundemContent(contentHtml);
+
                 const authorName = article.author_fullname || 'AperionX Bilim Ekibi';
                 const authorTitle = article.author_job_title || 'Bilim, Teknoloji ve Analiz Masası';
                 let authorAvatar = '/uploads/aperionx-a-transparent.png';
@@ -1393,7 +1426,7 @@ app.get('/preview-gundem/:id', async (req, res, next) => {
                     .replace(/\{\{TITLE\}\}/g, article.title || '')
                     .replace(/\{\{CATEGORY\}\}/g, article.category || 'Gündem')
                     .replace(/\{\{EXCERPT\}\}/g, article.excerpt || article.title || '')
-                    .replace(/\{\{CONTENT\}\}/g, contentHtml)
+                    .replace(/\{\{CONTENT\}\}/g, () => contentHtml)
                     .replace(/\{\{IMAGE_URL\}\}/g, imageUrl)
                     .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
                     .replace(/\{\{EN_CANONICAL_URL\}\}/g, `${origin}/en/gundem/${article.slug || 'onizleme'}`)
@@ -1487,6 +1520,7 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
                 }).join('') + '</ul></section>';
         }
     }
+    contentHtml = sanitizeGundemContent(contentHtml);
 
     let authorName = (session.user && session.user.fullname) || req.user.fullname || 'AperionX Yazarı';
     let authorTitle = 'Bilim, Teknoloji ve Analiz Masası';
@@ -1557,7 +1591,7 @@ app.get('/preview-gundem-live/:sessionId', async (req, res, next) => {
                 .replace(/\{\{TITLE\}\}/g, title || 'Başlıksız Gündem')
                 .replace(/\{\{CATEGORY\}\}/g, category || 'Gündem')
                 .replace(/\{\{EXCERPT\}\}/g, excerpt || title || '')
-                .replace(/\{\{CONTENT\}\}/g, contentHtml)
+                .replace(/\{\{CONTENT\}\}/g, () => contentHtml)
                 .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
                 .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
                 .replace(/\{\{EN_CANONICAL_URL\}\}/g, `${origin}/en/gundem/onizleme`)
@@ -1609,6 +1643,7 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
                     }).join('') + '</ul></section>';
             }
         }
+        contentHtml = sanitizeGundemContent(contentHtml);
 
         let authorName = req.user.fullname || 'AperionX Yazarı';
         let authorTitle = 'Bilim, Teknoloji ve Analiz Masası';
@@ -1679,7 +1714,7 @@ app.post('/api/author/gundem/preview-live', authenticateToken, async (req, res, 
                     .replace(/\{\{TITLE\}\}/g, title || 'Başlıksız Gündem')
                     .replace(/\{\{CATEGORY\}\}/g, category || 'Gündem')
                     .replace(/\{\{EXCERPT\}\}/g, excerpt || title || '')
-                    .replace(/\{\{CONTENT\}\}/g, contentHtml)
+                    .replace(/\{\{CONTENT\}\}/g, () => contentHtml)
                     .replace(/\{\{IMAGE_URL\}\}/g, finalImg)
                     .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
                     .replace(/\{\{DATE_FORMATTED\}\}/g, formattedDate)
@@ -7834,7 +7869,7 @@ app.put('/api/editor/gundem/:id', authenticateToken, upload.any(), optimizeImage
         }
 
         // Clean content
-        const cleanContent = content ? DOMPurify.sanitize(content) : article.content;
+        const cleanContent = content ? sanitizeGundemContent(content) : article.content;
         const cleanExcerpt = excerpt || article.excerpt;
         const cleanTags = tags || article.tags;
         const cleanCategory = category || article.category;
@@ -8026,7 +8061,7 @@ app.post('/api/author/gundem', authenticateToken, upload.any(), optimizeImageMid
             return res.status(400).json({ error: 'Başlık zorunludur.' });
         }
 
-        const cleanContent = DOMPurify.sanitize(content || '');
+        const cleanContent = sanitizeGundemContent(content || '');
 
         // If updating an existing article by ID
         if (body.id && !isNaN(Number(body.id))) {

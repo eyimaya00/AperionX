@@ -14794,12 +14794,36 @@
             bgeUpdateTOC();
         }
 
+        function cleanPastedInlineStyles(html) {
+            if (!html) return '';
+            return html.replace(/style="([^"]*)"/gi, (match, styles) => {
+                let cleaned = styles
+                    .split(';')
+                    .map(s => s.trim())
+                    .filter(s => {
+                        if (!s) return false;
+                        const l = s.toLowerCase();
+                        if (l.startsWith('color:') && (
+                            l.includes('#0') || l.includes('#1') || l.includes('#2') || l.includes('#3') || l.includes('#4') ||
+                            l.includes('rgb(0') || l.includes('rgb(1') || l.includes('rgb(2') || l.includes('rgb(3') ||
+                            l.includes('black') || l.includes('windowtext')
+                        )) return false;
+                        if (l.startsWith('background') && (
+                            l.includes('#fff') || l.includes('rgb(255') || l.includes('white')
+                        )) return false;
+                        return true;
+                    })
+                    .join('; ');
+                return cleaned ? `style="${cleaned}"` : '';
+            });
+        }
+
         function bgeSaveSectionValues() {
             bgeSections.forEach((sec) => {
                 const titleInput = document.getElementById('sec-title-' + sec.id);
                 if (titleInput) sec.title = titleInput.value;
                 if (bgeQuillInstances[sec.id] && bgeQuillInstances[sec.id].root) {
-                    sec.content = bgeQuillInstances[sec.id].root.innerHTML;
+                    sec.content = cleanPastedInlineStyles(bgeQuillInstances[sec.id].root.innerHTML);
                 }
             });
         }

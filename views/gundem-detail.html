@@ -1106,16 +1106,87 @@
             line-height: 1.84;
             color: rgba(255, 255, 255, 0.88);
             letter-spacing: -0.005em;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
-        .gundem-article-prose p {
-            margin-bottom: 24px;
+        .gundem-article-prose p,
+        .gundem-section-content p {
+            margin-bottom: 22px;
+            line-height: 1.84;
+            color: rgba(255, 255, 255, 0.88);
         }
 
-        .gundem-article-prose h2 {
+        /* Nuclear override: prevents Word / Google Docs pasted inline black text or white background from hiding paragraphs on dark theme */
+        .gundem-article-prose [style*="color: rgb(0"],
+        .gundem-article-prose [style*="color: rgb(1"],
+        .gundem-article-prose [style*="color: rgb(2"],
+        .gundem-article-prose [style*="color: rgb(3"],
+        .gundem-article-prose [style*="color: rgb(4"],
+        .gundem-article-prose [style*="color: rgb(5"],
+        .gundem-article-prose [style*="color: #0"],
+        .gundem-article-prose [style*="color: #1"],
+        .gundem-article-prose [style*="color: #2"],
+        .gundem-article-prose [style*="color: #3"],
+        .gundem-article-prose [style*="color: #4"],
+        .gundem-article-prose [style*="color: #5"],
+        .gundem-article-prose [style*="color: black"],
+        .gundem-article-prose [style*="color:black"],
+        .gundem-section-content [style*="color: rgb(0"],
+        .gundem-section-content [style*="color: rgb(1"],
+        .gundem-section-content [style*="color: rgb(2"],
+        .gundem-section-content [style*="color: rgb(3"],
+        .gundem-section-content [style*="color: #0"],
+        .gundem-section-content [style*="color: #1"],
+        .gundem-section-content [style*="color: #2"],
+        .gundem-section-content [style*="color: #3"],
+        .gundem-section-content [style*="color: black"],
+        .gundem-section-content [style*="color:black"] {
+            color: rgba(255, 255, 255, 0.92) !important;
+        }
+
+        .gundem-article-prose [style*="background"],
+        .gundem-section-content [style*="background"] {
+            background-color: transparent !important;
+            background: transparent !important;
+        }
+
+        /* Quill Editor Alignment & Formatting Support */
+        .gundem-article-prose .ql-align-center,
+        .gundem-section-content .ql-align-center {
+            text-align: center;
+        }
+        .gundem-article-prose .ql-align-right,
+        .gundem-section-content .ql-align-right {
+            text-align: right;
+        }
+        .gundem-article-prose .ql-align-justify,
+        .gundem-section-content .ql-align-justify {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+        .gundem-article-prose .ql-align-left,
+        .gundem-section-content .ql-align-left {
+            text-align: left;
+        }
+
+        .gundem-article-section {
+            margin-bottom: 34px;
+        }
+
+        .gundem-section-content {
+            font-size: 1.12rem;
+            line-height: 1.84;
+            color: rgba(255, 255, 255, 0.88);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .gundem-article-prose h2,
+        .gundem-article-section h2 {
             font-size: 1.65rem;
             font-weight: 700;
-            color: #ffffff;
+            color: #ffffff !important;
             margin: 44px 0 18px 0;
             line-height: 1.35;
             letter-spacing: -0.015em;
@@ -1124,7 +1195,8 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .gundem-article-prose h2::after {
+        .gundem-article-prose h2::after,
+        .gundem-article-section h2::after {
             content: '';
             position: absolute;
             bottom: -1px;
@@ -1134,7 +1206,61 @@
             background: var(--gundem-primary);
         }
 
-        .gundem-article-prose blockquote {
+        .gundem-article-prose h3,
+        .gundem-section-content h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin: 32px 0 14px 0;
+            line-height: 1.4;
+        }
+
+        .gundem-article-prose h4,
+        .gundem-section-content h4 {
+            font-size: 1.18rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin: 24px 0 10px 0;
+        }
+
+        .gundem-article-prose ul,
+        .gundem-article-prose ol,
+        .gundem-section-content ul,
+        .gundem-section-content ol {
+            margin: 16px 0 24px 28px;
+            padding: 0;
+        }
+
+        .gundem-article-prose li,
+        .gundem-section-content li {
+            margin-bottom: 10px;
+            line-height: 1.75;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .gundem-article-prose strong,
+        .gundem-article-prose b,
+        .gundem-section-content strong,
+        .gundem-section-content b {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .gundem-article-prose a,
+        .gundem-section-content a {
+            color: #818cf8;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.15s ease;
+        }
+
+        .gundem-article-prose a:hover,
+        .gundem-section-content a:hover {
+            color: #a5b4fc;
+        }
+
+        .gundem-article-prose blockquote,
+        .gundem-section-content blockquote {
             margin: 32px 0;
             padding: 20px 26px;
             background: rgba(99, 102, 241, 0.07);
@@ -1146,17 +1272,62 @@
             color: #e2e8f0;
         }
 
-        .gundem-article-prose img {
+        .gundem-article-prose img,
+        .gundem-section-content img {
             max-width: 100%;
             height: auto;
             border-radius: 12px;
+            display: block;
+            margin: 24px auto;
             cursor: zoom-in;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .gundem-article-prose img:hover {
+        .gundem-article-prose img:hover,
+        .gundem-section-content img:hover {
             transform: scale(1.015);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Kaynakça / Referanslar Alanı */
+        .gundem-sources-section {
+            margin-top: 48px;
+            padding: 24px 28px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+
+        .gundem-sources-section h2 {
+            font-size: 1.25rem;
+            color: #ffffff;
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .gundem-sources-section h2::after {
+            display: none;
+        }
+
+        .gundem-sources-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .gundem-sources-list li {
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 8px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .gundem-sources-list a {
+            color: #818cf8;
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
 
         /* Alt Paylaşım Alanı */
