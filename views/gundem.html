@@ -776,17 +776,47 @@
             transform: translateX(4px);
         }
 
-        /* === SAĞ KOLON: 2x2 ŞIK CAM KARTLAR === */
+        /* === SAĞ KOLON: KAYDIRMALI 2x2 ŞIK CAM KARTLAR === */
         .gundem-grid-col {
+            position: relative;
             display: flex;
             flex-direction: column;
+            min-height: 460px;
         }
 
         .gundem-cards-grid {
+            position: absolute;
+            inset: 0;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 221px;
+            align-content: start;
             gap: 18px;
-            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px 10px 4px 2px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.55) rgba(255, 255, 255, 0.05);
+        }
+
+        .gundem-cards-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .gundem-cards-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 999px;
+        }
+
+        .gundem-cards-grid::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 999px;
+            transition: background 0.2s ease;
+        }
+
+        .gundem-cards-grid::-webkit-scrollbar-thumb:hover {
+            background: rgba(129, 140, 248, 0.8);
         }
 
         .gundem-item-card {
@@ -907,6 +937,13 @@
                 width: 100%;
                 box-sizing: border-box;
             }
+            .gundem-grid-col {
+                min-height: 0;
+            }
+            .gundem-cards-grid {
+                position: static;
+                max-height: 480px;
+            }
         }
 
         @media (max-width: 868px) {
@@ -982,11 +1019,16 @@
             }
             .gundem-grid-col {
                 width: 100%;
+                min-height: 0;
             }
             .gundem-cards-grid {
+                position: static;
                 grid-template-columns: 1fr !important;
+                grid-auto-rows: 190px;
+                max-height: 420px;
                 gap: 16px;
                 width: 100%;
+                padding: 4px 8px 4px 2px;
             }
             .gundem-feed-section {
                 padding: 30px 16px 60px;
@@ -2078,7 +2120,7 @@
                             feedContainer.classList.remove('single-article');
                             feedContainer.style.gridTemplateColumns = '';
                             gridEl.style.display = 'grid';
-                            const gridArticles = articles.slice(1, 5);
+                            const gridArticles = articles.slice(1);
                             gridEl.innerHTML = gridArticles.map(item => `
                                 <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
                                     <div class="gundem-item-poster-bg">
