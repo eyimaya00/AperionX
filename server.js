@@ -138,7 +138,6 @@ app.use(async (req, res, next) => {
         '/index.html',   // Allow Login on index
         '/api/login',    // Allow login API
         '/api/register', // Allow register API
-        '/cydysn-1508',  // Secret Romantic Route
         '/sanalofis',    // Sanal Ofis
     ];
 
@@ -214,9 +213,6 @@ app.get('/maintenance-access', async (req, res) => {
         res.status(500).send(e.toString());
     }
 });
-
-// === SECRET ROMANTIC ROUTE (ISOLATED STATIC MOUNT) ===
-app.use('/cydysn-1508', express.static(path.join(__dirname, 'public', 'cydysn-1508'), { dotfiles: 'allow' }));
 
 // === SANAL OFIS (APERIONX SANAL OFIS) ===
 const { registerSanalOfisRoutes, attachSanalOfisWebSocket } = require('./sanalofis_backend');
