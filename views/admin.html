@@ -785,6 +785,7 @@
             color: #3b82f6;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -920,6 +921,9 @@
             </a>
             <a href="javascript:void(0)" class="menu-item" onclick="showSection('author-consents', this); loadAuthorConsents();">
                 <i class="ph ph-file-text"></i> <span>Yazar Sözleşmeleri</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-item" onclick="showSection('wheel-management', this); loadWheelItems();">
+                <i class="ph ph-aperture"></i> <span>Bilim Çarkı (/cark)</span>
             </a>
             <a href="/admin/dergi-basvurular" class="menu-item" target="_blank">
                 <i class="ph ph-newspaper"></i> <span>Dergi Başvuruları</span>
@@ -4678,6 +4682,92 @@
             </div>
         </div>
 
+        <!-- Wheel Management Section (/cark) -->
+        <div id="wheel-management" class="section">
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
+                <div>
+                    <h2 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                        <i class="ph-fill ph-aperture" style="color: #6366f1;"></i>
+                        Bilim Çarkı Yönetimi
+                    </h2>
+                    <p style="margin: 4px 0 0; color: #64748b; font-size: 0.92rem;">
+                        /cark sayfasındaki soruları, makale bağlantılarını ve QR kodlarını buradan yönetebilirsiniz.
+                    </p>
+                </div>
+                <a href="/cark" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 600; text-decoration: none;">
+                    <i class="ph ph-arrow-square-out"></i>
+                    <span>/cark Sayfasını Aç</span>
+                </a>
+            </div>
+
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+                <h3 id="wheelFormTitle" style="margin: 0 0 16px; font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Yeni Çark Sorusu Ekle</h3>
+                <input type="hidden" id="wheelEditId" value="">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                    <div style="grid-column: 1 / -1;">
+                        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; color: var(--text-main);">Soru Metni *</label>
+                        <textarea id="wheelQuestionInput" rows="2" placeholder="Örn: Kendi hücremiz kendi ilacımız olabilir mi?" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color, #fff); color: var(--text-main); font-family: inherit;"></textarea>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; color: var(--text-main);">Makale Linki (URL)</label>
+                        <input type="text" id="wheelArticleUrlInput" placeholder="https://aperionx.com/makale/..." style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color, #fff); color: var(--text-main);">
+                        <small style="color: #64748b; display: block; margin-top: 4px;">Makale linki girildiğinde QR kod otomatik oluşturulur.</small>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; color: var(--text-main);">Özel QR Görseli (İsteğe Bağlı)</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="wheelQrImageInput" placeholder="/uploads/... veya URL" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color, #fff); color: var(--text-main);">
+                            <label style="padding: 10px 14px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366f1; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 0.88rem;">
+                                <i class="ph ph-upload-simple"></i> Yükle
+                                <input type="file" id="wheelQrFileInput" accept="image/*" style="display: none;" onchange="uploadWheelQrImage(this)">
+                            </label>
+                        </div>
+                        <small style="color: #64748b; display: block; margin-top: 4px;">Özel QR görseli yüklerseniz otomatik QR yerine bu görsel gösterilir.</small>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; color: var(--text-main);">Sıra No</label>
+                        <input type="number" id="wheelSortOrderInput" value="1" min="0" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-color, #fff); color: var(--text-main);">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; padding-top: 24px;">
+                        <input type="checkbox" id="wheelActiveInput" checked style="width: 18px; height: 18px; accent-color: #6366f1;">
+                        <label for="wheelActiveInput" style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); cursor: pointer;">Çarkta Aktif Göster</label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 18px;">
+                    <button type="button" onclick="saveWheelItem()" style="padding: 10px 22px; border-radius: 10px; border: none; background: #6366f1; color: #fff; font-weight: 700; cursor: pointer;">
+                        <i class="ph ph-floppy-disk"></i> Kaydet
+                    </button>
+                    <button type="button" id="wheelCancelEditBtn" onclick="resetWheelForm()" style="display: none; padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-weight: 600; cursor: pointer;">
+                        İptal
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden;">
+                <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: var(--text-main);">Çark Soruları Listesi</span>
+                    <span id="wheelCountBadge" style="padding: 4px 12px; border-radius: 999px; background: rgba(99,102,241,0.14); color: #6366f1; font-weight: 700; font-size: 0.85rem;">0 Soru</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color); color: #64748b; font-size: 0.85rem;">
+                                <th style="padding: 12px 16px;">Sıra</th>
+                                <th style="padding: 12px 16px;">Soru</th>
+                                <th style="padding: 12px 16px;">Makale Linki</th>
+                                <th style="padding: 12px 16px;">QR Önizleme</th>
+                                <th style="padding: 12px 16px;">Durum</th>
+                                <th style="padding: 12px 16px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wheelTableBody">
+                            <tr><td colspan="6" style="padding: 24px; text-align: center; color: #64748b;">Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Team Activity Section -->
         <div id="team-activity" class="section">
             <style>
@@ -7550,6 +7640,7 @@
                 if (sectionId === 'tool-analytics-section') loadToolStats();
                 if (sectionId === 'team-activity') loadTeamActivity();
                 if (sectionId === 'author-consents') loadAuthorConsents();
+                if (sectionId === 'wheel-management') loadWheelItems();
                 if (sectionId === 'change-author-password-section') loadAuthorsForPasswordReset();
                 if (sectionId === 'campus-coordinator-section') loadCampusCoordinators();
                 if (sectionId === 'campus-teams-section') loadCampusTeamsOverview();
@@ -11551,6 +11642,176 @@
             } catch (err) {
                 console.error('Delete consent error:', err);
                 alert('Silme hatası: ' + err.message);
+            }
+        }
+
+        // === BİLİM ÇARKI (/cark) YÖNETİMİ ===
+        let cachedWheelItems = [];
+
+        async function loadWheelItems() {
+            const tbody = document.getElementById('wheelTableBody');
+            const badge = document.getElementById('wheelCountBadge');
+            if (!tbody) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/admin/wheel', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Çark verileri alınamadı');
+                cachedWheelItems = await res.json();
+                const activeCount = cachedWheelItems.filter(i => i.is_active).length;
+                if (badge) badge.textContent = `${activeCount} Aktif / ${cachedWheelItems.length} Toplam`;
+
+                if (!cachedWheelItems.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="padding: 24px; text-align: center; color: #64748b;">Henüz soru eklenmemiş.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = cachedWheelItems.map(item => {
+                    const safeQ = String(item.question || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const safeUrl = String(item.article_url || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const qrPreviewHtml = item.qr_image
+                        ? `<img src="${item.qr_image}" alt="QR" style="width: 56px; height: 56px; object-fit: contain; border-radius: 6px; background: #fff; padding: 3px; border: 1px solid #e2e8f0;">`
+                        : (item.article_url
+                            ? `<div id="admin-qr-${item.id}" style="width: 56px; height: 56px; background: #fff; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; justify-content: center;"></div>`
+                            : `<span style="color: #94a3b8; font-size: 0.8rem;">Yok</span>`);
+                    const statusBadge = item.is_active
+                        ? '<span style="padding: 3px 10px; border-radius: 999px; background: rgba(16,185,129,0.14); color: #10b981; font-size: 0.78rem; font-weight: 700;">Aktif</span>'
+                        : '<span style="padding: 3px 10px; border-radius: 999px; background: rgba(148,163,184,0.18); color: #64748b; font-size: 0.78rem; font-weight: 700;">Pasif</span>';
+
+                    return `
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px 16px; font-weight: 700;">${item.sort_order}</td>
+                            <td style="padding: 12px 16px; max-width: 320px; font-weight: 500;">${safeQ}</td>
+                            <td style="padding: 12px 16px; max-width: 220px; word-break: break-all; font-size: 0.85rem;">
+                                ${safeUrl ? `<a href="${safeUrl}" target="_blank" style="color: #6366f1;">${safeUrl}</a>` : '<span style="color:#94a3b8;">-</span>'}
+                            </td>
+                            <td style="padding: 12px 16px;">${qrPreviewHtml}</td>
+                            <td style="padding: 12px 16px;">${statusBadge}</td>
+                            <td style="padding: 12px 16px; white-space: nowrap;">
+                                <button onclick="editWheelItem(${item.id})" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(99,102,241,0.35); background: rgba(99,102,241,0.1); color: #6366f1; font-weight: 600; cursor: pointer; margin-right: 6px;">Düzenle</button>
+                                <button onclick="deleteWheelItem(${item.id})" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.1); color: #ef4444; font-weight: 600; cursor: pointer;">Sil</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                if (typeof QRCode !== 'undefined') {
+                    cachedWheelItems.forEach(item => {
+                        if (!item.qr_image && item.article_url) {
+                            const el = document.getElementById(`admin-qr-${item.id}`);
+                            if (el) {
+                                new QRCode(el, {
+                                    text: item.article_url.startsWith('http') ? item.article_url : (window.location.origin + (item.article_url.startsWith('/') ? '' : '/') + item.article_url),
+                                    width: 48,
+                                    height: 48,
+                                    colorDark: '#1e1b4b',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.M
+                                });
+                            }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('loadWheelItems error:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444;">Hata: ${err.message}</td></tr>`;
+            }
+        }
+
+        function editWheelItem(id) {
+            const item = cachedWheelItems.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('wheelEditId').value = item.id;
+            document.getElementById('wheelQuestionInput').value = item.question || '';
+            document.getElementById('wheelArticleUrlInput').value = item.article_url || '';
+            document.getElementById('wheelQrImageInput').value = item.qr_image || '';
+            document.getElementById('wheelSortOrderInput').value = item.sort_order ?? 0;
+            document.getElementById('wheelActiveInput').checked = !!item.is_active;
+            document.getElementById('wheelFormTitle').textContent = `Soruyu Düzenle (#${item.id})`;
+            document.getElementById('wheelCancelEditBtn').style.display = 'inline-block';
+            document.getElementById('wheelQuestionInput').focus();
+        }
+
+        function resetWheelForm() {
+            document.getElementById('wheelEditId').value = '';
+            document.getElementById('wheelQuestionInput').value = '';
+            document.getElementById('wheelArticleUrlInput').value = '';
+            document.getElementById('wheelQrImageInput').value = '';
+            document.getElementById('wheelSortOrderInput').value = (cachedWheelItems.length || 0) + 1;
+            document.getElementById('wheelActiveInput').checked = true;
+            document.getElementById('wheelFormTitle').textContent = 'Yeni Çark Sorusu Ekle';
+            document.getElementById('wheelCancelEditBtn').style.display = 'none';
+        }
+
+        async function saveWheelItem() {
+            const id = document.getElementById('wheelEditId').value;
+            const question = document.getElementById('wheelQuestionInput').value.trim();
+            const article_url = document.getElementById('wheelArticleUrlInput').value.trim();
+            const qr_image = document.getElementById('wheelQrImageInput').value.trim();
+            const sort_order = parseInt(document.getElementById('wheelSortOrderInput').value || '0', 10);
+            const is_active = document.getElementById('wheelActiveInput').checked ? 1 : 0;
+
+            if (!question) {
+                alert('Lütfen soru metnini girin.');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(id ? `/api/admin/wheel/${id}` : '/api/admin/wheel', {
+                    method: id ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ question, article_url, qr_image, sort_order, is_active })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Kaydedilemedi');
+                resetWheelForm();
+                loadWheelItems();
+            } catch (err) {
+                console.error('saveWheelItem error:', err);
+                alert('Kayıt hatası: ' + err.message);
+            }
+        }
+
+        async function deleteWheelItem(id) {
+            if (!confirm('Bu çark sorusunu silmek istediğinize emin misiniz?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/admin/wheel/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Silinemedi');
+                loadWheelItems();
+            } catch (err) {
+                console.error('deleteWheelItem error:', err);
+                alert('Silme hatası: ' + err.message);
+            }
+        }
+
+        async function uploadWheelQrImage(input) {
+            if (!input.files || !input.files[0]) return;
+            const formData = new FormData();
+            formData.append('qr_image', input.files[0]);
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/admin/wheel/upload-qr', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Yükleme başarısız');
+                document.getElementById('wheelQrImageInput').value = data.url;
+            } catch (err) {
+                console.error('uploadWheelQrImage error:', err);
+                alert('QR görseli yüklenemedi: ' + err.message);
+            } finally {
+                input.value = '';
             }
         }
     </script>

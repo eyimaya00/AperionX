@@ -9457,6 +9457,105 @@ app.get('/admin', (req, res) => {
     res.sendFile('admin.html', { root: path.join(__dirname, 'views') });
 });
 
+// Bilim Çarkı (/cark) Page Route
+app.get(['/cark', '/cark.html'], (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile('cark.html', { root: path.join(__dirname, 'views') });
+});
+
+// === BILIM ÇARKI (WHEEL) API ROUTES ===
+app.get('/api/wheel', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT id, question, article_url, qr_image, sort_order FROM wheel_items WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching public wheel items:', err);
+        res.status(500).json({ error: 'Çark verileri yüklenemedi.' });
+    }
+});
+
+app.get('/api/admin/wheel', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        const [rows] = await pool.query('SELECT * FROM wheel_items ORDER BY sort_order ASC, id ASC');
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching admin wheel items:', err);
+        res.status(500).json({ error: 'Çark verileri alınamadı.' });
+    }
+});
+
+app.post('/api/admin/wheel', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { question, article_url, qr_image, sort_order, is_active } = req.body;
+    if (!question || !question.trim()) {
+        return res.status(400).json({ error: 'Soru metni zorunludur.' });
+    }
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO wheel_items (question, article_url, qr_image, sort_order, is_active) VALUES (?, ?, ?, ?, ?)',
+            [
+                question.trim(),
+                (article_url || '').trim(),
+                (qr_image || '').trim(),
+                Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0,
+                is_active === undefined ? 1 : (is_active ? 1 : 0)
+            ]
+        );
+        res.json({ id: result.insertId, message: 'Çark sorusu eklendi.' });
+    } catch (err) {
+        console.error('Error creating wheel item:', err);
+        res.status(500).json({ error: 'Çark sorusu eklenemedi.' });
+    }
+});
+
+app.put('/api/admin/wheel/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    const { id } = req.params;
+    const { question, article_url, qr_image, sort_order, is_active } = req.body;
+    if (!question || !question.trim()) {
+        return res.status(400).json({ error: 'Soru metni zorunludur.' });
+    }
+    try {
+        await pool.query(
+            'UPDATE wheel_items SET question = ?, article_url = ?, qr_image = ?, sort_order = ?, is_active = ? WHERE id = ?',
+            [
+                question.trim(),
+                (article_url || '').trim(),
+                (qr_image || '').trim(),
+                Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0,
+                is_active === undefined ? 1 : (is_active ? 1 : 0),
+                id
+            ]
+        );
+        res.json({ message: 'Çark sorusu güncellendi.' });
+    } catch (err) {
+        console.error('Error updating wheel item:', err);
+        res.status(500).json({ error: 'Çark sorusu güncellenemedi.' });
+    }
+});
+
+app.delete('/api/admin/wheel/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    try {
+        await pool.query('DELETE FROM wheel_items WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Çark sorusu silindi.' });
+    } catch (err) {
+        console.error('Error deleting wheel item:', err);
+        res.status(500).json({ error: 'Çark sorusu silinemedi.' });
+    }
+});
+
+app.post('/api/admin/wheel/upload-qr', authenticateToken, upload.single('qr_image'), (req, res) => {
+    if (req.user.role !== 'admin') return res.sendStatus(403);
+    if (!req.file) {
+        return res.status(400).json({ error: 'QR görseli seçilmedi.' });
+    }
+    res.json({ url: `/uploads/${req.file.filename}` });
+});
+
 // Clean Author Profile Route & 301 Redirect for legacy URLs
 app.get(['/yazar/:identifier', '/yazar/:identifier.html', '/en/yazar/:identifier'], (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -13276,6 +13375,50 @@ const server = app.listen(PORT, async () => {
         console.log('[MIGRATION] Magazine applications table ready.');
     } catch(magMigErr) {
         console.error('[MIGRATION] Magazine applications error:', magMigErr.message);
+    }
+
+    // === AUTO MIGRATION: Wheel Items Table ===
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS wheel_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            question TEXT NOT NULL,
+            article_url VARCHAR(1000) DEFAULT '',
+            qr_image VARCHAR(1000) DEFAULT '',
+            sort_order INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+
+        const [wheelCountRows] = await pool.query('SELECT COUNT(*) AS cnt FROM wheel_items');
+        if (wheelCountRows[0].cnt === 0) {
+            const defaultWheelQuestions = [
+                'Kendi hücremiz kendi ilacımız olabilir mi?',
+                'Sizce yaşlanmayı durdurmak mümkün mü?',
+                'Tek bedende iki yaşam mümkün mü?',
+                'Anne karnının laboratuvara taşınması mümkün mü?',
+                'Diş çürükleri kök hücrelerimizi nasıl yaşlandırıyor?',
+                'Normal bir insan müdahalelerle dâhiye dönüştürülebilir mi?',
+                'Deja vu nedir? Bu tanıdıklık hissini neden yaşarız?',
+                'Beyinde sinyalin adresi sinyalin kendisinden önemli mi?',
+                'Fiziksel olarak kaybettiğimiz bir uzvu hâlâ hissedebilir miyiz?',
+                'Bakteriler birbirleriyle nasıl iletişim kurar?',
+                'Beynimiz stresle nasıl mücadele eder? Stresin beyin üzerinde etkileri neler?',
+                'Aynı genetik yapıya sahip tek yumurta ikizlerinin parmak izleri neden farklıdır?',
+                'Aynı ilacı kullanan iki kişide neden farklı sonuçlar görülebilir?',
+                'Canlılık sıfırdan inşa edilebilir mi?'
+            ];
+            for (let i = 0; i < defaultWheelQuestions.length; i++) {
+                await pool.query(
+                    'INSERT INTO wheel_items (question, article_url, qr_image, sort_order, is_active) VALUES (?, ?, ?, ?, 1)',
+                    [defaultWheelQuestions[i], '', '', i + 1]
+                );
+            }
+            console.log('[MIGRATION] Seeded 14 default wheel questions.');
+        }
+        console.log('[MIGRATION] Wheel items table ready.');
+    } catch (wheelMigErr) {
+        console.error('[MIGRATION] Wheel items error:', wheelMigErr.message);
     }
 
     // Check and Send Latest Article Notification if missed

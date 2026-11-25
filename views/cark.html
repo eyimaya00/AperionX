@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilim Çarkı | AperionX</title>
+    <meta name="description" content="AperionX Bilim Çarkı'nı çevir, karşına çıkan bilimsel soruyu keşfet ve QR kodu okutarak makaleye ulaş!">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --violet: #8b5cf6;
+            --bg-dark: #0f172a;
+            --bg-deep: #090b16;
+            --surface: rgba(30, 41, 59, 0.72);
+            --border: rgba(148, 163, 184, 0.18);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 45%),
+                        linear-gradient(160deg, #090b16 0%, #0f172a 55%, #1e1b4b 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .top-bar {
+            width: 100%;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand img {
+            height: 36px;
+            width: auto;
+        }
+
+        .brand-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.14);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            color: #e0e7ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(99, 102, 241, 0.28);
+            transform: translateY(-1px);
+        }
+
+        /* Main Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 20px 48px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .hero-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(139, 92, 246, 0.18);
+            border: 1px solid rgba(167, 139, 250, 0.35);
+            color: #ddd6fe;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.75rem, 4vw, 2.6rem);
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 55%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* Wheel Stage */
+        .wheel-stage {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: min(88vw, 640px);
+            height: min(88vw, 640px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 20px 55px rgba(99, 102, 241, 0.35));
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .wheel-wrapper.spinning {
+            cursor: wait;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            width: 44px;
+            height: 52px;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+            transition: transform 0.08s ease;
+            pointer-events: none;
+        }
+
+        .wheel-pointer.tick {
+            transform: translateX(-50%) rotate(-12deg);
+        }
+
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .center-hub {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 28px rgba(99, 102, 241, 0.65), inset 0 2px 6px rgba(255, 255, 255, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: none;
+        }
+
+        .wheel-wrapper:hover:not(.spinning) .center-hub {
+            transform: translate(-50%, -50%) scale(1.06);
+            box-shadow: 0 0 36px rgba(129, 140, 248, 0.85), inset 0 2px 6px rgba(255, 255, 255, 0.35);
+        }
+
+        .center-hub img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .center-hub span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #e0e7ff;
+            margin-top: 2px;
+        }
+
+        .spin-cta-btn {
+            margin-top: 26px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 34px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(99, 102, 241, 0.45);
+            transition: all 0.25s ease;
+        }
+
+        .spin-cta-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px rgba(139, 92, 246, 0.55);
+        }
+
+        .spin-cta-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Result Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 11, 22, 0.78);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.28s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .result-card {
+            background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            border-radius: 26px;
+            max-width: 480px;
+            width: 100%;
+            padding: 32px 28px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(99, 102, 241, 0.2);
+            transform: scale(0.92);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.open .result-card {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: #ffffff;
+        }
+
+        .result-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            color: #c7d2fe;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 14px;
+        }
+
+        .result-question {
+            font-size: 1.38rem;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #ffffff;
+            margin-bottom: 22px;
+        }
+
+        .qr-box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 16px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+            margin-bottom: 16px;
+            min-width: 212px;
+            min-height: 212px;
+        }
+
+        .qr-box img.custom-qr {
+            width: 190px;
+            height: 190px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        #generatedQr {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-center-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .qr-center-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-hint {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .qr-empty {
+            color: #64748b;
+            font-size: 0.9rem;
+            padding: 24px 16px;
+            max-width: 220px;
+            line-height: 1.5;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-article {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-article:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 26px rgba(99, 102, 241, 0.55);
+        }
+
+        .btn-respin {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, 0.14);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-respin:hover {
+            background: rgba(148, 163, 184, 0.24);
+        }
+
+        .loading-state {
+            padding: 60px 20px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .top-bar {
+                padding: 12px 16px;
+            }
+            .center-hub {
+                width: 68px;
+                height: 68px;
+            }
+            .center-hub img {
+                width: 26px;
+                height: 26px;
+            }
+            .center-hub span {
+                font-size: 0.55rem;
+            }
+            .result-card {
+                padding: 26px 20px;
+            }
+            .result-question {
+                font-size: 1.18rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <a href="/" class="brand">
+            <img src="/aperionx-a-transparent.png" alt="AperionX Logo" style="filter: brightness(0) invert(1);">
+            <span class="brand-name">APERIONX</span>
+        </a>
+        <a href="/" class="back-link">
+            <i class="ph ph-arrow-left"></i>
+            <span>Ana Sayfa</span>
+        </a>
+    </header>
+
+    <main class="main-container">
+        <div class="hero-header">
+            <div class="hero-badge">
+                <i class="ph-fill ph-sparkle"></i>
+                <span>AperionX Bilim Çarkı</span>
+            </div>
+            <h1 class="hero-title">Çarkı Çevir, Bilimi Keşfet</h1>
+            <p class="hero-subtitle">Çarka tıkla ve şansına çıkan bilimsel soruyu gör. Makalenin QR kodunu okutarak cevabına hemen ulaş!</p>
+        </div>
+
+        <div id="loadingState" class="loading-state">
+            <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: #818cf8;"></i>
+            <p style="margin-top: 10px;">Çark yükleniyor...</p>
+        </div>
+
+        <div id="wheelStage" class="wheel-stage" style="display: none;">
+            <div id="wheelWrapper" class="wheel-wrapper" title="Çevirmek için tıkla">
+                <svg class="wheel-pointer" id="wheelPointer" viewBox="0 0 44 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 50L4 12C2.2 8.2 5 4 9.2 4H34.8C39 4 41.8 8.2 40 12L22 50Z" fill="#6366f1" stroke="#ffffff" stroke-width="3.5"/>
+                    <circle cx="22" cy="14" r="5" fill="#ffffff"/>
+                </svg>
+                <canvas id="wheelCanvas"></canvas>
+                <div class="center-hub">
+                    <img src="/aperionx-a-transparent.png" alt="AperionX">
+                    <span>ÇEVİR</span>
+                </div>
+            </div>
+
+            <button id="spinBtn" class="spin-cta-btn">
+                <i class="ph-bold ph-arrows-clockwise"></i>
+                <span>Çarkı Çevir</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="result-card">
+            <button class="modal-close" id="closeModalBtn" aria-label="Kapat">
+                <i class="ph ph-x"></i>
+            </button>
+            <div class="result-pill">
+                <i class="ph-fill ph-question"></i>
+                <span>Seçilen Soru</span>
+            </div>
+            <h2 id="modalQuestion" class="result-question"></h2>
+
+            <div class="qr-box" id="qrBox"></div>
+            <div class="qr-hint" id="qrHint">
+                <i class="ph ph-qr-code" style="color: #818cf8; font-size: 1.15rem;"></i>
+                <span>Makaleye gitmek için QR kodu okutun</span>
+            </div>
+
+            <div class="result-actions">
+                <a id="articleLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-article" style="display: none;">
+                    <i class="ph-bold ph-book-open"></i>
+                    <span>Makaleye Git</span>
+                </a>
+                <button id="respinBtn" class="btn-respin">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                    <span>Tekrar Çevir</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const wheelWrapper = document.getElementById('wheelWrapper');
+            const wheelPointer = document.getElementById('wheelPointer');
+            const spinBtn = document.getElementById('spinBtn');
+            const loadingState = document.getElementById('loadingState');
+            const wheelStage = document.getElementById('wheelStage');
+
+            const resultModal = document.getElementById('resultModal');
+            const modalQuestion = document.getElementById('modalQuestion');
+            const qrBox = document.getElementById('qrBox');
+            const qrHint = document.getElementById('qrHint');
+            const articleLinkBtn = document.getElementById('articleLinkBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const respinBtn = document.getElementById('respinBtn');
+
+            let items = [];
+            let currentAngle = -Math.PI / 2;
+            let isSpinning = false;
+            let lastTickSlice = -1;
+
+            // AperionX purple & lavender palette matching brand and reference wheel
+            const SLICE_THEMES = [
+                { bg: '#8b5cf6', text: '#ffffff' },   // AperionX Violet
+                { bg: '#ede9fe', text: '#1e1b4b' },   // Soft Lavender
+                { bg: '#6366f1', text: '#ffffff' },   // AperionX Indigo
+                { bg: '#f3e8ff', text: '#1e1b4b' }    // Light Purple
+            ];
+
+            function getSliceTheme(index, total) {
+                // Alternate dark purple/indigo and light lavender cleanly
+                if (index % 2 === 0) {
+                    return (index / 2) % 2 === 0 ? SLICE_THEMES[0] : SLICE_THEMES[2];
+                }
+                return ((index - 1) / 2) % 2 === 0 ? SLICE_THEMES[1] : SLICE_THEMES[3];
+            }
+
+            function resizeCanvas() {
+                const rect = wheelWrapper.getBoundingClientRect();
+                const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+                const size = Math.max(300, Math.round(rect.width));
+                canvas.width = size * dpr;
+                canvas.height = size * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                drawWheel(size);
+            }
+
+            function wrapText(context, text, maxWidth) {
+                const words = text.split(/\s+/);
+                const lines = [];
+                let currentLine = '';
+
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+                    if (context.measureText(testLine).width > maxWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines;
+            }
+
+            function drawWheel(size) {
+                if (!items.length) return;
+                const cx = size / 2;
+                const cy = size / 2;
+                const outerRadius = size / 2 - 8;
+                const sliceAngle = (2 * Math.PI) / items.length;
+
+                ctx.clearRect(0, 0, size, size);
+
+                // Outer glowing ring
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, outerRadius + 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#312e81';
+                ctx.fill();
+                ctx.restore();
+
+                for (let i = 0; i < items.length; i++) {
+                    const startAngle = currentAngle + i * sliceAngle;
+                    const endAngle = startAngle + sliceAngle;
+                    const theme = getSliceTheme(i, items.length);
+
+                    // Slice sector
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.arc(cx, cy, outerRadius, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = theme.bg;
+                    ctx.fill();
+
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+
+                    // Radial text
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(startAngle + sliceAngle / 2);
+
+                    const innerMargin = size < 420 ? 52 : 70;
+                    const outerMargin = 22;
+                    const maxTextWidth = outerRadius - innerMargin - outerMargin;
+                    const fontSize = size < 420 ? 9.5 : (items.length > 12 ? 11.5 : 13);
+
+                    ctx.font = `700 ${fontSize}px Inter, sans-serif`;
+                    ctx.fillStyle = theme.text;
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+
+                    const lines = wrapText(ctx, items[i].question, maxTextWidth);
+                    const maxLines = 4;
+                    const displayLines = lines.slice(0, maxLines);
+                    if (lines.length > maxLines) {
+                        displayLines[maxLines - 1] = displayLines[maxLines - 1].replace(/\s+\S*$/, '') + '...';
+                    }
+
+                    const lineHeight = fontSize * 1.22;
+                    const totalHeight = displayLines.length * lineHeight;
+                    const startY = -totalHeight / 2 + lineHeight / 2;
+
+                    for (let l = 0; l < displayLines.length; l++) {
+                        ctx.fillText(displayLines[l], outerRadius - outerMargin, startY + l * lineHeight);
+                    }
+                    ctx.restore();
+                }
+
+                // Outer border
+                ctx.beginPath();
+                ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+            }
+
+            function getWinningIndex(angle) {
+                const sliceAngle = (2 * Math.PI) / items.length;
+                const relAngle = ((-Math.PI / 2 - angle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+                return Math.floor(relAngle / sliceAngle) % items.length;
+            }
+
+            function spinWheel() {
+                if (isSpinning || !items.length) return;
+                isSpinning = true;
+                wheelWrapper.classList.add('spinning');
+                spinBtn.disabled = true;
+                closeModal();
+
+                const extraRotations = (6 + Math.floor(Math.random() * 4)) * 2 * Math.PI;
+                const randomOffset = Math.random() * 2 * Math.PI;
+                const startAngle = currentAngle;
+                const targetAngle = startAngle + extraRotations + randomOffset;
+                const duration = 4800;
+                const startTime = performance.now();
+
+                function animate(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // Smooth quartic ease-out
+                    const eased = 1 - Math.pow(1 - progress, 4);
+                    currentAngle = startAngle + (targetAngle - startAngle) * eased;
+
+                    const currentSlice = getWinningIndex(currentAngle);
+                    if (currentSlice !== lastTickSlice) {
+                        lastTickSlice = currentSlice;
+                        wheelPointer.classList.add('tick');
+                        setTimeout(() => wheelPointer.classList.remove('tick'), 70);
+                    }
+
+                    const rect = wheelWrapper.getBoundingClientRect();
+                    drawWheel(Math.max(300, Math.round(rect.width)));
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        currentAngle = currentAngle % (2 * Math.PI);
+                        isSpinning = false;
+                        wheelWrapper.classList.remove('spinning');
+                        spinBtn.disabled = false;
+                        const winner = items[getWinningIndex(currentAngle)];
+                        showResult(winner);
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            function normalizeArticleUrl(url) {
+                if (!url) return '';
+                const trimmed = url.trim();
+                if (!trimmed) return '';
+                if (/^https?:\/\//i.test(trimmed)) return trimmed;
+                if (trimmed.startsWith('/')) return window.location.origin + trimmed;
+                return 'https://' + trimmed;
+            }
+
+            function showResult(item) {
+                if (!item) return;
+                modalQuestion.textContent = item.question;
+                qrBox.innerHTML = '';
+
+                const fullUrl = normalizeArticleUrl(item.article_url);
+                const customQr = (item.qr_image || '').trim();
+
+                if (customQr) {
+                    const img = document.createElement('img');
+                    img.src = customQr;
+                    img.alt = 'Makale QR Kodu';
+                    img.className = 'custom-qr';
+                    qrBox.appendChild(img);
+                    qrHint.style.display = 'flex';
+                } else if (fullUrl && typeof QRCode !== 'undefined') {
+                    const qrContainer = document.createElement('div');
+                    qrContainer.id = 'generatedQr';
+                    qrBox.appendChild(qrContainer);
+
+                    new QRCode(qrContainer, {
+                        text: fullUrl,
+                        width: 190,
+                        height: 190,
+                        colorDark: '#1e1b4b',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    const logoOverlay = document.createElement('div');
+                    logoOverlay.className = 'qr-center-logo';
+                    logoOverlay.innerHTML = '<img src="/aperionx-a-transparent.png" alt="AperionX">';
+                    qrContainer.appendChild(logoOverlay);
+                    qrHint.style.display = 'flex';
+                } else {
+                    qrBox.innerHTML = '<div class="qr-empty"><i class="ph ph-qr-code" style="font-size:2rem;display:block;margin-bottom:8px;color:#94a3b8;"></i>Bu soru için henüz makale QR kodu eklenmemiş.</div>';
+                    qrHint.style.display = 'none';
+                }
+
+                if (fullUrl) {
+                    articleLinkBtn.href = fullUrl;
+                    articleLinkBtn.style.display = 'inline-flex';
+                } else {
+                    articleLinkBtn.style.display = 'none';
+                }
+
+                resultModal.classList.add('open');
+            }
+
+            function closeModal() {
+                resultModal.classList.remove('open');
+            }
+
+            wheelWrapper.addEventListener('click', spinWheel);
+            spinBtn.addEventListener('click', spinWheel);
+            closeModalBtn.addEventListener('click', closeModal);
+            resultModal.addEventListener('click', (e) => {
+                if (e.target === resultModal) closeModal();
+            });
+            respinBtn.addEventListener('click', () => {
+                closeModal();
+                setTimeout(spinWheel, 160);
+            });
+
+            async function init() {
+                try {
+                    const res = await fetch('/api/wheel');
+                    if (!res.ok) throw new Error('API error');
+                    items = await res.json();
+                    loadingState.style.display = 'none';
+
+                    if (!items || !items.length) {
+                        loadingState.style.display = 'block';
+                        loadingState.innerHTML = '<p>Şu anda çarkta aktif soru bulunmuyor.</p>';
+                        return;
+                    }
+
+                    wheelStage.style.display = 'flex';
+                    resizeCanvas();
+                    window.addEventListener('resize', resizeCanvas);
+                } catch (err) {
+                    console.error('Wheel load error:', err);
+                    loadingState.innerHTML = '<p>Çark yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.</p>';
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
