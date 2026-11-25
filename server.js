@@ -595,7 +595,6 @@ app.get(['/api/public/gundem', '/api/gundem'], async (req, res) => {
             LEFT JOIN users u ON a.author_id = u.id
             WHERE a.is_gundem = 1 AND a.status = 'published'
             ORDER BY COALESCE(a.published_at, a.created_at) DESC, a.id DESC
-            LIMIT 20
         `);
 
         let dbArticles = [];
@@ -13436,16 +13435,16 @@ const server = app.listen(PORT, async () => {
                 article_url: 'https://aperionx.com/makale/beyinde-sinyalin-kendisi-degil-adresi-mi-onemli-noronlarin-gorunmez-biyokimyasal-haritasi'
             },
             {
-                question: 'Beynimiz stresle nasıl mücadele eder?',
-                article_url: 'https://aperionx.com/makale/beyin-stresle-nasil-mucadele-eder-stresin-beyin-uzerindeki-etkileri-ve-koruyucu-mekanizmalar'
+                question: 'Beynimiz ilaçsız kendi kendini yeniden eğitebilir mi?',
+                article_url: 'https://www.aperionx.com/makale/noroplastisite-ve-neurofeedback-zihin-sagliginda-ilacsiz-bir-donusum-paradigmasi'
             },
             {
-                question: 'Laboratuvarda üretilen mini tümörler kanseri yenebilir mi?',
-                article_url: 'https://aperionx.com/makale/laboratuvarda-yetistirilen-mini-tumorler-kanser-tedavisinin-gelecegi-mi-2'
+                question: 'Körlük tarih mi oluyor? Kök hücrelerle görme yetisi nasıl geri kazanıldı?',
+                article_url: 'https://www.aperionx.com/gundem/korluk-tarih-mi-oluyor-ips-kok-hucreleriyle-gorme-yetisi-geri-kazanildi'
             },
             {
-                question: 'Sağlıklı bir hücre nasıl kanser hücresine dönüşür?',
-                article_url: 'https://aperionx.com/makale/kanser-bir-gunde-mi-olusur-saglikli-bir-hucre-nasil-kanser-hucresine-donusur'
+                question: 'Çernobil mantarları radyasyonla nasıl besleniyor?',
+                article_url: 'https://www.aperionx.com/makale/felaketin-biyolojik-mirasi-cernobil-mantarlarinda-radyosentez-ve-yasamin-sinirlari-1'
             }
         ];
 
@@ -13462,6 +13461,30 @@ const server = app.listen(PORT, async () => {
                 );
             }
             console.log('[MIGRATION] Seeded 14 published article wheel questions with QR URLs.');
+        } else {
+            const wheelReplacements = [
+                {
+                    oldUrl: 'https://aperionx.com/makale/beyin-stresle-nasil-mucadele-eder-stresin-beyin-uzerindeki-etkileri-ve-koruyucu-mekanizmalar',
+                    question: 'Beynimiz ilaçsız kendi kendini yeniden eğitebilir mi?',
+                    article_url: 'https://www.aperionx.com/makale/noroplastisite-ve-neurofeedback-zihin-sagliginda-ilacsiz-bir-donusum-paradigmasi'
+                },
+                {
+                    oldUrl: 'https://aperionx.com/makale/laboratuvarda-yetistirilen-mini-tumorler-kanser-tedavisinin-gelecegi-mi-2',
+                    question: 'Körlük tarih mi oluyor? Kök hücrelerle görme yetisi nasıl geri kazanıldı?',
+                    article_url: 'https://www.aperionx.com/gundem/korluk-tarih-mi-oluyor-ips-kok-hucreleriyle-gorme-yetisi-geri-kazanildi'
+                },
+                {
+                    oldUrl: 'https://aperionx.com/makale/kanser-bir-gunde-mi-olusur-saglikli-bir-hucre-nasil-kanser-hucresine-donusur',
+                    question: 'Çernobil mantarları radyasyonla nasıl besleniyor?',
+                    article_url: 'https://www.aperionx.com/makale/felaketin-biyolojik-mirasi-cernobil-mantarlarinda-radyosentez-ve-yasamin-sinirlari-1'
+                }
+            ];
+            for (const rep of wheelReplacements) {
+                await pool.query(
+                    'UPDATE wheel_items SET question = ?, article_url = ? WHERE article_url = ?',
+                    [rep.question, rep.article_url, rep.oldUrl]
+                );
+            }
         }
         console.log('[MIGRATION] Wheel items table ready.');
     } catch (wheelMigErr) {
