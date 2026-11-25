@@ -13390,31 +13390,78 @@ const server = app.listen(PORT, async () => {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
+        const defaultWheelItems = [
+            {
+                question: "DNA'mız değişmeden genlerimiz nasıl değişebilir?",
+                article_url: 'https://aperionx.com/makale/dna-degismeden-genlerimiz-nasil-degisir-epigenetigin-gorunmeyen-dunyasi'
+            },
+            {
+                question: 'Korku ve travma genlerle kuşaktan kuşağa aktarılır mı?',
+                article_url: 'https://aperionx.com/makale/korku-miras-kalabilir-mi-epigenetik-travma-ve-kusaklar-arasi-biyolojik-izler'
+            },
+            {
+                question: 'Bağırsaklarımız duygularımızı ve psikolojimizi nasıl yönetiyor?',
+                article_url: 'https://aperionx.com/makale/ikinci-beynimiz-bagirsak-floramiz-duygularimizi-ve-psikolojimizi-nasil-yonetiyor'
+            },
+            {
+                question: 'Uzayda yaşlanma saati neden yavaşlıyor?',
+                article_url: 'https://aperionx.com/makale/uzayda-telomerler-neden-uzuyor-yaslanmanin-molekuler-saatine-beklenmedik-bir-bakis'
+            },
+            {
+                question: 'Su ayıları ölümcül radyasyona nasıl dayanıyor?',
+                article_url: 'https://aperionx.com/makale/dsup-proteini-su-ayilarinin-radyasyona-karsi-gizli-silahi'
+            },
+            {
+                question: 'Beynimizdeki hücreler neyin "yenmesi" gerektiğine nasıl karar veriyor?',
+                article_url: 'https://aperionx.com/makale/beynimizdeki-hucreler-neyin-yenmesi-gerektigine-nasil-karar-veriyor-mikroglialarin-gizli-dunyasi'
+            },
+            {
+                question: 'Kendi hücremiz kendi ilacımız olabilir mi?',
+                article_url: 'https://aperionx.com/makale/kendi-hucreniz-kendi-ilaciniz-olabilir-mi-ipsc-teknolojisi-ile-kisiye-ozel-tedavilerin-gelecegi'
+            },
+            {
+                question: 'Canlılık sıfırdan inşa edilebilir mi?',
+                article_url: 'https://aperionx.com/makale/canlilik-sifirdan-insa-edilebilir-mi-sentetik-hucreler-ve-yapay-yasamin-bilimsel-gercekligi'
+            },
+            {
+                question: 'Déjà vu nedir? Beynimiz bu tanıdıklık hissini neden yaşar?',
+                article_url: 'https://aperionx.com/makale/dj-vu-nedir-beynimiz-bu-tanidiklik-hissini-neden-olusturur'
+            },
+            {
+                question: 'Tek yumurta ikizlerinin parmak izleri neden farklıdır?',
+                article_url: 'https://aperionx.com/makale/parmak-izlerimiz-neden-birbirinden-farkli-genler-ve-anne-karnindaki-rastlantilarin-bulusmasi'
+            },
+            {
+                question: 'Beyinde sinyalin adresi sinyalin kendisinden önemli mi?',
+                article_url: 'https://aperionx.com/makale/beyinde-sinyalin-kendisi-degil-adresi-mi-onemli-noronlarin-gorunmez-biyokimyasal-haritasi'
+            },
+            {
+                question: 'Beynimiz stresle nasıl mücadele eder?',
+                article_url: 'https://aperionx.com/makale/beyin-stresle-nasil-mucadele-eder-stresin-beyin-uzerindeki-etkileri-ve-koruyucu-mekanizmalar'
+            },
+            {
+                question: 'Laboratuvarda üretilen mini tümörler kanseri yenebilir mi?',
+                article_url: 'https://aperionx.com/makale/laboratuvarda-yetistirilen-mini-tumorler-kanser-tedavisinin-gelecegi-mi-2'
+            },
+            {
+                question: 'Sağlıklı bir hücre nasıl kanser hücresine dönüşür?',
+                article_url: 'https://aperionx.com/makale/kanser-bir-gunde-mi-olusur-saglikli-bir-hucre-nasil-kanser-hucresine-donusur'
+            }
+        ];
+
         const [wheelCountRows] = await pool.query('SELECT COUNT(*) AS cnt FROM wheel_items');
-        if (wheelCountRows[0].cnt === 0) {
-            const defaultWheelQuestions = [
-                'Kendi hücremiz kendi ilacımız olabilir mi?',
-                'Sizce yaşlanmayı durdurmak mümkün mü?',
-                'Tek bedende iki yaşam mümkün mü?',
-                'Anne karnının laboratuvara taşınması mümkün mü?',
-                'Diş çürükleri kök hücrelerimizi nasıl yaşlandırıyor?',
-                'Normal bir insan müdahalelerle dâhiye dönüştürülebilir mi?',
-                'Deja vu nedir? Bu tanıdıklık hissini neden yaşarız?',
-                'Beyinde sinyalin adresi sinyalin kendisinden önemli mi?',
-                'Fiziksel olarak kaybettiğimiz bir uzvu hâlâ hissedebilir miyiz?',
-                'Bakteriler birbirleriyle nasıl iletişim kurar?',
-                'Beynimiz stresle nasıl mücadele eder? Stresin beyin üzerinde etkileri neler?',
-                'Aynı genetik yapıya sahip tek yumurta ikizlerinin parmak izleri neden farklıdır?',
-                'Aynı ilacı kullanan iki kişide neden farklı sonuçlar görülebilir?',
-                'Canlılık sıfırdan inşa edilebilir mi?'
-            ];
-            for (let i = 0; i < defaultWheelQuestions.length; i++) {
+        const [linkedCountRows] = await pool.query("SELECT COUNT(*) AS cnt FROM wheel_items WHERE article_url IS NOT NULL AND article_url != ''");
+        if (wheelCountRows[0].cnt === 0 || linkedCountRows[0].cnt === 0) {
+            if (wheelCountRows[0].cnt > 0) {
+                await pool.query('DELETE FROM wheel_items');
+            }
+            for (let i = 0; i < defaultWheelItems.length; i++) {
                 await pool.query(
                     'INSERT INTO wheel_items (question, article_url, qr_image, sort_order, is_active) VALUES (?, ?, ?, ?, 1)',
-                    [defaultWheelQuestions[i], '', '', i + 1]
+                    [defaultWheelItems[i].question, defaultWheelItems[i].article_url, '', i + 1]
                 );
             }
-            console.log('[MIGRATION] Seeded 14 default wheel questions.');
+            console.log('[MIGRATION] Seeded 14 published article wheel questions with QR URLs.');
         }
         console.log('[MIGRATION] Wheel items table ready.');
     } catch (wheelMigErr) {
