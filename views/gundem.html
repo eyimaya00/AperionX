@@ -783,6 +783,51 @@
             min-width: 0;
         }
 
+        .gundem-grid-stage {
+            position: relative;
+            display: flex;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gundem-grid-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 6;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+            transition: all 0.25s ease;
+        }
+
+        .gundem-grid-arrow:hover {
+            background: rgba(99, 102, 241, 0.45);
+            border-color: rgba(255, 255, 255, 0.55);
+            color: #ffffff;
+            transform: translateY(-50%) scale(1.08);
+            box-shadow: 0 0 18px rgba(99, 102, 241, 0.45);
+        }
+
+        .gundem-grid-arrow.prev {
+            left: -18px;
+        }
+
+        .gundem-grid-arrow.next {
+            right: -18px;
+        }
+
         .gundem-cards-grid {
             display: flex;
             flex-direction: row;
@@ -1038,6 +1083,17 @@
                 grid-template-columns: 1fr !important;
                 grid-auto-rows: 190px;
                 gap: 16px;
+            }
+            .gundem-grid-arrow {
+                width: 36px;
+                height: 36px;
+                font-size: 1.05rem;
+            }
+            .gundem-grid-arrow.prev {
+                left: 8px;
+            }
+            .gundem-grid-arrow.next {
+                right: 8px;
             }
             .gundem-feed-section {
                 padding: 30px 16px 60px;
@@ -1602,7 +1658,15 @@
 
             <!-- Sağ Kolon: 4'lü Haber Izgarası (Tam Üst Hizadan Başlar) -->
             <div class="gundem-grid-col">
-                <div class="gundem-cards-grid" id="gundemCardsGrid"></div>
+                <div class="gundem-grid-stage">
+                    <button type="button" class="gundem-grid-arrow prev" id="gundemGridPrev" aria-label="Önceki Gündemler" style="display: none;">
+                        <i class="ph-bold ph-caret-left"></i>
+                    </button>
+                    <div class="gundem-cards-grid" id="gundemCardsGrid"></div>
+                    <button type="button" class="gundem-grid-arrow next" id="gundemGridNext" aria-label="Sonraki Gündemler" style="display: none;">
+                        <i class="ph-bold ph-caret-right"></i>
+                    </button>
+                </div>
                 <div class="gundem-grid-dots" id="gundemGridDots" style="display: none;"></div>
             </div>
         </div>
@@ -2126,6 +2190,8 @@
                     // 3. Sağ 4'lü Kart Izgarası (Cards Grid - Kaydırmalı Sayfalar)
                     const gridEl = document.getElementById('gundemCardsGrid');
                     const gridDotsEl = document.getElementById('gundemGridDots');
+                    const gridPrevBtn = document.getElementById('gundemGridPrev');
+                    const gridNextBtn = document.getElementById('gundemGridNext');
                     if (gridEl) {
                         if (articles.length > 1) {
                             feedContainer.classList.remove('single-article');
@@ -2162,6 +2228,21 @@
 
                             if (gridDotsEl) {
                                 if (pages.length > 1) {
+                                    let currentGridPage = 0;
+                                    const goToGridPage = (pageIdx) => {
+                                        currentGridPage = (pageIdx + pages.length) % pages.length;
+                                        gridEl.scrollTo({ left: currentGridPage * gridEl.clientWidth, behavior: 'smooth' });
+                                    };
+
+                                    if (gridPrevBtn) {
+                                        gridPrevBtn.style.display = 'flex';
+                                        gridPrevBtn.onclick = () => goToGridPage(currentGridPage - 1);
+                                    }
+                                    if (gridNextBtn) {
+                                        gridNextBtn.style.display = 'flex';
+                                        gridNextBtn.onclick = () => goToGridPage(currentGridPage + 1);
+                                    }
+
                                     gridDotsEl.style.display = 'flex';
                                     gridDotsEl.innerHTML = pages.map((_, idx) => `
                                         <button type="button" class="gundem-grid-dot ${idx === 0 ? 'active' : ''}" data-page="${idx}" aria-label="${idx + 1}. sayfa"></button>
@@ -2170,14 +2251,14 @@
                                     const dotButtons = gridDotsEl.querySelectorAll('.gundem-grid-dot');
                                     dotButtons.forEach(btn => {
                                         btn.addEventListener('click', () => {
-                                            const pageIdx = Number(btn.dataset.page);
-                                            gridEl.scrollTo({ left: pageIdx * gridEl.clientWidth, behavior: 'smooth' });
+                                            goToGridPage(Number(btn.dataset.page));
                                         });
                                     });
 
                                     gridEl.addEventListener('scroll', () => {
                                         if (!gridEl.clientWidth) return;
                                         const activePage = Math.round(gridEl.scrollLeft / gridEl.clientWidth);
+                                        currentGridPage = activePage;
                                         dotButtons.forEach((d, idx) => {
                                             d.classList.toggle('active', idx === activePage);
                                         });
@@ -2185,6 +2266,8 @@
                                 } else {
                                     gridDotsEl.style.display = 'none';
                                     gridDotsEl.innerHTML = '';
+                                    if (gridPrevBtn) gridPrevBtn.style.display = 'none';
+                                    if (gridNextBtn) gridNextBtn.style.display = 'none';
                                 }
                             }
                         } else {
@@ -2193,6 +2276,8 @@
                             feedContainer.style.gridTemplateColumns = '';
                             gridEl.style.display = 'none';
                             gridEl.innerHTML = '';
+                            if (gridPrevBtn) gridPrevBtn.style.display = 'none';
+                            if (gridNextBtn) gridNextBtn.style.display = 'none';
                             if (gridDotsEl) {
                                 gridDotsEl.style.display = 'none';
                                 gridDotsEl.innerHTML = '';
