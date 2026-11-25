@@ -778,45 +778,62 @@
 
         /* === SAĞ KOLON: KAYDIRMALI 2x2 ŞIK CAM KARTLAR === */
         .gundem-grid-col {
-            position: relative;
             display: flex;
             flex-direction: column;
-            min-height: 460px;
+            min-width: 0;
         }
 
         .gundem-cards-grid {
-            position: absolute;
-            inset: 0;
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 4px 2px;
+            flex: 1;
+        }
+
+        .gundem-cards-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gundem-grid-page {
+            flex: 0 0 100%;
+            width: 100%;
+            scroll-snap-align: start;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-auto-rows: 221px;
             align-content: start;
             gap: 18px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 4px 10px 4px 2px;
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(99, 102, 241, 0.55) rgba(255, 255, 255, 0.05);
+            box-sizing: border-box;
         }
 
-        .gundem-cards-grid::-webkit-scrollbar {
-            width: 6px;
+        .gundem-grid-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
         }
 
-        .gundem-cards-grid::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.04);
+        .gundem-grid-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 999px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            transition: all 0.3s ease;
         }
 
-        .gundem-cards-grid::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.5);
-            border-radius: 999px;
-            transition: background 0.2s ease;
-        }
-
-        .gundem-cards-grid::-webkit-scrollbar-thumb:hover {
-            background: rgba(129, 140, 248, 0.8);
+        .gundem-grid-dot.active {
+            width: 30px;
+            background: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
         }
 
         .gundem-item-card {
@@ -937,13 +954,6 @@
                 width: 100%;
                 box-sizing: border-box;
             }
-            .gundem-grid-col {
-                min-height: 0;
-            }
-            .gundem-cards-grid {
-                position: static;
-                max-height: 480px;
-            }
         }
 
         @media (max-width: 868px) {
@@ -1019,16 +1029,15 @@
             }
             .gundem-grid-col {
                 width: 100%;
-                min-height: 0;
             }
             .gundem-cards-grid {
-                position: static;
+                width: 100%;
+                padding: 4px 0;
+            }
+            .gundem-grid-page {
                 grid-template-columns: 1fr !important;
                 grid-auto-rows: 190px;
-                max-height: 420px;
                 gap: 16px;
-                width: 100%;
-                padding: 4px 8px 4px 2px;
             }
             .gundem-feed-section {
                 padding: 30px 16px 60px;
@@ -1594,6 +1603,7 @@
             <!-- Sağ Kolon: 4'lü Haber Izgarası (Tam Üst Hizadan Başlar) -->
             <div class="gundem-grid-col">
                 <div class="gundem-cards-grid" id="gundemCardsGrid"></div>
+                <div class="gundem-grid-dots" id="gundemGridDots" style="display: none;"></div>
             </div>
         </div>
 
@@ -2113,37 +2123,80 @@
                         }
                     }
 
-                    // 3. Sağ 4'lü Kart Izgarası (Cards Grid)
+                    // 3. Sağ 4'lü Kart Izgarası (Cards Grid - Kaydırmalı Sayfalar)
                     const gridEl = document.getElementById('gundemCardsGrid');
+                    const gridDotsEl = document.getElementById('gundemGridDots');
                     if (gridEl) {
                         if (articles.length > 1) {
                             feedContainer.classList.remove('single-article');
                             feedContainer.style.gridTemplateColumns = '';
-                            gridEl.style.display = 'grid';
+                            gridEl.style.display = 'flex';
                             const gridArticles = articles.slice(1);
-                            gridEl.innerHTML = gridArticles.map(item => `
-                                <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
-                                    <div class="gundem-item-poster-bg">
-                                        <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
-                                        <div class="gundem-item-poster-overlay"></div>
-                                    </div>
-                                    <div class="gundem-item-content">
-                                        <h4 class="gundem-item-title">
-                                            ${escapeGundemHtml(item.title)}
-                                        </h4>
-                                        <div class="gundem-item-author-row">
-                                            <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
-                                            <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
-                                        </div>
-                                    </div>
-                                </a>
+                            const perPage = 4;
+                            const pages = [];
+                            for (let i = 0; i < gridArticles.length; i += perPage) {
+                                pages.push(gridArticles.slice(i, i + perPage));
+                            }
+
+                            gridEl.innerHTML = pages.map(pageItems => `
+                                <div class="gundem-grid-page">
+                                    ${pageItems.map(item => `
+                                        <a href="${item.link || `/gundem/${item.slug}`}" class="gundem-item-card">
+                                            <div class="gundem-item-poster-bg">
+                                                <img src="${item.image}" alt="${escapeGundemHtml(item.title)}" loading="lazy" onerror="this.src='/uploads/logo.png'">
+                                                <div class="gundem-item-poster-overlay"></div>
+                                            </div>
+                                            <div class="gundem-item-content">
+                                                <h4 class="gundem-item-title">
+                                                    ${escapeGundemHtml(item.title)}
+                                                </h4>
+                                                <div class="gundem-item-author-row">
+                                                    <img src="${item.authorAvatar || '/uploads/favicon-48x48.png'}" class="gundem-item-avatar" alt="${escapeGundemHtml(item.authorName)}" onerror="this.src='/uploads/favicon-48x48.png'">
+                                                    <span class="gundem-item-author-name">${escapeGundemHtml(item.authorName || 'AperionX Bilim Ekibi')}</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    `).join('')}
+                                </div>
                             `).join('');
+
+                            if (gridDotsEl) {
+                                if (pages.length > 1) {
+                                    gridDotsEl.style.display = 'flex';
+                                    gridDotsEl.innerHTML = pages.map((_, idx) => `
+                                        <button type="button" class="gundem-grid-dot ${idx === 0 ? 'active' : ''}" data-page="${idx}" aria-label="${idx + 1}. sayfa"></button>
+                                    `).join('');
+
+                                    const dotButtons = gridDotsEl.querySelectorAll('.gundem-grid-dot');
+                                    dotButtons.forEach(btn => {
+                                        btn.addEventListener('click', () => {
+                                            const pageIdx = Number(btn.dataset.page);
+                                            gridEl.scrollTo({ left: pageIdx * gridEl.clientWidth, behavior: 'smooth' });
+                                        });
+                                    });
+
+                                    gridEl.addEventListener('scroll', () => {
+                                        if (!gridEl.clientWidth) return;
+                                        const activePage = Math.round(gridEl.scrollLeft / gridEl.clientWidth);
+                                        dotButtons.forEach((d, idx) => {
+                                            d.classList.toggle('active', idx === activePage);
+                                        });
+                                    }, { passive: true });
+                                } else {
+                                    gridDotsEl.style.display = 'none';
+                                    gridDotsEl.innerHTML = '';
+                                }
+                            }
                         } else {
                             // Tek haber varsa vitrin kartı tek başına gösterilir
                             feedContainer.classList.add('single-article');
                             feedContainer.style.gridTemplateColumns = '';
                             gridEl.style.display = 'none';
                             gridEl.innerHTML = '';
+                            if (gridDotsEl) {
+                                gridDotsEl.style.display = 'none';
+                                gridDotsEl.innerHTML = '';
+                            }
                         }
                     }
 
