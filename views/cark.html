@@ -604,6 +604,8 @@
             let currentAngle = -Math.PI / 2;
             let isSpinning = false;
             let lastTickSlice = -1;
+            let remainingIndices = [];
+            let lastWinnerIndex = -1;
 
             // AperionX purple & lavender palette matching brand and reference wheel
             const SLICE_THEMES = [
@@ -729,6 +731,33 @@
                 return Math.floor(relAngle / sliceAngle) % items.length;
             }
 
+            function secureRandom() {
+                if (window.crypto && window.crypto.getRandomValues) {
+                    const arr = new Uint32Array(1);
+                    window.crypto.getRandomValues(arr);
+                    return arr[0] / 4294967296;
+                }
+                return Math.random();
+            }
+
+            function pickNextSliceIndex() {
+                if (!items.length) return 0;
+                if (items.length === 1) return 0;
+
+                if (remainingIndices.length === 0) {
+                    remainingIndices = items.map((_, idx) => idx);
+                    // Avoid repeating the immediately previous question when refilling
+                    if (lastWinnerIndex !== -1 && remainingIndices.length > 1) {
+                        remainingIndices = remainingIndices.filter(idx => idx !== lastWinnerIndex);
+                    }
+                }
+
+                const pickPos = Math.floor(secureRandom() * remainingIndices.length);
+                const chosenIndex = remainingIndices.splice(pickPos, 1)[0];
+                lastWinnerIndex = chosenIndex;
+                return chosenIndex;
+            }
+
             function spinWheel() {
                 if (isSpinning || !items.length) return;
                 isSpinning = true;
@@ -736,10 +765,16 @@
                 spinBtn.disabled = true;
                 closeModal();
 
-                const extraRotations = (6 + Math.floor(Math.random() * 4)) * 2 * Math.PI;
-                const randomOffset = Math.random() * 2 * Math.PI;
+                const targetIndex = pickNextSliceIndex();
+                const sliceAngle = (2 * Math.PI) / items.length;
+                const offsetFraction = 0.2 + secureRandom() * 0.6;
+                const desiredMod = ((-Math.PI / 2 - (targetIndex + offsetFraction) * sliceAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+
                 const startAngle = currentAngle;
-                const targetAngle = startAngle + extraRotations + randomOffset;
+                const startMod = ((startAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+                const deltaMod = (desiredMod - startMod + 2 * Math.PI) % (2 * Math.PI);
+                const extraRotations = (6 + Math.floor(secureRandom() * 4)) * 2 * Math.PI;
+                const targetAngle = startAngle + extraRotations + deltaMod;
                 const duration = 4800;
                 const startTime = performance.now();
 
