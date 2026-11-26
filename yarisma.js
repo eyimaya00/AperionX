@@ -156,7 +156,7 @@ function attachYarisma(app, server) {
 
     playerResults.forEach(r => {
       const s = io.sockets.sockets.get(r.id);
-      if (s) s.emit('answer:result', { correct: r.correct, points: r.points, totalScore: r.totalScore, rank: r.rank, streak: r.streak, correctAnswer: correct, totalPlayers: game.players.size });
+      if (s) s.emit('answer:result', { correct: r.correct, points: r.points, totalScore: r.totalScore, rank: r.rank, streak: r.streak, correctAnswer: correct, correctOptionText: q.options[correct] || '', totalPlayers: game.players.size });
     });
 
     io.emit('question:reveal', {

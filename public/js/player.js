@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const icon = document.getElementById('result-icon');
     const text = document.getElementById('result-text');
+    const correctBox = document.getElementById('result-correct-answer');
     const pointsEl = document.getElementById('result-points');
     const totalEl = document.getElementById('result-total');
     const rankEl = document.getElementById('result-rank');
@@ -128,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.className = 'result-icon correct';
       text.textContent = 'Doğru!';
       text.className = 'result-heading correct';
+      correctBox.style.display = 'none';
+      correctBox.textContent = '';
       pointsEl.textContent = '+' + data.points;
       if (navigator.vibrate) navigator.vibrate(100);
     } else {
@@ -135,6 +138,15 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.className = 'result-icon wrong';
       text.textContent = 'Yanlış!';
       text.className = 'result-heading wrong';
+      const letters = ['A', 'B', 'C', 'D'];
+      const letter = letters[data.correctAnswer] || '';
+      const optText = data.correctOptionText || '';
+      if (letter || optText) {
+        correctBox.style.display = 'block';
+        correctBox.textContent = 'Doğru Cevap: ' + letter + ') ' + optText;
+      } else {
+        correctBox.style.display = 'none';
+      }
       pointsEl.textContent = '0';
       if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
     }
