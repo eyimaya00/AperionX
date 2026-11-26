@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AperionX – Bilgi Arenası</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/yarisma/css/style.css">
+  <style>body { overflow-y: auto; }</style>
+</head>
+<body class="player-page">
+  <div class="bg-effects"><div class="bg-gradient"></div></div>
+
+  <!-- JOIN -->
+  <div id="screen-join" class="player-screen active">
+    <div class="join-container">
+      <img src="/yarisma/assets/logo.png" alt="AperionX" class="player-logo">
+      <h1 class="player-title">BİLGİ ARENASI</h1>
+      <form id="join-form">
+        <input type="text" id="player-name" class="input-field" placeholder="Adınızı girin..." maxlength="20" required autocomplete="off">
+        <div style="height:10px"></div>
+        <button type="submit" id="join-btn" class="btn btn-primary btn-large">🚀 Katıl</button>
+      </form>
+      <p id="join-error" class="error-text"></p>
+    </div>
+  </div>
+
+  <!-- WAITING -->
+  <div id="screen-waiting" class="player-screen">
+    <div class="waiting-container">
+      <img src="/yarisma/assets/logo.png" alt="AperionX" class="player-logo">
+      <div class="waiting-dots">
+        <div class="waiting-dot"></div>
+        <div class="waiting-dot"></div>
+        <div class="waiting-dot"></div>
+      </div>
+      <h2>Yarışma başlamasını bekleyin...</h2>
+      <p id="welcome-name" style="color: var(--electric); font-weight: 600;"></p>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="screen-player-question" class="player-screen">
+    <div class="player-q-container">
+      <div class="player-q-header">
+        <span class="player-q-number" id="pq-number">Soru 1/10</span>
+        <span class="player-q-category" id="pq-category"></span>
+        <span class="player-timer-text" id="player-timer-text">20</span>
+      </div>
+      <div class="player-timer-bar">
+        <div class="player-timer-fill" id="player-timer-fill"></div>
+      </div>
+      <p class="player-q-text" id="pq-text">Soru metni</p>
+      <div class="player-answers">
+        <button class="answer-btn" data-answer="0">
+          <span class="answer-letter">A</span>
+          <span class="answer-text" id="pa-0">Seçenek</span>
+        </button>
+        <button class="answer-btn" data-answer="1">
+          <span class="answer-letter">B</span>
+          <span class="answer-text" id="pa-1">Seçenek</span>
+        </button>
+        <button class="answer-btn" data-answer="2">
+          <span class="answer-letter">C</span>
+          <span class="answer-text" id="pa-2">Seçenek</span>
+        </button>
+        <button class="answer-btn" data-answer="3">
+          <span class="answer-letter">D</span>
+          <span class="answer-text" id="pa-3">Seçenek</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANSWERED -->
+  <div id="screen-answered" class="player-screen">
+    <div class="answered-container">
+      <div class="check-circle">✓</div>
+      <h2>Cevabınız gönderildi!</h2>
+      <p style="color: var(--text-secondary);">Sonuç bekleniyor...</p>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="player-screen">
+    <div class="result-container">
+      <div id="result-icon" class="result-icon">✓</div>
+      <h2 id="result-text" class="result-heading">Doğru!</h2>
+      <div id="result-points" class="result-points-display">+1000</div>
+      <div class="result-stats-grid">
+        <div class="result-stat">
+          <span class="result-stat-value" id="result-total">0</span>
+          <span class="result-stat-label">Toplam</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-stat-value" id="result-rank">#1</span>
+          <span class="result-stat-label">Sıralama</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-stat-value" id="result-streak">-</span>
+          <span class="result-stat-label">Seri</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINISHED -->
+  <div id="screen-player-finished" class="player-screen">
+    <div class="player-finished-container">
+      <h1 style="font-size: 2rem;">🎉</h1>
+      <h2>Yarışma Sona Erdi!</h2>
+      <div class="final-rank-card">
+        <span class="final-rank-label">Sıralamanız</span>
+        <span id="final-rank" class="final-rank-number">#1</span>
+        <span id="final-total-players" class="final-total-players"></span>
+      </div>
+      <div class="final-rank-card" style="padding: 16px 36px;">
+        <span class="final-rank-label">Toplam Puan</span>
+        <span id="final-score" style="font-size: 2rem; font-weight: 800; color: var(--electric);">0</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/yarisma/socket.io/socket.io.js"></script>
+  <script src="/yarisma/js/player.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AperionX – Yönetim Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/yarisma/css/style.css">
+  <style>body { overflow-y: auto; }</style>
+</head>
+<body>
+  <div class="admin-page">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-logo">
+        <img src="/yarisma/assets/logo.png" alt="AperionX">
+        <h1>Bilgi Arenası — Yönetim</h1>
+      </div>
+      <div class="admin-status">
+        <span class="status-badge" id="game-status" style="background:#6366F1">LOBİ</span>
+        <span id="admin-player-count" style="color: var(--text-secondary);">0 Oyuncu</span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="admin-content">
+      <!-- Controls -->
+      <section class="admin-section">
+        <h2>Yarışma Kontrolü</h2>
+        <div class="control-buttons">
+          <button id="btn-start" class="btn btn-primary">▶ Başlat</button>
+          <button id="btn-next" class="btn btn-primary" disabled>⏭ Sonraki Soru</button>
+          <button id="btn-reveal" class="btn btn-secondary" disabled>👁 Cevabı Göster</button>
+          <button id="btn-leaderboard" class="btn btn-secondary">🏆 Sıralama</button>
+          <button id="btn-end" class="btn btn-danger" disabled>⏹ Bitir</button>
+          <button id="btn-reset" class="btn btn-warning">🔄 Sıfırla</button>
+        </div>
+      </section>
+
+      <!-- Timer -->
+      <section class="admin-section">
+        <h2>Süre Ayarı</h2>
+        <div class="timer-setting">
+          <input type="range" id="time-slider" min="5" max="60" value="20">
+          <span id="time-value" style="min-width:80px; text-align:center;">20 saniye</span>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="admin-section">
+        <h2>İstatistikler</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="stat-players">0</span>
+            <span class="stat-label">Oyuncu</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-question">-</span>
+            <span class="stat-label">Soru</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-answers">0/0</span>
+            <span class="stat-label">Cevap</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Players -->
+      <section class="admin-section">
+        <h2>Oyuncular</h2>
+        <div class="player-table-container">
+          <table class="player-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>İsim</th>
+                <th>Puan</th>
+                <th>Seri</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="player-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Questions -->
+      <section class="admin-section">
+        <h2>Sorular (<span id="question-count">0</span>)</h2>
+        <div class="add-question-form">
+          <input type="text" id="new-q-text" placeholder="Soru metni..." class="full-width">
+          <input type="text" id="new-q-opt0" placeholder="A şıkkı">
+          <input type="text" id="new-q-opt1" placeholder="B şıkkı">
+          <input type="text" id="new-q-opt2" placeholder="C şıkkı">
+          <input type="text" id="new-q-opt3" placeholder="D şıkkı">
+          <select id="new-q-correct" class="full-width">
+            <option value="0">A doğru cevap</option>
+            <option value="1">B doğru cevap</option>
+            <option value="2">C doğru cevap</option>
+            <option value="3">D doğru cevap</option>
+          </select>
+          <input type="text" id="new-q-category" placeholder="Kategori (ör: Bilim)">
+          <button id="btn-add-question" class="btn btn-primary full-width" type="button">+ Soru Ekle</button>
+        </div>
+        <div id="question-list" class="question-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/yarisma/socket.io/socket.io.js"></script>
+  <script src="/yarisma/js/admin.js"></script>
+</body>
+</html>

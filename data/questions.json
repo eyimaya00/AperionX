@@ -1,0 +1,107 @@
+[
+  {
+    "question": "DNA'nın çift sarmal yapısını keşfeden bilim insanları kimlerdir?",
+    "options": ["Newton ve Galileo", "Watson ve Crick", "Einstein ve Bohr", "Darwin ve Mendel"],
+    "correctAnswer": 1,
+    "category": "Biyoloji",
+    "difficulty": "Orta"
+  },
+  {
+    "question": "Işık boşlukta saniyede yaklaşık kaç kilometre yol alır?",
+    "options": ["150.000 km", "300.000 km", "450.000 km", "600.000 km"],
+    "correctAnswer": 1,
+    "category": "Fizik",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Periyodik tablodaki ilk element hangisidir?",
+    "options": ["Helyum", "Oksijen", "Hidrojen", "Karbon"],
+    "correctAnswer": 2,
+    "category": "Kimya",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "İnsan vücudundaki en büyük organ hangisidir?",
+    "options": ["Karaciğer", "Beyin", "Akciğer", "Deri"],
+    "correctAnswer": 3,
+    "category": "Biyoloji",
+    "difficulty": "Orta"
+  },
+  {
+    "question": "E = mc² formülü hangi bilim insanına aittir?",
+    "options": ["Isaac Newton", "Nikola Tesla", "Albert Einstein", "Stephen Hawking"],
+    "correctAnswer": 2,
+    "category": "Fizik",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Türkiye'nin en yüksek dağı hangisidir?",
+    "options": ["Erciyes Dağı", "Kaçkar Dağı", "Süphan Dağı", "Ağrı Dağı"],
+    "correctAnswer": 3,
+    "category": "Coğrafya",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Nobel Barış Ödülü hangi şehirde verilir?",
+    "options": ["Stockholm", "Oslo", "Kopenhag", "Helsinki"],
+    "correctAnswer": 1,
+    "category": "Genel Kültür",
+    "difficulty": "Orta"
+  },
+  {
+    "question": "Fotosentez sonucunda hangi gaz üretilir?",
+    "options": ["Karbondioksit", "Azot", "Oksijen", "Hidrojen"],
+    "correctAnswer": 2,
+    "category": "Biyoloji",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Dünyanın en derin noktası hangisidir?",
+    "options": ["Tonga Çukuru", "Mariana Çukuru", "Porto Riko Çukuru", "Java Çukuru"],
+    "correctAnswer": 1,
+    "category": "Coğrafya",
+    "difficulty": "Orta"
+  },
+  {
+    "question": "Ay'a ayak basan ilk insan kimdir?",
+    "options": ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "John Glenn"],
+    "correctAnswer": 2,
+    "category": "Bilim Tarihi",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Atom numarası neyi ifade eder?",
+    "options": ["Nötron sayısını", "Elektron sayısını", "Kütle numarasını", "Proton sayısını"],
+    "correctAnswer": 3,
+    "category": "Kimya",
+    "difficulty": "Orta"
+  },
+  {
+    "question": "Güneş Sistemi'nde Güneş'e en yakın gezegen hangisidir?",
+    "options": ["Venüs", "Mars", "Merkür", "Dünya"],
+    "correctAnswer": 2,
+    "category": "Astronomi",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Kuantum mekaniğinin kurucusu olarak kabul edilen bilim insanı kimdir?",
+    "options": ["Richard Feynman", "Niels Bohr", "Max Planck", "Werner Heisenberg"],
+    "correctAnswer": 2,
+    "category": "Fizik",
+    "difficulty": "Zor"
+  },
+  {
+    "question": "İstanbul Boğazı hangi kıtaları birbirinden ayırır?",
+    "options": ["Asya ve Afrika", "Avrupa ve Asya", "Avrupa ve Afrika", "Asya ve Avustralya"],
+    "correctAnswer": 1,
+    "category": "Coğrafya",
+    "difficulty": "Kolay"
+  },
+  {
+    "question": "Yapay zekanın babası olarak kabul edilen bilim insanı kimdir?",
+    "options": ["Bill Gates", "Alan Turing", "Tim Berners-Lee", "Steve Jobs"],
+    "correctAnswer": 1,
+    "category": "Teknoloji",
+    "difficulty": "Orta"
+  }
+]

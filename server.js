@@ -6,6 +6,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const pool = require('./config/db');
 const { stampPdfFile } = require('./utils/stamp_pdf');
 const { buildSmartSEO } = require('./utils/smart_seo');
+const { registerYarismaRoutes, attachYarisma } = require('./yarisma');
 
 
 
@@ -13272,6 +13273,9 @@ app.delete('/api/dergi-basvuru/:id', authenticateToken, async (req, res) => {
 // END DERGI EKIBI BASVURU SISTEMI
 // =============================================
 
+// Yarisma Routes (must be before 404)
+registerYarismaRoutes(app);
+
 app.use((req, res) => {
     // Check if it looks like an API call first
     if (req.originalUrl.startsWith('/api')) {
@@ -13289,6 +13293,7 @@ const server = app.listen(PORT, async () => {
     console.log('SERVER RESTARTING WITH LATEST CODE...');
     console.log(`Server running on http://localhost:${PORT}`);
     attachSanalOfisWebSocket(server);
+    attachYarisma(app, server);
 
     // === AUTO MIGRATION: User Activity Tracking ===
     try {

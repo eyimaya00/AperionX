@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AperionX – Bilgi Arenası</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/yarisma/css/style.css">
+</head>
+<body>
+  <!-- Background Effects -->
+  <div class="bg-effects">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <canvas id="particles"></canvas>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="screen-lobby" class="screen active">
+    <div class="lobby-container">
+      <div class="logo-section">
+        <img src="/yarisma/assets/logo.png" alt="AperionX" class="logo">
+        <h1 class="title-glow">BİLGİ ARENASI</h1>
+        <p class="subtitle">Bilim ve Genel Kültür Yarışması</p>
+      </div>
+      <div class="qr-section glass-card">
+        <h2>📱 Katılmak İçin QR Kodu Tara</h2>
+        <div id="qr-code" class="qr-container"></div>
+        <p id="join-url" class="join-url"></p>
+      </div>
+      <div class="player-counter glass-card">
+        <span class="counter-label">Katılımcılar</span>
+        <span id="player-count-lobby" class="counter-value player-count-display">0</span>
+      </div>
+      <div id="player-avatars" class="player-chips"></div>
+    </div>
+  </div>
+
+  <!-- QUESTION / REVEAL -->
+  <div id="screen-game" class="screen">
+    <div class="question-container">
+      <div class="question-header">
+        <div class="question-info">
+          <span class="question-number">Soru <span id="q-number">1</span>/<span id="q-total">10</span></span>
+          <span class="question-category" id="q-category">Bilim</span>
+        </div>
+        <div class="timer-container" id="timer-container">
+          <svg class="timer-ring" viewBox="0 0 120 120">
+            <circle class="timer-track" cx="60" cy="60" r="54"/>
+            <circle class="timer-progress" id="timer-progress" cx="60" cy="60" r="54"/>
+          </svg>
+          <span class="timer-text" id="timer-text">20</span>
+        </div>
+      </div>
+      <div class="question-text-card glass-card" id="q-text">Soru metni burada görünecek</div>
+      <div class="options-grid" id="options-grid">
+        <div class="option-card glass-card" data-index="0">
+          <span class="option-letter">A</span>
+          <span class="option-text" id="opt-0">Seçenek A</span>
+          <div class="option-bar-fill" id="bar-0"></div>
+          <span class="option-percent" id="pct-0"></span>
+        </div>
+        <div class="option-card glass-card" data-index="1">
+          <span class="option-letter">B</span>
+          <span class="option-text" id="opt-1">Seçenek B</span>
+          <div class="option-bar-fill" id="bar-1"></div>
+          <span class="option-percent" id="pct-1"></span>
+        </div>
+        <div class="option-card glass-card" data-index="2">
+          <span class="option-letter">C</span>
+          <span class="option-text" id="opt-2">Seçenek C</span>
+          <div class="option-bar-fill" id="bar-2"></div>
+          <span class="option-percent" id="pct-2"></span>
+        </div>
+        <div class="option-card glass-card" data-index="3">
+          <span class="option-letter">D</span>
+          <span class="option-text" id="opt-3">Seçenek D</span>
+          <div class="option-bar-fill" id="bar-3"></div>
+          <span class="option-percent" id="pct-3"></span>
+        </div>
+      </div>
+      <div class="answer-counter">
+        <span id="answer-count">0</span>/<span id="answer-total">0</span> kişi cevapladı
+      </div>
+      <div class="reveal-top-players" id="reveal-top-players"></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="screen-leaderboard" class="screen">
+    <div class="leaderboard-container">
+      <h2 class="leaderboard-title">🏆 Sıralama</h2>
+      <div class="podium" id="podium"></div>
+      <div class="rankings-list" id="rankings-list"></div>
+    </div>
+  </div>
+
+  <!-- FINISHED -->
+  <div id="screen-finished" class="screen">
+    <div id="confetti-container"></div>
+    <div class="winner-container">
+      <div class="winner-title">🎉 Yarışma Sona Erdi!</div>
+      <div class="winner-spotlight">
+        <div class="winner-crown">👑</div>
+        <div class="winner-avatar-lg" id="winner-avatar"></div>
+        <div class="winner-name-lg" id="winner-name"></div>
+        <div class="winner-score-lg" id="winner-score"></div>
+      </div>
+      <div class="final-rankings" id="final-rankings"></div>
+    </div>
+  </div>
+
+  <!-- Branding -->
+  <div class="display-branding">
+    <img src="/yarisma/assets/logo.png" alt="" class="branding-logo">
+    <span>APERIONX • BİLGİ ARENASI</span>
+  </div>
+
+  <script src="/yarisma/socket.io/socket.io.js"></script>
+  <script src="/yarisma/js/display.js"></script>
+</body>
+</html>
